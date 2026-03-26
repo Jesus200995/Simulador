@@ -35,6 +35,9 @@ export default defineConfig({
         ]
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
@@ -43,6 +46,14 @@ export default defineConfig({
             options: {
               cacheName: 'mapbox-tiles',
               expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/apimaiz\.geodatos\.com\.mx\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-responses',
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 }
             }
           }
         ]
@@ -54,13 +65,10 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  build: {
+    chunkSizeWarningLimit: 2000
+  },
   server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true
-      }
-    }
+    port: 5173
   }
 })

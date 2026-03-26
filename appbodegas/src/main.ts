@@ -10,3 +10,10 @@ app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
+
+// PWA: reload immediately when a new service worker takes control
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload()
+  })
+}
