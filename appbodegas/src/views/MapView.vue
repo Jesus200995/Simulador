@@ -398,7 +398,7 @@ function initMap() {
   if (!mapContainer.value) return
   map = new mapboxgl.Map({
     container: mapContainer.value,
-    style: 'mapbox://styles/mapbox/light-v11',
+    style: 'mapbox://styles/mapbox/streets-v12',
     center: [-99.1332, 19.4326],
     zoom: 5,
     attributionControl: false,

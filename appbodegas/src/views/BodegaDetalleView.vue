@@ -155,7 +155,7 @@ async function loadBodega() {
       if (bodega.value && minimapContainer.value) {
         minimap = new mapboxgl.Map({
           container: minimapContainer.value,
-          style: 'mapbox://styles/mapbox/light-v11',
+          style: 'mapbox://styles/mapbox/streets-v12',
           center: [bodega.value.longitud, bodega.value.latitud],
           zoom: 12,
           interactive: false,

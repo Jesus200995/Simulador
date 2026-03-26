@@ -1,6 +1,6 @@
 import type { LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos, BodegasResponse } from '@/types'
 
-const API_BASE = '/api'
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('token')
@@ -22,7 +22,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || 'Error en la solicitud')
+    throw new Error(data.error || data.detail || 'Error en la solicitud')
   }
 
   return data as T
