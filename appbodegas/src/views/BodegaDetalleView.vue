@@ -2,6 +2,12 @@
   <div class="detalle-page">
     <!-- Header -->
     <header class="app-header">
+      <button class="sidebar-toggle" @click="mobileNavOpen = !mobileNavOpen; profileOpen = false" aria-label="Menu">
+        <span v-if="!mobileNavOpen" class="toggle-bars">
+          <span></span><span></span><span></span>
+        </span>
+        <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <div class="header-brand">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
         <div class="header-brand-text">
@@ -16,7 +22,7 @@
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
-        <button class="profile-avatar-btn" @click="profileOpen = !profileOpen">
+        <button class="profile-avatar-btn" @click="profileOpen = !profileOpen; mobileNavOpen = false">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <svg class="avatar-chevron" :class="{ open: profileOpen }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -49,6 +55,60 @@
       </div>
     </header>
 
+    <!-- Sidebar panel (same as MapView) -->
+    <div class="sidebar-overlay" :class="{ active: mobileNavOpen }" @click="mobileNavOpen = false"></div>
+    <aside class="detalle-sidebar" :class="{ open: mobileNavOpen }">
+      <div class="panel-mobile-header">
+        <span>Explorar Bodegas</span>
+        <button class="panel-close-btn" @click="mobileNavOpen = false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <!-- Nav tabs -->
+      <div class="panel-nav-tabs">
+        <router-link to="/" class="panel-nav-tab active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Mapa
+        </router-link>
+        <span class="panel-nav-tab disabled">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Inventarios
+        </span>
+        <span class="panel-nav-tab disabled">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Simulador
+        </span>
+      </div>
+      <!-- Search -->
+      <div class="panel-search">
+        <div class="search-input-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input v-model="sidebarSearch" type="text" class="search-input" placeholder="Buscar bodega, municipio..." />
+        </div>
+      </div>
+      <!-- Bodega list -->
+      <div class="panel-list-scroll">
+        <router-link
+          v-for="b in filteredBodegas"
+          :key="b.id"
+          :to="'/bodega/' + b.id"
+          class="bodega-list-item"
+          @click="mobileNavOpen = false"
+        >
+          <div class="bodega-list-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+          </div>
+          <div class="bodega-list-info">
+            <div class="bodega-list-name">{{ b.nombre }}</div>
+            <div class="bodega-list-sub">{{ b.municipio }}, {{ b.estado }}</div>
+            <div class="bodega-list-cap">{{ formatNumber(b.capacidad_toneladas) }} ton</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bodega-list-chevron"><polyline points="9 18 15 12 9 6"/></svg>
+        </router-link>
+        <div v-if="filteredBodegas.length === 0" class="bodega-list-empty">Sin resultados</div>
+      </div>
+    </aside>
+
     <main class="detalle-main">
       <div v-if="loading" class="detalle-loading">
         <div class="spinner spinner-dark"></div>
@@ -80,28 +140,37 @@
           </div>
         </div>
 
-        <!-- KPI -->
+        <!-- KPI — colores semánticos:
+             Capacidad (toneladas) = amber/gold (#A07A3A)
+             DDR (división regional) = indigo (#5856D6)
+             CADER (centro de apoyo) = forest green (#2D7D46) -->
         <div class="detalle-kpi-grid">
-          <div class="detalle-kpi total">
+          <div class="detalle-kpi capacidad">
             <div class="detalle-kpi-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
-            <div class="detalle-kpi-value">{{ formatNumber(bodega.capacidad_toneladas) }}</div>
-            <div class="detalle-kpi-label">Capacidad (ton)</div>
+            <div class="detalle-kpi-data">
+              <div class="detalle-kpi-value">{{ formatNumber(bodega.capacidad_toneladas) }}</div>
+              <div class="detalle-kpi-label">Capacidad (ton)</div>
+            </div>
           </div>
-          <div class="detalle-kpi nacional">
+          <div class="detalle-kpi ddr">
             <div class="detalle-kpi-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
             </div>
-            <div class="detalle-kpi-value">{{ bodega.ddr || '-' }}</div>
-            <div class="detalle-kpi-label">DDR</div>
+            <div class="detalle-kpi-data">
+              <div class="detalle-kpi-value">{{ bodega.ddr || '-' }}</div>
+              <div class="detalle-kpi-label">DDR</div>
+            </div>
           </div>
-          <div class="detalle-kpi importacion">
+          <div class="detalle-kpi cader">
             <div class="detalle-kpi-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="detalle-kpi-value">{{ bodega.cader || '-' }}</div>
-            <div class="detalle-kpi-label">CADER</div>
+            <div class="detalle-kpi-data">
+              <div class="detalle-kpi-value">{{ bodega.cader || '-' }}</div>
+              <div class="detalle-kpi-label">CADER</div>
+            </div>
           </div>
         </div>
 
@@ -196,6 +265,9 @@ const authStore = useAuthStore()
 
 const bodega = ref<Bodega | null>(null)
 const loading = ref(true)
+const mobileNavOpen = ref(false)
+const sidebarSearch = ref('')
+const allBodegas = ref<Bodega[]>([])
 const minimapContainer = ref<HTMLDivElement>()
 const profileOpen = ref(false)
 const profileRef = ref<HTMLDivElement>()
@@ -224,6 +296,25 @@ function formatNumber(n: number): string {
 function handleLogout() {
   authStore.logout()
   router.push('/login')
+}
+
+const filteredBodegas = computed(() => {
+  const q = sidebarSearch.value.toLowerCase().trim()
+  if (!q) return allBodegas.value.slice(0, 50)
+  return allBodegas.value.filter(b =>
+    b.nombre.toLowerCase().includes(q) ||
+    (b.municipio && b.municipio.toLowerCase().includes(q)) ||
+    (b.estado && b.estado.toLowerCase().includes(q))
+  ).slice(0, 50)
+})
+
+async function loadBodegas() {
+  try {
+    const res = await api.bodegas.listar()
+    allBodegas.value = res.bodegas || []
+  } catch (e) {
+    console.error('Error cargando bodegas sidebar:', e)
+  }
 }
 
 async function loadBodega() {
@@ -263,6 +354,7 @@ async function loadBodega() {
 
 onMounted(() => {
   loadBodega()
+  loadBodegas()
   document.addEventListener('click', onClickOutsideProfile)
 })
 
@@ -368,7 +460,7 @@ onUnmounted(() => {
   gap: 0.3rem;
 }
 
-/* KPI grid */
+/* KPI grid — semantic colors matching MapView logic */
 .detalle-kpi-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -379,53 +471,70 @@ onUnmounted(() => {
 .detalle-kpi {
   background: white;
   border-radius: var(--radius-lg);
-  padding: 1.25rem 1rem 1rem;
+  padding: 1rem;
   box-shadow: var(--shadow-xs);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 0.5px solid var(--color-border);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
 
-.detalle-kpi::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--color-text-tertiary);
-  border-radius: 0 0 2px 2px;
+.detalle-kpi:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
-
-.detalle-kpi.total::before { background: linear-gradient(90deg, var(--color-blue), var(--color-teal)); }
-.detalle-kpi.nacional::before { background: linear-gradient(90deg, var(--color-green), var(--color-mint)); }
-.detalle-kpi.importacion::before { background: linear-gradient(90deg, var(--color-orange), var(--color-yellow)); }
 
 .detalle-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
-  color: var(--color-text-tertiary);
+  flex-shrink: 0;
 }
 
-.detalle-kpi.total .detalle-kpi-icon { color: var(--color-blue); }
-.detalle-kpi.nacional .detalle-kpi-icon { color: var(--color-green); }
-.detalle-kpi.importacion .detalle-kpi-icon { color: var(--color-orange); }
+/* Capacidad = amber/gold (peso, valor) */
+.detalle-kpi.capacidad .detalle-kpi-icon {
+  background: rgba(160, 122, 58, 0.12);
+  color: #A07A3A;
+}
+.detalle-kpi.capacidad .detalle-kpi-value { color: #A07A3A; }
+
+/* DDR = indigo (divisiones regionales) */
+.detalle-kpi.ddr .detalle-kpi-icon {
+  background: rgba(88, 86, 214, 0.1);
+  color: #5856D6;
+}
+.detalle-kpi.ddr .detalle-kpi-value { color: #5856D6; }
+
+/* CADER = forest green (centros de apoyo) */
+.detalle-kpi.cader .detalle-kpi-icon {
+  background: rgba(45, 125, 70, 0.1);
+  color: #2D7D46;
+}
+.detalle-kpi.cader .detalle-kpi-value { color: #2D7D46; }
+
+.detalle-kpi-data {
+  flex: 1;
+  min-width: 0;
+}
 
 .detalle-kpi-value {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-text);
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .detalle-kpi-label {
-  font-size: 0.7rem;
+  font-size: 0.625rem;
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 600;
-  margin-top: 0.2rem;
+  margin-top: 0.1rem;
 }
 
 /* Info card */
@@ -519,8 +628,184 @@ onUnmounted(() => {
   font-size: 0.9rem;
 }
 
-/* Mobile */
-@media (max-width: 600px) {
+/* ── Sidebar Panel (reuses global styles) ── */
+.sidebar-overlay { display: none; }
+.panel-mobile-header { display: none; }
+.panel-nav-tabs { display: none; }
+
+.detalle-sidebar {
+  display: none;
+}
+
+.bodega-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--color-text);
+  border-bottom: 0.5px solid var(--color-separator);
+  transition: background 0.15s;
+}
+
+.bodega-list-item:active { background: var(--color-fill-tertiary); }
+
+.bodega-list-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #D35400, #E67E22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.bodega-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bodega-list-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bodega-list-sub {
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+}
+
+.bodega-list-cap {
+  font-size: 0.6875rem;
+  color: #2D7D46;
+  font-weight: 600;
+}
+
+.bodega-list-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-quaternary);
+}
+
+.bodega-list-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar-toggle { display: flex; }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease-out);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .detalle-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 88vw;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.4s var(--ease-out);
+    background: rgba(255, 255, 255, 0.96);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+    box-shadow: none;
+  }
+
+  .detalle-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.18);
+  }
+
+  .panel-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: var(--color-text);
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .panel-nav-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0;
+    border-bottom: 0.5px solid var(--color-separator);
+    flex-shrink: 0;
+  }
+
+  .panel-nav-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    flex: 1;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-decoration: none;
+    border-radius: 0;
+    background: none;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+
+  .panel-nav-tab svg {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+  }
+
+  .panel-nav-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+  }
+
+  .panel-nav-tab.active svg { color: var(--color-primary); }
+
+  .panel-nav-tab.disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .panel-list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .detalle-main {
     padding: 64px 1rem 2rem;
   }
@@ -531,34 +816,17 @@ onUnmounted(() => {
   }
 
   .detalle-kpi {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-align: left;
-    padding: 0.875rem 1rem;
-  }
-
-  .detalle-kpi::before {
-    top: 0;
-    left: 0;
-    right: auto;
-    bottom: 0;
-    width: 3px;
-    height: auto;
-    border-radius: 0 2px 2px 0;
+    padding: 0.75rem 0.875rem;
   }
 
   .detalle-kpi-icon {
-    margin-bottom: 0;
-    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
   }
 
   .detalle-kpi-value {
-    font-size: 1.2rem;
-  }
-
-  .detalle-kpi-label {
-    margin-top: 0;
+    font-size: 1.1rem;
   }
 
   .detalle-header-card {
