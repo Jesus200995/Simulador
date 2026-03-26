@@ -277,22 +277,25 @@ onUnmounted(() => {
   background: white;
   border-radius: var(--radius-xl);
   padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   display: flex;
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 1rem;
+  border: 0.5px solid var(--color-border);
+  animation: fadeInUp 0.5s var(--ease-out);
 }
 
 .detalle-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #691C32, #8B2A45);
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, #691C32, #A63D5A);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(105, 28, 50, 0.3);
 }
 
 .detalle-header-info {
@@ -352,9 +355,9 @@ onUnmounted(() => {
   border-radius: 0 0 2px 2px;
 }
 
-.detalle-kpi.total::before { background: var(--color-kpi-toneladas); }
-.detalle-kpi.nacional::before { background: var(--color-kpi-nacional); }
-.detalle-kpi.importacion::before { background: var(--color-kpi-importacion); }
+.detalle-kpi.total::before { background: linear-gradient(90deg, var(--color-blue), var(--color-teal)); }
+.detalle-kpi.nacional::before { background: linear-gradient(90deg, var(--color-green), var(--color-mint)); }
+.detalle-kpi.importacion::before { background: linear-gradient(90deg, var(--color-orange), var(--color-yellow)); }
 
 .detalle-kpi-icon {
   display: flex;
@@ -363,9 +366,9 @@ onUnmounted(() => {
   color: var(--color-text-tertiary);
 }
 
-.detalle-kpi.total .detalle-kpi-icon { color: var(--color-kpi-toneladas); }
-.detalle-kpi.nacional .detalle-kpi-icon { color: var(--color-kpi-nacional); }
-.detalle-kpi.importacion .detalle-kpi-icon { color: var(--color-kpi-importacion); }
+.detalle-kpi.total .detalle-kpi-icon { color: var(--color-blue); }
+.detalle-kpi.nacional .detalle-kpi-icon { color: var(--color-green); }
+.detalle-kpi.importacion .detalle-kpi-icon { color: var(--color-orange); }
 
 .detalle-kpi-value {
   font-size: 1.5rem;
@@ -388,8 +391,10 @@ onUnmounted(() => {
   background: white;
   border-radius: var(--radius-xl);
   padding: 1.25rem 1.5rem;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 1rem;
+  border: 0.5px solid var(--color-border);
+  animation: fadeInUp 0.55s var(--ease-out);
 }
 
 .detalle-info-card h3,
@@ -444,8 +449,10 @@ onUnmounted(() => {
   background: white;
   border-radius: var(--radius-xl);
   padding: 1.25rem 1.5rem;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 2rem;
+  border: 0.5px solid var(--color-border);
+  animation: fadeInUp 0.6s var(--ease-out);
 }
 
 .detalle-minimap {

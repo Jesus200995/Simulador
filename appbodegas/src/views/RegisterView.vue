@@ -4,7 +4,7 @@
       <div class="auth-card">
         <div class="auth-header">
           <div class="auth-logo-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#691C32" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><path d="M3 8l9-5 9 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><path d="M3 8l9-5 9 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <h1 class="auth-title">Crear cuenta</h1>
           <p class="auth-subtitle">Registrate para acceder al visor</p>
@@ -297,13 +297,15 @@ async function handleRegistro() {
 
 <style scoped>
 .auth-logo-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: var(--radius-lg);
-  background: rgba(105, 28, 50, 0.08);
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, #691C32, #A63D5A);
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 6px 20px rgba(105, 28, 50, 0.3);
 }
 
 .password-wrapper {
