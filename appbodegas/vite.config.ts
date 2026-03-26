@@ -8,28 +8,28 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'favicon-32x32.png', 'favicon-16x16.png', 'robots.txt'],
       manifest: {
         name: 'Bodegas de Maíz',
         short_name: 'Bodegas',
         description: 'Visor geográfico de bodegas de maíz',
         theme_color: '#691C32',
-        background_color: '#f5f5f5',
+        background_color: '#691C32',
         display: 'standalone',
         orientation: 'any',
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: '/icons/icon-192x192.svg',
+            src: '/icons/icon-192x192.png',
             sizes: '192x192',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/icons/icon-512x512.svg',
+            src: '/icons/icon-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any maskable'
           }
         ]
