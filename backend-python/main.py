@@ -156,17 +156,21 @@ def perfil(user: dict = Depends(verify_token)):
 
 @app.get("/bodegas/catalogos")
 def catalogos(user: dict = Depends(verify_token)):
-    regiones = db.query("SELECT id, nombre FROM regiones ORDER BY nombre")
+    regiones = db.query("SELECT id, nombre, estado FROM regiones ORDER BY estado, nombre")
     estados = db.query(
-        "SELECT DISTINCT estado, region_id FROM bodegas WHERE estado IS NOT NULL ORDER BY estado"
+        "SELECT DISTINCT estado FROM bodegas WHERE estado IS NOT NULL ORDER BY estado"
     )
     municipios = db.query(
-        "SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio"
+        "SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY estado, municipio"
+    )
+    ddrs = db.query(
+        "SELECT DISTINCT ddr, estado FROM bodegas WHERE ddr IS NOT NULL ORDER BY estado, ddr"
     )
     return {
         "regiones": [dict(r) for r in regiones],
-        "estados": [dict(e) for e in estados],
+        "estados": [{"estado": e["estado"]} for e in estados],
         "municipios": [dict(m) for m in municipios],
+        "ddrs": [dict(d) for d in ddrs],
     }
 
 
@@ -175,6 +179,7 @@ def listar_bodegas(
     region_id: Optional[int] = Query(None),
     estado: Optional[str] = Query(None),
     municipio: Optional[str] = Query(None),
+    ddr: Optional[str] = Query(None),
     q: Optional[str] = Query(None),
     user: dict = Depends(verify_token),
 ):
@@ -190,29 +195,36 @@ def listar_bodegas(
     if municipio:
         conditions.append("b.municipio = %s")
         params.append(municipio)
+    if ddr:
+        conditions.append("b.ddr = %s")
+        params.append(ddr)
     if q:
         conditions.append(
-            "(b.nombre ILIKE %s OR b.clave ILIKE %s OR b.estado ILIKE %s OR b.municipio ILIKE %s)"
+            "(b.nombre ILIKE %s OR b.clave ILIKE %s OR b.estado ILIKE %s OR b.municipio ILIKE %s OR b.ddr ILIKE %s)"
         )
         like = f"%{q}%"
-        params.extend([like, like, like, like])
+        params.extend([like, like, like, like, like])
 
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
     bodegas_sql = f"""
-        SELECT b.*, r.nombre as region_nombre
+        SELECT b.id, b.clave, b.nombre, b.estado, b.municipio, b.region_id,
+               b.ddr, b.cader, b.ejido, b.direccion, b.localidad, b.codigo_postal,
+               b.latitud, b.longitud, b.capacidad_toneladas,
+               b.cvegeo, b.cve_ent, b.cve_mun,
+               r.nombre as region_nombre
         FROM bodegas b
         LEFT JOIN regiones r ON b.region_id = r.id
         {where}
-        ORDER BY b.nombre ASC
+        ORDER BY b.estado, b.nombre ASC
     """
 
     kpi_sql = f"""
         SELECT
             COUNT(*)::int as total_bodegas,
-            COALESCE(SUM(b.toneladas_total), 0)::float as total_toneladas,
-            COALESCE(SUM(b.toneladas_nacional), 0)::float as total_nacional,
-            COALESCE(SUM(b.toneladas_importacion), 0)::float as total_importacion
+            COALESCE(SUM(b.capacidad_toneladas), 0)::float as total_capacidad,
+            COUNT(DISTINCT b.estado) as total_estados,
+            COUNT(DISTINCT b.municipio) as total_municipios
         FROM bodegas b
         {where}
     """
@@ -224,9 +236,9 @@ def listar_bodegas(
         "bodegas": [dict(b) for b in bodegas],
         "kpi": dict(kpi) if kpi else {
             "total_bodegas": 0,
-            "total_toneladas": 0,
-            "total_nacional": 0,
-            "total_importacion": 0,
+            "total_capacidad": 0,
+            "total_estados": 0,
+            "total_municipios": 0,
         },
     }
 
@@ -234,7 +246,11 @@ def listar_bodegas(
 @app.get("/bodegas/{bodega_id}")
 def obtener_bodega(bodega_id: int, user: dict = Depends(verify_token)):
     row = db.query_one(
-        """SELECT b.*, r.nombre as region_nombre
+        """SELECT b.id, b.clave, b.nombre, b.estado, b.municipio, b.region_id,
+                  b.ddr, b.cader, b.ejido, b.direccion, b.localidad, b.codigo_postal,
+                  b.latitud, b.longitud, b.capacidad_toneladas,
+                  b.cvegeo, b.cve_ent, b.cve_mun, b.fecha_actualizacion,
+                  r.nombre as region_nombre
            FROM bodegas b
            LEFT JOIN regiones r ON b.region_id = r.id
            WHERE b.id = %s""",

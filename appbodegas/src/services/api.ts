@@ -50,11 +50,12 @@ export const api = {
   },
 
   bodegas: {
-    listar(params?: { region_id?: number; estado?: string; municipio?: string; q?: string }): Promise<BodegasResponse> {
+    listar(params?: { region_id?: number; estado?: string; municipio?: string; ddr?: string; q?: string }): Promise<BodegasResponse> {
       const qs = new URLSearchParams()
       if (params?.region_id) qs.set('region_id', String(params.region_id))
       if (params?.estado) qs.set('estado', params.estado)
       if (params?.municipio) qs.set('municipio', params.municipio)
+      if (params?.ddr) qs.set('ddr', params.ddr)
       if (params?.q) qs.set('q', params.q)
       const query = qs.toString()
       return request(`/bodegas${query ? '?' + query : ''}`)

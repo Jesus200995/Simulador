@@ -47,33 +47,33 @@
             <p class="detalle-location">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               {{ bodega.municipio }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado }}
-              <span v-if="bodega.region_nombre"> · {{ bodega.region_nombre }}</span>
+              <span v-if="bodega.ddr"> · DDR {{ bodega.ddr }}</span>
             </p>
           </div>
         </div>
 
-        <!-- KPI inventario -->
+        <!-- KPI -->
         <div class="detalle-kpi-grid">
           <div class="detalle-kpi total">
             <div class="detalle-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
-            <div class="detalle-kpi-value">{{ formatNumber(bodega.toneladas_total) }}</div>
-            <div class="detalle-kpi-label">Toneladas totales</div>
+            <div class="detalle-kpi-value">{{ formatNumber(bodega.capacidad_toneladas) }}</div>
+            <div class="detalle-kpi-label">Capacidad (ton)</div>
           </div>
           <div class="detalle-kpi nacional">
             <div class="detalle-kpi-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
             </div>
-            <div class="detalle-kpi-value">{{ formatNumber(bodega.toneladas_nacional) }}</div>
-            <div class="detalle-kpi-label">Nacional</div>
+            <div class="detalle-kpi-value">{{ bodega.ddr || '-' }}</div>
+            <div class="detalle-kpi-label">DDR</div>
           </div>
           <div class="detalle-kpi importacion">
             <div class="detalle-kpi-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="detalle-kpi-value">{{ formatNumber(bodega.toneladas_importacion) }}</div>
-            <div class="detalle-kpi-label">Importacion</div>
+            <div class="detalle-kpi-value">{{ bodega.cader || '-' }}</div>
+            <div class="detalle-kpi-label">CADER</div>
           </div>
         </div>
 
@@ -89,6 +89,14 @@
               <span class="info-value">{{ bodega.direccion || 'Sin direccion registrada' }}</span>
             </div>
             <div class="info-row">
+              <span class="info-label">Localidad</span>
+              <span class="info-value">{{ bodega.localidad || '-' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Ejido</span>
+              <span class="info-value">{{ bodega.ejido || '-' }}</span>
+            </div>
+            <div class="info-row">
               <span class="info-label">Municipio</span>
               <span class="info-value">{{ bodega.municipio || '-' }}</span>
             </div>
@@ -97,16 +105,28 @@
               <span class="info-value">{{ bodega.estado || '-' }}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Region</span>
-              <span class="info-value">{{ bodega.region_nombre || '-' }}</span>
+              <span class="info-label">DDR</span>
+              <span class="info-value">{{ bodega.ddr || '-' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">CADER</span>
+              <span class="info-value">{{ bodega.cader || '-' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Codigo Postal</span>
+              <span class="info-value">{{ bodega.codigo_postal || '-' }}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Capacidad</span>
-              <span class="info-value">{{ bodega.capacidad_m2 ? bodega.capacidad_m2.toLocaleString() + ' m²' : '-' }}</span>
+              <span class="info-value">{{ bodega.capacidad_toneladas ? formatNumber(bodega.capacidad_toneladas) + ' ton' : '-' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">CVEGEO</span>
+              <span class="info-value">{{ bodega.cvegeo || '-' }}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Coordenadas</span>
-              <span class="info-value">{{ bodega.latitud.toFixed(4) }}, {{ bodega.longitud.toFixed(4) }}</span>
+              <span class="info-value">{{ bodega.latitud?.toFixed(4) }}, {{ bodega.longitud?.toFixed(4) }}</span>
             </div>
             <div class="info-row" v-if="bodega.fecha_actualizacion">
               <span class="info-label">Ultima actualizacion</span>
