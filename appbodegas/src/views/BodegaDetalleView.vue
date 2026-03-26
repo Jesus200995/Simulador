@@ -3,13 +3,16 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-brand">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <span>Bodegas de Maiz</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+        <div class="header-brand-text">
+          <span class="header-brand-title">Bodegas de Maiz</span>
+          <span class="header-brand-subtitle">Sistema Nacional de Monitoreo</span>
+        </div>
       </div>
       <nav class="header-nav">
         <router-link to="/">Mapa</router-link>
-        <span style="opacity:0.35;cursor:default;padding:0.375rem 0.875rem;font-size:0.8rem">Inventarios</span>
-        <span style="opacity:0.35;cursor:default;padding:0.375rem 0.875rem;font-size:0.8rem">Simulador</span>
+        <span>Inventarios</span>
+        <span>Simulador</span>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-user">
