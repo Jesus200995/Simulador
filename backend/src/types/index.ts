@@ -31,13 +31,32 @@ export interface JwtPayload {
 export interface Bodega {
   id: number;
   nombre: string;
+  clave: string | null;
   descripcion: string | null;
   latitud: number;
   longitud: number;
   direccion: string | null;
   capacidad_m2: number | null;
-  estado: string;
-  usuario_id: number | null;
+  estado: string | null;
+  municipio: string | null;
+  region_id: number | null;
+  region_nombre?: string;
+  toneladas_total: number;
+  toneladas_nacional: number;
+  toneladas_importacion: number;
+  fecha_actualizacion: string | null;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface Region {
+  id: number;
+  nombre: string;
+}
+
+export interface KpiAgregado {
+  total_bodegas: number;
+  total_toneladas: number;
+  total_nacional: number;
+  total_importacion: number;
 }

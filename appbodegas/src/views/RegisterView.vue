@@ -4,8 +4,8 @@
       <div class="auth-card">
         <div class="auth-header">
           <img src="/favicon.svg" alt="Logo" class="auth-logo" />
-          <h1 class="auth-title">Crear Cuenta</h1>
-          <p class="auth-subtitle">Completa tus datos para registrarte</p>
+          <h1 class="auth-title">Bodegas de Maíz</h1>
+          <p class="auth-subtitle">Crea tu cuenta para acceder al visor</p>
         </div>
 
         <div v-if="authStore.error" class="alert alert-error">

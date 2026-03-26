@@ -1,4 +1,4 @@
-import type { LoginPayload, RegistroPayload, AuthResponse, Bodega } from '@/types'
+import type { LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos, BodegasResponse } from '@/types'
 
 const API_BASE = '/api'
 
@@ -50,12 +50,22 @@ export const api = {
   },
 
   bodegas: {
-    listar(): Promise<{ bodegas: Bodega[] }> {
-      return request('/bodegas')
+    listar(params?: { region_id?: number; estado?: string; municipio?: string; q?: string }): Promise<BodegasResponse> {
+      const qs = new URLSearchParams()
+      if (params?.region_id) qs.set('region_id', String(params.region_id))
+      if (params?.estado) qs.set('estado', params.estado)
+      if (params?.municipio) qs.set('municipio', params.municipio)
+      if (params?.q) qs.set('q', params.q)
+      const query = qs.toString()
+      return request(`/bodegas${query ? '?' + query : ''}`)
     },
 
     obtener(id: number): Promise<{ bodega: Bodega }> {
       return request(`/bodegas/${id}`)
+    },
+
+    catalogos(): Promise<Catalogos> {
+      return request('/bodegas/catalogos')
     },
   },
 }

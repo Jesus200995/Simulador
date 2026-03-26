@@ -20,6 +20,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/MapView.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/bodega/:id',
+    name: 'BodegaDetalle',
+    component: () => import('@/views/BodegaDetalleView.vue'),
+    meta: { requiresAuth: true }
+  },
 ]
 
 const router = createRouter({

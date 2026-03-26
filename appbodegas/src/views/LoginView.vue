@@ -4,8 +4,8 @@
       <div class="auth-card">
         <div class="auth-header">
           <img src="/favicon.svg" alt="Logo" class="auth-logo" />
-          <h1 class="auth-title">Simulador de Bodegas</h1>
-          <p class="auth-subtitle">Inicia sesión para continuar</p>
+          <h1 class="auth-title">Bodegas de Maíz</h1>
+          <p class="auth-subtitle">Visor geográfico — Inicia sesión</p>
         </div>
 
         <div v-if="authStore.error" class="alert alert-error">
