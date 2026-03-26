@@ -15,12 +15,37 @@
         <span>Simulador</span>
       </nav>
       <div class="header-spacer"></div>
-      <div class="header-user">
-        <span class="header-user-name">{{ authStore.usuario?.nombre_completo }}</span>
-        <button class="btn-logout" @click="handleLogout">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Salir
+      <div class="header-profile" ref="profileRef">
+        <button class="profile-avatar-btn" @click="profileOpen = !profileOpen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg class="avatar-chevron" :class="{ open: profileOpen }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
+        <Transition name="profile-pop">
+          <div v-if="profileOpen" class="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="profile-dropdown-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="profile-dropdown-name">{{ authStore.usuario?.nombre_completo }}</div>
+            </div>
+            <div class="profile-dropdown-body">
+              <div class="profile-dropdown-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>{{ authStore.usuario?.email }}</span>
+              </div>
+              <div class="profile-dropdown-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+                <span>{{ authStore.usuario?.curp }}</span>
+              </div>
+            </div>
+            <div class="profile-dropdown-footer">
+              <button class="profile-logout-btn" @click="handleLogout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Cerrar sesion
+              </button>
+            </div>
+          </div>
+        </Transition>
       </div>
     </header>
 
@@ -158,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import mapboxgl from 'mapbox-gl'
 import { useAuthStore } from '@/stores/auth'
@@ -172,7 +197,22 @@ const authStore = useAuthStore()
 const bodega = ref<Bodega | null>(null)
 const loading = ref(true)
 const minimapContainer = ref<HTMLDivElement>()
+const profileOpen = ref(false)
+const profileRef = ref<HTMLDivElement>()
 let minimap: mapboxgl.Map | null = null
+
+const userInitials = computed(() => {
+  const name = authStore.usuario?.nombre_completo || ''
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return name.slice(0, 2).toUpperCase()
+})
+
+function onClickOutsideProfile(e: MouseEvent) {
+  if (profileRef.value && !profileRef.value.contains(e.target as Node)) {
+    profileOpen.value = false
+  }
+}
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
@@ -223,9 +263,11 @@ async function loadBodega() {
 
 onMounted(() => {
   loadBodega()
+  document.addEventListener('click', onClickOutsideProfile)
 })
 
 onUnmounted(() => {
+  document.removeEventListener('click', onClickOutsideProfile)
   if (minimap) { minimap.remove(); minimap = null }
 })
 </script>

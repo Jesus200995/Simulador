@@ -20,12 +20,37 @@
         <span>Simulador</span>
       </nav>
       <div class="header-spacer"></div>
-      <div class="header-user">
-        <span class="header-user-name">{{ authStore.usuario?.nombre_completo }}</span>
-        <button class="btn-logout" @click="handleLogout">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Salir
+      <div class="header-profile" ref="profileRef">
+        <button class="profile-avatar-btn" @click="profileOpen = !profileOpen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg class="avatar-chevron" :class="{ open: profileOpen }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
+        <Transition name="profile-pop">
+          <div v-if="profileOpen" class="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="profile-dropdown-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="profile-dropdown-name">{{ authStore.usuario?.nombre_completo }}</div>
+            </div>
+            <div class="profile-dropdown-body">
+              <div class="profile-dropdown-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>{{ authStore.usuario?.email }}</span>
+              </div>
+              <div class="profile-dropdown-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+                <span>{{ authStore.usuario?.curp }}</span>
+              </div>
+            </div>
+            <div class="profile-dropdown-footer">
+              <button class="profile-logout-btn" @click="handleLogout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Cerrar sesion
+              </button>
+            </div>
+          </div>
+        </Transition>
       </div>
     </header>
 
@@ -39,7 +64,9 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
-        <div class="visor-panel-scroll">
+
+        <!-- Zona fija: búsqueda, filtros, KPI -->
+        <div class="panel-top">
           <div class="panel-search">
             <div class="search-input-wrap">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -64,49 +91,77 @@
 
           <div class="panel-kpi">
             <div class="kpi-card bodegas">
-              <span class="kpi-value">{{ kpi.total_bodegas.toLocaleString() }}</span>
-              <span class="kpi-label">Bodegas</span>
+              <div class="kpi-icon-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-value">{{ kpi.total_bodegas.toLocaleString() }}</span>
+                <span class="kpi-label">Bodegas</span>
+              </div>
             </div>
             <div class="kpi-card toneladas">
-              <span class="kpi-value">{{ formatNumber(kpi.total_capacidad) }}</span>
-              <span class="kpi-label">Cap. Toneladas</span>
+              <div class="kpi-icon-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-value">{{ formatNumber(kpi.total_capacidad) }}</span>
+                <span class="kpi-label">Cap. Toneladas</span>
+              </div>
             </div>
-            <div class="kpi-card nacional">
-              <span class="kpi-value">{{ kpi.total_estados }}</span>
-              <span class="kpi-label">Estados</span>
+            <div class="kpi-card estados">
+              <div class="kpi-icon-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-value">{{ kpi.total_estados }}</span>
+                <span class="kpi-label">Estados</span>
+              </div>
             </div>
-            <div class="kpi-card importacion">
-              <span class="kpi-value">{{ kpi.total_municipios }}</span>
-              <span class="kpi-label">Municipios</span>
+            <div class="kpi-card municipios">
+              <div class="kpi-icon-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-value">{{ kpi.total_municipios }}</span>
+                <span class="kpi-label">Municipios</span>
+              </div>
             </div>
           </div>
+        </div>
 
+        <!-- Tarjeta de bodegas con scroll interno -->
+        <div class="panel-list-card">
           <div class="panel-list-header">
-            Bodegas ({{ bodegas.length }})
+            <span>Bodegas ({{ bodegas.length }})</span>
+            <button class="refresh-btn" :class="{ spinning: refreshing }" @click="handleRefresh" :disabled="refreshing" aria-label="Actualizar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </button>
           </div>
 
-          <div v-if="loading" class="panel-loading">
-            <div class="spinner spinner-dark spinner-lg"></div>
-            <span>Cargando bodegas...</span>
-          </div>
+          <div class="panel-list-scroll">
+            <div v-if="loading" class="panel-loading">
+              <div class="spinner spinner-dark spinner-lg"></div>
+              <span>Cargando bodegas...</span>
+            </div>
 
-          <ul v-else class="bodega-list">
-            <li v-for="bodega in bodegas" :key="bodega.id" class="bodega-item" :class="{ active: selectedBodega?.id === bodega.id }" @click="selectBodega(bodega)">
-              <div class="bodega-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-              </div>
-              <div class="bodega-info">
-                <div class="bodega-nombre">{{ bodega.nombre }}</div>
-                <div class="bodega-ubicacion">{{ bodega.municipio || '' }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado || '' }}</div>
-                <div class="bodega-toneladas"><strong>{{ formatNumber(bodega.capacidad_toneladas) }}</strong> ton</div>
-              </div>
-              <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </li>
-            <li v-if="bodegas.length === 0" class="bodega-empty">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.25;margin-bottom:0.5rem"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              No se encontraron bodegas
-            </li>
-          </ul>
+            <ul v-else class="bodega-list">
+              <li v-for="bodega in bodegas" :key="bodega.id" class="bodega-item" :class="{ active: selectedBodega?.id === bodega.id }" @click="selectBodega(bodega)">
+                <div class="bodega-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+                </div>
+                <div class="bodega-info">
+                  <div class="bodega-nombre">{{ bodega.nombre }}</div>
+                  <div class="bodega-ubicacion">{{ bodega.municipio || '' }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado || '' }}</div>
+                  <div class="bodega-toneladas"><strong>{{ formatNumber(bodega.capacidad_toneladas) }}</strong> ton</div>
+                </div>
+                <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </li>
+              <li v-if="bodegas.length === 0" class="bodega-empty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.25;margin-bottom:0.5rem"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                No se encontraron bodegas
+              </li>
+            </ul>
+          </div>
         </div>
       </aside>
 
@@ -134,8 +189,24 @@ let hoveredId: number | null = null
 const bodegas = ref<Bodega[]>([])
 const selectedBodega = ref<Bodega | null>(null)
 const loading = ref(true)
+const refreshing = ref(false)
 const searchText = ref('')
 const sidebarOpen = ref(false)
+const profileOpen = ref(false)
+const profileRef = ref<HTMLDivElement>()
+
+const userInitials = computed(() => {
+  const name = authStore.usuario?.nombre_completo || ''
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return name.slice(0, 2).toUpperCase()
+})
+
+function onClickOutsideProfile(e: MouseEvent) {
+  if (profileRef.value && !profileRef.value.contains(e.target as Node)) {
+    profileOpen.value = false
+  }
+}
 
 const catalogos = reactive<Catalogos>({ regiones: [], estados: [], municipios: [], ddrs: [] })
 const kpi = reactive<KpiAgregado>({ total_bodegas: 0, total_capacidad: 0, total_estados: 0, total_municipios: 0 })
@@ -177,6 +248,15 @@ function onSearch() {
 function onEstadoChange() { filters.ddr = null; filters.municipio = null; fetchBodegas() }
 function onDdrChange() { filters.municipio = null; fetchBodegas() }
 function onFilterChange() { fetchBodegas() }
+
+async function handleRefresh() {
+  refreshing.value = true
+  try {
+    await Promise.all([fetchCatalogos(), fetchBodegas()])
+  } finally {
+    setTimeout(() => { refreshing.value = false }, 500)
+  }
+}
 
 async function fetchCatalogos() {
   try {
@@ -353,9 +433,11 @@ function initMap() {
 onMounted(() => {
   fetchCatalogos()
   initMap()
+  document.addEventListener('click', onClickOutsideProfile)
 })
 
 onUnmounted(() => {
+  document.removeEventListener('click', onClickOutsideProfile)
   delete (window as any).__verDetalle
   if (activePopup) { activePopup.remove(); activePopup = null }
   if (map) { map.remove(); map = null }

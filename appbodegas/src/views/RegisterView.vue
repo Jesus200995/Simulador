@@ -299,7 +299,7 @@ async function handleRegistro() {
 .auth-logo-wrap {
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-xl);
+  border-radius: 50%;
   background: linear-gradient(145deg, #691C32, #A63D5A);
   display: flex;
   align-items: center;
