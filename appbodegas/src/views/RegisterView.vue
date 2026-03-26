@@ -3,20 +3,22 @@
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
-          <img src="/favicon.svg" alt="Logo" class="auth-logo" />
-          <h1 class="auth-title">Bodegas de Maíz</h1>
-          <p class="auth-subtitle">Crea tu cuenta para acceder al visor</p>
+          <div class="auth-logo-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#691C32" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><path d="M3 8l9-5 9 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h1 class="auth-title">Crear cuenta</h1>
+          <p class="auth-subtitle">Registrate para acceder al visor</p>
         </div>
 
         <div v-if="authStore.error" class="alert alert-error">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
           {{ authStore.error }}
         </div>
 
         <form @submit.prevent="handleRegistro" novalidate>
-          <!-- Nombre Completo -->
+          <!-- Nombre -->
           <div class="form-group">
             <label class="form-label" for="nombre">Nombre completo</label>
             <input
@@ -30,13 +32,13 @@
               @input="normalizeNombre"
               @focus="authStore.clearError()"
             />
-            <p class="form-hint">Se guardará en mayúsculas sin acentos</p>
+            <p class="form-hint">Se guardara en mayusculas sin acentos</p>
             <p v-if="errors.nombre_completo" class="form-error-text">{{ errors.nombre_completo }}</p>
           </div>
 
           <!-- Email -->
           <div class="form-group">
-            <label class="form-label" for="email">Correo electrónico</label>
+            <label class="form-label" for="email">Correo electronico</label>
             <input
               id="email"
               v-model="form.email"
@@ -65,20 +67,20 @@
               @input="normalizeCurp"
               @focus="authStore.clearError()"
             />
-            <p class="form-hint">18 caracteres alfanuméricos</p>
+            <p class="form-hint">18 caracteres alfanumericos</p>
             <p v-if="errors.curp" class="form-error-text">{{ errors.curp }}</p>
           </div>
 
-          <!-- Teléfono -->
+          <!-- Telefono -->
           <div class="form-group">
-            <label class="form-label" for="telefono">Número de teléfono</label>
+            <label class="form-label" for="telefono">Numero de telefono</label>
             <input
               id="telefono"
               v-model="form.telefono"
               type="tel"
               class="form-input"
               :class="{ error: errors.telefono }"
-              placeholder="10 dígitos"
+              placeholder="10 digitos"
               maxlength="10"
               autocomplete="tel"
               @input="normalizeTelefono"
@@ -87,9 +89,9 @@
             <p v-if="errors.telefono" class="form-error-text">{{ errors.telefono }}</p>
           </div>
 
-          <!-- Contraseña -->
+          <!-- Contrasena -->
           <div class="form-group">
-            <label class="form-label" for="password">Contraseña</label>
+            <label class="form-label" for="password">Contrasena</label>
             <div class="password-wrapper">
               <input
                 id="password"
@@ -97,22 +99,13 @@
                 :type="showPassword ? 'text' : 'password'"
                 class="form-input"
                 :class="{ error: errors.password }"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Minimo 6 caracteres"
                 autocomplete="new-password"
                 @focus="authStore.clearError()"
               />
-              <button
-                type="button"
-                class="password-toggle"
-                @click="showPassword = !showPassword"
-                tabindex="-1"
-              >
-                <svg v-if="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
+              <button type="button" class="password-toggle" @click="showPassword = !showPassword" tabindex="-1">
+                <svg v-if="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
               </button>
             </div>
             <p v-if="errors.password" class="form-error-text">{{ errors.password }}</p>
@@ -120,46 +113,36 @@
             <!-- Indicador de fuerza -->
             <div v-if="form.password" class="password-strength">
               <div class="strength-bar">
-                <div
-                  class="strength-fill"
-                  :class="passwordStrength.class"
-                  :style="{ width: passwordStrength.percent + '%' }"
-                ></div>
+                <div class="strength-fill" :class="passwordStrength.class" :style="{ width: passwordStrength.percent + '%' }"></div>
               </div>
-              <span class="strength-text" :class="passwordStrength.class">
-                {{ passwordStrength.label }}
-              </span>
+              <span class="strength-text" :class="passwordStrength.class">{{ passwordStrength.label }}</span>
             </div>
           </div>
 
-          <!-- Confirmar Contraseña -->
+          <!-- Confirmar -->
           <div class="form-group">
-            <label class="form-label" for="password2">Confirmar contraseña</label>
+            <label class="form-label" for="password2">Confirmar contrasena</label>
             <input
               id="password2"
               v-model="form.password2"
               :type="showPassword ? 'text' : 'password'"
               class="form-input"
               :class="{ error: errors.password2 }"
-              placeholder="Repite tu contraseña"
+              placeholder="Repite tu contrasena"
               autocomplete="new-password"
             />
             <p v-if="errors.password2" class="form-error-text">{{ errors.password2 }}</p>
           </div>
 
-          <button
-            type="submit"
-            class="btn btn-primary btn-block btn-lg"
-            :disabled="authStore.loading"
-          >
+          <button type="submit" class="btn btn-primary btn-block btn-lg" :disabled="authStore.loading">
             <span v-if="authStore.loading" class="spinner"></span>
             <span v-else>Crear Cuenta</span>
           </button>
         </form>
 
         <div class="auth-footer">
-          ¿Ya tienes cuenta?
-          <router-link to="/login">Inicia sesión</router-link>
+          <span>¿Ya tienes cuenta?</span>
+          <router-link to="/login">Inicia sesion</router-link>
         </div>
       </div>
     </div>
@@ -205,8 +188,8 @@ const passwordStrength = computed(() => {
   if (/[0-9]/.test(p)) score++
   if (/[^A-Za-z0-9]/.test(p)) score++
 
-  if (score <= 1) return { percent: 20, label: 'Muy débil', class: 'weak' }
-  if (score === 2) return { percent: 40, label: 'Débil', class: 'weak' }
+  if (score <= 1) return { percent: 20, label: 'Muy debil', class: 'weak' }
+  if (score === 2) return { percent: 40, label: 'Debil', class: 'weak' }
   if (score === 3) return { percent: 60, label: 'Moderada', class: 'moderate' }
   if (score === 4) return { percent: 80, label: 'Fuerte', class: 'strong' }
   return { percent: 100, label: 'Muy fuerte', class: 'very-strong' }
@@ -313,24 +296,35 @@ async function handleRegistro() {
 </script>
 
 <style scoped>
+.auth-logo-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-lg);
+  background: rgba(105, 28, 50, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .password-wrapper {
   position: relative;
 }
 
 .password-toggle {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--color-text-tertiary);
   padding: 4px;
+  border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color var(--transition-fast);
+  transition: color 0.2s ease;
 }
 
 .password-toggle:hover {
@@ -338,7 +332,7 @@ async function handleRegistro() {
 }
 
 .password-wrapper .form-input {
-  padding-right: 3rem;
+  padding-right: 2.75rem;
 }
 
 .password-strength {
@@ -350,8 +344,8 @@ async function handleRegistro() {
 
 .strength-bar {
   flex: 1;
-  height: 4px;
-  background: var(--color-border);
+  height: 3px;
+  background: var(--color-fill);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -359,22 +353,23 @@ async function handleRegistro() {
 .strength-fill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition: width 0.35s var(--ease-spring), background-color 0.3s ease;
 }
 
 .strength-fill.weak { background-color: var(--color-error); }
 .strength-fill.moderate { background-color: var(--color-warning); }
-.strength-fill.strong { background-color: var(--color-secondary); }
-.strength-fill.very-strong { background-color: var(--color-secondary-dark); }
+.strength-fill.strong { background-color: var(--color-gold); }
+.strength-fill.very-strong { background-color: var(--color-success); }
 
 .strength-text {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .strength-text.weak { color: var(--color-error); }
 .strength-text.moderate { color: var(--color-warning); }
-.strength-text.strong { color: var(--color-secondary); }
-.strength-text.very-strong { color: var(--color-secondary-dark); }
+.strength-text.strong { color: var(--color-gold); }
+.strength-text.very-strong { color: var(--color-success); }
 </style>

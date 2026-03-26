@@ -3,13 +3,15 @@
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
-          <img src="/favicon.svg" alt="Logo" class="auth-logo" />
-          <h1 class="auth-title">Bodegas de Maíz</h1>
-          <p class="auth-subtitle">Visor geográfico — Inicia sesión</p>
+          <div class="auth-logo-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#691C32" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><path d="M3 8l9-5 9 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h1 class="auth-title">Bodegas de Maiz</h1>
+          <p class="auth-subtitle">Inicia sesion para continuar</p>
         </div>
 
         <div v-if="authStore.error" class="alert alert-error">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
           {{ authStore.error }}
@@ -17,7 +19,7 @@
 
         <form @submit.prevent="handleLogin" novalidate>
           <div class="form-group">
-            <label class="form-label" for="email">Correo electrónico</label>
+            <label class="form-label" for="email">Correo electronico</label>
             <input
               id="email"
               v-model="form.email"
@@ -32,7 +34,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="password">Contraseña</label>
+            <label class="form-label" for="password">Contrasena</label>
             <div class="password-wrapper">
               <input
                 id="password"
@@ -40,7 +42,7 @@
                 :type="showPassword ? 'text' : 'password'"
                 class="form-input"
                 :class="{ error: errors.password }"
-                placeholder="Tu contraseña"
+                placeholder="Tu contrasena"
                 autocomplete="current-password"
                 @focus="authStore.clearError()"
               />
@@ -50,10 +52,10 @@
                 @click="showPassword = !showPassword"
                 tabindex="-1"
               >
-                <svg v-if="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg v-if="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                 </svg>
-                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
                 </svg>
               </button>
@@ -67,13 +69,13 @@
             :disabled="authStore.loading"
           >
             <span v-if="authStore.loading" class="spinner"></span>
-            <span v-else>Iniciar Sesión</span>
+            <span v-else>Iniciar Sesion</span>
           </button>
         </form>
 
         <div class="auth-footer">
-          ¿No tienes cuenta?
-          <router-link to="/registro">Regístrate aquí</router-link>
+          <span>¿No tienes cuenta?</span>
+          <router-link to="/registro">Registrate aqui</router-link>
         </div>
       </div>
     </div>
@@ -137,24 +139,36 @@ async function handleLogin() {
 </script>
 
 <style scoped>
+.auth-logo-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: rgba(105, 28, 50, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
 .password-wrapper {
   position: relative;
 }
 
 .password-toggle {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--color-text-tertiary);
   padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color var(--transition-fast);
+  border-radius: 6px;
 }
 
 .password-toggle:hover {
@@ -162,6 +176,6 @@ async function handleLogin() {
 }
 
 .password-wrapper .form-input {
-  padding-right: 3rem;
+  padding-right: 2.75rem;
 }
 </style>

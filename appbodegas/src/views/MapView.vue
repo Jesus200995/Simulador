@@ -1,15 +1,15 @@
 ﻿<template>
   <div class="map-page">
-    <!-- Header guinda -->
+    <!-- Header - frosted glass -->
     <header class="app-header">
       <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18L20 8.5v7l-8 4-8-4v-7l8-4.32z"/><path d="M12 6L6 9v6l6 3 6-3V9l-6-3z" opacity=".4"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><path d="M3 8l9-5 9 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Bodegas de Maiz</span>
       </div>
       <nav class="header-nav">
         <router-link to="/" class="active">Mapa</router-link>
-        <span style="opacity:0.4;cursor:default;padding:0.375rem 0.875rem;font-size:0.85rem">Inventarios</span>
-        <span style="opacity:0.4;cursor:default;padding:0.375rem 0.875rem;font-size:0.85rem">Simulador</span>
+        <span>Inventarios</span>
+        <span>Simulador</span>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-user">
@@ -23,40 +23,40 @@
 
     <!-- Desktop layout -->
     <div class="visor-layout">
-      <!-- Panel izquierdo -->
+      <!-- Panel izquierdo - glassmorphism -->
       <aside class="visor-panel">
         <div class="visor-panel-scroll">
           <!-- Buscador -->
           <div class="panel-search">
             <div class="search-input-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input
                 v-model="searchText"
                 type="text"
                 class="search-input"
-                placeholder="Busca tu bodega..."
+                placeholder="Buscar bodega..."
                 @input="onSearch"
               />
             </div>
           </div>
 
-          <!-- Filtros jerarquicos -->
+          <!-- Filtros -->
           <div class="panel-filters">
             <select v-model="filters.region_id" class="filter-select" @change="onFilterChange">
-              <option :value="null">Region</option>
+              <option :value="null">Todas las regiones</option>
               <option v-for="r in catalogos.regiones" :key="r.id" :value="r.id">{{ r.nombre }}</option>
             </select>
             <select v-model="filters.estado" class="filter-select" @change="onFilterChange">
-              <option :value="null">Estado</option>
+              <option :value="null">Todos los estados</option>
               <option v-for="e in estadosFiltrados" :key="e.estado" :value="e.estado">{{ e.estado }}</option>
             </select>
             <select v-model="filters.municipio" class="filter-select" @change="onFilterChange">
-              <option :value="null">Municipio</option>
+              <option :value="null">Todos los municipios</option>
               <option v-for="m in municipiosFiltrados" :key="m.municipio" :value="m.municipio">{{ m.municipio }}</option>
             </select>
           </div>
 
-          <!-- KPI -->
+          <!-- KPI widgets -->
           <div class="panel-kpi">
             <div class="kpi-card bodegas">
               <span class="kpi-value">{{ kpi.total_bodegas }}</span>
@@ -76,13 +76,13 @@
             </div>
           </div>
 
-          <!-- Lista de bodegas -->
+          <!-- Lista -->
           <div class="panel-list-header">
             Bodegas ({{ bodegas.length }})
           </div>
 
           <div v-if="loading" class="panel-loading">
-            <div class="spinner spinner-dark"></div>
+            <div class="spinner spinner-dark spinner-lg"></div>
             <span>Cargando bodegas...</span>
           </div>
 
@@ -95,15 +95,17 @@
               @click="selectBodega(bodega)"
             >
               <div class="bodega-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M3 21V7l9-4 9 4v14H3z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
               </div>
               <div class="bodega-info">
                 <div class="bodega-nombre">{{ bodega.nombre }}</div>
                 <div class="bodega-ubicacion">{{ bodega.municipio || '' }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado || '' }}</div>
                 <div class="bodega-toneladas"><strong>{{ formatNumber(bodega.toneladas_total) }}</strong> ton</div>
               </div>
+              <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </li>
             <li v-if="bodegas.length === 0" class="bodega-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.25;margin-bottom:0.5rem"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               No se encontraron bodegas
             </li>
           </ul>
@@ -120,35 +122,41 @@
         <div class="sheet-handle-bar"></div>
       </div>
       <div class="sheet-tabs">
-        <button class="sheet-tab" :class="{ active: mobileTab === 'filtros' }" @click="mobileTab = 'filtros'">Filtros</button>
-        <button class="sheet-tab" :class="{ active: mobileTab === 'lista' }" @click="mobileTab = 'lista'">Lista ({{ bodegas.length }})</button>
+        <button class="sheet-tab" :class="{ active: mobileTab === 'filtros' }" @click="mobileTab = 'filtros'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtros
+        </button>
+        <button class="sheet-tab" :class="{ active: mobileTab === 'lista' }" @click="mobileTab = 'lista'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Lista ({{ bodegas.length }})
+        </button>
       </div>
       <div class="sheet-content">
         <!-- Tab filtros -->
         <template v-if="mobileTab === 'filtros'">
           <div class="panel-search">
             <div class="search-input-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input
                 v-model="searchText"
                 type="text"
                 class="search-input"
-                placeholder="Busca tu bodega..."
+                placeholder="Buscar bodega..."
                 @input="onSearch"
               />
             </div>
           </div>
-          <div class="panel-filters">
+          <div class="panel-filters" style="flex-direction:column">
             <select v-model="filters.region_id" class="filter-select" @change="onFilterChange">
-              <option :value="null">Region</option>
+              <option :value="null">Todas las regiones</option>
               <option v-for="r in catalogos.regiones" :key="r.id" :value="r.id">{{ r.nombre }}</option>
             </select>
             <select v-model="filters.estado" class="filter-select" @change="onFilterChange">
-              <option :value="null">Estado</option>
+              <option :value="null">Todos los estados</option>
               <option v-for="e in estadosFiltrados" :key="e.estado" :value="e.estado">{{ e.estado }}</option>
             </select>
             <select v-model="filters.municipio" class="filter-select" @change="onFilterChange">
-              <option :value="null">Municipio</option>
+              <option :value="null">Todos los municipios</option>
               <option v-for="m in municipiosFiltrados" :key="m.municipio" :value="m.municipio">{{ m.municipio }}</option>
             </select>
           </div>
@@ -182,13 +190,14 @@
               @click="selectBodega(bodega); sheetCollapsed = true"
             >
               <div class="bodega-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M3 21V7l9-4 9 4v14H3z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
               </div>
               <div class="bodega-info">
                 <div class="bodega-nombre">{{ bodega.nombre }}</div>
                 <div class="bodega-ubicacion">{{ bodega.municipio || '' }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado || '' }}</div>
                 <div class="bodega-toneladas"><strong>{{ formatNumber(bodega.toneladas_total) }}</strong> ton</div>
               </div>
+              <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </li>
             <li v-if="bodegas.length === 0" class="bodega-empty">No se encontraron bodegas</li>
           </ul>
@@ -320,15 +329,15 @@ function addMarkers() {
   bodegas.value.forEach((bodega) => {
     const el = document.createElement('div')
     el.style.cssText = `
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #691C32; border: 2.5px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #691C32, #8B2A45); border: 2px solid white;
+      box-shadow: 0 2px 8px rgba(105,28,50,0.35), 0 1px 3px rgba(0,0,0,0.12);
       cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: transform 0.15s ease;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
     `
-    el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M3 21V7l9-4 9 4v14H3z"/></svg>'
-    el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.25)' })
-    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)' })
+    el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>'
+    el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; el.style.boxShadow = '0 4px 14px rgba(105,28,50,0.45), 0 2px 6px rgba(0,0,0,0.15)' })
+    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.boxShadow = '0 2px 8px rgba(105,28,50,0.35), 0 1px 3px rgba(0,0,0,0.12)' })
 
     const popupHtml = `
       <div class="popup-header">
@@ -340,11 +349,11 @@ function addMarkers() {
         <div class="popup-row"><span>Estado</span><strong>${sanitize(bodega.estado || '-')}</strong></div>
         <div class="popup-row"><span>Municipio</span><strong>${sanitize(bodega.municipio || '-')}</strong></div>
         <div class="popup-row"><span>Toneladas</span><strong>${formatNumber(bodega.toneladas_total)}</strong></div>
-        <button class="popup-btn" onclick="window.__verInventario(${bodega.id})">Ver inventario</button>
+        <button class="popup-btn" onclick="window.__verInventario(${bodega.id})">Ver detalle →</button>
       </div>
     `
 
-    const popup = new mapboxgl.Popup({ offset: 20, closeButton: true, maxWidth: '260px' })
+    const popup = new mapboxgl.Popup({ offset: 18, closeButton: true, maxWidth: '260px' })
       .setHTML(popupHtml)
 
     const marker = new mapboxgl.Marker({ element: el })
@@ -389,8 +398,8 @@ function fitMapToBodegas() {
   const bounds = new mapboxgl.LngLatBounds()
   bodegas.value.forEach((b) => bounds.extend([b.longitud, b.latitud]))
   map.fitBounds(bounds, {
-    padding: { top: 60, bottom: 60, left: isMobile.value ? 40 : 420, right: 40 },
-    duration: 800,
+    padding: { top: 60, bottom: 60, left: isMobile.value ? 40 : 400, right: 40 },
+    duration: 1000,
   })
 }
 
@@ -403,9 +412,9 @@ function initMap() {
     zoom: 5,
     attributionControl: false,
   })
-  map.addControl(new mapboxgl.NavigationControl(), 'bottom-right')
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
   map.addControl(new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showUserHeading: true }), 'bottom-right')
-  map.addControl(new mapboxgl.ScaleControl(), 'bottom-left')
+  map.addControl(new mapboxgl.ScaleControl({ maxWidth: 100 }), 'bottom-left')
   map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left')
 
   map.on('load', () => {
