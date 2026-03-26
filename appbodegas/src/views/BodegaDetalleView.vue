@@ -289,13 +289,13 @@ onUnmounted(() => {
 .detalle-icon {
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(145deg, #691C32, #A63D5A);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #D35400, #E67E22);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(105, 28, 50, 0.3);
+  box-shadow: 0 4px 14px rgba(211, 84, 0, 0.3);
 }
 
 .detalle-header-info {
