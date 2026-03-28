@@ -74,7 +74,7 @@
             </p>
             <div class="detalle-estatus-row">
               <span class="bodega-badge" :class="bodega.estatus || 'aprobada'">{{ bodega.estatus === 'pendiente' ? 'Pendiente' : 'Aprobada' }}</span>
-              <span class="detalle-coords">Lat: {{ bodega.latitud?.toFixed(6) }} Long: {{ bodega.longitud?.toFixed(6) }}</span>
+              <span class="detalle-coords"><span>Lat: {{ bodega.latitud?.toFixed(6) }}</span> <span>Long: {{ bodega.longitud?.toFixed(6) }}</span></span>
             </div>
           </div>
         </div>

@@ -200,16 +200,16 @@
         </button>
         <div v-if="preciosOpen" class="precios-body">
           <div v-for="p in preciosData.precios" :key="p.id" class="precio-row">
-            <span class="precio-tipo">{{ p.tipo }}</span>
-            <span class="precio-valor">${{ formatNumber(p.precio) }}/t</span>
-            <span class="precio-trend" :class="p.tendencia">
+            <span class="tipo">{{ p.tipo }}</span>
+            <span class="monto">${{ formatNumber(p.precio) }}/t</span>
+            <span class="tend" :class="p.tendencia">
               <svg v-if="p.tendencia === 'alza'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
               <svg v-else-if="p.tendencia === 'baja'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
               <svg v-else width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="1" y1="12" x2="23" y2="12"/></svg>
               {{ p.tendencia }}
             </span>
           </div>
-          <div v-if="preciosData.precios.length === 0" class="precios-empty">Sin datos de precios disponibles</div>
+          <div v-if="preciosData.precios.length === 0" class="inv-empty">Sin datos de precios disponibles</div>
         </div>
       </div>
     </div>
@@ -499,6 +499,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (searchTimer) clearTimeout(searchTimer)
   document.removeEventListener('click', onClickOutsideProfile)
   delete (window as any).__verDetalle
   if (activePopup) { activePopup.remove(); activePopup = null }

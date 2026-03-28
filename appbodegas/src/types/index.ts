@@ -57,7 +57,6 @@ export interface Bodega {
 export interface Region {
   id: number
   nombre: string
-  estado: string | null
 }
 
 export interface CatalogoEstado {

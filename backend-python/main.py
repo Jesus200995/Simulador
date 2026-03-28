@@ -159,7 +159,7 @@ def perfil(user: dict = Depends(verify_token)):
 
 @app.get("/bodegas/catalogos")
 def catalogos(user: dict = Depends(verify_token)):
-    regiones = db.query("SELECT id, nombre, estado FROM regiones ORDER BY estado, nombre")
+    regiones = db.query("SELECT id, nombre FROM regiones ORDER BY nombre")
     estados = db.query(
         "SELECT DISTINCT estado FROM bodegas WHERE estado IS NOT NULL ORDER BY estado"
     )

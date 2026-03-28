@@ -1744,30 +1744,42 @@ a:hover { opacity: 0.75; }
   border-radius: var(--radius-sm);
 }
 
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.15rem;
-  background: var(--color-fill);
-  color: var(--color-text);
-  border: 0.5px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-family: var(--font-family);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-secondary:hover {
-  background: var(--color-fill-tertiary);
-}
+/* btn-secondary defined above in Buttons section */
 
 /* Bodega icon pending state (MapView sidebar) */
-.bodega-icon-pending {
+.bodega-icon-pendiente {
   background: linear-gradient(180deg, #FFB020, #E09010) !important;
 }
+
+/* Precios panel extras */
+.precios-tab-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-left: 0.5rem;
+}
+
+.precios-tab-trend {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.precios-tab-trend.alza { color: var(--color-green); }
+.precios-tab-trend.baja { color: var(--color-red); }
+.precios-tab-trend.estable { color: var(--color-text-tertiary); }
+
+.precios-chevron {
+  transition: transform 0.25s var(--ease-out);
+}
+
+.precios-chevron.open {
+  transform: rotate(180deg);
+}
+
+.tend.alza { color: var(--color-green); }
+.tend.baja { color: var(--color-red); }
+.tend.estable { color: var(--color-text-tertiary); }
 
 /* Bodega meta line */
 .bodega-meta {
