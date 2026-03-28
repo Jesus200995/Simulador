@@ -129,6 +129,7 @@ class NuevaBodegaPayload(BaseModel):
 
 class InventarioPayload(BaseModel):
     ciclo: str
+    tipo_maiz: str = "Maiz blanco"
     volumen_almacenamiento: float
     volumen_problemas: Optional[float] = 0
 
@@ -139,6 +140,15 @@ class InventarioPayload(BaseModel):
         opciones = ["Primavera-Verano", "Otono-Invierno"]
         if v not in opciones:
             raise ValueError("Ciclo debe ser Primavera-Verano u Otono-Invierno")
+        return v
+
+    @field_validator("tipo_maiz")
+    @classmethod
+    def validar_tipo_maiz(cls, v: str) -> str:
+        v = v.strip()
+        opciones = ["Maiz blanco", "Maiz amarillo"]
+        if v not in opciones:
+            raise ValueError("Tipo de maiz debe ser Maiz blanco o Maiz amarillo")
         return v
 
     @field_validator("volumen_almacenamiento")

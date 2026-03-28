@@ -1,7 +1,7 @@
 import type {
   LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos,
   BodegasResponse, NuevaBodegaPayload, InventarioPayload, Inventario,
-  PreciosResponse, MiBodega,
+  PreciosResponse, MiBodega, MiInventario,
 } from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -105,6 +105,12 @@ export const api = {
   misBodegas: {
     listar(): Promise<{ bodegas: MiBodega[] }> {
       return request('/mis-bodegas')
+    },
+  },
+
+  misInventarios: {
+    listar(): Promise<{ inventarios: MiInventario[] }> {
+      return request('/mis-inventarios')
     },
   },
 

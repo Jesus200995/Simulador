@@ -230,7 +230,8 @@ def listar_bodegas(
             COUNT(*)::int as total_bodegas,
             COALESCE(SUM(b.capacidad_toneladas), 0)::float as total_capacidad,
             COUNT(DISTINCT b.estado) as total_estados,
-            COUNT(DISTINCT b.municipio) as total_municipios
+            COUNT(DISTINCT b.municipio) as total_municipios,
+            (SELECT COUNT(*) FROM inventarios)::int as total_inventarios
         FROM bodegas b
         {where}
     """
@@ -245,6 +246,7 @@ def listar_bodegas(
             "total_capacidad": 0,
             "total_estados": 0,
             "total_municipios": 0,
+            "total_inventarios": 0,
         },
     }
 
@@ -348,10 +350,10 @@ def registrar_inventario(bodega_id: int, payload: InventarioPayload, user: dict 
         raise HTTPException(status_code=404, detail="Bodega no encontrada")
 
     row = db.execute(
-        """INSERT INTO inventarios (bodega_id, usuario_id, ciclo, volumen_almacenamiento, volumen_problemas)
-           VALUES (%s, %s, %s, %s, %s)
-           RETURNING id, bodega_id, ciclo, volumen_almacenamiento, volumen_problemas, fecha_registro""",
-        (bodega_id, user["userId"], payload.ciclo, payload.volumen_almacenamiento, payload.volumen_problemas),
+        """INSERT INTO inventarios (bodega_id, usuario_id, ciclo, tipo_maiz, volumen_almacenamiento, volumen_problemas)
+           VALUES (%s, %s, %s, %s, %s, %s)
+           RETURNING id, bodega_id, ciclo, tipo_maiz, volumen_almacenamiento, volumen_problemas, fecha_registro""",
+        (bodega_id, user["userId"], payload.ciclo, payload.tipo_maiz, payload.volumen_almacenamiento, payload.volumen_problemas),
     )
     return {"message": "Inventario registrado", "inventario": dict(row)}
 
@@ -359,7 +361,7 @@ def registrar_inventario(bodega_id: int, payload: InventarioPayload, user: dict 
 @app.get("/bodegas/{bodega_id}/inventarios")
 def listar_inventarios(bodega_id: int, user: dict = Depends(verify_token)):
     rows = db.query(
-        """SELECT i.id, i.ciclo, i.volumen_almacenamiento, i.volumen_problemas, i.fecha_registro,
+        """SELECT i.id, i.ciclo, i.tipo_maiz, i.volumen_almacenamiento, i.volumen_problemas, i.fecha_registro,
                   u.nombre_completo as registrado_por
            FROM inventarios i
            LEFT JOIN usuarios u ON i.usuario_id = u.id
@@ -367,6 +369,25 @@ def listar_inventarios(bodega_id: int, user: dict = Depends(verify_token)):
            ORDER BY i.fecha_registro DESC
            LIMIT 20""",
         (bodega_id,),
+    )
+    return {"inventarios": [dict(r) for r in rows]}
+
+
+# =============================================
+# MIS INVENTARIOS
+# =============================================
+
+@app.get("/mis-inventarios")
+def mis_inventarios(user: dict = Depends(verify_token)):
+    rows = db.query(
+        """SELECT i.id, i.bodega_id, i.ciclo, i.tipo_maiz, i.volumen_almacenamiento,
+                  i.volumen_problemas, i.fecha_registro,
+                  b.nombre as bodega_nombre, b.municipio, b.estado
+           FROM inventarios i
+           JOIN bodegas b ON i.bodega_id = b.id
+           WHERE i.usuario_id = %s
+           ORDER BY i.fecha_registro DESC""",
+        (user["userId"],),
     )
     return {"inventarios": [dict(r) for r in rows]}
 

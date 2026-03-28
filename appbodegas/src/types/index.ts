@@ -85,6 +85,7 @@ export interface KpiAgregado {
   total_capacidad: number
   total_estados: number
   total_municipios: number
+  total_inventarios: number
 }
 
 export interface BodegasResponse {
@@ -110,6 +111,7 @@ export interface NuevaBodegaPayload {
 
 export interface InventarioPayload {
   ciclo: string
+  tipo_maiz: string
   volumen_almacenamiento: number
   volumen_problemas?: number
 }
@@ -118,10 +120,17 @@ export interface Inventario {
   id: number
   bodega_id: number
   ciclo: string
+  tipo_maiz: string
   volumen_almacenamiento: number
   volumen_problemas: number
   fecha_registro: string
   registrado_por: string | null
+}
+
+export interface MiInventario extends Inventario {
+  bodega_nombre: string
+  municipio: string
+  estado: string
 }
 
 export interface PrecioMaiz {

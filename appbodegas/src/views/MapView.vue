@@ -10,13 +10,13 @@
       <div class="header-brand">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
         <div class="header-brand-text">
-          <span class="header-brand-title">Bodegas de Maiz</span>
+          <span class="header-brand-title">Bodegas e inventarios</span>
           <span class="header-brand-subtitle">Sistema Nacional de Monitoreo</span>
         </div>
       </div>
       <nav class="header-nav">
         <router-link to="/" class="active">Mapa</router-link>
-        <router-link to="/mis-bodegas">Mis bodegas</router-link>
+        <router-link to="/mis-bodegas">Mis bodegas e inventarios</router-link>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
@@ -72,7 +72,7 @@
           </router-link>
           <router-link to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-            Mis bodegas
+            Mis bodegas e inventarios
           </router-link>
         </div>
 
@@ -123,7 +123,7 @@
               </div>
               <div class="kpi-data">
                 <span class="kpi-value">{{ formatNumber(kpi.total_capacidad) }}</span>
-                <span class="kpi-label">Cap. Toneladas</span>
+                <span class="kpi-label">Almacenamiento</span>
               </div>
             </div>
             <div class="kpi-card estados">
@@ -142,6 +142,15 @@
               <div class="kpi-data">
                 <span class="kpi-value">{{ kpi.total_municipios }}</span>
                 <span class="kpi-label">Municipios</span>
+              </div>
+            </div>
+            <div class="kpi-card inventarios">
+              <div class="kpi-icon-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-value">{{ kpi.total_inventarios }}</span>
+                <span class="kpi-label">Inventarios</span>
               </div>
             </div>
           </div>
@@ -175,6 +184,7 @@
                     <span v-if="bodega.estatus === 'pendiente'" class="bodega-badge pendiente">Pendiente</span>
                     <span v-else class="bodega-badge aprobada">Aprobada</span>
                   </div>
+                  <div class="bodega-cta">Captura inventario en esta bodega</div>
                 </div>
                 <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </li>
@@ -257,7 +267,7 @@ function onClickOutsideProfile(e: MouseEvent) {
 }
 
 const catalogos = reactive<Catalogos>({ regiones: [], estados: [], municipios: [], ddrs: [] })
-const kpi = reactive<KpiAgregado>({ total_bodegas: 0, total_capacidad: 0, total_estados: 0, total_municipios: 0 })
+const kpi = reactive<KpiAgregado>({ total_bodegas: 0, total_capacidad: 0, total_estados: 0, total_municipios: 0, total_inventarios: 0 })
 const filters = reactive<{ estado: string | null; ddr: string | null; municipio: string | null }>({
   estado: null, ddr: null, municipio: null,
 })
@@ -377,7 +387,7 @@ function showPopup(lngLat: [number, number], props: Record<string, any>) {
     + '<div class="popup-row"><span>Estado</span><strong>' + sanitize(String(props.estado || '-')) + '</strong></div>'
     + '<div class="popup-row"><span>Municipio</span><strong>' + sanitize(String(props.municipio || '-')) + '</strong></div>'
     + '<div class="popup-row"><span>Capacidad</span><strong>' + formatNumber(Number(props.capacidad_toneladas)) + ' ton</strong></div>'
-    + '<button class="popup-btn" onclick="window.__verDetalle(' + Number(props.id) + ')">Ver detalle &#x2192;</button>'
+    + '<button class="popup-btn" onclick="window.__verDetalle(' + Number(props.id) + ')">Ver y registrar inventario &#x2192;</button>'
     + '</div>'
   activePopup = new mapboxgl.Popup({ closeButton: true, maxWidth: '280px', offset: 14 })
     .setLngLat(lngLat)

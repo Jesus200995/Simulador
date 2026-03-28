@@ -1021,6 +1021,11 @@ a:hover { opacity: 0.75; }
   color: #2D7D46;
 }
 
+.kpi-card.inventarios .kpi-icon-wrap {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8E44AD;
+}
+
 .kpi-data {
   display: flex;
   flex-direction: column;
@@ -1040,6 +1045,7 @@ a:hover { opacity: 0.75; }
 .kpi-card.toneladas .kpi-value { color: #A07A3A; }
 .kpi-card.estados .kpi-value { color: var(--color-indigo); }
 .kpi-card.municipios .kpi-value { color: #2D7D46; }
+.kpi-card.inventarios .kpi-value { color: #8E44AD; }
 
 .kpi-label {
   font-size: 0.5625rem;
@@ -1787,6 +1793,14 @@ a:hover { opacity: 0.75; }
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.15rem;
+}
+
+.bodega-cta {
+  font-size: 0.7rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-top: 0.2rem;
+  opacity: 0.85;
 }
 
 @media (max-width: 768px) {
