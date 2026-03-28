@@ -4,6 +4,7 @@ export interface Usuario {
   curp: string
   nombre_completo: string
   telefono: string
+  rol?: string
 }
 
 export interface LoginPayload {
@@ -46,6 +47,11 @@ export interface Bodega {
   cve_ent: string | null
   cve_mun: string | null
   fecha_actualizacion: string | null
+  estatus: string
+  creado_por: number | null
+  aprobado_por: number | null
+  fecha_aprobacion: string | null
+  fecha_creacion: string | null
 }
 
 export interface Region {
@@ -85,4 +91,56 @@ export interface KpiAgregado {
 export interface BodegasResponse {
   bodegas: Bodega[]
   kpi: KpiAgregado
+}
+
+export interface NuevaBodegaPayload {
+  clave: string
+  nombre: string
+  estado: string
+  municipio: string
+  ddr?: string
+  cader?: string
+  ejido?: string
+  direccion?: string
+  localidad?: string
+  codigo_postal?: string
+  capacidad_toneladas?: number
+  latitud: number
+  longitud: number
+}
+
+export interface InventarioPayload {
+  ciclo: string
+  volumen_almacenamiento: number
+  volumen_problemas?: number
+}
+
+export interface Inventario {
+  id: number
+  bodega_id: number
+  ciclo: string
+  volumen_almacenamiento: number
+  volumen_problemas: number
+  fecha_registro: string
+  registrado_por: string | null
+}
+
+export interface PrecioMaiz {
+  id: number
+  tipo: string
+  precio: number
+  unidad: string
+  tendencia: string
+  fecha_actualizacion: string
+}
+
+export interface PreciosResponse {
+  precios: PrecioMaiz[]
+  promedio: number
+  tendencia_general: string
+}
+
+export interface MiBodega extends Bodega {
+  total_inventarios: number
+  ultimo_inventario: string | null
 }

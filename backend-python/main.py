@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 from psycopg2 import errors as pg_errors
 
 import database as db
-from models import RegistroPayload, LoginPayload, UsuarioResponse, AuthResponse
+from models import (
+    RegistroPayload, LoginPayload, UsuarioResponse, AuthResponse,
+    NuevaBodegaPayload, InventarioPayload,
+)
 
 load_dotenv()
 
@@ -186,6 +189,9 @@ def listar_bodegas(
     conditions = []
     params = []
 
+    # Excluir bodegas rechazadas del visualizador principal
+    conditions.append("(b.estatus = 'aprobada' OR b.estatus = 'pendiente')")
+
     if region_id is not None:
         conditions.append("b.region_id = %s")
         params.append(region_id)
@@ -211,7 +217,7 @@ def listar_bodegas(
         SELECT b.id, b.clave, b.nombre, b.estado, b.municipio, b.region_id,
                b.ddr, b.cader, b.ejido, b.direccion, b.localidad, b.codigo_postal,
                b.latitud, b.longitud, b.capacidad_toneladas,
-               b.cvegeo, b.cve_ent, b.cve_mun,
+               b.cvegeo, b.cve_ent, b.cve_mun, b.estatus,
                r.nombre as region_nombre
         FROM bodegas b
         LEFT JOIN regiones r ON b.region_id = r.id
@@ -250,6 +256,7 @@ def obtener_bodega(bodega_id: int, user: dict = Depends(verify_token)):
                   b.ddr, b.cader, b.ejido, b.direccion, b.localidad, b.codigo_postal,
                   b.latitud, b.longitud, b.capacidad_toneladas,
                   b.cvegeo, b.cve_ent, b.cve_mun, b.fecha_actualizacion,
+                  b.estatus, b.creado_por, b.aprobado_por, b.fecha_aprobacion,
                   r.nombre as region_nombre
            FROM bodegas b
            LEFT JOIN regiones r ON b.region_id = r.id
@@ -259,6 +266,172 @@ def obtener_bodega(bodega_id: int, user: dict = Depends(verify_token)):
     if not row:
         raise HTTPException(status_code=404, detail="Bodega no encontrada")
     return {"bodega": dict(row)}
+
+
+# =============================================
+# NUEVA BODEGA (alta por usuario)
+# =============================================
+
+@app.post("/bodegas")
+def crear_bodega(payload: NuevaBodegaPayload, user: dict = Depends(verify_token)):
+    # Verificar clave duplicada
+    existing = db.query_one(
+        "SELECT id FROM bodegas WHERE clave = %s", (payload.clave,)
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Ya existe una bodega con esa clave")
+
+    row = db.execute(
+        """INSERT INTO bodegas (clave, nombre, estado, municipio, ddr, cader, ejido,
+                                direccion, localidad, codigo_postal, capacidad_toneladas,
+                                latitud, longitud, estatus, creado_por, fecha_creacion)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pendiente', %s, NOW())
+           RETURNING id, clave, nombre, estado, municipio, latitud, longitud, estatus""",
+        (
+            payload.clave, payload.nombre, payload.estado, payload.municipio,
+            payload.ddr, payload.cader, payload.ejido, payload.direccion,
+            payload.localidad, payload.codigo_postal, payload.capacidad_toneladas,
+            payload.latitud, payload.longitud, user["userId"],
+        ),
+    )
+    return {"message": "Bodega registrada, pendiente de aprobacion", "bodega": dict(row)}
+
+
+# =============================================
+# APROBACION ADMINISTRATIVA
+# =============================================
+
+@app.patch("/bodegas/{bodega_id}/aprobar")
+def aprobar_bodega(bodega_id: int, user: dict = Depends(verify_token)):
+    # Verificar rol admin
+    admin = db.query_one("SELECT rol FROM usuarios WHERE id = %s", (user["userId"],))
+    if not admin or admin["rol"] != "admin":
+        raise HTTPException(status_code=403, detail="Solo administradores pueden aprobar bodegas")
+
+    row = db.execute(
+        """UPDATE bodegas SET estatus = 'aprobada', aprobado_por = %s, fecha_aprobacion = NOW()
+           WHERE id = %s AND estatus = 'pendiente'
+           RETURNING id, nombre, estatus""",
+        (user["userId"], bodega_id),
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Bodega no encontrada o ya procesada")
+    return {"message": "Bodega aprobada", "bodega": dict(row)}
+
+
+@app.patch("/bodegas/{bodega_id}/rechazar")
+def rechazar_bodega(bodega_id: int, user: dict = Depends(verify_token)):
+    admin = db.query_one("SELECT rol FROM usuarios WHERE id = %s", (user["userId"],))
+    if not admin or admin["rol"] != "admin":
+        raise HTTPException(status_code=403, detail="Solo administradores pueden rechazar bodegas")
+
+    row = db.execute(
+        """UPDATE bodegas SET estatus = 'rechazada', aprobado_por = %s, fecha_aprobacion = NOW()
+           WHERE id = %s AND estatus = 'pendiente'
+           RETURNING id, nombre, estatus""",
+        (user["userId"], bodega_id),
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Bodega no encontrada o ya procesada")
+    return {"message": "Bodega rechazada", "bodega": dict(row)}
+
+
+# =============================================
+# INVENTARIOS
+# =============================================
+
+@app.post("/bodegas/{bodega_id}/inventario")
+def registrar_inventario(bodega_id: int, payload: InventarioPayload, user: dict = Depends(verify_token)):
+    # Verificar que la bodega existe
+    bodega = db.query_one("SELECT id, estatus FROM bodegas WHERE id = %s", (bodega_id,))
+    if not bodega:
+        raise HTTPException(status_code=404, detail="Bodega no encontrada")
+
+    row = db.execute(
+        """INSERT INTO inventarios (bodega_id, usuario_id, ciclo, volumen_almacenamiento, volumen_problemas)
+           VALUES (%s, %s, %s, %s, %s)
+           RETURNING id, bodega_id, ciclo, volumen_almacenamiento, volumen_problemas, fecha_registro""",
+        (bodega_id, user["userId"], payload.ciclo, payload.volumen_almacenamiento, payload.volumen_problemas),
+    )
+    return {"message": "Inventario registrado", "inventario": dict(row)}
+
+
+@app.get("/bodegas/{bodega_id}/inventarios")
+def listar_inventarios(bodega_id: int, user: dict = Depends(verify_token)):
+    rows = db.query(
+        """SELECT i.id, i.ciclo, i.volumen_almacenamiento, i.volumen_problemas, i.fecha_registro,
+                  u.nombre_completo as registrado_por
+           FROM inventarios i
+           LEFT JOIN usuarios u ON i.usuario_id = u.id
+           WHERE i.bodega_id = %s
+           ORDER BY i.fecha_registro DESC
+           LIMIT 20""",
+        (bodega_id,),
+    )
+    return {"inventarios": [dict(r) for r in rows]}
+
+
+# =============================================
+# MIS BODEGAS
+# =============================================
+
+@app.get("/mis-bodegas")
+def mis_bodegas(user: dict = Depends(verify_token)):
+    bodegas = db.query(
+        """SELECT b.id, b.clave, b.nombre, b.estado, b.municipio, b.estatus,
+                  b.capacidad_toneladas, b.fecha_creacion, b.latitud, b.longitud,
+                  (SELECT COUNT(*) FROM inventarios i WHERE i.bodega_id = b.id) as total_inventarios,
+                  (SELECT MAX(i.fecha_registro) FROM inventarios i WHERE i.bodega_id = b.id) as ultimo_inventario
+           FROM bodegas b
+           WHERE b.creado_por = %s
+           ORDER BY b.fecha_creacion DESC""",
+        (user["userId"],),
+    )
+    return {"bodegas": [dict(b) for b in bodegas]}
+
+
+# =============================================
+# PRECIOS DE MAIZ
+# =============================================
+
+@app.get("/precios-maiz")
+def precios_maiz(user: dict = Depends(verify_token)):
+    rows = db.query("SELECT * FROM precios_maiz ORDER BY id")
+    if not rows:
+        return {
+            "precios": [],
+            "promedio": 0,
+            "tendencia_general": "sin datos",
+        }
+    precios = [dict(r) for r in rows]
+    promedio = sum(p["precio"] for p in precios) / len(precios)
+    return {
+        "precios": precios,
+        "promedio": round(promedio, 2),
+        "tendencia_general": "estable",
+    }
+
+
+# =============================================
+# ADMIN: Bodegas pendientes
+# =============================================
+
+@app.get("/admin/bodegas-pendientes")
+def bodegas_pendientes(user: dict = Depends(verify_token)):
+    admin = db.query_one("SELECT rol FROM usuarios WHERE id = %s", (user["userId"],))
+    if not admin or admin["rol"] != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
+    rows = db.query(
+        """SELECT b.id, b.clave, b.nombre, b.estado, b.municipio, b.estatus,
+                  b.capacidad_toneladas, b.fecha_creacion, b.latitud, b.longitud,
+                  u.nombre_completo as creado_por_nombre
+           FROM bodegas b
+           LEFT JOIN usuarios u ON b.creado_por = u.id
+           WHERE b.estatus = 'pendiente'
+           ORDER BY b.fecha_creacion DESC"""
+    )
+    return {"bodegas": [dict(r) for r in rows]}
 
 
 # =============================================

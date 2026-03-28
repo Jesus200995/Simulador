@@ -1500,6 +1500,289 @@ a:hover { opacity: 0.75; }
 .mb-2 { margin-bottom: 1rem; }
 .pwa-install-prompt { display: none; }
 
+/* =============================================
+   Bodega Badge — estatus
+   ============================================= */
+
+.bodega-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.bodega-badge.aprobada {
+  background: rgba(52, 199, 89, 0.12);
+  color: #1D8348;
+}
+
+.bodega-badge.pendiente {
+  background: rgba(255, 149, 0, 0.12);
+  color: #E67E22;
+}
+
+.bodega-badge.rechazada {
+  background: rgba(255, 59, 48, 0.10);
+  color: #C0392B;
+}
+
+/* =============================================
+   No encuentro mi bodega — MapView button
+   ============================================= */
+
+.panel-no-bodega {
+  padding: 0.75rem 1rem;
+  border-top: 0.5px solid var(--color-separator);
+}
+
+.btn-no-bodega {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border: 1px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-no-bodega:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* =============================================
+   Precios de maiz panel — MapView bottom
+   ============================================= */
+
+.precios-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+  max-height: 260px;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.precios-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: none;
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--color-text);
+  cursor: pointer;
+  border-bottom: 0.5px solid var(--color-separator);
+}
+
+.precios-tab svg { transition: transform 0.25s; }
+
+.precios-body {
+  padding: 0.75rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  max-height: 190px;
+}
+
+.precio-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  background: var(--color-fill-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.precio-row .tipo {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.precio-row .monto {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.precio-row .tend {
+  font-size: 0.85rem;
+}
+
+/* =============================================
+   Popup estatus
+   ============================================= */
+
+.popup-estatus {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}
+
+.popup-estatus.aprobada { background: rgba(52, 199, 89, 0.15); color: #1D8348; }
+.popup-estatus.pendiente { background: rgba(255, 149, 0, 0.15); color: #E67E22; }
+
+/* =============================================
+   Bodega detail extras
+   ============================================= */
+
+.detalle-estatus-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.detalle-coords {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.detalle-coords span {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+/* =============================================
+   Inventory section — BodegaDetalleView
+   ============================================= */
+
+.detalle-inventario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.detalle-inventario-form-card,
+.detalle-inventario-records-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  border: 0.5px solid var(--color-border);
+}
+
+.detalle-inventario-form-card h3,
+.detalle-inventario-records-card h3 {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.inv-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--color-separator-opaque);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.68rem;
+}
+
+.inv-table td {
+  padding: 0.5rem 0.4rem;
+  border-bottom: 0.5px solid var(--color-separator);
+  color: var(--color-text);
+}
+
+.inv-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--color-text-tertiary);
+  font-size: 0.82rem;
+}
+
+/* =============================================
+   Button variants
+   ============================================= */
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.15rem;
+  background: var(--color-fill);
+  color: var(--color-text);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  background: var(--color-fill-tertiary);
+}
+
+/* Bodega icon pending state (MapView sidebar) */
+.bodega-icon-pending {
+  background: linear-gradient(180deg, #FFB020, #E09010) !important;
+}
+
+/* Bodega meta line */
+.bodega-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 768px) {
+  .detalle-inventario-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Safe areas for PWA on notch devices */
 @supports (padding-top: env(safe-area-inset-top)) {
   .app-header {

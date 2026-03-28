@@ -15,8 +15,7 @@
       </div>
       <nav class="header-nav">
         <router-link to="/">Mapa</router-link>
-        <span>Inventarios</span>
-        <span>Simulador</span>
+        <router-link to="/mis-bodegas">Mis bodegas</router-link>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
@@ -67,12 +66,16 @@
           </div>
           <div class="detalle-header-info">
             <h1 class="detalle-title">{{ bodega.nombre }}</h1>
-            <p class="detalle-subtitle" v-if="bodega.clave">Clave: {{ bodega.clave }}</p>
+            <p class="detalle-subtitle" v-if="bodega.clave">Clave centro de acopio: {{ bodega.clave }}</p>
             <p class="detalle-location">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               {{ bodega.municipio }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado }}
               <span v-if="bodega.ddr"> · DDR {{ bodega.ddr }}</span>
             </p>
+            <div class="detalle-estatus-row">
+              <span class="bodega-badge" :class="bodega.estatus || 'aprobada'">{{ bodega.estatus === 'pendiente' ? 'Pendiente' : 'Aprobada' }}</span>
+              <span class="detalle-coords">Lat: {{ bodega.latitud?.toFixed(6) }} Long: {{ bodega.longitud?.toFixed(6) }}</span>
+            </div>
           </div>
         </div>
 
@@ -154,10 +157,6 @@
               <span class="info-value">{{ bodega.capacidad_toneladas ? formatNumber(bodega.capacidad_toneladas) + ' ton' : '-' }}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">CVEGEO</span>
-              <span class="info-value">{{ bodega.cvegeo || '-' }}</span>
-            </div>
-            <div class="info-row">
               <span class="info-label">Coordenadas</span>
               <span class="info-value">{{ bodega.latitud?.toFixed(4) }}, {{ bodega.longitud?.toFixed(4) }}</span>
             </div>
@@ -165,6 +164,63 @@
               <span class="info-label">Ultima actualizacion</span>
               <span class="info-value">{{ new Date(bodega.fecha_actualizacion).toLocaleDateString('es-MX') }}</span>
             </div>
+          </div>
+        </div>
+
+        <!-- Registrar inventario + Registros recientes -->
+        <div class="detalle-inventario-grid">
+          <div class="detalle-inventario-form-card">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+              Registrar inventario
+            </h3>
+            <div v-if="invSuccess" class="alert alert-success">{{ invSuccess }}</div>
+            <div v-if="invError" class="alert alert-error">{{ invError }}</div>
+            <form @submit.prevent="handleInventario" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="ciclo">Ciclo *</label>
+                <select id="ciclo" v-model="invForm.ciclo" class="form-input">
+                  <option value="">Selecciona ciclo</option>
+                  <option value="Primavera-Verano">Primavera-Verano</option>
+                  <option value="Otono-Invierno">Otono-Invierno</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="volumen">Volumen en toneladas de almacenamiento *</label>
+                <input id="volumen" v-model.number="invForm.volumen_almacenamiento" type="number" min="1" step="any" class="form-input" placeholder="Toneladas" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="problemas">Volumen en toneladas con problemas para su venta</label>
+                <input id="problemas" v-model.number="invForm.volumen_problemas" type="number" min="0" step="any" class="form-input" placeholder="Opcional" />
+              </div>
+              <button type="submit" class="btn btn-primary btn-block" :disabled="invLoading">
+                <span v-if="invLoading" class="spinner"></span>
+                <span v-else>Guardar</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="detalle-inventario-records-card">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+              Registros recientes
+            </h3>
+            <div v-if="inventarios.length > 0" class="inv-table-wrap">
+              <table class="inv-table">
+                <thead>
+                  <tr><th>Ciclo</th><th>Almacen</th><th>Problemas</th><th>Fecha</th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="inv in inventarios" :key="inv.id">
+                    <td>{{ inv.ciclo === 'Primavera-Verano' ? 'PV' : 'OI' }} {{ new Date(inv.fecha_registro).getFullYear() }}</td>
+                    <td>{{ formatNumber(inv.volumen_almacenamiento) }} t</td>
+                    <td>{{ inv.volumen_problemas ? formatNumber(inv.volumen_problemas) + ' t' : '-' }}</td>
+                    <td>{{ new Date(inv.fecha_registro).toLocaleDateString('es-MX') }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="inv-empty">Sin registros de inventario</div>
           </div>
         </div>
 
@@ -188,12 +244,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import mapboxgl from 'mapbox-gl'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/services/api'
-import type { Bodega } from '@/types'
+import type { Bodega, Inventario } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -205,6 +261,13 @@ const minimapContainer = ref<HTMLDivElement>()
 const profileOpen = ref(false)
 const profileRef = ref<HTMLDivElement>()
 let minimap: mapboxgl.Map | null = null
+
+// Inventario
+const inventarios = ref<Inventario[]>([])
+const invForm = reactive({ ciclo: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null })
+const invLoading = ref(false)
+const invError = ref('')
+const invSuccess = ref('')
 
 const userInitials = computed(() => {
   const name = authStore.usuario?.nombre_completo || ''
@@ -231,12 +294,49 @@ function handleLogout() {
   router.push('/login')
 }
 
+async function fetchInventarios() {
+  if (!bodega.value) return
+  try {
+    const res = await api.inventarios.listar(bodega.value.id)
+    inventarios.value = res.inventarios
+  } catch (err) {
+    console.error('Error cargando inventarios:', err)
+  }
+}
+
+async function handleInventario() {
+  invError.value = ''
+  invSuccess.value = ''
+  if (!invForm.ciclo) { invError.value = 'Selecciona un ciclo'; return }
+  if (!invForm.volumen_almacenamiento || invForm.volumen_almacenamiento <= 0) { invError.value = 'Ingresa un volumen valido'; return }
+  if (!bodega.value) return
+
+  invLoading.value = true
+  try {
+    await api.inventarios.registrar(bodega.value.id, {
+      ciclo: invForm.ciclo,
+      volumen_almacenamiento: invForm.volumen_almacenamiento,
+      volumen_problemas: invForm.volumen_problemas || 0,
+    })
+    invSuccess.value = 'Inventario registrado exitosamente'
+    invForm.ciclo = ''
+    invForm.volumen_almacenamiento = null
+    invForm.volumen_problemas = null
+    await fetchInventarios()
+  } catch (err: any) {
+    invError.value = err.message || 'Error al registrar inventario'
+  } finally {
+    invLoading.value = false
+  }
+}
+
 async function loadBodega() {
   loading.value = true
   try {
     const id = Number(route.params.id)
     const res = await api.bodegas.obtener(id)
     bodega.value = res.bodega
+    await fetchInventarios()
 
     // Init minimap after data loads
     setTimeout(() => {

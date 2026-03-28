@@ -26,6 +26,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/BodegaDetalleView.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/nueva-bodega',
+    name: 'NuevaBodega',
+    component: () => import('@/views/NuevaBodegaView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mis-bodegas',
+    name: 'MisBodegas',
+    component: () => import('@/views/MisBodegasView.vue'),
+    meta: { requiresAuth: true }
+  },
 ]
 
 const router = createRouter({

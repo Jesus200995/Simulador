@@ -16,8 +16,7 @@
       </div>
       <nav class="header-nav">
         <router-link to="/" class="active">Mapa</router-link>
-        <span>Inventarios</span>
-        <span>Simulador</span>
+        <router-link to="/mis-bodegas">Mis bodegas</router-link>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
@@ -71,14 +70,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
             Mapa
           </router-link>
-          <span class="panel-nav-tab disabled">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            Inventarios
-          </span>
-          <span class="panel-nav-tab disabled">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-            Simulador
-          </span>
+          <router-link to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+            Mis bodegas
+          </router-link>
         </div>
 
         <!-- Zona fija: búsqueda, filtros, KPI -->
@@ -103,6 +98,13 @@
               <option :value="null">Todos los municipios</option>
               <option v-for="m in municipiosFiltrados" :key="m.municipio" :value="m.municipio">{{ m.municipio }}</option>
             </select>
+          </div>
+
+          <div class="panel-no-bodega">
+            <router-link to="/nueva-bodega" class="btn-no-bodega">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              No encuentro mi bodega
+            </router-link>
           </div>
 
           <div class="panel-kpi">
@@ -162,13 +164,17 @@
 
             <ul v-else class="bodega-list">
               <li v-for="bodega in bodegas" :key="bodega.id" class="bodega-item" :class="{ active: selectedBodega?.id === bodega.id }" @click="selectBodega(bodega)">
-                <div class="bodega-icon">
+                <div class="bodega-icon" :class="{ 'bodega-icon-pendiente': bodega.estatus === 'pendiente' }">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
                 </div>
                 <div class="bodega-info">
                   <div class="bodega-nombre">{{ bodega.nombre }}</div>
                   <div class="bodega-ubicacion">{{ bodega.municipio || '' }}{{ bodega.municipio && bodega.estado ? ', ' : '' }}{{ bodega.estado || '' }}</div>
-                  <div class="bodega-toneladas"><strong>{{ formatNumber(bodega.capacidad_toneladas) }}</strong> ton</div>
+                  <div class="bodega-meta">
+                    <span class="bodega-toneladas"><strong>{{ formatNumber(bodega.capacidad_toneladas) }}</strong> ton</span>
+                    <span v-if="bodega.estatus === 'pendiente'" class="bodega-badge pendiente">Pendiente</span>
+                    <span v-else class="bodega-badge aprobada">Aprobada</span>
+                  </div>
                 </div>
                 <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </li>
@@ -182,6 +188,30 @@
       </aside>
 
       <div class="visor-map" ref="mapContainer"></div>
+
+      <!-- Panel inferior: Precios de maiz -->
+      <div class="precios-panel" :class="{ open: preciosOpen }">
+        <button class="precios-tab" @click="preciosOpen = !preciosOpen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          <span>Precios de maiz</span>
+          <span v-if="preciosData.promedio" class="precios-tab-value">Promedio: ${{ formatNumber(preciosData.promedio) }}/t</span>
+          <span v-if="preciosData.tendencia_general" class="precios-tab-trend" :class="preciosData.tendencia_general">{{ preciosData.tendencia_general }}</span>
+          <svg class="precios-chevron" :class="{ open: preciosOpen }" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <div v-if="preciosOpen" class="precios-body">
+          <div v-for="p in preciosData.precios" :key="p.id" class="precio-row">
+            <span class="precio-tipo">{{ p.tipo }}</span>
+            <span class="precio-valor">${{ formatNumber(p.precio) }}/t</span>
+            <span class="precio-trend" :class="p.tendencia">
+              <svg v-if="p.tendencia === 'alza'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+              <svg v-else-if="p.tendencia === 'baja'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
+              <svg v-else width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="1" y1="12" x2="23" y2="12"/></svg>
+              {{ p.tendencia }}
+            </span>
+          </div>
+          <div v-if="preciosData.precios.length === 0" class="precios-empty">Sin datos de precios disponibles</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -192,7 +222,7 @@ import { useRouter } from 'vue-router'
 import mapboxgl from 'mapbox-gl'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/services/api'
-import type { Bodega, Catalogos, KpiAgregado } from '@/types'
+import type { Bodega, Catalogos, KpiAgregado, PreciosResponse } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -210,6 +240,8 @@ const searchText = ref('')
 const sidebarOpen = ref(false)
 const profileOpen = ref(false)
 const profileRef = ref<HTMLDivElement>()
+const preciosOpen = ref(false)
+const preciosData = reactive<PreciosResponse>({ precios: [], promedio: 0, tendencia_general: 'estable' })
 
 const userInitials = computed(() => {
   const name = authStore.usuario?.nombre_completo || ''
@@ -286,6 +318,17 @@ async function fetchCatalogos() {
   }
 }
 
+async function fetchPrecios() {
+  try {
+    const data = await api.precios.obtener()
+    preciosData.precios = data.precios
+    preciosData.promedio = data.promedio
+    preciosData.tendencia_general = data.tendencia_general
+  } catch (err) {
+    console.error('Error cargando precios:', err)
+  }
+}
+
 async function fetchBodegas() {
   loading.value = true
   try {
@@ -317,7 +360,7 @@ function updateMapSource() {
     features: bodegas.value.map((b) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [b.longitud, b.latitud] },
-      properties: { id: b.id, nombre: b.nombre, clave: b.clave || '', estado: b.estado || '', municipio: b.municipio || '', ddr: b.ddr || '', capacidad_toneladas: b.capacidad_toneladas || 0 },
+      properties: { id: b.id, nombre: b.nombre, clave: b.clave || '', estado: b.estado || '', municipio: b.municipio || '', ddr: b.ddr || '', capacidad_toneladas: b.capacidad_toneladas || 0, estatus: b.estatus || 'aprobada' },
     })),
   } as any)
 }
@@ -329,6 +372,7 @@ function showPopup(lngLat: [number, number], props: Record<string, any>) {
     + '<div class="popup-title">' + sanitize(String(props.nombre)) + '</div>'
     + (props.clave ? '<div class="popup-clave">' + sanitize(String(props.clave)) + '</div>' : '')
     + '</div><div class="popup-body">'
+    + '<div class="popup-estatus ' + (props.estatus === 'pendiente' ? 'pendiente' : 'aprobada') + '">' + (props.estatus === 'pendiente' ? 'Pendiente' : 'Aprobada') + '</div>'
     + '<div class="popup-row"><span>DDR</span><strong>' + sanitize(String(props.ddr || '-')) + '</strong></div>'
     + '<div class="popup-row"><span>Estado</span><strong>' + sanitize(String(props.estado || '-')) + '</strong></div>'
     + '<div class="popup-row"><span>Municipio</span><strong>' + sanitize(String(props.municipio || '-')) + '</strong></div>'
@@ -351,6 +395,7 @@ function selectBodega(bodega: Bodega) {
       id: bodega.id, nombre: bodega.nombre, clave: bodega.clave,
       estado: bodega.estado, municipio: bodega.municipio,
       ddr: bodega.ddr, capacidad_toneladas: bodega.capacidad_toneladas,
+      estatus: bodega.estatus,
     })
   }, 350)
 }
@@ -392,7 +437,7 @@ function initMap() {
       source: 'bodegas-src',
       paint: {
         'circle-radius': ['case', ['boolean', ['feature-state', 'hover'], false], 18, 14],
-        'circle-color': '#D35400',
+        'circle-color': ['case', ['==', ['get', 'estatus'], 'pendiente'], '#FFB020', '#D35400'],
         'circle-opacity': 0.15,
         'circle-blur': 1,
       },
@@ -404,7 +449,7 @@ function initMap() {
       source: 'bodegas-src',
       paint: {
         'circle-radius': ['case', ['boolean', ['feature-state', 'hover'], false], 9, 7],
-        'circle-color': '#D35400',
+        'circle-color': ['case', ['==', ['get', 'estatus'], 'pendiente'], '#FFB020', '#D35400'],
         'circle-stroke-color': '#ffffff',
         'circle-stroke-width': 2.5,
         'circle-opacity': 0.92,
@@ -448,6 +493,7 @@ function initMap() {
 
 onMounted(() => {
   fetchCatalogos()
+  fetchPrecios()
   initMap()
   document.addEventListener('click', onClickOutsideProfile)
 })

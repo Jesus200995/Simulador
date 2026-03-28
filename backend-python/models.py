@@ -70,3 +70,80 @@ class AuthResponse(BaseModel):
     message: str
     token: str
     usuario: UsuarioResponse
+
+
+class NuevaBodegaPayload(BaseModel):
+    clave: str
+    nombre: str
+    estado: str
+    municipio: str
+    ddr: Optional[str] = None
+    cader: Optional[str] = None
+    ejido: Optional[str] = None
+    direccion: Optional[str] = None
+    localidad: Optional[str] = None
+    codigo_postal: Optional[str] = None
+    capacidad_toneladas: Optional[float] = None
+    latitud: float
+    longitud: float
+
+    @field_validator("clave")
+    @classmethod
+    def validar_clave(cls, v: str) -> str:
+        v = v.strip().upper()
+        if len(v) < 3:
+            raise ValueError("La clave debe tener al menos 3 caracteres")
+        return v
+
+    @field_validator("nombre")
+    @classmethod
+    def validar_nombre_bodega(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 3:
+            raise ValueError("El nombre debe tener al menos 3 caracteres")
+        return v
+
+    @field_validator("latitud")
+    @classmethod
+    def validar_latitud(cls, v: float) -> float:
+        if v < -90 or v > 90:
+            raise ValueError("Latitud debe estar entre -90 y 90")
+        return v
+
+    @field_validator("longitud")
+    @classmethod
+    def validar_longitud(cls, v: float) -> float:
+        if v < -180 or v > 180:
+            raise ValueError("Longitud debe estar entre -180 y 180")
+        return v
+
+    @field_validator("codigo_postal")
+    @classmethod
+    def validar_cp(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = re.sub(r"\D", "", v)
+            if v and len(v) != 5:
+                raise ValueError("El codigo postal debe tener 5 digitos")
+        return v or None
+
+
+class InventarioPayload(BaseModel):
+    ciclo: str
+    volumen_almacenamiento: float
+    volumen_problemas: Optional[float] = 0
+
+    @field_validator("ciclo")
+    @classmethod
+    def validar_ciclo(cls, v: str) -> str:
+        v = v.strip()
+        opciones = ["Primavera-Verano", "Otono-Invierno"]
+        if v not in opciones:
+            raise ValueError("Ciclo debe ser Primavera-Verano u Otono-Invierno")
+        return v
+
+    @field_validator("volumen_almacenamiento")
+    @classmethod
+    def validar_volumen(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("El volumen debe ser mayor a 0")
+        return v

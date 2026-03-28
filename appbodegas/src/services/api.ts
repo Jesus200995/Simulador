@@ -1,4 +1,8 @@
-import type { LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos, BodegasResponse } from '@/types'
+import type {
+  LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos,
+  BodegasResponse, NuevaBodegaPayload, InventarioPayload, Inventario,
+  PreciosResponse, MiBodega,
+} from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -67,6 +71,46 @@ export const api = {
 
     catalogos(): Promise<Catalogos> {
       return request('/bodegas/catalogos')
+    },
+
+    crear(payload: NuevaBodegaPayload): Promise<{ message: string; bodega: Bodega }> {
+      return request('/bodegas', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    },
+
+    aprobar(id: number): Promise<{ message: string; bodega: Bodega }> {
+      return request(`/bodegas/${id}/aprobar`, { method: 'PATCH' })
+    },
+
+    rechazar(id: number): Promise<{ message: string; bodega: Bodega }> {
+      return request(`/bodegas/${id}/rechazar`, { method: 'PATCH' })
+    },
+  },
+
+  inventarios: {
+    registrar(bodegaId: number, payload: InventarioPayload): Promise<{ message: string; inventario: Inventario }> {
+      return request(`/bodegas/${bodegaId}/inventario`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    },
+
+    listar(bodegaId: number): Promise<{ inventarios: Inventario[] }> {
+      return request(`/bodegas/${bodegaId}/inventarios`)
+    },
+  },
+
+  misBodegas: {
+    listar(): Promise<{ bodegas: MiBodega[] }> {
+      return request('/mis-bodegas')
+    },
+  },
+
+  precios: {
+    obtener(): Promise<PreciosResponse> {
+      return request('/precios-maiz')
     },
   },
 }
