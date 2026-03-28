@@ -468,9 +468,9 @@ def listar_usuarios(user: dict = Depends(verify_token)):
 
     rows = db.query(
         """SELECT id, email, curp, nombre_completo, telefono, rol, activo,
-                  fecha_registro
+                  created_at AS fecha_registro
            FROM usuarios
-           ORDER BY fecha_registro DESC"""
+           ORDER BY created_at DESC"""
     )
     return {"usuarios": [dict(r) for r in rows]}
 
