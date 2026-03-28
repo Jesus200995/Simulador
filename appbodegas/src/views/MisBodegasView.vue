@@ -103,6 +103,38 @@ onMounted(fetchMisBodegas)
 </script>
 
 <style scoped>
+.detalle-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+
+.detalle-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 74px 1.25rem 2.5rem;
+}
+
+.detalle-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem 0.35rem 0.45rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.detalle-back-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
 .mis-bodegas-header {
   display: flex;
   align-items: center;
@@ -246,6 +278,12 @@ onMounted(fetchMisBodegas)
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .detalle-main {
+    padding: 64px 1rem 2rem;
+  }
 }
 
 @media (max-width: 640px) {
