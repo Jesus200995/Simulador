@@ -26,16 +26,20 @@
 
       <!-- Tabs -->
       <div class="mis-tabs">
-        <button class="mis-tab" :class="{ active: activeTab === 'solicitudes' }" @click="activeTab = 'solicitudes'">
-          Solicitudes
-          <span v-if="solicitudes.length" class="mis-tab-badge">{{ solicitudes.length }}</span>
+        <button class="mis-tab" :class="{ active: activeTab === 'catalogo' }" @click="activeTab = 'catalogo'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Buscar en catalogo
         </button>
         <button class="mis-tab" :class="{ active: activeTab === 'inventarios' }" @click="activeTab = 'inventarios'">
           Inventarios
           <span v-if="inventarios.length" class="mis-tab-badge">{{ inventarios.length }}</span>
         </button>
+        <button class="mis-tab" :class="{ active: activeTab === 'solicitudes' }" @click="activeTab = 'solicitudes'">
+          Solicitudes
+          <span v-if="solicitudes.length" class="mis-tab-badge">{{ solicitudes.length }}</span>
+        </button>
         <button class="mis-tab" :class="{ active: activeTab === 'bodegas' }" @click="activeTab = 'bodegas'">
-          Bodegas
+          Mis bodegas
           <span v-if="bodegas.length" class="mis-tab-badge">{{ bodegas.length }}</span>
         </button>
       </div>
@@ -46,33 +50,100 @@
 
       <div v-else-if="error" class="alert alert-error">{{ error }}</div>
 
-      <!-- Tab: Solicitudes (bodegas pendientes) -->
-      <div v-else-if="activeTab === 'solicitudes'">
-        <div v-if="solicitudes.length === 0" class="mis-bodegas-empty">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <p>No tienes solicitudes pendientes</p>
-        </div>
-        <div v-else class="mis-bodegas-grid">
-          <router-link v-for="b in solicitudes" :key="b.id" :to="`/bodega/${b.id}`" class="mis-bodega-card">
-            <div class="mis-bodega-top">
-              <span class="mis-bodega-clave">{{ b.clave || 'Sin clave' }}</span>
-              <span class="bodega-badge" :class="b.estatus">{{ b.estatus }}</span>
+      <!-- Tab: Buscar en catálogo -->
+      <div v-else-if="activeTab === 'catalogo'" class="catalogo-tab">
+        <div class="catalogo-search-card">
+          <p class="catalogo-desc">Busca una bodega del catalogo nacional para registrar inventario.</p>
+          <div class="catalogo-search-row">
+            <div class="catalogo-search-input-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input v-model="catSearch" type="text" class="catalogo-search-input" placeholder="Nombre, clave, municipio..." @input="onCatSearch" />
             </div>
-            <h3 class="mis-bodega-nombre">{{ b.nombre }}</h3>
-            <p class="mis-bodega-ubicacion">{{ b.municipio }}, {{ b.estado }}</p>
-            <div class="mis-bodega-pendiente-info">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              En espera de aprobacion
+          </div>
+          <div v-if="catSearching" class="catalogo-searching">
+            <span class="spinner spinner-dark spinner-sm"></span> Buscando...
+          </div>
+          <div v-else-if="catResults.length > 0" class="catalogo-results">
+            <div v-for="b in catResults" :key="b.id" class="catalogo-result-item" :class="{ selected: selectedCatBodega?.id === b.id }" @click="selectCatBodega(b)">
+              <div class="catalogo-result-info">
+                <div class="catalogo-result-nombre">{{ b.nombre }}</div>
+                <div class="catalogo-result-meta">
+                  <span v-if="b.clave" class="catalogo-result-clave">{{ b.clave }}</span>
+                  <span>{{ b.municipio }}{{ b.municipio && b.estado ? ', ' : '' }}{{ b.estado }}</span>
+                </div>
+              </div>
+              <div class="catalogo-result-cap">{{ b.capacidad_toneladas?.toLocaleString() || '—' }} ton</div>
             </div>
-          </router-link>
+          </div>
+          <div v-else-if="catSearch.length >= 2 && !catSearching" class="catalogo-no-results">
+            <p>No se encontraron bodegas</p>
+          </div>
+          <div class="catalogo-no-bodega-link">
+            <router-link to="/nueva-bodega" class="btn-link-nueva">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              No encuentro mi bodega — Registrar nueva
+            </router-link>
+          </div>
         </div>
+
+        <!-- Formulario de inventario inline cuando se selecciona bodega -->
+        <Transition name="slide-down">
+          <div v-if="selectedCatBodega" class="catalogo-inv-card">
+            <div class="catalogo-inv-header">
+              <div>
+                <h3>Registrar inventario</h3>
+                <p class="catalogo-inv-bodega">{{ selectedCatBodega.nombre }} <span v-if="selectedCatBodega.clave">({{ selectedCatBodega.clave }})</span></p>
+              </div>
+              <button class="catalogo-inv-close" @click="selectedCatBodega = null" aria-label="Cerrar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div v-if="invSuccess" class="alert alert-success">{{ invSuccess }}</div>
+            <div v-if="invError" class="alert alert-error">{{ invError }}</div>
+            <form @submit.prevent="handleInventario" novalidate class="catalogo-inv-form">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="cat-ciclo">Ciclo *</label>
+                  <select id="cat-ciclo" v-model="invForm.ciclo" class="form-input">
+                    <option value="">Selecciona ciclo</option>
+                    <option value="Primavera-Verano">Primavera-Verano</option>
+                    <option value="Otono-Invierno">Otono-Invierno</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cat-tipo">Tipo de maiz *</label>
+                  <select id="cat-tipo" v-model="invForm.tipo_maiz" class="form-input">
+                    <option value="">Selecciona tipo</option>
+                    <option value="Maiz blanco">Maiz blanco</option>
+                    <option value="Maiz amarillo">Maiz amarillo</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="cat-vol">Volumen almacenamiento (ton) *</label>
+                  <input id="cat-vol" v-model.number="invForm.volumen_almacenamiento" type="number" min="1" step="any" class="form-input" placeholder="Toneladas" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cat-prob">Volumen con problemas (ton)</label>
+                  <input id="cat-prob" v-model.number="invForm.volumen_problemas" type="number" min="0" step="any" class="form-input" placeholder="Opcional" />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" :disabled="invLoading">
+                <span v-if="invLoading" class="spinner"></span>
+                <span v-else>Guardar inventario</span>
+              </button>
+            </form>
+          </div>
+        </Transition>
       </div>
 
-      <!-- Tab: Inventarios -->
+      <!-- Tab: Mis inventarios -->
       <div v-else-if="activeTab === 'inventarios'">
         <div v-if="inventarios.length === 0" class="mis-bodegas-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
           <p>No tienes inventarios registrados</p>
+          <p class="empty-hint">Usa la pestana "Buscar en catalogo" para registrar inventario en una bodega.</p>
         </div>
         <div v-else class="mis-inv-table-wrap">
           <table class="mis-inv-table">
@@ -103,7 +174,29 @@
         </div>
       </div>
 
-      <!-- Tab: Bodegas (todas) -->
+      <!-- Tab: Mis solicitudes (bodegas pendientes) -->
+      <div v-else-if="activeTab === 'solicitudes'">
+        <div v-if="solicitudes.length === 0" class="mis-bodegas-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>No tienes solicitudes pendientes</p>
+        </div>
+        <div v-else class="mis-bodegas-grid">
+          <router-link v-for="b in solicitudes" :key="b.id" :to="`/bodega/${b.id}`" class="mis-bodega-card">
+            <div class="mis-bodega-top">
+              <span class="mis-bodega-clave">{{ b.clave || 'Sin clave' }}</span>
+              <span class="bodega-badge" :class="b.estatus">{{ b.estatus }}</span>
+            </div>
+            <h3 class="mis-bodega-nombre">{{ b.nombre }}</h3>
+            <p class="mis-bodega-ubicacion">{{ b.municipio }}, {{ b.estado }}</p>
+            <div class="mis-bodega-pendiente-info">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              En espera de aprobacion
+            </div>
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Tab: Mis bodegas (todas) -->
       <div v-else-if="activeTab === 'bodegas'">
         <div v-if="bodegas.length === 0" class="mis-bodegas-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
@@ -148,17 +241,90 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { api } from '@/services/api'
-import type { MiBodega, MiInventario } from '@/types'
+import type { MiBodega, MiInventario, Bodega } from '@/types'
 
 const bodegas = ref<MiBodega[]>([])
 const inventarios = ref<MiInventario[]>([])
 const loading = ref(true)
 const error = ref('')
-const activeTab = ref<'solicitudes' | 'inventarios' | 'bodegas'>('solicitudes')
+const activeTab = ref<'catalogo' | 'inventarios' | 'solicitudes' | 'bodegas'>('catalogo')
 
 const solicitudes = computed(() => bodegas.value.filter(b => b.estatus === 'pendiente'))
+
+// Catalog search
+const catSearch = ref('')
+const catResults = ref<Bodega[]>([])
+const catSearching = ref(false)
+const selectedCatBodega = ref<Bodega | null>(null)
+let catTimer: ReturnType<typeof setTimeout> | null = null
+
+// Inline inventory form
+const invForm = reactive({ ciclo: '', tipo_maiz: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null })
+const invLoading = ref(false)
+const invError = ref('')
+const invSuccess = ref('')
+
+function onCatSearch() {
+  if (catTimer) clearTimeout(catTimer)
+  if (catSearch.value.length < 2) {
+    catResults.value = []
+    return
+  }
+  catTimer = setTimeout(async () => {
+    catSearching.value = true
+    try {
+      const res = await api.bodegas.listar({ q: catSearch.value.trim() })
+      catResults.value = res.bodegas.slice(0, 20)
+    } catch {
+      catResults.value = []
+    } finally {
+      catSearching.value = false
+    }
+  }, 400)
+}
+
+function selectCatBodega(b: Bodega) {
+  selectedCatBodega.value = b
+  invForm.ciclo = ''
+  invForm.tipo_maiz = ''
+  invForm.volumen_almacenamiento = null
+  invForm.volumen_problemas = null
+  invError.value = ''
+  invSuccess.value = ''
+}
+
+async function handleInventario() {
+  invError.value = ''
+  invSuccess.value = ''
+  if (!invForm.ciclo) { invError.value = 'Selecciona un ciclo'; return }
+  if (!invForm.tipo_maiz) { invError.value = 'Selecciona un tipo de maiz'; return }
+  if (!invForm.volumen_almacenamiento || invForm.volumen_almacenamiento <= 0) { invError.value = 'Ingresa un volumen valido'; return }
+  if (!selectedCatBodega.value) return
+
+  invLoading.value = true
+  try {
+    await api.inventarios.registrar(selectedCatBodega.value.id, {
+      ciclo: invForm.ciclo,
+      tipo_maiz: invForm.tipo_maiz,
+      volumen_almacenamiento: invForm.volumen_almacenamiento,
+      volumen_problemas: invForm.volumen_problemas || 0,
+    })
+    invSuccess.value = 'Inventario registrado exitosamente'
+    invForm.ciclo = ''
+    invForm.tipo_maiz = ''
+    invForm.volumen_almacenamiento = null
+    invForm.volumen_problemas = null
+    // Refresh inventarios
+    const invRes = await api.misInventarios.listar()
+    inventarios.value = invRes.inventarios
+  } catch (err: any) {
+    invError.value = err.message || 'Error al registrar inventario'
+  } finally {
+    invLoading.value = false
+  }
+}
 
 async function fetchData() {
   loading.value = true
@@ -250,6 +416,11 @@ onMounted(fetchData)
 .mis-bodegas-empty p {
   font-size: 0.95rem;
   margin: 0;
+}
+
+.empty-hint {
+  font-size: 0.82rem !important;
+  opacity: 0.7;
 }
 
 .mis-bodegas-grid {
@@ -392,6 +563,10 @@ onMounted(fetchData)
   border-bottom-color: var(--color-primary);
 }
 
+.mis-tab svg {
+  flex-shrink: 0;
+}
+
 .mis-tab-badge {
   background: var(--color-primary);
   color: white;
@@ -402,6 +577,213 @@ onMounted(fetchData)
   min-width: 1.2rem;
   text-align: center;
   line-height: 1.3;
+}
+
+/* ── Catálogo search ── */
+.catalogo-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.catalogo-search-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 0.5px solid var(--color-border);
+}
+
+.catalogo-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.75rem;
+}
+
+.catalogo-search-row {
+  margin-bottom: 0.75rem;
+}
+
+.catalogo-search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.catalogo-search-input-wrap:focus-within {
+  border-color: var(--color-primary);
+}
+
+.catalogo-search-input-wrap svg {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.catalogo-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  outline: none;
+}
+
+.catalogo-searching {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+
+.catalogo-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.catalogo-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-separator);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.catalogo-result-item:hover {
+  background: var(--color-bg);
+  border-color: var(--color-primary-light, #e0d4c8);
+}
+
+.catalogo-result-item.selected {
+  background: #FFF3E8;
+  border-color: var(--color-primary);
+}
+
+.catalogo-result-nombre {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.catalogo-result-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.catalogo-result-clave {
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+
+.catalogo-result-cap {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.catalogo-no-results {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: var(--color-text-tertiary);
+  font-size: 0.85rem;
+}
+
+.catalogo-no-bodega-link {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-separator);
+}
+
+.btn-link-nueva {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.btn-link-nueva:hover {
+  opacity: 0.8;
+}
+
+/* Inline inventory card */
+.catalogo-inv-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-primary);
+}
+
+.catalogo-inv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.catalogo-inv-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 0.15rem;
+}
+
+.catalogo-inv-bodega {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.catalogo-inv-bodega span {
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+}
+
+.catalogo-inv-close {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.catalogo-inv-close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.catalogo-inv-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
 }
 
 /* Inventory table */
@@ -457,9 +839,24 @@ onMounted(fetchData)
   margin-top: 0.1rem;
 }
 
+/* Slide transition */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 @media (max-width: 768px) {
   .detalle-main {
     padding: 64px 1rem 2rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -476,6 +873,16 @@ onMounted(fetchData)
     white-space: nowrap;
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
+  }
+
+  .mis-bodegas-header h1 {
+    font-size: 1.1rem;
+  }
+
+  .catalogo-result-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
   }
 }
 </style>

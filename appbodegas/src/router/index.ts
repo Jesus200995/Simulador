@@ -30,13 +30,19 @@ const routes: RouteRecordRaw[] = [
     path: '/nueva-bodega',
     name: 'NuevaBodega',
     component: () => import('@/views/NuevaBodegaView.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['bodeguero', 'admin'] }
   },
   {
     path: '/mis-bodegas',
     name: 'MisBodegas',
     component: () => import('@/views/MisBodegasView.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['bodeguero', 'admin'] }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('@/views/AdminView.vue'),
+    meta: { requiresAuth: true, roles: ['admin'] }
   },
 ]
 
@@ -52,6 +58,13 @@ router.beforeEach((to, _from, next) => {
     next({ name: 'Login' })
   } else if (to.meta.guest && auth.isAuthenticated) {
     next({ name: 'Mapa' })
+  } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
+    const allowedRoles = to.meta.roles as string[]
+    if (!allowedRoles.includes(auth.rol)) {
+      next({ name: 'Mapa' })
+    } else {
+      next()
+    }
   } else {
     next()
   }

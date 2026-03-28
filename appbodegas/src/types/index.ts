@@ -4,8 +4,10 @@ export interface Usuario {
   curp: string
   nombre_completo: string
   telefono: string
-  rol?: string
+  rol: 'general' | 'bodeguero' | 'admin'
 }
+
+export type UserRole = 'general' | 'bodeguero' | 'admin'
 
 export interface LoginPayload {
   email: string
@@ -151,4 +153,15 @@ export interface PreciosResponse {
 export interface MiBodega extends Bodega {
   total_inventarios: number
   ultimo_inventario: string | null
+}
+
+export interface AdminUsuario {
+  id: number
+  email: string
+  curp: string
+  nombre_completo: string
+  telefono: string
+  rol: UserRole
+  activo: boolean
+  fecha_registro: string
 }

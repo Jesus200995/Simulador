@@ -1,7 +1,7 @@
 import type {
   LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos,
   BodegasResponse, NuevaBodegaPayload, InventarioPayload, Inventario,
-  PreciosResponse, MiBodega, MiInventario,
+  PreciosResponse, MiBodega, MiInventario, AdminUsuario, UserRole,
 } from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -117,6 +117,38 @@ export const api = {
   precios: {
     obtener(): Promise<PreciosResponse> {
       return request('/precios-maiz')
+    },
+  },
+
+  admin: {
+    listarUsuarios(): Promise<{ usuarios: AdminUsuario[] }> {
+      return request('/admin/usuarios')
+    },
+
+    cambiarRol(id: number, rol: UserRole): Promise<{ message: string; usuario: AdminUsuario }> {
+      return request(`/admin/usuarios/${id}/rol`, {
+        method: 'PATCH',
+        body: JSON.stringify({ rol }),
+      })
+    },
+
+    cambiarEstatus(id: number, activo: boolean): Promise<{ message: string; usuario: AdminUsuario }> {
+      return request(`/admin/usuarios/${id}/estatus`, {
+        method: 'PATCH',
+        body: JSON.stringify({ activo }),
+      })
+    },
+
+    bodegasPendientes(): Promise<{ bodegas: Bodega[] }> {
+      return request('/admin/bodegas-pendientes')
+    },
+
+    aprobarBodega(id: number): Promise<{ message: string; bodega: Bodega }> {
+      return request(`/bodegas/${id}/aprobar`, { method: 'PATCH' })
+    },
+
+    rechazarBodega(id: number): Promise<{ message: string; bodega: Bodega }> {
+      return request(`/bodegas/${id}/rechazar`, { method: 'PATCH' })
     },
   },
 }

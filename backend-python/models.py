@@ -64,6 +64,7 @@ class UsuarioResponse(BaseModel):
     curp: str
     nombre_completo: str
     telefono: str
+    rol: str = "general"
 
 
 class AuthResponse(BaseModel):

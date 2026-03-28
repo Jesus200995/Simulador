@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
-import type { Usuario, LoginPayload, RegistroPayload } from '@/types'
+import type { Usuario, LoginPayload, RegistroPayload, UserRole } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('token'))
@@ -10,6 +10,11 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
+  const rol = computed<UserRole>(() => usuario.value?.rol || 'general')
+  const isGeneral = computed(() => rol.value === 'general')
+  const isBodeguero = computed(() => rol.value === 'bodeguero')
+  const isAdmin = computed(() => rol.value === 'admin')
+  const canCapture = computed(() => rol.value === 'bodeguero' || rol.value === 'admin')
 
   // Restaurar usuario desde localStorage
   const stored = localStorage.getItem('usuario')
@@ -66,5 +71,5 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
   }
 
-  return { token, usuario, loading, error, isAuthenticated, login, registro, logout, clearError }
+  return { token, usuario, loading, error, isAuthenticated, rol, isGeneral, isBodeguero, isAdmin, canCapture, login, registro, logout, clearError }
 })

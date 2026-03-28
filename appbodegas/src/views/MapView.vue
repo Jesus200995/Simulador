@@ -16,7 +16,8 @@
       </div>
       <nav class="header-nav">
         <router-link to="/" class="active">Mapa</router-link>
-        <router-link to="/mis-bodegas">Mis bodegas e inventarios</router-link>
+        <router-link v-if="authStore.canCapture" to="/mis-bodegas">Mis bodegas e inventarios</router-link>
+        <router-link v-if="authStore.isAdmin" to="/admin" class="nav-admin">Admin</router-link>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
@@ -31,6 +32,7 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </div>
               <div class="profile-dropdown-name">{{ authStore.usuario?.nombre_completo }}</div>
+              <span class="profile-role-badge" :class="authStore.rol">{{ authStore.rol }}</span>
             </div>
             <div class="profile-dropdown-body">
               <div class="profile-dropdown-row">
@@ -70,9 +72,13 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
             Mapa
           </router-link>
-          <router-link to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
+          <router-link v-if="authStore.canCapture" to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
             Mis bodegas e inventarios
+          </router-link>
+          <router-link v-if="authStore.isAdmin" to="/admin" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Admin
           </router-link>
         </div>
 
@@ -100,7 +106,7 @@
             </select>
           </div>
 
-          <div class="panel-no-bodega">
+          <div v-if="authStore.canCapture" class="panel-no-bodega">
             <router-link to="/nueva-bodega" class="btn-no-bodega">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
               No encuentro mi bodega
@@ -144,7 +150,7 @@
                 <span class="kpi-label">Municipios</span>
               </div>
             </div>
-            <div class="kpi-card inventarios">
+            <div class="kpi-card inventarios" v-if="authStore.canCapture">
               <div class="kpi-icon-wrap">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
               </div>
@@ -184,7 +190,7 @@
                     <span v-if="bodega.estatus === 'pendiente'" class="bodega-badge pendiente">Pendiente</span>
                     <span v-else class="bodega-badge aprobada">Aprobada</span>
                   </div>
-                  <div class="bodega-cta">Captura inventario en esta bodega</div>
+                  <div class="bodega-cta" v-if="authStore.canCapture">Captura inventario en esta bodega</div>
                 </div>
                 <svg class="bodega-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </li>
@@ -387,7 +393,7 @@ function showPopup(lngLat: [number, number], props: Record<string, any>) {
     + '<div class="popup-row"><span>Estado</span><strong>' + sanitize(String(props.estado || '-')) + '</strong></div>'
     + '<div class="popup-row"><span>Municipio</span><strong>' + sanitize(String(props.municipio || '-')) + '</strong></div>'
     + '<div class="popup-row"><span>Capacidad</span><strong>' + formatNumber(Number(props.capacidad_toneladas)) + ' ton</strong></div>'
-    + '<button class="popup-btn" onclick="window.__verDetalle(' + Number(props.id) + ')">Ver y registrar inventario &#x2192;</button>'
+    + '<button class="popup-btn" onclick="window.__verDetalle(' + Number(props.id) + ')">' + (authStore.canCapture ? 'Ver y registrar inventario &#x2192;' : 'Ver m&aacute;s detalles &#x2192;') + '</button>'
     + '</div>'
   activePopup = new mapboxgl.Popup({ closeButton: true, maxWidth: '280px', offset: 14 })
     .setLngLat(lngLat)
@@ -523,5 +529,32 @@ onUnmounted(() => {
   width: 100%;
   height: 100vh;
   overflow: hidden;
+}
+
+/* Role badge in profile dropdown */
+.profile-role-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}
+
+.profile-role-badge.general {
+  background: rgba(88, 86, 214, 0.12);
+  color: #5856D6;
+}
+
+.profile-role-badge.bodeguero {
+  background: rgba(211, 84, 0, 0.12);
+  color: #D35400;
+}
+
+.profile-role-badge.admin {
+  background: rgba(105, 28, 50, 0.12);
+  color: #691C32;
 }
 </style>

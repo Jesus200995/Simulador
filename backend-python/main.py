@@ -48,9 +48,9 @@ security = HTTPBearer()
 
 
 # --- Helpers ---
-def create_token(user_id: int, email: str) -> str:
+def create_token(user_id: int, email: str, rol: str = "general") -> str:
     expire = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS)
-    payload = {"userId": user_id, "email": email, "exp": expire}
+    payload = {"userId": user_id, "email": email, "rol": rol, "exp": expire}
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
@@ -91,9 +91,9 @@ def registro(payload: RegistroPayload):
 
     try:
         row = db.execute(
-            """INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono)
-               VALUES (%s, %s, %s, %s, %s)
-               RETURNING id, email, curp, nombre_completo, telefono""",
+            """INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono, rol)
+               VALUES (%s, %s, %s, %s, %s, 'general')
+               RETURNING id, email, curp, nombre_completo, telefono, rol""",
             (payload.email, payload.curp, payload.nombre_completo, password_hash, payload.telefono),
         )
     except Exception as e:
@@ -101,7 +101,7 @@ def registro(payload: RegistroPayload):
             raise HTTPException(status_code=409, detail="Ya existe un usuario con ese email o CURP")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-    token = create_token(row["id"], row["email"])
+    token = create_token(row["id"], row["email"], row["rol"])
     return {
         "message": "Usuario registrado exitosamente",
         "token": token,
@@ -111,6 +111,7 @@ def registro(payload: RegistroPayload):
             "curp": row["curp"],
             "nombre_completo": row["nombre_completo"],
             "telefono": row["telefono"],
+            "rol": row["rol"],
         },
     }
 
@@ -128,7 +129,7 @@ def login(payload: LoginPayload):
     if not pwd_ctx.verify(payload.password, row["password_hash"]):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
 
-    token = create_token(row["id"], row["email"])
+    token = create_token(row["id"], row["email"], row["rol"] or "general")
     return {
         "message": "Inicio de sesión exitoso",
         "token": token,
@@ -138,6 +139,7 @@ def login(payload: LoginPayload):
             "curp": row["curp"],
             "nombre_completo": row["nombre_completo"],
             "telefono": row["telefono"],
+            "rol": row["rol"] or "general",
         },
     }
 
@@ -145,7 +147,7 @@ def login(payload: LoginPayload):
 @app.get("/auth/perfil")
 def perfil(user: dict = Depends(verify_token)):
     row = db.query_one(
-        "SELECT id, email, curp, nombre_completo, telefono FROM usuarios WHERE id = %s",
+        "SELECT id, email, curp, nombre_completo, telefono, rol FROM usuarios WHERE id = %s",
         (user["userId"],),
     )
     if not row:
@@ -276,6 +278,8 @@ def obtener_bodega(bodega_id: int, user: dict = Depends(verify_token)):
 
 @app.post("/bodegas")
 def crear_bodega(payload: NuevaBodegaPayload, user: dict = Depends(verify_token)):
+    if user.get("rol") not in ("bodeguero", "admin"):
+        raise HTTPException(status_code=403, detail="Solo bodegueros y administradores pueden registrar bodegas")
     # Verificar clave duplicada
     existing = db.query_one(
         "SELECT id FROM bodegas WHERE clave = %s", (payload.clave,)
@@ -305,9 +309,7 @@ def crear_bodega(payload: NuevaBodegaPayload, user: dict = Depends(verify_token)
 
 @app.patch("/bodegas/{bodega_id}/aprobar")
 def aprobar_bodega(bodega_id: int, user: dict = Depends(verify_token)):
-    # Verificar rol admin
-    admin = db.query_one("SELECT rol FROM usuarios WHERE id = %s", (user["userId"],))
-    if not admin or admin["rol"] != "admin":
+    if user.get("rol") != "admin":
         raise HTTPException(status_code=403, detail="Solo administradores pueden aprobar bodegas")
 
     row = db.execute(
@@ -323,8 +325,7 @@ def aprobar_bodega(bodega_id: int, user: dict = Depends(verify_token)):
 
 @app.patch("/bodegas/{bodega_id}/rechazar")
 def rechazar_bodega(bodega_id: int, user: dict = Depends(verify_token)):
-    admin = db.query_one("SELECT rol FROM usuarios WHERE id = %s", (user["userId"],))
-    if not admin or admin["rol"] != "admin":
+    if user.get("rol") != "admin":
         raise HTTPException(status_code=403, detail="Solo administradores pueden rechazar bodegas")
 
     row = db.execute(
@@ -344,6 +345,8 @@ def rechazar_bodega(bodega_id: int, user: dict = Depends(verify_token)):
 
 @app.post("/bodegas/{bodega_id}/inventario")
 def registrar_inventario(bodega_id: int, payload: InventarioPayload, user: dict = Depends(verify_token)):
+    if user.get("rol") not in ("bodeguero", "admin"):
+        raise HTTPException(status_code=403, detail="Solo bodegueros y administradores pueden registrar inventario")
     # Verificar que la bodega existe
     bodega = db.query_one("SELECT id, estatus FROM bodegas WHERE id = %s", (bodega_id,))
     if not bodega:
@@ -439,8 +442,7 @@ def precios_maiz(user: dict = Depends(verify_token)):
 
 @app.get("/admin/bodegas-pendientes")
 def bodegas_pendientes(user: dict = Depends(verify_token)):
-    admin = db.query_one("SELECT rol FROM usuarios WHERE id = %s", (user["userId"],))
-    if not admin or admin["rol"] != "admin":
+    if user.get("rol") != "admin":
         raise HTTPException(status_code=403, detail="Acceso denegado")
 
     rows = db.query(
@@ -453,6 +455,66 @@ def bodegas_pendientes(user: dict = Depends(verify_token)):
            ORDER BY b.fecha_creacion DESC"""
     )
     return {"bodegas": [dict(r) for r in rows]}
+
+
+# =============================================
+# ADMIN: Usuarios (gestión de roles)
+# =============================================
+
+@app.get("/admin/usuarios")
+def listar_usuarios(user: dict = Depends(verify_token)):
+    if user.get("rol") != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
+    rows = db.query(
+        """SELECT id, email, curp, nombre_completo, telefono, rol, activo,
+                  fecha_registro
+           FROM usuarios
+           ORDER BY fecha_registro DESC"""
+    )
+    return {"usuarios": [dict(r) for r in rows]}
+
+
+@app.patch("/admin/usuarios/{usuario_id}/rol")
+def cambiar_rol(usuario_id: int, payload: dict, user: dict = Depends(verify_token)):
+    if user.get("rol") != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
+    nuevo_rol = payload.get("rol", "").strip().lower()
+    if nuevo_rol not in ("general", "bodeguero", "admin"):
+        raise HTTPException(status_code=400, detail="Rol inválido. Debe ser general, bodeguero o admin")
+
+    if usuario_id == user["userId"]:
+        raise HTTPException(status_code=400, detail="No puedes cambiar tu propio rol")
+
+    row = db.execute(
+        "UPDATE usuarios SET rol = %s WHERE id = %s RETURNING id, email, nombre_completo, rol",
+        (nuevo_rol, usuario_id),
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": f"Rol actualizado a {nuevo_rol}", "usuario": dict(row)}
+
+
+@app.patch("/admin/usuarios/{usuario_id}/estatus")
+def cambiar_estatus(usuario_id: int, payload: dict, user: dict = Depends(verify_token)):
+    if user.get("rol") != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
+    activo = payload.get("activo")
+    if activo is None or not isinstance(activo, bool):
+        raise HTTPException(status_code=400, detail="Campo 'activo' requerido (true/false)")
+
+    if usuario_id == user["userId"]:
+        raise HTTPException(status_code=400, detail="No puedes desactivar tu propia cuenta")
+
+    row = db.execute(
+        "UPDATE usuarios SET activo = %s WHERE id = %s RETURNING id, email, nombre_completo, activo",
+        (activo, usuario_id),
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": "Estado actualizado", "usuario": dict(row)}
 
 
 # =============================================

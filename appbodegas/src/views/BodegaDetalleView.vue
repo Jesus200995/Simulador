@@ -15,7 +15,8 @@
       </div>
       <nav class="header-nav">
         <router-link to="/">Mapa</router-link>
-        <router-link to="/mis-bodegas">Mis bodegas</router-link>
+        <router-link v-if="authStore.canCapture" to="/mis-bodegas">Mis bodegas</router-link>
+        <router-link v-if="authStore.isAdmin" to="/admin">Admin</router-link>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
@@ -167,8 +168,17 @@
           </div>
         </div>
 
+        <!-- Aviso solo lectura para usuarios generales -->
+        <div v-if="authStore.isGeneral" class="detalle-readonly-notice">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>
+            <strong>Vista informativa</strong>
+            <p>Para registrar inventario necesitas el rol de bodeguero. Contacta al administrador.</p>
+          </div>
+        </div>
+
         <!-- Registrar inventario + Registros recientes -->
-        <div class="detalle-inventario-grid">
+        <div v-if="authStore.canCapture" class="detalle-inventario-grid">
           <div class="detalle-inventario-form-card">
             <h3>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
@@ -717,5 +727,35 @@ onUnmounted(() => {
   .detalle-minimap {
     height: 200px;
   }
+}
+
+/* Readonly notice */
+.detalle-readonly-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #EDF6FF;
+  border: 1px solid #B3D7FF;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+  color: #1B5E95;
+}
+
+.detalle-readonly-notice svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.detalle-readonly-notice strong {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.detalle-readonly-notice p {
+  font-size: 0.8rem;
+  margin: 0;
+  opacity: 0.85;
 }
 </style>
