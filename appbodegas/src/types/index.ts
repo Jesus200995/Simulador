@@ -114,6 +114,7 @@ export interface NuevaBodegaPayload {
 export interface InventarioPayload {
   ciclo: string
   tipo_maiz: string
+  origen: string
   volumen_almacenamiento: number
   volumen_problemas?: number
 }
@@ -123,6 +124,7 @@ export interface Inventario {
   bodega_id: number
   ciclo: string
   tipo_maiz: string
+  origen: string
   volumen_almacenamiento: number
   volumen_problemas: number
   fecha_registro: string

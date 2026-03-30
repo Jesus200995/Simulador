@@ -353,10 +353,10 @@ def registrar_inventario(bodega_id: int, payload: InventarioPayload, user: dict 
         raise HTTPException(status_code=404, detail="Bodega no encontrada")
 
     row = db.execute(
-        """INSERT INTO inventarios (bodega_id, usuario_id, ciclo, tipo_maiz, volumen_almacenamiento, volumen_problemas)
-           VALUES (%s, %s, %s, %s, %s, %s)
-           RETURNING id, bodega_id, ciclo, tipo_maiz, volumen_almacenamiento, volumen_problemas, fecha_registro""",
-        (bodega_id, user["userId"], payload.ciclo, payload.tipo_maiz, payload.volumen_almacenamiento, payload.volumen_problemas),
+        """INSERT INTO inventarios (bodega_id, usuario_id, ciclo, tipo_maiz, origen, volumen_almacenamiento, volumen_problemas)
+           VALUES (%s, %s, %s, %s, %s, %s, %s)
+           RETURNING id, bodega_id, ciclo, tipo_maiz, origen, volumen_almacenamiento, volumen_problemas, fecha_registro""",
+        (bodega_id, user["userId"], payload.ciclo, payload.tipo_maiz, payload.origen, payload.volumen_almacenamiento, payload.volumen_problemas),
     )
     return {"message": "Inventario registrado", "inventario": dict(row)}
 
@@ -364,7 +364,7 @@ def registrar_inventario(bodega_id: int, payload: InventarioPayload, user: dict 
 @app.get("/bodegas/{bodega_id}/inventarios")
 def listar_inventarios(bodega_id: int, user: dict = Depends(verify_token)):
     rows = db.query(
-        """SELECT i.id, i.ciclo, i.tipo_maiz, i.volumen_almacenamiento, i.volumen_problemas, i.fecha_registro,
+        """SELECT i.id, i.ciclo, i.tipo_maiz, i.origen, i.volumen_almacenamiento, i.volumen_problemas, i.fecha_registro,
                   u.nombre_completo as registrado_por
            FROM inventarios i
            LEFT JOIN usuarios u ON i.usuario_id = u.id
@@ -383,7 +383,7 @@ def listar_inventarios(bodega_id: int, user: dict = Depends(verify_token)):
 @app.get("/mis-inventarios")
 def mis_inventarios(user: dict = Depends(verify_token)):
     rows = db.query(
-        """SELECT i.id, i.bodega_id, i.ciclo, i.tipo_maiz, i.volumen_almacenamiento,
+        """SELECT i.id, i.bodega_id, i.ciclo, i.tipo_maiz, i.origen, i.volumen_almacenamiento,
                   i.volumen_problemas, i.fecha_registro,
                   b.nombre as bodega_nombre, b.municipio, b.estado
            FROM inventarios i

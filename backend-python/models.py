@@ -131,8 +131,17 @@ class NuevaBodegaPayload(BaseModel):
 class InventarioPayload(BaseModel):
     ciclo: str
     tipo_maiz: str = "Maiz blanco"
+    origen: str = "Local"
     volumen_almacenamiento: float
     volumen_problemas: Optional[float] = 0
+
+    @field_validator("origen")
+    @classmethod
+    def validar_origen(cls, v: str) -> str:
+        v = v.strip()
+        if v not in ("Importado", "Local"):
+            raise ValueError("Origen debe ser Importado o Local")
+        return v
 
     @field_validator("ciclo")
     @classmethod

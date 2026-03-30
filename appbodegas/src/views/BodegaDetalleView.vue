@@ -204,6 +204,14 @@
                 </select>
               </div>
               <div class="form-group">
+                <label class="form-label" for="origen">Origen *</label>
+                <select id="origen" v-model="invForm.origen" class="form-input">
+                  <option value="">Selecciona origen</option>
+                  <option value="Local">Local</option>
+                  <option value="Importado">Importado</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label class="form-label" for="volumen">Volumen en toneladas de almacenamiento *</label>
                 <input id="volumen" v-model.number="invForm.volumen_almacenamiento" type="number" min="1" step="any" class="form-input" placeholder="Toneladas" />
               </div>
@@ -226,12 +234,13 @@
             <div v-if="inventarios.length > 0" class="inv-table-wrap">
               <table class="inv-table">
                 <thead>
-                  <tr><th>Ciclo</th><th>Tipo</th><th>Almacen</th><th>Problemas</th><th>Fecha</th></tr>
+                  <tr><th>Ciclo</th><th>Tipo</th><th>Origen</th><th>Almacen</th><th>Problemas</th><th>Fecha</th></tr>
                 </thead>
                 <tbody>
                   <tr v-for="inv in inventarios" :key="inv.id">
                     <td>{{ inv.ciclo === 'Primavera-Verano' ? 'PV' : 'OI' }} {{ new Date(inv.fecha_registro).getFullYear() }}</td>
                     <td>{{ inv.tipo_maiz || '-' }}</td>
+                    <td>{{ inv.origen || '-' }}</td>
                     <td>{{ formatNumber(inv.volumen_almacenamiento) }} t</td>
                     <td>{{ inv.volumen_problemas ? formatNumber(inv.volumen_problemas) + ' t' : '-' }}</td>
                     <td>{{ new Date(inv.fecha_registro).toLocaleDateString('es-MX') }}</td>
@@ -283,7 +292,7 @@ let minimap: mapboxgl.Map | null = null
 
 // Inventario
 const inventarios = ref<Inventario[]>([])
-const invForm = reactive({ ciclo: '', tipo_maiz: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null })
+const invForm = reactive({ ciclo: '', tipo_maiz: '', origen: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null })
 const invLoading = ref(false)
 const invError = ref('')
 const invSuccess = ref('')
@@ -328,6 +337,7 @@ async function handleInventario() {
   invSuccess.value = ''
   if (!invForm.ciclo) { invError.value = 'Selecciona un ciclo'; return }
   if (!invForm.tipo_maiz) { invError.value = 'Selecciona un tipo de maíz'; return }
+  if (!invForm.origen) { invError.value = 'Selecciona el origen'; return }
   if (!invForm.volumen_almacenamiento || invForm.volumen_almacenamiento <= 0) { invError.value = 'Ingresa un volumen valido'; return }
   if (!bodega.value) return
 
@@ -336,12 +346,14 @@ async function handleInventario() {
     await api.inventarios.registrar(bodega.value.id, {
       ciclo: invForm.ciclo,
       tipo_maiz: invForm.tipo_maiz,
+      origen: invForm.origen,
       volumen_almacenamiento: invForm.volumen_almacenamiento,
       volumen_problemas: invForm.volumen_problemas || 0,
     })
     invSuccess.value = 'Inventario registrado exitosamente'
     invForm.ciclo = ''
     invForm.tipo_maiz = ''
+    invForm.origen = ''
     invForm.volumen_almacenamiento = null
     invForm.volumen_problemas = null
     await fetchInventarios()
