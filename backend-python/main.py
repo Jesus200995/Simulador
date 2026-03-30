@@ -23,7 +23,7 @@ JWT_SECRET = os.getenv("JWT_SECRET", "default_secret")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_HOURS = 24
 
-app = FastAPI(title="Bodegas de Maíz API", version="2.0.0")
+app = FastAPI(title="SIMAC API", version="2.0.0")
 
 # CORS
 app.add_middleware(

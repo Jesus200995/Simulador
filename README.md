@@ -1,2 +1,2 @@
-# Simulador
-Sembrando Vida
+# SIMAC
+Sistema de Información de Maíz y Cultivos

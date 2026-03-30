@@ -8,7 +8,7 @@
       <div class="header-brand">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
         <div class="header-brand-text">
-          <span class="header-brand-title">Bodegas e inventarios</span>
+          <span class="header-brand-title">SIMAC</span>
           <span class="header-brand-subtitle">Sistema Nacional de Monitoreo</span>
         </div>
       </div>

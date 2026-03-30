@@ -6,8 +6,8 @@
           <div class="auth-logo-wrap">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><path d="M3 8l9-5 9 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h1 class="auth-title">Crear cuenta</h1>
-          <p class="auth-subtitle">Registrate para acceder al visor</p>
+          <h1 class="auth-title">SIMAC — Crear cuenta</h1>
+          <p class="auth-subtitle">Regístrate para acceder al sistema</p>
         </div>
 
         <div v-if="authStore.error" class="alert alert-error">

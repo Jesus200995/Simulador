@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'favicon-32x32.png', 'favicon-16x16.png', 'robots.txt'],
       manifest: {
-        name: 'Bodegas de Maíz',
-        short_name: 'Bodegas',
-        description: 'Visor geográfico de bodegas de maíz',
+        name: 'Sistema de Información de Maíz y Cultivos',
+        short_name: 'SIMAC',
+        description: 'SIMAC — Sistema de Información de Maíz y Cultivos',
         theme_color: '#691C32',
         background_color: '#691C32',
         display: 'standalone',
