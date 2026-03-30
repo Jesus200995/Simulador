@@ -21,7 +21,7 @@ load_dotenv()
 # --- Config ---
 JWT_SECRET = os.getenv("JWT_SECRET", "default_secret")
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_HOURS = 24
+JWT_EXPIRE_HOURS = 168  # 7 dias
 
 app = FastAPI(title="SIMAC API", version="2.0.0")
 
