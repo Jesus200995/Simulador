@@ -2,6 +2,9 @@ import type {
   LoginPayload, RegistroPayload, AuthResponse, Bodega, Catalogos,
   BodegasResponse, NuevaBodegaPayload, InventarioPayload, Inventario,
   PreciosResponse, MiBodega, MiInventario, AdminUsuario, UserRole,
+  Producer, ProductorCatalogos, UP, Cycle, CycleCrop,
+  CreateUPPayload, CreateCyclePayload, CreateCycleCropPayload,
+  GeoMunicipality,
 } from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -154,6 +157,65 @@ export const api = {
 
     rechazarBodega(id: number): Promise<{ message: string; bodega: Bodega }> {
       return request(`/bodegas/${id}/rechazar`, { method: 'PATCH' })
+    },
+  },
+
+  // =============================================
+  // Módulo Productor
+  // =============================================
+  producers: {
+    crear(payload: { curp: string; phone?: string; privacy_consent: boolean }): Promise<{ producer: Producer; message: string }> {
+      return request('/producers', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    obtener(curp: string): Promise<{ producer: Producer }> {
+      return request(`/producers/${curp}`)
+    },
+  },
+
+  catalogosProductor: {
+    obtener(): Promise<ProductorCatalogos> {
+      return request('/catalogos-productor')
+    },
+
+    municipios(stateId: string): Promise<{ municipalities: GeoMunicipality[] }> {
+      return request(`/catalogos-productor/municipalities?state_id=${stateId}`)
+    },
+  },
+
+  ups: {
+    crear(payload: CreateUPPayload): Promise<{ up: UP; message: string }> {
+      return request('/ups', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    listar(curp: string): Promise<{ ups: UP[] }> {
+      return request(`/ups?curp=${curp}`)
+    },
+
+    obtener(upId: number): Promise<{ up: UP }> {
+      return request(`/ups/${upId}`)
+    },
+
+    actualizar(upId: number, payload: Partial<UP>): Promise<{ up: UP; message: string }> {
+      return request(`/ups/${upId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+    },
+  },
+
+  cycles: {
+    crear(upId: number, payload: CreateCyclePayload): Promise<{ cycle: Cycle; message: string }> {
+      return request(`/ups/${upId}/cycles`, { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    listar(upId: number): Promise<{ cycles: Cycle[] }> {
+      return request(`/ups/${upId}/cycles`)
+    },
+
+    agregarCultivo(cycleId: number, payload: CreateCycleCropPayload): Promise<{ crop: CycleCrop; message: string }> {
+      return request(`/cycles/${cycleId}/crops`, { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    editarCultivo(cropId: number, payload: Partial<CreateCycleCropPayload>): Promise<{ crop: CycleCrop; message: string }> {
+      return request(`/cycle-crops/${cropId}`, { method: 'PATCH', body: JSON.stringify(payload) })
     },
   },
 }

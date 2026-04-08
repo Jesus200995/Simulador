@@ -167,3 +167,111 @@ export interface AdminUsuario {
   activo: boolean
   fecha_registro: string
 }
+
+// =============================================
+// Módulo Productor - Sembrando Vida
+// =============================================
+
+export interface Producer {
+  producer_id: number
+  curp: string
+  phone: string | null
+  privacy_consent: boolean
+  created_at: string
+}
+
+export interface CatalogItem {
+  code: string
+  label: string
+}
+
+export interface CropVariety {
+  code: string
+  label: string
+}
+
+export interface GeoState {
+  state_id: string
+  name: string
+}
+
+export interface GeoMunicipality {
+  municipality_id: string
+  name: string
+}
+
+export interface ProductorCatalogos {
+  catalogs: Record<string, CatalogItem[]>
+  varieties: Record<string, CropVariety[]>
+  states: GeoState[]
+}
+
+export interface UP {
+  up_id: number
+  producer_id: number
+  up_name: string
+  up_type: string
+  production_system: string
+  water_regime: string
+  area_ha_calc: number | null
+  state_name: string | null
+  municipality_name: string | null
+  state_id: string | null
+  municipality_id: string | null
+  location_confirmed: boolean | null
+  location_correction_reason: string | null
+  geom_geojson: any
+  centroid_lng: number | null
+  centroid_lat: number | null
+  curp?: string
+  created_at: string
+  updated_at?: string
+}
+
+export interface Cycle {
+  cycle_id: number
+  up_id: number
+  cycle_year: number
+  cycle_type: string
+  created_at: string
+  crops: CycleCrop[]
+}
+
+export interface CycleCrop {
+  cycle_crop_id: number
+  crop: string
+  variety_id: string
+  variety_other: string | null
+  area_sown_ha: number
+  area_harvested_ha: number
+  destination: string
+  production_qty: number
+  production_unit: string
+}
+
+export interface CreateUPPayload {
+  curp: string
+  up_name: string
+  up_type: string
+  production_system: string
+  water_regime: string
+  geom_geojson: any
+  state_name?: string
+  municipality_name?: string
+}
+
+export interface CreateCyclePayload {
+  cycle_year: number
+  cycle_type: string
+}
+
+export interface CreateCycleCropPayload {
+  crop: string
+  variety_id: string
+  variety_other?: string
+  area_sown_ha: number
+  area_harvested_ha: number
+  destination: string
+  production_qty: number
+  production_unit: string
+}
