@@ -183,6 +183,7 @@
                   v-model="form.municipality_id"
                   class="form-input"
                   :class="{ 'input-error': errors.municipality_id }"
+                  :disabled="!form.state_id || municipalities.length === 0"
                 >
                   <option value="">Selecciona municipio</option>
                   <option v-for="mun in municipalities" :key="mun.municipality_id" :value="mun.municipality_id">
@@ -286,24 +287,27 @@ const form = reactive({
 
 const errors = reactive<Record<string, string>>({})
 
-const municipios_filtrados = computed(() => {
-  if (!form.state_id) return municipalities.value
-  return municipalities.value.filter((m) => m.state_id === form.state_id)
-})
-
 async function fetchCatalogos() {
   try {
     const catalogos = await api.productor.catalogos()
     states.value = catalogos.states
-    municipalities.value = catalogos.municipalities
   } catch (err: any) {
     console.error('Error cargando catálogos:', err)
-    error.value = 'Error al cargar los catálogos de estados y municipios'
+    error.value = 'Error al cargar los catálogos de estados'
   }
 }
 
-function onStateChange() {
+async function onStateChange() {
   form.municipality_id = '' // Reset municipio
+  municipalities.value = []
+  if (form.state_id) {
+    try {
+      const res = await api.productor.municipios(form.state_id)
+      municipalities.value = res.municipalities
+    } catch (err) {
+      console.error('Error cargando municipios:', err)
+    }
+  }
 }
 
 async function handleRegistro() {
