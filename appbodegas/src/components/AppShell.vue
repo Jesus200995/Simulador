@@ -365,7 +365,7 @@ onUnmounted(() => {
 /* ── "Más" overlay panel ── */
 .more-overlay { display: none; }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .topbar-nav { display: none; }
   .topbar { height: 52px; padding: 0 .75rem; }
   .brand-sub { display: none; }

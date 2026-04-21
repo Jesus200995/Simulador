@@ -1339,7 +1339,7 @@ a:hover { opacity: 0.75; }
    Responsive — Mobile sidebar
    ============================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .auth-card {
     padding: 2rem 1.5rem;
     border-radius: var(--radius-xl);
@@ -2327,7 +2327,7 @@ a:hover { opacity: 0.75; }
   opacity: 0.85;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .detalle-inventario-grid {
     grid-template-columns: 1fr;
   }
@@ -2335,7 +2335,7 @@ a:hover { opacity: 0.75; }
   .page-header-text h1 { font-size: 1.25rem; }
   .view-header h1 { font-size: 1.5rem; }
   .view-header { margin-bottom: 1.25rem; }
-  .card-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
   .filter-bar { flex-direction: column; align-items: stretch; }
   .visor-layout { top: 52px; bottom: 72px; }
   .precios-panel { bottom: 0; left: 0; right: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
@@ -2343,9 +2343,13 @@ a:hover { opacity: 0.75; }
   .precios-body { max-height: 150px; }
 }
 
+@media (max-width: 600px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
 /* Safe areas for PWA on notch devices */
 @supports (padding-top: env(safe-area-inset-top)) {
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .visor-layout { top: calc(52px + env(safe-area-inset-top)); }
     .visor-map { top: calc(52px + env(safe-area-inset-top)); }
   }
