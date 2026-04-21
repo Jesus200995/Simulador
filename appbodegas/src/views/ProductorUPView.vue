@@ -239,6 +239,8 @@
                 <label>Sup. sembrada (ha) <span class="required">*</span></label>
                 <input v-model.number="crop.area_sown_ha" type="number" step="0.01" min="0" class="form-input" />
               </div>
+            </div>
+
             <div class="form-row">
               <div class="form-group flex-1">
                 <label>Fecha de siembra <span class="required">*</span></label>
