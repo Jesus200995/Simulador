@@ -836,7 +836,7 @@ a:hover { opacity: 0.75; }
 
 .visor-layout {
   position: fixed;
-  top: 58px;
+  top: 56px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -1507,6 +1507,72 @@ a:hover { opacity: 0.75; }
 .pwa-install-prompt { display: none; }
 
 /* =============================================
+   Page Layout — consistent shell-aware containers
+   ============================================= */
+
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2rem;
+  animation: fadeInUp .4s var(--ease-out);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: .5px solid var(--color-separator);
+}
+
+.page-header .btn-back {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-fill); border: none; cursor: pointer;
+  color: var(--color-text-secondary); transition: all .2s;
+  flex-shrink: 0;
+}
+
+.page-header .btn-back:hover { background: var(--color-fill-tertiary); color: var(--color-text); }
+
+.page-header-text { flex: 1; min-width: 0; }
+
+.page-header-text h1 {
+  font-size: 1.5rem; font-weight: 750; letter-spacing: -.03em;
+  color: var(--color-text); line-height: 1.2;
+}
+
+.page-header-text p {
+  font-size: .8125rem; color: var(--color-text-secondary); margin-top: 2px;
+}
+
+/* Glass card used across views */
+.glass-card {
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-xl);
+  border: .5px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: box-shadow .25s var(--ease-out);
+}
+
+.glass-card:hover { box-shadow: var(--shadow-md); }
+
+/* Section title inside glass card */
+.section-title {
+  font-size: .95rem; font-weight: 700; color: var(--color-text);
+  display: flex; align-items: center; gap: .5rem;
+  margin-bottom: 1rem; padding-bottom: .5rem;
+  border-bottom: .5px solid var(--color-separator);
+}
+
+.section-title svg { color: var(--color-primary); flex-shrink: 0; }
+
+/* =============================================
    Bodega Badge — estatus
    ============================================= */
 
@@ -1750,8 +1816,6 @@ a:hover { opacity: 0.75; }
   border-radius: var(--radius-sm);
 }
 
-/* btn-secondary defined above in Buttons section */
-
 /* Bodega icon pending state (MapView sidebar) */
 .bodega-icon-pendiente {
   background: linear-gradient(180deg, #FFB020, #E09010) !important;
@@ -1807,22 +1871,16 @@ a:hover { opacity: 0.75; }
   .detalle-inventario-grid {
     grid-template-columns: 1fr;
   }
+  .page-container { padding: 1rem; }
+  .page-header-text h1 { font-size: 1.25rem; }
+  .visor-layout { top: 50px; }
 }
 
 /* Safe areas for PWA on notch devices */
 @supports (padding-top: env(safe-area-inset-top)) {
-  .app-header {
-    padding-top: env(safe-area-inset-top);
-    height: calc(58px + env(safe-area-inset-top));
-  }
-
-  .visor-layout {
-    top: calc(58px + env(safe-area-inset-top));
-  }
-
   @media (max-width: 768px) {
-    .app-header { height: calc(54px + env(safe-area-inset-top)); }
-    .visor-layout { top: calc(54px + env(safe-area-inset-top)); }
-    .visor-map { top: calc(54px + env(safe-area-inset-top)); }
+    .visor-layout { top: calc(50px + env(safe-area-inset-top)); }
+    .visor-map { top: calc(50px + env(safe-area-inset-top)); }
   }
 }
+

@@ -1,68 +1,5 @@
 <template>
   <div class="map-page">
-    <header class="app-header">
-      <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen" aria-label="Menu">
-        <span v-if="!sidebarOpen" class="toggle-bars">
-          <span></span><span></span><span></span>
-        </span>
-        <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <div class="header-brand-text">
-          <span class="header-brand-title">SIMAC</span>
-          <span class="header-brand-subtitle">Maíz y Cultivos</span>
-        </div>
-      </div>
-      <nav class="header-nav">
-        <router-link to="/" exact>Mapa</router-link>
-        <router-link v-if="!authStore.isResponsable" to="/productor">Productores</router-link>
-        <router-link v-if="!authStore.isResponsable" to="/seguimiento">Seguimiento</router-link>
-        <router-link v-if="!authStore.isResponsable" to="/alertas">Alertas</router-link>
-        <router-link to="/infraestructura">Infraestructura</router-link>
-        <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas">Mis bodegas</router-link>
-        <router-link v-if="authStore.isAdmin" to="/admin" class="nav-admin">Admin</router-link>
-        <router-link to="/notificaciones" class="notif-link" title="Notificaciones">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span v-if="notifCount > 0" class="notif-badge">{{ notifCount > 9 ? '9+' : notifCount }}</span>
-        </router-link>
-      </nav>
-      <div class="header-spacer"></div>
-      <div class="header-profile" ref="profileRef">
-        <button class="profile-avatar-btn" @click="profileOpen = !profileOpen">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <svg class="avatar-chevron" :class="{ open: profileOpen }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <Transition name="profile-pop">
-          <div v-if="profileOpen" class="profile-dropdown">
-            <div class="profile-dropdown-header">
-              <div class="profile-dropdown-avatar">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </div>
-              <div class="profile-dropdown-name">{{ authStore.usuario?.nombre_completo }}</div>
-              <span class="profile-role-badge" :class="authStore.rol">{{ authStore.rol }}</span>
-            </div>
-            <div class="profile-dropdown-body">
-              <div class="profile-dropdown-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <span>{{ authStore.usuario?.email }}</span>
-              </div>
-              <div class="profile-dropdown-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
-                <span>{{ authStore.usuario?.curp }}</span>
-              </div>
-            </div>
-            <div class="profile-dropdown-footer">
-              <button class="profile-logout-btn" @click="handleLogout">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Cerrar sesion
-              </button>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </header>
-
     <div class="visor-layout">
       <div class="sidebar-overlay" :class="{ active: sidebarOpen }" @click="sidebarOpen = false"></div>
 
@@ -72,42 +9,6 @@
           <button class="panel-close-btn" @click="sidebarOpen = false">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-        </div>
-
-        <!-- Nav tabs (visible on mobile only) -->
-        <div class="panel-nav-tabs">
-          <router-link to="/" exact class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-            Mapa
-          </router-link>
-          <router-link v-if="!authStore.isResponsable" to="/productor" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            Productores
-          </router-link>
-          <router-link v-if="!authStore.isResponsable" to="/seguimiento" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
-            Seguimiento
-          </router-link>
-          <router-link v-if="!authStore.isResponsable" to="/alertas" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Alertas
-          </router-link>
-          <router-link to="/infraestructura" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-            Infraestructura
-          </router-link>
-          <router-link to="/notificaciones" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            Notificaciones<span v-if="notifCount > 0" class="mobile-notif-badge">{{ notifCount > 9 ? '9+' : notifCount }}</span>
-          </router-link>
-          <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-            Mis bodegas
-          </router-link>
-          <router-link v-if="authStore.isAdmin" to="/admin" class="panel-nav-tab" @click="sidebarOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Admin
-          </router-link>
         </div>
 
         <!-- Zona fija: búsqueda, filtros, KPI -->
