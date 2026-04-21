@@ -39,10 +39,10 @@ function normalizarNombre(nombre: string): string {
 // =============================================
 router.post('/registro', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, curp, nombre_completo, password, telefono }: RegistroPayload = req.body;
+    const { email, curp, nombre_completo, password, telefono, rol, state_id, municipality_id }: RegistroPayload = req.body;
 
     // Validaciones
-    if (!email || !curp || !nombre_completo || !password || !telefono) {
+    if (!email || !curp || !nombre_completo || !password || !telefono || !rol) {
       res.status(400).json({ error: 'Todos los campos son obligatorios' });
       return;
     }
@@ -69,6 +69,12 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const rolesValidos = ['tecnico', 'supervisor', 'responsable', 'admin'];
+    if (!rolesValidos.includes(rol)) {
+      res.status(400).json({ error: 'Rol no válido' });
+      return;
+    }
+
     // Verificar si ya existe
     const existente = await pool.query(
       'SELECT id FROM usuarios WHERE email = $1 OR curp = $2',
@@ -89,10 +95,10 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
 
     // Insertar usuario
     const result = await pool.query(
-      `INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, email, curp, nombre_completo, telefono, created_at`,
-      [email.toLowerCase().trim(), curpUpper, nombreNormalizado, passwordHash, telefonoLimpio]
+      `INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono, rol, state_id, municipality_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id, created_at`,
+      [email.toLowerCase().trim(), curpUpper, nombreNormalizado, passwordHash, telefonoLimpio, rol, state_id || null, municipality_id || null]
     );
 
     const usuario = result.rows[0];
@@ -114,6 +120,9 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
         curp: usuario.curp,
         nombre_completo: usuario.nombre_completo,
         telefono: usuario.telefono,
+        rol: usuario.rol,
+        state_id: usuario.state_id,
+        municipality_id: usuario.municipality_id,
       },
     });
   } catch (error: any) {
@@ -175,6 +184,9 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         curp: usuario.curp,
         nombre_completo: usuario.nombre_completo,
         telefono: usuario.telefono,
+        rol: usuario.rol,
+        state_id: usuario.state_id,
+        municipality_id: usuario.municipality_id,
       },
     });
   } catch (error) {
@@ -189,7 +201,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(
-      'SELECT id, email, curp, nombre_completo, telefono, created_at FROM usuarios WHERE id = $1',
+      'SELECT id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id, created_at FROM usuarios WHERE id = $1',
       [req.user!.userId]
     );
 
@@ -202,6 +214,38 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
   } catch (error) {
     console.error('Error al obtener perfil:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// GET /api/auth/states
+// =============================================
+router.get('/states', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const states = await pool.query('SELECT state_id, name FROM geo_state ORDER BY name');
+    res.json({ states: states.rows });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener estados' });
+  }
+});
+
+// =============================================
+// GET /api/auth/municipalities
+// =============================================
+router.get('/municipalities', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { state_id } = req.query;
+    if (!state_id) {
+      res.status(400).json({ error: 'Se requiere state_id' });
+      return;
+    }
+    const result = await pool.query(
+      'SELECT municipality_id, name FROM geo_municipality WHERE state_id = $1 ORDER BY name',
+      [state_id]
+    );
+    res.json({ municipalities: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener municipios' });
   }
 });
 

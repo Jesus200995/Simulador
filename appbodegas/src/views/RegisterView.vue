@@ -89,6 +89,38 @@
             <p v-if="errors.telefono" class="form-error-text">{{ errors.telefono }}</p>
           </div>
 
+          <!-- Rol -->
+          <div class="form-group">
+            <label class="form-label" for="rol">Rol</label>
+            <select id="rol" v-model="form.rol" class="form-input" :class="{ error: errors.rol }" @focus="authStore.clearError()">
+              <option value="">Selecciona un rol</option>
+              <option value="tecnico">Técnico</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="responsable">Responsable de Bodega</option>
+            </select>
+            <p v-if="errors.rol" class="form-error-text">{{ errors.rol }}</p>
+          </div>
+
+          <!-- Estado -->
+          <div class="form-group">
+            <label class="form-label" for="estado">Estado</label>
+            <select id="estado" v-model="form.state_id" class="form-input" :class="{ error: errors.state_id }" @change="onStateChange" @focus="authStore.clearError()">
+              <option value="">Selecciona un estado</option>
+              <option v-for="s in states" :key="s.state_id" :value="s.state_id">{{ s.name }}</option>
+            </select>
+            <p v-if="errors.state_id" class="form-error-text">{{ errors.state_id }}</p>
+          </div>
+
+          <!-- Municipio -->
+          <div class="form-group">
+            <label class="form-label" for="municipio">Municipio</label>
+            <select id="municipio" v-model="form.municipality_id" class="form-input" :class="{ error: errors.municipality_id }" :disabled="!form.state_id" @focus="authStore.clearError()">
+              <option value="">Selecciona un municipio</option>
+              <option v-for="m in municipalities" :key="m.municipality_id" :value="m.municipality_id">{{ m.name }}</option>
+            </select>
+            <p v-if="errors.municipality_id" class="form-error-text">{{ errors.municipality_id }}</p>
+          </div>
+
           <!-- Contrasena -->
           <div class="form-group">
             <label class="form-label" for="password">Contrasena</label>
@@ -150,9 +182,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { api } from '@/services/api'
+import type { GeoState, GeoMunicipality } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -164,6 +198,9 @@ const form = reactive({
   email: '',
   curp: '',
   telefono: '',
+  rol: '',
+  state_id: '',
+  municipality_id: '',
   password: '',
   password2: '',
 })
@@ -173,9 +210,38 @@ const errors = reactive({
   email: '',
   curp: '',
   telefono: '',
+  rol: '',
+  state_id: '',
+  municipality_id: '',
   password: '',
   password2: '',
 })
+
+const states = ref<GeoState[]>([])
+const municipalities = ref<GeoMunicipality[]>([])
+
+onMounted(async () => {
+  try {
+    const res = await api.auth.states()
+    states.value = res.states
+  } catch (err) {
+    console.error('Error fetching states', err)
+  }
+})
+
+async function onStateChange() {
+  form.municipality_id = ''
+  municipalities.value = []
+  if (!form.state_id) return
+  try {
+    const res = await api.auth.municipalities(form.state_id)
+    municipalities.value = res.municipalities
+  } catch (err) {
+    console.error('Error fetching municipalities', err)
+  }
+}
+
+
 
 const passwordStrength = computed(() => {
   const p = form.password
@@ -256,6 +322,24 @@ function validate(): boolean {
     valid = false
   }
 
+  // Rol
+  if (!form.rol) {
+    errors.rol = 'El rol es obligatorio'
+    valid = false
+  }
+
+  // Estado
+  if (!form.state_id) {
+    errors.state_id = 'El estado es obligatorio'
+    valid = false
+  }
+
+  // Municipio
+  if (!form.municipality_id) {
+    errors.municipality_id = 'El municipio es obligatorio'
+    valid = false
+  }
+
   // Contraseña
   if (!form.password) {
     errors.password = 'La contraseña es obligatoria'
@@ -285,8 +369,11 @@ async function handleRegistro() {
       email: form.email.trim().toLowerCase(),
       curp: form.curp,
       nombre_completo: form.nombre_completo.trim(),
-      password: form.password,
       telefono: form.telefono,
+      rol: form.rol,
+      state_id: form.state_id,
+      municipality_id: form.municipality_id,
+      password: form.password,
     })
     router.push('/')
   } catch {

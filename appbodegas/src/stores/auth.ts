@@ -10,11 +10,12 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
-  const rol = computed<UserRole>(() => usuario.value?.rol || 'general')
-  const isGeneral = computed(() => rol.value === 'general')
-  const isBodeguero = computed(() => rol.value === 'bodeguero')
+  const rol = computed<UserRole>(() => usuario.value?.rol || 'tecnico')
+  const isTecnico = computed(() => rol.value === 'tecnico')
+  const isSupervisor = computed(() => rol.value === 'supervisor')
+  const isResponsable = computed(() => rol.value === 'responsable')
   const isAdmin = computed(() => rol.value === 'admin')
-  const canCapture = computed(() => rol.value === 'bodeguero' || rol.value === 'admin')
+  const canCapture = computed(() => rol.value === 'responsable' || rol.value === 'admin' || rol.value === 'tecnico')
 
   // Restaurar usuario desde localStorage
   const stored = localStorage.getItem('usuario')
@@ -71,5 +72,5 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
   }
 
-  return { token, usuario, loading, error, isAuthenticated, rol, isGeneral, isBodeguero, isAdmin, canCapture, login, registro, logout, clearError }
+  return { token, usuario, loading, error, isAuthenticated, rol, isTecnico, isSupervisor, isResponsable, isAdmin, canCapture, login, registro, logout, clearError }
 })

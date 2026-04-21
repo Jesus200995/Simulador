@@ -67,8 +67,9 @@
                 <td>{{ u.email }}</td>
                 <td>
                   <select class="role-select" :class="u.rol" :value="u.rol" @change="handleRolChange(u.id, ($event.target as HTMLSelectElement).value)" :disabled="actionLoading === u.id">
-                    <option value="general">General</option>
-                    <option value="bodeguero">Bodeguero</option>
+                    <option value="tecnico">Técnico</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="responsable">Responsable de Bodega</option>
                     <option value="admin">Admin</option>
                   </select>
                 </td>
@@ -414,12 +415,17 @@ onMounted(fetchData)
   min-width: 100px;
 }
 
-.role-select.general {
+.role-select.tecnico {
   color: #5856D6;
   border-color: rgba(88, 86, 214, 0.3);
 }
 
-.role-select.bodeguero {
+.role-select.supervisor {
+  color: #007AFF;
+  border-color: rgba(0, 122, 255, 0.3);
+}
+
+.role-select.responsable {
   color: #D35400;
   border-color: rgba(211, 84, 0, 0.3);
 }

@@ -4,10 +4,12 @@ export interface Usuario {
   curp: string
   nombre_completo: string
   telefono: string
-  rol: 'general' | 'bodeguero' | 'admin'
+  rol: 'tecnico' | 'supervisor' | 'responsable' | 'admin'
+  state_id?: string
+  municipality_id?: string
 }
 
-export type UserRole = 'general' | 'bodeguero' | 'admin'
+export type UserRole = 'tecnico' | 'supervisor' | 'responsable' | 'admin'
 
 export interface LoginPayload {
   email: string
@@ -20,6 +22,9 @@ export interface RegistroPayload {
   nombre_completo: string
   password: string
   telefono: string
+  rol: string
+  state_id: string
+  municipality_id: string
 }
 
 export interface AuthResponse {
@@ -257,10 +262,13 @@ export interface CycleCrop {
   variety_id: string
   variety_other: string | null
   area_sown_ha: number
-  area_harvested_ha: number
-  destination: string
-  production_qty: number
-  production_unit: string
+  planting_date: string
+  estimated_harvest_date: string | null
+  yield_expected: number | null
+  area_harvested_ha: number | null
+  destination: string | null
+  production_qty: number | null
+  production_unit: string | null
 }
 
 export interface CreateUPPayload {
@@ -284,8 +292,11 @@ export interface CreateCycleCropPayload {
   variety_id: string
   variety_other?: string
   area_sown_ha: number
-  area_harvested_ha: number
-  destination: string
-  production_qty: number
-  production_unit: string
+  planting_date: string
+  estimated_harvest_date?: string
+  yield_expected?: number
+  area_harvested_ha?: number
+  destination?: string
+  production_qty?: number
+  production_unit?: string
 }

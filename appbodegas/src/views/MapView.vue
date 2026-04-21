@@ -543,12 +543,17 @@ onUnmounted(() => {
   margin-top: 0.25rem;
 }
 
-.profile-role-badge.general {
+.profile-role-badge.tecnico {
   background: rgba(88, 86, 214, 0.12);
   color: #5856D6;
 }
 
-.profile-role-badge.bodeguero {
+.profile-role-badge.supervisor {
+  background: rgba(0, 122, 255, 0.12);
+  color: #007AFF;
+}
+
+.profile-role-badge.responsable {
   background: rgba(211, 84, 0, 0.12);
   color: #D35400;
 }

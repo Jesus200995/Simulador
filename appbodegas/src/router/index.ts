@@ -42,13 +42,13 @@ const routes: RouteRecordRaw[] = [
     path: '/nueva-bodega',
     name: 'NuevaBodega',
     component: () => import('@/views/NuevaBodegaView.vue'),
-    meta: { requiresAuth: true, roles: ['bodeguero', 'admin'] }
+    meta: { requiresAuth: true, roles: ['responsable', 'admin'] }
   },
   {
     path: '/mis-bodegas',
     name: 'MisBodegas',
     component: () => import('@/views/MisBodegasView.vue'),
-    meta: { requiresAuth: true, roles: ['bodeguero', 'admin'] }
+    meta: { requiresAuth: true, roles: ['responsable', 'admin'] }
   },
   {
     path: '/admin',

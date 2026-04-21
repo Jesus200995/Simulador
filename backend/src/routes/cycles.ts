@@ -60,6 +60,9 @@ router.get('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: R
                   'variety_id', cc.variety_id,
                   'variety_other', cc.variety_other,
                   'area_sown_ha', cc.area_sown_ha,
+                  'planting_date', cc.planting_date,
+                  'estimated_harvest_date', cc.estimated_harvest_date,
+                  'yield_expected', cc.yield_expected,
                   'area_harvested_ha', cc.area_harvested_ha,
                   'destination', cc.destination,
                   'production_qty', cc.production_qty,
@@ -89,12 +92,12 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
     const { cycle_id } = req.params;
     const {
       crop, variety_id, variety_other,
-      area_sown_ha, area_harvested_ha,
-      destination, production_qty, production_unit
+      area_sown_ha, planting_date, estimated_harvest_date, yield_expected,
+      area_harvested_ha, destination, production_qty, production_unit
     } = req.body;
 
     // Validations
-    if (!crop || !variety_id || !area_sown_ha || area_harvested_ha === undefined || !destination || production_qty === undefined || !production_unit) {
+    if (!crop || !variety_id || !area_sown_ha || !planting_date) {
       res.status(400).json({ error: 'Faltan campos obligatorios' });
       return;
     }
@@ -110,12 +113,12 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
       return;
     }
 
-    if (Number(area_harvested_ha) < 0 || Number(area_harvested_ha) > Number(area_sown_ha)) {
+    if (area_harvested_ha !== undefined && (Number(area_harvested_ha) < 0 || Number(area_harvested_ha) > Number(area_sown_ha))) {
       res.status(400).json({ error: 'area_harvested_ha debe ser >= 0 y <= area_sown_ha' });
       return;
     }
 
-    if (Number(production_qty) < 0) {
+    if (production_qty !== undefined && Number(production_qty) < 0) {
       res.status(400).json({ error: 'production_qty debe ser >= 0' });
       return;
     }
@@ -134,10 +137,18 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
     }
 
     const result = await pool.query(
-      `INSERT INTO cycle_crop (cycle_id, crop, variety_id, variety_other, area_sown_ha, area_harvested_ha, destination, production_qty, production_unit)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO cycle_crop (
+        cycle_id, crop, variety_id, variety_other, area_sown_ha,
+        planting_date, estimated_harvest_date, yield_expected,
+        area_harvested_ha, destination, production_qty, production_unit
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
-      [cycle_id, crop, variety_id, variety_other || null, area_sown_ha, area_harvested_ha, destination, production_qty, production_unit]
+      [
+        cycle_id, crop, variety_id, variety_other || null, area_sown_ha,
+        planting_date, estimated_harvest_date || null, yield_expected || null,
+        area_harvested_ha || null, destination || null, production_qty || null, production_unit || null
+      ]
     );
 
     res.status(201).json({ crop: result.rows[0], message: 'Cultivo agregado exitosamente' });
@@ -154,8 +165,9 @@ router.patch('/cycle-crops/:id', authMiddleware, async (req: AuthRequest, res: R
   try {
     const { id } = req.params;
     const {
-      variety_id, variety_other, area_sown_ha, area_harvested_ha,
-      destination, production_qty, production_unit
+      variety_id, variety_other, area_sown_ha,
+      planting_date, estimated_harvest_date, yield_expected,
+      area_harvested_ha, destination, production_qty, production_unit
     } = req.body;
 
     const sets: string[] = [];
@@ -165,6 +177,9 @@ router.patch('/cycle-crops/:id', authMiddleware, async (req: AuthRequest, res: R
     if (variety_id !== undefined) { sets.push(`variety_id = $${idx++}`); params.push(variety_id); }
     if (variety_other !== undefined) { sets.push(`variety_other = $${idx++}`); params.push(variety_other); }
     if (area_sown_ha !== undefined) { sets.push(`area_sown_ha = $${idx++}`); params.push(area_sown_ha); }
+    if (planting_date !== undefined) { sets.push(`planting_date = $${idx++}`); params.push(planting_date); }
+    if (estimated_harvest_date !== undefined) { sets.push(`estimated_harvest_date = $${idx++}`); params.push(estimated_harvest_date); }
+    if (yield_expected !== undefined) { sets.push(`yield_expected = $${idx++}`); params.push(yield_expected); }
     if (area_harvested_ha !== undefined) { sets.push(`area_harvested_ha = $${idx++}`); params.push(area_harvested_ha); }
     if (destination !== undefined) { sets.push(`destination = $${idx++}`); params.push(destination); }
     if (production_qty !== undefined) { sets.push(`production_qty = $${idx++}`); params.push(production_qty); }

@@ -168,12 +168,12 @@
           </div>
         </div>
 
-        <!-- Aviso solo lectura para usuarios generales -->
-        <div v-if="authStore.isGeneral" class="detalle-readonly-notice">
+        <!-- Aviso solo lectura para usuarios sin permisos -->
+        <div v-if="!authStore.canCapture" class="detalle-readonly-notice">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <div>
             <strong>Vista informativa</strong>
-            <p>Para registrar inventario necesitas el rol de bodeguero. Contacta al administrador.</p>
+            <p>Para registrar inventario necesitas el rol de responsable de bodega. Contacta al administrador.</p>
           </div>
         </div>
 

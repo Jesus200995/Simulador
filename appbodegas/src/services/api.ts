@@ -59,6 +59,14 @@ export const api = {
     perfil(): Promise<{ usuario: AuthResponse['usuario'] }> {
       return request('/auth/perfil')
     },
+
+    states(): Promise<{ states: import('@/types').GeoState[] }> {
+      return request('/auth/states')
+    },
+
+    municipalities(stateId: string): Promise<{ municipalities: import('@/types').GeoMunicipality[] }> {
+      return request(`/auth/municipalities?state_id=${stateId}`)
+    },
   },
 
   bodegas: {

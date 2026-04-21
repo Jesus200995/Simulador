@@ -6,6 +6,9 @@ export interface Usuario {
   password_hash: string;
   telefono: string;
   activo: boolean;
+  rol: string;
+  state_id?: string;
+  municipality_id?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -16,6 +19,9 @@ export interface RegistroPayload {
   nombre_completo: string;
   password: string;
   telefono: string;
+  rol: string;
+  state_id: string;
+  municipality_id: string;
 }
 
 export interface LoginPayload {
