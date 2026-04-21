@@ -168,6 +168,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { api } from '@/services/api'
 
 defineProps<{ fullBleed?: boolean }>()
 
@@ -178,6 +179,16 @@ const moreOpen = ref(false)
 const avatarRef = ref<HTMLElement>()
 const menuRef = ref<HTMLElement>()
 const notifCount = ref(0)
+let notifTimer: ReturnType<typeof setInterval> | null = null
+
+async function fetchNotifs() {
+  try {
+    const data = await api.alertas.notificaciones()
+    notifCount.value = data.total_no_leidas ?? 0
+  } catch {
+    // silently ignore
+  }
+}
 
 const showField = computed(() => !authStore.isResponsable)
 
@@ -204,8 +215,15 @@ function onClickOutside(e: MouseEvent) {
   }
 }
 
-onMounted(() => document.addEventListener('click', onClickOutside))
-onUnmounted(() => document.removeEventListener('click', onClickOutside))
+onMounted(() => {
+  document.addEventListener('click', onClickOutside)
+  fetchNotifs()
+  notifTimer = setInterval(fetchNotifs, 30_000)
+})
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+  if (notifTimer) clearInterval(notifTimer)
+})
 </script>
 
 <style scoped>
