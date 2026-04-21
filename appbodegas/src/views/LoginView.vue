@@ -159,10 +159,9 @@ async function handleLogin() {
 
 <style scoped>
 .auth-page {
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
-  overflow: hidden;
 }
 
 /* ── Brand panel ── */
@@ -172,7 +171,10 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   padding: 3rem 2.5rem;
 }
@@ -256,8 +258,7 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
   background: var(--color-bg);
-  padding: 1.5rem;
-  overflow-y: auto;
+  padding: 2rem 1.5rem;
 }
 
 .auth-form-inner {
@@ -415,13 +416,11 @@ async function handleLogin() {
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .auth-page { overflow: auto; }
   .auth-panel-brand { display: none; }
   .auth-panel-form {
     background: linear-gradient(160deg, #2A0A15 0%, #691C32 45%, #8B2A45 75%, #A63D5A 100%);
     align-items: flex-end;
     padding: 0;
-    overflow: visible;
   }
   .auth-form-inner {
     max-width: 100%;
