@@ -1,45 +1,179 @@
-import { Router, Response } from 'express';
+﻿import { Router, Response } from 'express';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
+function validarCURP(curp: string): boolean {
+  const curpRegex = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/;
+  return curpRegex.test(curp);
+}
 
 // =============================================
 // POST /api/producers - Alta de productor
 // =============================================
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { curp, phone, privacy_consent } = req.body;
+    const {
+      nombres,
+      apellido_paterno,
+      apellido_materno,
+      curp,
+      sexo,
+      telefono,
+      correo_electronico,
+      state_id,
+      municipality_id,
+      localidad,
+      observaciones,
+      consentimiento_recabado,
+      phone,
+      privacy_consent,
+    } = req.body;
 
-    if (!curp || curp.length !== 18) {
+    if (!curp || typeof curp !== 'string' || curp.length !== 18) {
       res.status(400).json({ error: 'CURP debe tener exactamente 18 caracteres' });
       return;
     }
 
+    const curpUpper = curp.toUpperCase().trim();
+    if (!validarCURP(curpUpper)) {
+      res.status(400).json({ error: 'Formato de CURP inválido' });
+      return;
+    }
+
+    const hasStep1Data = nombres !== undefined || apellido_paterno !== undefined || apellido_materno !== undefined || sexo !== undefined || telefono !== undefined || correo_electronico !== undefined || state_id !== undefined || municipality_id !== undefined || localidad !== undefined || observaciones !== undefined || consentimiento_recabado !== undefined;
+
+    if (hasStep1Data) {
+      if (!nombres?.trim() || !apellido_paterno?.trim() || !apellido_materno?.trim()) {
+        res.status(400).json({ error: 'Nombre completo es obligatorio' });
+        return;
+      }
+
+      if (!sexo || typeof sexo !== 'string') {
+        res.status(400).json({ error: 'Sexo es obligatorio' });
+        return;
+      }
+
+      if (!telefono || !/^[0-9]{10}$/.test(String(telefono))) {
+        res.status(400).json({ error: 'Teléfono debe tener 10 dígitos' });
+        return;
+      }
+
+      if (!state_id || !municipality_id) {
+        res.status(400).json({ error: 'Estado y municipio son obligatorios' });
+        return;
+      }
+
+      if (!localidad?.trim()) {
+        res.status(400).json({ error: 'Localidad es obligatoria' });
+        return;
+      }
+
+      if (consentimiento_recabado !== true) {
+        res.status(400).json({ error: 'Debe aceptar el aviso de privacidad' });
+        return;
+      }
+
+      const values = [
+        nombres.trim(),
+        apellido_paterno.trim(),
+        apellido_materno.trim(),
+        sexo.trim(),
+        telefono.trim(),
+        correo_electronico?.trim() || null,
+        state_id,
+        municipality_id,
+        localidad.trim(),
+        observaciones?.trim() || null,
+        consentimiento_recabado,
+        req.user!.userId,
+        curpUpper,
+      ];
+
+      const existing = await pool.query('SELECT producer_id FROM producer WHERE curp = $1', [curpUpper]);
+      if (existing.rows.length > 0) {
+        const result = await pool.query(
+          `UPDATE producer SET
+             nombres = $1,
+             apellido_paterno = $2,
+             apellido_materno = $3,
+             sexo = $4,
+             telefono = $5,
+             correo_electronico = $6,
+             state_id = $7,
+             municipality_id = $8,
+             localidad = $9,
+             observaciones = $10,
+             privacy_consent = $11,
+             usuario_id = $12,
+             fecha_captura = COALESCE(fecha_captura, CURRENT_TIMESTAMP),
+             updated_at = CURRENT_TIMESTAMP
+           WHERE curp = $13
+           RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+                     correo_electronico, state_id, municipality_id, localidad, observaciones,
+                     privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
+                     estatus_registro, fecha_captura, created_at, updated_at`,
+          values
+        );
+
+        res.json({ producer: result.rows[0], message: 'Productor actualizado' });
+        return;
+      }
+
+      const result = await pool.query(
+        `INSERT INTO producer (
+           curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+           correo_electronico, state_id, municipality_id, localidad, observaciones,
+           privacy_consent, usuario_id
+         )
+         VALUES ($13, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+                   correo_electronico, state_id, municipality_id, localidad, observaciones,
+                   privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
+                   estatus_registro, fecha_captura, created_at, updated_at`,
+        values
+      );
+
+      res.status(201).json({ producer: result.rows[0], message: 'Productor registrado exitosamente' });
+      return;
+    }
+
+    // Legacy minimal registration flow for old ProductorUPView / producers.crear
     if (privacy_consent !== true) {
       res.status(400).json({ error: 'Debe aceptar el aviso de privacidad' });
       return;
     }
 
-    const curpUpper = curp.toUpperCase().trim();
-    const curpRegex = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/;
-    if (!curpRegex.test(curpUpper)) {
-      res.status(400).json({ error: 'Formato de CURP inválido' });
-      return;
-    }
-
-    // Check if producer already exists
-    const existing = await pool.query('SELECT producer_id, curp FROM producer WHERE curp = $1', [curpUpper]);
+    const existing = await pool.query('SELECT producer_id FROM producer WHERE curp = $1', [curpUpper]);
     if (existing.rows.length > 0) {
-      res.json({ producer: existing.rows[0], message: 'Productor ya registrado' });
+      const result = await pool.query(
+        `UPDATE producer SET
+           telefono = $1,
+           phone = $1,
+           privacy_consent = $2,
+           usuario_id = $3,
+           updated_at = CURRENT_TIMESTAMP
+         WHERE curp = $4
+         RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+                   correo_electronico, state_id, municipality_id, localidad, observaciones,
+                   privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
+                   estatus_registro, fecha_captura, created_at, updated_at`,
+        [phone || null, privacy_consent, req.user!.userId, curpUpper]
+      );
+
+      res.json({ producer: result.rows[0], message: 'Productor actualizado' });
       return;
     }
 
     const result = await pool.query(
-      `INSERT INTO producer (curp, phone, privacy_consent, usuario_id)
-       VALUES ($1, $2, $3, $4)
-       RETURNING producer_id, curp, phone, privacy_consent, created_at`,
-      [curpUpper, phone || null, true, req.user!.userId]
+      `INSERT INTO producer (curp, phone, telefono, privacy_consent, usuario_id)
+       VALUES ($1, $2, $2, $3, $4)
+       RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+                 correo_electronico, state_id, municipality_id, localidad, observaciones,
+                 privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
+                 estatus_registro, fecha_captura, created_at, updated_at`,
+      [curpUpper, phone || null, privacy_consent, req.user!.userId]
     );
 
     res.status(201).json({ producer: result.rows[0], message: 'Productor registrado exitosamente' });
@@ -60,7 +194,10 @@ router.get('/:curp', authMiddleware, async (req: AuthRequest, res: Response): Pr
   try {
     const curp = req.params.curp.toUpperCase().trim();
     const result = await pool.query(
-      `SELECT producer_id, curp, phone, privacy_consent, created_at
+      `SELECT producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+              correo_electronico, state_id, municipality_id, localidad, observaciones,
+              privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
+              estatus_registro, fecha_captura, created_at, updated_at
        FROM producer WHERE curp = $1`,
       [curp]
     );

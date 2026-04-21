@@ -189,14 +189,15 @@ export interface Producer {
   state_id: string
   municipality_id: string
   localidad: string
-  tecnico_asignado_id: number
+  tecnico_asignado_id: number | null
   estatus_registro: string
   observaciones: string | null
   privacy_consent: boolean
   usuario_id: number
-  usuario_capturista_id: number
-  fecha_captura: string
+  usuario_capturista_id: number | null
+  fecha_captura: string | null
   created_at: string
+  updated_at?: string
 }
 
 export interface CatalogItem {
