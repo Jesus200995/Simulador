@@ -124,13 +124,15 @@ const routes: RouteRecordRaw[] = [
     path: '/infraestructura/nueva',
     name: 'NuevaInfraestructura',
     component: () => import('@/views/NuevaInfraestructuraView.vue'),
-    meta: { requiresAuth: true, roles: ['responsable', 'admin', 'bodeguero'] }
+    meta: { requiresAuth: true, roles: ['responsable', 'admin'] }
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  linkActiveClass: 'active',
+  linkExactActiveClass: 'active-exact',
 })
 
 router.beforeEach((to, _from, next) => {

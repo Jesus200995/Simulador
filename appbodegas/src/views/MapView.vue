@@ -15,9 +15,17 @@
         </div>
       </div>
       <nav class="header-nav">
-        <router-link to="/" class="active">Mapa</router-link>
-        <router-link v-if="authStore.canCapture" to="/mis-bodegas">Mis bodegas e inventarios</router-link>
+        <router-link to="/" exact>Mapa</router-link>
+        <router-link v-if="!authStore.isResponsable" to="/productor">Productores</router-link>
+        <router-link v-if="!authStore.isResponsable" to="/seguimiento">Seguimiento</router-link>
+        <router-link v-if="!authStore.isResponsable" to="/alertas">Alertas</router-link>
+        <router-link to="/infraestructura">Infraestructura</router-link>
+        <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas">Mis bodegas</router-link>
         <router-link v-if="authStore.isAdmin" to="/admin" class="nav-admin">Admin</router-link>
+        <router-link to="/notificaciones" class="notif-link" title="Notificaciones">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span v-if="notifCount > 0" class="notif-badge">{{ notifCount > 9 ? '9+' : notifCount }}</span>
+        </router-link>
       </nav>
       <div class="header-spacer"></div>
       <div class="header-profile" ref="profileRef">
@@ -68,13 +76,33 @@
 
         <!-- Nav tabs (visible on mobile only) -->
         <div class="panel-nav-tabs">
-          <router-link to="/" class="panel-nav-tab active" @click="sidebarOpen = false">
+          <router-link to="/" exact class="panel-nav-tab" @click="sidebarOpen = false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
             Mapa
           </router-link>
-          <router-link v-if="authStore.canCapture" to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
+          <router-link v-if="!authStore.isResponsable" to="/productor" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Productores
+          </router-link>
+          <router-link v-if="!authStore.isResponsable" to="/seguimiento" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
+            Seguimiento
+          </router-link>
+          <router-link v-if="!authStore.isResponsable" to="/alertas" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Alertas
+          </router-link>
+          <router-link to="/infraestructura" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            Infraestructura
+          </router-link>
+          <router-link to="/notificaciones" class="panel-nav-tab" @click="sidebarOpen = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notificaciones<span v-if="notifCount > 0" class="mobile-notif-badge">{{ notifCount > 9 ? '9+' : notifCount }}</span>
+          </router-link>
+          <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas" class="panel-nav-tab" @click="sidebarOpen = false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-            Mis bodegas e inventarios
+            Mis bodegas
           </router-link>
           <router-link v-if="authStore.isAdmin" to="/admin" class="panel-nav-tab" @click="sidebarOpen = false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -258,6 +286,8 @@ const profileOpen = ref(false)
 const profileRef = ref<HTMLDivElement>()
 const preciosOpen = ref(false)
 const preciosData = reactive<PreciosResponse>({ precios: [], promedio: 0, tendencia_general: 'estable' })
+const notifCount = ref(0)
+let notifInterval: ReturnType<typeof setInterval> | null = null
 
 const userInitials = computed(() => {
   const name = authStore.usuario?.nombre_completo || ''
@@ -332,6 +362,13 @@ async function fetchCatalogos() {
   } catch (err) {
     console.error('Error cargando catalogos:', err)
   }
+}
+
+async function fetchNotifCount() {
+  try {
+    const res = await api.alertas.notificaciones()
+    notifCount.value = res.total_no_leidas
+  } catch { /* silent */ }
 }
 
 async function fetchPrecios() {
@@ -510,12 +547,15 @@ function initMap() {
 onMounted(() => {
   fetchCatalogos()
   fetchPrecios()
+  fetchNotifCount()
+  notifInterval = setInterval(fetchNotifCount, 30000)
   initMap()
   document.addEventListener('click', onClickOutsideProfile)
 })
 
 onUnmounted(() => {
   if (searchTimer) clearTimeout(searchTimer)
+  if (notifInterval) clearInterval(notifInterval)
   document.removeEventListener('click', onClickOutsideProfile)
   delete (window as any).__verDetalle
   if (activePopup) { activePopup.remove(); activePopup = null }
@@ -561,5 +601,48 @@ onUnmounted(() => {
 .profile-role-badge.admin {
   background: rgba(105, 28, 50, 0.12);
   color: #691C32;
+}
+
+/* Notification bell in header */
+.notif-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3125rem 0.625rem !important;
+}
+
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #e53e3e;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+.mobile-notif-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e53e3e;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  padding: 0 4px;
+  margin-left: 4px;
+  line-height: 1;
 }
 </style>
