@@ -33,6 +33,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/productor/paso1',
+    name: 'ProductorRegistro',
+    component: () => import('@/views/ProductorRegistroView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/nueva-bodega',
     name: 'NuevaBodega',
     component: () => import('@/views/NuevaBodegaView.vue'),

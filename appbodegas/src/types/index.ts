@@ -175,8 +175,22 @@ export interface AdminUsuario {
 export interface Producer {
   producer_id: number
   curp: string
-  phone: string | null
+  nombres: string
+  apellido_paterno: string
+  apellido_materno: string
+  sexo: string
+  telefono: string
+  correo_electronico: string | null
+  state_id: string
+  municipality_id: string
+  localidad: string
+  tecnico_asignado_id: number
+  estatus_registro: string
+  observaciones: string | null
   privacy_consent: boolean
+  usuario_id: number
+  usuario_capturista_id: number
+  fecha_captura: string
   created_at: string
 }
 

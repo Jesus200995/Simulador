@@ -173,6 +173,36 @@ export const api = {
     },
   },
 
+  productor: {
+    registrar(payload: {
+      nombres: string
+      apellido_paterno: string
+      apellido_materno: string
+      curp: string
+      sexo: string
+      telefono: string
+      correo_electronico: string | null
+      state_id: string
+      municipality_id: string
+      localidad: string
+      observaciones: string | null
+      consentimiento_recabado: boolean
+    }): Promise<{ message: string; producer: Producer }> {
+      return request('/producers', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    },
+
+    catalogos(): Promise<ProductorCatalogos> {
+      return request('/catalogos-productor')
+    },
+
+    municipios(stateId: string): Promise<{ municipalities: GeoMunicipality[] }> {
+      return request(`/catalogos-productor/municipalities?state_id=${stateId}`)
+    },
+  },
+
   catalogosProductor: {
     obtener(): Promise<ProductorCatalogos> {
       return request('/catalogos-productor')
