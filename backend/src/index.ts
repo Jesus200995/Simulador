@@ -7,6 +7,9 @@ import producersRoutes from './routes/producers';
 import upsRoutes from './routes/ups';
 import cyclesRoutes from './routes/cycles';
 import catalogosProductorRoutes from './routes/catalogos-productor';
+import seguimientoRoutes from './routes/seguimiento';
+import alertasRoutes from './routes/alertas';
+import infraestructuraRoutes from './routes/infraestructura';
 import pool from './config/database';
 
 dotenv.config();
@@ -28,6 +31,9 @@ app.use('/api/producers', producersRoutes);
 app.use('/api/ups', upsRoutes);
 app.use('/api', cyclesRoutes);
 app.use('/api/catalogos-productor', catalogosProductorRoutes);
+app.use('/api/seguimiento', seguimientoRoutes);
+app.use('/api/alertas', alertasRoutes);
+app.use('/api/infraestructura', infraestructuraRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

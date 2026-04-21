@@ -56,6 +56,76 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/AdminView.vue'),
     meta: { requiresAuth: true, roles: ['admin'] }
   },
+  // ── Seguimiento de Maíz ──────────────────────
+  {
+    path: '/seguimiento',
+    name: 'Seguimiento',
+    component: () => import('@/views/SeguimientoListView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/seguimiento/visita',
+    name: 'SeguimientoVisita',
+    component: () => import('@/views/SeguimientoVisitaView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/seguimiento/incidencia',
+    name: 'SeguimientoIncidencia',
+    component: () => import('@/views/SeguimientoIncidenciaView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/seguimiento/estimacion',
+    name: 'SeguimientoEstimacion',
+    component: () => import('@/views/SeguimientoEstimacionView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/seguimiento/cosecha',
+    name: 'SeguimientoCosecha',
+    component: () => import('@/views/SeguimientoCosechaView.vue'),
+    meta: { requiresAuth: true }
+  },
+  // ── Alertas ──────────────────────────────────
+  {
+    path: '/alertas',
+    name: 'Alertas',
+    component: () => import('@/views/AlertasView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/alertas/:id',
+    name: 'AlertaDetalle',
+    component: () => import('@/views/AlertaDetalleView.vue'),
+    meta: { requiresAuth: true }
+  },
+  // ── Notificaciones ───────────────────────────
+  {
+    path: '/notificaciones',
+    name: 'Notificaciones',
+    component: () => import('@/views/NotificacionesView.vue'),
+    meta: { requiresAuth: true }
+  },
+  // ── Infraestructura PRO ──────────────────────
+  {
+    path: '/infraestructura',
+    name: 'Infraestructura',
+    component: () => import('@/views/InfraestructuraView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/infraestructura/:id',
+    name: 'InfraestructuraDetalle',
+    component: () => import('@/views/InfraestructuraDetalleView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/infraestructura/nueva',
+    name: 'NuevaInfraestructura',
+    component: () => import('@/views/NuevaInfraestructuraView.vue'),
+    meta: { requiresAuth: true, roles: ['responsable', 'admin', 'bodeguero'] }
+  },
 ]
 
 const router = createRouter({

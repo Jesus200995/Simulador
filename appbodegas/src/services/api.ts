@@ -256,4 +256,162 @@ export const api = {
       return request(`/cycle-crops/${cropId}`, { method: 'PATCH', body: JSON.stringify(payload) })
     },
   },
+
+  // =============================================
+  // Módulo Seguimiento de Maíz
+  // =============================================
+  seguimiento: {
+    productores(q?: string): Promise<any> {
+      return request(`/seguimiento/productores${q ? '?q=' + encodeURIComponent(q) : ''}`)
+    },
+
+    visitas(params: { up_id?: number; ciclo_id?: number; producer_id?: number }): Promise<any> {
+      const qs = new URLSearchParams()
+      if (params.up_id) qs.set('up_id', String(params.up_id))
+      if (params.ciclo_id) qs.set('ciclo_id', String(params.ciclo_id))
+      if (params.producer_id) qs.set('producer_id', String(params.producer_id))
+      return request(`/seguimiento/visitas?${qs.toString()}`)
+    },
+
+    crearVisita(payload: any): Promise<any> {
+      return request('/seguimiento/visitas', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    incidencias(params: { up_id?: number; ciclo_id?: number; producer_id?: number }): Promise<any> {
+      const qs = new URLSearchParams()
+      if (params.up_id) qs.set('up_id', String(params.up_id))
+      if (params.ciclo_id) qs.set('ciclo_id', String(params.ciclo_id))
+      if (params.producer_id) qs.set('producer_id', String(params.producer_id))
+      return request(`/seguimiento/incidencias?${qs.toString()}`)
+    },
+
+    crearIncidencia(payload: any): Promise<any> {
+      return request('/seguimiento/incidencias', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    estimaciones(params: { up_id?: number; ciclo_id?: number }): Promise<any> {
+      const qs = new URLSearchParams()
+      if (params.up_id) qs.set('up_id', String(params.up_id))
+      if (params.ciclo_id) qs.set('ciclo_id', String(params.ciclo_id))
+      return request(`/seguimiento/estimacion?${qs.toString()}`)
+    },
+
+    crearEstimacion(payload: any): Promise<any> {
+      return request('/seguimiento/estimacion', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    cosechas(params: { up_id?: number; ciclo_id?: number }): Promise<any> {
+      const qs = new URLSearchParams()
+      if (params.up_id) qs.set('up_id', String(params.up_id))
+      if (params.ciclo_id) qs.set('ciclo_id', String(params.ciclo_id))
+      return request(`/seguimiento/cosecha?${qs.toString()}`)
+    },
+
+    crearCosecha(payload: any): Promise<any> {
+      return request('/seguimiento/cosecha', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    resumen(producerId: number, upId: number, cicloId: number): Promise<any> {
+      return request(`/seguimiento/resumen/${producerId}/${upId}/${cicloId}`)
+    },
+  },
+
+  // =============================================
+  // Módulo Alertas híbridas
+  // =============================================
+  alertas: {
+    listar(params?: { up_id?: number; ciclo_id?: number; estado_alerta?: string; nivel_alerta?: string }): Promise<any> {
+      const qs = new URLSearchParams()
+      if (params?.up_id) qs.set('up_id', String(params.up_id))
+      if (params?.ciclo_id) qs.set('ciclo_id', String(params.ciclo_id))
+      if (params?.estado_alerta) qs.set('estado_alerta', params.estado_alerta)
+      if (params?.nivel_alerta) qs.set('nivel_alerta', params.nivel_alerta)
+      return request(`/alertas?${qs.toString()}`)
+    },
+
+    obtener(id: number): Promise<any> {
+      return request(`/alertas/${id}`)
+    },
+
+    crear(payload: any): Promise<any> {
+      return request('/alertas', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    cambiarEstado(id: number, estado_alerta: string, observaciones?: string): Promise<any> {
+      return request(`/alertas/${id}/estado`, {
+        method: 'PATCH',
+        body: JSON.stringify({ estado_alerta, observaciones }),
+      })
+    },
+
+    editar(id: number, payload: any): Promise<any> {
+      return request(`/alertas/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+    },
+
+    notificaciones(): Promise<any> {
+      return request('/alertas/notificaciones/mis')
+    },
+
+    marcarLeida(id: number): Promise<any> {
+      return request(`/alertas/notificaciones/${id}/leer`, { method: 'PATCH' })
+    },
+
+    marcarTodasLeidas(): Promise<any> {
+      return request('/alertas/notificaciones/leer-todas', { method: 'PATCH' })
+    },
+  },
+
+  // =============================================
+  // Módulo Infraestructura PRO
+  // =============================================
+  infraestructura: {
+    catalogos(): Promise<any> {
+      return request('/infraestructura/catalogos')
+    },
+
+    listar(params?: { tipo?: string; estado?: string; municipio?: string; q?: string }): Promise<any> {
+      const qs = new URLSearchParams()
+      if (params?.tipo) qs.set('tipo', params.tipo)
+      if (params?.estado) qs.set('estado', params.estado)
+      if (params?.municipio) qs.set('municipio', params.municipio)
+      if (params?.q) qs.set('q', params.q)
+      return request(`/infraestructura?${qs.toString()}`)
+    },
+
+    obtener(id: number): Promise<any> {
+      return request(`/infraestructura/${id}`)
+    },
+
+    crear(payload: any): Promise<any> {
+      return request('/infraestructura', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    editar(id: number, payload: any): Promise<any> {
+      return request(`/infraestructura/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+    },
+
+    agregarContacto(id: number, payload: any): Promise<any> {
+      return request(`/infraestructura/${id}/contactos`, { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    eliminarContacto(id: number, cid: number): Promise<any> {
+      return request(`/infraestructura/${id}/contactos/${cid}`, { method: 'DELETE' })
+    },
+
+    registrarInventario(id: number, payload: any): Promise<any> {
+      return request(`/infraestructura/${id}/inventario`, { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    precios(id: number): Promise<any> {
+      return request(`/infraestructura/${id}/precios`)
+    },
+
+    registrarPrecio(id: number, payload: any): Promise<any> {
+      return request(`/infraestructura/${id}/precios`, { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    aprobar(id: number): Promise<any> {
+      return request(`/infraestructura/${id}/aprobar`, { method: 'PATCH' })
+    },
+  },
 }
