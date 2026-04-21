@@ -349,7 +349,7 @@ async function handleRegistro() {
     success.value = 'Productor registrado exitosamente'
     
     // Guardar producer_id en sessionStorage para continuar con Paso 2
-    sessionStorage.setItem('producer_id', response.producer.producer_id)
+    sessionStorage.setItem('producer_id', String(response.producer.producer_id))
     sessionStorage.setItem('producer_curp', response.producer.curp)
 
     // Redirigir a Paso 2 (Dibujo de UP) después de 1.5s

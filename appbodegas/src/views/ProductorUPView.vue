@@ -239,14 +239,30 @@
                 <label>Sup. sembrada (ha) <span class="required">*</span></label>
                 <input v-model.number="crop.area_sown_ha" type="number" step="0.01" min="0" class="form-input" />
               </div>
+            <div class="form-row">
               <div class="form-group flex-1">
-                <label>Sup. cosechada (ha) <span class="required">*</span></label>
+                <label>Fecha de siembra <span class="required">*</span></label>
+                <input v-model="crop.planting_date" type="date" class="form-input" />
+              </div>
+              <div class="form-group flex-1">
+                <label>Rendimiento esperado (t/ha) <span class="required">*</span></label>
+                <input v-model.number="crop.yield_expected" type="number" step="0.1" min="0" class="form-input" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Fecha estimada de cosecha</label>
+                <input v-model="crop.estimated_harvest_date" type="date" class="form-input" />
+              </div>
+              <div class="form-group flex-1">
+                <label>Sup. cosechada (ha)</label>
                 <input v-model.number="crop.area_harvested_ha" type="number" step="0.01" min="0" class="form-input" />
               </div>
             </div>
 
             <div class="form-group">
-              <label>Destino <span class="required">*</span></label>
+              <label>Destino</label>
               <select v-model="crop.destination" class="form-input">
                 <option value="">Seleccionar...</option>
                 <option v-for="c in getCatalog('destination')" :key="c.code" :value="c.code">{{ c.label }}</option>
@@ -255,11 +271,11 @@
 
             <div class="form-row">
               <div class="form-group flex-1">
-                <label>Producción <span class="required">*</span></label>
+                <label>Producción total</label>
                 <input v-model.number="crop.production_qty" type="number" step="0.1" min="0" class="form-input" />
               </div>
               <div class="form-group flex-1">
-                <label>Unidad <span class="required">*</span></label>
+                <label>Unidad</label>
                 <select v-model="crop.production_unit" class="form-input">
                   <option value="">Seleccionar...</option>
                   <option v-for="c in getCatalog('production_unit')" :key="c.code" :value="c.code">{{ c.label }}</option>
@@ -357,10 +373,13 @@ const emptyCrop = () => ({
   crop: '',
   variety_id: '',
   variety_other: '',
-  area_sown_ha: 0,
-  area_harvested_ha: 0,
+  area_sown_ha: null as unknown as number,
+  planting_date: '',
+  estimated_harvest_date: '',
+  yield_expected: null as unknown as number,
+  area_harvested_ha: null as unknown as number,
   destination: '',
-  production_qty: 0,
+  production_qty: null as unknown as number,
   production_unit: '',
 })
 
@@ -555,7 +574,7 @@ async function submitStep3() {
   // Validate crops
   for (let i = 0; i < cropForms.value.length; i++) {
     const c = cropForms.value[i]
-    if (!c.crop || !c.variety_id || !c.destination || !c.production_unit) {
+    if (!c.crop || !c.variety_id || !c.area_sown_ha || !c.planting_date) {
       stepError.value = `Cultivo ${i + 1}: complete todos los campos obligatorios`
       return
     }
@@ -589,10 +608,13 @@ async function submitStep3() {
         variety_id: c.variety_id,
         variety_other: c.variety_other || undefined,
         area_sown_ha: c.area_sown_ha,
-        area_harvested_ha: c.area_harvested_ha,
-        destination: c.destination,
-        production_qty: c.production_qty,
-        production_unit: c.production_unit,
+        planting_date: c.planting_date,
+        estimated_harvest_date: c.estimated_harvest_date || undefined,
+        yield_expected: c.yield_expected || undefined,
+        area_harvested_ha: c.area_harvested_ha || undefined,
+        destination: c.destination || undefined,
+        production_qty: c.production_qty || undefined,
+        production_unit: c.production_unit || undefined,
       })
     }
 
