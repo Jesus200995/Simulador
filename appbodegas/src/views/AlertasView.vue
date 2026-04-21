@@ -1,12 +1,21 @@
 <template>
-  <div class="alertas-page">
-    <div class="page-header">
-      <h1>Alertas</h1>
-      <button class="btn-primary" @click="showForm = true">+ Nueva alerta</button>
+  <div class="page-container">
+    <div class="view-header">
+      <div class="view-header-row">
+        <div>
+          <h1>Alertas</h1>
+          <p class="view-subtitle">Monitoreo de eventos climáticos y riesgos</p>
+        </div>
+        <div class="view-header-actions">
+          <button class="btn btn-primary" @click="showForm = true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva alerta
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="filtros">
+    <div class="filter-bar">
       <select v-model="filtros.estado_alerta" @change="cargar">
         <option value="">Todos los estados</option>
         <option value="pendiente">Pendiente</option>
@@ -22,47 +31,54 @@
       </select>
     </div>
 
-    <div v-if="loading" class="loading">Cargando alertas...</div>
-    <div v-else-if="alertas.length === 0" class="empty">No hay alertas con los filtros seleccionados.</div>
+    <div v-if="loading" class="state-loading">
+      <span class="spinner spinner-dark spinner-lg"></span>
+      <p>Cargando alertas...</p>
+    </div>
+    <div v-else-if="alertas.length === 0" class="state-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <p>No hay alertas con los filtros seleccionados.</p>
+    </div>
 
-    <div v-else class="alertas-lista">
+    <div v-else class="alertas-grid">
       <div
         v-for="alerta in alertas"
         :key="alerta.id"
-        class="alerta-card"
+        class="glass-card interactive alerta-card"
         @click="$router.push({ name: 'AlertaDetalle', params: { id: alerta.id } })"
       >
-        <div class="alerta-top">
-          <span :class="['nivel-badge', alerta.nivel_alerta]">{{ alerta.nivel_alerta.toUpperCase() }}</span>
-          <span :class="['estado-badge', alerta.estado_alerta]">{{ alerta.estado_alerta }}</span>
-          <span class="origen-badge">{{ alerta.origen_alerta }}</span>
+        <div class="alerta-badges">
+          <span class="badge" :class="nivelBadge(alerta.nivel_alerta)">{{ alerta.nivel_alerta }}</span>
+          <span class="badge" :class="estadoBadge(alerta.estado_alerta)">{{ alerta.estado_alerta }}</span>
+          <span class="badge badge-gray">{{ alerta.origen_alerta }}</span>
         </div>
         <div class="alerta-body">
-          <div class="tipo">{{ tipoLabel(alerta.tipo_alerta) }}</div>
-          <div class="productor">
-            {{ alerta.apellido_paterno }} {{ alerta.nombres }} · {{ alerta.up_name }}
-          </div>
-          <div class="fecha">{{ formatFecha(alerta.fecha_alerta) }}</div>
+          <div class="alerta-tipo">{{ tipoLabel(alerta.tipo_alerta) }}</div>
+          <div class="alerta-productor">{{ alerta.apellido_paterno }} {{ alerta.nombres }} · {{ alerta.up_name }}</div>
+          <div class="alerta-fecha">{{ formatFecha(alerta.fecha_alerta) }}</div>
+        </div>
+        <div class="alerta-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
     </div>
 
     <!-- Modal nueva alerta -->
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
-      <div class="modal">
+      <div class="modal-card">
         <h2>Nueva alerta manual</h2>
         <form @submit.prevent="crearAlerta">
-          <div class="field">
-            <label>UP ID <span class="req">*</span></label>
-            <input v-model.number="newAlerta.up_id" type="number" placeholder="ID de la UP" required />
+          <div class="form-group">
+            <label class="form-label">UP ID <span class="form-required">*</span></label>
+            <input v-model.number="newAlerta.up_id" type="number" class="form-input" placeholder="ID de la UP" required />
           </div>
-          <div class="field">
-            <label>Ciclo ID <span class="req">*</span></label>
-            <input v-model.number="newAlerta.ciclo_id" type="number" placeholder="ID del ciclo" required />
+          <div class="form-group">
+            <label class="form-label">Ciclo ID <span class="form-required">*</span></label>
+            <input v-model.number="newAlerta.ciclo_id" type="number" class="form-input" placeholder="ID del ciclo" required />
           </div>
-          <div class="field">
-            <label>Tipo de alerta <span class="req">*</span></label>
-            <select v-model="newAlerta.tipo_alerta" required>
+          <div class="form-group">
+            <label class="form-label">Tipo de alerta <span class="form-required">*</span></label>
+            <select v-model="newAlerta.tipo_alerta" class="form-input" required>
               <option value="">-- Seleccionar --</option>
               <option value="helada">Helada</option>
               <option value="sequia">Sequía</option>
@@ -71,27 +87,27 @@
               <option value="otro">Otro</option>
             </select>
           </div>
-          <div class="field">
-            <label>Nivel <span class="req">*</span></label>
-            <select v-model="newAlerta.nivel_alerta" required>
+          <div class="form-group">
+            <label class="form-label">Nivel <span class="form-required">*</span></label>
+            <select v-model="newAlerta.nivel_alerta" class="form-input" required>
               <option value="">-- Seleccionar --</option>
               <option value="bajo">Bajo</option>
               <option value="medio">Medio</option>
               <option value="alto">Alto</option>
             </select>
           </div>
-          <div class="field">
-            <label>Fecha <span class="req">*</span></label>
-            <input v-model="newAlerta.fecha_alerta" type="date" required />
+          <div class="form-group">
+            <label class="form-label">Fecha <span class="form-required">*</span></label>
+            <input v-model="newAlerta.fecha_alerta" type="date" class="form-input" required />
           </div>
-          <div class="field">
-            <label>Observaciones</label>
-            <textarea v-model="newAlerta.observaciones" rows="2" maxlength="500" />
+          <div class="form-group">
+            <label class="form-label">Observaciones</label>
+            <textarea v-model="newAlerta.observaciones" class="form-input" rows="2" maxlength="500" />
           </div>
-          <div v-if="formError" class="error-msg">{{ formError }}</div>
+          <div v-if="formError" class="alert alert-error">{{ formError }}</div>
           <div class="modal-actions">
-            <button type="button" class="btn-cancel" @click="showForm = false">Cancelar</button>
-            <button type="submit" :disabled="formLoading" class="btn-primary">
+            <button type="button" class="btn btn-ghost" @click="showForm = false">Cancelar</button>
+            <button type="submit" :disabled="formLoading" class="btn btn-primary">
               {{ formLoading ? 'Guardando...' : 'Crear alerta' }}
             </button>
           </div>
@@ -157,6 +173,16 @@ function tipoLabel(tipo: string) {
   return map[tipo] || tipo
 }
 
+function nivelBadge(nivel: string) {
+  const m: Record<string, string> = { bajo: 'badge-green', medio: 'badge-yellow', alto: 'badge-red' }
+  return m[nivel] || 'badge-gray'
+}
+
+function estadoBadge(estado: string) {
+  const m: Record<string, string> = { pendiente: 'badge-gray', confirmada: 'badge-blue', descartada: 'badge-gray', atendida: 'badge-green' }
+  return m[estado] || 'badge-gray'
+}
+
 function formatFecha(fecha: string) {
   if (!fecha) return ''
   return new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -166,48 +192,25 @@ onMounted(cargar)
 </script>
 
 <style scoped>
-.alertas-page { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-.page-header h1 { font-size: 1.5rem; font-weight: 700; color: #1a202c; margin: 0; }
-.btn-primary { background: #2f855a; color: #fff; border: none; border-radius: 8px; padding: 0.55rem 1.1rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.filtros { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-.filtros select { padding: 0.45rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; }
-.loading, .empty { text-align: center; color: #718096; padding: 2rem; }
-.alertas-lista { display: grid; gap: 0.75rem; }
+.alertas-grid { display: flex; flex-direction: column; gap: .75rem; }
+
 .alerta-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-  padding: 1rem; cursor: pointer; transition: box-shadow 0.15s;
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1.25rem !important;
 }
-.alerta-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-.alerta-top { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
-.nivel-badge, .estado-badge, .origen-badge {
-  padding: 2px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
+
+.alerta-badges { display: flex; gap: .375rem; flex-wrap: wrap; min-width: 0; flex-shrink: 0; }
+
+.alerta-body { flex: 1; min-width: 0; }
+.alerta-tipo { font-size: 1rem; font-weight: 700; color: var(--color-text); letter-spacing: -.02em; margin-bottom: .15rem; }
+.alerta-productor { font-size: .8125rem; color: var(--color-text-secondary); }
+.alerta-fecha { font-size: .75rem; color: var(--color-text-tertiary); margin-top: .25rem; }
+
+.alerta-chevron { color: var(--color-text-tertiary); opacity: .4; flex-shrink: 0; align-self: center; }
+.alerta-card:hover .alerta-chevron { opacity: .7; }
+
+@media (max-width: 600px) {
+  .alerta-card { flex-direction: column; gap: .625rem; }
+  .alerta-chevron { display: none; }
 }
-.nivel-badge.bajo { background: #c6f6d5; color: #276749; }
-.nivel-badge.medio { background: #fef3c7; color: #92400e; }
-.nivel-badge.alto { background: #fed7d7; color: #9b2c2c; }
-.estado-badge.pendiente { background: #e2e8f0; color: #4a5568; }
-.estado-badge.confirmada { background: #bee3f8; color: #2b6cb0; }
-.estado-badge.descartada { background: #e2e8f0; color: #718096; }
-.estado-badge.atendida { background: #c6f6d5; color: #276749; }
-.origen-badge { background: #f7fafc; color: #718096; border: 1px solid #e2e8f0; }
-.alerta-body .tipo { font-weight: 700; font-size: 1rem; color: #2d3748; margin-bottom: 0.2rem; }
-.alerta-body .productor { font-size: 0.85rem; color: #718096; }
-.alerta-body .fecha { font-size: 0.8rem; color: #a0aec0; margin-top: 0.2rem; }
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal { background: #fff; border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 480px; }
-.modal h2 { font-size: 1.2rem; font-weight: 700; margin: 0 0 1.25rem; color: #1a202c; }
-.field { margin-bottom: 1rem; }
-.field label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.3rem; }
-.req { color: #e53e3e; }
-.field input, .field select, .field textarea {
-  width: 100%; box-sizing: border-box; padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;
-}
-.field textarea { resize: vertical; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
-.btn-cancel { background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; padding: 0.55rem 1rem; font-size: 0.9rem; cursor: pointer; }
-.error-msg { color: #e53e3e; font-size: 0.85rem; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; }
 </style>

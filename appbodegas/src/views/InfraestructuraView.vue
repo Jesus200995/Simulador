@@ -1,55 +1,75 @@
 <template>
-  <div class="infra-page">
-    <div class="page-header">
-      <h1>Infraestructura</h1>
-      <div class="header-actions">
-        <div class="tipo-tabs">
-          <button :class="{ active: filtros.tipo === '' }" @click="setTipo('')">Todas</button>
-          <button :class="{ active: filtros.tipo === 'bodega' }" @click="setTipo('bodega')">Bodegas</button>
-          <button :class="{ active: filtros.tipo === 'ventanilla' }" @click="setTipo('ventanilla')">Ventanillas</button>
+  <div class="page-container wide">
+    <div class="view-header">
+      <div class="view-header-row">
+        <div>
+          <h1>Infraestructura</h1>
+          <p class="view-subtitle">Bodegas, ventanillas y centros de acopio</p>
         </div>
-        <button class="btn-primary" @click="$router.push({ name: 'NuevaInfraestructura' })">+ Alta</button>
+        <div class="view-header-actions">
+          <div class="segmented-control">
+            <button :class="{ active: filtros.tipo === '' }" @click="setTipo('')">Todas</button>
+            <button :class="{ active: filtros.tipo === 'bodega' }" @click="setTipo('bodega')">Bodegas</button>
+            <button :class="{ active: filtros.tipo === 'ventanilla' }" @click="setTipo('ventanilla')">Ventanillas</button>
+          </div>
+          <button class="btn btn-primary" @click="$router.push({ name: 'NuevaInfraestructura' })">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Alta
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="filtros">
-      <input v-model="filtros.q" type="text" placeholder="Buscar por nombre, clave o municipio..." @input="buscar" />
-      <select v-model="filtros.estado" @change="cargar">
-        <option value="">Todos los estados</option>
-        <option v-for="e in catalogos.estados" :key="e" :value="e">{{ e }}</option>
-      </select>
+    <div class="filter-row">
+      <div class="search-bar-unified" style="flex:1;margin-bottom:0">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input v-model="filtros.q" type="text" placeholder="Buscar por nombre, clave o municipio..." @input="buscar" />
+      </div>
+      <div class="filter-bar" style="margin-bottom:0">
+        <select v-model="filtros.estado" @change="cargar">
+          <option value="">Todos los estados</option>
+          <option v-for="e in catalogos.estados" :key="e" :value="e">{{ e }}</option>
+        </select>
+      </div>
     </div>
 
-    <div v-if="loading" class="loading">Cargando infraestructura...</div>
-    <div v-else-if="lista.length === 0" class="empty">No se encontraron resultados.</div>
+    <div v-if="loading" class="state-loading">
+      <span class="spinner spinner-dark spinner-lg"></span>
+      <p>Cargando infraestructura...</p>
+    </div>
+    <div v-else-if="lista.length === 0" class="state-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <p>No se encontraron resultados.</p>
+    </div>
 
-    <div v-else class="lista-grid">
+    <div v-else class="card-grid">
       <div
         v-for="item in lista"
         :key="item.id"
-        class="infra-card"
+        class="glass-card interactive infra-card"
         @click="$router.push({ name: 'InfraestructuraDetalle', params: { id: item.id } })"
       >
-        <div class="card-top">
-          <span :class="['tipo-badge', item.es_ventanilla ? 'ventanilla' : 'bodega']">
+        <div class="infra-badges">
+          <span class="badge" :class="item.es_ventanilla ? 'badge-purple' : 'badge-blue'">
             {{ item.es_ventanilla ? 'Ventanilla' : 'Bodega' }}
           </span>
-          <span :class="['estatus-badge', item.estatus_operativo]">{{ item.estatus_operativo }}</span>
+          <span class="badge" :class="item.estatus_operativo === 'activa' ? 'badge-green' : 'badge-red'">{{ item.estatus_operativo }}</span>
         </div>
-        <div class="card-nombre">{{ item.nombre }}</div>
-        <div class="card-ubicacion">{{ item.municipio }}, {{ item.estado }}</div>
-        <div class="card-meta">
-          <span v-if="item.capacidad_ton">Cap: {{ item.capacidad_ton.toLocaleString() }} ton</span>
-          <span v-if="item.clave" class="clave">{{ item.clave }}</span>
+        <div class="infra-nombre">{{ item.nombre }}</div>
+        <div class="infra-ubicacion">{{ item.municipio }}, {{ item.estado }}</div>
+        <div class="infra-meta">
+          <span v-if="item.capacidad_ton">{{ item.capacidad_ton.toLocaleString() }} ton</span>
+          <span v-if="item.clave" class="infra-clave">{{ item.clave }}</span>
         </div>
-        <div v-if="item.ultimo_precio" class="precio-info">
-          Último precio: <strong>${{ item.ultimo_precio.precio?.toLocaleString() }}/ton</strong>
-          {{ item.ultimo_precio.tipo_maiz }} · {{ formatFecha(item.ultimo_precio.fecha) }}
+        <div v-if="item.ultimo_precio" class="infra-precio">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <strong>${{ item.ultimo_precio.precio?.toLocaleString() }}/ton</strong>
+          <span>{{ item.ultimo_precio.tipo_maiz }} · {{ formatFecha(item.ultimo_precio.fecha) }}</span>
         </div>
-        <div class="funciones">
-          <span v-if="item.realiza_acopio" class="func-tag">Acopio</span>
-          <span v-if="item.opera_incentivos" class="func-tag">Incentivos</span>
-          <span v-if="item.opera_coberturas" class="func-tag">Coberturas</span>
+        <div class="infra-tags">
+          <span v-if="item.realiza_acopio" class="tag">Acopio</span>
+          <span v-if="item.opera_incentivos" class="tag">Incentivos</span>
+          <span v-if="item.opera_coberturas" class="tag">Coberturas</span>
         </div>
       </div>
     </div>
@@ -112,35 +132,46 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.infra-page { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
-.page-header h1 { font-size: 1.5rem; font-weight: 700; color: #1a202c; margin: 0; }
-.header-actions { display: flex; align-items: center; gap: 0.75rem; }
-.tipo-tabs { display: flex; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
-.tipo-tabs button { border: none; background: #fff; padding: 0.4rem 0.85rem; font-size: 0.85rem; cursor: pointer; color: #718096; }
-.tipo-tabs button.active { background: #2f855a; color: #fff; }
-.btn-primary { background: #2f855a; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
-.filtros { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-.filtros input { flex: 1; min-width: 200px; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; }
-.filtros select { padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; }
-.loading, .empty { text-align: center; color: #718096; padding: 2rem; }
-.lista-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
-.infra-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-  padding: 1.1rem; cursor: pointer; transition: box-shadow 0.15s;
+.filter-row {
+  display: flex; gap: .75rem; margin-bottom: 1.5rem;
+  align-items: center; flex-wrap: wrap;
 }
-.infra-card:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.08); }
-.card-top { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; }
-.tipo-badge, .estatus-badge { padding: 2px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; }
-.tipo-badge.bodega { background: #bee3f8; color: #2b6cb0; }
-.tipo-badge.ventanilla { background: #d6bcfa; color: #553c9a; }
-.estatus-badge.activa { background: #c6f6d5; color: #276749; }
-.estatus-badge.inactiva { background: #fed7d7; color: #9b2c2c; }
-.card-nombre { font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 0.2rem; }
-.card-ubicacion { font-size: 0.8rem; color: #718096; margin-bottom: 0.4rem; }
-.card-meta { display: flex; justify-content: space-between; font-size: 0.78rem; color: #a0aec0; margin-bottom: 0.4rem; }
-.clave { font-family: monospace; }
-.precio-info { font-size: 0.8rem; color: #4a5568; background: #f0fff4; border-radius: 6px; padding: 0.3rem 0.6rem; margin-bottom: 0.4rem; }
-.funciones { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.func-tag { background: #edf2f7; color: #4a5568; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; }
+
+.infra-card { padding: 1.25rem !important; }
+
+.infra-badges { display: flex; gap: .375rem; margin-bottom: .75rem; }
+
+.infra-nombre {
+  font-size: 1rem; font-weight: 700; color: var(--color-text);
+  letter-spacing: -.02em; margin-bottom: .15rem;
+}
+
+.infra-ubicacion { font-size: .8125rem; color: var(--color-text-secondary); margin-bottom: .5rem; }
+
+.infra-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .78rem; color: var(--color-text-tertiary); margin-bottom: .5rem;
+}
+
+.infra-clave { font-family: var(--font-mono); font-size: .75rem; }
+
+.infra-precio {
+  display: flex; align-items: center; gap: .375rem;
+  font-size: .8125rem; color: var(--color-text-secondary);
+  background: var(--color-success-bg); border-radius: var(--radius-sm);
+  padding: .4rem .75rem; margin-bottom: .625rem;
+}
+
+.infra-precio strong { color: var(--color-text); }
+.infra-precio span { font-size: .75rem; color: var(--color-text-tertiary); }
+.infra-precio svg { color: var(--color-success); flex-shrink: 0; }
+
+.infra-tags { display: flex; gap: .375rem; flex-wrap: wrap; }
+
+@media (max-width: 768px) {
+  .filter-row { flex-direction: column; align-items: stretch; }
+  .view-header-actions { flex-direction: column; align-items: stretch; }
+  .view-header-actions .segmented-control { width: 100%; display: flex; }
+  .view-header-actions .segmented-control button { flex: 1; text-align: center; }
+}
 </style>

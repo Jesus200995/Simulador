@@ -140,15 +140,15 @@ async function handleLogin() {
 
 <style scoped>
 .auth-logo-wrap {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
   background: linear-gradient(145deg, #691C32, #A63D5A);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.25rem;
-  box-shadow: 0 6px 20px rgba(105, 28, 50, 0.3);
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 8px 28px rgba(105, 28, 50, 0.35), 0 0 0 1px rgba(255,255,255,0.1) inset;
 }
 
 .password-wrapper {

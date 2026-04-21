@@ -28,7 +28,7 @@
         </router-link>
         <router-link to="/infraestructura" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-          <span>Infra</span>
+          <span>Infraestructura</span>
         </router-link>
         <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
@@ -81,27 +81,39 @@
     <!-- ═══ Bottom Tab Bar (mobile) ═══ -->
     <nav class="bottom-tabs">
       <router-link to="/" exact class="tab-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+        </div>
         <span>Mapa</span>
       </router-link>
       <router-link v-if="showField" to="/productor" class="tab-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
         <span>Productores</span>
       </router-link>
       <router-link v-if="showField" to="/seguimiento" class="tab-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
+        </div>
         <span>Seguimiento</span>
       </router-link>
       <router-link to="/infraestructura" class="tab-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        </div>
         <span>Infra</span>
       </router-link>
       <router-link v-if="showField" to="/alertas" class="tab-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
         <span>Alertas</span>
       </router-link>
       <router-link v-if="!showField && (authStore.isResponsable || authStore.isAdmin)" to="/mis-bodegas" class="tab-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+        </div>
         <span>Bodegas</span>
       </router-link>
     </nav>
@@ -155,112 +167,130 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 /* ── Top Bar ── */
 .topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 900;
-  height: 56px; display: flex; align-items: center; gap: .75rem;
-  padding: 0 1rem;
+  height: 60px; display: flex; align-items: center; gap: 1rem;
+  padding: 0 1.25rem;
   background: rgba(255,255,255,.72);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border-bottom: .5px solid rgba(0,0,0,.08);
+  border-bottom: .5px solid rgba(0,0,0,.06);
 }
-.topbar-brand { display: flex; align-items: center; gap: .5rem; text-decoration: none; flex-shrink: 0; }
+.topbar-brand { display: flex; align-items: center; gap: .625rem; text-decoration: none; flex-shrink: 0; }
 .brand-icon {
-  width: 32px; height: 32px; border-radius: 9px;
-  background: linear-gradient(135deg, #691C32, #A63D5A);
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(145deg, #691C32, #A63D5A);
   display: flex; align-items: center; justify-content: center; color: #fff;
+  box-shadow: 0 2px 8px rgba(105, 28, 50, 0.25);
 }
-.brand-name { font-size: 1.05rem; font-weight: 750; color: var(--color-text); letter-spacing: -.03em; }
+.brand-name { font-size: 1.1rem; font-weight: 800; color: var(--color-text); letter-spacing: -.04em; }
 
 /* ── Desktop Nav ── */
-.topbar-nav { display: flex; gap: 2px; margin-left: .5rem; }
+.topbar-nav {
+  display: flex; gap: 2px; margin-left: .75rem;
+  background: var(--color-fill); border-radius: 10px; padding: 3px;
+}
 .nav-pill {
-  display: flex; align-items: center; gap: 5px;
-  padding: 6px 12px; border-radius: 8px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
   font-size: .8125rem; font-weight: 550; color: var(--color-text-secondary);
   text-decoration: none; transition: all .2s var(--ease-out);
+  white-space: nowrap;
 }
-.nav-pill:hover { background: var(--color-fill); color: var(--color-text); }
+.nav-pill:hover { background: rgba(255,255,255,.6); color: var(--color-text); }
 .nav-pill.active, .nav-pill.active-exact {
-  background: var(--color-primary-subtle); color: var(--color-primary); font-weight: 650;
+  background: var(--color-surface); color: var(--color-primary); font-weight: 650;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 .nav-pill svg { flex-shrink: 0; }
-.nav-admin.active { background: rgba(88,86,214,.1); color: var(--color-indigo); }
+.nav-admin.active { color: var(--color-indigo); }
 
 /* ── End section ── */
-.topbar-end { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
+.topbar-end { margin-left: auto; display: flex; align-items: center; gap: .625rem; }
 .topbar-icon-btn {
-  position: relative; width: 36px; height: 36px; border-radius: 10px;
+  position: relative; width: 38px; height: 38px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   color: var(--color-text-secondary); transition: all .2s;
 }
 .topbar-icon-btn:hover { background: var(--color-fill); color: var(--color-text); }
 .notif-dot {
-  position: absolute; top: 3px; right: 3px;
-  min-width: 16px; height: 16px; border-radius: 99px;
+  position: absolute; top: 2px; right: 2px;
+  min-width: 17px; height: 17px; border-radius: 99px;
   background: var(--color-red); color: #fff;
   font-size: .6rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  padding: 0 4px; border: 2px solid #fff;
+  padding: 0 4px; border: 2px solid rgba(255,255,255,.9);
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
 }
 
 /* ── Avatar ── */
 .avatar-btn {
-  display: flex; align-items: center; gap: 4px;
-  height: 34px; padding: 0 10px; border-radius: 99px; border: none; cursor: pointer;
-  background: linear-gradient(135deg, #691C32, #A63D5A); color: #fff;
+  display: flex; align-items: center; gap: 5px;
+  height: 36px; padding: 0 12px; border-radius: 99px; border: none; cursor: pointer;
+  background: linear-gradient(145deg, #691C32, #A63D5A); color: #fff;
   font-family: var(--font-family); transition: all .2s;
+  box-shadow: 0 2px 8px rgba(105, 28, 50, 0.25);
 }
 .avatar-btn:hover { filter: brightness(1.1); transform: scale(1.04); }
 .avatar-btn:active { transform: scale(.96); }
-.avatar-initials { font-size: .72rem; font-weight: 700; letter-spacing: .02em; }
+.avatar-initials { font-size: .75rem; font-weight: 700; letter-spacing: .02em; }
 .avatar-chev { opacity: .7; transition: transform .25s; }
 .avatar-chev.flip { transform: rotate(180deg); }
 
 /* ── User Menu ── */
 .user-menu {
-  position: fixed; top: 60px; right: 12px; width: 270px; z-index: 950;
+  position: fixed; top: 66px; right: 16px; width: 280px; z-index: 950;
   background: rgba(255,255,255,.97);
   backdrop-filter: blur(40px) saturate(200%);
-  border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.06);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.06);
   overflow: hidden;
 }
-.um-header { padding: 1.25rem 1rem 1rem; text-align: center; background: var(--color-fill-secondary); border-bottom: .5px solid var(--color-separator); }
-.um-avatar {
-  width: 44px; height: 44px; margin: 0 auto .5rem; border-radius: 50%;
-  background: linear-gradient(135deg, #691C32, #A63D5A); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; font-weight: 700;
+.um-header {
+  padding: 1.5rem 1.25rem 1.125rem; text-align: center;
+  background: var(--color-fill-secondary); border-bottom: .5px solid var(--color-separator);
 }
-.um-name { font-size: .875rem; font-weight: 700; color: var(--color-text); }
+.um-avatar {
+  width: 48px; height: 48px; margin: 0 auto .625rem; border-radius: 50%;
+  background: linear-gradient(145deg, #691C32, #A63D5A); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.0625rem; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(105, 28, 50, 0.25);
+}
+.um-name { font-size: .9375rem; font-weight: 700; color: var(--color-text); letter-spacing: -.015em; }
 .um-role {
-  display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 99px;
+  display: inline-block; margin-top: 6px; padding: 3px 12px; border-radius: 99px;
   font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
 }
 .um-role.tecnico { background: rgba(0,122,255,.1); color: #007AFF; }
 .um-role.supervisor { background: rgba(88,86,214,.1); color: #5856D6; }
 .um-role.responsable { background: rgba(52,199,89,.1); color: #1D8348; }
 .um-role.admin { background: rgba(105,28,50,.1); color: #691C32; }
-.um-body { padding: .75rem 1rem; }
-.um-row { display: flex; align-items: center; gap: .5rem; padding: .4rem 0; font-size: .78rem; color: var(--color-text-secondary); border-bottom: .5px solid var(--color-separator); }
+.um-body { padding: .875rem 1.25rem; }
+.um-row {
+  display: flex; align-items: center; gap: .625rem;
+  padding: .5rem 0; font-size: .8125rem; color: var(--color-text-secondary);
+  border-bottom: .5px solid var(--color-separator);
+}
 .um-row:last-child { border-bottom: none; }
 .um-row svg { color: var(--color-text-tertiary); flex-shrink: 0; }
 .um-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.um-footer { padding: .625rem 1rem; border-top: .5px solid var(--color-separator); }
+.um-footer { padding: .75rem 1.25rem; border-top: .5px solid var(--color-separator); }
 .um-logout {
   width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .5rem; background: var(--color-error-bg); color: var(--color-error);
-  border: none; border-radius: 10px; font-size: .8125rem; font-weight: 600;
+  padding: .625rem; background: var(--color-error-bg); color: var(--color-error);
+  border: none; border-radius: 12px; font-size: .8125rem; font-weight: 600;
   font-family: var(--font-family); cursor: pointer; transition: all .2s;
 }
 .um-logout:hover { background: rgba(255,59,48,.14); }
 
 /* Menu transition */
-.menu-pop-enter-active { transition: all .25s cubic-bezier(.34,1.56,.64,1); }
+.menu-pop-enter-active { transition: all .3s cubic-bezier(.34,1.56,.64,1); }
 .menu-pop-leave-active { transition: all .15s ease-in; }
-.menu-pop-enter-from { opacity: 0; transform: scale(.92) translateY(-6px); }
+.menu-pop-enter-from { opacity: 0; transform: scale(.92) translateY(-8px); }
 .menu-pop-leave-to { opacity: 0; transform: scale(.95) translateY(-4px); }
 
 /* ── Main Area ── */
-.shell-main { margin-top: 56px; min-height: calc(100vh - 56px); padding-bottom: 0; }
+.shell-main { margin-top: 60px; min-height: calc(100vh - 60px); padding-bottom: 0; }
 .shell-main.full-bleed { padding: 0; }
 
 /* ── Bottom Tab Bar ── */
@@ -268,21 +298,32 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
 @media (max-width: 768px) {
   .topbar-nav { display: none; }
-  .topbar { height: 50px; }
-  .shell-main { margin-top: 50px; min-height: calc(100vh - 50px - 64px); padding-bottom: 64px; }
+  .topbar { height: 52px; padding: 0 .875rem; }
+  .shell-main { margin-top: 52px; min-height: calc(100vh - 52px - 72px); padding-bottom: 72px; }
   .bottom-tabs {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
-    height: 64px; display: flex; align-items: stretch;
-    background: rgba(255,255,255,.82);
+    height: 72px; display: flex; align-items: stretch;
+    background: rgba(255,255,255,.85);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border-top: .5px solid rgba(0,0,0,.08);
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    border-top: .5px solid rgba(0,0,0,.06);
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0));
   }
   .tab-item {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px; text-decoration: none; color: var(--color-text-tertiary);
-    font-size: .6rem; font-weight: 600; transition: color .2s;
+    gap: 3px; text-decoration: none; color: var(--color-text-tertiary);
+    font-size: .625rem; font-weight: 600; transition: color .2s;
+    border-radius: 12px;
+    position: relative;
+  }
+  .tab-icon-wrap {
+    width: 32px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: 14px; transition: all .25s var(--ease-out);
+  }
+  .tab-item.active .tab-icon-wrap,
+  .tab-item.active-exact .tab-icon-wrap {
+    background: var(--color-primary-subtle);
+    transform: scale(1.05);
   }
   .tab-item.active, .tab-item.active-exact { color: var(--color-primary); }
   .tab-item svg { width: 22px; height: 22px; }

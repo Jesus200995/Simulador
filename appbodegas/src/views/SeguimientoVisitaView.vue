@@ -1,24 +1,27 @@
 <template>
-  <div class="form-page">
-    <div class="form-header">
-      <button class="back-btn" @click="$router.back()">← Volver</button>
+  <div class="page-container narrow">
+    <div class="view-header">
+      <button class="btn btn-ghost btn-sm" @click="$router.back()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
       <h1>Registrar Visita</h1>
-      <p class="context-info">
-        <strong>{{ route.query.nombres }}</strong> ·
-        {{ route.query.up_name }} ·
-        Ciclo {{ route.query.ciclo_label }}
-      </p>
     </div>
 
-    <form class="form-card" @submit.prevent="guardar">
-      <div class="field">
-        <label>Fecha de visita <span class="req">*</span></label>
-        <input v-model="form.fecha_visita" type="date" :max="hoy" required />
+    <div class="context-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <strong>{{ route.query.nombres }}</strong> · {{ route.query.up_name }} · Ciclo {{ route.query.ciclo_label }}
+    </div>
+
+    <form class="glass-card" @submit.prevent="guardar">
+      <div class="form-group">
+        <label class="form-label">Fecha de visita <span class="form-required">*</span></label>
+        <input v-model="form.fecha_visita" type="date" class="form-input" :max="hoy" required />
       </div>
 
-      <div class="field">
-        <label>Etapa del cultivo <span class="req">*</span></label>
-        <select v-model="form.etapa_cultivo" required>
+      <div class="form-group">
+        <label class="form-label">Etapa del cultivo <span class="form-required">*</span></label>
+        <select v-model="form.etapa_cultivo" class="form-input" required>
           <option value="">-- Seleccionar --</option>
           <option value="siembra">Siembra</option>
           <option value="crecimiento">Crecimiento</option>
@@ -28,31 +31,31 @@
         </select>
       </div>
 
-      <div class="field">
-        <label>Estado del cultivo <span class="req">*</span></label>
-        <div class="radio-group">
-          <label v-for="opt in estadoOptions" :key="opt.value" class="radio-label">
-            <input type="radio" v-model="form.estado_cultivo" :value="opt.value" required />
-            <span :class="['badge-estado', opt.value]">{{ opt.label }}</span>
+      <div class="form-group">
+        <label class="form-label">Estado del cultivo <span class="form-required">*</span></label>
+        <div class="radio-card-group">
+          <label v-for="opt in estadoOptions" :key="opt.value">
+            <input type="radio" v-model="form.estado_cultivo" :value="opt.value" required class="sr-only" />
+            <span :class="['radio-pill', opt.value, { selected: form.estado_cultivo === opt.value }]">{{ opt.label }}</span>
           </label>
         </div>
       </div>
 
-      <div class="field">
-        <label>Observaciones</label>
-        <textarea v-model="form.observaciones" rows="3" placeholder="Notas de la visita..." maxlength="500" />
+      <div class="form-group">
+        <label class="form-label">Observaciones</label>
+        <textarea v-model="form.observaciones" class="form-input" rows="3" placeholder="Notas de la visita..." maxlength="500" />
       </div>
 
-      <div class="separator"><span>Precio observado (opcional)</span></div>
+      <div class="form-divider"><span>Precio observado (opcional)</span></div>
 
-      <div class="field">
-        <label>Precio observado ($/ton)</label>
-        <input v-model.number="form.precio_observado" type="number" min="0.01" step="0.01" placeholder="Ej. 5800" />
+      <div class="form-group">
+        <label class="form-label">Precio observado ($/ton)</label>
+        <input v-model.number="form.precio_observado" type="number" class="form-input" min="0.01" step="0.01" placeholder="Ej. 5800" />
       </div>
 
-      <div v-if="form.precio_observado" class="field">
-        <label>Tipo de maíz <span class="req">*</span></label>
-        <select v-model="form.tipo_maiz" :required="!!form.precio_observado">
+      <div v-if="form.precio_observado" class="form-group">
+        <label class="form-label">Tipo de maíz <span class="form-required">*</span></label>
+        <select v-model="form.tipo_maiz" class="form-input" :required="!!form.precio_observado">
           <option value="">-- Seleccionar --</option>
           <option value="blanco">Maíz Blanco</option>
           <option value="amarillo">Maíz Amarillo</option>
@@ -63,22 +66,16 @@
         </select>
       </div>
 
-      <div v-if="error" class="error-msg">{{ error }}</div>
-      <div v-if="exito" class="exito-msg">Visita registrada correctamente.</div>
+      <div v-if="error" class="alert alert-error">{{ error }}</div>
+      <div v-if="exito" class="alert alert-success">Visita registrada correctamente.</div>
 
-      <div class="actions">
-        <button type="submit" :disabled="loading" class="btn-primary">
+      <div class="form-actions">
+        <button type="submit" :disabled="loading" class="btn btn-primary">
           {{ loading ? 'Guardando...' : 'Guardar visita' }}
         </button>
-        <button type="button" class="btn-secondary" @click="irA('SeguimientoIncidencia')">
-          + Incidencia
-        </button>
-        <button type="button" class="btn-secondary" @click="irA('SeguimientoEstimacion')">
-          + Estimación
-        </button>
-        <button type="button" class="btn-secondary" @click="irA('SeguimientoCosecha')">
-          + Cosecha real
-        </button>
+        <button type="button" class="btn btn-ghost" @click="irA('SeguimientoIncidencia')">+ Incidencia</button>
+        <button type="button" class="btn btn-ghost" @click="irA('SeguimientoEstimacion')">+ Estimación</button>
+        <button type="button" class="btn btn-ghost" @click="irA('SeguimientoCosecha')">+ Cosecha real</button>
       </div>
     </form>
   </div>
@@ -141,36 +138,28 @@ function irA(name: string) {
 </script>
 
 <style scoped>
-.form-page { max-width: 600px; margin: 0 auto; padding: 1.5rem; }
-.form-header { margin-bottom: 1.5rem; }
-.back-btn { background: none; border: none; color: #2f855a; cursor: pointer; font-size: 0.9rem; margin-bottom: 0.5rem; padding: 0; }
-.form-header h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 0.25rem; color: #1a202c; }
-.context-info { font-size: 0.85rem; color: #718096; margin: 0; }
-.form-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; }
-.field { margin-bottom: 1.1rem; }
-.field label { display: block; font-size: 0.875rem; font-weight: 600; color: #4a5568; margin-bottom: 0.35rem; }
-.req { color: #e53e3e; }
-.field input, .field select, .field textarea {
-  width: 100%; box-sizing: border-box;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9rem;
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
 }
-.field textarea { resize: vertical; }
-.radio-group { display: flex; gap: 1rem; flex-wrap: wrap; }
-.radio-label { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
-.badge-estado { padding: 4px 12px; border-radius: 99px; font-size: 0.85rem; font-weight: 600; }
-.badge-estado.bueno { background: #c6f6d5; color: #276749; }
-.badge-estado.regular { background: #fef3c7; color: #92400e; }
-.badge-estado.malo { background: #fed7d7; color: #9b2c2c; }
-.separator { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0; }
-.separator span { color: #a0aec0; font-size: 0.8rem; white-space: nowrap; }
-.separator::before, .separator::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-.actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
-.btn-primary { background: #2f855a; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-secondary { background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; cursor: pointer; }
-.error-msg { color: #e53e3e; font-size: 0.85rem; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; padding: 0.5rem 0.75rem; }
-.exito-msg { color: #276749; font-size: 0.85rem; background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 6px; padding: 0.5rem 0.75rem; }
+
+.radio-pill {
+  padding: .4375rem .875rem; border-radius: var(--radius-full);
+  font-size: .8125rem; font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--color-separator-opaque);
+  background: var(--color-surface); color: var(--color-text-secondary);
+  transition: all .2s var(--ease-out);
+}
+
+.radio-pill:hover { border-color: var(--color-text-tertiary); }
+
+.radio-pill.bueno.selected { background: rgba(52, 199, 89, 0.12); color: #1D8348; border-color: rgba(52, 199, 89, 0.3); }
+.radio-pill.regular.selected { background: rgba(255, 149, 0, 0.12); color: #B8720E; border-color: rgba(255, 149, 0, 0.3); }
+.radio-pill.malo.selected { background: rgba(255, 59, 48, 0.10); color: #C0392B; border-color: rgba(255, 59, 48, 0.3); }
+
+.form-actions {
+  display: flex; gap: .625rem; flex-wrap: wrap; margin-top: 1.5rem;
+  padding-top: 1.25rem; border-top: .5px solid var(--color-separator);
+}
 </style>

@@ -1,48 +1,39 @@
 <template>
-  <div class="detalle-page">
-    <header class="app-header">
-      <router-link to="/" class="detalle-back-btn" aria-label="Volver al mapa">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        <span class="detalle-back-label">Mapa</span>
-      </router-link>
-      <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <div class="header-brand-text">
-          <span class="header-brand-title">SIMAC</span>
-          <span class="header-brand-subtitle">Sistema Nacional de Monitoreo</span>
+  <div class="page-container">
+    <div class="view-header">
+      <div class="view-header-row">
+        <div>
+          <h1>Mis bodegas e inventarios</h1>
+          <p class="view-subtitle">Gestión de bodegas, inventarios y solicitudes</p>
+        </div>
+        <div class="view-header-actions">
+          <router-link to="/nueva-bodega" class="btn btn-primary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva bodega
+          </router-link>
         </div>
       </div>
-      <div class="header-spacer"></div>
-    </header>
+    </div>
 
-    <main class="detalle-main">
-      <div class="mis-bodegas-header">
-        <h1>Mis bodegas e inventarios</h1>
-        <router-link to="/nueva-bodega" class="btn btn-primary btn-sm">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nueva bodega
-        </router-link>
-      </div>
+    <div class="segmented-control mis-tabs-wrap">
+      <button :class="{ active: activeTab === 'catalogo' }" @click="activeTab = 'catalogo'">
+        Buscar en catálogo
+      </button>
+      <button :class="{ active: activeTab === 'inventarios' }" @click="activeTab = 'inventarios'">
+        Inventarios
+        <span v-if="inventarios.length" class="tab-count">{{ inventarios.length }}</span>
+      </button>
+      <button :class="{ active: activeTab === 'solicitudes' }" @click="activeTab = 'solicitudes'">
+        Solicitudes
+        <span v-if="solicitudes.length" class="tab-count">{{ solicitudes.length }}</span>
+      </button>
+      <button :class="{ active: activeTab === 'bodegas' }" @click="activeTab = 'bodegas'">
+        Mis bodegas
+        <span v-if="bodegas.length" class="tab-count">{{ bodegas.length }}</span>
+      </button>
+    </div>
 
-      <!-- Tabs -->
-      <div class="mis-tabs">
-        <button class="mis-tab" :class="{ active: activeTab === 'catalogo' }" @click="activeTab = 'catalogo'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Buscar en catalogo
-        </button>
-        <button class="mis-tab" :class="{ active: activeTab === 'inventarios' }" @click="activeTab = 'inventarios'">
-          Inventarios
-          <span v-if="inventarios.length" class="mis-tab-badge">{{ inventarios.length }}</span>
-        </button>
-        <button class="mis-tab" :class="{ active: activeTab === 'solicitudes' }" @click="activeTab = 'solicitudes'">
-          Solicitudes
-          <span v-if="solicitudes.length" class="mis-tab-badge">{{ solicitudes.length }}</span>
-        </button>
-        <button class="mis-tab" :class="{ active: activeTab === 'bodegas' }" @click="activeTab = 'bodegas'">
-          Mis bodegas
-          <span v-if="bodegas.length" class="mis-tab-badge">{{ bodegas.length }}</span>
-        </button>
-      </div>
+    <div class="mis-main">
 
       <div v-if="loading" class="mis-bodegas-loading">
         <span class="spinner spinner-dark"></span> Cargando...
@@ -248,7 +239,7 @@
           </router-link>
         </div>
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -363,50 +354,20 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-.detalle-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--color-bg);
+.mis-tabs-wrap {
+  margin-bottom: 1.5rem;
 }
 
-.detalle-main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 74px 1.25rem 2.5rem;
-}
-
-.detalle-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  padding: 0.35rem 0.65rem 0.35rem 0.45rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-
-.detalle-back-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-
-.mis-bodegas-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
-}
-
-.mis-bodegas-header h1 {
-  font-size: 1.35rem;
+.tab-count {
+  background: var(--color-primary);
+  color: white;
+  font-size: .6rem;
   font-weight: 700;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
+  padding: .1rem .4rem;
+  border-radius: 10px;
+  min-width: 1.1rem;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .mis-bodegas-loading {
@@ -446,14 +407,16 @@ onMounted(fetchData)
 }
 
 .mis-bodega-card {
-  background: white;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-radius: var(--radius-xl);
   padding: 1.25rem;
   box-shadow: var(--shadow-sm);
   border: 0.5px solid var(--color-border);
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.25s, transform 0.15s;
+  transition: all .25s var(--ease-out);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -525,8 +488,8 @@ onMounted(fetchData)
   gap: 0.4rem;
   margin-top: 0.5rem;
   padding: 0.4rem 0.7rem;
-  background: #FFEAEA;
-  color: #C0392B;
+  background: var(--color-error-bg);
+  color: var(--color-error);
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
   font-weight: 600;
@@ -538,62 +501,14 @@ onMounted(fetchData)
   gap: 0.4rem;
   margin-top: 0.5rem;
   padding: 0.4rem 0.7rem;
-  background: #FFF8E1;
-  color: #F57F17;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
   font-weight: 600;
 }
 
-/* Tabs */
-.mis-tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1.5px solid var(--color-separator);
-  padding-bottom: 0;
-}
-
-.mis-tab {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: none;
-  border: none;
-  border-bottom: 2.5px solid transparent;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
-  margin-bottom: -1.5px;
-}
-
-.mis-tab:hover {
-  color: var(--color-text);
-}
-
-.mis-tab.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
-
-.mis-tab svg {
-  flex-shrink: 0;
-}
-
-.mis-tab-badge {
-  background: var(--color-primary);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 10px;
-  min-width: 1.2rem;
-  text-align: center;
-  line-height: 1.3;
-}
+/* Tabs are now handled by .segmented-control from main.css */
 
 /* ── Catálogo search ── */
 .catalogo-tab {
@@ -603,7 +518,9 @@ onMounted(fetchData)
 }
 
 .catalogo-search-card {
-  background: white;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-radius: var(--radius-xl);
   padding: 1.25rem 1.5rem;
   box-shadow: var(--shadow-sm);
@@ -743,7 +660,9 @@ onMounted(fetchData)
 
 /* Inline inventory card */
 .catalogo-inv-card {
-  background: white;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-radius: var(--radius-xl);
   padding: 1.25rem 1.5rem;
   box-shadow: var(--shadow-md);
@@ -805,7 +724,9 @@ onMounted(fetchData)
 /* Inventory table */
 .mis-inv-table-wrap {
   overflow-x: auto;
-  background: white;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   border: 0.5px solid var(--color-border);
@@ -867,32 +788,18 @@ onMounted(fetchData)
 }
 
 @media (max-width: 768px) {
-  .detalle-main {
-    padding: 64px 1rem 2rem;
-  }
-
   .form-row-2 {
     grid-template-columns: 1fr;
+  }
+  .mis-tabs-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
 @media (max-width: 640px) {
   .mis-bodegas-grid {
     grid-template-columns: 1fr;
-  }
-
-  .mis-tabs {
-    overflow-x: auto;
-  }
-
-  .mis-tab {
-    white-space: nowrap;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .mis-bodegas-header h1 {
-    font-size: 1.1rem;
   }
 
   .catalogo-result-item {

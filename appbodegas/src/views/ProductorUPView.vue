@@ -1,21 +1,5 @@
 <template>
   <div class="productor-page">
-    <!-- Header -->
-    <header class="app-header">
-      <router-link to="/" class="detalle-back-btn" aria-label="Volver al mapa">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        <span>Mapa</span>
-      </router-link>
-      <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <div class="header-brand-text">
-          <span class="header-brand-title">SIMAC</span>
-          <span class="header-brand-subtitle">Módulo Productor</span>
-        </div>
-      </div>
-      <div class="header-spacer"></div>
-    </header>
-
     <!-- Stepper -->
     <div class="wizard-stepper">
       <div v-for="(s, i) in steps" :key="i"
@@ -685,8 +669,10 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0;
   padding: 1rem 1.25rem;
-  margin-top: 56px;
-  background: white;
+  margin-top: 0;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 0.5px solid var(--color-separator);
 }
 
@@ -753,7 +739,9 @@ onUnmounted(() => {
 }
 
 .wizard-card {
-  background: white;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-radius: var(--radius-xl);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);

@@ -1,39 +1,51 @@
 <template>
-  <div class="notif-page">
-    <div class="page-header">
-      <h1>Notificaciones</h1>
-      <button v-if="totalNoLeidas > 0" class="btn-leer-todas" @click="leerTodas">
-        Marcar todas como leídas
-      </button>
+  <div class="page-container narrow">
+    <div class="view-header">
+      <div class="view-header-row">
+        <div>
+          <h1>Notificaciones</h1>
+          <p class="view-subtitle">Alertas y actualizaciones recientes</p>
+        </div>
+        <div class="view-header-actions">
+          <button v-if="totalNoLeidas > 0" class="btn btn-ghost" @click="leerTodas">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Marcar todas como leídas
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div v-if="loading" class="loading">Cargando notificaciones...</div>
-    <div v-else-if="notificaciones.length === 0" class="empty">No tienes notificaciones.</div>
+    <div v-if="loading" class="state-loading">
+      <span class="spinner spinner-dark spinner-lg"></span>
+      <p>Cargando notificaciones...</p>
+    </div>
+    <div v-else-if="notificaciones.length === 0" class="state-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <p>No tienes notificaciones.</p>
+    </div>
 
-    <div v-else class="lista">
+    <div v-else class="notif-lista">
       <div
         v-for="n in notificaciones"
         :key="n.id"
-        :class="['notif-item', { 'no-leida': !n.leida }]"
+        :class="['list-card-item notif-item', { 'notif-unread': !n.leida }]"
         @click="abrir(n)"
       >
-        <div class="notif-icon">
-          <span :class="['nivel-dot', n.nivel_alerta]"></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-titulo">
-            <strong>{{ tipoLabel(n.tipo_alerta) }}</strong>
-            <span :class="['nivel-badge', n.nivel_alerta]">{{ n.nivel_alerta }}</span>
-          </div>
-          <div class="notif-meta">
-            {{ n.apellido_paterno }} {{ n.nombres }} · {{ n.up_name }}
-          </div>
-          <div class="notif-estado">
-            Estado: <span :class="['estado-badge', n.estado_alerta]">{{ n.estado_alerta }}</span>
-            · {{ formatFecha(n.fecha_alerta) }}
+        <div class="notif-dot-wrap">
+          <span v-if="!n.leida" class="unread-indicator"></span>
+          <div :class="['notif-level-icon', n.nivel_alerta]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
         </div>
-        <div class="notif-fecha">{{ formatRelativo(n.created_at) }}</div>
+        <div class="list-item-body">
+          <div class="notif-title-row">
+            <span class="list-item-title">{{ tipoLabel(n.tipo_alerta) }}</span>
+            <span class="badge" :class="nivelBadge(n.nivel_alerta)">{{ n.nivel_alerta }}</span>
+          </div>
+          <div class="list-item-subtitle">{{ n.apellido_paterno }} {{ n.nombres }} · {{ n.up_name }}</div>
+          <div class="list-item-meta">{{ n.estado_alerta }} · {{ formatFecha(n.fecha_alerta) }}</div>
+        </div>
+        <div class="notif-time">{{ formatRelativo(n.created_at) }}</div>
       </div>
     </div>
   </div>
@@ -85,6 +97,11 @@ function tipoLabel(tipo: string) {
   return map[tipo] || tipo
 }
 
+function nivelBadge(nivel: string) {
+  const m: Record<string, string> = { bajo: 'badge-green', medio: 'badge-yellow', alto: 'badge-red' }
+  return m[nivel] || 'badge-gray'
+}
+
 function formatFecha(fecha: string) {
   if (!fecha) return ''
   return new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -105,33 +122,34 @@ onMounted(cargar)
 </script>
 
 <style scoped>
-.notif-page { max-width: 700px; margin: 0 auto; padding: 1.5rem; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-.page-header h1 { font-size: 1.5rem; font-weight: 700; color: #1a202c; margin: 0; }
-.btn-leer-todas { background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem; font-size: 0.8rem; color: #718096; cursor: pointer; }
-.loading, .empty { text-align: center; color: #718096; padding: 2rem; }
-.lista { display: flex; flex-direction: column; gap: 0.5rem; }
-.notif-item {
-  display: flex; align-items: flex-start; gap: 0.75rem;
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-  padding: 0.9rem 1rem; cursor: pointer; transition: box-shadow 0.15s;
+.notif-lista { display: flex; flex-direction: column; gap: .5rem; }
+
+.notif-item { position: relative; }
+.notif-unread { background: rgba(255, 149, 0, 0.04) !important; border-color: rgba(255, 149, 0, 0.15) !important; }
+
+.notif-dot-wrap {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.notif-item.no-leida { border-left: 3px solid #ed8936; background: #fffaf0; }
-.notif-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
-.notif-icon { padding-top: 4px; }
-.nivel-dot { display: block; width: 10px; height: 10px; border-radius: 50%; }
-.nivel-dot.bajo { background: #48bb78; }
-.nivel-dot.medio { background: #ed8936; }
-.nivel-dot.alto { background: #e53e3e; }
-.notif-body { flex: 1; }
-.notif-titulo { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; }
-.notif-titulo strong { font-size: 0.95rem; color: #2d3748; }
-.nivel-badge { padding: 1px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
-.nivel-badge.bajo { background: #c6f6d5; color: #276749; }
-.nivel-badge.medio { background: #fef3c7; color: #92400e; }
-.nivel-badge.alto { background: #fed7d7; color: #9b2c2c; }
-.notif-meta { font-size: 0.8rem; color: #718096; margin-bottom: 0.2rem; }
-.notif-estado { font-size: 0.78rem; color: #a0aec0; }
-.estado-badge { font-weight: 600; color: #4a5568; }
-.notif-fecha { font-size: 0.75rem; color: #a0aec0; white-space: nowrap; }
+
+.notif-dot-wrap .unread-indicator {
+  position: absolute; top: -2px; right: -2px; z-index: 1;
+}
+
+.notif-level-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.notif-level-icon.bajo { background: rgba(52, 199, 89, 0.1); color: var(--color-green); }
+.notif-level-icon.medio { background: rgba(255, 149, 0, 0.1); color: var(--color-orange); }
+.notif-level-icon.alto { background: rgba(255, 59, 48, 0.1); color: var(--color-red); }
+
+.notif-title-row { display: flex; align-items: center; gap: .5rem; }
+
+.notif-time {
+  font-size: .75rem; color: var(--color-text-tertiary);
+  white-space: nowrap; flex-shrink: 0; align-self: flex-start;
+  margin-top: 2px;
+}
 </style>
