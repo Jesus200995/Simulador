@@ -69,9 +69,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
     const kpiQuery = `
       SELECT
         COUNT(*)::int as total_bodegas,
-        COALESCE(SUM(b.toneladas_total), 0)::float as total_toneladas,
-        COALESCE(SUM(b.toneladas_nacional), 0)::float as total_nacional,
-        COALESCE(SUM(b.toneladas_importacion), 0)::float as total_importacion
+        COALESCE(SUM(b.capacidad_toneladas), 0)::float as total_toneladas,
+        COUNT(*) FILTER (WHERE b.activo = true)::int as total_activas,
+        COUNT(*) FILTER (WHERE b.realiza_acopio = true)::int as total_acopio
       FROM bodegas b
       ${where}
     `;

@@ -26,15 +26,30 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers,
   })
 
-  const data = await response.json()
+  // Handle 401 before parsing body
+  if (response.status === 401) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('usuario')
+    window.location.href = '/login'
+    throw new Error('No autorizado')
+  }
+
+  // Safely parse JSON — if the server returns HTML (502/504/nginx error) don't crash
+  const contentType = response.headers.get('content-type') || ''
+  let data: any = null
+
+  if (contentType.includes('application/json')) {
+    data = await response.json()
+  } else {
+    const text = await response.text()
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: respuesta inesperada del servidor`)
+    }
+    throw new Error(text.slice(0, 120) || 'Respuesta inválida del servidor')
+  }
 
   if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('usuario')
-      window.location.href = '/login'
-    }
-    throw new Error(data.error || data.detail || 'Error en la solicitud')
+    throw new Error(data?.error || data?.detail || `Error ${response.status}`)
   }
 
   return data as T
