@@ -99,14 +99,14 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
          nivel_alerta, estado_alerta, observaciones, usuario_registro)
       VALUES ($1,$2,$3,$4,'manual',$5,$6,'pendiente',$7,$8)
       RETURNING *
-    `, [producer_id || null, up_id, ciclo_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones || null, req.userId]);
+    `, [producer_id || null, up_id, ciclo_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones || null, req.user?.userId]);
 
     const alerta = result.rows[0];
 
     // Crear notificación interna para el técnico que registró
     await pool.query(`
       INSERT INTO notificaciones (alerta_id, usuario_id) VALUES ($1, $2)
-    `, [alerta.id, req.userId]);
+    `, [alerta.id, req.user?.userId]);
 
     res.status(201).json({ alerta });
   } catch (error) {
@@ -147,7 +147,7 @@ router.post('/automatica', authMiddleware, async (req: AuthRequest, res: Respons
          nivel_alerta, estado_alerta, observaciones, usuario_registro)
       VALUES ($1,$2,$3,$4,'automatica',$5,$6,'pendiente',$7,$8)
       RETURNING *
-    `, [producer_id || null, up_id, ciclo_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones || null, req.userId]);
+    `, [producer_id || null, up_id, ciclo_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones || null, req.user?.userId]);
 
     const alerta = result.rows[0];
 
@@ -263,7 +263,7 @@ router.get('/notificaciones/mis', authMiddleware, async (req: AuthRequest, res: 
       WHERE n.usuario_id = $1
       ORDER BY n.created_at DESC
       LIMIT 50
-    `, [req.userId]);
+    `, [req.user?.userId]);
 
     const total_no_leidas = result.rows.filter(r => !r.leida).length;
 
@@ -286,7 +286,7 @@ router.patch('/notificaciones/:id/leer', authMiddleware, async (req: AuthRequest
       UPDATE notificaciones
       SET leida = TRUE, fecha_leida = CURRENT_TIMESTAMP
       WHERE id = $1 AND usuario_id = $2
-    `, [id, req.userId]);
+    `, [id, req.user?.userId]);
 
     res.json({ ok: true });
   } catch (error) {
@@ -305,7 +305,7 @@ router.patch('/notificaciones/leer-todas', authMiddleware, async (req: AuthReque
       UPDATE notificaciones
       SET leida = TRUE, fecha_leida = CURRENT_TIMESTAMP
       WHERE usuario_id = $1 AND leida = FALSE
-    `, [req.userId]);
+    `, [req.user?.userId]);
 
     res.json({ ok: true });
   } catch (error) {

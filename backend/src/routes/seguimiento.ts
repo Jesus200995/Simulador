@@ -131,7 +131,7 @@ router.post('/visitas', authMiddleware, async (req: AuthRequest, res: Response):
       RETURNING *
     `, [
       producer_id, up_id, ciclo_id, fecha_visita, etapa_cultivo, estado_cultivo,
-      observaciones || null, precio_observado || null, tipo_maiz || null, req.userId,
+      observaciones || null, precio_observado || null, tipo_maiz || null, req.user?.userId,
     ]);
 
     const visita = result.rows[0];
@@ -144,7 +144,7 @@ router.post('/visitas', authMiddleware, async (req: AuthRequest, res: Response):
         VALUES ('observado','tecnico',$1,$2,$3,$4,$5,$6,$7,$8,$9)
       `, [
         precio_observado, tipo_maiz, fecha_visita, observaciones || null,
-        visita.id, producer_id, up_id, ciclo_id, req.userId,
+        visita.id, producer_id, up_id, ciclo_id, req.user?.userId,
       ]);
     }
 
@@ -209,7 +209,7 @@ router.post('/incidencias', authMiddleware, async (req: AuthRequest, res: Respon
         (producer_id, up_id, ciclo_id, tipo_incidencia, severidad, fecha, observaciones, usuario_captura)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING *
-    `, [producer_id, up_id, ciclo_id, tipo_incidencia, severidad, fecha, observaciones || null, req.userId]);
+    `, [producer_id, up_id, ciclo_id, tipo_incidencia, severidad, fecha, observaciones || null, req.user?.userId]);
 
     res.status(201).json({ incidencia: result.rows[0] });
   } catch (error) {
@@ -274,7 +274,7 @@ router.post('/estimacion', authMiddleware, async (req: AuthRequest, res: Respons
       RETURNING *
     `, [
       producer_id, up_id, ciclo_id, fecha_estimacion, rendimiento_estimado_ton_ha,
-      produccion_estimada_ton, observaciones || null, req.userId,
+      produccion_estimada_ton, observaciones || null, req.user?.userId,
     ]);
 
     res.status(201).json({ estimacion: result.rows[0] });
@@ -349,7 +349,7 @@ router.post('/cosecha', authMiddleware, async (req: AuthRequest, res: Response):
       RETURNING *
     `, [
       producer_id, up_id, ciclo_id, fecha_cosecha, superficie_cosechada_ha,
-      produccion_total_ton, rendimiento_real_ton_ha, observaciones || null, req.userId,
+      produccion_total_ton, rendimiento_real_ton_ha, observaciones || null, req.user?.userId,
     ]);
 
     res.status(201).json({ cosecha: result.rows[0] });

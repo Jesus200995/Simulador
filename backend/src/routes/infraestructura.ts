@@ -176,7 +176,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     const esCoberturas = esVentanilla ? true : (opera_coberturas === true || opera_coberturas === 'true');
 
     // Rol del usuario — bodeguero/admin pueden crear; otros quedan en pendiente
-    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.userId]);
+    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.user?.userId]);
     const rol = userResult.rows[0]?.rol || 'tecnico';
     const estatus = ['admin', 'responsable'].includes(rol) ? 'aprobada' : 'pendiente';
     const estatus_operativo = estatus === 'aprobada' ? 'activa' : 'inactiva';
@@ -194,7 +194,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       latitud, longitud, capacidad_ton || 0,
       esVentanilla, esAcopio, esIncentivos, esCoberturas,
       registra_inventario !== false,
-      estatus, estatus_operativo, req.userId,
+      estatus, estatus_operativo, req.user?.userId,
     ]);
 
     res.status(201).json({ bodega: result.rows[0] });
@@ -211,7 +211,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
   try {
     const { id } = req.params;
 
-    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.userId]);
+    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.user?.userId]);
     const rol = userResult.rows[0]?.rol || 'tecnico';
     if (!['admin', 'responsable'].includes(rol)) {
       res.status(403).json({ error: 'Sin permisos para editar infraestructura' });
@@ -344,7 +344,7 @@ router.post('/:id/inventario', authMiddleware, async (req: AuthRequest, res: Res
          volumen_problema, fecha, observaciones, fecha_registro)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, req.userId, ciclo, tipo_maiz, volumen_almacenado, volumen_problema || 0, fecha, observaciones || null]);
+    `, [id, req.user?.userId, ciclo, tipo_maiz, volumen_almacenado, volumen_problema || 0, fecha, observaciones || null]);
 
     res.status(201).json({ inventario: result.rows[0] });
   } catch (error) {
@@ -406,7 +406,7 @@ router.post('/:id/precios', authMiddleware, async (req: AuthRequest, res: Respon
         (tipo_precio, fuente, precio, tipo_maiz, fecha, observaciones, bodega_id, usuario_captura)
       VALUES ('bodega','bodeguero',$1,$2,$3,$4,$5,$6)
       RETURNING *
-    `, [precio, tipo_maiz, fecha, observaciones || null, id, req.userId]);
+    `, [precio, tipo_maiz, fecha, observaciones || null, id, req.user?.userId]);
 
     res.status(201).json({ precio: result.rows[0] });
   } catch (error) {
@@ -422,7 +422,7 @@ router.patch('/:id/aprobar', authMiddleware, async (req: AuthRequest, res: Respo
   try {
     const { id } = req.params;
 
-    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.userId]);
+    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.user?.userId]);
     if (userResult.rows[0]?.rol !== 'admin') {
       res.status(403).json({ error: 'Solo admin puede aprobar bodegas' });
       return;
@@ -434,7 +434,7 @@ router.patch('/:id/aprobar', authMiddleware, async (req: AuthRequest, res: Respo
           aprobado_por = $1, fecha_aprobacion = CURRENT_TIMESTAMP
       WHERE id = $2
       RETURNING *
-    `, [req.userId, id]);
+    `, [req.user?.userId, id]);
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Bodega no encontrada' });
