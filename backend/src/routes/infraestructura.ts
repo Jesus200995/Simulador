@@ -17,7 +17,7 @@ router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response
       'SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio'
     );
     const tiposMaiz = await pool.query(
-      "SELECT code, label FROM cat_catalog WHERE catalog='tipo_maiz' ORDER BY display_order"
+      "SELECT code, label FROM cat_catalog WHERE catalog='tipo_maiz' ORDER BY id"
     );
 
     res.json({
