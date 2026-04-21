@@ -4,9 +4,12 @@
     <header class="topbar">
       <router-link to="/" class="topbar-brand">
         <div class="brand-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
         </div>
-        <span class="brand-name">SIMAC</span>
+        <div class="brand-text">
+          <span class="brand-name">SIMAC</span>
+          <span class="brand-sub">Maíz y Cultivos</span>
+        </div>
       </router-link>
 
       <nav class="topbar-nav">
@@ -104,19 +107,60 @@
         </div>
         <span>Infra</span>
       </router-link>
-      <router-link v-if="showField" to="/alertas" class="tab-item">
+      <!-- "Más" overflow menu — always present on mobile -->
+      <button class="tab-item tab-more" :class="{ active: moreOpen }" @click="moreOpen = !moreOpen">
         <div class="tab-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
         </div>
-        <span>Alertas</span>
-      </router-link>
-      <router-link v-if="!showField && (authStore.isResponsable || authStore.isAdmin)" to="/mis-bodegas" class="tab-item">
-        <div class="tab-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        </div>
-        <span>Bodegas</span>
-      </router-link>
+        <span>Más</span>
+      </button>
     </nav>
+
+    <!-- ═══ "Más" Overlay Panel (mobile) ═══ -->
+    <Transition name="more-slide">
+      <div v-if="moreOpen" class="more-overlay" @click.self="moreOpen = false">
+        <div class="more-panel">
+          <div class="more-header">
+            <span class="more-title">Menú</span>
+            <button class="more-close" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="more-links">
+            <router-link v-if="showField" to="/alertas" class="more-link" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Alertas
+            </router-link>
+            <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas" class="more-link" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+              Mis Bodegas
+            </router-link>
+            <router-link v-if="authStore.isAdmin" to="/admin" class="more-link" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Administración
+            </router-link>
+            <router-link to="/notificaciones" class="more-link" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Notificaciones
+              <span v-if="notifCount > 0" class="more-badge">{{ notifCount }}</span>
+            </router-link>
+          </div>
+          <div class="more-user">
+            <div class="more-user-info">
+              <div class="more-user-avatar">{{ initials }}</div>
+              <div>
+                <div class="more-user-name">{{ authStore.usuario?.nombre_completo }}</div>
+                <div class="more-user-email">{{ authStore.usuario?.email }}</div>
+              </div>
+            </div>
+            <button class="more-logout" @click="handleLogout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -130,6 +174,7 @@ defineProps<{ fullBleed?: boolean }>()
 const authStore = useAuthStore()
 const router = useRouter()
 const menuOpen = ref(false)
+const moreOpen = ref(false)
 const avatarRef = ref<HTMLElement>()
 const menuRef = ref<HTMLElement>()
 const notifCount = ref(0)
@@ -169,19 +214,21 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   position: fixed; top: 0; left: 0; right: 0; z-index: 900;
   height: 60px; display: flex; align-items: center; gap: 1rem;
   padding: 0 1.25rem;
-  background: rgba(255,255,255,.72);
+  background: linear-gradient(135deg, rgba(105,28,50,.06) 0%, rgba(255,255,255,.88) 40%, rgba(255,255,255,.88) 100%);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-bottom: .5px solid rgba(0,0,0,.06);
 }
 .topbar-brand { display: flex; align-items: center; gap: .625rem; text-decoration: none; flex-shrink: 0; }
 .brand-icon {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: linear-gradient(145deg, #691C32, #A63D5A);
+  width: 36px; height: 36px; border-radius: 11px;
+  background: linear-gradient(145deg, #4A0E20, #691C32, #A63D5A);
   display: flex; align-items: center; justify-content: center; color: #fff;
-  box-shadow: 0 2px 8px rgba(105, 28, 50, 0.25);
+  box-shadow: 0 3px 10px rgba(105, 28, 50, 0.3), inset 0 1px 0 rgba(255,255,255,.15);
 }
-.brand-name { font-size: 1.1rem; font-weight: 800; color: var(--color-text); letter-spacing: -.04em; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name { font-size: 1.15rem; font-weight: 800; color: #691C32; letter-spacing: -.04em; }
+.brand-sub { font-size: .58rem; font-weight: 600; color: var(--color-text-tertiary); letter-spacing: .04em; text-transform: uppercase; }
 
 /* ── Desktop Nav ── */
 .topbar-nav {
@@ -201,7 +248,7 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 .nav-pill svg { flex-shrink: 0; }
-.nav-admin.active { color: var(--color-indigo); }
+.nav-admin.active { color: #691C32; }
 
 /* ── End section ── */
 .topbar-end { margin-left: auto; display: flex; align-items: center; gap: .625rem; }
@@ -225,17 +272,17 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 .avatar-btn {
   display: flex; align-items: center; gap: 5px;
   height: 36px; padding: 0 12px; border-radius: 99px; border: none; cursor: pointer;
-  background: linear-gradient(145deg, #691C32, #A63D5A); color: #fff;
+  background: linear-gradient(145deg, #4A0E20, #691C32); color: #fff;
   font-family: var(--font-family); transition: all .2s;
   box-shadow: 0 2px 8px rgba(105, 28, 50, 0.25);
 }
-.avatar-btn:hover { filter: brightness(1.1); transform: scale(1.04); }
+.avatar-btn:hover { filter: brightness(1.15); transform: scale(1.04); }
 .avatar-btn:active { transform: scale(.96); }
 .avatar-initials { font-size: .75rem; font-weight: 700; letter-spacing: .02em; }
 .avatar-chev { opacity: .7; transition: transform .25s; }
 .avatar-chev.flip { transform: rotate(180deg); }
 
-/* ── User Menu ── */
+/* ── User Menu (desktop) ── */
 .user-menu {
   position: fixed; top: 66px; right: 16px; width: 280px; z-index: 950;
   background: rgba(255,255,255,.97);
@@ -247,11 +294,12 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 }
 .um-header {
   padding: 1.5rem 1.25rem 1.125rem; text-align: center;
-  background: var(--color-fill-secondary); border-bottom: .5px solid var(--color-separator);
+  background: linear-gradient(180deg, rgba(105,28,50,.04), transparent);
+  border-bottom: .5px solid var(--color-separator);
 }
 .um-avatar {
   width: 48px; height: 48px; margin: 0 auto .625rem; border-radius: 50%;
-  background: linear-gradient(145deg, #691C32, #A63D5A); color: #fff;
+  background: linear-gradient(145deg, #4A0E20, #691C32); color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.0625rem; font-weight: 700;
   box-shadow: 0 4px 12px rgba(105, 28, 50, 0.25);
@@ -296,25 +344,31 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 /* ── Bottom Tab Bar ── */
 .bottom-tabs { display: none; }
 
+/* ── "Más" overlay panel ── */
+.more-overlay { display: none; }
+
 @media (max-width: 768px) {
   .topbar-nav { display: none; }
-  .topbar { height: 52px; padding: 0 .875rem; }
+  .topbar { height: 52px; padding: 0 .75rem; }
+  .brand-sub { display: none; }
   .shell-main { margin-top: 52px; min-height: calc(100vh - 52px - 72px); padding-bottom: 72px; }
+
   .bottom-tabs {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
     height: 72px; display: flex; align-items: stretch;
-    background: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.88);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
     border-top: .5px solid rgba(0,0,0,.06);
-    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0));
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0));
   }
   .tab-item {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 3px; text-decoration: none; color: var(--color-text-tertiary);
-    font-size: .625rem; font-weight: 600; transition: color .2s;
-    border-radius: 12px;
-    position: relative;
+    font-size: .6rem; font-weight: 600; transition: color .2s;
+    border-radius: 12px; position: relative;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-family);
   }
   .tab-icon-wrap {
     width: 32px; height: 28px; display: flex; align-items: center; justify-content: center;
@@ -322,10 +376,81 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   }
   .tab-item.active .tab-icon-wrap,
   .tab-item.active-exact .tab-icon-wrap {
-    background: var(--color-primary-subtle);
+    background: rgba(105,28,50,.08);
     transform: scale(1.05);
   }
-  .tab-item.active, .tab-item.active-exact { color: var(--color-primary); }
+  .tab-item.active, .tab-item.active-exact { color: #691C32; }
   .tab-item svg { width: 22px; height: 22px; }
+  .tab-more.active { color: #691C32; }
+
+  /* "Más" overlay */
+  .more-overlay {
+    display: flex; position: fixed; inset: 0; z-index: 950;
+    background: rgba(0,0,0,.4);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    align-items: flex-end; justify-content: center;
+  }
+  .more-panel {
+    width: 100%; max-width: 440px; max-height: 80vh;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    box-shadow: 0 -10px 40px rgba(0,0,0,.12);
+    overflow-y: auto;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 8px);
+  }
+  .more-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem .75rem;
+    border-bottom: .5px solid var(--color-separator);
+  }
+  .more-title { font-size: 1rem; font-weight: 700; color: var(--color-text); }
+  .more-close {
+    width: 32px; height: 32px; border-radius: 99px; border: none;
+    background: var(--color-fill); color: var(--color-text-secondary);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .more-links { padding: .5rem .75rem; }
+  .more-link {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .85rem .75rem; border-radius: var(--radius-sm);
+    font-size: .9rem; font-weight: 550; color: var(--color-text);
+    text-decoration: none; transition: background .15s;
+  }
+  .more-link:hover, .more-link:active { background: var(--color-fill); }
+  .more-link svg { color: var(--color-text-secondary); flex-shrink: 0; }
+  .more-badge {
+    margin-left: auto; min-width: 20px; height: 20px;
+    background: var(--color-red); color: #fff; border-radius: 99px;
+    font-size: .65rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; padding: 0 5px;
+  }
+  .more-user {
+    margin: .5rem .75rem; padding: 1rem;
+    background: linear-gradient(135deg, rgba(105,28,50,.04), rgba(105,28,50,.02));
+    border-radius: var(--radius-md); border-top: .5px solid var(--color-separator);
+  }
+  .more-user-info { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+  .more-user-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(145deg, #4A0E20, #691C32); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .82rem; font-weight: 700;
+  }
+  .more-user-name { font-size: .85rem; font-weight: 650; color: var(--color-text); }
+  .more-user-email { font-size: .75rem; color: var(--color-text-tertiary); }
+  .more-logout {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .6rem; background: var(--color-error-bg); color: var(--color-error);
+    border: none; border-radius: var(--radius-sm); font-size: .82rem; font-weight: 600;
+    font-family: var(--font-family); cursor: pointer;
+  }
+
+  /* "Más" panel transitions */
+  .more-slide-enter-active { transition: all .3s cubic-bezier(.33,1,.68,1); }
+  .more-slide-leave-active { transition: all .2s ease-in; }
+  .more-slide-enter-from .more-panel { transform: translateY(100%); }
+  .more-slide-leave-to .more-panel { transform: translateY(100%); }
+  .more-slide-enter-from { opacity: 0; }
+  .more-slide-leave-to { opacity: 0; }
 }
 </style>

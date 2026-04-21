@@ -1,16 +1,24 @@
 <template>
-  <div class="detalle-page">
-    <button class="back-btn" @click="$router.back()">← Volver</button>
+  <div class="page-container">
+    <div class="page-nav">
+      <button class="page-back-btn" @click="$router.back()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
+    </div>
 
-    <div v-if="loading" class="loading">Cargando...</div>
+    <div v-if="loading" class="state-loading">
+      <div class="spinner spinner-dark"></div>
+      <span>Cargando...</span>
+    </div>
     <template v-else-if="bodega">
       <!-- Ficha básica -->
-      <div class="ficha">
+      <div class="glass-card ficha">
         <div class="ficha-top">
-          <span :class="['tipo-badge', bodega.es_ventanilla ? 'ventanilla' : 'bodega']">
+          <span :class="['badge', bodega.es_ventanilla ? 'badge-ventanilla' : 'badge-bodega']">
             {{ bodega.es_ventanilla ? 'Ventanilla' : 'Bodega' }}
           </span>
-          <span :class="['estatus-badge', bodega.estatus_operativo]">{{ bodega.estatus_operativo }}</span>
+          <span :class="['badge', bodega.estatus_operativo === 'activa' ? 'badge-success' : 'badge-error']">{{ bodega.estatus_operativo }}</span>
         </div>
         <h1>{{ bodega.nombre }}</h1>
         <p class="ubicacion">{{ bodega.localidad }}, {{ bodega.municipio }}, {{ bodega.estado }}</p>
@@ -27,7 +35,7 @@
       </div>
 
       <!-- Tabs -->
-      <div class="tabs">
+      <div class="segmented-control">
         <button :class="{ active: tab === 'inventario' }" @click="tab = 'inventario'">Inventario</button>
         <button :class="{ active: tab === 'precios' }" @click="tab = 'precios'; cargarPrecios()">Precios</button>
         <button v-if="bodega.es_ventanilla" :class="{ active: tab === 'contactos' }" @click="tab = 'contactos'">Contactos</button>
@@ -107,7 +115,7 @@
 
     <!-- Modal inventario -->
     <div v-if="showInventarioForm" class="modal-overlay" @click.self="showInventarioForm = false">
-      <div class="modal">
+      <div class="modal-card">
         <h2>Registrar inventario</h2>
         <form @submit.prevent="guardarInventario">
           <div class="field"><label>Ciclo <span class="req">*</span></label>
@@ -137,7 +145,7 @@
 
     <!-- Modal precio -->
     <div v-if="showPrecioForm" class="modal-overlay" @click.self="showPrecioForm = false">
-      <div class="modal">
+      <div class="modal-card">
         <h2>Registrar precio</h2>
         <form @submit.prevent="guardarPrecio">
           <div class="field"><label>Precio ($/ton) <span class="req">*</span></label>
@@ -163,7 +171,7 @@
 
     <!-- Modal contacto -->
     <div v-if="showContactoForm" class="modal-overlay" @click.self="showContactoForm = false">
-      <div class="modal">
+      <div class="modal-card">
         <h2>Agregar contacto</h2>
         <form @submit.prevent="guardarContacto">
           <div class="field"><label>Nombre <span class="req">*</span></label>
@@ -288,56 +296,141 @@ onMounted(cargar)
 </script>
 
 <style scoped>
-.detalle-page { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
-.back-btn { background: none; border: none; color: #2f855a; cursor: pointer; font-size: 0.9rem; margin-bottom: 1rem; padding: 0; }
-.loading { text-align: center; color: #718096; padding: 2rem; }
-.ficha { margin-bottom: 1.5rem; }
+.page-nav { margin-bottom: 1rem; }
+.page-back-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: none; border: none; color: var(--color-primary);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  padding: 0.4rem 0.75rem 0.4rem 0.5rem; border-radius: var(--radius-sm);
+  transition: background 0.2s; font-family: var(--font-family);
+}
+.page-back-btn:hover { background: var(--color-fill); }
+
+.state-loading {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  padding: 4rem 1rem; color: var(--color-text-tertiary); font-size: 0.85rem;
+}
+
+/* Ficha */
+.ficha { margin-bottom: 1.25rem; }
 .ficha-top { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
-.tipo-badge, .estatus-badge { padding: 3px 12px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; }
-.tipo-badge.bodega { background: #bee3f8; color: #2b6cb0; }
-.tipo-badge.ventanilla { background: #d6bcfa; color: #553c9a; }
-.estatus-badge.activa { background: #c6f6d5; color: #276749; }
-.estatus-badge.inactiva { background: #fed7d7; color: #9b2c2c; }
-.ficha h1 { font-size: 1.5rem; font-weight: 700; color: #1a202c; margin: 0 0 0.25rem; }
-.ubicacion { font-size: 0.875rem; color: #718096; margin-bottom: 0.5rem; }
-.ficha-meta { display: flex; gap: 1rem; font-size: 0.82rem; color: #a0aec0; flex-wrap: wrap; margin-bottom: 0.5rem; }
-.funciones { display: flex; gap: 0.5rem; }
-.func-tag { background: #edf2f7; color: #4a5568; padding: 2px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
-/* Tabs */
-.tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.25rem; }
-.tabs button { border: none; background: none; padding: 0.6rem 1.1rem; font-size: 0.875rem; color: #718096; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-.tabs button.active { color: #2f855a; border-bottom-color: #2f855a; font-weight: 700; }
-.tab-content { }
+.badge { padding: 3px 12px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; text-transform: capitalize; }
+.badge-bodega { background: rgba(0,122,255,0.1); color: #007AFF; }
+.badge-ventanilla { background: rgba(88,86,214,0.1); color: #5856D6; }
+.badge-success { background: var(--color-success-bg); color: var(--color-success); }
+.badge-error { background: var(--color-error-bg); color: var(--color-error); }
+.ficha h1 { font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+.ubicacion { font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0.5rem; }
+.ficha-meta { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--color-text-tertiary); flex-wrap: wrap; margin-bottom: 0.5rem; }
+.ficha-meta strong { color: var(--color-text); }
+.funciones { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+.func-tag { background: var(--color-fill); color: var(--color-text-secondary); padding: 2px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 600; }
+
+/* Segmented tabs */
+.segmented-control {
+  display: inline-flex; gap: 2px; padding: 3px;
+  background: var(--color-fill); border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+}
+.segmented-control button {
+  border: none; background: none; padding: 0.5rem 1rem; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 600; color: var(--color-text-secondary);
+  cursor: pointer; transition: all 0.2s; font-family: var(--font-family);
+}
+.segmented-control button.active {
+  background: var(--color-surface); color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Tab content */
 .tab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.tab-header h2 { font-size: 1.1rem; font-weight: 700; color: #2d3748; margin: 0; }
-.btn-sm { background: #2f855a; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-.empty { color: #a0aec0; font-size: 0.875rem; padding: 1rem 0; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-.data-table th { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid #e2e8f0; color: #4a5568; font-weight: 600; }
-.data-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f7fafc; color: #2d3748; }
-.ultimo-precio { background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.9rem; }
-.tipo-maiz-tag { background: #edf2f7; color: #4a5568; padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; }
-.fecha-precio { color: #a0aec0; font-size: 0.8rem; }
+.tab-header h2 { font-size: 1rem; font-weight: 650; color: var(--color-text); margin: 0; }
+.btn-sm {
+  background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: filter 0.2s; font-family: var(--font-family);
+}
+.btn-sm:hover { filter: brightness(1.1); }
+.empty { color: var(--color-text-tertiary); font-size: 0.85rem; padding: 1rem 0; }
+
+/* Data table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.data-table th {
+  text-align: left; padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--color-separator); color: var(--color-text-tertiary);
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+}
+.data-table td { padding: 0.55rem 0.75rem; border-bottom: 0.5px solid var(--color-separator); color: var(--color-text); }
+
+/* Precio highlight */
+.ultimo-precio {
+  background: var(--color-success-bg); border: 1px solid rgba(52,199,89,0.2);
+  border-radius: var(--radius-md); padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.875rem;
+}
+.tipo-maiz-tag { background: var(--color-fill); color: var(--color-text-secondary); padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 600; }
+.fecha-precio { color: var(--color-text-tertiary); font-size: 0.78rem; }
+
+/* Contacts */
 .contactos-lista { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-.contacto-card { background: #f7fafc; border-radius: 8px; padding: 0.9rem; }
-.c-nombre { font-weight: 700; color: #2d3748; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
-.principal-tag { background: #c6f6d5; color: #276749; font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
-.c-meta { font-size: 0.8rem; color: #718096; }
+.contacto-card { background: var(--color-fill-secondary); border-radius: var(--radius-md); padding: 0.9rem; }
+.c-nombre { font-weight: 650; color: var(--color-text); margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.principal-tag { background: var(--color-success-bg); color: var(--color-success); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+.c-meta { font-size: 0.78rem; color: var(--color-text-secondary); }
+
 /* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal { background: #fff; border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
-.modal h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 1.1rem; color: #1a202c; }
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-card {
+  background: var(--color-surface); border-radius: var(--radius-xl);
+  padding: 1.75rem; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(0,0,0,0.06);
+}
+.modal-card h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 1.1rem; color: var(--color-text); letter-spacing: -0.02em; }
+
 .field { margin-bottom: 0.9rem; }
-.field label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.3rem; }
-.req { color: #e53e3e; }
+.field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.3rem; }
+.req { color: var(--color-error); }
 .field input, .field select, .field textarea {
-  width: 100%; box-sizing: border-box; padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;
+  width: 100%; box-sizing: border-box; padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  font-size: 0.875rem; font-family: var(--font-family);
+  background: var(--color-surface); color: var(--color-text);
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-subtle);
 }
 .field textarea { resize: vertical; }
+
 .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
-.btn-cancel { background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; cursor: pointer; }
-.btn-primary { background: #2f855a; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+.btn-cancel {
+  background: var(--color-fill); color: var(--color-text-secondary); border: none;
+  border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.84rem;
+  cursor: pointer; font-family: var(--font-family); transition: background 0.2s;
+}
+.btn-cancel:hover { background: var(--color-fill-secondary); }
+.btn-primary {
+  background: var(--color-primary); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.84rem;
+  font-weight: 600; cursor: pointer; font-family: var(--font-family); transition: filter 0.2s;
+}
+.btn-primary:hover { filter: brightness(1.1); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.error-msg { color: #e53e3e; font-size: 0.85rem; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; }
+.error-msg {
+  color: var(--color-error); font-size: 0.82rem;
+  background: var(--color-error-bg); border: 1px solid rgba(255,59,48,0.15);
+  border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; margin-bottom: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .segmented-control { display: flex; width: 100%; }
+  .segmented-control button { flex: 1; text-align: center; padding: 0.45rem 0.5rem; font-size: 0.78rem; }
+  .data-table { font-size: 0.78rem; }
+  .data-table th, .data-table td { padding: 0.45rem 0.5rem; }
+}
 </style>

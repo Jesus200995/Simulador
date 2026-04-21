@@ -1,22 +1,12 @@
 <template>
-  <div class="detalle-page">
-    <header class="app-header">
-      <router-link to="/" class="detalle-back-btn" aria-label="Volver al mapa">
+  <div class="page-container">
+    <div class="page-header">
+      <button class="page-back-btn" @click="$router.back()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        <span class="detalle-back-label">Mapa</span>
-      </router-link>
-      <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <div class="header-brand-text">
-          <span class="header-brand-title">SIMAC</span>
-          <span class="header-brand-subtitle">Maíz y Cultivos</span>
-        </div>
-      </div>
-      <div class="header-spacer"></div>
-    </header>
-
-    <main class="detalle-main">
-      <div class="nueva-bodega-card">
+        Volver
+      </button>
+    </div>
+    <div class="glass-card nueva-bodega-card">
         <div class="nueva-bodega-header">
           <h1>Registrar nueva bodega</h1>
           <span class="bodega-badge pendiente">Estatus inicial: Pendiente</span>
@@ -135,7 +125,6 @@
           </button>
         </form>
       </div>
-    </main>
   </div>
 </template>
 
@@ -272,45 +261,34 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.detalle-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--color-bg);
+.page-header {
+  margin-bottom: 1rem;
 }
 
-.detalle-main {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 74px 1.25rem 2.5rem;
-}
-
-.detalle-back-btn {
-  display: flex;
+.page-back-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-size: 0.8125rem;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.85rem;
   font-weight: 600;
-  padding: 0.35rem 0.65rem 0.35rem 0.45rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem 0.4rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+  font-family: var(--font-family);
 }
 
-.detalle-back-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+.page-back-btn:hover {
+  background: var(--color-fill);
 }
 
 .nueva-bodega-card {
-  background: white;
-  border-radius: var(--radius-xl);
   padding: 2rem;
-  box-shadow: var(--shadow-md);
-  border: 0.5px solid var(--color-border);
-  animation: fadeInUp 0.5s var(--ease-out);
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .nueva-bodega-header {
@@ -392,11 +370,6 @@ onMounted(() => {
   font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .detalle-main {
-    padding: 64px 1rem 2rem;
-  }
-}
 
 @media (max-width: 640px) {
   .form-grid-2 {

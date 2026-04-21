@@ -1,55 +1,65 @@
 <template>
-  <div class="detalle-page">
-    <button class="back-btn" @click="$router.back()">← Volver</button>
+  <div class="page-container">
+    <div class="page-nav">
+      <button class="page-back-btn" @click="$router.back()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
+    </div>
 
-    <div v-if="loading" class="loading">Cargando alerta...</div>
-    <div v-else-if="!alerta" class="empty">Alerta no encontrada.</div>
+    <div class="content-wrap">
+      <div v-if="loading" class="state-loading">
+        <div class="spinner spinner-dark"></div>
+        <span>Cargando alerta...</span>
+      </div>
+      <div v-else-if="!alerta" class="state-empty">Alerta no encontrada.</div>
 
-    <template v-else>
-      <div class="detalle-header">
-        <div class="header-top">
-          <span :class="['nivel-badge', alerta.nivel_alerta]">{{ alerta.nivel_alerta.toUpperCase() }}</span>
-          <span :class="['estado-badge', alerta.estado_alerta]">{{ alerta.estado_alerta }}</span>
-          <span class="origen-badge">{{ alerta.origen_alerta }}</span>
+      <template v-else>
+        <div class="glass-card detalle-card">
+          <div class="badge-row">
+            <span :class="['badge', 'nivel-' + alerta.nivel_alerta]">{{ alerta.nivel_alerta.toUpperCase() }}</span>
+            <span :class="['badge', 'estado-' + alerta.estado_alerta]">{{ alerta.estado_alerta }}</span>
+            <span class="badge badge-outline">{{ alerta.origen_alerta }}</span>
+          </div>
+          <h1 class="detalle-title">{{ tipoLabel(alerta.tipo_alerta) }}</h1>
+          <p class="detalle-meta">
+            {{ alerta.apellido_paterno }} {{ alerta.nombres }} ·
+            {{ alerta.up_name }} · Ciclo {{ alerta.cycle_year }} {{ alerta.cycle_type }}
+          </p>
+          <p class="detalle-fecha">{{ formatFecha(alerta.fecha_alerta) }}</p>
         </div>
-        <h1>{{ tipoLabel(alerta.tipo_alerta) }}</h1>
-        <p class="meta">
-          {{ alerta.apellido_paterno }} {{ alerta.nombres }} ·
-          {{ alerta.up_name }} · Ciclo {{ alerta.cycle_year }} {{ alerta.cycle_type }}
-        </p>
-        <p class="fecha">{{ formatFecha(alerta.fecha_alerta) }}</p>
-      </div>
 
-      <div v-if="alerta.observaciones" class="obs-card">
-        <strong>Observaciones:</strong> {{ alerta.observaciones }}
-      </div>
-
-      <!-- Acciones de estado -->
-      <div v-if="alerta.estado_alerta === 'pendiente'" class="acciones">
-        <h3>Acciones</h3>
-        <div class="acciones-btns">
-          <button class="btn-confirmar" @click="cambiarEstado('confirmada')">Confirmar</button>
-          <button class="btn-descartar" @click="cambiarEstado('descartada')">Descartar</button>
-          <button class="btn-atender" @click="cambiarEstado('atendida')">Marcar atendida</button>
+        <div v-if="alerta.observaciones" class="glass-card obs-card">
+          <strong>Observaciones:</strong> {{ alerta.observaciones }}
         </div>
-      </div>
-      <div v-else-if="alerta.estado_alerta === 'confirmada'" class="acciones">
-        <h3>Acciones</h3>
-        <div class="acciones-btns">
-          <button class="btn-atender" @click="cambiarEstado('atendida')">Marcar atendida</button>
+
+        <!-- Acciones de estado -->
+        <div v-if="alerta.estado_alerta === 'pendiente'" class="glass-card acciones-card">
+          <h3>Acciones</h3>
+          <div class="acciones-btns">
+            <button class="btn btn-sm btn-confirmar" @click="cambiarEstado('confirmada')">Confirmar</button>
+            <button class="btn btn-sm btn-descartar" @click="cambiarEstado('descartada')">Descartar</button>
+            <button class="btn btn-sm btn-atender" @click="cambiarEstado('atendida')">Marcar atendida</button>
+          </div>
         </div>
-      </div>
+        <div v-else-if="alerta.estado_alerta === 'confirmada'" class="glass-card acciones-card">
+          <h3>Acciones</h3>
+          <div class="acciones-btns">
+            <button class="btn btn-sm btn-atender" @click="cambiarEstado('atendida')">Marcar atendida</button>
+          </div>
+        </div>
 
-      <div v-if="error" class="error-msg">{{ error }}</div>
+        <div v-if="error" class="alert alert-error">{{ error }}</div>
 
-      <div class="meta-info">
-        <p>Registrada por: {{ alerta.usuario_nombre || 'Sistema' }}</p>
-        <p>Fecha registro: {{ formatFechaHora(alerta.created_at) }}</p>
-        <p v-if="alerta.updated_at !== alerta.created_at">
-          Última actualización: {{ formatFechaHora(alerta.updated_at) }}
-        </p>
-      </div>
-    </template>
+        <div class="glass-card meta-card">
+          <p>Registrada por: {{ alerta.usuario_nombre || 'Sistema' }}</p>
+          <p>Fecha registro: {{ formatFechaHora(alerta.created_at) }}</p>
+          <p v-if="alerta.updated_at !== alerta.created_at">
+            Última actualización: {{ formatFechaHora(alerta.updated_at) }}
+          </p>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -107,33 +117,53 @@ onMounted(cargar)
 </script>
 
 <style scoped>
-.detalle-page { max-width: 680px; margin: 0 auto; padding: 1.5rem; }
-.back-btn { background: none; border: none; color: #2f855a; cursor: pointer; font-size: 0.9rem; margin-bottom: 1rem; padding: 0; }
-.loading, .empty { text-align: center; color: #718096; padding: 2rem; }
-.detalle-header { margin-bottom: 1.5rem; }
-.header-top { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
-.nivel-badge, .estado-badge, .origen-badge {
-  padding: 3px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;
+.content-wrap { max-width: 680px; margin: 0 auto; }
+
+.page-nav { margin-bottom: 1rem; }
+
+.page-back-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: none; border: none; color: var(--color-primary);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  padding: 0.4rem 0.75rem 0.4rem 0.5rem; border-radius: var(--radius-sm);
+  transition: background 0.2s; font-family: var(--font-family);
 }
-.nivel-badge.bajo { background: #c6f6d5; color: #276749; }
-.nivel-badge.medio { background: #fef3c7; color: #92400e; }
-.nivel-badge.alto { background: #fed7d7; color: #9b2c2c; }
-.estado-badge.pendiente { background: #e2e8f0; color: #4a5568; }
-.estado-badge.confirmada { background: #bee3f8; color: #2b6cb0; }
-.estado-badge.descartada { background: #e2e8f0; color: #718096; }
-.estado-badge.atendida { background: #c6f6d5; color: #276749; }
-.origen-badge { background: #f7fafc; color: #718096; border: 1px solid #e2e8f0; }
-.detalle-header h1 { font-size: 1.5rem; font-weight: 700; color: #1a202c; margin: 0 0 0.25rem; }
-.meta { font-size: 0.875rem; color: #718096; margin: 0 0 0.2rem; }
-.fecha { font-size: 0.85rem; color: #a0aec0; margin: 0; }
-.obs-card { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; margin-bottom: 1.25rem; font-size: 0.9rem; color: #4a5568; }
-.acciones { margin-bottom: 1.25rem; }
-.acciones h3 { font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 0.75rem; }
+.page-back-btn:hover { background: var(--color-fill); }
+
+.detalle-card { margin-bottom: 1rem; }
+
+.badge-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.badge {
+  padding: 3px 12px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
+  text-transform: capitalize;
+}
+.nivel-bajo { background: var(--color-success-bg); color: var(--color-success); }
+.nivel-medio { background: var(--color-warning-bg); color: var(--color-warning); }
+.nivel-alto { background: var(--color-error-bg); color: var(--color-error); }
+.estado-pendiente { background: var(--color-fill); color: var(--color-text-secondary); }
+.estado-confirmada { background: rgba(0,122,255,0.1); color: #007AFF; }
+.estado-descartada { background: var(--color-fill); color: var(--color-text-tertiary); }
+.estado-atendida { background: var(--color-success-bg); color: var(--color-success); }
+.badge-outline { background: var(--color-surface); color: var(--color-text-tertiary); border: 1px solid var(--color-border); }
+
+.detalle-title { font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+.detalle-meta { font-size: 0.85rem; color: var(--color-text-secondary); margin: 0 0 0.2rem; }
+.detalle-fecha { font-size: 0.82rem; color: var(--color-text-tertiary); margin: 0; }
+
+.obs-card { font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem; padding: 1rem 1.25rem; }
+.obs-card strong { color: var(--color-text); }
+
+.acciones-card { margin-bottom: 1rem; }
+.acciones-card h3 { font-size: 0.9rem; font-weight: 650; color: var(--color-text); margin: 0 0 0.75rem; }
 .acciones-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-.btn-confirmar { background: #3182ce; color: #fff; border: none; border-radius: 8px; padding: 0.55rem 1rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
-.btn-descartar { background: #e2e8f0; color: #4a5568; border: none; border-radius: 8px; padding: 0.55rem 1rem; font-size: 0.875rem; cursor: pointer; }
-.btn-atender { background: #2f855a; color: #fff; border: none; border-radius: 8px; padding: 0.55rem 1rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
-.error-msg { color: #e53e3e; font-size: 0.85rem; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; }
-.meta-info { border-top: 1px solid #e2e8f0; padding-top: 1rem; font-size: 0.8rem; color: #a0aec0; }
-.meta-info p { margin: 0.2rem 0; }
+
+.btn-confirmar { background: #007AFF; color: #fff; border: none; border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-confirmar:hover { background: #0063D1; }
+.btn-descartar { background: var(--color-fill); color: var(--color-text-secondary); border: none; border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-descartar:hover { background: var(--color-fill-secondary); }
+.btn-atender { background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-atender:hover { filter: brightness(1.1); }
+
+.meta-card { font-size: 0.8rem; color: var(--color-text-tertiary); }
+.meta-card p { margin: 0.25rem 0; }
 </style>

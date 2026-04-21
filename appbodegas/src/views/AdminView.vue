@@ -1,30 +1,11 @@
 <template>
-  <div class="detalle-page">
-    <header class="app-header">
-      <router-link to="/" class="detalle-back-btn" aria-label="Volver al mapa">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        <span class="detalle-back-label">Mapa</span>
-      </router-link>
-      <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <div class="header-brand-text">
-          <span class="header-brand-title">SIMAC</span>
-          <span class="header-brand-subtitle">Panel de Administración</span>
-        </div>
-      </div>
-      <nav class="header-nav">
-        <router-link to="/">Mapa</router-link>
-        <router-link to="/mis-bodegas">Mis bodegas</router-link>
-        <router-link to="/admin" class="active">Admin</router-link>
-      </nav>
-      <div class="header-spacer"></div>
-    </header>
-
-    <main class="admin-main">
-      <h1 class="admin-title">
+  <div class="page-container">
+    <div class="view-header">
+      <h1>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Administracion
+        Administración
       </h1>
+    </div>
 
       <!-- Admin tabs -->
       <div class="admin-tabs">
@@ -125,7 +106,6 @@
           </div>
         </div>
       </div>
-    </main>
   </div>
 </template>
 
@@ -227,53 +207,6 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-.detalle-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--color-bg);
-}
-
-.admin-main {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 74px 1.25rem 2.5rem;
-}
-
-.admin-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.admin-title svg {
-  color: var(--color-primary);
-}
-
-.detalle-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  padding: 0.35rem 0.65rem 0.35rem 0.45rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-
-.detalle-back-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-
 /* Tabs */
 .admin-tabs {
   display: flex;
@@ -605,10 +538,6 @@ onMounted(fetchData)
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .admin-main {
-    padding: 64px 1rem 2rem;
-  }
-
   .admin-table-wrap {
     font-size: 0.75rem;
   }

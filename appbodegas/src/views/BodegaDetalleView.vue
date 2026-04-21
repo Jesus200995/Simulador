@@ -1,59 +1,13 @@
 <template>
-  <div class="detalle-page">
-    <!-- Header -->
-    <header class="app-header">
-      <router-link to="/" class="detalle-back-btn" aria-label="Volver al mapa">
+  <div class="page-container detalle-page">
+    <div class="page-header">
+      <button class="page-back-btn" @click="$router.back()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        <span class="detalle-back-label">Mapa</span>
-      </router-link>
-      <div class="header-brand">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
-        <div class="header-brand-text">
-          <span class="header-brand-title">SIMAC</span>
-          <span class="header-brand-subtitle">Maíz y Cultivos</span>
-        </div>
-      </div>
-      <nav class="header-nav">
-        <router-link to="/">Mapa</router-link>
-        <router-link v-if="authStore.canCapture" to="/mis-bodegas">Mis bodegas</router-link>
-        <router-link v-if="authStore.isAdmin" to="/admin">Admin</router-link>
-      </nav>
-      <div class="header-spacer"></div>
-      <div class="header-profile" ref="profileRef">
-        <button class="profile-avatar-btn" @click="profileOpen = !profileOpen">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <svg class="avatar-chevron" :class="{ open: profileOpen }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <Transition name="profile-pop">
-          <div v-if="profileOpen" class="profile-dropdown">
-            <div class="profile-dropdown-header">
-              <div class="profile-dropdown-avatar">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </div>
-              <div class="profile-dropdown-name">{{ authStore.usuario?.nombre_completo }}</div>
-            </div>
-            <div class="profile-dropdown-body">
-              <div class="profile-dropdown-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <span>{{ authStore.usuario?.email }}</span>
-              </div>
-              <div class="profile-dropdown-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
-                <span>{{ authStore.usuario?.curp }}</span>
-              </div>
-            </div>
-            <div class="profile-dropdown-footer">
-              <button class="profile-logout-btn" @click="handleLogout">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Cerrar sesion
-              </button>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </header>
+        Volver al mapa
+      </button>
+    </div>
 
-    <main class="detalle-main">
+    <div class="detalle-main">
       <div v-if="loading" class="detalle-loading">
         <div class="spinner spinner-dark"></div>
         <span>Cargando informacion...</span>
@@ -267,7 +221,7 @@
         <p>No se encontro la bodega solicitada.</p>
         <router-link to="/" class="btn btn-primary">Volver al mapa</router-link>
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -286,8 +240,6 @@ const authStore = useAuthStore()
 const bodega = ref<Bodega | null>(null)
 const loading = ref(true)
 const minimapContainer = ref<HTMLDivElement>()
-const profileOpen = ref(false)
-const profileRef = ref<HTMLDivElement>()
 let minimap: mapboxgl.Map | null = null
 
 // Inventario
@@ -297,29 +249,11 @@ const invLoading = ref(false)
 const invError = ref('')
 const invSuccess = ref('')
 
-const userInitials = computed(() => {
-  const name = authStore.usuario?.nombre_completo || ''
-  const parts = name.trim().split(/\s+/)
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return name.slice(0, 2).toUpperCase()
-})
-
-function onClickOutsideProfile(e: MouseEvent) {
-  if (profileRef.value && !profileRef.value.contains(e.target as Node)) {
-    profileOpen.value = false
-  }
-}
-
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
 function formatNumber(n: number): string {
   if (n == null) return '0'
   return n.toLocaleString('es-MX')
-}
-
-function handleLogout() {
-  authStore.logout()
-  router.push('/login')
 }
 
 async function fetchInventarios() {
@@ -402,26 +336,41 @@ async function loadBodega() {
 
 onMounted(() => {
   loadBodega()
-  document.addEventListener('click', onClickOutsideProfile)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', onClickOutsideProfile)
   if (minimap) { minimap.remove(); minimap = null }
 })
 </script>
 
 <style scoped>
-.detalle-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--color-bg);
+.page-header {
+  margin-bottom: 1rem;
+}
+
+.page-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem 0.4rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+  font-family: var(--font-family);
+}
+
+.page-back-btn:hover {
+  background: var(--color-fill);
 }
 
 .detalle-main {
   max-width: 760px;
   margin: 0 auto;
-  padding: 72px 1.25rem 2.5rem;
 }
 
 .detalle-loading {
@@ -432,31 +381,6 @@ onUnmounted(() => {
   padding: 5rem 1rem;
   color: var(--color-text-tertiary);
   font-size: 0.85rem;
-}
-
-/* Back button in header */
-.detalle-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  padding: 0.35rem 0.65rem 0.35rem 0.45rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-
-.detalle-back-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-
-.detalle-back-btn svg {
-  flex-shrink: 0;
 }
 
 /* Header card */
@@ -683,19 +607,6 @@ onUnmounted(() => {
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .detalle-back-btn {
-    padding: 0.3rem 0.55rem 0.3rem 0.35rem;
-    font-size: 0.75rem;
-  }
-
-  .detalle-back-label {
-    display: inline;
-  }
-
-  .detalle-main {
-    padding: 64px 1rem 2rem;
-  }
-
   .detalle-kpi-grid {
     grid-template-columns: 1fr;
     gap: 0.5rem;

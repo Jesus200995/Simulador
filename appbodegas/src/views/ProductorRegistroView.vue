@@ -1,16 +1,13 @@
 <template>
-  <div class="app-container">
-    <header class="header">
-      <button class="btn-icon" @click="$router.back()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5m7-7l-7 7 7 7" />
-        </svg>
+  <div class="page-container">
+    <div class="page-nav">
+      <button class="page-back-btn" @click="$router.back()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
       </button>
-      <h1 class="header-title">Registrar Productor</h1>
-      <div class="header-spacer"></div>
-    </header>
+    </div>
 
-    <main class="main-content">
+    <div class="form-wrap">
       <!-- Progreso -->
       <div class="progress-bar">
         <div class="progress-step active">
@@ -252,7 +249,7 @@
           </div>
         </form>
       </section>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -374,14 +371,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.page-nav { margin-bottom: 1rem; }
+.page-back-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: none; border: none; color: var(--color-primary);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  padding: 0.4rem 0.75rem 0.4rem 0.5rem; border-radius: var(--radius-sm);
+  transition: background 0.2s; font-family: var(--font-family);
+}
+.page-back-btn:hover { background: var(--color-fill); }
+
+.form-wrap { max-width: 680px; margin: 0 auto; }
+
 .progress-bar {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: var(--color-fill-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
 }
 
 .progress-step {
@@ -392,7 +401,7 @@ onMounted(() => {
 }
 
 .progress-step.active .step-number {
-  background: #691c32;
+  background: var(--color-primary);
   color: white;
 }
 
@@ -400,18 +409,18 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e2e2e2;
-  color: #666;
+  background: var(--color-fill);
+  color: var(--color-text-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .step-label {
-  font-size: 0.75rem;
-  color: #666;
+  font-size: 0.72rem;
+  color: var(--color-text-tertiary);
   text-align: center;
   max-width: 60px;
 }
@@ -419,35 +428,37 @@ onMounted(() => {
 .progress-divider {
   flex: 1;
   height: 2px;
-  background: #e2e2e2;
+  background: var(--color-separator);
   margin: 0 0.5rem;
 }
 
 .form-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
+  border: 0.5px solid var(--color-border);
   margin-bottom: 2rem;
 }
 
 .form-title {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text);
   margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
 }
 
 .form-subtitle {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
   margin: 0 0 1.5rem;
 }
 
 .form-section {
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 0.5px solid var(--color-separator);
 }
 
 .form-section:last-of-type {
@@ -457,9 +468,9 @@ onMounted(() => {
 }
 
 .form-section-title {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   font-weight: 650;
-  color: #691c32;
+  color: var(--color-primary);
   margin: 0 0 1rem;
   letter-spacing: 0.02em;
 }
@@ -473,44 +484,46 @@ onMounted(() => {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .form-label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-secondary);
 }
 
 .required {
-  color: #dc3545;
+  color: var(--color-error);
 }
 
 .form-input,
 textarea {
-  padding: 0.75rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-family: inherit;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: var(--font-family);
+  background: var(--color-surface);
+  color: var(--color-text);
   transition: border-color 0.2s;
 }
 
 .form-input:focus,
 textarea:focus {
   outline: none;
-  border-color: #691c32;
-  box-shadow: 0 0 0 2px rgba(105, 28, 50, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-subtle);
 }
 
 .form-input.input-error,
 textarea.input-error {
-  border-color: #dc3545;
+  border-color: var(--color-error);
 }
 
 .form-error {
-  font-size: 0.75rem;
-  color: #dc3545;
+  font-size: 0.72rem;
+  color: var(--color-error);
   font-weight: 500;
 }
 
@@ -529,11 +542,12 @@ textarea.input-error {
   height: 20px;
   cursor: pointer;
   margin-top: 0.15rem;
+  accent-color: var(--color-primary);
 }
 
 .checkbox-label {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -542,97 +556,72 @@ textarea.input-error {
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 0.5px solid var(--color-separator);
 }
 
 .btn {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 1rem;
   border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   min-height: 44px;
+  font-family: var(--font-family);
 }
 
 .btn-primary {
-  background: #691c32;
+  background: var(--color-primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #5a1728;
+  filter: brightness(1.1);
 }
 
 .btn-primary:disabled {
-  background: #999;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background: #e2e2e2;
-  color: #333;
+  background: var(--color-fill);
+  color: var(--color-text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d0d0d0;
+  background: var(--color-fill-secondary);
 }
 
 .alert {
-  padding: 1rem;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
   margin-bottom: 1rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .alert-error {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  background: var(--color-error-bg);
+  border: 1px solid rgba(255,59,48,0.15);
+  color: var(--color-error);
 }
 
 .alert-success {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  color: #155724;
+  background: var(--color-success-bg);
+  border: 1px solid rgba(52,199,89,0.2);
+  color: var(--color-success);
 }
 
 @media (max-width: 768px) {
-  .progress-bar {
-    gap: 0.5rem;
-  }
-
-  .step-number {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
-  }
-
-  .step-label {
-    font-size: 0.65rem;
-    max-width: 50px;
-  }
-
-  .progress-divider {
-    flex: 0.5;
-  }
-
-  .form-card {
-    padding: 1.5rem;
-  }
-
-  .form-grid-2 {
-    grid-template-columns: 1fr;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .form-title {
-    font-size: 1.25rem;
-  }
+  .progress-bar { gap: 0.5rem; }
+  .step-number { width: 28px; height: 28px; font-size: 0.78rem; }
+  .step-label { font-size: 0.62rem; max-width: 50px; }
+  .progress-divider { flex: 0.5; }
+  .form-card { padding: 1.5rem; }
+  .form-grid-2 { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column; }
+  .form-title { font-size: 1.2rem; }
 }
 </style>
