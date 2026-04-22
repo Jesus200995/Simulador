@@ -19,9 +19,9 @@ function soloAdmin(req: AuthRequest, res: Response, next: Function): void {
 router.get('/usuarios', authMiddleware, soloAdmin, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(`
-      SELECT id, nombre_completo, email, curp, rol, activo, fecha_registro
+      SELECT id, nombre_completo, email, curp, rol, activo, created_at as fecha_registro
       FROM usuarios
-      ORDER BY fecha_registro DESC
+      ORDER BY created_at DESC
     `);
     res.json({ usuarios: result.rows });
   } catch (error) {

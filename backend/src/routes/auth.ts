@@ -106,7 +106,7 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
     // Generar JWT
     const secret = process.env.JWT_SECRET || 'default_secret';
     const token = jwt.sign(
-      { userId: usuario.id, email: usuario.email },
+      { userId: usuario.id, email: usuario.email, rol: usuario.rol },
       secret,
       { expiresIn: '24h' }
     );
@@ -170,7 +170,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     // Generar JWT
     const secret = process.env.JWT_SECRET || 'default_secret';
     const token = jwt.sign(
-      { userId: usuario.id, email: usuario.email },
+      { userId: usuario.id, email: usuario.email, rol: usuario.rol },
       secret,
       { expiresIn: '24h' }
     );

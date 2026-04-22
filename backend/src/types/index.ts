@@ -32,6 +32,7 @@ export interface LoginPayload {
 export interface JwtPayload {
   userId: number;
   email: string;
+  rol: string;
 }
 
 export interface Bodega {
