@@ -2335,12 +2335,25 @@ a:hover { opacity: 0.75; }
   .page-header-text h1 { font-size: 1.25rem; }
   .view-header h1 { font-size: 1.5rem; }
   .view-header { margin-bottom: 1.25rem; }
+  .view-header-row { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .view-header-actions { width: 100%; }
   .card-grid { grid-template-columns: repeat(2, 1fr); }
   .filter-bar { flex-direction: column; align-items: stretch; }
   .visor-layout { top: 52px; bottom: 72px; }
   .precios-panel { bottom: 0; left: 0; right: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
   .precios-tab { font-size: 0.78rem; padding: 0.55rem 0.75rem; }
   .precios-body { max-height: 150px; }
+  .glass-card { padding: 1.125rem; }
+  /* Segmented control: scrollable by default on mobile */
+  .segmented-control { display: flex; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .segmented-control::-webkit-scrollbar { display: none; }
+  .segmented-control button { flex-shrink: 0; padding: .4rem .65rem; font-size: .76rem; }
+  /* Opt-in equal-width variant for controls with few buttons */
+  .segmented-control.segmented-equal { width: 100%; overflow: visible; }
+  .segmented-control.segmented-equal button { flex: 1; text-align: center; min-width: 0; }
+  /* Buttons slightly smaller on mobile */
+  .btn { padding: .6875rem 1.125rem; font-size: .9rem; }
+  .btn-sm { padding: .35rem .7rem; font-size: .75rem; }
 }
 
 @media (max-width: 600px) {

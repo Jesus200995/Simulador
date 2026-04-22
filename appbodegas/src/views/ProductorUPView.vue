@@ -1087,7 +1087,7 @@ onUnmounted(() => {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .wizard-stepper {
     padding: 0.75rem 0.5rem;
     overflow-x: auto;

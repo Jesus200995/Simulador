@@ -290,7 +290,7 @@ onMounted(cargar)
 
 .state-empty .btn { margin-top: 1rem; }
 
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
   .filter-bar select,
   .date-input { flex: 1 1 100%; }
   .data-table thead th:nth-child(6),
@@ -299,5 +299,7 @@ onMounted(cargar)
   .data-table tbody td:nth-child(6),
   .data-table tbody td:nth-child(7),
   .data-table tbody td:nth-child(8) { display: none; }
+  .data-table { font-size: .75rem; }
+  .data-table th, .data-table td { padding: .5rem .4rem; }
 }
 </style>

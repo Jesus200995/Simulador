@@ -614,7 +614,7 @@ textarea.input-error {
   color: var(--color-success);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .progress-bar { gap: 0.5rem; }
   .step-number { width: 28px; height: 28px; font-size: 0.78rem; }
   .step-label { font-size: 0.62rem; max-width: 50px; }

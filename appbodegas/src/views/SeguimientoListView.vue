@@ -173,7 +173,7 @@ onMounted(() => cargar())
   font-style: italic; padding: .25rem 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .prod-header { flex-wrap: wrap; }
   .up-item { flex-direction: column; align-items: flex-start; }
   .ciclos { width: 100%; }

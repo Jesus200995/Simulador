@@ -27,7 +27,8 @@
       <div v-else-if="adminTab === 'usuarios'">
         <div v-if="actionMsg" class="alert" :class="actionMsg.type === 'success' ? 'alert-success' : 'alert-error'">{{ actionMsg.text }}</div>
 
-        <div class="admin-table-wrap">
+        <!-- Desktop table -->
+        <div class="admin-table-wrap admin-desk">
           <table class="admin-table">
             <thead>
               <tr>
@@ -67,6 +68,35 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="admin-mob">
+          <div v-for="u in usuarios" :key="'m'+u.id" class="u-card" :class="{ 'u-card-off': !u.activo }">
+            <div class="u-card-top">
+              <div class="u-card-info">
+                <div class="u-card-name">{{ u.nombre_completo }}</div>
+                <div class="u-card-email">{{ u.email }}</div>
+                <div class="u-card-curp">{{ u.curp }}</div>
+              </div>
+              <span class="status-badge" :class="u.activo ? 'active' : 'inactive'">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
+            </div>
+            <div class="u-card-meta">
+              <span v-if="u.fecha_registro" class="u-card-date">{{ new Date(u.fecha_registro).toLocaleDateString('es-MX') }}</span>
+            </div>
+            <div class="u-card-actions">
+              <select class="role-select" :class="u.rol" :value="u.rol" @change="handleRolChange(u.id, ($event.target as HTMLSelectElement).value)" :disabled="actionLoading === u.id">
+                <option value="tecnico">Técnico</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="responsable">Responsable</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button class="btn-action" :class="u.activo ? 'btn-deactivate' : 'btn-activate'" @click="handleEstatusChange(u.id, !u.activo)" :disabled="actionLoading === u.id">
+                <span v-if="actionLoading === u.id" class="spinner spinner-sm"></span>
+                <span v-else>{{ u.activo ? 'Desactivar' : 'Activar' }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -536,35 +566,39 @@ onMounted(fetchData)
   cursor: not-allowed;
 }
 
+/* ── Mobile user cards ── */
+.admin-mob { display: none; flex-direction: column; gap: .625rem; }
+.u-card {
+  background: white; border-radius: var(--radius-xl); padding: 1rem;
+  box-shadow: var(--shadow-sm); border: .5px solid var(--color-border);
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.u-card-off { opacity: .55; }
+.u-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }
+.u-card-info { min-width: 0; flex: 1; }
+.u-card-name { font-size: .9rem; font-weight: 650; color: var(--color-text); word-break: break-word; }
+.u-card-email { font-size: .78rem; color: var(--color-text-secondary); margin-top: .1rem; word-break: break-all; }
+.u-card-curp { font-size: .68rem; font-family: monospace; color: var(--color-text-tertiary); margin-top: .15rem; }
+.u-card-meta { font-size: .72rem; color: var(--color-text-tertiary); }
+.u-card-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; padding-top: .5rem; border-top: .5px solid var(--color-separator); }
+.u-card-actions .role-select { flex: 1; min-width: 120px; }
+.u-card-actions .btn-action { flex-shrink: 0; }
+
 /* ── Responsive ── */
-@media (max-width: 768px) {
-  .admin-table-wrap {
-    font-size: 0.75rem;
-  }
-
-  .admin-table th,
-  .admin-table td {
-    padding: 0.55rem 0.5rem;
-  }
-
-  .pendientes-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 1024px) {
+  .admin-desk { display: none; }
+  .admin-mob { display: flex; }
+  .pendientes-grid { grid-template-columns: 1fr; }
+  .admin-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .admin-tabs::-webkit-scrollbar { display: none; }
+  .admin-tab { white-space: nowrap; padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+  .pendiente-card { padding: 1rem; }
+  .pendiente-actions { flex-direction: column; }
+  .pendiente-actions .btn { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 640px) {
-  .admin-tabs {
-    overflow-x: auto;
-  }
-
-  .admin-tab {
-    white-space: nowrap;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .admin-title {
-    font-size: 1.15rem;
-  }
+  .u-card-actions { flex-direction: column; align-items: stretch; }
+  .u-card-actions .role-select { width: 100%; }
 }
 </style>

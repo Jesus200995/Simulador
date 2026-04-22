@@ -35,7 +35,7 @@
       </div>
 
       <!-- Tabs -->
-      <div class="segmented-control">
+      <div class="segmented-control segmented-equal">
         <button :class="{ active: tab === 'inventario' }" @click="tab = 'inventario'">Inventario</button>
         <button :class="{ active: tab === 'precios' }" @click="tab = 'precios'; cargarPrecios()">Precios</button>
         <button v-if="bodega.es_ventanilla" :class="{ active: tab === 'contactos' }" @click="tab = 'contactos'">Contactos</button>
@@ -326,21 +326,9 @@ onMounted(cargar)
 .funciones { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
 .func-tag { background: var(--color-fill); color: var(--color-text-secondary); padding: 2px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 600; }
 
-/* Segmented tabs */
-.segmented-control {
-  display: inline-flex; gap: 2px; padding: 3px;
-  background: var(--color-fill); border-radius: var(--radius-md);
-  margin-bottom: 1.25rem;
-}
-.segmented-control button {
-  border: none; background: none; padding: 0.5rem 1rem; border-radius: var(--radius-sm);
-  font-size: 0.82rem; font-weight: 600; color: var(--color-text-secondary);
-  cursor: pointer; transition: all 0.2s; font-family: var(--font-family);
-}
-.segmented-control button.active {
-  background: var(--color-surface); color: var(--color-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
+/* Segmented tabs — inherits global .segmented-control */
+.segmented-control { margin-bottom: 1.25rem; }
+.segmented-control button.active { color: var(--color-primary); }
 
 /* Tab content */
 .tab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
@@ -427,10 +415,11 @@ onMounted(cargar)
   border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; margin-bottom: 0.75rem;
 }
 
-@media (max-width: 640px) {
-  .segmented-control { display: flex; width: 100%; }
-  .segmented-control button { flex: 1; text-align: center; padding: 0.45rem 0.5rem; font-size: 0.78rem; }
+@media (max-width: 1024px) {
   .data-table { font-size: 0.78rem; }
   .data-table th, .data-table td { padding: 0.45rem 0.5rem; }
+  .ficha-meta { flex-direction: column; gap: .35rem; }
+  .funciones { flex-wrap: wrap; }
+  .ultimo-precio { flex-direction: column; align-items: flex-start; gap: .5rem; }
 }
 </style>

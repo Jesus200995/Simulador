@@ -146,7 +146,8 @@
           <p>No tienes inventarios registrados</p>
           <p class="empty-hint">Usa la pestana "Buscar en catalogo" para registrar inventario en una bodega.</p>
         </div>
-        <div v-else class="mis-inv-table-wrap">
+        <!-- Desktop table -->
+        <div v-else class="mis-inv-table-wrap inv-desktop">
           <table class="mis-inv-table">
             <thead>
               <tr>
@@ -174,6 +175,25 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <!-- Mobile cards -->
+        <div v-if="inventarios.length > 0" class="inv-mobile">
+          <router-link v-for="inv in inventarios" :key="'m'+inv.id" :to="`/bodega/${inv.bodega_id}`" class="inv-card">
+            <div class="inv-card-header">
+              <span class="inv-card-bodega">{{ inv.bodega_nombre }}</span>
+              <span class="inv-card-date">{{ new Date(inv.fecha_registro).toLocaleDateString('es-MX') }}</span>
+            </div>
+            <div class="inv-card-ubi">{{ inv.municipio }}, {{ inv.estado }}</div>
+            <div class="inv-card-tags">
+              <span class="inv-tag">{{ inv.ciclo === 'Primavera-Verano' ? 'PV' : 'OI' }}</span>
+              <span v-if="inv.tipo_maiz" class="inv-tag">{{ inv.tipo_maiz }}</span>
+              <span v-if="inv.origen" class="inv-tag">{{ inv.origen }}</span>
+            </div>
+            <div class="inv-card-stats">
+              <div><strong>{{ inv.volumen_almacenamiento?.toLocaleString() }}</strong> <small>ton almacen</small></div>
+              <div v-if="inv.volumen_problemas"><strong>{{ inv.volumen_problemas.toLocaleString() }}</strong> <small>ton problema</small></div>
+            </div>
+          </router-link>
         </div>
       </div>
 
@@ -787,25 +807,48 @@ onMounted(fetchData)
   transform: translateY(-10px);
 }
 
-@media (max-width: 768px) {
-  .form-row-2 {
-    grid-template-columns: 1fr;
-  }
-  .mis-tabs-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+/* ── Mobile inventory cards ── */
+.inv-mobile { display: none; flex-direction: column; gap: .625rem; }
+.inv-card {
+  display: flex; flex-direction: column; gap: .35rem;
+  background: rgba(255,255,255,.92); border-radius: var(--radius-lg);
+  padding: 1rem 1.125rem; text-decoration: none; color: inherit;
+  border: .5px solid var(--color-border); box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s;
+}
+.inv-card:active { box-shadow: var(--shadow-md); }
+.inv-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }
+.inv-card-bodega { font-size: .9rem; font-weight: 650; color: var(--color-primary); }
+.inv-card-date { font-size: .72rem; color: var(--color-text-tertiary); white-space: nowrap; margin-top: 2px; }
+.inv-card-ubi { font-size: .75rem; color: var(--color-text-secondary); }
+.inv-card-tags { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .25rem; }
+.inv-tag {
+  font-size: .65rem; font-weight: 600; padding: .15rem .45rem;
+  background: var(--color-fill); border-radius: 6px; color: var(--color-text-secondary);
+}
+.inv-card-stats {
+  display: flex; gap: 1.25rem; margin-top: .5rem; padding-top: .5rem;
+  border-top: .5px solid var(--color-separator);
+}
+.inv-card-stats strong { font-size: .95rem; font-weight: 700; color: var(--color-text); }
+.inv-card-stats small { font-size: .68rem; color: var(--color-text-tertiary); margin-left: .2rem; }
+
+@media (max-width: 1024px) {
+  .form-row-2 { grid-template-columns: 1fr; }
+  .mis-bodegas-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .mis-bodega-stats { gap: .5rem; }
+  .stat-value { font-size: .88rem; }
+  .stat-label { font-size: .62rem; }
+  .catalogo-search-card { padding: 1rem; }
+  .catalogo-inv-card { padding: 1rem; }
+  .inv-desktop { display: none; }
+  .inv-mobile { display: flex; }
 }
 
 @media (max-width: 640px) {
-  .mis-bodegas-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .catalogo-result-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-  }
+  .mis-bodegas-grid { grid-template-columns: 1fr; }
+  .catalogo-result-item { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+  .mis-bodega-card { padding: 1rem; }
+  .mis-bodega-nombre { font-size: .95rem; }
 }
 </style>

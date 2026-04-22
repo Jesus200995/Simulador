@@ -7,7 +7,7 @@
           <p class="view-subtitle">Bodegas, ventanillas y centros de acopio</p>
         </div>
         <div class="view-header-actions">
-          <div class="segmented-control">
+          <div class="segmented-control segmented-equal">
             <button :class="{ active: filtros.tipo === '' }" @click="setTipo('')">Todas</button>
             <button :class="{ active: filtros.tipo === 'bodega' }" @click="setTipo('bodega')">Bodegas</button>
             <button :class="{ active: filtros.tipo === 'ventanilla' }" @click="setTipo('ventanilla')">Ventanillas</button>
@@ -168,10 +168,8 @@ onMounted(async () => {
 
 .infra-tags { display: flex; gap: .375rem; flex-wrap: wrap; }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .filter-row { flex-direction: column; align-items: stretch; }
   .view-header-actions { flex-direction: column; align-items: stretch; }
-  .view-header-actions .segmented-control { width: 100%; display: flex; }
-  .view-header-actions .segmented-control button { flex: 1; text-align: center; }
 }
 </style>
