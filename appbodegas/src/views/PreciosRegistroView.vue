@@ -197,7 +197,7 @@ const error = ref('')
 const hoy = new Date().toISOString().split('T')[0]
 
 const form = ref({
-  tipo_precio: 'mercado_local',
+  tipo_precio: 'bodega',
   tipo_maiz: '',
   fecha: hoy,
   precio: null as number | null,
@@ -213,9 +213,9 @@ const form = ref({
 
 const tiposPrecios = [
   {
-    value: 'mercado_local',
-    label: 'Mercado local',
-    desc: 'Precios en mercados nacionales',
+    value: 'bodega',
+    label: 'Bodega',
+    desc: 'Precio registrado en bodega o ventanilla',
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
   },
   {
@@ -241,7 +241,7 @@ const estadosMx = [
 ]
 
 function tipoLabel(t: string) {
-  const map: Record<string, string> = { mercado_local: 'Local', mercado_internacional: 'Internacional', gobierno: 'Gobierno' }
+  const map: Record<string, string> = { bodega: 'Bodega', mercado_internacional: 'Internacional', gobierno: 'Gobierno' }
   return map[t] || t
 }
 function maizLabel(t: string) {
@@ -249,7 +249,7 @@ function maizLabel(t: string) {
   return map[t] || t
 }
 function tipoBadge(t: string) {
-  if (t === 'mercado_local') return 'badge-blue'
+  if (t === 'bodega') return 'badge-orange'
   if (t === 'mercado_internacional') return 'badge-purple'
   if (t === 'gobierno') return 'badge-green'
   return 'badge-gray'
@@ -434,7 +434,7 @@ async function guardar() {
 
 /* badges */
 .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
-.badge-blue { background: #ebf4ff; color: #1a56db; }
+.badge-orange { background: #fff7ed; color: #c05621; }
 .badge-purple { background: #f5f3ff; color: #7e3af2; }
 .badge-green { background: #f0fff4; color: #276749; }
 .badge-gray { background: #f7fafc; color: #718096; }

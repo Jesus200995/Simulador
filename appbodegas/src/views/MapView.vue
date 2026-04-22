@@ -21,13 +21,13 @@
           </div>
 
           <div class="panel-filters">
+            <select v-model="filters.region_id" class="filter-select" @change="onRegionChange">
+              <option :value="null">Todas las regiones</option>
+              <option v-for="r in catalogos.regiones" :key="r.id" :value="r.id">{{ r.nombre }}</option>
+            </select>
             <select v-model="filters.estado" class="filter-select" @change="onEstadoChange">
               <option :value="null">Todos los estados</option>
-              <option v-for="e in catalogos.estados" :key="e.estado" :value="e.estado">{{ e.estado }}</option>
-            </select>
-            <select v-model="filters.ddr" class="filter-select" @change="onDdrChange">
-              <option :value="null">Todos los DDR</option>
-              <option v-for="d in ddrsFiltrados" :key="d.ddr" :value="d.ddr">{{ d.ddr }}</option>
+              <option v-for="e in estadosFiltrados" :key="e.estado" :value="e.estado">{{ e.estado }}</option>
             </select>
             <select v-model="filters.municipio" class="filter-select" @change="onFilterChange">
               <option :value="null">Todos los municipios</option>
@@ -211,17 +211,17 @@ function onClickOutsideProfile(e: MouseEvent) {
 
 const catalogos = reactive<Catalogos>({ regiones: [], estados: [], municipios: [], ddrs: [] })
 const kpi = reactive<KpiAgregado>({ total_bodegas: 0, total_capacidad: 0, total_estados: 0, total_municipios: 0, total_inventarios: 0 })
-const filters = reactive<{ estado: string | null; ddr: string | null; municipio: string | null }>({
-  estado: null, ddr: null, municipio: null,
+const filters = reactive<{ region_id: number | null; estado: string | null; municipio: string | null }>({
+  region_id: null, estado: null, municipio: null,
 })
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
-const ddrsFiltrados = computed(() => {
-  const ddrs = catalogos.ddrs ?? []
-  if (!filters.estado) return ddrs
-  return ddrs.filter((d) => d.estado === filters.estado)
+const estadosFiltrados = computed(() => {
+  const estados = catalogos.estados ?? []
+  if (!filters.region_id) return estados
+  return estados.filter((e) => e.region_id === filters.region_id)
 })
 
 const municipiosFiltrados = computed(() => {
@@ -248,8 +248,8 @@ function onSearch() {
   searchTimer = setTimeout(() => fetchBodegas(), 400)
 }
 
-function onEstadoChange() { filters.ddr = null; filters.municipio = null; fetchBodegas() }
-function onDdrChange() { filters.municipio = null; fetchBodegas() }
+function onRegionChange() { filters.estado = null; filters.municipio = null; fetchBodegas() }
+function onEstadoChange() { filters.municipio = null; fetchBodegas() }
 function onFilterChange() { fetchBodegas() }
 
 async function handleRefresh() {
@@ -295,8 +295,8 @@ async function fetchBodegas() {
   loading.value = true
   try {
     const params: any = {}
+    if (filters.region_id) params.region_id = filters.region_id
     if (filters.estado) params.estado = filters.estado
-    if (filters.ddr) params.ddr = filters.ddr
     if (filters.municipio) params.municipio = filters.municipio
     if (searchText.value.trim()) params.q = searchText.value.trim()
 

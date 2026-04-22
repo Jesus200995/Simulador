@@ -99,18 +99,28 @@
         </div>
       </div>
 
-      <!-- Tabla por tipo de maíz -->
+      <!-- Tabla por tipo de maíz (pivot por fuente) -->
       <div class="glass-card table-wrapper" v-if="porTipoMaiz.length > 0">
         <div class="table-header-row">
-          <h3 class="table-title">Por tipo de maíz</h3>
+          <h3 class="table-title">Promedio por tipo de maíz · últimos 90 días</h3>
+          <p class="table-sub">Precio promedio ($/ton) según la fuente del registro</p>
         </div>
         <table class="data-table">
           <thead>
             <tr>
               <th>Tipo de maíz</th>
-              <th class="text-right">Promedio $/ton</th>
-              <th class="text-right">Máximo</th>
-              <th class="text-right">Mínimo</th>
+              <th class="text-right">
+                <span class="badge badge-blue th-badge">Observado</span>
+              </th>
+              <th class="text-right">
+                <span class="badge badge-orange th-badge">Bodega</span>
+              </th>
+              <th class="text-right">
+                <span class="badge badge-purple th-badge">Internacional</span>
+              </th>
+              <th class="text-right">
+                <span class="badge badge-green th-badge">Gobierno</span>
+              </th>
               <th class="text-right">Registros</th>
             </tr>
           </thead>
@@ -120,9 +130,10 @@
                 <span class="maiz-dot" :class="maizDot(row.tipo_maiz)"></span>
                 {{ maizLabel(row.tipo_maiz) }}
               </td>
-              <td class="text-right td-precio">{{ formatPrecio(row.promedio) }}</td>
-              <td class="text-right">{{ formatPrecio(row.maximo) }}</td>
-              <td class="text-right">{{ formatPrecio(row.minimo) }}</td>
+              <td class="text-right td-precio">{{ formatPrecio(row.observado) }}</td>
+              <td class="text-right td-precio">{{ formatPrecio(row.bodega) }}</td>
+              <td class="text-right td-precio">{{ formatPrecio(row.internacional) }}</td>
+              <td class="text-right td-precio">{{ formatPrecio(row.gobierno) }}</td>
               <td class="text-right">{{ row.registros }}</td>
             </tr>
           </tbody>
@@ -266,8 +277,14 @@ onMounted(cargar)
 
 /* Badges */
 .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+.badge-blue { background: #ebf4ff; color: #1a56db; }
+.badge-orange { background: #fff7ed; color: #c05621; }
 .badge-purple { background: #f5f3ff; color: #7e3af2; }
 .badge-green { background: #f0fff4; color: #276749; }
+.th-badge { font-size: 0.65rem; }
+
+/* table sub */
+.table-sub { font-size: 0.75rem; color: var(--color-text-muted, #718096); margin: 0 0 0.5rem; }
 
 /* spinner */
 .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }

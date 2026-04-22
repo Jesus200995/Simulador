@@ -137,7 +137,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 // =============================================
 router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const [kpi, porTipo, ultimoInt, ultimoGob] = await Promise.all([
+    const [kpi, porTipoMaiz, ultimoInt, ultimoGob] = await Promise.all([
       pool.query(`
         SELECT
           ROUND(AVG(precio)::numeric, 2)  AS promedio,
@@ -147,15 +147,18 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
         FROM precios
         WHERE fecha >= NOW() - INTERVAL '90 days'
       `),
+      // Tabla pivot: por tipo_maiz × tipo_precio (últimos 90 días)
       pool.query(`
         SELECT
           tipo_maiz,
-          ROUND(AVG(precio)::numeric, 2) AS promedio,
-          MAX(precio)                    AS maximo,
-          MIN(precio)                    AS minimo,
-          COUNT(*)::int                  AS registros
+          ROUND(AVG(precio) FILTER (WHERE tipo_precio = 'observado')::numeric, 2)             AS observado,
+          ROUND(AVG(precio) FILTER (WHERE tipo_precio = 'bodega')::numeric, 2)                AS bodega,
+          ROUND(AVG(precio) FILTER (WHERE tipo_precio = 'mercado_internacional')::numeric, 2) AS internacional,
+          ROUND(AVG(precio) FILTER (WHERE tipo_precio = 'gobierno')::numeric, 2)              AS gobierno,
+          COUNT(*)::int                                                                        AS registros
         FROM precios
         WHERE fecha >= NOW() - INTERVAL '90 days'
+          AND tipo_maiz IS NOT NULL
         GROUP BY tipo_maiz
         ORDER BY tipo_maiz
       `),
@@ -177,7 +180,7 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
 
     res.json({
       kpi: kpi.rows[0],
-      por_tipo_maiz: porTipo.rows,
+      por_tipo_maiz: porTipoMaiz.rows,
       ultimo_internacional: ultimoInt.rows[0] || null,
       ultimo_gobierno: ultimoGob.rows[0] || null,
     });

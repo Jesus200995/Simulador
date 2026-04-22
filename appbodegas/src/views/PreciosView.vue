@@ -23,7 +23,8 @@
     <div class="filter-bar">
       <select v-model="filtros.tipo_precio" @change="cargar">
         <option value="">Todos los tipos</option>
-        <option value="mercado_local">Mercado local</option>
+        <option value="observado">Observado (técnico)</option>
+        <option value="bodega">Bodega</option>
         <option value="mercado_internacional">Internacional</option>
         <option value="gobierno">Gobierno</option>
       </select>
@@ -185,7 +186,8 @@ function formatPrecio(n: number | string) {
 
 function tipoLabel(t: string) {
   const map: Record<string, string> = {
-    mercado_local: 'Local',
+    observado: 'Observado',
+    bodega: 'Bodega',
     mercado_internacional: 'Internacional',
     gobierno: 'Gobierno',
   }
@@ -198,7 +200,8 @@ function maizLabel(t: string) {
 }
 
 function tipoBadge(t: string) {
-  if (t === 'mercado_local') return 'badge-blue'
+  if (t === 'observado') return 'badge-blue'
+  if (t === 'bodega') return 'badge-orange'
   if (t === 'mercado_internacional') return 'badge-purple'
   if (t === 'gobierno') return 'badge-green'
   return 'badge-gray'
@@ -280,6 +283,7 @@ onMounted(cargar)
 /* badges */
 .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
 .badge-blue { background: #ebf4ff; color: #1a56db; }
+.badge-orange { background: #fff7ed; color: #c05621; }
 .badge-purple { background: #f5f3ff; color: #7e3af2; }
 .badge-green { background: #f0fff4; color: #276749; }
 .badge-gray { background: #f7fafc; color: #718096; }
