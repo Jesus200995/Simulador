@@ -219,13 +219,15 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
 const ddrsFiltrados = computed(() => {
-  if (!filters.estado) return catalogos.ddrs
-  return catalogos.ddrs.filter((d) => d.estado === filters.estado)
+  const ddrs = catalogos.ddrs ?? []
+  if (!filters.estado) return ddrs
+  return ddrs.filter((d) => d.estado === filters.estado)
 })
 
 const municipiosFiltrados = computed(() => {
-  if (!filters.estado) return catalogos.municipios
-  return catalogos.municipios.filter((m) => m.estado === filters.estado)
+  const municipios = catalogos.municipios ?? []
+  if (!filters.estado) return municipios
+  return municipios.filter((m) => m.estado === filters.estado)
 })
 
 function formatNumber(n: number): string {

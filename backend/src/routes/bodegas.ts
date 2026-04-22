@@ -9,17 +9,17 @@ const router = Router();
 // =============================================
 router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const regiones = await pool.query('SELECT id, nombre FROM regiones ORDER BY nombre');
-    const estados = await pool.query(
-      'SELECT DISTINCT estado, region_id FROM bodegas WHERE estado IS NOT NULL ORDER BY estado'
-    );
-    const municipios = await pool.query(
-      'SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio'
-    );
+    const [regiones, estados, municipios, ddrs] = await Promise.all([
+      pool.query('SELECT id, nombre FROM regiones ORDER BY nombre'),
+      pool.query('SELECT DISTINCT estado, region_id FROM bodegas WHERE estado IS NOT NULL ORDER BY estado'),
+      pool.query('SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio'),
+      pool.query('SELECT DISTINCT ddr, estado FROM bodegas WHERE ddr IS NOT NULL AND ddr != \'\' ORDER BY ddr'),
+    ]);
     res.json({
       regiones: regiones.rows,
       estados: estados.rows,
       municipios: municipios.rows,
+      ddrs: ddrs.rows,
     });
   } catch (error) {
     console.error('Error al obtener catalogos:', error);
@@ -68,10 +68,11 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 
     const kpiQuery = `
       SELECT
-        COUNT(*)::int as total_bodegas,
-        COALESCE(SUM(b.capacidad_toneladas), 0)::float as total_toneladas,
-        COUNT(*) FILTER (WHERE b.activo = true)::int as total_activas,
-        COUNT(*) FILTER (WHERE b.realiza_acopio = true)::int as total_acopio
+        COUNT(*)::int                                     AS total_bodegas,
+        COALESCE(SUM(b.capacidad_toneladas), 0)::float   AS total_capacidad,
+        COUNT(DISTINCT b.estado)::int                    AS total_estados,
+        COUNT(DISTINCT b.municipio)::int                 AS total_municipios,
+        COUNT(*) FILTER (WHERE b.activo = true)::int     AS total_inventarios
       FROM bodegas b
       ${where}
     `;
