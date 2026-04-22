@@ -118,4 +118,56 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
   }
 });
 
+// =============================================
+// PATCH /api/bodegas/:id/aprobar
+// =============================================
+router.patch('/:id/aprobar', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.rol !== 'admin') {
+      res.status(403).json({ error: 'Solo el admin puede aprobar bodegas' });
+      return;
+    }
+    const { id } = req.params;
+    const result = await pool.query(
+      `UPDATE bodegas SET estatus = 'aprobada' WHERE id = $1
+       RETURNING *`,
+      [id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+    res.json({ message: 'Bodega aprobada', bodega: result.rows[0] });
+  } catch (error) {
+    console.error('Error al aprobar bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// PATCH /api/bodegas/:id/rechazar
+// =============================================
+router.patch('/:id/rechazar', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.rol !== 'admin') {
+      res.status(403).json({ error: 'Solo el admin puede rechazar bodegas' });
+      return;
+    }
+    const { id } = req.params;
+    const result = await pool.query(
+      `UPDATE bodegas SET estatus = 'rechazada' WHERE id = $1
+       RETURNING *`,
+      [id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+    res.json({ message: 'Bodega rechazada', bodega: result.rows[0] });
+  } catch (error) {
+    console.error('Error al rechazar bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

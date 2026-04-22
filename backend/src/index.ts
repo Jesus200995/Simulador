@@ -14,6 +14,7 @@ import seguimientoRoutes from './routes/seguimiento';
 import alertasRoutes from './routes/alertas';
 import infraestructuraRoutes from './routes/infraestructura';
 import preciosRoutes from './routes/precios';
+import adminRoutes from './routes/admin';
 import pool from './config/database';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api/seguimiento', seguimientoRoutes);
 app.use('/api/alertas', alertasRoutes);
 app.use('/api/infraestructura', infraestructuraRoutes);
 app.use('/api/precios', preciosRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {
