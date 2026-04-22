@@ -242,29 +242,10 @@
                 <input v-model="crop.estimated_harvest_date" type="date" class="form-input" />
               </div>
               <div class="form-group flex-1">
-                <label>Sup. cosechada (ha)</label>
-                <input v-model.number="crop.area_harvested_ha" type="number" step="0.01" min="0" class="form-input" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Destino</label>
-              <select v-model="crop.destination" class="form-input">
-                <option value="">Seleccionar...</option>
-                <option v-for="c in getCatalog('destination')" :key="c.code" :value="c.code">{{ c.label }}</option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label>Producción total</label>
-                <input v-model.number="crop.production_qty" type="number" step="0.1" min="0" class="form-input" />
-              </div>
-              <div class="form-group flex-1">
-                <label>Unidad</label>
-                <select v-model="crop.production_unit" class="form-input">
+                <label>Destino</label>
+                <select v-model="crop.destination" class="form-input">
                   <option value="">Seleccionar...</option>
-                  <option v-for="c in getCatalog('production_unit')" :key="c.code" :value="c.code">{{ c.label }}</option>
+                  <option v-for="c in getCatalog('destination')" :key="c.code" :value="c.code">{{ c.label }}</option>
                 </select>
               </div>
             </div>

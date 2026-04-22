@@ -113,12 +113,14 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
       return;
     }
 
-    if (area_harvested_ha !== undefined && (Number(area_harvested_ha) < 0 || Number(area_harvested_ha) > Number(area_sown_ha))) {
+    const harvestedNum = area_harvested_ha === undefined || area_harvested_ha === null || area_harvested_ha === '' ? null : Number(area_harvested_ha);
+    if (harvestedNum !== null && !Number.isNaN(harvestedNum) && (harvestedNum < 0 || harvestedNum > Number(area_sown_ha))) {
       res.status(400).json({ error: 'area_harvested_ha debe ser >= 0 y <= area_sown_ha' });
       return;
     }
 
-    if (production_qty !== undefined && Number(production_qty) < 0) {
+    const productionNum = production_qty === undefined || production_qty === null || production_qty === '' ? null : Number(production_qty);
+    if (productionNum !== null && !Number.isNaN(productionNum) && productionNum < 0) {
       res.status(400).json({ error: 'production_qty debe ser >= 0' });
       return;
     }
