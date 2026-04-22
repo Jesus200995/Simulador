@@ -99,7 +99,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
              apellido_paterno = $2,
              apellido_materno = $3,
              sexo = $4,
-             telefono = $5,
+             phone = $5,
              correo_electronico = $6,
              state_id = $7,
              municipality_id = $8,
@@ -107,13 +107,12 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
              observaciones = $10,
              privacy_consent = $11,
              usuario_id = $12,
-             fecha_captura = COALESCE(fecha_captura, CURRENT_TIMESTAMP),
-             updated_at = CURRENT_TIMESTAMP
+             fecha_captura = COALESCE(fecha_captura, CURRENT_TIMESTAMP)
            WHERE curp = $13
-           RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+           RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
                      correo_electronico, state_id, municipality_id, localidad, observaciones,
                      privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
-                     estatus_registro, fecha_captura, created_at, updated_at`,
+                     estatus_registro, fecha_captura, created_at`,
           values
         );
 
@@ -123,15 +122,15 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 
       const result = await pool.query(
         `INSERT INTO producer (
-           curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+           curp, nombres, apellido_paterno, apellido_materno, sexo, phone,
            correo_electronico, state_id, municipality_id, localidad, observaciones,
            privacy_consent, usuario_id
          )
          VALUES ($13, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-         RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+         RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
                    correo_electronico, state_id, municipality_id, localidad, observaciones,
                    privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
-                   estatus_registro, fecha_captura, created_at, updated_at`,
+                   estatus_registro, fecha_captura, created_at`,
         values
       );
 
@@ -149,16 +148,14 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     if (existing.rows.length > 0) {
       const result = await pool.query(
         `UPDATE producer SET
-           telefono = $1,
            phone = $1,
            privacy_consent = $2,
-           usuario_id = $3,
-           updated_at = CURRENT_TIMESTAMP
+           usuario_id = $3
          WHERE curp = $4
-         RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+         RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
                    correo_electronico, state_id, municipality_id, localidad, observaciones,
                    privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
-                   estatus_registro, fecha_captura, created_at, updated_at`,
+                   estatus_registro, fecha_captura, created_at`,
         [phone || null, privacy_consent, req.user!.userId, curpUpper]
       );
 
@@ -167,12 +164,12 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     }
 
     const result = await pool.query(
-      `INSERT INTO producer (curp, phone, telefono, privacy_consent, usuario_id)
-       VALUES ($1, $2, $2, $3, $4)
-       RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+      `INSERT INTO producer (curp, phone, privacy_consent, usuario_id)
+       VALUES ($1, $2, $3, $4)
+       RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
                  correo_electronico, state_id, municipality_id, localidad, observaciones,
                  privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
-                 estatus_registro, fecha_captura, created_at, updated_at`,
+                 estatus_registro, fecha_captura, created_at`,
       [curpUpper, phone || null, privacy_consent, req.user!.userId]
     );
 
@@ -194,10 +191,10 @@ router.get('/:curp', authMiddleware, async (req: AuthRequest, res: Response): Pr
   try {
     const curp = req.params.curp.toUpperCase().trim();
     const result = await pool.query(
-      `SELECT producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, telefono,
+      `SELECT producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
               correo_electronico, state_id, municipality_id, localidad, observaciones,
               privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,
-              estatus_registro, fecha_captura, created_at, updated_at
+              estatus_registro, fecha_captura, created_at
        FROM producer WHERE curp = $1`,
       [curp]
     );
