@@ -68,6 +68,7 @@ export interface Region {
 
 export interface CatalogoEstado {
   estado: string
+  region_id?: number
 }
 
 export interface CatalogoMunicipio {
