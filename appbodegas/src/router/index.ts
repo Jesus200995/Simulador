@@ -107,6 +107,25 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/NotificacionesView.vue'),
     meta: { requiresAuth: true }
   },
+  // ── Precios de Maíz ─────────────────────────
+  {
+    path: '/precios',
+    name: 'Precios',
+    component: () => import('@/views/PreciosView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/precios/registrar',
+    name: 'PreciosRegistro',
+    component: () => import('@/views/PreciosRegistroView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/precios/dashboard',
+    name: 'PreciosDashboard',
+    component: () => import('@/views/PreciosDashboardView.vue'),
+    meta: { requiresAuth: true }
+  },
   // ── Infraestructura PRO ──────────────────────
   {
     path: '/infraestructura',

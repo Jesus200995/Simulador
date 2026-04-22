@@ -13,6 +13,7 @@ import catalogosProductorRoutes from './routes/catalogos-productor';
 import seguimientoRoutes from './routes/seguimiento';
 import alertasRoutes from './routes/alertas';
 import infraestructuraRoutes from './routes/infraestructura';
+import preciosRoutes from './routes/precios';
 import pool from './config/database';
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api/catalogos-productor', catalogosProductorRoutes);
 app.use('/api/seguimiento', seguimientoRoutes);
 app.use('/api/alertas', alertasRoutes);
 app.use('/api/infraestructura', infraestructuraRoutes);
+app.use('/api/precios', preciosRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

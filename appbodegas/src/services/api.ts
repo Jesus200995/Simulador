@@ -151,6 +151,59 @@ export const api = {
     },
   },
 
+  // =============================================
+  // Módulo Precios de Maíz
+  // =============================================
+  preciosMaiz: {
+    listar(params?: {
+      tipo_precio?: string
+      fuente?: string
+      tipo_maiz?: string
+      estado?: string
+      municipio?: string
+      fecha_inicio?: string
+      fecha_fin?: string
+    }): Promise<{ precios: any[] }> {
+      const qs = new URLSearchParams()
+      if (params?.tipo_precio) qs.set('tipo_precio', params.tipo_precio)
+      if (params?.fuente) qs.set('fuente', params.fuente)
+      if (params?.tipo_maiz) qs.set('tipo_maiz', params.tipo_maiz)
+      if (params?.estado) qs.set('estado', params.estado)
+      if (params?.municipio) qs.set('municipio', params.municipio)
+      if (params?.fecha_inicio) qs.set('fecha_inicio', params.fecha_inicio)
+      if (params?.fecha_fin) qs.set('fecha_fin', params.fecha_fin)
+      const q = qs.toString()
+      return request(`/precios${q ? '?' + q : ''}`)
+    },
+
+    registrar(payload: {
+      tipo_precio: string
+      fuente?: string
+      tipo_maiz: string
+      fecha: string
+      precio: number
+      estado?: string
+      municipio?: string
+      observaciones?: string
+      valor_origen?: number
+      unidad_origen?: string
+      tipo_cambio?: number
+      programa?: string
+      bodega_id?: number
+    }): Promise<{ mensaje: string; precio: any }> {
+      return request('/precios', { method: 'POST', body: JSON.stringify(payload) })
+    },
+
+    dashboard(): Promise<{
+      kpi: { promedio: number; maximo: number; minimo: number; total_registros: number }
+      por_tipo_maiz: any[]
+      ultimo_internacional: any | null
+      ultimo_gobierno: any | null
+    }> {
+      return request('/precios/dashboard')
+    },
+  },
+
   admin: {
     listarUsuarios(): Promise<{ usuarios: AdminUsuario[] }> {
       return request('/admin/usuarios')
