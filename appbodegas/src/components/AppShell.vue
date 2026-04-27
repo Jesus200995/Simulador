@@ -27,7 +27,7 @@
           <span>Mis UPs</span>
         </router-link>
         <!-- Productor/Tecnico: Seguimiento y Alertas -->
-        <router-link v-if="authStore.isProductor" to="/seguimiento" class="nav-pill">
+        <router-link v-if="!authStore.isBodeguero" to="/seguimiento" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
           <span>Seguimiento</span>
         </router-link>

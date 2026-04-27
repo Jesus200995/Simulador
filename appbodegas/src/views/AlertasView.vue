@@ -7,7 +7,7 @@
           <p class="view-subtitle">Monitoreo de eventos climáticos y riesgos</p>
         </div>
         <div class="view-header-actions">
-          <button v-if="authStore.isProductor" class="btn btn-primary" @click="showForm = true">
+          <button v-if="!authStore.isBodeguero" class="btn btn-primary" @click="showForm = true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nueva alerta
           </button>
@@ -68,11 +68,36 @@
       <div class="modal-card">
         <h2>Nueva alerta manual</h2>
         <form @submit.prevent="crearAlerta">
+          <!-- Supervisor/Admin: buscar productor primero -->
+          <div class="form-group" v-if="!authStore.isProductor">
+            <label class="form-label">Productor <span class="form-required">*</span></label>
+            <input
+              v-model="productorQuery"
+              type="text"
+              class="form-input"
+              placeholder="Buscar por nombre o CURP..."
+              @input="buscarProductores"
+            />
+            <div v-if="productoresList.length > 0 && !selectedProductor" class="autocomplete-list">
+              <div
+                v-for="p in productoresList"
+                :key="p.producer_id"
+                class="autocomplete-item"
+                @click="seleccionarProductor(p)"
+              >
+                {{ p.apellido_paterno }} {{ p.apellido_materno }} {{ p.nombres }} · {{ p.curp }}
+              </div>
+            </div>
+            <div v-if="selectedProductor" class="selected-badge">
+              {{ selectedProductor.apellido_paterno }} {{ selectedProductor.nombres }}
+              <button type="button" class="badge-clear" @click="limpiarProductor">&times;</button>
+            </div>
+          </div>
           <div class="form-group">
             <label class="form-label">Unidad de Producción <span class="form-required">*</span></label>
             <select v-model="newAlerta.up_id" class="form-input" required @change="onUpChange">
               <option :value="null">-- Seleccionar UP --</option>
-              <option v-for="up in misUps" :key="up.up_id" :value="up.up_id">
+              <option v-for="up in upsDisponibles" :key="up.up_id" :value="up.up_id">
                 {{ up.up_name }} ({{ up.state_name || up.municipality_name || 'Sin ubicación' }})
               </option>
             </select>
@@ -137,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { api } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
@@ -153,6 +178,18 @@ const hoy = new Date().toISOString().split('T')[0]
 const misUps = ref<any[]>([])
 const ciclosUp = ref<any[]>([])
 const cultivosCiclo = ref<any[]>([])
+
+// Supervisor/Admin: producer search
+const productorQuery = ref('')
+const productoresList = ref<any[]>([])
+const selectedProductor = ref<any>(null)
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+
+const upsDisponibles = computed(() => {
+  if (authStore.isProductor) return misUps.value
+  if (!selectedProductor.value) return []
+  return selectedProductor.value.ups || []
+})
 
 const newAlerta = ref({
   up_id: null as number | null,
@@ -177,6 +214,7 @@ async function cargar() {
 }
 
 async function cargarMisUps() {
+  if (!authStore.isProductor) return
   try {
     const data = await api.misUps.listar()
     misUps.value = data.ups || []
@@ -185,17 +223,62 @@ async function cargarMisUps() {
   }
 }
 
+function buscarProductores() {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  selectedProductor.value = null
+  productoresList.value = []
+  if (productorQuery.value.length < 2) return
+  searchTimeout = setTimeout(async () => {
+    try {
+      const data = await api.seguimiento.productores(productorQuery.value)
+      productoresList.value = data.productores || []
+    } catch (e) {
+      console.error(e)
+    }
+  }, 350)
+}
+
+function seleccionarProductor(p: any) {
+  selectedProductor.value = p
+  productoresList.value = []
+  productorQuery.value = `${p.apellido_paterno || ''} ${p.nombres || ''}`.trim()
+  // Reset downstream selectors
+  newAlerta.value.up_id = null
+  newAlerta.value.ciclo_id = null
+  newAlerta.value.cycle_crop_id = null
+  ciclosUp.value = []
+  cultivosCiclo.value = []
+}
+
+function limpiarProductor() {
+  selectedProductor.value = null
+  productorQuery.value = ''
+  productoresList.value = []
+  newAlerta.value.up_id = null
+  newAlerta.value.ciclo_id = null
+  newAlerta.value.cycle_crop_id = null
+  ciclosUp.value = []
+  cultivosCiclo.value = []
+}
+
 async function onUpChange() {
   ciclosUp.value = []
   cultivosCiclo.value = []
   newAlerta.value.ciclo_id = null
   newAlerta.value.cycle_crop_id = null
   if (!newAlerta.value.up_id) return
-  try {
-    const data = await api.cycles.listar(newAlerta.value.up_id)
-    ciclosUp.value = data.cycles || []
-  } catch (e) {
-    console.error(e)
+
+  if (!authStore.isProductor && selectedProductor.value) {
+    // Supervisor/Admin: cycles already embedded in the producer data
+    const up = (selectedProductor.value.ups || []).find((u: any) => u.up_id === newAlerta.value.up_id)
+    ciclosUp.value = up?.ciclos || []
+  } else {
+    try {
+      const data = await api.cycles.listar(newAlerta.value.up_id)
+      ciclosUp.value = data.cycles || []
+    } catch (e) {
+      console.error(e)
+    }
   }
 }
 
@@ -217,6 +300,9 @@ async function crearAlerta() {
     newAlerta.value = { up_id: null, ciclo_id: null, cycle_crop_id: null, tipo_alerta: '', nivel_alerta: '', fecha_alerta: hoy, observaciones: '' }
     ciclosUp.value = []
     cultivosCiclo.value = []
+    selectedProductor.value = null
+    productorQuery.value = ''
+    productoresList.value = []
     await cargar()
   } catch (e: any) {
     formError.value = e.message || 'Error al crear alerta'
@@ -273,6 +359,32 @@ onMounted(() => { cargar(); cargarMisUps() })
 
 .alerta-chevron { color: var(--color-text-tertiary); opacity: .4; flex-shrink: 0; align-self: center; }
 .alerta-card:hover .alerta-chevron { opacity: .7; }
+
+.autocomplete-list {
+  position: absolute; z-index: 10; left: 0; right: 0;
+  max-height: 180px; overflow-y: auto;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); margin-top: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+.autocomplete-item {
+  padding: .6rem .75rem; cursor: pointer; font-size: .8125rem;
+  color: var(--color-text); transition: background .15s;
+}
+.autocomplete-item:hover { background: var(--color-fill); }
+.selected-badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  margin-top: .35rem; padding: .3rem .65rem; border-radius: 99px;
+  background: rgba(15,81,50,.08); color: #0F5132;
+  font-size: .8125rem; font-weight: 600;
+}
+.badge-clear {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.1rem; color: #0F5132; opacity: .6; line-height: 1;
+  padding: 0 2px;
+}
+.badge-clear:hover { opacity: 1; }
+.form-group { position: relative; }
 
 @media (max-width: 600px) {
   .alerta-card { flex-direction: column; gap: .625rem; }
