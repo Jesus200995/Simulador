@@ -56,6 +56,28 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  home: {
+    stats(): Promise<{
+      role: string
+      stats: {
+        productores: number
+        productores_label?: string
+        productores_recientes?: number
+        seguimientos: number
+        seguimientos_label?: string
+        seguimientos_pendientes: number
+        ciclos?: number
+        alertas: number
+        alertas_hidden?: boolean
+        bodegas: number
+        bodegas_label?: string
+        recientes?: Array<{ id: number; titulo: string; nivel?: string; fecha: string; estado?: string }>
+      }
+    }> {
+      return request('/home/stats')
+    },
+  },
+
   auth: {
     login(payload: LoginPayload): Promise<AuthResponse> {
       return request<AuthResponse>('/auth/login', {

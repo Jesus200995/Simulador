@@ -17,6 +17,7 @@ import preciosRoutes from './routes/precios';
 import adminRoutes from './routes/admin';
 import misUpsRoutes from './routes/mis-ups';
 import misProductoresRoutes from './routes/mis-productores';
+import homeRoutes from './routes/home';
 import pool from './config/database';
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/precios', preciosRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/mis-ups', misUpsRoutes);
 app.use('/api/mis-productores', misProductoresRoutes);
+app.use('/api/home', homeRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

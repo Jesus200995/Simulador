@@ -20,34 +20,41 @@
     <!-- Stats grid -->
     <section class="inicio-stats">
       <div class="stat-card" @click="goTo(productoresRoute)">
-        <p class="stat-label">Productores</p>
-        <p class="stat-value">{{ formatNum(stats.productores) }}</p>
-        <p class="stat-trend stat-trend-up" v-if="stats.productores_recientes != null">
+        <p class="stat-label">{{ stats.productores_label || 'Productores' }}</p>
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.productores) }}</p>
+        <p class="stat-trend stat-trend-up" v-if="stats.productores_recientes">
           +{{ stats.productores_recientes }} esta semana
         </p>
+        <p class="stat-trend" v-else-if="!loading">
+          {{ productoresHint }}
+        </p>
       </div>
 
-      <div class="stat-card" @click="goTo('/seguimiento')">
-        <p class="stat-label">Seguimientos</p>
-        <p class="stat-value">{{ formatNum(stats.seguimientos) }}</p>
-        <p class="stat-trend stat-trend-warn" v-if="stats.seguimientos_pendientes != null">
+      <div class="stat-card" @click="goTo(seguimientoRoute)">
+        <p class="stat-label">{{ stats.seguimientos_label || 'Seguimientos' }}</p>
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.seguimientos) }}</p>
+        <p class="stat-trend stat-trend-warn" v-if="stats.seguimientos_pendientes">
           Pendientes: {{ stats.seguimientos_pendientes }}
         </p>
+        <p class="stat-trend" v-else-if="!loading && stats.seguimientos > 0">
+          Registrados
+        </p>
+        <p class="stat-trend" v-else-if="!loading">Sin registros</p>
       </div>
 
-      <div class="stat-card" @click="goTo('/alertas')">
+      <div v-if="!stats.alertas_hidden" class="stat-card" @click="goTo('/alertas')">
         <p class="stat-label">Alertas activas</p>
-        <p class="stat-value">{{ formatNum(stats.alertas) }}</p>
-        <p class="stat-trend stat-trend-danger" v-if="stats.alertas > 0">
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.alertas) }}</p>
+        <p class="stat-trend stat-trend-danger" v-if="!loading && stats.alertas > 0">
           Requieren atención
         </p>
-        <p class="stat-trend stat-trend-ok" v-else>Todo en orden</p>
+        <p class="stat-trend stat-trend-ok" v-else-if="!loading">Todo en orden</p>
       </div>
 
-      <div class="stat-card" @click="goTo('/infraestructura')">
-        <p class="stat-label">Bodegas cercanas</p>
-        <p class="stat-value">{{ formatNum(stats.bodegas) }}</p>
-        <p class="stat-trend">En tu región</p>
+      <div class="stat-card" @click="goTo(bodegasRoute)">
+        <p class="stat-label">{{ bodegasTitle }}</p>
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.bodegas) }}</p>
+        <p class="stat-trend" v-if="!loading">{{ stats.bodegas_label || 'En tu región' }}</p>
       </div>
     </section>
 
@@ -72,10 +79,10 @@
       </div>
       <div class="recent-list">
         <div v-for="r in recientes" :key="r.id" class="recent-item">
-          <div class="recent-dot" :class="'dot-' + (r.tipo || 'info')"></div>
+          <div class="recent-dot" :class="'dot-' + nivelToTone(r.nivel)"></div>
           <div class="recent-body">
-            <p class="recent-title">{{ r.titulo }}</p>
-            <p class="recent-time">{{ formatTime(r.fecha) }}</p>
+            <p class="recent-title">{{ alertaTitulo(r.titulo) }}</p>
+            <p class="recent-time">{{ formatTime(r.fecha) }} · {{ r.estado || 'pendiente' }}</p>
           </div>
         </div>
       </div>
@@ -108,19 +115,58 @@ const roleLabel = computed(() => {
 const productoresRoute = computed(() => {
   if (auth.isSupervisor) return '/mis-productores'
   if (auth.isAdmin) return '/productor'
+  if (auth.isBodeguero) return '/mis-bodegas'
   return '/mis-ups'
 })
 
-const stats = ref({
+const seguimientoRoute = computed(() => {
+  if (auth.isBodeguero) return '/mis-bodegas'
+  return '/seguimiento'
+})
+
+const bodegasRoute = computed(() => {
+  if (auth.isBodeguero) return '/mis-bodegas'
+  return '/infraestructura'
+})
+
+const bodegasTitle = computed(() => {
+  if (auth.isBodeguero) return 'Bodegas'
+  if (auth.isAdmin) return 'Bodegas'
+  if (auth.isSupervisor) return 'Bodegas'
+  return 'Bodegas cercanas'
+})
+
+const productoresHint = computed(() => {
+  if (auth.isProductor) return 'Tus unidades'
+  if (auth.isSupervisor) return 'Productores vinculados'
+  if (auth.isBodeguero) return 'Tus bodegas'
+  return 'Total en sistema'
+})
+
+interface HomeStats {
+  productores: number
+  productores_label?: string
+  productores_recientes?: number
+  seguimientos: number
+  seguimientos_label?: string
+  seguimientos_pendientes: number
+  ciclos?: number
+  alertas: number
+  alertas_hidden?: boolean
+  bodegas: number
+  bodegas_label?: string
+}
+
+const stats = ref<HomeStats>({
   productores: 0,
-  productores_recientes: null as number | null,
   seguimientos: 0,
-  seguimientos_pendientes: null as number | null,
+  seguimientos_pendientes: 0,
   alertas: 0,
   bodegas: 0,
 })
 
-const recientes = ref<Array<{ id: string | number; titulo: string; tipo?: string; fecha: string }>>([])
+const loading = ref(true)
+const recientes = ref<Array<{ id: number | string; titulo: string; nivel?: string; fecha: string; estado?: string }>>([])
 const notifCount = ref(0)
 
 // Icons as inline SVG components
@@ -198,48 +244,47 @@ function formatTime(d: string) {
   }
 }
 
+function nivelToTone(nivel?: string): string {
+  if (nivel === 'alto') return 'danger'
+  if (nivel === 'medio') return 'warn'
+  if (nivel === 'bajo') return 'info'
+  return 'info'
+}
+
+function alertaTitulo(tipo: string): string {
+  const m: Record<string, string> = {
+    helada: 'Helada',
+    sequia: 'Sequía',
+    lluvia_fuerte: 'Lluvia fuerte',
+    viento_fuerte: 'Viento fuerte',
+    otro: 'Alerta',
+  }
+  return m[tipo] || tipo
+}
+
 async function loadStats() {
-  // Best-effort, silent failure for any endpoint that doesn't exist for this role
-  const tasks: Array<Promise<any>> = []
+  loading.value = true
+  try {
+    const res = await api.home.stats()
+    stats.value = res.stats as HomeStats
+    recientes.value = (res.stats as any).recientes ?? []
+  } catch (e) {
+    console.warn('No se pudieron cargar las estadísticas:', e)
+  } finally {
+    loading.value = false
+  }
+}
 
-  // Productores count
-  tasks.push((async () => {
-    try {
-      if (auth.isSupervisor) {
-        const r = await api.misProductores.listar()
-        stats.value.productores = r.productores?.length ?? 0
-      } else if (auth.isAdmin) {
-        const r = await api.admin.listarUsuarios()
-        stats.value.productores = r.usuarios?.filter((u: any) => u.rol === 'productor').length ?? 0
-      } else {
-        const r = await api.misUps.listar()
-        stats.value.productores = r.ups?.length ?? 0
-      }
-    } catch { /* noop */ }
-  })())
-
-  // Alertas
-  tasks.push((async () => {
-    try {
-      const r = await api.alertas.notificaciones()
-      stats.value.alertas = r.total_no_leidas ?? 0
-      notifCount.value = r.total_no_leidas ?? 0
-    } catch { /* noop */ }
-  })())
-
-  // Bodegas
-  tasks.push((async () => {
-    try {
-      const r = await api.bodegas.listar()
-      stats.value.bodegas = r.bodegas?.length ?? 0
-    } catch { /* noop */ }
-  })())
-
-  await Promise.all(tasks)
+async function loadNotifs() {
+  try {
+    const r = await api.alertas.notificaciones()
+    notifCount.value = r.total_no_leidas ?? 0
+  } catch { /* noop */ }
 }
 
 onMounted(() => {
   loadStats()
+  loadNotifs()
 })
 </script>
 
@@ -361,6 +406,16 @@ onMounted(() => {
   letter-spacing: -.04em;
   line-height: 1;
 }
+.stat-value.skeleton {
+  color: transparent;
+  background: linear-gradient(90deg, #eee 0%, #f5f5f5 50%, #eee 100%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+  border-radius: 6px;
+  display: inline-block;
+  min-width: 50px;
+}
+@keyframes skeletonPulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 .stat-trend {
   font-size: .72rem;
   font-weight: 600;
