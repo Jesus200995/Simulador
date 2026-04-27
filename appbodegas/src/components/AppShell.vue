@@ -27,7 +27,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
           <span>Seguimiento</span>
         </router-link>
-        <router-link v-if="authStore.isProductor" to="/alertas" class="nav-pill">
+        <router-link v-if="!authStore.isBodeguero" to="/alertas" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>Alertas</span>
         </router-link>
@@ -122,12 +122,18 @@
         </div>
         <span>Seguimiento</span>
       </router-link>
-      <!-- Supervisor: Mis Productores -->
+      <!-- Supervisor: Mis Productores + Alertas -->
       <router-link v-if="authStore.isSupervisor" to="/mis-productores" class="tab-item">
         <div class="tab-icon-wrap">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <span>Productores</span>
+      </router-link>
+      <router-link v-if="authStore.isSupervisor" to="/alertas" class="tab-item">
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <span>Alertas</span>
       </router-link>
       <!-- Bodeguero: Mis Bodegas -->
       <router-link v-if="authStore.isBodeguero" to="/mis-bodegas" class="tab-item">
@@ -162,7 +168,7 @@
             </button>
           </div>
           <div class="more-links">
-            <router-link v-if="authStore.isProductor" to="/alertas" class="more-link" @click="moreOpen = false">
+            <router-link v-if="!authStore.isBodeguero" to="/alertas" class="more-link" @click="moreOpen = false">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               Alertas
             </router-link>

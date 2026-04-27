@@ -7,7 +7,7 @@
           <p class="view-subtitle">Monitoreo de eventos climáticos y riesgos</p>
         </div>
         <div class="view-header-actions">
-          <button class="btn btn-primary" @click="showForm = true">
+          <button v-if="authStore.isProductor" class="btn btn-primary" @click="showForm = true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nueva alerta
           </button>
@@ -130,6 +130,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { api } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const alertas = ref<any[]>([])
 const loading = ref(true)
