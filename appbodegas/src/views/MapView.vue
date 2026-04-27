@@ -508,8 +508,8 @@ onUnmounted(() => {
 }
 
 .profile-role-badge.admin {
-  background: rgba(105, 28, 50, 0.12);
-  color: #691C32;
+  background: rgba(15, 81, 50, 0.12);
+  color: #0F5132;
 }
 
 /* Notification bell in header */

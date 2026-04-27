@@ -350,14 +350,14 @@ async function guardar() {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--color-primary, #691C32);
+  color: var(--color-primary, #0F5132);
 }
 
 .form-section-cond {
-  background: rgba(105, 28, 50, 0.03);
+  background: rgba(15, 81, 50, 0.03);
   border-radius: 10px;
   padding: 1.25rem;
-  border: 1.5px solid rgba(105, 28, 50, 0.12);
+  border: 1.5px solid rgba(15, 81, 50, 0.12);
   margin-bottom: 1.25rem;
 }
 
@@ -370,7 +370,7 @@ async function guardar() {
 
 .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
 .form-label { font-size: 0.82rem; font-weight: 600; color: var(--color-text, #1a202c); }
-.form-required { color: var(--color-primary, #691C32); }
+.form-required { color: var(--color-primary, #0F5132); }
 .form-input {
   padding: 0.55rem 0.75rem;
   border: 1.5px solid var(--color-border, #e2e8f0);
@@ -383,7 +383,7 @@ async function guardar() {
   width: 100%;
   box-sizing: border-box;
 }
-.form-input:focus { border-color: var(--color-primary, #691C32); }
+.form-input:focus { border-color: var(--color-primary, #0F5132); }
 .form-textarea { resize: vertical; min-height: 80px; }
 
 /* Tipo selector cards */
@@ -407,12 +407,12 @@ async function guardar() {
   text-align: center;
   background: #fff;
 }
-.tipo-card:hover { border-color: var(--color-primary, #691C32); background: rgba(105,28,50,0.03); }
+.tipo-card:hover { border-color: var(--color-primary, #0F5132); background: rgba(15, 81, 50,0.03); }
 .tipo-card.selected {
-  border-color: var(--color-primary, #691C32);
-  background: rgba(105,28,50,0.06);
+  border-color: var(--color-primary, #0F5132);
+  background: rgba(15, 81, 50,0.06);
 }
-.tipo-icon { color: var(--color-primary, #691C32); }
+.tipo-icon { color: var(--color-primary, #0F5132); }
 .tipo-label { font-size: 0.82rem; font-weight: 700; color: var(--color-text, #1a202c); }
 .tipo-desc { font-size: 0.72rem; color: var(--color-text-muted, #718096); line-height: 1.3; }
 
@@ -454,7 +454,7 @@ async function guardar() {
 .preview-precio {
   font-size: 1.6rem;
   font-weight: 800;
-  color: var(--color-primary, #691C32);
+  color: var(--color-primary, #0F5132);
   margin-bottom: 0.5rem;
 }
 .preview-meta { font-size: 0.8rem; color: var(--color-text-muted, #718096); margin-bottom: 0.2rem; }
@@ -473,7 +473,7 @@ async function guardar() {
   color: var(--color-text-muted, #718096); font-size: 0.82rem;
   padding: 0; margin-bottom: 0.5rem; transition: color 0.15s;
 }
-.btn-back:hover { color: var(--color-primary, #691C32); }
+.btn-back:hover { color: var(--color-primary, #0F5132); }
 
 /* spinner */
 .spinner { width: 14px; height: 14px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }

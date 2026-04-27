@@ -125,7 +125,7 @@ onMounted(cargar)
 .up-card { padding: 1rem 1.25rem; margin-bottom: .5rem; }
 .up-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .25rem; }
 .up-name { font-weight: 700; color: var(--color-text); }
-.up-area { font-size: .78rem; font-weight: 600; padding: .15rem .5rem; background: rgba(105,28,50,.08); color: #691C32; border-radius: 99px; }
+.up-area { font-size: .78rem; font-weight: 600; padding: .15rem .5rem; background: rgba(15, 81, 50,.08); color: #0F5132; border-radius: 99px; }
 .up-meta { font-size: .8125rem; color: var(--color-text-secondary); }
 .up-ciclos { font-size: .75rem; color: var(--color-text-tertiary); margin-top: .15rem; }
 
@@ -148,6 +148,6 @@ onMounted(cargar)
 
 .spinner { display: inline-block; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin .6s linear infinite; }
 .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
-.spinner-dark { border-top-color: var(--color-primary, #691C32); }
+.spinner-dark { border-top-color: var(--color-primary, #0F5132); }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

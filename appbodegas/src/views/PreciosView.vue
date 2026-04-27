@@ -232,7 +232,7 @@ onMounted(cargar)
 }
 .filter-bar select:focus,
 .date-input:focus {
-  border-color: var(--color-primary, #691C32);
+  border-color: var(--color-primary, #0F5132);
 }
 .filter-bar select:disabled {
   opacity: 0.5;
@@ -267,7 +267,7 @@ onMounted(cargar)
   border-bottom: none;
 }
 .data-table tbody tr:hover {
-  background: rgba(105, 28, 50, 0.03);
+  background: rgba(15, 81, 50, 0.03);
 }
 .data-table td {
   padding: 0.7rem 1rem;

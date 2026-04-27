@@ -293,7 +293,7 @@ async function handleRegistro() {
 /* ═══ Brand Panel ═══ */
 .rp-brand {
   display: none; width: 380px; position: relative; overflow: hidden;
-  background: linear-gradient(160deg, #1E0812 0%, #3D1024 22%, #691C32 52%, #A63D5A 82%, #BC955C 100%);
+  background: linear-gradient(160deg, #041510 0%, #0A2D1B 22%, #0F5132 52%, #2D8659 82%, #BC955C 100%);
   color: #fff; padding: 3rem 2.5rem; flex-direction: column; justify-content: center;
   position: sticky; top: 0; height: 100vh; height: 100dvh;
 }
@@ -332,17 +332,17 @@ async function handleRegistro() {
 .rp-mob-brand { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
 .rp-mob-icon {
   width: 42px; height: 42px; border-radius: 12px;
-  background: linear-gradient(145deg, #4A0E20, #691C32); color: #fff;
+  background: linear-gradient(145deg, #0A3D24, #0F5132); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 12px rgba(105,28,50,.3);
+  box-shadow: 0 3px 12px rgba(15, 81, 50,.3);
 }
-.rp-mob-name { display: block; font-size: 1.25rem; font-weight: 800; color: #691C32; letter-spacing: -.04em; line-height: 1; }
+.rp-mob-name { display: block; font-size: 1.25rem; font-weight: 800; color: #0F5132; letter-spacing: -.04em; line-height: 1; }
 .rp-mob-sub { display: block; font-size: .62rem; font-weight: 600; color: #9a8a7e; letter-spacing: .04em; text-transform: uppercase; margin-top: .1rem; }
 
 /* Card */
 .rp-card {
   background: rgba(255,255,255,.96); border-radius: 22px; padding: 2rem 1.75rem;
-  box-shadow: 0 8px 40px rgba(105,28,50,.05), 0 1px 3px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.04);
+  box-shadow: 0 8px 40px rgba(15, 81, 50,.05), 0 1px 3px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.04);
 }
 .rp-card-title { font-size: 1.35rem; font-weight: 750; color: #1a1a1a; letter-spacing: -.03em; margin: 0 0 .25rem; }
 .rp-card-sub { font-size: .82rem; color: #8a8078; margin: 0 0 1.5rem; }
@@ -367,7 +367,7 @@ async function handleRegistro() {
 }
 .rp-input::placeholder { color: #b8b0a8; }
 .rp-input:hover { background: #f4f1ee; border-color: #d8d4d0; }
-.rp-input:focus { outline: none; background: #fff; border-color: #691C32; box-shadow: 0 0 0 3px rgba(105,28,50,.08); }
+.rp-input:focus { outline: none; background: #fff; border-color: #0F5132; box-shadow: 0 0 0 3px rgba(15, 81, 50,.08); }
 .rp-input.err { border-color: #DC2626 !important; box-shadow: 0 0 0 3px rgba(220,38,38,.06) !important; }
 .rp-input:disabled { opacity: .5; cursor: not-allowed; }
 .rp-upper { text-transform: uppercase; }
@@ -405,20 +405,20 @@ async function handleRegistro() {
 .rp-submit {
   width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem;
   padding: .82rem 1.5rem; margin-top: .5rem; min-height: 48px;
-  background: linear-gradient(160deg, #5A1428, #691C32, #8B2A45); color: #fff;
+  background: linear-gradient(160deg, #0A3D24, #0F5132, #187A4F); color: #fff;
   border: none; border-radius: 12px; font-size: .9375rem; font-weight: 650;
   font-family: var(--font-family); cursor: pointer; transition: all .25s;
-  box-shadow: 0 4px 16px rgba(105,28,50,.25), inset 0 1px 0 rgba(255,255,255,.1);
+  box-shadow: 0 4px 16px rgba(15, 81, 50,.25), inset 0 1px 0 rgba(255,255,255,.1);
 }
-.rp-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(105,28,50,.3); }
+.rp-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(15, 81, 50,.3); }
 .rp-submit:active:not(:disabled) { transform: translateY(0); }
 .rp-submit:disabled { opacity: .6; cursor: not-allowed; }
 .rp-spin { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: rpSpin .6s linear infinite; }
 
 /* Footer */
 .rp-footer { text-align: center; margin: 1.25rem 0 0; font-size: .82rem; color: #8a8078; }
-.rp-footer a { font-weight: 650; color: #691C32; margin-left: .25rem; text-decoration: none; }
-.rp-footer a:hover { color: #A63D5A; }
+.rp-footer a { font-weight: 650; color: #0F5132; margin-left: .25rem; text-decoration: none; }
+.rp-footer a:hover { color: #2D8659; }
 
 @keyframes rpFade { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes rpSpin { to { transform: rotate(360deg); } }
@@ -442,7 +442,7 @@ async function handleRegistro() {
 
 /* ═══ Mobile (<768px) ═══ */
 @media (max-width: 767px) {
-  .rp { flex-direction: column; background: linear-gradient(170deg, #2A0A15 0%, #691C32 30%, #A63D5A 100%); }
+  .rp { flex-direction: column; background: linear-gradient(170deg, #041510 0%, #0F5132 30%, #2D8659 100%); }
   .rp-form-side { background: transparent; align-items: flex-start; padding: 0; flex: 1; }
   .rp-form-wrap {
     max-width: 100%; background: #f5f3f0;
@@ -451,8 +451,8 @@ async function handleRegistro() {
   .rp-card { padding: 1.5rem 1.25rem; border-radius: 16px; }
   .rp-card-title { font-size: 1.2rem; }
   .rp-row { grid-template-columns: 1fr; gap: 0; }
-  .rp-mob-icon { background: linear-gradient(145deg, #fff, #f0ece8); color: #691C32; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
-  .rp-mob-name { color: #3D1024; }
+  .rp-mob-icon { background: linear-gradient(145deg, #fff, #f0ece8); color: #0F5132; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .rp-mob-name { color: #0A3D24; }
 }
 
 /* ═══ Small mobile ═══ */

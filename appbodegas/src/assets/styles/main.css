@@ -5,15 +5,17 @@
    ============================================= */
 
 :root {
-  /* Guinda palette — rich institutional */
-  --color-primary: #691C32;
-  --color-primary-hover: #7D2540;
-  --color-primary-active: #551728;
-  --color-primary-subtle: rgba(105, 28, 50, 0.06);
-  --color-primary-glow: rgba(105, 28, 50, 0.15);
-  --color-primary-light: #A63D5A;
+  /* Green palette — institutional forest green */
+  --color-primary: #0F5132;
+  --color-primary-hover: #157347;
+  --color-primary-active: #0A3D24;
+  --color-primary-subtle: rgba(15, 81, 50, 0.06);
+  --color-primary-glow: rgba(15, 81, 50, 0.15);
+  --color-primary-light: #2D8659;
+  --color-primary-dark: #0A3D24;
+  --color-primary-darker: #062818;
 
-  /* Oro institucional */
+  /* Accents (warm earthy) */
   --color-gold: #BC955C;
   --color-gold-light: #D4B07A;
 
@@ -59,7 +61,7 @@
   --color-warning-bg: rgba(255, 149, 0, 0.08);
 
   /* KPI accent spectrum */
-  --color-kpi-bodegas: #691C32;
+  --color-kpi-bodegas: #0F5132;
   --color-kpi-toneladas: #007AFF;
   --color-kpi-estados: #34C759;
   --color-kpi-municipios: #FF9500;
@@ -260,18 +262,18 @@ a:hover { opacity: 0.75; }
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #7D2540 0%, #691C32 100%);
+  background: linear-gradient(180deg, #157347 0%, #0F5132 100%);
   color: var(--color-text-inverse);
-  box-shadow: 0 1px 3px rgba(105, 28, 50, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 3px rgba(15, 81, 50, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #8B2A45 0%, #7D2540 100%);
-  box-shadow: 0 4px 12px rgba(105, 28, 50, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, #187A4F 0%, #157347 100%);
+  box-shadow: 0 4px 12px rgba(15, 81, 50, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .btn-primary:active:not(:disabled) {
-  background: linear-gradient(180deg, #551728 0%, #691C32 100%);
+  background: linear-gradient(180deg, #0A3D24 0%, #0F5132 100%);
 }
 
 .btn-secondary {
@@ -355,7 +357,7 @@ a:hover { opacity: 0.75; }
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(145deg, #2A0A15 0%, #691C32 35%, #8B2A45 60%, #A63D5A 80%, #BC955C 100%);
+  background: linear-gradient(145deg, #062818 0%, #0F5132 35%, #157347 60%, #2D8659 80%, #BC955C 100%);
   position: relative;
   overflow: hidden;
 }
@@ -450,7 +452,7 @@ a:hover { opacity: 0.75; }
   align-items: center;
   padding: 0 1.25rem;
   height: 58px;
-  background: rgba(105, 28, 50, 0.88);
+  background: rgba(15, 81, 50, 0.88);
   backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
   color: var(--color-text-inverse);
@@ -613,7 +615,7 @@ a:hover { opacity: 0.75; }
 
 .profile-avatar-btn:hover {
   border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 0 3px rgba(105, 28, 50, 0.25);
+  box-shadow: 0 0 0 3px rgba(15, 81, 50, 0.25);
   transform: scale(1.06);
 }
 
@@ -1010,7 +1012,7 @@ a:hover { opacity: 0.75; }
 }
 
 .kpi-card.bodegas .kpi-icon-wrap {
-  background: rgba(105, 28, 50, 0.1);
+  background: rgba(15, 81, 50, 0.1);
   color: var(--color-primary);
 }
 
@@ -1133,7 +1135,7 @@ a:hover { opacity: 0.75; }
 
 .bodega-item:last-child { border-bottom: none; }
 .bodega-item:hover { background: var(--color-primary-subtle); }
-.bodega-item:active { background: rgba(105, 28, 50, 0.1); }
+.bodega-item:active { background: rgba(15, 81, 50, 0.1); }
 
 .bodega-item.active {
   background: var(--color-primary-subtle);
@@ -1318,7 +1320,7 @@ a:hover { opacity: 0.75; }
   box-shadow: 0 1px 3px rgba(211, 84, 0, 0.3);
 }
 
-.popup-btn:hover { background: linear-gradient(180deg, #8B2A45, #7D2540); }
+.popup-btn:hover { background: linear-gradient(180deg, #187A4F, #157347); }
 .popup-btn:active { transform: scale(0.98); }
 
 /* =============================================
@@ -1771,7 +1773,7 @@ a:hover { opacity: 0.75; }
 .badge-blue { background: rgba(0, 122, 255, 0.10); color: #006ADB; }
 .badge-purple { background: rgba(88, 86, 214, 0.10); color: #4B49B5; }
 .badge-gray { background: var(--color-fill-tertiary); color: var(--color-text-secondary); }
-.badge-guinda { background: rgba(105, 28, 50, 0.10); color: #691C32; }
+.badge-guinda { background: rgba(15, 81, 50, 0.10); color: #0F5132; }
 .badge-orange { background: rgba(255, 149, 0, 0.10); color: #B8720E; }
 
 /* =============================================
@@ -1943,7 +1945,7 @@ a:hover { opacity: 0.75; }
   margin-bottom: 1.25rem;
   font-size: .8125rem;
   color: var(--color-text-secondary);
-  border: .5px solid rgba(105, 28, 50, 0.08);
+  border: .5px solid rgba(15, 81, 50, 0.08);
 }
 
 .context-banner strong {

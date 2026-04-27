@@ -145,7 +145,7 @@ onMounted(cargar)
 
 .prod-avatar {
   width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(145deg, #4A0E20, #691C32); color: #fff;
+  background: linear-gradient(145deg, #0A3D24, #0F5132); color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: .9rem; font-weight: 700;
 }
@@ -167,7 +167,7 @@ onMounted(cargar)
 
 .spinner { display: inline-block; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin .6s linear infinite; }
 .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
-.spinner-dark { border-top-color: var(--color-primary, #691C32); }
+.spinner-dark { border-top-color: var(--color-primary, #0F5132); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .form-group { margin-bottom: 1rem; }

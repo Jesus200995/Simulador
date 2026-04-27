@@ -394,8 +394,8 @@ onMounted(fetchData)
 }
 
 .role-select.admin {
-  color: #691C32;
-  border-color: rgba(105, 28, 50, 0.3);
+  color: #0F5132;
+  border-color: rgba(15, 81, 50, 0.3);
 }
 
 /* Status badge */

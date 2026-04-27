@@ -807,7 +807,7 @@ onUnmounted(() => {
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(105, 28, 50, 0.12);
+  box-shadow: 0 0 0 3px rgba(15, 81, 50, 0.12);
 }
 
 .form-input.error {

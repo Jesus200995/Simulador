@@ -319,7 +319,7 @@ async function loadBodega() {
         })
 
         const el = document.createElement('div')
-        el.style.cssText = 'width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#691C32,#8B2A45);border:3px solid white;box-shadow:0 2px 8px rgba(105,28,50,0.35);'
+        el.style.cssText = 'width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0F5132,#187A4F);border:3px solid white;box-shadow:0 2px 8px rgba(15, 81, 50,0.35);'
 
         new mapboxgl.Marker({ element: el })
           .setLngLat([bodega.value.longitud, bodega.value.latitud])

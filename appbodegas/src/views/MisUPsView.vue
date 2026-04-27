@@ -89,7 +89,7 @@ onMounted(cargar)
 .up-name { font-size: 1rem; font-weight: 700; color: var(--color-text); }
 .up-area {
   font-size: .78rem; font-weight: 600; padding: .2rem .6rem;
-  background: rgba(105,28,50,.08); color: #691C32; border-radius: 99px; white-space: nowrap;
+  background: rgba(15, 81, 50,.08); color: #0F5132; border-radius: 99px; white-space: nowrap;
 }
 
 .up-meta { display: flex; gap: .75rem; flex-wrap: wrap; }
@@ -115,6 +115,6 @@ onMounted(cargar)
 
 .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin .6s linear infinite; }
 .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
-.spinner-dark { border-top-color: var(--color-primary, #691C32); }
+.spinner-dark { border-top-color: var(--color-primary, #0F5132); }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

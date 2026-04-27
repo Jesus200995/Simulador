@@ -16,6 +16,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
+    name: 'Inicio',
+    component: () => import('@/views/InicioView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mapa',
     name: 'Mapa',
     component: () => import('@/views/MapView.vue'),
     meta: { requiresAuth: true }
@@ -184,11 +190,11 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     next({ name: 'Login' })
   } else if (to.meta.guest && auth.isAuthenticated) {
-    next({ name: 'Mapa' })
+    next({ name: 'Inicio' })
   } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
     const allowedRoles = to.meta.roles as string[]
     if (!allowedRoles.includes(auth.rol)) {
-      next({ name: 'Mapa' })
+      next({ name: 'Inicio' })
     } else {
       next()
     }

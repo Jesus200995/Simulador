@@ -272,7 +272,7 @@ onMounted(cargar)
 
 .spinner { display: inline-block; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin .6s linear infinite; }
 .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
-.spinner-dark { border-top-color: var(--color-primary, #691C32); }
+.spinner-dark { border-top-color: var(--color-primary, #0F5132); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .field label { display: block; font-size: .8rem; font-weight: 600; margin-bottom: .35rem; color: var(--color-text-secondary); }

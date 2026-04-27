@@ -219,7 +219,7 @@ onMounted(cargar)
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.kpi-icon-primary { background: rgba(105,28,50,0.1); color: var(--color-primary, #691C32); }
+.kpi-icon-primary { background: rgba(15, 81, 50,0.1); color: var(--color-primary, #0F5132); }
 .kpi-icon-green { background: #f0fff4; color: #276749; }
 .kpi-icon-red { background: #fff5f5; color: #c53030; }
 .kpi-icon-gray { background: #f7fafc; color: #4a5568; }
@@ -244,7 +244,7 @@ onMounted(cargar)
 }
 .ref-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
 .ref-fecha { font-size: 0.78rem; color: var(--color-text-muted, #718096); }
-.ref-precio { font-size: 1.5rem; font-weight: 800; color: var(--color-primary, #691C32); margin-bottom: 0.25rem; }
+.ref-precio { font-size: 1.5rem; font-weight: 800; color: var(--color-primary, #0F5132); margin-bottom: 0.25rem; }
 .ref-maiz { font-size: 0.82rem; font-weight: 600; color: var(--color-text, #1a202c); margin-bottom: 0.2rem; }
 .ref-detalle { font-size: 0.78rem; color: var(--color-text-muted, #718096); }
 
@@ -264,7 +264,7 @@ onMounted(cargar)
 }
 .data-table tbody tr { border-bottom: 1px solid var(--color-border, #f0f4f8); }
 .data-table tbody tr:last-child { border-bottom: none; }
-.data-table tbody tr:hover { background: rgba(105,28,50,0.03); }
+.data-table tbody tr:hover { background: rgba(15, 81, 50,0.03); }
 .data-table td { padding: 0.7rem 1rem; color: var(--color-text, #1a202c); vertical-align: middle; }
 .text-right { text-align: right !important; }
 .td-precio { font-weight: 700; }
@@ -289,7 +289,7 @@ onMounted(cargar)
 /* spinner */
 .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }
 .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
-.spinner-dark { border-top-color: var(--color-primary, #691C32); }
+.spinner-dark { border-top-color: var(--color-primary, #0F5132); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .state-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; text-align: center; gap: 0.75rem; color: var(--color-text-muted, #718096); }

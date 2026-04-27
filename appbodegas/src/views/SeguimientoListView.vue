@@ -163,9 +163,9 @@ onMounted(() => cargar())
   cursor: pointer; transition: all .2s var(--ease-out);
   display: inline-flex; align-items: center; gap: .35rem;
   font-family: var(--font-family);
-  box-shadow: 0 1px 3px rgba(105, 28, 50, 0.2);
+  box-shadow: 0 1px 3px rgba(15, 81, 50, 0.2);
 }
-.ciclo-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(105, 28, 50, 0.25); }
+.ciclo-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(15, 81, 50, 0.25); }
 .ciclo-btn:active { transform: scale(.97); }
 
 .no-ciclos, .no-ups {
