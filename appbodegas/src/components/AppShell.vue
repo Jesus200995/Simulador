@@ -17,27 +17,42 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
           <span>Mapa</span>
         </router-link>
-        <router-link v-if="showField" to="/productor" class="nav-pill">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          <span>Productores</span>
+        <!-- Productor: Mis UPs -->
+        <router-link v-if="authStore.isProductor" to="/mis-ups" class="nav-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Mis UPs</span>
         </router-link>
-        <router-link v-if="showField" to="/seguimiento" class="nav-pill">
+        <!-- Productor/Tecnico: Seguimiento y Alertas -->
+        <router-link v-if="authStore.isProductor" to="/seguimiento" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
           <span>Seguimiento</span>
         </router-link>
-        <router-link v-if="showField" to="/alertas" class="nav-pill">
+        <router-link v-if="authStore.isProductor" to="/alertas" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>Alertas</span>
         </router-link>
+        <!-- Supervisor: Mis Productores -->
+        <router-link v-if="authStore.isSupervisor" to="/mis-productores" class="nav-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Mis Productores</span>
+        </router-link>
+        <!-- Admin: ver productores (gestión) -->
+        <router-link v-if="authStore.isAdmin" to="/productor" class="nav-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <span>Productores</span>
+        </router-link>
+        <!-- Infraestructura: visible para todos excepto productor puro -->
         <router-link to="/infraestructura" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
           <span>Infraestructura</span>
         </router-link>
-        <router-link to="/precios" class="nav-pill">
+        <!-- Precios: visible para productor, supervisor y admin -->
+        <router-link v-if="!authStore.isBodeguero" to="/precios" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span>Precios</span>
         </router-link>
-        <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas" class="nav-pill">
+        <!-- Bodeguero: Mis Bodegas -->
+        <router-link v-if="authStore.isBodeguero || authStore.isAdmin" to="/mis-bodegas" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
           <span>Bodegas</span>
         </router-link>
@@ -93,17 +108,33 @@
         </div>
         <span>Mapa</span>
       </router-link>
-      <router-link v-if="showField" to="/productor" class="tab-item">
+      <!-- Productor: Mis UPs como segundo tab -->
+      <router-link v-if="authStore.isProductor" to="/mis-ups" class="tab-item">
         <div class="tab-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
-        <span>Productores</span>
+        <span>Mis UPs</span>
       </router-link>
-      <router-link v-if="showField" to="/seguimiento" class="tab-item">
+      <!-- Productor: Seguimiento -->
+      <router-link v-if="authStore.isProductor" to="/seguimiento" class="tab-item">
         <div class="tab-icon-wrap">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
         </div>
         <span>Seguimiento</span>
+      </router-link>
+      <!-- Supervisor: Mis Productores -->
+      <router-link v-if="authStore.isSupervisor" to="/mis-productores" class="tab-item">
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <span>Productores</span>
+      </router-link>
+      <!-- Bodeguero: Mis Bodegas -->
+      <router-link v-if="authStore.isBodeguero" to="/mis-bodegas" class="tab-item">
+        <div class="tab-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+        </div>
+        <span>Bodegas</span>
       </router-link>
       <router-link to="/infraestructura" class="tab-item">
         <div class="tab-icon-wrap">
@@ -131,21 +162,21 @@
             </button>
           </div>
           <div class="more-links">
-            <router-link v-if="showField" to="/alertas" class="more-link" @click="moreOpen = false">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <router-link v-if="authStore.isProductor" to="/alertas" class="more-link" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               Alertas
             </router-link>
-            <router-link v-if="authStore.isResponsable || authStore.isAdmin" to="/mis-bodegas" class="more-link" @click="moreOpen = false">
+            <router-link v-if="!authStore.isBodeguero" to="/precios" class="more-link" @click="moreOpen = false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Precios
+            </router-link>
+            <router-link v-if="authStore.isBodeguero || authStore.isAdmin" to="/mis-bodegas" class="more-link" @click="moreOpen = false">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
               Mis Bodegas
             </router-link>
             <router-link v-if="authStore.isAdmin" to="/admin" class="more-link" @click="moreOpen = false">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               Administración
-            </router-link>
-            <router-link to="/precios" class="more-link" @click="moreOpen = false">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              Precios
             </router-link>
             <router-link to="/notificaciones" class="more-link" @click="moreOpen = false">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -198,15 +229,20 @@ async function fetchNotifs() {
   }
 }
 
-const showField = computed(() => !authStore.isResponsable)
-
 const initials = computed(() => {
   const n = authStore.usuario?.nombre_completo || ''
   return n.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 })
 
 const rolLabel = computed(() => {
-  const m: Record<string, string> = { tecnico: 'Técnico', supervisor: 'Supervisor', responsable: 'Responsable', admin: 'Admin' }
+  const m: Record<string, string> = {
+    productor: 'Productor',
+    tecnico: 'Técnico',
+    supervisor: 'Supervisor',
+    bodeguero: 'Bodeguero',
+    responsable: 'Responsable',
+    admin: 'Admin',
+  }
   return m[authStore.rol] || authStore.rol
 })
 
@@ -335,9 +371,11 @@ onUnmounted(() => {
   display: inline-block; margin-top: 6px; padding: 3px 12px; border-radius: 99px;
   font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
 }
+.um-role.productor { background: rgba(52,199,89,.1); color: #1D6B34; }
 .um-role.tecnico { background: rgba(0,122,255,.1); color: #007AFF; }
 .um-role.supervisor { background: rgba(88,86,214,.1); color: #5856D6; }
-.um-role.responsable { background: rgba(52,199,89,.1); color: #1D8348; }
+.um-role.bodeguero { background: rgba(255,149,0,.1); color: #C05621; }
+.um-role.responsable { background: rgba(255,149,0,.1); color: #C05621; }
 .um-role.admin { background: rgba(105,28,50,.1); color: #691C32; }
 .um-body { padding: .875rem 1.25rem; }
 .um-row {

@@ -69,12 +69,22 @@
         <h2>Nueva alerta manual</h2>
         <form @submit.prevent="crearAlerta">
           <div class="form-group">
-            <label class="form-label">UP ID <span class="form-required">*</span></label>
-            <input v-model.number="newAlerta.up_id" type="number" class="form-input" placeholder="ID de la UP" required />
+            <label class="form-label">Unidad de Producción <span class="form-required">*</span></label>
+            <select v-model="newAlerta.up_id" class="form-input" required @change="onUpChange">
+              <option :value="null">-- Seleccionar UP --</option>
+              <option v-for="up in misUps" :key="up.up_id" :value="up.up_id">
+                {{ up.up_name }} ({{ up.state_name || up.municipality_name || 'Sin ubicación' }})
+              </option>
+            </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Ciclo ID <span class="form-required">*</span></label>
-            <input v-model.number="newAlerta.ciclo_id" type="number" class="form-input" placeholder="ID del ciclo" required />
+          <div class="form-group" v-if="ciclosUp.length > 0">
+            <label class="form-label">Ciclo <span class="form-required">*</span></label>
+            <select v-model="newAlerta.ciclo_id" class="form-input" required>
+              <option :value="null">-- Seleccionar ciclo --</option>
+              <option v-for="c in ciclosUp" :key="c.cycle_id" :value="c.cycle_id">
+                {{ c.cycle_year }} / {{ c.cycle_type }}
+              </option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Tipo de alerta <span class="form-required">*</span></label>
@@ -128,6 +138,8 @@ const formLoading = ref(false)
 const formError = ref('')
 const filtros = ref({ estado_alerta: '', nivel_alerta: '' })
 const hoy = new Date().toISOString().split('T')[0]
+const misUps = ref<any[]>([])
+const ciclosUp = ref<any[]>([])
 
 const newAlerta = ref({
   up_id: null as number | null,
@@ -150,6 +162,27 @@ async function cargar() {
   }
 }
 
+async function cargarMisUps() {
+  try {
+    const data = await api.misUps.listar()
+    misUps.value = data.ups || []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+async function onUpChange() {
+  ciclosUp.value = []
+  newAlerta.value.ciclo_id = null
+  if (!newAlerta.value.up_id) return
+  try {
+    const data = await api.cycles.listar(newAlerta.value.up_id)
+    ciclosUp.value = data.cycles || []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 async function crearAlerta() {
   formError.value = ''
   formLoading.value = true
@@ -157,6 +190,7 @@ async function crearAlerta() {
     await api.alertas.crear(newAlerta.value)
     showForm.value = false
     newAlerta.value = { up_id: null, ciclo_id: null, tipo_alerta: '', nivel_alerta: '', fecha_alerta: hoy, observaciones: '' }
+    ciclosUp.value = []
     await cargar()
   } catch (e: any) {
     formError.value = e.message || 'Error al crear alerta'
@@ -188,7 +222,7 @@ function formatFecha(fecha: string) {
   return new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-onMounted(cargar)
+onMounted(() => { cargar(); cargarMisUps() })
 </script>
 
 <style scoped>

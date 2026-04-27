@@ -186,18 +186,57 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const guardando = ref(false)
 const error = ref('')
 
 const hoy = new Date().toISOString().split('T')[0]
 
+const todosLosTipos = [
+  {
+    value: 'observado',
+    label: 'Observado',
+    desc: 'Precio observado en campo o mercado local',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    roles: ['productor', 'tecnico', 'admin'],
+  },
+  {
+    value: 'bodega',
+    label: 'Bodega',
+    desc: 'Precio registrado en bodega o ventanilla',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    roles: ['bodeguero', 'responsable', 'admin'],
+  },
+  {
+    value: 'mercado_internacional',
+    label: 'Internacional',
+    desc: 'CBOT, CME, referencia global',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+    roles: ['admin'],
+  },
+  {
+    value: 'gobierno',
+    label: 'Gobierno',
+    desc: 'SEGALMEX, FIRA, ASERCA',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="1"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    roles: ['admin'],
+  },
+]
+
+const tiposPrecios = computed(() =>
+  todosLosTipos.filter(t => t.roles.includes(authStore.rol))
+)
+
+const defaultTipo = computed(() => tiposPrecios.value[0]?.value || 'observado')
+
 const form = ref({
-  tipo_precio: 'bodega',
+  tipo_precio: defaultTipo.value,
   tipo_maiz: '',
   fecha: hoy,
   precio: null as number | null,
@@ -211,24 +250,12 @@ const form = ref({
   programa: '',
 })
 
-const tiposPrecios = [
+const allTiposData = [
   {
     value: 'bodega',
     label: 'Bodega',
     desc: 'Precio registrado en bodega o ventanilla',
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-  },
-  {
-    value: 'mercado_internacional',
-    label: 'Internacional',
-    desc: 'CBOT, CME, referencia global',
-    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-  },
-  {
-    value: 'gobierno',
-    label: 'Gobierno',
-    desc: 'SEGALMEX, FIRA, ASERCA',
-    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="1"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
   },
 ]
 

@@ -38,7 +38,7 @@ router.patch('/usuarios/:id/rol', authMiddleware, soloAdmin, async (req: AuthReq
     const { id } = req.params;
     const { rol } = req.body;
 
-    const rolesValidos = ['tecnico', 'supervisor', 'responsable', 'admin'];
+    const rolesValidos = ['productor', 'tecnico', 'supervisor', 'bodeguero', 'responsable', 'admin'];
     if (!rolesValidos.includes(rol)) {
       res.status(400).json({ error: 'Rol inválido' });
       return;

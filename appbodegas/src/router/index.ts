@@ -39,16 +39,40 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/mis-ups',
+    name: 'MisUPs',
+    component: () => import('@/views/MisUPsView.vue'),
+    meta: { requiresAuth: true, roles: ['productor', 'tecnico'] }
+  },
+  {
+    path: '/mis-ups/:up_id',
+    name: 'MisUPsDetalle',
+    component: () => import('@/views/MisUPsDetalleView.vue'),
+    meta: { requiresAuth: true, roles: ['productor', 'tecnico'] }
+  },
+  {
+    path: '/mis-productores',
+    name: 'MisProductores',
+    component: () => import('@/views/MisProductoresView.vue'),
+    meta: { requiresAuth: true, roles: ['supervisor'] }
+  },
+  {
+    path: '/mis-productores/:producerId',
+    name: 'MisProductoresDetalle',
+    component: () => import('@/views/MisProductoresDetalleView.vue'),
+    meta: { requiresAuth: true, roles: ['supervisor'] }
+  },
+  {
     path: '/nueva-bodega',
     name: 'NuevaBodega',
     component: () => import('@/views/NuevaBodegaView.vue'),
-    meta: { requiresAuth: true, roles: ['responsable', 'admin'] }
+    meta: { requiresAuth: true, roles: ['bodeguero', 'responsable', 'admin'] }
   },
   {
     path: '/mis-bodegas',
     name: 'MisBodegas',
     component: () => import('@/views/MisBodegasView.vue'),
-    meta: { requiresAuth: true, roles: ['responsable', 'admin'] }
+    meta: { requiresAuth: true, roles: ['bodeguero', 'responsable', 'admin'] }
   },
   {
     path: '/admin',

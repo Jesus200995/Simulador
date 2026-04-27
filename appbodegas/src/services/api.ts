@@ -482,4 +482,42 @@ export const api = {
       return request(`/infraestructura/${id}/aprobar`, { method: 'PATCH' })
     },
   },
+
+  // =============================================
+  // Módulo Mis UPs (productor)
+  // =============================================
+  misUps: {
+    listar(): Promise<{ ups: any[]; producer: any }> {
+      return request('/mis-ups')
+    },
+
+    obtener(upId: number): Promise<{ up: any; cycles: any[]; seguimiento: any; alertas: any[] }> {
+      return request(`/mis-ups/${upId}`)
+    },
+
+    editar(upId: number, payload: any): Promise<{ up: any }> {
+      return request(`/mis-ups/${upId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+    },
+  },
+
+  // =============================================
+  // Módulo Mis Productores (supervisor)
+  // =============================================
+  misProductores: {
+    listar(): Promise<{ productores: any[] }> {
+      return request('/mis-productores')
+    },
+
+    vincular(curp: string): Promise<{ message: string; productor: any }> {
+      return request('/mis-productores', { method: 'POST', body: JSON.stringify({ curp }) })
+    },
+
+    desvincular(producerId: number): Promise<{ message: string }> {
+      return request(`/mis-productores/${producerId}`, { method: 'DELETE' })
+    },
+
+    obtener(producerId: number): Promise<{ productor: any; ups: any[]; alertas: any[] }> {
+      return request(`/mis-productores/${producerId}`)
+    },
+  },
 }

@@ -10,12 +10,14 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
-  const rol = computed<UserRole>(() => usuario.value?.rol || 'tecnico')
+  const rol = computed<UserRole>(() => usuario.value?.rol || 'productor')
+  const isProductor = computed(() => rol.value === 'productor' || rol.value === 'tecnico')
   const isTecnico = computed(() => rol.value === 'tecnico')
   const isSupervisor = computed(() => rol.value === 'supervisor')
-  const isResponsable = computed(() => rol.value === 'responsable')
+  const isBodeguero = computed(() => rol.value === 'bodeguero' || rol.value === 'responsable')
+  const isResponsable = computed(() => rol.value === 'responsable' || rol.value === 'bodeguero')
   const isAdmin = computed(() => rol.value === 'admin')
-  const canCapture = computed(() => rol.value === 'responsable' || rol.value === 'admin' || rol.value === 'tecnico')
+  const canCapture = computed(() => isProductor.value || isBodeguero.value || isAdmin.value)
 
   // Restaurar usuario desde localStorage
   const stored = localStorage.getItem('usuario')
@@ -72,5 +74,5 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
   }
 
-  return { token, usuario, loading, error, isAuthenticated, rol, isTecnico, isSupervisor, isResponsable, isAdmin, canCapture, login, registro, logout, clearError }
+  return { token, usuario, loading, error, isAuthenticated, rol, isProductor, isTecnico, isSupervisor, isBodeguero, isResponsable, isAdmin, canCapture, login, registro, logout, clearError }
 })

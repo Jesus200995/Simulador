@@ -21,6 +21,7 @@
         <label>Tipo de incidencia <span class="req">*</span></label>
         <select v-model="form.tipo_incidencia" required>
           <option value="">-- Seleccionar --</option>
+          <option value="helada">Helada</option>
           <option value="sequia">Sequía</option>
           <option value="lluvia_excesiva">Lluvia excesiva</option>
           <option value="plaga">Plaga</option>

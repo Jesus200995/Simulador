@@ -74,9 +74,9 @@
               <label class="rp-label" for="rol">Rol en el sistema</label>
               <select id="rol" v-model="form.rol" class="rp-input" :class="{ err: errors.rol }" @focus="authStore.clearError()">
                 <option value="">Selecciona un rol</option>
-                <option value="tecnico">Técnico de campo</option>
+                <option value="productor">Productor / Sembrador</option>
                 <option value="supervisor">Supervisor</option>
-                <option value="responsable">Responsable de Bodega</option>
+                <option value="bodeguero">Bodeguero</option>
               </select>
               <p v-if="errors.rol" class="rp-err">{{ errors.rol }}</p>
             </div>
