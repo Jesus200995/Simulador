@@ -11,7 +11,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
   try {
     const {
       curp, up_name, up_type, production_system, water_regime,
-      geom_geojson, state_name, municipality_name
+      geom_geojson, state_name, municipality_name,
+      coincide_superficie_calculada, area_real_declarada_ha, motivo_diferencia_superficie,
     } = req.body;
 
     // Validations
@@ -47,7 +48,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       INSERT INTO up (
         producer_id, up_name, up_type, production_system, water_regime,
         geom, centroid, area_ha_calc, state_name, municipality_name,
-        state_id, municipality_id
+        state_id, municipality_id,
+        coincide_superficie_calculada, area_real_declarada_ha, motivo_diferencia_superficie
       )
       VALUES (
         $1, $2, $3, $4, $5,
@@ -72,12 +74,14 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
           END
         ::geography) / 10000.0)::numeric, 4),
-        $7, $8, $9, $10
+        $7, $8, $9, $10,
+        $11, $12, $13
       )
       RETURNING
         up_id, producer_id, up_name, up_type, production_system, water_regime,
         area_ha_calc, state_name, municipality_name, state_id, municipality_id,
-        location_confirmed,
+        location_confirmed, coincide_superficie_calculada, area_real_declarada_ha,
+        motivo_diferencia_superficie,
         ST_AsGeoJSON(geom)::json as geom_geojson,
         ST_X(centroid) as centroid_lng, ST_Y(centroid) as centroid_lat,
         created_at
@@ -87,7 +91,10 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       producerId, up_name.trim(), up_type, production_system, water_regime,
       geojsonStr,
       state_name || null, municipality_name || null,
-      null, null // state_id, municipality_id - set during confirmation step
+      null, null, // state_id, municipality_id - set during confirmation step
+      coincide_superficie_calculada ?? null,
+      area_real_declarada_ha ?? null,
+      motivo_diferencia_superficie || null,
     ]);
 
     res.status(201).json({

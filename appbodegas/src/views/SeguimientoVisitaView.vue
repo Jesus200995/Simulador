@@ -10,7 +10,7 @@
 
     <div class="context-banner">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      <strong>{{ route.query.nombres }}</strong> · {{ route.query.up_name }} · Ciclo {{ route.query.ciclo_label }}
+      <strong>{{ route.query.nombres }}</strong> · {{ route.query.up_name }} · Ciclo {{ route.query.ciclo_label }}<span v-if="route.query.cultivo_label"> · Cultivo: <strong>{{ route.query.cultivo_label }}</strong></span>
     </div>
 
     <form class="glass-card" @submit.prevent="guardar">
@@ -119,6 +119,7 @@ async function guardar() {
       producer_id: Number(route.query.producer_id),
       up_id: Number(route.query.up_id),
       ciclo_id: Number(route.query.ciclo_id),
+      cycle_crop_id: route.query.cycle_crop_id ? Number(route.query.cycle_crop_id) : null,
       ...form.value,
       precio_observado: form.value.precio_observado || undefined,
       tipo_maiz: form.value.tipo_maiz || undefined,

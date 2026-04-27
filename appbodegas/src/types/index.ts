@@ -282,6 +282,9 @@ export interface CreateUPPayload {
   geom_geojson: any
   state_name?: string
   municipality_name?: string
+  coincide_superficie_calculada?: boolean | null
+  area_real_declarada_ha?: number | null
+  motivo_diferencia_superficie?: string | null
 }
 
 export interface CreateCyclePayload {

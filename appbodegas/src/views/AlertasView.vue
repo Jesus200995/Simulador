@@ -79,10 +79,19 @@
           </div>
           <div class="form-group" v-if="ciclosUp.length > 0">
             <label class="form-label">Ciclo <span class="form-required">*</span></label>
-            <select v-model="newAlerta.ciclo_id" class="form-input" required>
+            <select v-model="newAlerta.ciclo_id" class="form-input" required @change="onCicloChange">
               <option :value="null">-- Seleccionar ciclo --</option>
               <option v-for="c in ciclosUp" :key="c.cycle_id" :value="c.cycle_id">
                 {{ c.cycle_year }} / {{ c.cycle_type }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group" v-if="cultivosCiclo.length > 0">
+            <label class="form-label">Cultivo (opcional)</label>
+            <select v-model="newAlerta.cycle_crop_id" class="form-input">
+              <option :value="null">-- Aplica a todo el ciclo --</option>
+              <option v-for="cc in cultivosCiclo" :key="cc.cycle_crop_id" :value="cc.cycle_crop_id">
+                {{ cropLabel(cc.crop) }}{{ cc.variety_id ? ' · ' + cc.variety_id : '' }}
               </option>
             </select>
           </div>
@@ -143,10 +152,12 @@ const filtros = ref({ estado_alerta: '', nivel_alerta: '' })
 const hoy = new Date().toISOString().split('T')[0]
 const misUps = ref<any[]>([])
 const ciclosUp = ref<any[]>([])
+const cultivosCiclo = ref<any[]>([])
 
 const newAlerta = ref({
   up_id: null as number | null,
   ciclo_id: null as number | null,
+  cycle_crop_id: null as number | null,
   tipo_alerta: '',
   nivel_alerta: '',
   fecha_alerta: hoy,
@@ -176,7 +187,9 @@ async function cargarMisUps() {
 
 async function onUpChange() {
   ciclosUp.value = []
+  cultivosCiclo.value = []
   newAlerta.value.ciclo_id = null
+  newAlerta.value.cycle_crop_id = null
   if (!newAlerta.value.up_id) return
   try {
     const data = await api.cycles.listar(newAlerta.value.up_id)
@@ -186,14 +199,24 @@ async function onUpChange() {
   }
 }
 
+function onCicloChange() {
+  cultivosCiclo.value = []
+  newAlerta.value.cycle_crop_id = null
+  const ciclo = ciclosUp.value.find((c: any) => c.cycle_id === newAlerta.value.ciclo_id)
+  if (ciclo && Array.isArray(ciclo.crops)) {
+    cultivosCiclo.value = ciclo.crops
+  }
+}
+
 async function crearAlerta() {
   formError.value = ''
   formLoading.value = true
   try {
     await api.alertas.crear(newAlerta.value)
     showForm.value = false
-    newAlerta.value = { up_id: null, ciclo_id: null, tipo_alerta: '', nivel_alerta: '', fecha_alerta: hoy, observaciones: '' }
+    newAlerta.value = { up_id: null, ciclo_id: null, cycle_crop_id: null, tipo_alerta: '', nivel_alerta: '', fecha_alerta: hoy, observaciones: '' }
     ciclosUp.value = []
+    cultivosCiclo.value = []
     await cargar()
   } catch (e: any) {
     formError.value = e.message || 'Error al crear alerta'
@@ -208,6 +231,11 @@ function tipoLabel(tipo: string) {
     viento_fuerte: 'Viento fuerte', otro: 'Otro',
   }
   return map[tipo] || tipo
+}
+
+function cropLabel(crop: string) {
+  const m: Record<string, string> = { maiz: 'Maíz', frijol: 'Frijol' }
+  return m[crop] || crop
 }
 
 function nivelBadge(nivel: string) {

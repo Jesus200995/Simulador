@@ -230,7 +230,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
 // =============================================
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { up_id, ciclo_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones } = req.body;
+    const { up_id, ciclo_id, cycle_crop_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones } = req.body;
 
     if (!up_id || !ciclo_id || !tipo_alerta || !fecha_alerta || !nivel_alerta) {
       res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -243,11 +243,11 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 
     const result = await pool.query(`
       INSERT INTO alertas
-        (producer_id, up_id, ciclo_id, tipo_alerta, origen_alerta, fecha_alerta,
+        (producer_id, up_id, ciclo_id, cycle_crop_id, tipo_alerta, origen_alerta, fecha_alerta,
          nivel_alerta, estado_alerta, observaciones, usuario_registro)
-      VALUES ($1,$2,$3,$4,'manual',$5,$6,'pendiente',$7,$8)
+      VALUES ($1,$2,$3,$4,$5,'manual',$6,$7,'pendiente',$8,$9)
       RETURNING *
-    `, [producer_id, up_id, ciclo_id, tipo_alerta, fecha_alerta, nivel_alerta, observaciones || null, req.user!.userId]);
+    `, [producer_id, up_id, ciclo_id, cycle_crop_id || null, tipo_alerta, fecha_alerta, nivel_alerta, observaciones || null, req.user!.userId]);
 
     const alerta = result.rows[0];
 

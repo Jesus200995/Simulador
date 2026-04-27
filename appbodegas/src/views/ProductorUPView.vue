@@ -146,6 +146,35 @@
             </div>
           </div>
 
+          <!-- Superficie declarada (Punto 3) -->
+          <div class="form-section" v-if="calculatedArea && Number(calculatedArea) > 0">
+            <h4 class="form-section-title">Superficie declarada</h4>
+            <p class="form-hint">Superficie calculada por el polígono: <strong>{{ calculatedArea }} ha</strong></p>
+            <div class="form-group">
+              <label>¿La superficie calculada coincide con la superficie real de su parcela? <span class="required">*</span></label>
+              <div class="radio-row">
+                <label class="radio-label">
+                  <input type="radio" v-model="form.coincide_superficie" :value="true" /> Sí, coincide
+                </label>
+                <label class="radio-label">
+                  <input type="radio" v-model="form.coincide_superficie" :value="false" /> No, es diferente
+                </label>
+              </div>
+            </div>
+            <template v-if="form.coincide_superficie === false">
+              <div class="form-group">
+                <label>Superficie real declarada (ha) <span class="required">*</span></label>
+                <input v-model.number="form.area_real_declarada_ha" type="number" step="0.01" min="0" class="form-input"
+                       placeholder="Ej: 3.5" />
+              </div>
+              <div class="form-group">
+                <label>Motivo de la diferencia <span class="optional">(opcional)</span></label>
+                <textarea v-model="form.motivo_diferencia_superficie" class="form-input" rows="2"
+                          placeholder="Ej: el polígono incluye zona no cultivable"></textarea>
+              </div>
+            </template>
+          </div>
+
           <div class="wizard-actions">
             <button class="btn btn-secondary" @click="step = 1">Atrás</button>
             <button class="btn btn-primary" @click="submitStep2" :disabled="saving">
@@ -329,6 +358,9 @@ const form = reactive({
   water_regime: '',
   state_name: '',
   municipality_name: '',
+  coincide_superficie: null as boolean | null,
+  area_real_declarada_ha: null as number | null,
+  motivo_diferencia_superficie: '',
 })
 
 const cycleForm = reactive({
@@ -508,6 +540,15 @@ async function submitStep2() {
     return
   }
 
+  if (Number(calculatedArea.value) > 0 && form.coincide_superficie === null) {
+    stepError.value = 'Indique si la superficie calculada coincide con la real'
+    return
+  }
+  if (form.coincide_superficie === false && (!form.area_real_declarada_ha || form.area_real_declarada_ha <= 0)) {
+    stepError.value = 'Indique la superficie real declarada'
+    return
+  }
+
   saving.value = true
   try {
     const res = await api.ups.crear({
@@ -519,6 +560,9 @@ async function submitStep2() {
       geom_geojson: drawnGeoJSON.value,
       state_name: form.state_name,
       municipality_name: form.municipality_name,
+      coincide_superficie_calculada: form.coincide_superficie,
+      area_real_declarada_ha: form.coincide_superficie === false ? form.area_real_declarada_ha : null,
+      motivo_diferencia_superficie: form.coincide_superficie === false ? (form.motivo_diferencia_superficie || null) : null,
     })
     savedUp.value = res.up
     step.value = 3
@@ -604,6 +648,9 @@ function resetWizard() {
   form.water_regime = ''
   form.state_name = ''
   form.municipality_name = ''
+  form.coincide_superficie = null
+  form.area_real_declarada_ha = null
+  form.motivo_diferencia_superficie = ''
   cycleForm.cycle_year = new Date().getFullYear()
   cycleForm.cycle_type = ''
   cropForms.value = [emptyCrop()]
@@ -754,6 +801,32 @@ onUnmounted(() => {
 
 .form-section:last-of-type {
   border-bottom: none;
+}
+
+.form-hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.radio-row {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.35rem;
+}
+
+.radio-label {
+  display: flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem !important;
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
 }
 
 .form-section-title {

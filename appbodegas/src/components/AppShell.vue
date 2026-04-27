@@ -113,19 +113,35 @@
         <span>Inicio</span>
       </router-link>
 
-      <router-link :to="productoresRoute" class="tab-item">
-        <div class="tab-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <span>Productores</span>
-      </router-link>
-
-      <router-link to="/seguimiento" class="tab-item">
-        <div class="tab-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        </div>
-        <span>Seguimiento</span>
-      </router-link>
+      <!-- Bodeguero: Mis Bodegas + Inventarios. Otros: Productores + Seguimiento -->
+      <template v-if="authStore.isBodeguero">
+        <router-link to="/mis-bodegas" class="tab-item">
+          <div class="tab-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+          </div>
+          <span>Bodegas</span>
+        </router-link>
+        <router-link to="/infraestructura" class="tab-item">
+          <div class="tab-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <span>Inventarios</span>
+        </router-link>
+      </template>
+      <template v-else>
+        <router-link :to="productoresRoute" class="tab-item">
+          <div class="tab-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <span>{{ authStore.isProductor ? 'Mis UPs' : 'Productores' }}</span>
+        </router-link>
+        <router-link to="/seguimiento" class="tab-item">
+          <div class="tab-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <span>Seguimiento</span>
+        </router-link>
+      </template>
 
       <button class="tab-item tab-more" :class="{ active: moreOpen }" @click="moreOpen = !moreOpen">
         <div class="tab-icon-wrap">

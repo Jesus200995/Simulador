@@ -13,6 +13,7 @@
         <p class="context-info">
           <strong>{{ route.query.nombres }}</strong> ·
           {{ route.query.up_name }} · Ciclo {{ route.query.ciclo_label }}
+          <span v-if="route.query.cultivo_label"> · Cultivo: <strong>{{ route.query.cultivo_label }}</strong></span>
         </p>
       </div>
 
@@ -89,6 +90,7 @@ async function guardar() {
       producer_id: Number(route.query.producer_id),
       up_id: Number(route.query.up_id),
       ciclo_id: Number(route.query.ciclo_id),
+      cycle_crop_id: route.query.cycle_crop_id ? Number(route.query.cycle_crop_id) : null,
       ...form.value,
     })
     exito.value = true

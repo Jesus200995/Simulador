@@ -1,8 +1,12 @@
 import { Router, Response } from 'express';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { requireRole } from '../middleware/roles';
 
 const router = Router();
+
+// Roles que pueden operar bodegas (Reajustes.pdf §13)
+const BODEGA_WRITE = requireRole('bodeguero', 'responsable', 'admin');
 
 // =============================================
 // GET /api/infraestructura/catalogos
@@ -143,7 +147,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
 // =============================================
 // POST /api/infraestructura - Alta de bodega
 // =============================================
-router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
       nombre, clave, estado, municipio, localidad,
@@ -207,7 +211,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 // =============================================
 // PUT /api/infraestructura/:id - Editar (solo admin)
 // =============================================
-router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put('/:id', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -267,7 +271,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
 // =============================================
 // POST /api/infraestructura/:id/contactos
 // =============================================
-router.post('/:id/contactos', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:id/contactos', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { nombre, cargo, telefono, correo, es_principal } = req.body;
@@ -300,7 +304,7 @@ router.post('/:id/contactos', authMiddleware, async (req: AuthRequest, res: Resp
 // =============================================
 // DELETE /api/infraestructura/:id/contactos/:cid
 // =============================================
-router.delete('/:id/contactos/:cid', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/:id/contactos/:cid', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id, cid } = req.params;
     await pool.query(
@@ -317,7 +321,7 @@ router.delete('/:id/contactos/:cid', authMiddleware, async (req: AuthRequest, re
 // =============================================
 // POST /api/infraestructura/:id/inventario
 // =============================================
-router.post('/:id/inventario', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:id/inventario', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { ciclo, tipo_maiz, volumen_almacenado, volumen_problema, fecha, observaciones } = req.body;
@@ -380,7 +384,7 @@ router.get('/:id/precios', authMiddleware, async (req: AuthRequest, res: Respons
 // =============================================
 // POST /api/infraestructura/:id/precios
 // =============================================
-router.post('/:id/precios', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:id/precios', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { precio, tipo_maiz, fecha, observaciones } = req.body;

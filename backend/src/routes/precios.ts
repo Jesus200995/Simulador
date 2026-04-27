@@ -94,6 +94,24 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       return;
     }
 
+    // ── Permission rules per role (Reajustes.pdf §13) ──
+    const role = req.user?.rol;
+    const allowedByRole: Record<string, string[]> = {
+      productor: ['observado'],
+      tecnico: ['observado'],
+      bodeguero: ['bodega'],
+      responsable: ['bodega'],
+      admin: ['observado', 'bodega', 'mercado_internacional', 'gobierno'],
+      supervisor: [], // read-only
+    };
+    const allowed = allowedByRole[role || ''] || [];
+    if (!allowed.includes(tipo_precio)) {
+      res.status(403).json({
+        error: `El rol '${role}' no puede registrar precios de tipo '${tipo_precio}'.`,
+      });
+      return;
+    }
+
     // Ensure columns exist before inserting
     const result = await pool.query(`
       INSERT INTO precios (

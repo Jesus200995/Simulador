@@ -38,7 +38,15 @@ router.get('/productores', authMiddleware, async (req: AuthRequest, res: Respons
               SELECT json_agg(json_build_object(
                 'cycle_id', c.cycle_id,
                 'cycle_year', c.cycle_year,
-                'cycle_type', c.cycle_type
+                'cycle_type', c.cycle_type,
+                'crops', (
+                  SELECT COALESCE(json_agg(json_build_object(
+                    'cycle_crop_id', cc.cycle_crop_id,
+                    'crop', cc.crop,
+                    'variety_id', cc.variety_id
+                  )), '[]'::json)
+                  FROM cycle_crop cc WHERE cc.cycle_id = c.cycle_id
+                )
               ))
               FROM cycle c WHERE c.up_id = u.up_id
             )
@@ -96,7 +104,7 @@ router.get('/visitas', authMiddleware, async (req: AuthRequest, res: Response): 
 router.post('/visitas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
-      producer_id, up_id, ciclo_id,
+      producer_id, up_id, ciclo_id, cycle_crop_id,
       fecha_visita, etapa_cultivo, estado_cultivo,
       observaciones, precio_observado, tipo_maiz,
     } = req.body;
@@ -125,12 +133,12 @@ router.post('/visitas', authMiddleware, async (req: AuthRequest, res: Response):
 
     const result = await pool.query(`
       INSERT INTO seguimiento_visitas
-        (producer_id, up_id, ciclo_id, fecha_visita, etapa_cultivo, estado_cultivo,
+        (producer_id, up_id, ciclo_id, cycle_crop_id, fecha_visita, etapa_cultivo, estado_cultivo,
          observaciones, precio_observado, tipo_maiz, usuario_captura)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *
     `, [
-      producer_id, up_id, ciclo_id, fecha_visita, etapa_cultivo, estado_cultivo,
+      producer_id, up_id, ciclo_id, cycle_crop_id || null, fecha_visita, etapa_cultivo, estado_cultivo,
       observaciones || null, precio_observado || null, tipo_maiz || null, req.user?.userId,
     ]);
 
@@ -191,7 +199,7 @@ router.get('/incidencias', authMiddleware, async (req: AuthRequest, res: Respons
 // =============================================
 router.post('/incidencias', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { producer_id, up_id, ciclo_id, tipo_incidencia, severidad, fecha, observaciones } = req.body;
+    const { producer_id, up_id, ciclo_id, cycle_crop_id, tipo_incidencia, severidad, fecha, observaciones } = req.body;
 
     if (!producer_id || !up_id || !ciclo_id || !tipo_incidencia || !severidad || !fecha) {
       res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -206,10 +214,10 @@ router.post('/incidencias', authMiddleware, async (req: AuthRequest, res: Respon
 
     const result = await pool.query(`
       INSERT INTO seguimiento_incidencias
-        (producer_id, up_id, ciclo_id, tipo_incidencia, severidad, fecha, observaciones, usuario_captura)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        (producer_id, up_id, ciclo_id, cycle_crop_id, tipo_incidencia, severidad, fecha, observaciones, usuario_captura)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
-    `, [producer_id, up_id, ciclo_id, tipo_incidencia, severidad, fecha, observaciones || null, req.user?.userId]);
+    `, [producer_id, up_id, ciclo_id, cycle_crop_id || null, tipo_incidencia, severidad, fecha, observaciones || null, req.user?.userId]);
 
     res.status(201).json({ incidencia: result.rows[0] });
   } catch (error) {
@@ -249,7 +257,7 @@ router.get('/estimacion', authMiddleware, async (req: AuthRequest, res: Response
 // =============================================
 router.post('/estimacion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { producer_id, up_id, ciclo_id, fecha_estimacion, rendimiento_estimado_ton_ha, observaciones } = req.body;
+    const { producer_id, up_id, ciclo_id, cycle_crop_id, fecha_estimacion, rendimiento_estimado_ton_ha, observaciones } = req.body;
 
     if (!producer_id || !up_id || !ciclo_id || !fecha_estimacion || !rendimiento_estimado_ton_ha) {
       res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -268,12 +276,12 @@ router.post('/estimacion', authMiddleware, async (req: AuthRequest, res: Respons
 
     const result = await pool.query(`
       INSERT INTO estimacion_cosecha
-        (producer_id, up_id, ciclo_id, fecha_estimacion, rendimiento_estimado_ton_ha,
+        (producer_id, up_id, ciclo_id, cycle_crop_id, fecha_estimacion, rendimiento_estimado_ton_ha,
          produccion_estimada_ton, observaciones, usuario_captura)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `, [
-      producer_id, up_id, ciclo_id, fecha_estimacion, rendimiento_estimado_ton_ha,
+      producer_id, up_id, ciclo_id, cycle_crop_id || null, fecha_estimacion, rendimiento_estimado_ton_ha,
       produccion_estimada_ton, observaciones || null, req.user?.userId,
     ]);
 
@@ -317,7 +325,7 @@ router.get('/cosecha', authMiddleware, async (req: AuthRequest, res: Response): 
 router.post('/cosecha', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
-      producer_id, up_id, ciclo_id,
+      producer_id, up_id, ciclo_id, cycle_crop_id,
       fecha_cosecha, superficie_cosechada_ha, produccion_total_ton, observaciones,
     } = req.body;
 
@@ -343,12 +351,12 @@ router.post('/cosecha', authMiddleware, async (req: AuthRequest, res: Response):
 
     const result = await pool.query(`
       INSERT INTO cosecha_real
-        (producer_id, up_id, ciclo_id, fecha_cosecha, superficie_cosechada_ha,
+        (producer_id, up_id, ciclo_id, cycle_crop_id, fecha_cosecha, superficie_cosechada_ha,
          produccion_total_ton, rendimiento_real_ton_ha, observaciones, usuario_captura)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *
     `, [
-      producer_id, up_id, ciclo_id, fecha_cosecha, superficie_cosechada_ha,
+      producer_id, up_id, ciclo_id, cycle_crop_id || null, fecha_cosecha, superficie_cosechada_ha,
       produccion_total_ton, rendimiento_real_ton_ha, observaciones || null, req.user?.userId,
     ]);
 
