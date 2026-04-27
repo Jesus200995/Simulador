@@ -3,8 +3,8 @@
     <div class="view-header">
       <div class="view-header-row">
         <div>
-          <h1>Mis bodegas e inventarios</h1>
-          <p class="view-subtitle">Gestión de bodegas, inventarios y solicitudes</p>
+          <h1>Inventarios</h1>
+          <p class="view-subtitle">Gestión de inventarios, bodegas y solicitudes</p>
         </div>
         <div class="view-header-actions">
           <router-link to="/nueva-bodega" class="btn btn-primary btn-sm">
