@@ -425,20 +425,26 @@ onMounted(fetchData)
 
 <style scoped>
 /* ══════ LAYOUT ══════ */
-.adm { min-height: 100vh; background: #F5F5F7; padding-bottom: 5rem; }
+.adm {
+  background: #F5F5F7;
+  display: flex; flex-direction: column;
+  height: calc(100vh - 60px); /* desktop: topbar 60px */
+  overflow: hidden;
+}
 
 /* ══════ HEADER ══════ */
 .adm-header {
   background: linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
-  padding: 2rem 1.5rem 2.5rem;
+  padding: 1.5rem 1.5rem 2rem;
   border-radius: 0 0 32px 32px;
+  flex-shrink: 0;
 }
 .adm-header-inner { max-width: 820px; margin: 0 auto; }
 .adm-title { font-size: 1.75rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: -.03em; }
 .adm-sub { font-size: .9rem; color: rgba(255,255,255,.6); margin: .25rem 0 0; font-weight: 500; }
 
 /* ══════ SEGMENTED CONTROL ══════ */
-.adm-seg-wrap { max-width: 820px; margin: -1.25rem auto 0; padding: 0 1.5rem; position: relative; z-index: 2; }
+.adm-seg-wrap { max-width: 820px; margin: -1.25rem auto 0; padding: 0 1.5rem; position: relative; z-index: 2; flex-shrink: 0; }
 .adm-seg {
   display: inline-flex; background: rgba(255,255,255,.85); backdrop-filter: blur(16px);
   border-radius: 14px; padding: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.08);
@@ -471,7 +477,12 @@ onMounted(fetchData)
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ══════ SECTION ══════ */
-.adm-section { max-width: 820px; margin: 1.25rem auto 0; padding: 0 1.5rem; }
+.adm-section {
+  max-width: 820px; width: 100%; margin: .75rem auto 0; padding: 0 1.5rem;
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  box-sizing: border-box;
+}
 
 /* ══════ TOAST ══════ */
 .adm-toast {
@@ -488,8 +499,9 @@ onMounted(fetchData)
   display: flex; align-items: center; gap: .6rem;
   background: rgba(255,255,255,.75); backdrop-filter: blur(12px);
   border: .5px solid rgba(0,0,0,.06); border-radius: 14px;
-  padding: .6rem 1rem; margin-bottom: 1rem;
+  padding: .6rem 1rem; margin-bottom: .75rem;
   box-shadow: 0 1px 4px rgba(0,0,0,.03);
+  flex-shrink: 0;
 }
 .adm-search-bar svg { color: #999; flex-shrink: 0; }
 .adm-search {
@@ -502,7 +514,8 @@ onMounted(fetchData)
 .adm-users-card {
   background: rgba(255,255,255,.5); backdrop-filter: blur(12px);
   border: .5px solid rgba(0,0,0,.06); border-radius: 20px;
-  padding: .75rem; max-height: calc(100vh - 320px); overflow-y: auto;
+  padding: .75rem;
+  flex: 1; min-height: 0; overflow-y: auto;
   box-shadow: 0 2px 16px rgba(0,0,0,.04);
   scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.12) transparent;
 }
@@ -716,16 +729,16 @@ onMounted(fetchData)
   .usr-avatar { position: absolute; left: 1rem; top: 1rem; }
   .usr-actions { justify-content: flex-end; border-top: .5px solid rgba(0,0,0,.06); padding-top: .6rem; }
   .usr-badge { display: none; }
-  .adm-users-card { max-height: calc(100vh - 310px); }
+  .adm { height: calc(100vh - 52px - 72px); } /* topbar 52px + bottom tabs 72px */
   .pend-grid { grid-template-columns: 1fr; }
   .modal-card { padding: 1.25rem; border-radius: 18px; }
 }
 
 @media (max-width: 420px) {
-  .adm-header { padding: 1.25rem 1rem 1.75rem; }
+  .adm-header { padding: 1rem 1rem 1.5rem; }
+  .adm-title { font-size: 1.25rem; }
   .adm-section { padding: 0 1rem; }
   .adm-seg-wrap { padding: 0 1rem; }
-  .adm-users-card { max-height: calc(100vh - 300px); }
   .usr-meta { display: none; }
   .modal-actions { flex-direction: column; }
   .modal-btn { justify-content: center; }
