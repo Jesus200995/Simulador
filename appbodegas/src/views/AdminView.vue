@@ -53,7 +53,6 @@
           <div class="usr-body">
             <div class="usr-row-top">
               <div class="usr-name">{{ u.nombre_completo }}</div>
-              <span class="usr-badge" :class="'usr-badge--' + u.rol">{{ rolLabel(u.rol) }}</span>
             </div>
             <div class="usr-email">{{ u.email }}</div>
             <div class="usr-meta">
@@ -247,7 +246,7 @@ const roles = [
   { value: 'productor', label: 'Productor' },
   { value: 'supervisor', label: 'Supervisor' },
   { value: 'responsable', label: 'Responsable' },
-  { value: 'admin', label: 'Admin' },
+  { value: 'admin', label: 'Administrador' },
 ]
 
 const rolModal = ref<AdminUsuario | null>(null)
@@ -549,17 +548,6 @@ onMounted(fetchData)
 .usr-body { flex: 1; min-width: 0; }
 .usr-row-top { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
 .usr-name { font-size: .88rem; font-weight: 700; color: #1a1a2e; letter-spacing: -.015em; }
-.usr-badge {
-  padding: 2px 8px; border-radius: 8px; font-size: .62rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .03em; cursor: pointer;
-  transition: transform .15s;
-}
-.usr-badge:hover { transform: scale(1.05); }
-.usr-badge--productor { background: rgba(124,58,237,.12); color: #7C3AED; }
-.usr-badge--supervisor { background: rgba(37,99,235,.1); color: #2563EB; }
-.usr-badge--responsable { background: rgba(234,88,12,.1); color: #EA580C; }
-.usr-badge--admin { background: rgba(15,81,50,.1); color: #0F5132; }
-.usr-badge--bodeguero { background: rgba(217,119,6,.1); color: #D97706; }
 .usr-email { font-size: .78rem; color: #666; margin-top: .15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .usr-meta { display: flex; align-items: center; gap: .4rem; font-size: .7rem; color: #999; margin-top: .25rem; flex-wrap: wrap; }
 .usr-curp { font-family: ui-monospace, monospace; }
@@ -569,20 +557,27 @@ onMounted(fetchData)
 
 .usr-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
 .usr-role-group {
-  display: flex; align-items: center; gap: .25rem; cursor: pointer;
-  padding: 2px 4px 2px 8px; border-radius: 10px;
-  transition: background .2s;
+  display: flex; align-items: center; gap: 0; cursor: pointer;
+  border-radius: 10px; overflow: hidden; height: 36px;
+  transition: opacity .2s;
 }
-.usr-role-group:hover { background: rgba(0,0,0,.04); }
+.usr-role-group:hover { opacity: .85; }
 .usr-role-tag {
-  font-size: .62rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .03em; white-space: nowrap;
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; white-space: nowrap;
+  padding: 0; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  width: 110px;
 }
-.usr-role-tag--productor { color: #7C3AED; }
-.usr-role-tag--supervisor { color: #2563EB; }
-.usr-role-tag--responsable { color: #EA580C; }
-.usr-role-tag--admin { color: #0F5132; }
-.usr-role-tag--bodeguero { color: #D97706; }
+.usr-role-tag--productor { background: #EDE9FE; color: #6D28D9; }
+.usr-role-tag--supervisor { background: #DBEAFE; color: #1D4ED8; }
+.usr-role-tag--responsable { background: #FFF7ED; color: #C2410C; }
+.usr-role-tag--admin { background: #ECFDF5; color: #065F46; }
+.usr-role-tag--bodeguero { background: #FFFBEB; color: #B45309; }
+.usr-role-group .usr-btn--role {
+  border-radius: 0; width: 34px; height: 100%;
+  background: rgba(0,0,0,.05);
+}
 .usr-btn {
   width: 36px; height: 36px; border-radius: 11px; border: none;
   display: flex; align-items: center; justify-content: center;
@@ -728,7 +723,7 @@ onMounted(fetchData)
   .usr { position: relative; padding-left: 3.5rem; }
   .usr-avatar { position: absolute; left: 1rem; top: 1rem; }
   .usr-actions { justify-content: flex-end; border-top: .5px solid rgba(0,0,0,.06); padding-top: .6rem; }
-  .usr-badge { display: none; }
+  .usr-role-tag { min-width: 70px; font-size: .55rem; }
   .adm { height: calc(100vh - 52px - 72px); } /* topbar 52px + bottom tabs 72px */
   .pend-grid { grid-template-columns: 1fr; }
   .modal-card { padding: 1.25rem; border-radius: 18px; }

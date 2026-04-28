@@ -254,7 +254,7 @@ const rolLabel = computed(() => {
     supervisor: 'Supervisor',
     bodeguero: 'Bodeguero',
     responsable: 'Responsable',
-    admin: 'Admin',
+    admin: 'Administrador',
   }
   return m[authStore.rol] || authStore.rol
 })
