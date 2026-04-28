@@ -41,6 +41,7 @@
       </div>
 
       <!-- User cards list -->
+      <div class="adm-users-card">
       <div class="adm-users">
         <div v-for="u in filteredUsers" :key="u.id" class="usr" :class="{ 'usr--off': !u.activo }">
           <!-- Avatar -->
@@ -66,9 +67,12 @@
 
           <!-- Actions -->
           <div class="usr-actions">
-            <button class="usr-btn usr-btn--role" title="Cambiar rol" @click="openRolModal(u)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
-            </button>
+            <div class="usr-role-group" @click="openRolModal(u)">
+              <span class="usr-role-tag" :class="'usr-role-tag--' + u.rol">{{ rolLabel(u.rol) }}</span>
+              <button class="usr-btn usr-btn--role" title="Cambiar rol">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
+              </button>
+            </div>
             <button class="usr-btn usr-btn--toggle" :class="u.activo ? 'on' : 'off'" :title="u.activo ? 'Desactivar' : 'Activar'" @click="openToggleModal(u)">
               <svg v-if="u.activo" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64A9 9 0 0 1 12 21a9 9 0 0 1 0-18c1.66 0 3.2.45 4.53 1.23"/><path d="M12 2v10"/></svg>
               <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/></svg>
@@ -84,6 +88,7 @@
         <div v-if="filteredUsers.length === 0 && !loading" class="adm-empty">
           <p>{{ search ? 'Sin resultados' : 'No hay usuarios' }}</p>
         </div>
+      </div>
       </div>
     </section>
 
@@ -494,6 +499,16 @@ onMounted(fetchData)
 .adm-search::placeholder { color: #aaa; }
 
 /* ══════ USER CARDS ══════ */
+.adm-users-card {
+  background: rgba(255,255,255,.5); backdrop-filter: blur(12px);
+  border: .5px solid rgba(0,0,0,.06); border-radius: 20px;
+  padding: .75rem; max-height: calc(100vh - 260px); overflow-y: auto;
+  box-shadow: 0 2px 16px rgba(0,0,0,.04);
+  scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.12) transparent;
+}
+.adm-users-card::-webkit-scrollbar { width: 6px; }
+.adm-users-card::-webkit-scrollbar-thumb { background: rgba(0,0,0,.12); border-radius: 3px; }
+.adm-users-card::-webkit-scrollbar-track { background: transparent; }
 .adm-users { display: flex; flex-direction: column; gap: .625rem; }
 .usr {
   display: flex; align-items: center; gap: 1rem;
@@ -539,7 +554,22 @@ onMounted(fetchData)
 .usr-status-on { color: #22C55E; font-weight: 600; }
 .usr-status-off { color: #EF4444; font-weight: 600; }
 
-.usr-actions { display: flex; gap: .35rem; flex-shrink: 0; }
+.usr-actions { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; }
+.usr-role-group {
+  display: flex; align-items: center; gap: .25rem; cursor: pointer;
+  padding: 2px 4px 2px 8px; border-radius: 10px;
+  transition: background .2s;
+}
+.usr-role-group:hover { background: rgba(0,0,0,.04); }
+.usr-role-tag {
+  font-size: .62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .03em; white-space: nowrap;
+}
+.usr-role-tag--productor { color: #7C3AED; }
+.usr-role-tag--supervisor { color: #2563EB; }
+.usr-role-tag--responsable { color: #EA580C; }
+.usr-role-tag--admin { color: #0F5132; }
+.usr-role-tag--bodeguero { color: #D97706; }
 .usr-btn {
   width: 36px; height: 36px; border-radius: 11px; border: none;
   display: flex; align-items: center; justify-content: center;
@@ -686,6 +716,7 @@ onMounted(fetchData)
   .usr-avatar { position: absolute; left: 1rem; top: 1rem; }
   .usr-actions { justify-content: flex-end; border-top: .5px solid rgba(0,0,0,.06); padding-top: .6rem; }
   .usr-badge { display: none; }
+  .adm-users-card { max-height: calc(100vh - 240px); }
   .pend-grid { grid-template-columns: 1fr; }
   .modal-card { padding: 1.25rem; border-radius: 18px; }
 }
