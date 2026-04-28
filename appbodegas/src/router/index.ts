@@ -48,13 +48,13 @@ const routes: RouteRecordRaw[] = [
     path: '/mis-ups',
     name: 'MisUPs',
     component: () => import('@/views/MisUPsView.vue'),
-    meta: { requiresAuth: true, roles: ['productor', 'tecnico'] }
+    meta: { requiresAuth: true, roles: ['productor'] }
   },
   {
     path: '/mis-ups/:up_id',
     name: 'MisUPsDetalle',
     component: () => import('@/views/MisUPsDetalleView.vue'),
-    meta: { requiresAuth: true, roles: ['productor', 'tecnico'] }
+    meta: { requiresAuth: true, roles: ['productor'] }
   },
   {
     path: '/mis-productores',

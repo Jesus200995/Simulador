@@ -149,7 +149,7 @@ router.post('/visitas', authMiddleware, async (req: AuthRequest, res: Response):
       await pool.query(`
         INSERT INTO precios (tipo_precio, fuente, precio, tipo_maiz, fecha, observaciones,
                              visita_id, producer_id, up_id, ciclo_id, usuario_captura)
-        VALUES ('observado','tecnico',$1,$2,$3,$4,$5,$6,$7,$8,$9)
+        VALUES ('observado','campo',$1,$2,$3,$4,$5,$6,$7,$8,$9)
       `, [
         precio_observado, tipo_maiz, fecha_visita, observaciones || null,
         visita.id, producer_id, up_id, ciclo_id, req.user?.userId,

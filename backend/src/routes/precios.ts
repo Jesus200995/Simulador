@@ -98,7 +98,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     const role = req.user?.rol;
     const allowedByRole: Record<string, string[]> = {
       productor: ['observado'],
-      tecnico: ['observado'],
+      // tecnico role merged into productor
       bodeguero: ['bodega'],
       responsable: ['bodega'],
       admin: ['observado', 'bodega', 'mercado_internacional', 'gobierno'],

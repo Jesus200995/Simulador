@@ -23,7 +23,7 @@
     <div class="filter-bar">
       <select v-model="filtros.tipo_precio" @change="cargar">
         <option value="">Todos los tipos</option>
-        <option value="observado">Observado (técnico)</option>
+        <option value="observado">Observado (campo)</option>
         <option value="bodega">Bodega</option>
         <option value="mercado_internacional">Internacional</option>
         <option value="gobierno">Gobierno</option>

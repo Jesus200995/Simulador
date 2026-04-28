@@ -492,7 +492,7 @@ onUnmounted(() => {
   margin-top: 0.25rem;
 }
 
-.profile-role-badge.tecnico {
+.profile-role-badge.productor {
   background: rgba(88, 86, 214, 0.12);
   color: #5856D6;
 }

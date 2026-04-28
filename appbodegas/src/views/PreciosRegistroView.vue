@@ -204,7 +204,7 @@ const todosLosTipos = [
     label: 'Observado',
     desc: 'Precio observado en campo o mercado local',
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
-    roles: ['productor', 'tecnico', 'admin'],
+    roles: ['productor', 'admin'],
   },
   {
     value: 'bodega',

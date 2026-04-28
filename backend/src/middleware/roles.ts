@@ -18,7 +18,7 @@ export function requireRole(...allowed: string[]) {
 
 // Convenience constants per the Reajustes.pdf model
 export const ROLES = {
-  PRODUCTOR: ['productor', 'tecnico'],
+  PRODUCTOR: ['productor'],
   SUPERVISOR: ['supervisor'],
   BODEGUERO: ['bodeguero', 'responsable'],
   ADMIN: ['admin'],

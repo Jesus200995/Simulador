@@ -124,7 +124,7 @@ const firstName = computed(() => {
 
 const roleLabel = computed(() => {
   const m: Record<string, string> = {
-    productor: 'Productor', tecnico: 'Técnico', supervisor: 'Supervisor',
+    productor: 'Productor', supervisor: 'Supervisor',
     bodeguero: 'Bodeguero', responsable: 'Responsable', admin: 'Admin',
   }
   return m[auth.rol] || 'Usuario'
@@ -222,7 +222,7 @@ const IconMap = () => h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fi
 const quickActions = computed(() => {
   const items: Array<{ key: string; label: string; to: string; color: string; icon: any }> = []
 
-  if (auth.isAdmin || auth.isSupervisor || auth.rol === 'tecnico') {
+  if (auth.isAdmin || auth.isSupervisor || auth.isProductor) {
     items.push({ key: 'nuevo-prod', label: 'Registrar productor', to: '/productor/paso1', color: 'green', icon: IconUserPlus })
   }
   items.push({ key: 'seg', label: 'Seguimiento', to: '/seguimiento', color: 'teal', icon: IconClipboard })

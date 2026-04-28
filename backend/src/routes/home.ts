@@ -27,8 +27,8 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
       return { total, pendientes: 0 };
     }
 
-    // ── PRODUCTOR / TECNICO ─────────────────────────────────────
-    if (role === 'productor' || role === 'tecnico') {
+    // ── PRODUCTOR ──────────────────────────────────────────────
+    if (role === 'productor') {
       const producerRow = await pool.query(
         'SELECT producer_id, state_name, municipality_name FROM producer WHERE usuario_id = $1',
         [userId]

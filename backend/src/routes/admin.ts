@@ -39,7 +39,7 @@ router.patch('/usuarios/:id/rol', authMiddleware, soloAdmin, async (req: AuthReq
     const { id } = req.params;
     const { rol } = req.body;
 
-    const rolesValidos = ['productor', 'tecnico', 'supervisor', 'bodeguero', 'responsable', 'admin'];
+    const rolesValidos = ['productor', 'supervisor', 'bodeguero', 'responsable', 'admin'];
     if (!rolesValidos.includes(rol)) {
       res.status(400).json({ error: 'Rol inválido' });
       return;
@@ -125,7 +125,7 @@ router.post('/crear-usuario', authMiddleware, soloAdmin, async (req: AuthRequest
       return;
     }
 
-    const rolesValidos = ['productor', 'tecnico', 'supervisor', 'bodeguero', 'responsable', 'admin'];
+    const rolesValidos = ['productor', 'supervisor', 'bodeguero', 'responsable', 'admin'];
     if (!rolesValidos.includes(rol)) {
       res.status(400).json({ error: 'Rol no válido' });
       return;

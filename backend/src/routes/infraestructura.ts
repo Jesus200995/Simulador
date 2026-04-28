@@ -181,7 +181,7 @@ router.post('/', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Res
 
     // Rol del usuario — bodeguero/admin pueden crear; otros quedan en pendiente
     const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.user?.userId]);
-    const rol = userResult.rows[0]?.rol || 'tecnico';
+    const rol = userResult.rows[0]?.rol || 'productor';
     const estatus = ['admin', 'responsable'].includes(rol) ? 'aprobada' : 'pendiente';
     const estatus_operativo = estatus === 'aprobada' ? 'activa' : 'inactiva';
 
@@ -216,7 +216,7 @@ router.put('/:id', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: R
     const { id } = req.params;
 
     const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.user?.userId]);
-    const rol = userResult.rows[0]?.rol || 'tecnico';
+    const rol = userResult.rows[0]?.rol || 'productor';
     if (!['admin', 'responsable'].includes(rol)) {
       res.status(403).json({ error: 'Sin permisos para editar infraestructura' });
       return;

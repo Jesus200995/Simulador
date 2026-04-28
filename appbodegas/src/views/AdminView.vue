@@ -49,7 +49,7 @@
                 <td>{{ u.email }}</td>
                 <td>
                   <select class="role-select" :class="u.rol" :value="u.rol" @change="handleRolChange(u.id, ($event.target as HTMLSelectElement).value)" :disabled="actionLoading === u.id">
-                    <option value="tecnico">Técnico</option>
+                    <option value="productor">Productor</option>
                     <option value="supervisor">Supervisor</option>
                     <option value="responsable">Responsable de Bodega</option>
                     <option value="admin">Admin</option>
@@ -86,7 +86,7 @@
             </div>
             <div class="u-card-actions">
               <select class="role-select" :class="u.rol" :value="u.rol" @change="handleRolChange(u.id, ($event.target as HTMLSelectElement).value)" :disabled="actionLoading === u.id">
-                <option value="tecnico">Técnico</option>
+                <option value="productor">Productor</option>
                 <option value="supervisor">Supervisor</option>
                 <option value="responsable">Responsable</option>
                 <option value="admin">Admin</option>
@@ -380,7 +380,7 @@ onMounted(fetchData)
   min-width: 100px;
 }
 
-.role-select.tecnico {
+.role-select.productor {
   color: #5856D6;
   border-color: rgba(88, 86, 214, 0.3);
 }

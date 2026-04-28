@@ -149,7 +149,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
     let idx = 1;
 
     // Filtro por rol
-    if (rol === 'productor' || rol === 'tecnico') {
+    if (rol === 'productor') {
       conditions.push(`a.up_id IN (
         SELECT u.up_id FROM up u
         JOIN producer p ON p.producer_id = u.producer_id

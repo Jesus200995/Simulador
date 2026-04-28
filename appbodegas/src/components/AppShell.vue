@@ -26,7 +26,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span>Mis UPs</span>
         </router-link>
-        <!-- Productor/Tecnico: Seguimiento y Alertas -->
+        <!-- Productor: Seguimiento y Alertas -->
         <router-link v-if="!authStore.isBodeguero" to="/seguimiento" class="nav-pill">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
           <span>Seguimiento</span>
@@ -251,7 +251,6 @@ const initials = computed(() => {
 const rolLabel = computed(() => {
   const m: Record<string, string> = {
     productor: 'Productor',
-    tecnico: 'Técnico',
     supervisor: 'Supervisor',
     bodeguero: 'Bodeguero',
     responsable: 'Responsable',
@@ -386,7 +385,6 @@ onUnmounted(() => {
   font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
 }
 .um-role.productor { background: rgba(52,199,89,.1); color: #1D6B34; }
-.um-role.tecnico { background: rgba(0,122,255,.1); color: #007AFF; }
 .um-role.supervisor { background: rgba(88,86,214,.1); color: #5856D6; }
 .um-role.bodeguero { background: rgba(255,149,0,.1); color: #C05621; }
 .um-role.responsable { background: rgba(255,149,0,.1); color: #C05621; }
