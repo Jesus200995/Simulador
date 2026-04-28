@@ -169,4 +169,82 @@ router.post('/crear-usuario', authMiddleware, soloAdmin, async (req: AuthRequest
   }
 });
 
+// =============================================
+// PUT /api/admin/usuarios/:id - Edit user
+// =============================================
+router.put('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { nombre_completo, email, curp, telefono } = req.body;
+
+    if (!nombre_completo && !email && !curp && !telefono) {
+      res.status(400).json({ error: 'Debe enviar al menos un campo para actualizar' });
+      return;
+    }
+
+    const sets: string[] = [];
+    const params: any[] = [];
+    let idx = 1;
+
+    if (nombre_completo) { sets.push(`nombre_completo = $${idx++}`); params.push(nombre_completo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim()); }
+    if (email) { sets.push(`email = $${idx++}`); params.push(email.toLowerCase().trim()); }
+    if (curp) { sets.push(`curp = $${idx++}`); params.push(curp.toUpperCase().trim()); }
+    if (telefono) { sets.push(`telefono = $${idx++}`); params.push(telefono.replace(/\D/g, '')); }
+
+    params.push(id);
+    const result = await pool.query(
+      `UPDATE usuarios SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, nombre_completo, email, curp, telefono, rol, activo, created_at as fecha_registro`,
+      params
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json({ message: 'Usuario actualizado correctamente', usuario: result.rows[0] });
+  } catch (error: any) {
+    console.error('Error al editar usuario:', error);
+    if (error.code === '23505') {
+      res.status(409).json({ error: 'Ya existe un usuario con ese email o CURP' });
+      return;
+    }
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// DELETE /api/admin/usuarios/:id
+// =============================================
+router.delete('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Prevent self-deletion
+    if (Number(id) === req.user!.userId) {
+      res.status(400).json({ error: 'No puedes eliminar tu propia cuenta' });
+      return;
+    }
+
+    const result = await pool.query(
+      'DELETE FROM usuarios WHERE id = $1 RETURNING id, nombre_completo',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json({ message: `Usuario "${result.rows[0].nombre_completo}" eliminado correctamente` });
+  } catch (error: any) {
+    console.error('Error al eliminar usuario:', error);
+    if (error.code === '23503') {
+      res.status(409).json({ error: 'No se puede eliminar: el usuario tiene registros asociados. Desactívalo en su lugar.' });
+      return;
+    }
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

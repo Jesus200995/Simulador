@@ -260,6 +260,14 @@ export const api = {
     crearUsuario(payload: { email: string; curp: string; nombre_completo: string; password: string; telefono: string; rol: string }): Promise<{ message: string; usuario: AdminUsuario }> {
       return request('/admin/crear-usuario', { method: 'POST', body: JSON.stringify(payload) })
     },
+
+    editarUsuario(id: number, payload: { nombre_completo?: string; email?: string; curp?: string; telefono?: string }): Promise<{ message: string; usuario: AdminUsuario }> {
+      return request(`/admin/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+    },
+
+    eliminarUsuario(id: number): Promise<{ message: string }> {
+      return request(`/admin/usuarios/${id}`, { method: 'DELETE' })
+    },
   },
 
   // =============================================
