@@ -56,10 +56,28 @@
         <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.bodegas) }}</p>
         <p class="stat-trend" v-if="!loading">{{ stats.bodegas_label || 'En tu región' }}</p>
       </div>
+
+      <div v-if="auth.isAdmin" class="stat-card" @click="goTo('/precios')">
+        <p class="stat-label">Precios registrados</p>
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.precios || 0) }}</p>
+        <p class="stat-trend" v-if="!loading">Registros de maíz</p>
+      </div>
+
+      <div v-if="auth.isAdmin" class="stat-card" @click="goTo('/mis-bodegas')">
+        <p class="stat-label">Inventarios</p>
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.inventarios || 0) }}</p>
+        <p class="stat-trend" v-if="!loading">En sistema</p>
+      </div>
+
+      <div v-if="auth.isAdmin" class="stat-card" @click="goTo('/admin')">
+        <p class="stat-label">Usuarios activos</p>
+        <p class="stat-value" :class="{ skeleton: loading }">{{ loading ? '—' : formatNum(stats.usuarios || 0) }}</p>
+        <p class="stat-trend" v-if="!loading">En plataforma</p>
+      </div>
     </section>
 
-    <!-- Quick actions -->
-    <section class="inicio-actions">
+    <!-- Quick actions (hidden for admin) -->
+    <section v-if="!auth.isAdmin" class="inicio-actions">
       <h2 class="actions-title">Acciones rápidas</h2>
       <div class="actions-grid">
         <button v-for="a in quickActions" :key="a.key" class="action-card" @click="goTo(a.to)">
@@ -155,6 +173,9 @@ interface HomeStats {
   alertas_hidden?: boolean
   bodegas: number
   bodegas_label?: string
+  precios?: number
+  inventarios?: number
+  usuarios?: number
 }
 
 const stats = ref<HomeStats>({
@@ -212,7 +233,7 @@ const quickActions = computed(() => {
   }
 
   if (auth.isBodeguero || auth.isAdmin) {
-    items.push({ key: 'mis-bodegas', label: 'Mis bodegas', to: '/mis-bodegas', color: 'green', icon: IconWarehouse })
+    items.push({ key: 'mis-bodegas', label: 'Inventarios', to: '/mis-bodegas', color: 'green', icon: IconWarehouse })
   }
   items.push({ key: 'mapa', label: 'Ver mapa', to: '/mapa', color: 'teal', icon: IconMap })
 
@@ -536,8 +557,11 @@ onMounted(() => {
 
 /* ============ RESPONSIVE ============ */
 @media (min-width: 700px) {
-  .inicio-stats { grid-template-columns: repeat(4, 1fr); }
+  .inicio-stats { grid-template-columns: repeat(3, 1fr); }
   .actions-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 900px) {
+  .inicio-stats { grid-template-columns: repeat(4, 1fr); }
 }
 @media (min-width: 1024px) {
   .inicio-hero { padding: 2.25rem 2rem 3rem; border-radius: 0 0 36px 36px; }

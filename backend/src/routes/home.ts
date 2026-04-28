@@ -192,7 +192,7 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
 
     // ── ADMIN ───────────────────────────────────────────────────
     if (role === 'admin') {
-      const [productoresRow, ciclosRow, alertasRow, bodegasRow, recientes, recientesProd] = await Promise.all([
+      const [productoresRow, ciclosRow, alertasRow, bodegasRow, recientes, recientesProd, preciosRow, inventariosRow, usuariosRow] = await Promise.all([
         pool.query(`SELECT COUNT(*)::int AS c FROM producer`),
         pool.query(`SELECT COUNT(*)::int AS c FROM cycle`),
         pool.query(
@@ -210,6 +210,9 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
           `SELECT COUNT(*)::int AS c FROM producer
            WHERE created_at >= NOW() - INTERVAL '7 days'`
         ).catch(() => ({ rows: [{ c: 0 }] } as any)),
+        pool.query(`SELECT COUNT(*)::int AS c FROM precios_maiz`).catch(() => ({ rows: [{ c: 0 }] } as any)),
+        pool.query(`SELECT COUNT(*)::int AS c FROM inventarios`).catch(() => ({ rows: [{ c: 0 }] } as any)),
+        pool.query(`SELECT COUNT(*)::int AS c FROM usuarios WHERE activo = true`).catch(() => ({ rows: [{ c: 0 }] } as any)),
       ]);
 
       // Seguimiento total (sum of 4 tables)
@@ -233,6 +236,9 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
           alertas: alertasRow.rows[0].c,
           bodegas: bodegasRow.rows[0].c,
           bodegas_label: 'En sistema',
+          precios: preciosRow.rows[0].c,
+          inventarios: inventariosRow.rows[0].c,
+          usuarios: usuariosRow.rows[0].c,
           recientes: recientes.rows,
         },
       });
