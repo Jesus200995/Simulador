@@ -425,7 +425,7 @@ onMounted(fetchData)
 
 <style scoped>
 /* ══════ LAYOUT ══════ */
-.adm { min-height: 100vh; background: #F5F5F7; padding-bottom: 2rem; }
+.adm { min-height: 100vh; background: #F5F5F7; padding-bottom: 5rem; }
 
 /* ══════ HEADER ══════ */
 .adm-header {
@@ -502,7 +502,7 @@ onMounted(fetchData)
 .adm-users-card {
   background: rgba(255,255,255,.5); backdrop-filter: blur(12px);
   border: .5px solid rgba(0,0,0,.06); border-radius: 20px;
-  padding: .75rem; max-height: calc(100vh - 260px); overflow-y: auto;
+  padding: .75rem; max-height: calc(100vh - 320px); overflow-y: auto;
   box-shadow: 0 2px 16px rgba(0,0,0,.04);
   scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.12) transparent;
 }
@@ -716,7 +716,7 @@ onMounted(fetchData)
   .usr-avatar { position: absolute; left: 1rem; top: 1rem; }
   .usr-actions { justify-content: flex-end; border-top: .5px solid rgba(0,0,0,.06); padding-top: .6rem; }
   .usr-badge { display: none; }
-  .adm-users-card { max-height: calc(100vh - 240px); }
+  .adm-users-card { max-height: calc(100vh - 310px); }
   .pend-grid { grid-template-columns: 1fr; }
   .modal-card { padding: 1.25rem; border-radius: 18px; }
 }
@@ -725,6 +725,7 @@ onMounted(fetchData)
   .adm-header { padding: 1.25rem 1rem 1.75rem; }
   .adm-section { padding: 0 1rem; }
   .adm-seg-wrap { padding: 0 1rem; }
+  .adm-users-card { max-height: calc(100vh - 300px); }
   .usr-meta { display: none; }
   .modal-actions { flex-direction: column; }
   .modal-btn { justify-content: center; }
