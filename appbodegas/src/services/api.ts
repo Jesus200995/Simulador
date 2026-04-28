@@ -256,6 +256,10 @@ export const api = {
     rechazarBodega(id: number): Promise<{ message: string; bodega: Bodega }> {
       return request(`/bodegas/${id}/rechazar`, { method: 'PATCH' })
     },
+
+    crearUsuario(payload: { email: string; curp: string; nombre_completo: string; password: string; telefono: string; rol: string }): Promise<{ message: string; usuario: AdminUsuario }> {
+      return request('/admin/crear-usuario', { method: 'POST', body: JSON.stringify(payload) })
+    },
   },
 
   // =============================================

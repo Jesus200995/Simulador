@@ -1,10 +1,18 @@
 <template>
   <div class="page-container">
     <div class="view-header">
-      <h1>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Administración
-      </h1>
+      <div class="view-header-row">
+        <h1>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Administración
+        </h1>
+        <div class="view-header-actions">
+          <button class="btn btn-primary" @click="showCrear = true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Crear usuario
+          </button>
+        </div>
+      </div>
     </div>
 
       <!-- Admin tabs -->
@@ -136,6 +144,54 @@
           </div>
         </div>
       </div>
+
+      <!-- Modal: Crear usuario -->
+      <div v-if="showCrear" class="modal-overlay" @click.self="showCrear = false">
+        <div class="modal-card">
+          <h2>Crear usuario</h2>
+          <form @submit.prevent="handleCrearUsuario">
+            <div class="form-group">
+              <label class="form-label">Nombre completo <span class="form-required">*</span></label>
+              <input v-model="nuevoUser.nombre_completo" class="form-input" required placeholder="Ej. PERFIL NIVEL 1" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email <span class="form-required">*</span></label>
+              <input v-model="nuevoUser.email" type="email" class="form-input" required placeholder="usuario@correo.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CURP <span class="form-required">*</span></label>
+              <input v-model="nuevoUser.curp" class="form-input" required maxlength="18" placeholder="18 caracteres" style="text-transform:uppercase" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Teléfono <span class="form-required">*</span></label>
+              <input v-model="nuevoUser.telefono" class="form-input" required maxlength="10" placeholder="10 dígitos" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contraseña <span class="form-required">*</span></label>
+              <input v-model="nuevoUser.password" type="password" class="form-input" required minlength="6" placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rol <span class="form-required">*</span></label>
+              <select v-model="nuevoUser.rol" class="form-select" required>
+                <option value="admin">Admin</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="tecnico">Técnico</option>
+                <option value="bodeguero">Bodeguero</option>
+                <option value="responsable">Responsable de Bodega</option>
+                <option value="productor">Productor</option>
+              </select>
+            </div>
+            <div v-if="crearMsg" class="alert" :class="crearMsg.type === 'success' ? 'alert-success' : 'alert-error'" style="margin-bottom:.75rem">{{ crearMsg.text }}</div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" @click="showCrear = false">Cancelar</button>
+              <button type="submit" class="btn btn-primary" :disabled="crearLoading">
+                <span v-if="crearLoading" class="spinner spinner-sm"></span>
+                <span v-else>Crear</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
   </div>
 </template>
 
@@ -152,6 +208,18 @@ const actionLoading = ref<number | null>(null)
 const pendienteLoading = ref<number | null>(null)
 const actionMsg = ref<{ type: string; text: string } | null>(null)
 const pendientesMsg = ref<{ type: string; text: string } | null>(null)
+
+const showCrear = ref(false)
+const crearLoading = ref(false)
+const crearMsg = ref<{ type: string; text: string } | null>(null)
+const nuevoUser = ref({
+  nombre_completo: '',
+  email: '',
+  curp: '',
+  telefono: '',
+  password: '',
+  rol: 'admin',
+})
 
 async function fetchData() {
   loading.value = true
@@ -230,6 +298,27 @@ async function handleRechazar(bodegaId: number) {
   } finally {
     pendienteLoading.value = null
     setTimeout(() => { pendientesMsg.value = null }, 4000)
+  }
+}
+
+async function handleCrearUsuario() {
+  crearMsg.value = null
+  crearLoading.value = true
+  try {
+    const res = await api.admin.crearUsuario(nuevoUser.value)
+    crearMsg.value = { type: 'success', text: res.message }
+    // Add the new user to the list
+    usuarios.value.unshift(res.usuario as any)
+    // Reset form after short delay
+    setTimeout(() => {
+      showCrear.value = false
+      crearMsg.value = null
+      nuevoUser.value = { nombre_completo: '', email: '', curp: '', telefono: '', password: '', rol: 'admin' }
+    }, 1500)
+  } catch (err: any) {
+    crearMsg.value = { type: 'error', text: err.message || 'Error al crear usuario' }
+  } finally {
+    crearLoading.value = false
   }
 }
 

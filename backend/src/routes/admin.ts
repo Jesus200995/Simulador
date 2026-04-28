@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import bcrypt from 'bcrypt';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
@@ -108,6 +109,62 @@ router.get('/bodegas-pendientes', authMiddleware, soloAdmin, async (_req: AuthRe
     res.json({ bodegas: result.rows });
   } catch (error) {
     console.error('Error al obtener bodegas pendientes:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// POST /api/admin/crear-usuario
+// =============================================
+router.post('/crear-usuario', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { email, curp, nombre_completo, password, telefono, rol } = req.body;
+
+    if (!email || !curp || !nombre_completo || !password || !telefono || !rol) {
+      res.status(400).json({ error: 'Todos los campos son obligatorios' });
+      return;
+    }
+
+    const rolesValidos = ['productor', 'tecnico', 'supervisor', 'bodeguero', 'responsable', 'admin'];
+    if (!rolesValidos.includes(rol)) {
+      res.status(400).json({ error: 'Rol no válido' });
+      return;
+    }
+
+    if (password.length < 6) {
+      res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+      return;
+    }
+
+    const curpUpper = curp.toUpperCase().trim();
+    const emailLower = email.toLowerCase().trim();
+
+    const existente = await pool.query(
+      'SELECT id FROM usuarios WHERE email = $1 OR curp = $2',
+      [emailLower, curpUpper]
+    );
+    if (existente.rows.length > 0) {
+      res.status(409).json({ error: 'Ya existe un usuario con ese email o CURP' });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const nombreNorm = nombre_completo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+
+    const result = await pool.query(
+      `INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono, rol, activo)
+       VALUES ($1, $2, $3, $4, $5, $6, true)
+       RETURNING id, email, curp, nombre_completo, telefono, rol, activo, created_at as fecha_registro`,
+      [emailLower, curpUpper, nombreNorm, passwordHash, telefono.replace(/[\s\-\(\)]/g, ''), rol]
+    );
+
+    res.status(201).json({ message: 'Usuario creado exitosamente', usuario: result.rows[0] });
+  } catch (error: any) {
+    console.error('Error al crear usuario:', error);
+    if (error.code === '23505') {
+      res.status(409).json({ error: 'Ya existe un usuario con ese email o CURP' });
+      return;
+    }
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
