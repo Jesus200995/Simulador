@@ -1,6 +1,5 @@
 <template>
-  <AppShell>
-    <div class="dash">
+  <div class="dash">
       <!-- Header -->
       <div class="dash-header">
         <div class="dash-header-left">
@@ -460,12 +459,11 @@
         </template>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import AppShell from '@/components/AppShell.vue'
 import { api } from '@/services/api'
 
 type Tab = 'resumen' | 'produccion' | 'infraestructura' | 'precios' | 'alertas' | 'operacion'

@@ -57,6 +57,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   home: {
+    dashboard(): Promise<any> { return request('/home/dashboard') },
+    mapa(): Promise<any> { return request('/home/mapa') },
     stats(): Promise<{
       role: string
       stats: {
