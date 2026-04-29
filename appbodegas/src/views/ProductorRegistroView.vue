@@ -327,7 +327,8 @@ async function handleRegistro() {
   if (!form.localidad.trim()) errors.localidad = 'Localidad es obligatoria'
   if (!form.consentimiento_recabado) errors.consentimiento_recabado = 'Debe aceptar el consentimiento'
 
-  if (Object.keys(errors).length > 0) return
+  const hasErrors = Object.values(errors).some(v => v !== '')
+  if (hasErrors) return
 
   loading.value = true
   try {
@@ -353,9 +354,9 @@ async function handleRegistro() {
     sessionStorage.setItem('producer_id', String(response.producer.producer_id))
     sessionStorage.setItem('producer_curp', response.producer.curp)
 
-    // Redirigir a Paso 2 (Dibujo de UP) después de 1.5s
+    // Redirigir a Mis UPs después de 1.5s para crear la UP
     setTimeout(() => {
-      router.push('/productor/paso2')
+      router.push('/mis-ups')
     }, 1500)
   } catch (err: any) {
     console.error('Error registrando productor:', err)

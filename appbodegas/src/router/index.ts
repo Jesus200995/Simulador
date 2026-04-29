@@ -72,13 +72,13 @@ const routes: RouteRecordRaw[] = [
     path: '/nueva-bodega',
     name: 'NuevaBodega',
     component: () => import('@/views/NuevaBodegaView.vue'),
-    meta: { requiresAuth: true, roles: ['bodeguero', 'responsable', 'admin'] }
+    meta: { requiresAuth: true, roles: ['productor', 'bodeguero', 'responsable', 'admin'] }
   },
   {
     path: '/mis-bodegas',
     name: 'MisBodegas',
     component: () => import('@/views/MisBodegasView.vue'),
-    meta: { requiresAuth: true, roles: ['bodeguero', 'responsable', 'admin'] }
+    meta: { requiresAuth: true, roles: ['productor', 'bodeguero', 'responsable', 'admin'] }
   },
   {
     path: '/admin',
@@ -173,7 +173,7 @@ const routes: RouteRecordRaw[] = [
     path: '/infraestructura/nueva',
     name: 'NuevaInfraestructura',
     component: () => import('@/views/NuevaInfraestructuraView.vue'),
-    meta: { requiresAuth: true, roles: ['responsable', 'admin'] }
+    meta: { requiresAuth: true, roles: ['productor', 'responsable', 'admin'] }
   },
 ]
 
