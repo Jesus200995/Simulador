@@ -7,7 +7,7 @@
           <p class="view-subtitle">Gestión de inventarios, bodegas y solicitudes</p>
         </div>
         <div class="view-header-actions">
-          <router-link to="/nueva-bodega" class="btn btn-primary btn-sm">
+          <router-link v-if="!auth.isProductor" to="/nueva-bodega" class="btn btn-primary btn-sm">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nueva bodega
           </router-link>
@@ -69,7 +69,7 @@
           <div v-else-if="catSearch.length >= 2 && !catSearching" class="catalogo-no-results">
             <p>No se encontraron bodegas</p>
           </div>
-          <div class="catalogo-no-bodega-link">
+          <div v-if="!auth.isProductor" class="catalogo-no-bodega-link">
             <router-link to="/nueva-bodega" class="btn-link-nueva">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
               No encuentro mi bodega — Registrar nueva
@@ -224,7 +224,7 @@
         <div v-if="bodegas.length === 0" class="mis-bodegas-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
           <p>No tienes bodegas registradas</p>
-          <router-link to="/nueva-bodega" class="btn btn-primary">Registrar nueva bodega</router-link>
+          <router-link v-if="!auth.isProductor" to="/nueva-bodega" class="btn btn-primary">Registrar nueva bodega</router-link>
         </div>
         <div v-else class="mis-bodegas-grid">
           <router-link v-for="b in bodegas" :key="b.id" :to="`/bodega/${b.id}`" class="mis-bodega-card">
@@ -267,6 +267,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { api } from '@/services/api'
 import type { MiBodega, MiInventario, Bodega } from '@/types'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 
 const bodegas = ref<MiBodega[]>([])
 const inventarios = ref<MiInventario[]>([])

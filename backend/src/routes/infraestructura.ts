@@ -6,7 +6,7 @@ import { requireRole } from '../middleware/roles';
 const router = Router();
 
 // Roles que pueden operar bodegas (Reajustes.pdf §13)
-const BODEGA_WRITE = requireRole('productor', 'bodeguero', 'responsable', 'admin');
+const BODEGA_WRITE = requireRole('bodeguero', 'responsable', 'admin');
 
 // =============================================
 // GET /api/infraestructura/catalogos
