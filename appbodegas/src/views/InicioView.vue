@@ -3,29 +3,25 @@
     <!-- Hero greeting -->
     <header class="inicio-hero">
       <div class="inicio-hero-inner">
-        <div class="inicio-hero-row">
-          <div class="inicio-hero-text">
-            <p class="inicio-eyebrow">Inicio</p>
-            <h1 class="inicio-greeting">¡Hola, {{ firstName }}!</h1>
-            <p class="inicio-sub">Este es el resumen de hoy</p>
-          </div>
+        <div class="inicio-hero-text">
+          <p class="inicio-eyebrow">Inicio</p>
+          <h1 class="inicio-greeting">¡Hola, {{ firstName }}!</h1>
+          <p class="inicio-sub">Este es el resumen de hoy</p>
         </div>
+
+        <!-- Dashboard Admin card (inside hero) -->
+        <button v-if="auth.isAdmin" class="adb-card" @click="$router.push('/admin/dashboard')">
+          <div class="adb-icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <div class="adb-body">
+            <p class="adb-title">Dashboard Administrativo</p>
+            <p class="adb-sub">Monitoreo completo del sistema</p>
+          </div>
+          <svg class="adb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
     </header>
-
-    <!-- Dashboard Admin banner -->
-    <section v-if="auth.isAdmin" class="admin-dashboard-banner" @click="$router.push('/admin/dashboard')">
-      <div class="adb-left">
-        <div class="adb-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        </div>
-        <div>
-          <p class="adb-title">Dashboard Administrativo</p>
-          <p class="adb-sub">Visión completa del sistema</p>
-        </div>
-      </div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </section>
 
     <!-- Stats grid -->
     <section class="inicio-stats">
@@ -329,7 +325,7 @@ onMounted(() => {
 /* ============ HERO ============ */
 .inicio-hero {
   background: linear-gradient(160deg, var(--color-primary-darker) 0%, var(--color-primary) 55%, var(--color-primary-hover) 100%);
-  padding: 1.5rem 1.25rem 2.5rem;
+  padding: 1.5rem 1.25rem 1.5rem;
   border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;
@@ -373,45 +369,58 @@ onMounted(() => {
   margin: 0;
   font-weight: 500;
 }
-/* ============ ADMIN DASHBOARD BANNER ============ */
-.admin-dashboard-banner {
+/* ============ ADMIN DASHBOARD CARD (inside hero) ============ */
+.adb-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: -1rem auto 0;
-  max-width: 720px;
-  padding: 0 1.25rem 1rem;
-  background: transparent;
+  gap: .9rem;
+  width: 100%;
+  margin-top: 1.1rem;
+  padding: .9rem 1rem;
+  background: rgba(255,255,255,.13);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 16px;
   cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .18s, transform .18s, box-shadow .18s;
+  box-shadow: 0 2px 12px rgba(0,0,0,.10);
 }
-.adb-left {
-  display: flex;
-  align-items: center;
-  gap: .85rem;
+.adb-card:hover {
+  background: rgba(255,255,255,.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.14);
 }
-.adb-icon {
-  width: 48px; height: 48px;
-  border-radius: 14px;
-  background: var(--color-primary);
-  color: #fff;
+.adb-card:active { transform: scale(.98); }
+.adb-icon-wrap {
+  width: 42px; height: 42px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.22);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(15,81,50,.28);
+  color: #fff;
 }
+.adb-body { flex: 1; min-width: 0; }
 .adb-title {
-  font-size: .98rem;
+  font-size: .95rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: #fff;
   margin: 0 0 .1rem;
   letter-spacing: -.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .adb-sub {
-  font-size: .78rem;
-  color: var(--color-text-secondary);
+  font-size: .75rem;
+  color: rgba(255,255,255,.72);
   margin: 0;
   font-weight: 500;
 }
-.admin-dashboard-banner > svg { color: var(--color-text-tertiary); flex-shrink: 0; }
+.adb-arrow { color: rgba(255,255,255,.55); flex-shrink: 0; }
 
 /* ============ STATS ============ */
 .inicio-stats {
@@ -420,7 +429,7 @@ onMounted(() => {
   gap: .75rem;
   padding: 0 1.25rem;
   max-width: 720px;
-  margin: -1.5rem auto 0;
+  margin: 1.25rem auto 0;
   position: relative;
   z-index: 2;
 }
