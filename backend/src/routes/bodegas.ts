@@ -93,6 +93,51 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 });
 
 // =============================================
+// POST /api/bodegas - Crear nueva bodega
+// =============================================
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const {
+      clave, nombre, estado, municipio, localidad, direccion,
+      latitud, longitud, capacidad_ton, descripcion,
+    } = req.body;
+
+    if (!nombre || !estado || !municipio || latitud == null || longitud == null) {
+      res.status(400).json({ error: 'Campos obligatorios: nombre, estado, municipio, latitud, longitud' });
+      return;
+    }
+
+    if (latitud < -90 || latitud > 90 || longitud < -180 || longitud > 180) {
+      res.status(400).json({ error: 'Coordenadas inválidas' });
+      return;
+    }
+
+    // Determinar estatus según rol
+    const userResult = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [req.user?.userId]);
+    const rol = userResult.rows[0]?.rol || 'bodeguero';
+    const estatus = ['admin', 'responsable'].includes(rol) ? 'aprobada' : 'pendiente';
+
+    const result = await pool.query(`
+      INSERT INTO bodegas (
+        clave, nombre, estado, municipio, localidad, direccion,
+        latitud, longitud, capacidad_ton, descripcion,
+        estatus, creado_por, fecha_creacion
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, CURRENT_TIMESTAMP)
+      RETURNING *
+    `, [
+      clave || null, nombre, estado, municipio, localidad || null, direccion || null,
+      latitud, longitud, capacidad_ton || 0, descripcion || null,
+      estatus, req.user?.userId,
+    ]);
+
+    res.status(201).json({ message: 'Bodega registrada exitosamente', bodega: result.rows[0] });
+  } catch (error: any) {
+    console.error('Error al crear bodega:', error);
+    res.status(500).json({ error: 'Error al crear bodega: ' + (error.message || '') });
+  }
+});
+
+// =============================================
 // GET /api/bodegas/:id - Detalle de bodega
 // =============================================
 router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {

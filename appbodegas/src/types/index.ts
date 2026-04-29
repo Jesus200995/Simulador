@@ -102,17 +102,14 @@ export interface BodegasResponse {
 }
 
 export interface NuevaBodegaPayload {
-  clave: string
+  clave?: string
   nombre: string
   estado: string
   municipio: string
-  ddr?: string
-  cader?: string
-  ejido?: string
   direccion?: string
   localidad?: string
-  codigo_postal?: string
-  capacidad_toneladas?: number
+  descripcion?: string
+  capacidad_ton?: number
   latitud: number
   longitud: number
 }
