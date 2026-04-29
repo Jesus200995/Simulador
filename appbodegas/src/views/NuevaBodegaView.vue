@@ -30,10 +30,6 @@
               <input id="nombre" v-model="form.nombre" type="text" class="form-input" placeholder="Nombre visible en mapa" />
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="descripcion">Descripción</label>
-            <textarea id="descripcion" v-model="form.descripcion" class="form-input" rows="2" placeholder="Breve descripción de la bodega"></textarea>
-          </div>
         </div>
 
         <!-- Ubicación -->
@@ -165,7 +161,6 @@ let marker: mapboxgl.Marker | null = null
 const form = reactive({
   clave: '',
   nombre: '',
-  descripcion: '',
   estado: '',
   municipio: '',
   localidad: '',
@@ -319,7 +314,6 @@ async function handleSubmit() {
       localidad: form.localidad.trim() || undefined,
       direccion: form.direccion.trim() || undefined,
       capacidad_ton: form.capacidad_ton || undefined,
-      descripcion: form.descripcion.trim() || undefined,
       latitud: form.latitud,
       longitud: form.longitud,
     } as any)

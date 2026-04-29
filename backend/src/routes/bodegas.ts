@@ -99,7 +99,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
   try {
     const {
       clave, nombre, estado, municipio, localidad, direccion,
-      latitud, longitud, capacidad_ton, descripcion,
+      latitud, longitud, capacidad_ton,
     } = req.body;
 
     if (!nombre || !estado || !municipio || latitud == null || longitud == null) {
@@ -120,13 +120,13 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     const result = await pool.query(`
       INSERT INTO bodegas (
         clave, nombre, estado, municipio, localidad, direccion,
-        latitud, longitud, capacidad_ton, descripcion,
+        latitud, longitud, capacidad_ton,
         estatus, creado_por, fecha_creacion
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, CURRENT_TIMESTAMP)
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, CURRENT_TIMESTAMP)
       RETURNING *
     `, [
       clave || null, nombre, estado, municipio, localidad || null, direccion || null,
-      latitud, longitud, capacidad_ton || 0, descripcion || null,
+      latitud, longitud, capacidad_ton || 0,
       estatus, req.user?.userId,
     ]);
 

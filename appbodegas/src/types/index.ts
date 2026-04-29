@@ -108,7 +108,6 @@ export interface NuevaBodegaPayload {
   municipio: string
   direccion?: string
   localidad?: string
-  descripcion?: string
   capacidad_ton?: number
   latitud: number
   longitud: number
