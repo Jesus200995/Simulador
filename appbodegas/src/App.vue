@@ -1,5 +1,5 @@
 <template>
-  <AppShell v-if="authStore.isAuthenticated && !isGuestRoute" :full-bleed="isFullBleed">
+  <AppShell v-if="authStore.isAuthenticated && !isGuestRoute" :full-bleed="isMapRoute">
     <router-view />
   </AppShell>
   <router-view v-else />
@@ -15,8 +15,5 @@ const authStore = useAuthStore()
 const route = useRoute()
 
 const isGuestRoute = computed(() => route.meta.guest === true)
-const isFullBleed = computed(() =>
-  route.name === 'Mapa' ||
-  (route.name === 'Inicio' && (authStore.isAdmin || authStore.rol === 'responsable'))
-)
+const isMapRoute = computed(() => route.name === 'Mapa')
 </script>
