@@ -107,6 +107,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
              observaciones = $10,
              privacy_consent = $11,
              usuario_id = $12,
+             estatus_registro = 'completo',
              fecha_captura = COALESCE(fecha_captura, CURRENT_TIMESTAMP)
            WHERE curp = $13
            RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
@@ -124,9 +125,9 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
         `INSERT INTO producer (
            curp, nombres, apellido_paterno, apellido_materno, sexo, phone,
            correo_electronico, state_id, municipality_id, localidad, observaciones,
-           privacy_consent, usuario_id
+           privacy_consent, usuario_id, estatus_registro
          )
-         VALUES ($13, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         VALUES ($13, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'completo')
          RETURNING producer_id, curp, nombres, apellido_paterno, apellido_materno, sexo, phone AS telefono,
                    correo_electronico, state_id, municipality_id, localidad, observaciones,
                    privacy_consent, usuario_id, tecnico_asignado_id, usuario_capturista_id,

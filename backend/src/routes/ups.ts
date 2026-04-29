@@ -97,6 +97,12 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       motivo_diferencia_superficie || null,
     ]);
 
+    // Marcar productor como 'completo' si estaba pendiente
+    await pool.query(
+      `UPDATE producer SET estatus_registro = 'completo' WHERE producer_id = $1 AND estatus_registro = 'pendiente'`,
+      [producerId]
+    );
+
     res.status(201).json({
       up: result.rows[0],
       message: 'Unidad de Producción registrada exitosamente'
