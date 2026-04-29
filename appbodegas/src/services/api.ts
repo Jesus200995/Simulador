@@ -535,6 +535,18 @@ export const api = {
   },
 
   // =============================================
+  // Dashboard Admin
+  // =============================================
+  dashboardAdmin: {
+    resumen(): Promise<any> { return request('/dashboard/admin/resumen') },
+    produccion(): Promise<any> { return request('/dashboard/admin/produccion') },
+    infraestructura(): Promise<any> { return request('/dashboard/admin/infraestructura') },
+    precios(): Promise<any> { return request('/dashboard/admin/precios') },
+    alertas(): Promise<any> { return request('/dashboard/admin/alertas') },
+    operacion(): Promise<any> { return request('/dashboard/admin/operacion') },
+  },
+
+  // =============================================
   // Módulo Mis Productores (supervisor)
   // =============================================
   misProductores: {

@@ -86,6 +86,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/AdminView.vue'),
     meta: { requiresAuth: true, roles: ['admin'] }
   },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: () => import('@/views/DashboardAdminView.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'responsable'] }
+  },
   // ── Seguimiento de Maíz ──────────────────────
   {
     path: '/seguimiento',
