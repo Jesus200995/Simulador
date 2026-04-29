@@ -9,13 +9,23 @@
             <h1 class="inicio-greeting">¡Hola, {{ firstName }}!</h1>
             <p class="inicio-sub">Este es el resumen de hoy</p>
           </div>
-          <button class="inicio-bell" @click="$router.push('/notificaciones')" aria-label="Notificaciones">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span v-if="notifCount > 0" class="inicio-bell-dot">{{ notifCount > 9 ? '9+' : notifCount }}</span>
-          </button>
         </div>
       </div>
     </header>
+
+    <!-- Dashboard Admin banner -->
+    <section v-if="auth.isAdmin" class="admin-dashboard-banner" @click="$router.push('/admin/dashboard')">
+      <div class="adb-left">
+        <div class="adb-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div>
+          <p class="adb-title">Dashboard Administrativo</p>
+          <p class="adb-sub">Visión completa del sistema</p>
+        </div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </section>
 
     <!-- Stats grid -->
     <section class="inicio-stats">
@@ -363,32 +373,45 @@ onMounted(() => {
   margin: 0;
   font-weight: 500;
 }
-.inicio-bell {
-  position: relative;
-  width: 40px; height: 40px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.16);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
+/* ============ ADMIN DASHBOARD BANNER ============ */
+.admin-dashboard-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -1rem auto 0;
+  max-width: 720px;
+  padding: 0 1.25rem 1rem;
+  background: transparent;
   cursor: pointer;
-  transition: background .2s;
-  flex-shrink: 0;
 }
-.inicio-bell:hover { background: rgba(255,255,255,.2); }
-.inicio-bell-dot {
-  position: absolute;
-  top: -4px; right: -4px;
-  min-width: 18px; height: 18px;
-  background: #FF3B30;
+.adb-left {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+.adb-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: var(--color-primary);
   color: #fff;
-  border-radius: 99px;
-  font-size: .62rem;
-  font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  padding: 0 5px;
-  border: 2px solid var(--color-primary);
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(15,81,50,.28);
 }
+.adb-title {
+  font-size: .98rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 .1rem;
+  letter-spacing: -.015em;
+}
+.adb-sub {
+  font-size: .78rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+.admin-dashboard-banner > svg { color: var(--color-text-tertiary); flex-shrink: 0; }
 
 /* ============ STATS ============ */
 .inicio-stats {
