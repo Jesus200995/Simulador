@@ -322,12 +322,15 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import mapboxgl from 'mapbox-gl'
 import MapboxDraw from '@mapbox/mapbox-gl-draw'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import { api } from '@/services/api'
 import type { ProductorCatalogos, UP, GeoMunicipality, CatalogItem, CropVariety } from '@/types'
 import * as turf from '@turf/turf'
+
+const route = useRoute()
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
@@ -675,6 +678,16 @@ onMounted(async () => {
     catalogos.value = await api.catalogosProductor.obtener()
   } catch (e) {
     console.error('Error cargando catálogos:', e)
+  }
+
+  // Si viene de ProductorRegistroView (paso1) con step=1, saltar al mapa
+  const queryStep = route.query.step
+  const storedCurp = sessionStorage.getItem('producer_curp')
+  if (queryStep === '1' && storedCurp) {
+    form.curp = storedCurp
+    step.value = 1
+    await nextTick()
+    initMap()
   }
 })
 

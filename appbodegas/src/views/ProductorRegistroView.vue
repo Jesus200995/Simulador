@@ -354,13 +354,13 @@ async function handleRegistro() {
     sessionStorage.setItem('producer_id', String(response.producer.producer_id))
     sessionStorage.setItem('producer_curp', response.producer.curp)
 
-    // Redirigir a Mis UPs después de 1.5s para crear la UP
+    // Redirigir a Paso 2 (dibujar UP en mapa) después de 1.5s
     setTimeout(() => {
-      router.push('/mis-ups')
+      router.push('/productor?step=1')
     }, 1500)
   } catch (err: any) {
     console.error('Error registrando productor:', err)
-    error.value = err.response?.data?.error || 'Error al registrar productor'
+    error.value = err.message || 'Error al registrar productor'
   } finally {
     loading.value = false
   }
