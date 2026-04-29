@@ -544,6 +544,7 @@ export const api = {
     precios(): Promise<any> { return request('/dashboard/admin/precios') },
     alertas(): Promise<any> { return request('/dashboard/admin/alertas') },
     operacion(): Promise<any> { return request('/dashboard/admin/operacion') },
+    mapa(): Promise<any> { return request('/dashboard/admin/mapa') },
   },
 
   // =============================================

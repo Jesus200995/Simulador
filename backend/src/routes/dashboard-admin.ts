@@ -396,4 +396,56 @@ router.get('/operacion', authMiddleware, async (req: AuthRequest, res: Response)
   }
 });
 
+// GET /api/dashboard/admin/mapa — Datos geográficos para el mapa
+router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!adminOnly(req, res)) return;
+  try {
+    const [upsGeo, bodegasGeo, porEstado] = await Promise.all([
+      pool.query(`
+        SELECT
+          u.up_id, u.up_name, u.state_name, u.municipality_name,
+          u.area_ha_calc,
+          ST_X(u.centroid) AS lng, ST_Y(u.centroid) AS lat
+        FROM up u
+        WHERE u.centroid IS NOT NULL
+        LIMIT 500
+      `),
+      pool.query(`
+        SELECT
+          b.id, b.nombre, b.estado, b.municipio,
+          b.latitud AS lat, b.longitud AS lng,
+          b.capacidad_toneladas
+        FROM bodegas b
+        WHERE b.estatus = 'aprobada' AND b.activo = true
+          AND b.latitud IS NOT NULL AND b.longitud IS NOT NULL
+        LIMIT 200
+      `),
+      pool.query(`
+        SELECT
+          u.state_name AS estado,
+          COUNT(DISTINCT u.up_id)::int AS ups,
+          COUNT(DISTINCT p.producer_id)::int AS productores,
+          COALESCE(SUM(u.area_ha_calc), 0)::numeric(10,2) AS superficie_ha,
+          COALESCE(SUM(ec.produccion_estimada_ton), 0)::numeric(10,2) AS produccion_ton
+        FROM up u
+        JOIN producer p ON p.producer_id = u.producer_id
+        LEFT JOIN cycle c ON c.up_id = u.up_id
+        LEFT JOIN estimacion_cosecha ec ON ec.up_id = u.up_id AND ec.ciclo_id = c.cycle_id
+        WHERE u.state_name IS NOT NULL
+        GROUP BY u.state_name
+        ORDER BY produccion_ton DESC
+      `),
+    ]);
+
+    res.json({
+      ups: upsGeo.rows,
+      bodegas: bodegasGeo.rows,
+      por_estado: porEstado.rows,
+    });
+  } catch (error) {
+    console.error('Error dashboard mapa:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

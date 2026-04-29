@@ -1,947 +1,574 @@
 <template>
   <AppShell>
     <div class="dash">
-      <!-- Header -->
-      <div class="dash-header">
-        <div class="dash-header-left">
-          <h1 class="dash-title">Dashboard Administrativo</h1>
-          <p class="dash-subtitle">Sistema de Monitoreo de Maíz y Cultivos — SIMAC</p>
+      <!-- ═══ HEADER ═══ -->
+      <header class="dash-header">
+        <div>
+          <h1 class="dash-title">Dashboard administrativo</h1>
+          <p class="dash-subtitle">Vision general del sistema</p>
         </div>
-        <div class="dash-header-right">
-          <span class="dash-date">{{ fechaActual }}</span>
-          <button class="dash-refresh" @click="recargarTodo" :class="{ loading: cargando }">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            Actualizar
+        <div class="header-actions">
+          <span class="header-date">{{ fechaActual }}</span>
+          <button class="btn-glass" @click="recargarTodo" :class="{ spinning: cargando }">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- Tabs -->
-      <nav class="dash-tabs">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          class="dash-tab"
-          :class="{ active: tabActiva === tab.key }"
-          @click="tabActiva = tab.key"
-        >
-          <span v-html="tab.icon"></span>
-          {{ tab.label }}
-        </button>
-      </nav>
-
-      <!-- ════════ RESUMEN ════════ -->
-      <div v-if="tabActiva === 'resumen'" class="tab-content">
-        <div v-if="loadingResumen" class="loading-panel">
-          <div class="spinner"></div><span>Cargando KPIs...</span>
+      <!-- ═══ KPI CARDS ═══ -->
+      <div v-if="loadingResumen" class="loader-row"><div class="loader"></div></div>
+      <section v-else-if="resumen" class="kpi-row">
+        <div class="kpi" v-for="k in kpis" :key="k.key">
+          <div class="kpi-icon" :style="{ background: k.bg, color: k.color }">
+            <span v-html="k.icon"></span>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-val">{{ k.fmt(resumen[k.key]) }}</span>
+            <span class="kpi-lbl">{{ k.label }}</span>
+          </div>
         </div>
-        <template v-else-if="resumen">
-          <!-- KPI Cards -->
-          <div class="kpi-grid">
-            <div class="kpi-card green">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.productores.toLocaleString() }}</div>
-                <div class="kpi-label">Productores registrados</div>
-              </div>
-            </div>
-            <div class="kpi-card blue">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.ups.toLocaleString() }}</div>
-                <div class="kpi-label">Unidades Productivas</div>
-              </div>
-            </div>
-            <div class="kpi-card teal">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.superficie_ha.toLocaleString() }}</div>
-                <div class="kpi-label">Hectáreas sembradas (año)</div>
-              </div>
-            </div>
-            <div class="kpi-card amber">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12c0-2.76 1.12-5.26 2.93-7.07"/><path d="M12 6v6l4 2"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.produccion_estimada_ton.toLocaleString() }}</div>
-                <div class="kpi-label">Ton estimadas (año)</div>
-              </div>
-            </div>
-            <div class="kpi-card purple">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.bodegas_activas }}</div>
-                <div class="kpi-label">Bodegas activas</div>
-              </div>
-            </div>
-            <div class="kpi-card red">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.alertas_pendientes }}</div>
-                <div class="kpi-label">Alertas pendientes</div>
-              </div>
-            </div>
-            <div class="kpi-card slate">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.supervisores_activos }}</div>
-                <div class="kpi-label">Supervisores activos</div>
-              </div>
-            </div>
-            <div class="kpi-card green">
-              <div class="kpi-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
-              </div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ resumen.ciclos_activos }}</div>
-                <div class="kpi-label">Ciclos año actual</div>
-              </div>
-            </div>
-          </div>
-        </template>
-        <div v-else class="empty-panel">No hay datos disponibles</div>
-      </div>
+      </section>
 
-      <!-- ════════ PRODUCCIÓN ════════ -->
-      <div v-if="tabActiva === 'produccion'" class="tab-content">
-        <div v-if="loadingProduccion" class="loading-panel"><div class="spinner"></div><span>Cargando...</span></div>
-        <template v-else-if="produccion">
-          <!-- Por año summary -->
-          <div class="section-title">Resumen por Año</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Año</th><th>Ciclos</th><th>UPs</th><th>Área (ha)</th></tr></thead>
-              <tbody>
-                <tr v-for="row in produccion.por_anio" :key="row.cycle_year">
-                  <td><strong>{{ row.cycle_year }}</strong></td>
-                  <td>{{ row.ciclos }}</td>
-                  <td>{{ row.ups }}</td>
-                  <td>{{ Number(row.area_ha).toLocaleString() }} ha</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- ═══ MAP + INSIGHTS ═══ -->
+      <section class="map-section glass-card">
+        <div class="map-header">
+          <h2 class="section-heading">Mapa general del sistema</h2>
+          <nav class="map-tabs">
+            <button v-for="t in mapTabs" :key="t" class="map-tab" :class="{ active: mapTab === t }" @click="mapTab = t">{{ t }}</button>
+          </nav>
+        </div>
+        <div class="map-body">
+          <div ref="mapContainer" class="map-container"></div>
+          <aside class="insights-panel">
+            <h3 class="insights-title">Insights principales</h3>
+            <ul class="insights-list" v-if="insights.length">
+              <li v-for="(ins, i) in insights" :key="i" class="insight-item">
+                <span class="insight-dot" :class="ins.type"></span>
+                <span>{{ ins.text }}</span>
+              </li>
+            </ul>
+            <p v-else class="insights-empty">Cargando datos...</p>
+          </aside>
+        </div>
+      </section>
 
-          <div class="section-title">Por Estado</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Estado</th><th>UPs</th><th>Cultivos</th><th>Área (ha)</th><th>Producción (ton)</th></tr></thead>
-              <tbody>
-                <tr v-for="row in produccion.por_estado" :key="row.estado">
-                  <td>{{ row.estado || '—' }}</td>
-                  <td>{{ row.ups }}</td>
-                  <td>{{ row.cultivos }}</td>
-                  <td>{{ Number(row.area_ha).toLocaleString() }}</td>
-                  <td>{{ Number(row.produccion_ton).toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
+      <!-- ═══ CHARTS ROW ═══ -->
+      <section class="charts-row">
+        <div class="glass-card chart-card">
+          <h3 class="card-heading">Produccion por estado</h3>
+          <div class="chart-wrap">
+            <Bar v-if="produccionChartData" :data="produccionChartData" :options="barOpts" />
+            <div v-else class="chart-placeholder">Sin datos</div>
           </div>
-
-          <div class="section-title">Por Tipo de Ciclo</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Tipo</th><th>Año</th><th>Ciclos</th><th>Cultivos</th><th>Área (ha)</th></tr></thead>
-              <tbody>
-                <tr v-for="row in produccion.por_ciclo" :key="`${row.cycle_type}-${row.cycle_year}`">
-                  <td><span class="badge" :class="row.cycle_type === 'PV' ? 'badge-green' : 'badge-blue'">{{ row.cycle_type }}</span></td>
-                  <td>{{ row.cycle_year }}</td>
-                  <td>{{ row.ciclos }}</td>
-                  <td>{{ row.cultivos }}</td>
-                  <td>{{ Number(row.area_ha).toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
+        </div>
+        <div class="glass-card chart-card">
+          <h3 class="card-heading">Distribucion de alertas</h3>
+          <div class="chart-wrap chart-wrap-sm">
+            <Doughnut v-if="alertasChartData" :data="alertasChartData" :options="doughnutOpts" />
+            <div v-else class="chart-placeholder">Sin datos</div>
           </div>
+        </div>
+      </section>
 
-          <div class="info-note" v-if="produccion.ups_sin_ciclo > 0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {{ produccion.ups_sin_ciclo }} UPs sin ciclo registrado
-          </div>
-        </template>
-      </div>
+      <!-- ═══ STATE TABLE ═══ -->
+      <section class="glass-card table-section">
+        <h2 class="section-heading">Resumen por estado</h2>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead>
+              <tr>
+                <th>Estado</th>
+                <th>UPs</th>
+                <th>Productores</th>
+                <th>Superficie (ha)</th>
+                <th>Produccion est. (ton)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in estadoRows" :key="row.estado">
+                <td class="td-state">{{ row.estado || '—' }}</td>
+                <td>{{ row.ups }}</td>
+                <td>{{ row.productores }}</td>
+                <td>{{ fmtNum(row.superficie_ha) }}</td>
+                <td>{{ fmtNum(row.produccion_ton) }}</td>
+              </tr>
+              <tr v-if="!estadoRows.length">
+                <td colspan="5" class="td-empty">Sin datos disponibles</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <!-- ════════ INFRAESTRUCTURA ════════ -->
-      <div v-if="tabActiva === 'infraestructura'" class="tab-content">
-        <div v-if="loadingInfraestructura" class="loading-panel"><div class="spinner"></div><span>Cargando...</span></div>
-        <template v-else-if="infraestructura">
-          <!-- Summary cards -->
-          <div class="kpi-grid kpi-grid-3">
-            <div class="kpi-card purple">
-              <div class="kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ infraestructura.bodegas_aprobadas }}</div>
-                <div class="kpi-label">Bodegas aprobadas</div>
-              </div>
+      <!-- ═══ INFRAESTRUCTURA + PRECIOS ROW ═══ -->
+      <section class="detail-row">
+        <div class="glass-card detail-card">
+          <h3 class="card-heading">Infraestructura</h3>
+          <div v-if="infraestructura" class="mini-stats">
+            <div class="mini-stat">
+              <span class="ms-val">{{ infraestructura.bodegas_aprobadas }}</span>
+              <span class="ms-lbl">Bodegas</span>
             </div>
-            <div class="kpi-card blue">
-              <div class="kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><line x1="12" y1="3" x2="12" y2="21"/></svg></div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ Number(infraestructura.capacidad_total_ton).toLocaleString() }}</div>
-                <div class="kpi-label">Capacidad total (ton)</div>
-              </div>
+            <div class="mini-stat">
+              <span class="ms-val">{{ fmtNum(infraestructura.capacidad_total_ton) }}</span>
+              <span class="ms-lbl">Capacidad ton</span>
             </div>
-            <div class="kpi-card teal">
-              <div class="kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-              <div class="kpi-body">
-                <div class="kpi-value">{{ Number(infraestructura.stock_actual_ton).toLocaleString() }}</div>
-                <div class="kpi-label">Stock actual (ton)</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Ocupación gauge -->
-          <div class="ocupacion-wrap">
-            <div class="ocupacion-label">Ocupación de bodegas</div>
-            <div class="progress-bar-wrap">
-              <div class="progress-bar" :style="{ width: infraestructura.ocupacion_pct + '%' }" :class="ocupacionClass"></div>
-            </div>
-            <div class="ocupacion-pct">{{ infraestructura.ocupacion_pct }}%</div>
-          </div>
-
-          <div class="section-title">Por Estado</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Estado</th><th>Bodegas</th><th>Capacidad (ton)</th></tr></thead>
-              <tbody>
-                <tr v-for="row in infraestructura.por_estado" :key="row.estado">
-                  <td>{{ row.estado || '—' }}</td>
-                  <td>{{ row.total_bodegas }}</td>
-                  <td>{{ Number(row.capacidad_ton).toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="section-title">Top Bodegas por Capacidad</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Nombre</th><th>Estado</th><th>Municipio</th><th>Capacidad (ton)</th><th>Stock (ton)</th><th>Ocupación</th></tr></thead>
-              <tbody>
-                <tr v-for="row in infraestructura.top_bodegas" :key="row.nombre">
-                  <td>{{ row.nombre }}</td>
-                  <td>{{ row.estado }}</td>
-                  <td>{{ row.municipio }}</td>
-                  <td>{{ Number(row.capacidad_toneladas).toLocaleString() }}</td>
-                  <td>{{ Number(row.stock_actual).toLocaleString() }}</td>
-                  <td>
-                    <span class="mini-bar-wrap">
-                      <span class="mini-bar" :style="{ width: Math.min(100, Math.round((row.stock_actual / row.capacidad_toneladas) * 100)) + '%' }"></span>
-                    </span>
-                    {{ Math.min(100, Math.round((row.stock_actual / row.capacidad_toneladas) * 100)) }}%
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-      </div>
-
-      <!-- ════════ PRECIOS ════════ -->
-      <div v-if="tabActiva === 'precios'" class="tab-content">
-        <div v-if="loadingPrecios" class="loading-panel"><div class="spinner"></div><span>Cargando...</span></div>
-        <template v-else-if="precios">
-          <!-- Últimos precios registrados -->
-          <div class="section-title">Últimos Precios por Tipo</div>
-          <div class="precios-cards">
-            <div v-for="p in precios.recientes" :key="p.tipo_precio" class="precio-card" :class="tipoPrecioClass(p.tipo_precio)">
-              <div class="precio-tipo">{{ tipoPrecioLabel(p.tipo_precio) }}</div>
-              <div class="precio-valor">${{ Number(p.precio).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }}</div>
-              <div class="precio-meta">{{ p.tipo_maiz }} · {{ formatFecha(p.fecha) }}</div>
-              <div class="precio-lugar" v-if="p.estado">{{ p.estado }}<span v-if="p.municipio">, {{ p.municipio }}</span></div>
+            <div class="mini-stat">
+              <span class="ms-val">{{ fmtNum(infraestructura.stock_actual_ton) }}</span>
+              <span class="ms-lbl">Stock ton</span>
             </div>
           </div>
-
-          <!-- Promedios 30 días -->
-          <div class="section-title">Promedios últimos 30 días</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Tipo</th><th>Maíz</th><th>Promedio</th><th>Mín</th><th>Máx</th><th>Registros</th><th>Último</th></tr></thead>
-              <tbody>
-                <tr v-for="row in precios.promedios" :key="`${row.tipo_precio}-${row.tipo_maiz}`">
-                  <td><span class="badge" :class="tipoPrecioClass(row.tipo_precio)">{{ tipoPrecioLabel(row.tipo_precio) }}</span></td>
-                  <td>{{ row.tipo_maiz }}</td>
-                  <td><strong>${{ Number(row.promedio).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }}</strong></td>
-                  <td>${{ Number(row.minimo).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }}</td>
-                  <td>${{ Number(row.maximo).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }}</td>
-                  <td>{{ row.registros }}</td>
-                  <td>{{ formatFecha(row.ultima_fecha) }}</td>
-                </tr>
-                <tr v-if="!precios.promedios?.length">
-                  <td colspan="7" class="empty-cell">Sin datos en los últimos 30 días</td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="infraestructura" class="ocu-bar-wrap">
+            <div class="ocu-label">Ocupacion <strong>{{ infraestructura.ocupacion_pct }}%</strong></div>
+            <div class="ocu-track"><div class="ocu-fill" :class="ocuClass" :style="{ width: infraestructura.ocupacion_pct + '%' }"></div></div>
           </div>
+          <div v-else class="chart-placeholder">Cargando...</div>
+        </div>
 
-          <!-- Tendencia semanal -->
-          <div class="section-title">Tendencia Semanal (90 días)</div>
-          <div class="table-wrap" v-if="precios.tendencia?.length">
-            <table class="dash-table">
-              <thead><tr><th>Semana</th><th>Tipo</th><th>Promedio</th></tr></thead>
-              <tbody>
-                <tr v-for="row in precios.tendencia" :key="`${row.semana}-${row.tipo_precio}`">
-                  <td>{{ formatFecha(row.semana) }}</td>
-                  <td><span class="badge" :class="tipoPrecioClass(row.tipo_precio)">{{ tipoPrecioLabel(row.tipo_precio) }}</span></td>
-                  <td>${{ Number(row.promedio).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="empty-panel">Sin datos de tendencia</div>
-        </template>
-      </div>
-
-      <!-- ════════ ALERTAS ════════ -->
-      <div v-if="tabActiva === 'alertas'" class="tab-content">
-        <div v-if="loadingAlertas" class="loading-panel"><div class="spinner"></div><span>Cargando...</span></div>
-        <template v-else-if="alertasData">
-          <!-- Por nivel -->
-          <div class="kpi-grid kpi-grid-4">
-            <div v-for="n in alertasData.por_nivel" :key="n.nivel_alerta" class="kpi-card" :class="nivelClass(n.nivel_alerta)">
-              <div class="kpi-body">
-                <div class="kpi-value">{{ n.total }}</div>
-                <div class="kpi-label">{{ nivelLabel(n.nivel_alerta) }}</div>
-              </div>
+        <div class="glass-card detail-card">
+          <h3 class="card-heading">Precios recientes</h3>
+          <div v-if="precios?.recientes?.length" class="precio-list">
+            <div v-for="p in precios.recientes" :key="p.tipo_precio" class="precio-row">
+              <span class="pr-badge" :class="tipoPrecioClass(p.tipo_precio)">{{ tipoPrecioLabel(p.tipo_precio) }}</span>
+              <span class="pr-val">${{ fmtPrice(p.precio) }}/ton</span>
+              <span class="pr-meta">{{ p.tipo_maiz }}</span>
             </div>
           </div>
+          <div v-else class="chart-placeholder">Sin precios</div>
+        </div>
 
-          <!-- Por estado -->
-          <div class="section-title">Por Estado de Alerta</div>
-          <div class="estado-bars">
-            <div v-for="e in alertasData.por_estado" :key="e.estado_alerta" class="estado-bar-row">
-              <span class="estado-bar-label">{{ e.estado_alerta }}</span>
-              <div class="estado-bar-track">
-                <div class="estado-bar-fill" :class="estadoAlertaClass(e.estado_alerta)"
-                  :style="{ width: maxEstado > 0 ? Math.round((e.total / maxEstado) * 100) + '%' : '0%' }">
-                </div>
-              </div>
-              <span class="estado-bar-val">{{ e.total }}</span>
+        <div class="glass-card detail-card">
+          <h3 class="card-heading">Operacion</h3>
+          <div v-if="operacion" class="roles-list">
+            <div v-for="r in operacion.usuarios_por_rol" :key="r.rol" class="role-item">
+              <span class="ri-name">{{ rolLabel(r.rol) }}</span>
+              <span class="ri-count">{{ r.total }}</span>
             </div>
           </div>
-
-          <!-- Pendientes críticas -->
-          <div class="section-title">Alertas Pendientes (más críticas)</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Nivel</th><th>Tipo</th><th>Productor</th><th>UP</th><th>Estado</th><th>Fecha</th></tr></thead>
-              <tbody>
-                <tr v-for="a in alertasData.recientes_pendientes" :key="a.id">
-                  <td><span class="badge" :class="nivelClass(a.nivel_alerta)">{{ nivelLabel(a.nivel_alerta) }}</span></td>
-                  <td>{{ a.tipo_alerta }}</td>
-                  <td>{{ a.nombres ? `${a.nombres} ${a.apellido_paterno}` : '—' }}</td>
-                  <td>{{ a.up_name || '—' }}</td>
-                  <td>{{ a.state_name || '—' }}</td>
-                  <td>{{ formatFecha(a.fecha_alerta) }}</td>
-                </tr>
-                <tr v-if="!alertasData.recientes_pendientes?.length">
-                  <td colspan="6" class="empty-cell">No hay alertas pendientes</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Tipos con pendientes -->
-          <div class="section-title">Tipos con Alertas Pendientes</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Tipo</th><th>Nivel</th><th>Total</th></tr></thead>
-              <tbody>
-                <tr v-for="t in alertasData.por_tipo" :key="`${t.tipo_alerta}-${t.nivel_alerta}`">
-                  <td>{{ t.tipo_alerta }}</td>
-                  <td><span class="badge" :class="nivelClass(t.nivel_alerta)">{{ nivelLabel(t.nivel_alerta) }}</span></td>
-                  <td>{{ t.total }}</td>
-                </tr>
-                <tr v-if="!alertasData.por_tipo?.length">
-                  <td colspan="3" class="empty-cell">Sin alertas pendientes</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-      </div>
-
-      <!-- ════════ OPERACIÓN ════════ -->
-      <div v-if="tabActiva === 'operacion'" class="tab-content">
-        <div v-if="loadingOperacion" class="loading-panel"><div class="spinner"></div><span>Cargando...</span></div>
-        <template v-else-if="operacion">
-          <!-- Usuarios por rol -->
-          <div class="section-title">Usuarios por Rol</div>
-          <div class="roles-chips">
-            <div v-for="r in operacion.usuarios_por_rol" :key="r.rol" class="rol-chip">
-              <span class="rol-chip-name">{{ rolLabel(r.rol) }}</span>
-              <span class="rol-chip-count">{{ r.total }}</span>
+          <div v-if="operacion" class="calidad-mini">
+            <div class="cm-row" v-for="q in calidadItems" :key="q.key">
+              <span class="cm-lbl">{{ q.label }}</span>
+              <div class="cm-track"><div class="cm-fill" :style="{ width: q.pct + '%' }"></div></div>
+              <span class="cm-pct">{{ q.pct }}%</span>
             </div>
           </div>
-
-          <!-- Calidad de datos -->
-          <div class="section-title">Calidad de Datos — UPs</div>
-          <div class="calidad-grid">
-            <div class="calidad-item">
-              <div class="calidad-bar-wrap">
-                <div class="calidad-bar" :style="{ width: operacion.calidad_datos.con_nombre_pct + '%' }"></div>
-              </div>
-              <div class="calidad-label">Con nombre <strong>{{ operacion.calidad_datos.con_nombre_pct }}%</strong></div>
-            </div>
-            <div class="calidad-item">
-              <div class="calidad-bar-wrap">
-                <div class="calidad-bar" :style="{ width: operacion.calidad_datos.con_area_pct + '%' }"></div>
-              </div>
-              <div class="calidad-label">Con área calculada <strong>{{ operacion.calidad_datos.con_area_pct }}%</strong></div>
-            </div>
-            <div class="calidad-item">
-              <div class="calidad-bar-wrap">
-                <div class="calidad-bar" :style="{ width: operacion.calidad_datos.con_ciclo_pct + '%' }"></div>
-              </div>
-              <div class="calidad-label">Con ciclo <strong>{{ operacion.calidad_datos.con_ciclo_pct }}%</strong></div>
-            </div>
-            <div class="calidad-item">
-              <div class="calidad-bar-wrap">
-                <div class="calidad-bar" :style="{ width: operacion.calidad_datos.con_cultivo_pct + '%' }"></div>
-              </div>
-              <div class="calidad-label">Con cultivo <strong>{{ operacion.calidad_datos.con_cultivo_pct }}%</strong></div>
-            </div>
-          </div>
-          <div class="calidad-total">Total UPs: {{ operacion.calidad_datos.total_ups }}</div>
-
-          <!-- Supervisores -->
-          <div class="section-title">Actividad de Supervisores (últimos 30 días)</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Supervisor</th><th>Email</th><th>Productores</th><th>Visitas (mes)</th></tr></thead>
-              <tbody>
-                <tr v-for="s in operacion.supervisores" :key="s.supervisor_id">
-                  <td>{{ s.nombre_completo }}</td>
-                  <td class="cell-muted">{{ s.email }}</td>
-                  <td>{{ s.productores_asignados }}</td>
-                  <td>
-                    <span class="badge" :class="s.visitas_mes > 0 ? 'badge-green' : 'badge-gray'">{{ s.visitas_mes }}</span>
-                  </td>
-                </tr>
-                <tr v-if="!operacion.supervisores?.length">
-                  <td colspan="4" class="empty-cell">Sin supervisores activos</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Visitas recientes -->
-          <div class="section-title">Últimas Visitas de Campo</div>
-          <div class="table-wrap">
-            <table class="dash-table">
-              <thead><tr><th>Fecha</th><th>Productor</th><th>UP</th><th>Tipo</th><th>Técnico</th></tr></thead>
-              <tbody>
-                <tr v-for="v in operacion.visitas_recientes" :key="v.id">
-                  <td>{{ formatFecha(v.fecha_visita) }}</td>
-                  <td>{{ v.nombres }} {{ v.apellido_paterno }}</td>
-                  <td>{{ v.up_name || '—' }}</td>
-                  <td>{{ v.tipo_visita || '—' }}</td>
-                  <td class="cell-muted">{{ v.tecnico || '—' }}</td>
-                </tr>
-                <tr v-if="!operacion.visitas_recientes?.length">
-                  <td colspan="5" class="empty-cell">Sin visitas recientes</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-      </div>
+          <div v-else class="chart-placeholder">Cargando...</div>
+        </div>
+      </section>
     </div>
   </AppShell>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import AppShell from '@/components/AppShell.vue'
 import { api } from '@/services/api'
+import mapboxgl from 'mapbox-gl'
+import { Bar, Doughnut } from 'vue-chartjs'
+import {
+  Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
+  Title, Tooltip, Legend
+} from 'chart.js'
 
-type Tab = 'resumen' | 'produccion' | 'infraestructura' | 'precios' | 'alertas' | 'operacion'
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
-const tabActiva = ref<Tab>('resumen')
 const cargando = ref(false)
-
+const loadingResumen = ref(false)
 const resumen = ref<any>(null)
 const produccion = ref<any>(null)
 const infraestructura = ref<any>(null)
 const precios = ref<any>(null)
 const alertasData = ref<any>(null)
 const operacion = ref<any>(null)
+const mapaData = ref<any>(null)
 
-const loadingResumen = ref(false)
-const loadingProduccion = ref(false)
-const loadingInfraestructura = ref(false)
-const loadingPrecios = ref(false)
-const loadingAlertas = ref(false)
-const loadingOperacion = ref(false)
+const mapContainer = ref<HTMLElement | null>(null)
+let map: mapboxgl.Map | null = null
+const markers: mapboxgl.Marker[] = []
+const mapTab = ref('UPs')
+const mapTabs = ['UPs', 'Bodegas']
 
-const tabs: { key: Tab; label: string; icon: string }[] = [
-  { key: 'resumen',        label: 'Resumen',        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
-  { key: 'produccion',     label: 'Producción',     icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>' },
-  { key: 'infraestructura',label: 'Infraestructura',icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>' },
-  { key: 'precios',        label: 'Precios',        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
-  { key: 'alertas',        label: 'Alertas',        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
-  { key: 'operacion',      label: 'Operación',      icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
+const fechaActual = computed(() =>
+  new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+)
+
+const kpis = [
+  { key: 'productores', label: 'Productores activos', bg: 'rgba(26,92,56,.08)', color: '#15803d', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', fmt: (v: number) => fmtCompact(v) },
+  { key: 'ups', label: 'UPs registradas', bg: 'rgba(37,99,235,.08)', color: '#2563eb', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', fmt: (v: number) => fmtCompact(v) },
+  { key: 'superficie_ha', label: 'Hectareas sembradas', bg: 'rgba(14,148,148,.08)', color: '#0e9494', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>', fmt: (v: number) => fmtCompact(v) + ' ha' },
+  { key: 'bodegas_activas', label: 'Bodegas activas', bg: 'rgba(124,58,237,.08)', color: '#7c3aed', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>', fmt: (v: number) => String(v) },
+  { key: 'alertas_pendientes', label: 'Alertas activas', bg: 'rgba(220,38,38,.08)', color: '#dc2626', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', fmt: (v: number) => String(v) },
+  { key: 'ciclos_activos', label: 'Ciclos activos', bg: 'rgba(217,119,6,.08)', color: '#d97706', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>', fmt: (v: number) => String(v) },
 ]
 
-const fechaActual = computed(() => {
-  return new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+const estadoRows = computed(() => mapaData.value?.por_estado ?? [])
+
+const insights = computed(() => {
+  const arr: { text: string; type: string }[] = []
+  const estados = mapaData.value?.por_estado ?? []
+  if (estados.length > 0) {
+    const top = estados[0]
+    const totalProd = estados.reduce((s: number, e: any) => s + Number(e.produccion_ton || 0), 0)
+    const pct = totalProd > 0 ? Math.round((Number(top.produccion_ton) / totalProd) * 100) : 0
+    arr.push({ text: `${top.estado} concentra el ${pct}% de produccion estimada.`, type: 'green' })
+  }
+  if (resumen.value?.alertas_pendientes > 0)
+    arr.push({ text: `${resumen.value.alertas_pendientes} alertas pendientes por atender.`, type: 'red' })
+  if (infraestructura.value)
+    arr.push({ text: `Ocupacion de bodegas al ${infraestructura.value.ocupacion_pct}%.`, type: infraestructura.value.ocupacion_pct > 70 ? 'amber' : 'blue' })
+  if (resumen.value)
+    arr.push({ text: `${resumen.value.supervisores_activos} supervisores activos monitoreando.`, type: 'blue' })
+  return arr
 })
 
-const maxEstado = computed(() => {
-  if (!alertasData.value?.por_estado?.length) return 1
-  return Math.max(...alertasData.value.por_estado.map((e: any) => e.total))
+const produccionChartData = computed(() => {
+  const rows = mapaData.value?.por_estado?.slice(0, 8) ?? []
+  if (!rows.length) return null
+  return {
+    labels: rows.map((r: any) => r.estado?.substring(0, 12) || '—'),
+    datasets: [{
+      label: 'Superficie (ha)',
+      data: rows.map((r: any) => Number(r.superficie_ha)),
+      backgroundColor: 'rgba(26,92,56,.65)',
+      borderRadius: 6,
+    }],
+  }
 })
 
-const ocupacionClass = computed(() => {
-  const pct = infraestructura.value?.ocupacion_pct ?? 0
-  if (pct >= 90) return 'bar-red'
-  if (pct >= 70) return 'bar-amber'
-  return 'bar-green'
+const alertasChartData = computed(() => {
+  const niveles = alertasData.value?.por_nivel ?? []
+  if (!niveles.length) return null
+  const colors: Record<string, string> = { critico: '#dc2626', alto: '#f59e0b', medio: '#3b82f6', bajo: '#22c55e' }
+  return {
+    labels: niveles.map((n: any) => n.nivel_alerta),
+    datasets: [{
+      data: niveles.map((n: any) => n.total),
+      backgroundColor: niveles.map((n: any) => colors[n.nivel_alerta] || '#94a3b8'),
+      borderWidth: 0,
+    }],
+  }
 })
 
-async function cargarResumen() {
-  if (resumen.value) return
+const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)' } }, x: { grid: { display: false } } } }
+const doughnutOpts = { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' as const, labels: { boxWidth: 12, padding: 12, font: { size: 11 } } } } }
+
+const ocuClass = computed(() => {
+  const p = infraestructura.value?.ocupacion_pct ?? 0
+  return p >= 90 ? 'ocu-red' : p >= 70 ? 'ocu-amber' : 'ocu-green'
+})
+
+const calidadItems = computed(() => {
+  const c = operacion.value?.calidad_datos
+  if (!c) return []
+  return [
+    { key: 'nombre', label: 'Con nombre', pct: c.con_nombre_pct },
+    { key: 'area', label: 'Con area', pct: c.con_area_pct },
+    { key: 'ciclo', label: 'Con ciclo', pct: c.con_ciclo_pct },
+    { key: 'cultivo', label: 'Con cultivo', pct: c.con_cultivo_pct },
+  ]
+})
+
+function fmtCompact(v: number): string {
+  if (v >= 1_000_000) return (v / 1_000_000).toFixed(2) + ' M'
+  if (v >= 1_000) return (v / 1_000).toFixed(1).replace(/\.0$/, '') + ' K'
+  return String(v)
+}
+function fmtNum(v: any): string { return Number(v || 0).toLocaleString('es-MX') }
+function fmtPrice(v: any): string { return Number(v || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 }) }
+function tipoPrecioLabel(t: string) { return ({ observado: 'Parcela', bodega: 'Bodega', mercado_internacional: 'Internacional' } as any)[t] || t }
+function tipoPrecioClass(t: string) { return ({ observado: 'pr-green', bodega: 'pr-blue', mercado_internacional: 'pr-purple' } as any)[t] || '' }
+function rolLabel(r: string) { return ({ admin: 'Admin', supervisor: 'Supervisor', productor: 'Productor', bodeguero: 'Bodeguero', responsable: 'Responsable', tecnico: 'Tecnico' } as any)[r] || r }
+
+// ── Map ──
+function initMap() {
+  if (!mapContainer.value || map) return
+  map = new mapboxgl.Map({
+    container: mapContainer.value,
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-102.5, 23.5],
+    zoom: 4.3,
+    attributionControl: false,
+  })
+  map.addControl(new mapboxgl.NavigationControl(), 'top-right')
+  map.on('load', () => updateMarkers())
+}
+
+function clearMarkers() { markers.forEach(m => m.remove()); markers.length = 0 }
+
+function updateMarkers() {
+  clearMarkers()
+  if (!map || !mapaData.value) return
+  const items = mapTab.value === 'UPs' ? (mapaData.value.ups || []) : (mapaData.value.bodegas || [])
+  const color = mapTab.value === 'UPs' ? '#15803d' : '#7c3aed'
+  items.forEach((item: any) => {
+    if (!item.lng || !item.lat) return
+    const el = document.createElement('div')
+    el.style.cssText = `width:10px;height:10px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:pointer;`
+    const popup = new mapboxgl.Popup({ offset: 12, maxWidth: '200px' })
+      .setHTML(`<strong>${item.up_name || item.nombre || '—'}</strong><br><small>${item.state_name || item.estado || ''}</small>`)
+    const marker = new mapboxgl.Marker({ element: el }).setLngLat([Number(item.lng), Number(item.lat)]).setPopup(popup).addTo(map!)
+    markers.push(marker)
+  })
+}
+
+watch(mapTab, () => updateMarkers())
+
+// ── Data loading ──
+async function loadAll() {
   loadingResumen.value = true
-  try { resumen.value = await api.dashboardAdmin.resumen() } catch { } finally { loadingResumen.value = false }
-}
-async function cargarProduccion() {
-  if (produccion.value) return
-  loadingProduccion.value = true
-  try { produccion.value = await api.dashboardAdmin.produccion() } catch { } finally { loadingProduccion.value = false }
-}
-async function cargarInfraestructura() {
-  if (infraestructura.value) return
-  loadingInfraestructura.value = true
-  try { infraestructura.value = await api.dashboardAdmin.infraestructura() } catch { } finally { loadingInfraestructura.value = false }
-}
-async function cargarPrecios() {
-  if (precios.value) return
-  loadingPrecios.value = true
-  try { precios.value = await api.dashboardAdmin.precios() } catch { } finally { loadingPrecios.value = false }
-}
-async function cargarAlertas() {
-  if (alertasData.value) return
-  loadingAlertas.value = true
-  try { alertasData.value = await api.dashboardAdmin.alertas() } catch { } finally { loadingAlertas.value = false }
-}
-async function cargarOperacion() {
-  if (operacion.value) return
-  loadingOperacion.value = true
-  try { operacion.value = await api.dashboardAdmin.operacion() } catch { } finally { loadingOperacion.value = false }
+  const results = await Promise.allSettled([
+    api.dashboardAdmin.resumen(),
+    api.dashboardAdmin.produccion(),
+    api.dashboardAdmin.infraestructura(),
+    api.dashboardAdmin.precios(),
+    api.dashboardAdmin.alertas(),
+    api.dashboardAdmin.operacion(),
+    api.dashboardAdmin.mapa(),
+  ])
+  resumen.value = results[0].status === 'fulfilled' ? results[0].value : null
+  produccion.value = results[1].status === 'fulfilled' ? results[1].value : null
+  infraestructura.value = results[2].status === 'fulfilled' ? results[2].value : null
+  precios.value = results[3].status === 'fulfilled' ? results[3].value : null
+  alertasData.value = results[4].status === 'fulfilled' ? results[4].value : null
+  operacion.value = results[5].status === 'fulfilled' ? results[5].value : null
+  mapaData.value = results[6].status === 'fulfilled' ? results[6].value : null
+  loadingResumen.value = false
+  await nextTick()
+  initMap()
+  if (map?.loaded()) updateMarkers()
 }
 
 async function recargarTodo() {
   cargando.value = true
   resumen.value = null; produccion.value = null; infraestructura.value = null
-  precios.value = null; alertasData.value = null; operacion.value = null
-  await cargarTab(tabActiva.value)
+  precios.value = null; alertasData.value = null; operacion.value = null; mapaData.value = null
+  clearMarkers()
+  await loadAll()
   cargando.value = false
 }
 
-async function cargarTab(tab: Tab) {
-  if (tab === 'resumen') await cargarResumen()
-  else if (tab === 'produccion') await cargarProduccion()
-  else if (tab === 'infraestructura') await cargarInfraestructura()
-  else if (tab === 'precios') await cargarPrecios()
-  else if (tab === 'alertas') await cargarAlertas()
-  else if (tab === 'operacion') await cargarOperacion()
-}
-
-// Watch tab change and lazy-load
-import { watch } from 'vue'
-watch(tabActiva, (tab) => cargarTab(tab))
-
-onMounted(() => cargarResumen())
-
-// ── Helpers ──
-function formatFecha(f: string | null): string {
-  if (!f) return '—'
-  return new Date(f).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function tipoPrecioLabel(tipo: string): string {
-  const m: Record<string, string> = {
-    observado: 'Parcela',
-    bodega: 'Bodega',
-    mercado_internacional: 'Internacional',
-  }
-  return m[tipo] || tipo
-}
-
-function tipoPrecioClass(tipo: string): string {
-  const m: Record<string, string> = {
-    observado: 'badge-green',
-    bodega: 'badge-blue',
-    mercado_internacional: 'badge-purple',
-  }
-  return m[tipo] || 'badge-gray'
-}
-
-function nivelLabel(nivel: string): string {
-  const m: Record<string, string> = { critico: 'Crítico', alto: 'Alto', medio: 'Medio', bajo: 'Bajo' }
-  return m[nivel] || nivel
-}
-
-function nivelClass(nivel: string): string {
-  const m: Record<string, string> = { critico: 'red', alto: 'amber', medio: 'blue', bajo: 'green' }
-  return m[nivel] || 'slate'
-}
-
-function estadoAlertaClass(estado: string): string {
-  const m: Record<string, string> = { pendiente: 'bar-amber', confirmada: 'bar-blue', atendida: 'bar-green', descartada: 'bar-gray' }
-  return m[estado] || 'bar-gray'
-}
-
-function rolLabel(rol: string): string {
-  const m: Record<string, string> = { admin: 'Administrador', supervisor: 'Supervisor', productor: 'Productor', bodeguero: 'Bodeguero', responsable: 'Responsable', tecnico: 'Técnico' }
-  return m[rol] || rol
-}
+onMounted(() => loadAll())
+onUnmounted(() => { if (map) { map.remove(); map = null } })
 </script>
 
 <style scoped>
+/* ═══════════════════════════════════════════
+   Apple 2026 — Glassmorphism Dashboard
+   ═══════════════════════════════════════════ */
 .dash {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 24px 20px 60px;
+  padding: 28px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Header */
+/* ── Glass card base ── */
+.glass-card {
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.04), 0 0.5px 0 rgba(255,255,255,.6) inset;
+  padding: 22px 24px;
+}
+
+/* ── Header ── */
 .dash-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
   flex-wrap: wrap;
-}
-.dash-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #1A5C38;
-  margin: 0 0 4px;
-}
-.dash-subtitle {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin: 0;
-}
-.dash-header-right {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  flex-shrink: 0;
 }
-.dash-date {
-  font-size: 0.8rem;
-  color: #9ca3af;
-  text-transform: capitalize;
+.dash-title { font-size: 1.55rem; font-weight: 700; color: #111; margin: 0; letter-spacing: -.02em; }
+.dash-subtitle { font-size: .82rem; color: #6b7280; margin: 2px 0 0; }
+.header-actions { display: flex; align-items: center; gap: 14px; }
+.header-date { font-size: .78rem; color: #9ca3af; text-transform: capitalize; }
+.btn-glass {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(0,0,0,.08); background: rgba(255,255,255,.7);
+  backdrop-filter: blur(8px); cursor: pointer; color: #374151;
+  transition: all .15s;
 }
-.dash-refresh {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  color: #374151;
-  font-size: 0.82rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.dash-refresh:hover { background: #f3f4f6; border-color: #9ca3af; }
-.dash-refresh.loading svg { animation: spin 1s linear infinite; }
+.btn-glass:hover { background: rgba(255,255,255,.95); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.btn-glass.spinning svg { animation: spin .8s linear infinite; }
 
-/* Tabs */
-.dash-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 2px solid #e5e7eb;
-  margin-bottom: 24px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 0;
-}
-.dash-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border: none;
-  background: none;
-  color: #6b7280;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.dash-tab:hover { color: #1A5C38; }
-.dash-tab.active { color: #1A5C38; border-bottom-color: #1A5C38; }
-
-/* Tab content */
-.tab-content { animation: fadeUp 0.2s ease; }
-
-/* KPI Grid */
-.kpi-grid {
+/* ── KPI Row ── */
+.kpi-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
-}
-.kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.kpi-grid-4 { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-
-.kpi-card {
-  display: flex;
-  align-items: center;
+  grid-template-columns: repeat(6, 1fr);
   gap: 14px;
-  padding: 18px 20px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
-.kpi-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.kpi {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 16px;
+  box-shadow: 0 1px 8px rgba(0,0,0,.03);
+  transition: transform .15s, box-shadow .15s;
 }
-.kpi-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 4px;
+.kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,.07); }
+.kpi .kpi-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.kpi-label { font-size: 0.78rem; color: #6b7280; }
+.kpi-body { display: flex; flex-direction: column; min-width: 0; }
+.kpi-val { font-size: 1.35rem; font-weight: 700; line-height: 1.1; color: #111; letter-spacing: -.01em; }
+.kpi-lbl { font-size: .7rem; color: #6b7280; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Color variants */
-.kpi-card.green .kpi-icon  { background: rgba(26,92,56,.1);  color: #1A5C38; }
-.kpi-card.green .kpi-value { color: #1A5C38; }
-.kpi-card.blue .kpi-icon   { background: rgba(37,99,235,.1); color: #2563eb; }
-.kpi-card.blue .kpi-value  { color: #2563eb; }
-.kpi-card.teal .kpi-icon   { background: rgba(14,148,148,.1);color: #0e9494; }
-.kpi-card.teal .kpi-value  { color: #0e9494; }
-.kpi-card.amber .kpi-icon  { background: rgba(217,119,6,.1);  color: #d97706; }
-.kpi-card.amber .kpi-value { color: #d97706; }
-.kpi-card.purple .kpi-icon { background: rgba(124,58,237,.1); color: #7c3aed; }
-.kpi-card.purple .kpi-value{ color: #7c3aed; }
-.kpi-card.red .kpi-icon    { background: rgba(220,38,38,.1);  color: #dc2626; }
-.kpi-card.red .kpi-value   { color: #dc2626; }
-.kpi-card.slate .kpi-icon  { background: rgba(100,116,139,.1);color: #64748b; }
-.kpi-card.slate .kpi-value { color: #64748b; }
-
-/* Sections */
-.section-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 24px 0 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #f3f4f6;
+/* ── Map Section ── */
+.map-section { padding: 0; overflow: hidden; }
+.map-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px 14px; flex-wrap: wrap; gap: 10px;
 }
+.section-heading { font-size: 1.05rem; font-weight: 650; color: #111; margin: 0; }
+.map-tabs { display: flex; gap: 4px; }
+.map-tab {
+  padding: 6px 16px; border-radius: 99px; border: none;
+  font-size: .8rem; font-weight: 550; cursor: pointer;
+  background: rgba(0,0,0,.04); color: #6b7280; transition: all .15s;
+}
+.map-tab.active { background: #1A5C38; color: #fff; }
+.map-tab:hover:not(.active) { background: rgba(0,0,0,.08); }
+.map-body { display: flex; min-height: 380px; }
+.map-container { flex: 1; min-height: 380px; }
+.insights-panel {
+  width: 260px; flex-shrink: 0;
+  padding: 20px 22px;
+  border-left: 1px solid rgba(0,0,0,.06);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.insights-title { font-size: .85rem; font-weight: 600; color: #111; margin: 0; }
+.insights-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.insight-item { display: flex; align-items: flex-start; gap: 8px; font-size: .8rem; color: #374151; line-height: 1.4; }
+.insight-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0;
+}
+.insight-dot.green { background: #22c55e; }
+.insight-dot.red { background: #ef4444; }
+.insight-dot.amber { background: #f59e0b; }
+.insight-dot.blue { background: #3b82f6; }
+.insights-empty { font-size: .8rem; color: #9ca3af; margin: 0; }
 
-/* Tables */
-.table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; margin-bottom: 24px; }
-.dash-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.dash-table thead tr { background: #f9fafb; }
-.dash-table th {
-  padding: 10px 14px;
-  text-align: left;
-  font-weight: 600;
-  color: #374151;
+/* ── Charts Row ── */
+.charts-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; }
+.chart-card { display: flex; flex-direction: column; }
+.card-heading { font-size: .92rem; font-weight: 600; color: #111; margin: 0 0 16px; }
+.chart-wrap { height: 220px; position: relative; }
+.chart-wrap-sm { height: 220px; }
+.chart-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: .85rem; }
+
+/* ── State Table ── */
+.table-section { padding-bottom: 10px; }
+.table-wrap { overflow-x: auto; margin-top: 12px; }
+.dt { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.dt thead tr { border-bottom: 2px solid #e5e7eb; }
+.dt th {
+  padding: 10px 16px; text-align: left; font-weight: 600;
+  color: #6b7280; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em;
   white-space: nowrap;
-  border-bottom: 1px solid #e5e7eb;
 }
-.dash-table td {
-  padding: 10px 14px;
-  color: #374151;
-  border-bottom: 1px solid #f3f4f6;
-  vertical-align: middle;
-}
-.dash-table tr:last-child td { border-bottom: none; }
-.dash-table tr:hover td { background: #fafafa; }
-.empty-cell { text-align: center; color: #9ca3af; padding: 20px !important; }
-.cell-muted { color: #9ca3af !important; }
+.dt td { padding: 11px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+.dt tbody tr:last-child td { border-bottom: none; }
+.dt tbody tr { transition: background .1s; }
+.dt tbody tr:hover td { background: rgba(26,92,56,.03); }
+.td-state { font-weight: 600; color: #111; }
+.td-empty { text-align: center; color: #9ca3af; padding: 28px 16px !important; }
 
-/* Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-size: 0.75rem;
-  font-weight: 600;
+/* ── Detail Row (3 cols) ── */
+.detail-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.detail-card { display: flex; flex-direction: column; gap: 14px; }
+.mini-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.mini-stat {
+  flex: 1; min-width: 80px; text-align: center;
+  padding: 12px 8px; border-radius: 12px;
+  background: rgba(0,0,0,.02);
 }
-.badge-green  { background: rgba(26,92,56,.12);  color: #1A5C38; }
-.badge-blue   { background: rgba(37,99,235,.12);  color: #2563eb; }
-.badge-purple { background: rgba(124,58,237,.12); color: #7c3aed; }
-.badge-gray   { background: rgba(100,116,139,.12);color: #64748b; }
-.badge-amber  { background: rgba(217,119,6,.12);  color: #d97706; }
-.red          { background: rgba(220,38,38,.12);  color: #dc2626; }
-.amber        { background: rgba(217,119,6,.12);  color: #d97706; }
-.green        { background: rgba(26,92,56,.12);   color: #1A5C38; }
-.blue         { background: rgba(37,99,235,.12);  color: #2563eb; }
-.slate        { background: rgba(100,116,139,.12);color: #64748b; }
+.ms-val { display: block; font-size: 1.15rem; font-weight: 700; color: #111; }
+.ms-lbl { display: block; font-size: .68rem; color: #6b7280; margin-top: 2px; }
 
-/* Progress bars */
-.progress-bar-wrap {
-  height: 14px;
-  background: #e5e7eb;
-  border-radius: 99px;
-  overflow: hidden;
-  flex: 1;
+/* Ocupacion bar */
+.ocu-bar-wrap { margin-top: 4px; }
+.ocu-label { font-size: .8rem; color: #374151; margin-bottom: 6px; }
+.ocu-track { height: 8px; border-radius: 99px; background: #e5e7eb; overflow: hidden; }
+.ocu-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+.ocu-green { background: #22c55e; }
+.ocu-amber { background: #f59e0b; }
+.ocu-red { background: #ef4444; }
+
+/* Precios list */
+.precio-list { display: flex; flex-direction: column; gap: 10px; }
+.precio-row { display: flex; align-items: center; gap: 10px; }
+.pr-badge {
+  font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 99px;
 }
-.progress-bar { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
-.bar-green  { background: #1A5C38; }
-.bar-amber  { background: #d97706; }
-.bar-red    { background: #dc2626; }
-.bar-blue   { background: #2563eb; }
-.bar-gray   { background: #9ca3af; }
+.pr-green { background: rgba(22,163,74,.1); color: #16a34a; }
+.pr-blue { background: rgba(37,99,235,.1); color: #2563eb; }
+.pr-purple { background: rgba(124,58,237,.1); color: #7c3aed; }
+.pr-val { font-size: .95rem; font-weight: 700; color: #111; }
+.pr-meta { font-size: .75rem; color: #9ca3af; }
 
-.ocupacion-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  padding: 16px 20px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+/* Roles & calidad */
+.roles-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.role-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 8px; background: rgba(0,0,0,.03);
+  font-size: .8rem;
 }
-.ocupacion-label { font-size: 0.85rem; font-weight: 500; color: #374151; min-width: 160px; }
-.ocupacion-pct { font-size: 1.1rem; font-weight: 700; color: #111827; min-width: 48px; text-align: right; }
+.ri-name { color: #374151; }
+.ri-count { font-weight: 700; color: #1A5C38; }
+.calidad-mini { display: flex; flex-direction: column; gap: 8px; }
+.cm-row { display: flex; align-items: center; gap: 8px; }
+.cm-lbl { font-size: .75rem; color: #6b7280; min-width: 70px; }
+.cm-track { flex: 1; height: 6px; border-radius: 99px; background: #e5e7eb; overflow: hidden; }
+.cm-fill { height: 100%; border-radius: 99px; background: #1A5C38; transition: width .5s; }
+.cm-pct { font-size: .75rem; font-weight: 600; color: #1A5C38; min-width: 32px; text-align: right; }
 
-/* Mini bar in table */
-.mini-bar-wrap {
-  display: inline-block;
-  width: 60px;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-.mini-bar { display: block; height: 100%; background: #1A5C38; border-radius: 4px; }
-
-/* Precio cards */
-.precios-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.precio-card {
-  padding: 20px;
-  border-radius: 12px;
-  border: 2px solid transparent;
-  background: #fff;
-}
-.precio-card.badge-green  { border-color: rgba(26,92,56,.3);  background: rgba(26,92,56,.04); }
-.precio-card.badge-blue   { border-color: rgba(37,99,235,.3); background: rgba(37,99,235,.04); }
-.precio-card.badge-purple { border-color: rgba(124,58,237,.3);background: rgba(124,58,237,.04); }
-.precio-tipo { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 8px; }
-.precio-valor { font-size: 1.8rem; font-weight: 800; color: #111827; margin-bottom: 4px; }
-.precio-meta { font-size: 0.78rem; color: #6b7280; }
-.precio-lugar { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
-
-/* Estado bars */
-.estado-bars { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-.estado-bar-row { display: flex; align-items: center; gap: 12px; }
-.estado-bar-label { min-width: 100px; font-size: 0.85rem; color: #374151; text-transform: capitalize; }
-.estado-bar-track { flex: 1; height: 10px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
-.estado-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
-.estado-bar-val { min-width: 36px; text-align: right; font-size: 0.85rem; font-weight: 600; color: #374151; }
-
-/* Roles chips */
-.roles-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
-.rol-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-}
-.rol-chip-name { font-size: 0.85rem; color: #374151; }
-.rol-chip-count { font-size: 1.2rem; font-weight: 700; color: #1A5C38; }
-
-/* Calidad */
-.calidad-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
-.calidad-item { display: flex; align-items: center; gap: 12px; }
-.calidad-bar-wrap { width: 180px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
-.calidad-bar { height: 100%; background: #1A5C38; border-radius: 4px; transition: width 0.6s ease; }
-.calidad-label { font-size: 0.85rem; color: #374151; }
-.calidad-label strong { color: #1A5C38; }
-.calidad-total { font-size: 0.78rem; color: #9ca3af; margin-bottom: 24px; }
-
-/* Info note */
-.info-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: rgba(217,119,6,.08);
-  border: 1px solid rgba(217,119,6,.25);
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: #92400e;
-  margin-bottom: 16px;
-}
-
-/* Loading & Empty */
-.loading-panel, .empty-panel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 160px;
-  color: #9ca3af;
-  font-size: 0.9rem;
-}
-.spinner {
-  width: 24px; height: 24px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #1A5C38;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+/* Loader */
+.loader-row { display: flex; justify-content: center; padding: 40px; }
+.loader {
+  width: 28px; height: 28px; border: 3px solid #e5e7eb;
+  border-top-color: #1A5C38; border-radius: 50%; animation: spin .7s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
-/* Responsive */
-@media (max-width: 600px) {
-  .dash { padding: 16px 12px 80px; }
-  .dash-title { font-size: 1.2rem; }
-  .kpi-grid, .kpi-grid-3 { grid-template-columns: 1fr 1fr; }
-  .kpi-grid-4 { grid-template-columns: 1fr 1fr; }
-  .dash-header { flex-direction: column; }
-  .precios-cards { grid-template-columns: 1fr; }
+/* ═══ Responsive ═══ */
+@media (max-width: 1024px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .detail-row { grid-template-columns: 1fr; }
+  .map-body { flex-direction: column; }
+  .insights-panel { width: 100%; border-left: none; border-top: 1px solid rgba(0,0,0,.06); }
+}
+@media (max-width: 768px) {
+  .dash { padding: 16px 14px 72px; gap: 14px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi { padding: 12px 14px; }
+  .kpi-val { font-size: 1.1rem; }
+  .kpi .kpi-icon { width: 34px; height: 34px; }
+  .charts-row { grid-template-columns: 1fr; }
+  .detail-row { grid-template-columns: 1fr; }
+  .map-container { min-height: 260px; }
+  .dash-title { font-size: 1.25rem; }
+}
+@media (max-width: 480px) {
+  .dash { padding: 12px 10px 80px; }
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi { padding: 10px 12px; gap: 8px; }
+  .kpi-val { font-size: 1rem; }
+  .kpi-lbl { font-size: .65rem; }
+  .kpi .kpi-icon { width: 30px; height: 30px; }
+  .map-header { padding: 14px 16px 10px; }
+  .glass-card { padding: 16px; border-radius: 14px; }
+  .dt th, .dt td { padding: 8px 10px; font-size: .78rem; }
 }
 </style>
