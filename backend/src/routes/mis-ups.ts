@@ -10,9 +10,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
   try {
     const userId = req.user!.userId;
 
-    // Find producer record linked to this user
+    // Find ALL producer records linked to this user
     const producerResult = await pool.query(
-      'SELECT producer_id, curp, nombres, apellido_paterno, apellido_materno FROM producer WHERE usuario_id = $1',
+      'SELECT producer_id, curp, nombres, apellido_paterno, apellido_materno FROM producer WHERE usuario_id = $1 ORDER BY producer_id DESC',
       [userId]
     );
 
@@ -21,10 +21,13 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       return;
     }
 
-    const producer = producerResult.rows[0];
+    const producer = producerResult.rows[0]; // Primary producer for display
+    const producerIds = producerResult.rows.map((r: any) => r.producer_id);
 
     const upsResult = await pool.query(
       `SELECT u.*,
+        p.curp AS producer_curp,
+        p.nombres AS producer_nombres,
         ST_AsGeoJSON(u.geom)::json AS geom_geojson,
         ST_X(ST_PointOnSurface(u.geom)) AS centroid_lng,
         ST_Y(ST_PointOnSurface(u.geom)) AS centroid_lat,
@@ -39,9 +42,10 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
           LIMIT 1
         ) AS ultimo_ciclo
        FROM up u
-       WHERE u.producer_id = $1
+       JOIN producer p ON p.producer_id = u.producer_id
+       WHERE u.producer_id = ANY($1)
        ORDER BY u.created_at DESC`,
-      [producer.producer_id]
+      [producerIds]
     );
 
     res.json({ ups: upsResult.rows, producer });
@@ -65,7 +69,7 @@ router.get('/:up_id', authMiddleware, async (req: AuthRequest, res: Response): P
       res.status(404).json({ error: 'Productor no encontrado' });
       return;
     }
-    const producer_id = producerResult.rows[0].producer_id;
+    const producerIds = producerResult.rows.map((r: any) => r.producer_id);
 
     const upResult = await pool.query(
       `SELECT u.*,
@@ -73,8 +77,8 @@ router.get('/:up_id', authMiddleware, async (req: AuthRequest, res: Response): P
         ST_X(ST_PointOnSurface(u.geom)) AS centroid_lng,
         ST_Y(ST_PointOnSurface(u.geom)) AS centroid_lat
        FROM up u
-       WHERE u.up_id = $1 AND u.producer_id = $2`,
-      [up_id, producer_id]
+       WHERE u.up_id = $1 AND u.producer_id = ANY($2)`,
+      [up_id, producerIds]
     );
 
     if (upResult.rows.length === 0) {
