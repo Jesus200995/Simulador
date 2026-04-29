@@ -344,7 +344,7 @@ router.get('/operacion', authMiddleware, async (req: AuthRequest, res: Response)
       `),
       pool.query(`
         SELECT
-          sv.id, sv.fecha_visita, sv.tipo_visita,
+          sv.id, sv.fecha_visita, sv.etapa_cultivo AS tipo_visita,
           p.nombres, p.apellido_paterno,
           u.up_name,
           usu.nombre_completo AS tecnico
