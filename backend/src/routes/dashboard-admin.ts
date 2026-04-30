@@ -419,9 +419,15 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
           b.id, b.nombre, b.estado, b.municipio,
           b.latitud AS lat, b.longitud AS lng,
           b.capacidad_toneladas,
-          COALESCE(b.stock_actual, 0)::numeric(10,2) AS stock_actual,
+          COALESCE(
+            (SELECT i.volumen_almacenamiento FROM inventarios i
+             WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
+          )::numeric(10,2) AS stock_actual,
           CASE WHEN b.capacidad_toneladas > 0
-            THEN ROUND((COALESCE(b.stock_actual,0) / b.capacidad_toneladas) * 100)::int
+            THEN ROUND((COALESCE(
+              (SELECT i.volumen_almacenamiento FROM inventarios i
+               WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
+            ) / b.capacidad_toneladas) * 100)::int
             ELSE 0 END AS ocupacion_pct
         FROM bodegas b
         WHERE b.estatus = 'aprobada' AND b.activo = true

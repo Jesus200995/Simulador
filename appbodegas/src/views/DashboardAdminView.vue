@@ -1142,6 +1142,13 @@ watch(tabActiva, async (tab) => {
   if (tab === 'vision') { await nextTick(); if (!map) initMap(); else if (map.loaded()) updateMarkers() }
 })
 
+watch(mapaData, async () => {
+  if (tabActiva.value !== 'vision') return
+  await nextTick()
+  if (!map) initMap()
+  else if (map.loaded()) updateMarkers()
+})
+
 onMounted(() => {
   loadAll()
   nextTick(() => {
