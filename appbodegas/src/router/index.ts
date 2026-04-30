@@ -196,11 +196,13 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     next({ name: 'Login' })
   } else if (to.meta.guest && auth.isAuthenticated) {
-    next({ name: 'Inicio' })
+    next(auth.isAdmin ? { name: 'AdminDashboard' } : { name: 'Inicio' })
+  } else if (to.name === 'Inicio' && auth.isAuthenticated && auth.isAdmin) {
+    next({ name: 'AdminDashboard' })
   } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
     const allowedRoles = to.meta.roles as string[]
     if (!allowedRoles.includes(auth.rol)) {
-      next({ name: 'Inicio' })
+      next(auth.isAdmin ? { name: 'AdminDashboard' } : { name: 'Inicio' })
     } else {
       next()
     }
