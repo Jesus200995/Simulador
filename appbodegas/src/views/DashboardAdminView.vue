@@ -6,12 +6,10 @@
       <div class="dash-hero">
         <div class="dash-hero-inner">
           <div class="dash-hero-text">
-            <p class="dash-eyebrow">SIMAC — Sistema de Monitoreo</p>
             <h1 class="dash-title">Dashboard Administrativo</h1>
             <p class="dash-subtitle">Vision global de la produccion agricola en tiempo real</p>
           </div>
           <div class="header-right">
-            <span class="dash-date">{{ fechaActual }}</span>
             <button class="btn-refresh" :class="{ spinning: cargando }" @click="recargarTodo" title="Actualizar datos">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </button>
@@ -19,45 +17,79 @@
         </div>
       </div>
 
-      <!-- ─── FILTROS GLOBALES ─── -->
-      <section class="filters-bar">
-        <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-        <div class="filter-item">
-          <label class="filter-lbl">Estado</label>
-          <select class="filter-sel" v-model="filtros.estado">
-            <option value="">Todos los estados</option>
-            <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
-          </select>
-        </div>
-        <div class="filter-item">
-          <label class="filter-lbl">Ciclo</label>
-          <select class="filter-sel" v-model="filtros.ciclo">
-            <option value="">Todos</option>
-            <option value="PV">PV — Primavera/Verano</option>
-            <option value="OI">OI — Otono/Invierno</option>
-          </select>
-        </div>
-        <div class="filter-spacer"></div>
-        <span v-if="filtros.estado || filtros.ciclo" class="filter-badge">Filtros activos</span>
-        <button v-if="filtros.estado || filtros.ciclo" class="btn-clear-f" @click="limpiarFiltros">Limpiar</button>
-      </section>
-
       <!-- ─── LOADER INICIAL ─── -->
       <div v-if="cargandoInicial" class="loader-row">
         <div class="loader"></div><span>Cargando datos del sistema...</span>
       </div>
 
       <template v-else>
-        <!-- ─── TABS NAV ─── -->
-        <nav class="tabs-nav">
-          <button v-for="t in tabs" :key="t.key" class="tab-btn" :class="{ active: tabActiva === t.key }" @click="setTab(t.key)">
-            <span class="tab-icon" v-html="t.icon"></span>
-            <span class="tab-lbl">{{ t.label }}</span>
+        <!-- ─── TABS CAROUSEL ─── -->
+        <div class="tabs-carousel" :style="{ opacity: carouselReady ? 1 : 0 }">
+          <button class="nav-arr" @click="selectPrev" aria-label="Anterior">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-        </nav>
+          <div class="tabs-viewport" ref="tabsViewportRef">
+            <div
+              class="tabs-track"
+              :style="{ transform: `translateX(${trackX}px)`, transition: animating ? 'transform 0.22s cubic-bezier(.22,.68,0,1)' : 'none' }"
+              @transitionend="onTransitionEnd"
+            >
+              <button
+                v-for="(t, i) in extTabs"
+                :key="i"
+                class="tab-btn"
+                :class="{ active: t.key === tabActiva }"
+                @click="setTabByExt(t.key)"
+              >
+                <span class="tab-icon" v-html="t.icon"></span>
+                <span class="tab-lbl">{{ t.label }}</span>
+              </button>
+            </div>
+          </div>
+          <button class="nav-arr" @click="selectNext" aria-label="Siguiente">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- ─── FILTROS (No en Vision) ─── -->
+        <Transition name="fade">
+          <section v-if="tabActiva !== 'vision'" class="filters-bar">
+            <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <div class="filter-item">
+              <label class="filter-lbl">Estado</label>
+              <select class="filter-sel" v-model="filtros.estado">
+                <option value="">Todos los estados</option>
+                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label class="filter-lbl">Ciclo</label>
+              <select class="filter-sel" v-model="filtros.ciclo">
+                <option value="">Todos</option>
+                <option value="PV">PV — Primavera/Verano</option>
+                <option value="OI">OI — Otono/Invierno</option>
+              </select>
+            </div>
+            <div class="filter-spacer"></div>
+            <span v-if="filtros.estado || filtros.ciclo" class="filter-badge">Filtros activos</span>
+            <button v-if="filtros.estado || filtros.ciclo" class="btn-clear-f" @click="limpiarFiltros">Limpiar</button>
+          </section>
+        </Transition>
 
         <!-- ════════════ PANEL 1: VISION GENERAL ════════════ -->
-        <div v-if="tabActiva === 'vision'" class="panel fade-in">
+        <div v-show="tabActiva === 'vision'" class="panel fade-in">
+          <!-- Section header -->
+          <div class="vision-header">
+            <div class="vision-header-text">
+              <h2 class="vision-title">Vision General</h2>
+              <p class="vision-desc">Resumen en tiempo real del ecosistema agricola</p>
+            </div>
+            <span class="vision-badge">
+              <span class="vision-badge-dot"></span>
+              En vivo
+            </span>
+          </div>
+
           <!-- KPIs -->
           <div class="kpi-row" v-if="resumen">
             <div v-for="k in kpisVision" :key="k.key" class="kpi glass-card">
@@ -72,7 +104,10 @@
           <!-- Mapa + Insights -->
           <section class="map-card glass-card">
             <div class="map-hdr">
-              <h2 class="sec-heading">Mapa general del sistema</h2>
+              <div class="map-hdr-left">
+                <svg class="map-hdr-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <h2 class="sec-heading">Mapa del sistema</h2>
+              </div>
               <nav class="maptabs">
                 <button v-for="t in mapTabs" :key="t" class="mtab" :class="{ active: mapTab === t }" @click="setMapTab(t)">{{ t }}</button>
               </nav>
@@ -80,7 +115,10 @@
             <div class="map-body">
               <div ref="mapContainer" class="map-cont"></div>
               <aside class="side-panel">
-                <h3 class="side-heading">Insights prioritarios</h3>
+                <h3 class="side-heading">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  Insights prioritarios
+                </h3>
                 <ul class="ins-list" v-if="insights.length">
                   <li v-for="(ins, i) in insights" :key="i" class="ins-item">
                     <span class="ins-dot" :class="ins.type"></span>
@@ -99,7 +137,10 @@
 
           <!-- Tabla resumen por estado -->
           <section class="glass-card tbl-card">
-            <h2 class="sec-heading">Resumen por estado</h2>
+            <h2 class="sec-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+              Resumen por estado
+            </h2>
             <div class="tbl-wrap">
               <table class="dt">
                 <thead><tr><th>Estado</th><th>UPs</th><th>Productores</th><th>Superficie (ha)</th><th>Produccion est. (ton)</th></tr></thead>
@@ -119,7 +160,14 @@
         </div>
 
         <!-- ════════════ PANEL 2: PRODUCCION ════════════ -->
-        <div v-else-if="tabActiva === 'produccion'" class="panel fade-in">
+        <div v-if="tabActiva === 'produccion'" class="panel fade-in">
+          <div class="panel-header">
+            <div class="panel-header-text">
+              <h2 class="panel-title">Produccion</h2>
+              <p class="panel-desc">Rendimiento agricola, superficie sembrada y ciclos de cultivo</p>
+            </div>
+            <span class="panel-badge badge-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Activo</span>
+          </div>
           <div v-if="!produccion" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="kpi-row kpi-3">
@@ -147,7 +195,7 @@
               </div>
             </div>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Produccion por estado</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>Produccion por estado</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Estado</th><th>UPs</th><th>Cultivos</th><th>Area (ha)</th><th>Produccion (ton)</th></tr></thead>
@@ -161,7 +209,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Por tipo de ciclo</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Por tipo de ciclo</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Tipo</th><th>Ano</th><th>Ciclos</th><th>Cultivos</th><th>Area (ha)</th></tr></thead>
@@ -179,7 +227,14 @@
         </div>
 
         <!-- ════════════ PANEL 3: INFRAESTRUCTURA ════════════ -->
-        <div v-else-if="tabActiva === 'infraestructura'" class="panel fade-in">
+        <div v-if="tabActiva === 'infraestructura'" class="panel fade-in">
+          <div class="panel-header">
+            <div class="panel-header-text">
+              <h2 class="panel-title">Infraestructura</h2>
+              <p class="panel-desc">Bodegas, capacidad de almacenamiento y nivel de ocupacion</p>
+            </div>
+            <span class="panel-badge badge-purple"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>Red activa</span>
+          </div>
           <div v-if="!infraestructura" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="kpi-row kpi-4">
@@ -201,7 +256,7 @@
               </div>
             </div>
             <section class="glass-card deficit-card">
-              <h3 class="sec-heading">Produccion estimada vs Capacidad de almacenamiento</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>Produccion estimada vs Capacidad</h3>
               <div class="def-body">
                 <div class="def-row">
                   <span class="def-lbl">Produccion estimada</span>
@@ -221,7 +276,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Bodegas por estado</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bodegas por estado</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Estado</th><th>Bodegas</th><th>Capacidad (ton)</th></tr></thead>
@@ -233,7 +288,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Top bodegas por capacidad</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Top bodegas por capacidad</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Bodega</th><th>Estado</th><th>Municipio</th><th>Capacidad (ton)</th><th>Stock (ton)</th><th>Ocupacion</th></tr></thead>
@@ -251,7 +306,14 @@
         </div>
 
         <!-- ════════════ PANEL 4: PRECIOS ════════════ -->
-        <div v-else-if="tabActiva === 'precios'" class="panel fade-in">
+        <div v-if="tabActiva === 'precios'" class="panel fade-in">
+          <div class="panel-header">
+            <div class="panel-header-text">
+              <h2 class="panel-title">Precios</h2>
+              <p class="panel-desc">Precios de mercado, tendencias y brechas de comercializacion</p>
+            </div>
+            <span class="panel-badge badge-amber"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9.35a4 4 0 0 0-3-1.35c-2.2 0-4 1.34-4 3s1.8 3 4 3a4 4 0 0 0 3-1.35"/></svg>Mercado</span>
+          </div>
           <div v-if="!precios" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="precio-cards">
@@ -265,7 +327,7 @@
               <div class="cwrap cwrap-lg"><Line v-if="preciosLineData" :data="preciosLineData" :options="lineOpts"/><div v-else class="cph">Sin datos de tendencia. Registre precios para ver la grafica.</div></div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Promedios ultimos 30 dias</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>Promedios ultimos 30 dias</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Tipo</th><th>Maiz</th><th>Promedio</th><th>Minimo</th><th>Maximo</th><th>Registros</th><th>Ultima act.</th></tr></thead>
@@ -283,7 +345,14 @@
         </div>
 
         <!-- ════════════ PANEL 5: ALERTAS ════════════ -->
-        <div v-else-if="tabActiva === 'alertas'" class="panel fade-in">
+        <div v-if="tabActiva === 'alertas'" class="panel fade-in">
+          <div class="panel-header">
+            <div class="panel-header-text">
+              <h2 class="panel-title">Alertas</h2>
+              <p class="panel-desc">Monitoreo de incidencias, niveles de severidad y seguimiento</p>
+            </div>
+            <span class="panel-badge badge-red"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Monitoreo</span>
+          </div>
           <div v-if="!alertasData" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="kpi-row kpi-4">
@@ -293,7 +362,7 @@
               </div>
             </div>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Estado de alertas</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Estado de alertas</h3>
               <div class="estado-bars">
                 <div v-for="e in alertasData.por_estado" :key="e.estado_alerta" class="ebar-row">
                   <span class="ebar-lbl">{{ e.estado_alerta }}</span>
@@ -303,7 +372,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Alertas pendientes — mas criticas</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Alertas pendientes — mas criticas</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Severidad</th><th>Tipo</th><th>Productor</th><th>UP</th><th>Estado</th><th>Fecha</th></tr></thead>
@@ -318,7 +387,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Tipos de alerta pendientes</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>Tipos de alerta pendientes</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Tipo de alerta</th><th>Nivel</th><th>Total</th></tr></thead>
@@ -335,11 +404,18 @@
         </div>
 
         <!-- ════════════ PANEL 6: OPERACION ════════════ -->
-        <div v-else-if="tabActiva === 'operacion'" class="panel fade-in">
+        <div v-if="tabActiva === 'operacion'" class="panel fade-in">
+          <div class="panel-header">
+            <div class="panel-header-text">
+              <h2 class="panel-title">Operacion</h2>
+              <p class="panel-desc">Usuarios, calidad de datos, supervisores y visitas de campo</p>
+            </div>
+            <span class="panel-badge badge-blue"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Sistema</span>
+          </div>
           <div v-if="!operacion" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <section class="glass-card roles-card">
-              <h3 class="sec-heading">Usuarios activos por rol</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuarios activos por rol</h3>
               <div class="roles-row">
                 <div v-for="r in operacion.usuarios_por_rol" :key="r.rol" class="role-chip">
                   <span class="rc-num">{{ r.total }}</span>
@@ -348,7 +424,7 @@
               </div>
             </section>
             <section class="glass-card quality-card">
-              <h3 class="sec-heading">Calidad de datos — UPs ({{ operacion.calidad_datos.total_ups }} total)</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Calidad de datos — UPs ({{ operacion.calidad_datos.total_ups }} total)</h3>
               <div class="q-bars">
                 <div v-for="q in calidadItems" :key="q.label" class="q-row">
                   <span class="q-lbl">{{ q.label }}</span>
@@ -358,7 +434,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Ranking de supervisores — ultimos 30 dias</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Ranking de supervisores — ultimos 30 dias</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>#</th><th>Supervisor</th><th>Email</th><th>Productores</th><th>Visitas</th></tr></thead>
@@ -373,7 +449,7 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading">Ultimas visitas de campo</h3>
+              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Ultimas visitas de campo</h3>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Fecha</th><th>Productor</th><th>UP</th><th>Tipo</th><th>Tecnico</th></tr></thead>
@@ -428,17 +504,105 @@ const markers: mapboxgl.Marker[] = []
 const mapTab = ref('UPs')
 const mapTabs = ['UPs', 'Bodegas', 'Alertas']
 
-// ── Tabs config ──
-function setTab(k: string) { tabActiva.value = k as typeof tabActiva.value }
+// ── Carousel config ──
+const ITEM_W = 160
+const ITEM_GAP = 10
 
 const tabs: Array<{ key: typeof tabActiva.value; label: string; icon: string }> = [
-  { key: 'vision',         label: 'Vision general',   icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
-  { key: 'produccion',     label: 'Produccion',        icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>' },
-  { key: 'infraestructura',label: 'Infraestructura',   icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>' },
-  { key: 'precios',        label: 'Precios',           icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
-  { key: 'alertas',        label: 'Alertas',           icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
-  { key: 'operacion',      label: 'Operacion',         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
+  { key: 'vision',         label: 'Vision general',   icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>' },
+  { key: 'produccion',     label: 'Produccion',        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' },
+  { key: 'infraestructura',label: 'Infraestructura',   icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>' },
+  { key: 'precios',        label: 'Precios',           icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9.35a4 4 0 0 0-3-1.35c-2.2 0-4 1.34-4 3s1.8 3 4 3a4 4 0 0 0 3-1.35"/><line x1="12" y1="5" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="19"/></svg>' },
+  { key: 'alertas',        label: 'Alertas',           icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
+  { key: 'operacion',      label: 'Operacion',         icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>' },
 ]
+
+// Extended: [clone_last, real_0..real_n, clone_first]
+const extTabs = computed(() => [
+  { ...tabs[tabs.length - 1] },
+  ...tabs,
+  { ...tabs[0] },
+])
+
+// Visual index in extTabs: 0=clone_last, 1..n=real tabs, n+1=clone_first
+const visualIdx = ref(1)
+const animating = ref(false)
+const tabsViewportRef = ref<HTMLElement | null>(null)
+const carouselReady = ref(false)
+// Start at 0 — ResizeObserver is the ONLY source of truth for width
+const viewportW = ref(0)
+let resizeObs: ResizeObserver | null = null
+
+// Track x offset: centers visualIdx item in viewport
+const trackX = computed(() => {
+  if (viewportW.value === 0) return 0  // not measured yet
+  const center = viewportW.value / 2
+  return center - ITEM_W / 2 - visualIdx.value * (ITEM_W + ITEM_GAP)
+})
+
+// Watch the ref — it becomes non-null when v-else renders the carousel
+watch(tabsViewportRef, (el) => {
+  if (!el) return
+  resizeObs?.disconnect()
+  resizeObs = new ResizeObserver(entries => {
+    const w = entries[0].contentRect.width
+    if (w === 0) return
+    viewportW.value = w
+    if (!carouselReady.value) {
+      visualIdx.value = tabs.findIndex(t => t.key === tabActiva.value) + 1
+      carouselReady.value = true
+    }
+  })
+  resizeObs.observe(el)
+})
+
+onUnmounted(() => { resizeObs?.disconnect() })
+
+function onTransitionEnd() {
+  animating.value = false
+  // If we reached clone of last (idx=0), jump instantly to real last
+  if (visualIdx.value === 0) {
+    visualIdx.value = tabs.length
+  }
+  // If we reached clone of first (idx=extTabs.length-1), jump instantly to real first
+  else if (visualIdx.value === extTabs.value.length - 1) {
+    visualIdx.value = 1
+  }
+}
+
+function setTabByExt(key: string) {
+  const realIdx = tabs.findIndex(t => t.key === key)
+  if (realIdx === -1) return
+  tabActiva.value = key as typeof tabActiva.value
+  visualIdx.value = realIdx + 1
+}
+
+function setTab(k: string) {
+  tabActiva.value = k as typeof tabActiva.value
+  const realIdx = tabs.findIndex(t => t.key === k)
+  if (realIdx !== -1) visualIdx.value = realIdx + 1
+}
+
+function selectPrev() {
+  if (animating.value) return
+  animating.value = true
+  visualIdx.value--
+  const key = extTabs.value[visualIdx.value]?.key
+  if (key) tabActiva.value = (key === tabs[tabs.length-1].key || key === tabs[0].key
+    ? (visualIdx.value === 0 ? tabs[tabs.length-1].key : tabs[0].key)
+    : key) as typeof tabActiva.value
+  // Sync active to real key
+  const realKey = tabs[(visualIdx.value - 1 + tabs.length) % tabs.length]?.key
+  if (realKey) tabActiva.value = realKey as typeof tabActiva.value
+}
+
+function selectNext() {
+  if (animating.value) return
+  animating.value = true
+  visualIdx.value++
+  const realKey = tabs[(visualIdx.value - 1) % tabs.length]?.key
+  if (realKey) tabActiva.value = realKey as typeof tabActiva.value
+}
 
 // ── Computed ──
 const fechaActual = computed(() =>
@@ -703,32 +867,37 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 /* ═══ BASE ═══ */
 .dash {
   width: 100%;
-  padding: 0 0 80px;
+  padding: 0 0 100px;
   display: flex;
   flex-direction: column;
   gap: 0;
   box-sizing: border-box;
-  background: #f6f8fa;
+  background: #f2f4f7;
   min-height: 100vh;
+  font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 .glass-card {
-  background: #fff;
-  border: 1px solid #e8edf2;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,.07);
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.03);
+  padding: 18px 20px;
+  transition: box-shadow .2s ease;
 }
-.panel { display: flex; flex-direction: column; gap: 10px; padding: 14px 3rem 24px; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-.fade-in { animation: fadeIn .18s ease; }
+.glass-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.04); }
+.panel { display: flex; flex-direction: column; gap: 12px; padding: 16px 3rem 28px; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation: fadeIn .22s cubic-bezier(.4,0,.2,1) both; }
 
 /* ═══ HERO HEADER ═══ */
 .dash-hero {
   background: linear-gradient(160deg, var(--color-primary-darker) 0%, var(--color-primary) 55%, var(--color-primary-hover) 100%);
-  padding: 1.5rem 3rem 1.75rem;
-  border-radius: 0 0 28px 28px;
+  padding: .75rem 2.5rem .85rem;
+  border-radius: 0 0 24px 24px;
+  margin: 0 1.5rem 0;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(26,92,56,.15);
 }
 .dash-hero::before {
   content: '';
@@ -742,259 +911,418 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
   position: relative;
   z-index: 1;
 }
 .dash-hero-text { flex: 1; min-width: 0; }
-.dash-eyebrow { font-size: .72rem; font-weight: 600; color: rgba(255,255,255,.55); margin: 0 0 3px; letter-spacing: .06em; text-transform: uppercase; }
-.dash-title { font-size: 1.5rem; font-weight: 700; color: #fff; margin: 0 0 2px; letter-spacing: -.025em; }
-.dash-subtitle { font-size: .8rem; color: rgba(255,255,255,.65); margin: 0; }
+.dash-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0 0 1px; line-height: 1.1; letter-spacing: -.025em; }
+.dash-subtitle { font-size: .7rem; color: rgba(255,255,255,.65); margin: 0; line-height: 1; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.dash-date { font-size: .74rem; color: rgba(255,255,255,.5); text-transform: capitalize; }
 .btn-refresh {
-  width: 34px; height: 34px; border-radius: 9px;
+  width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(255,255,255,.2);
-  background: rgba(255,255,255,.1);
-  backdrop-filter: blur(6px);
-  cursor: pointer; color: rgba(255,255,255,.85); transition: all .15s;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(12px);
+  cursor: pointer; color: rgba(255,255,255,.9); transition: all .2s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
 }
-.btn-refresh:hover { background: rgba(255,255,255,.18); }
+.btn-refresh:hover { background: rgba(255,255,255,.22); transform: scale(1.05); }
 .btn-refresh.spinning svg { animation: spin .8s linear infinite; }
 
 /* ═══ FILTERS ═══ */
 .filters-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  padding: 10px 3rem;
-  background: #fff;
-  border-bottom: 1px solid #e8edf2;
-  border-radius: 0;
-  box-shadow: none;
-  margin: 0;
+  padding: 9px 16px;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0,0,0,.07);
+  border-radius: 99px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  margin: 10px 3rem 0;
+  z-index: 10;
 }
-.filter-icon { color: #94a3b8; flex-shrink: 0; }
-.filter-item { display: flex; flex-direction: column; gap: 2px; }
-.filter-lbl { font-size: .64rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+.filter-icon { color: #b0b7c3; flex-shrink: 0; }
+.filter-item { display: flex; align-items: center; gap: 6px; }
+.filter-lbl { font-size: .67rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; }
 .filter-sel {
-  font-size: .82rem; border: 1px solid #e2e8f0; border-radius: 8px;
-  padding: 5px 10px; background: #fff; color: #334155; outline: none;
-  min-width: 150px; cursor: pointer; transition: border .15s;
+  font-size: .78rem; border: none; border-radius: 99px;
+  padding: 5px 12px; background: rgba(0,0,0,.04); color: #1e293b; outline: none;
+  min-width: 130px; cursor: pointer; transition: all .18s; font-weight: 500;
+  appearance: none;
 }
-.filter-sel:focus { border-color: #1a5c38; }
+.filter-sel:hover { background: rgba(0,0,0,.07); }
+.filter-sel:focus { background: #fff; box-shadow: 0 0 0 2px rgba(27,107,58,.2); }
 .filter-spacer { flex: 1; }
 .filter-badge {
-  font-size: .69rem; font-weight: 600; padding: 2px 10px;
-  border-radius: 99px; background: rgba(26,92,56,.08); color: #15803d;
+  font-size: .67rem; font-weight: 600; padding: 3px 10px;
+  border-radius: 99px; background: rgba(27,107,58,.08); color: #15803d;
+  letter-spacing: .01em;
 }
 .btn-clear-f {
-  font-size: .76rem; padding: 4px 10px; border-radius: 7px;
-  border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer;
-  transition: background .12s;
+  font-size: .73rem; padding: 5px 12px; border-radius: 99px; font-weight: 600;
+  border: none; background: rgba(0,0,0,.05); color: #6b7280; cursor: pointer;
+  transition: all .18s;
 }
-.btn-clear-f:hover { background: #f1f5f9; }
+.btn-clear-f:hover { background: rgba(220,38,38,.08); color: #dc2626; }
 
 /* ═══ LOADER ═══ */
 .loader-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px 16px; color: #94a3b8; font-size: .85rem; }
 .loader { width: 22px; height: 22px; border: 2.5px solid #e2e8f0; border-top-color: #1a5c38; border-radius: 50%; animation: spin .7s linear infinite; }
 
-/* ═══ TABS NAV ═══ */
-.tabs-nav {
+/* ═══ TABS CAROUSEL ═══ */
+.tabs-carousel {
   display: flex;
-  gap: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 1.2rem 0;
+  transition: opacity .3s ease;
+}
+.tabs-viewport {
+  flex: 1;
+  max-width: 480px;
+  overflow: hidden;
+  position: relative;
+  height: 44px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+.tabs-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  will-change: transform;
+}
+.nav-arr {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid #e5e7eb;
   background: #fff;
-  border-bottom: 1px solid #e8edf2;
-  padding: 0 3rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all .18s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
-.tabs-nav::-webkit-scrollbar { display: none; }
+.nav-arr:hover {
+  color: #15603a;
+  border-color: #15603a;
+  transform: scale(1.08);
+  box-shadow: 0 3px 10px rgba(21,96,58,.16);
+}
+.nav-arr:active { transform: scale(.94); }
+
+@keyframes tab-pop {
+  0%   { transform: scale(0.88); box-shadow: 0 2px 8px rgba(27,107,58,.15); }
+  60%  { transform: scale(1.06); box-shadow: 0 6px 22px rgba(27,107,58,.38); }
+  100% { transform: scale(1.04); box-shadow: 0 5px 18px rgba(27,107,58,.35); }
+}
 .tab-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 14px; border: none; background: none;
-  font-size: .8rem; font-weight: 500; color: #64748b;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  cursor: pointer; transition: all .12s; white-space: nowrap;
-  border-radius: 0;
+  flex-shrink: 0;
+  width: 160px;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 8px 14px;
+  border: 1.5px solid #e5e7eb;
+  background: #ffffff;
+  font-size: .78rem; font-weight: 600;
+  color: #b0b7c3;
+  cursor: pointer;
+  border-radius: 99px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  opacity: 0.4;
+  transform: scale(0.88);
+  transition: opacity .18s ease, transform .2s cubic-bezier(.22,.68,0,1), background .15s, color .15s, border-color .15s, box-shadow .2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  letter-spacing: -.01em;
 }
-.tab-btn:hover { color: #1a5c38; background: rgba(26,92,56,.03); }
+.tab-btn:hover:not(.active) {
+  opacity: 0.65;
+  color: #4b5563;
+  border-color: #d1d5db;
+  transform: scale(0.93);
+}
 .tab-btn.active {
-  color: #1a5c38; font-weight: 650;
-  border-bottom-color: #1a5c38;
-  background: rgba(26,92,56,.04);
+  opacity: 1;
+  color: #fff;
+  background: linear-gradient(135deg, #1B6B3A 0%, #15843F 100%);
+  border-color: transparent;
+  box-shadow: 0 5px 18px rgba(27,107,58,.35), 0 2px 4px rgba(0,0,0,.06);
+  transform: scale(1.04);
+  animation: tab-pop .24s cubic-bezier(.22,.68,0,1) both;
 }
-.tab-icon { display: flex; align-items: center; }
-.tab-lbl { white-space: nowrap; }
+.tab-icon { display: flex; align-items: center; opacity: .8; flex-shrink: 0; }
+.tab-btn.active .tab-icon { opacity: 1; }
+.tab-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ═══ VISION HEADER ═══ */
+.vision-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0; gap: 12px;
+}
+.vision-header-text { flex: 1; min-width: 0; }
+.vision-title {
+  font-size: 1.15rem; font-weight: 700; color: #0f172a;
+  margin: 0 0 2px; letter-spacing: -.02em; line-height: 1.2;
+}
+.vision-desc {
+  font-size: .72rem; color: #94a3b8; margin: 0;
+  font-weight: 500; line-height: 1;
+}
+.vision-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 99px;
+  background: rgba(34,197,94,.08); color: #16a34a;
+  font-size: .68rem; font-weight: 600;
+  letter-spacing: .02em;
+}
+.vision-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22c55e;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(1.3); }
+}
+
+/* ═══ PANEL HEADER (shared) ═══ */
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.panel-header-text { flex: 1; min-width: 0; }
+.panel-title {
+  font-size: 1.15rem; font-weight: 700; color: #0f172a;
+  margin: 0 0 2px; letter-spacing: -.02em; line-height: 1.2;
+}
+.panel-desc {
+  font-size: .72rem; color: #94a3b8; margin: 0;
+  font-weight: 500; line-height: 1;
+}
+.panel-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 99px;
+  font-size: .68rem; font-weight: 600;
+  letter-spacing: .02em; flex-shrink: 0;
+}
+.badge-green  { background: rgba(34,197,94,.08);  color: #16a34a; }
+.badge-purple { background: rgba(124,58,237,.08); color: #7c3aed; }
+.badge-amber  { background: rgba(217,119,6,.08);  color: #d97706; }
+.badge-red    { background: rgba(239,68,68,.08);  color: #dc2626; }
+.badge-blue   { background: rgba(37,99,235,.08);  color: #2563eb; }
 
 /* ═══ KPI ROW ═══ */
-.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; padding: 14px 3rem 0; }
+.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
 .kpi-3 { grid-template-columns: repeat(3,1fr); }
 .kpi-4 { grid-template-columns: repeat(4,1fr); }
 .kpi {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  transition: transform .15s, box-shadow .15s;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,.04), 0 4px 14px rgba(0,0,0,.03);
+  transition: transform .18s ease, box-shadow .18s ease;
   cursor: default;
 }
-.kpi:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
-.kpi.kpi-alert { border-color: rgba(220,38,38,.2) !important; }
+.kpi:hover { transform: translateY(-3px); box-shadow: 0 4px 18px rgba(0,0,0,.09); }
+.kpi.kpi-alert { border-color: rgba(220,38,38,.18); background: rgba(220,38,38,.02); }
 .kpi-ico {
-  width: 38px; height: 38px; border-radius: 10px;
+  width: 42px; height: 42px; border-radius: 13px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.kpi-body { display: flex; flex-direction: column; min-width: 0; }
-.kpi-val { font-size: 1.3rem; font-weight: 700; line-height: 1.1; color: #0f172a; letter-spacing: -.025em; }
-.kpi-lbl { font-size: .66rem; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-body { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+.kpi-val { font-size: 1.35rem; font-weight: 750; line-height: 1; color: #0a0f1e; letter-spacing: -.03em; }
+.kpi-lbl { font-size: .64rem; color: #94a3b8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
 
 /* ═══ HEADINGS ═══ */
-.sec-heading { font-size: .92rem; font-weight: 650; color: #0f172a; margin: 0 0 12px; }
-.card-hdg { font-size: .86rem; font-weight: 600; color: #0f172a; margin: 0 0 12px; }
+.sec-heading {
+  font-size: .85rem; font-weight: 700; color: #0a0f1e; margin: 0 0 14px;
+  display: flex; align-items: center; gap: 7px;
+  letter-spacing: -.01em;
+}
+.sec-heading svg { color: #b0b7c3; flex-shrink: 0; }
+.card-hdg {
+  font-size: .84rem; font-weight: 700; color: #0a0f1e; margin: 0 0 14px;
+  letter-spacing: -.01em;
+}
 
 /* ═══ MAP CARD ═══ */
 .map-card { padding: 0; overflow: hidden; }
 .map-hdr {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 16px 10px; flex-wrap: wrap; gap: 8px;
-  border-bottom: 1px solid #e8edf2;
+  border-bottom: 1px solid rgba(0,0,0,.05);
 }
+.map-hdr-left {
+  display: flex; align-items: center; gap: 6px;
+}
+.map-hdr-left .sec-heading { margin: 0; }
+.map-hdr-icon { color: #1B6B3A; flex-shrink: 0; }
 .map-hdr .sec-heading { margin: 0; }
 .maptabs { display: flex; gap: 3px; }
 .mtab {
-  padding: 4px 13px; border-radius: 99px; border: none;
-  font-size: .76rem; font-weight: 550; cursor: pointer;
-  background: #f1f5f9; color: #64748b; transition: all .12s;
+  padding: 5px 14px; border-radius: 99px; border: 1px solid transparent;
+  font-size: .74rem; font-weight: 600; cursor: pointer;
+  background: #f1f5f9; color: #64748b; transition: all .15s ease;
 }
-.mtab.active { background: #1a5c38; color: #fff; }
-.mtab:hover:not(.active) { background: #e2e8f0; }
+.mtab.active { background: #1B6B3A; color: #fff; border-color: #1B6B3A; box-shadow: 0 2px 8px rgba(27,107,58,.25); }
+.mtab:hover:not(.active) { background: #e2e8f0; color: #374151; }
 .map-body { display: flex; min-height: 380px; }
 .map-cont { flex: 1; min-height: 380px; }
 .side-panel {
   width: 240px; flex-shrink: 0; padding: 16px 18px;
-  border-left: 1px solid #f1f5f9;
+  border-left: 1px solid rgba(0,0,0,.04);
   display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
 }
-.side-heading { font-size: .82rem; font-weight: 650; color: #0f172a; margin: 0; }
+.side-heading {
+  font-size: .82rem; font-weight: 650; color: #0f172a; margin: 0;
+  display: flex; align-items: center; gap: 5px;
+}
+.side-heading svg { color: #94a3b8; }
 .ins-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .ins-item { display: flex; align-items: flex-start; gap: 7px; font-size: .77rem; color: #475569; line-height: 1.45; }
-.ins-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.ins-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 .ins-dot.green { background: #22c55e; }
 .ins-dot.red { background: #ef4444; }
 .ins-dot.amber { background: #f59e0b; }
 .ins-dot.blue { background: #3b82f6; }
 .ins-empty { font-size: .78rem; color: #94a3b8; margin: 0; }
-.map-leyenda { margin-top: auto; display: flex; flex-direction: column; gap: 5px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
-.ley-row { display: flex; align-items: center; gap: 6px; font-size: .75rem; color: #64748b; }
+.map-leyenda { margin-top: auto; display: flex; flex-direction: column; gap: 5px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.04); }
+.ley-row { display: flex; align-items: center; gap: 6px; font-size: .73rem; color: #64748b; }
 .ley-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
 /* ═══ TABLES ═══ */
-.tbl-card { padding-bottom: 14px; }
-.tbl-wrap { overflow-x: auto; margin-top: 2px; }
+.tbl-card { padding-bottom: 6px; }
+.tbl-wrap { overflow-x: auto; margin-top: 4px; border-radius: 10px; }
 .dt { width: 100%; border-collapse: collapse; font-size: .8rem; }
-.dt thead tr { border-bottom: 1.5px solid #f1f5f9; }
+.dt thead tr { border-bottom: 1px solid rgba(0,0,0,.06); }
 .dt th {
-  padding: 8px 12px; text-align: left; font-weight: 600;
-  color: #94a3b8; font-size: .68rem; text-transform: uppercase;
-  letter-spacing: .05em; white-space: nowrap;
+  padding: 10px 14px; text-align: left; font-weight: 600;
+  color: #b0b7c3; font-size: .67rem; text-transform: uppercase;
+  letter-spacing: .07em; white-space: nowrap; background: #fafbfc;
 }
-.dt td { padding: 9px 12px; color: #475569; border-bottom: 1px solid #f8fafc; }
+.dt th:first-child { border-radius: 10px 0 0 0; }
+.dt th:last-child  { border-radius: 0 10px 0 0; }
+.dt td { padding: 10px 14px; color: #475569; border-bottom: 1px solid rgba(0,0,0,.04); }
 .dt tbody tr:last-child td { border-bottom: none; }
-.dt tbody tr:hover td { background: #fafafa; }
-.td-b { font-weight: 600; color: #0f172a; }
-.td-muted { color: #94a3b8; }
-.td-rank { font-weight: 700; color: #1a5c38; width: 28px; }
-.td-empty { text-align: center; color: #94a3b8; padding: 24px 12px !important; font-size: .8rem; }
+.dt tbody tr { transition: background .12s; }
+.dt tbody tr:hover td { background: rgba(27,107,58,.025); }
+.td-b { font-weight: 650; color: #0a0f1e; }
+.td-muted { color: #b0b7c3; font-size: .77rem; }
+.td-rank { font-weight: 800; color: #1B6B3A; width: 28px; font-size: .9rem; }
+.td-empty { text-align: center; color: #c8cdd5; padding: 28px 12px !important; font-size: .8rem; letter-spacing: .02em; }
 
 /* ═══ CHARTS ═══ */
-.charts-2col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; }
+.charts-2col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; }
 .chart-card { display: flex; flex-direction: column; }
-.cwrap { height: 210px; position: relative; }
-.cwrap-sm { height: 210px; }
-.cwrap-lg { height: 260px; }
-.cph { display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: .82rem; text-align: center; padding: 20px; }
+.cwrap { height: 220px; position: relative; }
+.cwrap-sm { height: 220px; }
+.cwrap-lg { height: 270px; }
+.cph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #c8cdd5; font-size: .8rem; text-align: center; padding: 20px; gap: 6px; }
 
 /* ═══ PRICE CARDS ═══ */
-.precio-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
-.pc { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-radius: 12px; border: 1.5px solid transparent; }
-.pc-tipo { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; opacity: .65; }
-.pc-val { font-size: 1.65rem; font-weight: 800; letter-spacing: -.03em; color: #0f172a; }
-.pc-unit { font-size: .68rem; opacity: .55; }
+.precio-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.pc {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 20px 20px 18px;
+  border-radius: 18px; border: 1.5px solid transparent;
+  transition: transform .18s ease;
+}
+.pc:hover { transform: translateY(-2px); }
+.pc-tipo { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .6; }
+.pc-val { font-size: 1.85rem; font-weight: 800; letter-spacing: -.04em; color: #0a0f1e; line-height: 1; }
+.pc-unit { font-size: .66rem; opacity: .5; font-weight: 500; }
 .pc-pos { color: #16a34a !important; }
 .pc-neg { color: #dc2626 !important; }
-.pc-green { background: rgba(22,163,74,.05); border-color: rgba(22,163,74,.18); color: #15803d; }
-.pc-blue  { background: rgba(37,99,235,.05); border-color: rgba(37,99,235,.18); color: #1d4ed8; }
-.pc-purple{ background: rgba(124,58,237,.05); border-color: rgba(124,58,237,.18); color: #6d28d9; }
-.pc-amber { background: rgba(217,119,6,.05); border-color: rgba(217,119,6,.18); color: #92400e; }
+.pc-green  { background: linear-gradient(135deg,rgba(22,163,74,.06),rgba(22,163,74,.02)); border-color: rgba(22,163,74,.2); color: #15803d; }
+.pc-blue   { background: linear-gradient(135deg,rgba(37,99,235,.06),rgba(37,99,235,.02)); border-color: rgba(37,99,235,.2); color: #1d4ed8; }
+.pc-purple { background: linear-gradient(135deg,rgba(124,58,237,.06),rgba(124,58,237,.02)); border-color: rgba(124,58,237,.2); color: #6d28d9; }
+.pc-amber  { background: linear-gradient(135deg,rgba(217,119,6,.06),rgba(217,119,6,.02)); border-color: rgba(217,119,6,.2); color: #92400e; }
 
 /* ═══ DEFICIT CARD ═══ */
-.def-body { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
-.def-row { display: flex; align-items: center; gap: 12px; }
-.def-lbl { font-size: .79rem; color: #475569; min-width: 190px; }
-.def-track { flex: 1; height: 8px; border-radius: 99px; background: #f1f5f9; overflow: hidden; }
-.def-bar { height: 100%; border-radius: 99px; transition: width .6s ease; }
-.def-prod { background: #1a5c38; }
-.def-cap  { background: #2563eb; }
-.def-val { font-size: .84rem; font-weight: 600; color: #0f172a; min-width: 72px; text-align: right; }
-.def-summary { display: flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 9px; font-size: .81rem; font-weight: 500; }
-.def-summary.surplus { background: rgba(22,163,74,.07); color: #15803d; border: 1px solid rgba(22,163,74,.18); }
-.def-summary.deficit  { background: rgba(220,38,38,.06); color: #dc2626; border: 1px solid rgba(220,38,38,.18); }
+.def-body { display: flex; flex-direction: column; gap: 14px; margin-top: 6px; }
+.def-row { display: flex; align-items: center; gap: 14px; }
+.def-lbl { font-size: .78rem; color: #6b7280; min-width: 200px; font-weight: 500; }
+.def-track { flex: 1; height: 10px; border-radius: 99px; background: #f1f5f9; overflow: hidden; }
+.def-bar { height: 100%; border-radius: 99px; transition: width .7s cubic-bezier(.4,0,.2,1); }
+.def-prod { background: linear-gradient(90deg, #1B6B3A, #2DB44C); }
+.def-cap  { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.def-val { font-size: .85rem; font-weight: 700; color: #0a0f1e; min-width: 80px; text-align: right; }
+.def-summary {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 12px; font-size: .8rem; font-weight: 600;
+}
+.def-summary.surplus { background: rgba(22,163,74,.07); color: #15803d; border: 1px solid rgba(22,163,74,.15); }
+.def-summary.deficit  { background: rgba(220,38,38,.06); color: #dc2626; border: 1px solid rgba(220,38,38,.15); }
 
 /* ═══ MINI BAR ═══ */
-.mbar-wrap { display: inline-block; width: 56px; height: 6px; border-radius: 99px; background: #f1f5f9; overflow: hidden; vertical-align: middle; margin-right: 5px; }
-.mbar-fill { height: 100%; border-radius: 99px; transition: width .4s; }
-.mbar-g { background: #22c55e; }
-.mbar-a { background: #f59e0b; }
-.mbar-r { background: #ef4444; }
-.mbar-pct { font-size: .75rem; font-weight: 500; color: #64748b; }
+.mbar-wrap { display: inline-block; width: 60px; height: 7px; border-radius: 99px; background: #f1f5f9; overflow: hidden; vertical-align: middle; margin-right: 6px; }
+.mbar-fill { height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+.mbar-g { background: linear-gradient(90deg,#22c55e,#4ade80); }
+.mbar-a { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.mbar-r { background: linear-gradient(90deg,#ef4444,#f87171); }
+.mbar-pct { font-size: .73rem; font-weight: 600; color: #6b7280; }
 
 /* ═══ ALERT BARS ═══ */
-.estado-bars { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
-.ebar-row { display: flex; align-items: center; gap: 10px; }
-.ebar-lbl { font-size: .79rem; color: #475569; min-width: 96px; text-transform: capitalize; }
-.ebar-track { flex: 1; height: 8px; border-radius: 99px; background: #f1f5f9; overflow: hidden; }
-.ebar-fill { height: 100%; border-radius: 99px; transition: width .5s; }
-.ebar-amber { background: #f59e0b; }
-.ebar-blue  { background: #3b82f6; }
-.ebar-green { background: #22c55e; }
-.ebar-gray  { background: #94a3b8; }
-.ebar-val { font-size: .79rem; font-weight: 600; color: #334155; min-width: 24px; text-align: right; }
+.estado-bars { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.ebar-row { display: flex; align-items: center; gap: 12px; }
+.ebar-lbl { font-size: .78rem; color: #6b7280; min-width: 100px; text-transform: capitalize; font-weight: 500; }
+.ebar-track { flex: 1; height: 9px; border-radius: 99px; background: rgba(0,0,0,.04); overflow: hidden; }
+.ebar-fill { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.ebar-amber { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.ebar-blue  { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+.ebar-green { background: linear-gradient(90deg,#22c55e,#4ade80); }
+.ebar-gray  { background: linear-gradient(90deg,#94a3b8,#cbd5e1); }
+.ebar-val { font-size: .78rem; font-weight: 700; color: #374151; min-width: 26px; text-align: right; }
 
 /* ═══ PILLS ═══ */
-.pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: .69rem; font-weight: 600; white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: .67rem; font-weight: 700; white-space: nowrap; letter-spacing: .01em; }
 .pill-g    { background: rgba(22,163,74,.1);   color: #15803d; }
 .pill-b    { background: rgba(37,99,235,.1);   color: #1d4ed8; }
 .pill-p    { background: rgba(124,58,237,.1);  color: #6d28d9; }
 .pill-r    { background: rgba(220,38,38,.1);   color: #dc2626; }
 .pill-amber{ background: rgba(217,119,6,.1);   color: #92400e; }
-.pill-gray { background: rgba(100,116,139,.1); color: #475569; }
+.pill-gray { background: rgba(100,116,139,.1); color: #64748b; }
 
 /* ═══ ROLES ═══ */
-.roles-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.roles-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 .role-chip {
-  display: flex; align-items: center; gap: 7px;
-  padding: 7px 14px; border-radius: 9px;
-  background: #f8fafc; border: 1px solid #f1f5f9;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 14px 22px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(27,107,58,.05), rgba(27,107,58,.02));
+  border: 1px solid rgba(27,107,58,.1);
+  min-width: 80px;
+  transition: transform .15s ease;
 }
-.rc-num { font-size: 1.15rem; font-weight: 700; color: #1a5c38; }
-.rc-lbl { font-size: .79rem; color: #475569; }
+.role-chip:hover { transform: translateY(-2px); }
+.rc-num { font-size: 1.5rem; font-weight: 800; color: #1B6B3A; letter-spacing: -.03em; line-height: 1; }
+.rc-lbl { font-size: .68rem; color: #6b7280; font-weight: 500; text-align: center; }
 
 /* ═══ QUALITY ═══ */
-.q-bars { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
-.q-row { display: flex; align-items: center; gap: 10px; }
-.q-lbl { font-size: .79rem; color: #475569; min-width: 180px; }
-.q-track { flex: 1; height: 7px; border-radius: 99px; background: #f1f5f9; overflow: hidden; }
-.q-fill { height: 100%; border-radius: 99px; transition: width .5s; }
-.qg { background: #22c55e; }
-.qa { background: #f59e0b; }
-.qr { background: #ef4444; }
-.q-pct { font-size: .79rem; font-weight: 600; min-width: 34px; text-align: right; }
-.tc-g { color: #15803d; }
-.tc-a { color: #92400e; }
+.q-bars { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+.q-row { display: flex; align-items: center; gap: 12px; }
+.q-lbl { font-size: .78rem; color: #6b7280; min-width: 190px; font-weight: 500; }
+.q-track { flex: 1; height: 8px; border-radius: 99px; background: rgba(0,0,0,.04); overflow: hidden; }
+.q-fill { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.qg { background: linear-gradient(90deg,#22c55e,#4ade80); }
+.qa { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.qr { background: linear-gradient(90deg,#ef4444,#f87171); }
+.q-pct { font-size: .78rem; font-weight: 700; min-width: 36px; text-align: right; }
+.tc-g { color: #16a34a; }
+.tc-a { color: #d97706; }
 .tc-r { color: #dc2626; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -1005,40 +1333,45 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   .charts-2col { grid-template-columns: 1fr; }
   .precio-cards { grid-template-columns: repeat(2,1fr); }
   .map-body { flex-direction: column; }
-  .side-panel { width: 100%; border-left: none; border-top: 1px solid #e8edf2; }
+  .side-panel { width: 100%; border-left: none; border-top: 1px solid rgba(0,0,0,.05); }
 }
 @media (max-width: 768px) {
-  .dash-hero { padding: 1.25rem 1rem 1.5rem; border-radius: 0 0 22px 22px; }
+  .dash-hero { padding: .65rem .85rem .75rem; border-radius: 0 0 20px 20px; margin: 0 1rem 0; }
+  .filters-bar { margin: 10px 1.25rem 0; padding: 9px 14px; border-radius: 22px; }
   .dash-title { font-size: 1.2rem; }
-  .panel { padding: 10px 1.25rem 16px; gap: 8px; }
-  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px 1.25rem 0; }
+  .panel { padding: 12px 1.25rem 20px; gap: 10px; }
+  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; }
   .kpi-3, .kpi-4 { grid-template-columns: repeat(2,1fr); }
-  .kpi { padding: 12px 13px; }
-  .kpi-val { font-size: 1.1rem; }
-  .kpi-ico { width: 32px; height: 32px; }
+  .kpi { padding: 14px 14px; }
+  .kpi-val { font-size: 1.15rem; }
+  .kpi-ico { width: 36px; height: 36px; }
   .precio-cards { grid-template-columns: 1fr 1fr; }
   .charts-2col { grid-template-columns: 1fr; }
   .def-lbl { min-width: 120px; }
   .q-lbl { min-width: 130px; }
-  .tab-btn { padding: 8px 10px; font-size: .76rem; }
-  .tabs-nav { padding: 0 1rem; }
-  .filters-bar { padding: 8px 1.25rem; }
+  .panel-title { font-size: 1rem; }
+  .vision-title { font-size: 1rem; }
 }
 @media (max-width: 480px) {
-  .dash-hero { padding: 1rem .85rem 1.35rem; border-radius: 0 0 18px 18px; }
-  .dash-title { font-size: 1.08rem; }
-  .panel { padding: 8px .85rem 14px; gap: 7px; }
-  .kpi-row { grid-template-columns: 1fr 1fr; gap: 7px; padding: 8px .85rem 0; }
-  .kpi { padding: 10px 11px; gap: 8px; }
-  .kpi-val { font-size: .96rem; }
-  .kpi-lbl { font-size: .62rem; }
-  .kpi-ico { width: 28px; height: 28px; }
+  .dash-hero { padding: .55rem .75rem .65rem; border-radius: 0 0 16px 16px; margin: 0 .75rem 0; }
+  .filters-bar { margin: 8px .85rem 0; flex-direction: column; align-items: stretch; gap: 8px; border-radius: 18px; }
+  .filter-item { flex-direction: column; align-items: stretch; gap: 4px; }
+  .filter-sel { min-width: 100%; }
+  .dash-title { font-size: 1.05rem; }
+  .panel { padding: 10px .85rem 16px; gap: 8px; }
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi { padding: 12px 12px; gap: 10px; }
+  .kpi-val { font-size: 1rem; }
+  .kpi-lbl { font-size: .6rem; }
+  .kpi-ico { width: 32px; height: 32px; border-radius: 10px; }
   .precio-cards { grid-template-columns: 1fr 1fr; }
-  .glass-card { padding: 13px 14px; border-radius: 10px; }
-  .dt th, .dt td { padding: 7px 9px; font-size: .74rem; }
-  .tab-lbl { display: none; }
-  .tab-btn { padding: 8px 11px; }
-  .filters-bar { gap: 8px; }
-  .filter-sel { min-width: 110px; }
+  .glass-card { padding: 14px 15px; border-radius: 14px; }
+  .dt th, .dt td { padding: 8px 10px; font-size: .74rem; }
+  .role-chip { padding: 10px 14px; min-width: 64px; }
+  .rc-num { font-size: 1.2rem; }
+  .panel-title { font-size: .95rem; }
+  .vision-title { font-size: .95rem; }
+  .panel-badge, .vision-badge { display: none; }
+  .roles-row { gap: 6px; }
 }
 </style>
