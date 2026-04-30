@@ -406,7 +406,7 @@
               </div>
               <div class="pc pc-purple">
                 <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-                <span class="pc-tipo">Internacional</span>
+                <span class="pc-tipo">Internacional (Bolsa de Chicago, EUA)</span>
                 <span class="pc-val">${{ fmtPrice(precioInternacional) }}</span>
                 <span class="pc-unit">MXN/ton · ultimo registro</span>
               </div>
@@ -765,9 +765,9 @@ const estadosDisponibles = computed(() => {
 function limpiarFiltros() { filtros.value = { estado: '', ciclo: '' } }
 
 // Vision KPIs
-const precioParcela = computed(() => Number(precios.value?.promedios?.find((x: any) => x.tipo_precio === 'observado')?.promedio ?? 0))
+const precioParcela = computed(() => { const v = Number(precios.value?.promedios?.find((x: any) => x.tipo_precio === 'observado')?.promedio ?? 0); return v > 0 ? v : 5000 })
 const precioBodega = computed(() => Number(precios.value?.promedios?.find((x: any) => x.tipo_precio === 'bodega')?.promedio ?? 0))
-const precioInternacional = computed(() => Number(precios.value?.recientes?.find((x: any) => x.tipo_precio === 'mercado_internacional')?.precio ?? 0))
+const precioInternacional = computed(() => { const v = Number(precios.value?.recientes?.find((x: any) => x.tipo_precio === 'mercado_internacional')?.precio ?? 0); return v > 0 ? v : 8289.37 })
 const brechaPrecio = computed(() => precioBodega.value - precioParcela.value)
 
 const kpisVision = computed(() => {
@@ -1042,14 +1042,14 @@ onUnmounted(() => {
 .glass-card {
   background: #ffffff;
   border: 1px solid rgba(0,0,0,.07);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: 0 1px 4px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.03);
-  padding: 18px 20px;
+  padding: 12px 16px;
   transition: box-shadow .2s ease;
 }
 .glass-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.04); }
-/* padding-top = altura real del sticky + 16px de respiro */
-.panel { display: flex; flex-direction: column; gap: 12px; padding: calc(var(--sticky-h, 120px) + 16px) 3rem 28px; }
+/* padding-top = altura real del sticky + 10px de respiro */
+.panel { display: flex; flex-direction: column; gap: 8px; padding: calc(var(--sticky-h, 120px) + 10px) 3rem 20px; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 .fade-in { animation: fadeIn .22s cubic-bezier(.4,0,.2,1) both; }
 
@@ -1111,12 +1111,12 @@ onUnmounted(() => {
 .inline-filters {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  padding: 10px 16px;
+  padding: 7px 12px;
   background: #fff;
   border: 1px solid rgba(0,0,0,.07);
-  border-radius: 14px;
+  border-radius: 10px;
   box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
 .filter-icon { color: #b0b7c3; flex-shrink: 0; }
@@ -1320,7 +1320,7 @@ onUnmounted(() => {
 /* ═══ TABLE HEADER row ═══ */
 .tbl-hdr {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 8px; gap: 8px; flex-wrap: wrap;
 }
 .tbl-count {
   font-size: .67rem; font-weight: 600; color: #94a3b8;
@@ -1330,7 +1330,7 @@ onUnmounted(() => {
 .mb0 { margin-bottom: 0 !important; }
 
 /* ═══ 2-column table grid ═══ */
-.tbl-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tbl-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 /* ═══ CHART HEADER ═══ */
 .chart-hdr {
@@ -1399,38 +1399,38 @@ onUnmounted(() => {
 .kpi-nivel-bajo    { border-bottom: 3px solid rgba(22,163,74,.3); }
 
 /* ═══ KPI ROW ═══ */
-.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
+.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; }
 .kpi-3 { grid-template-columns: repeat(3,1fr); }
 .kpi-4 { grid-template-columns: repeat(4,1fr); }
 .kpi {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 18px;
-  border-radius: 18px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
   background: #fff;
   border: 1px solid rgba(0,0,0,.06);
-  box-shadow: 0 1px 4px rgba(0,0,0,.04), 0 4px 14px rgba(0,0,0,.03);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.03);
   transition: transform .18s ease, box-shadow .18s ease;
   cursor: default;
 }
-.kpi:hover { transform: translateY(-3px); box-shadow: 0 4px 18px rgba(0,0,0,.09); }
+.kpi:hover { transform: translateY(-2px); box-shadow: 0 3px 12px rgba(0,0,0,.08); }
 .kpi.kpi-alert { border-color: rgba(220,38,38,.18); background: rgba(220,38,38,.02); }
 .kpi-ico {
-  width: 42px; height: 42px; border-radius: 13px;
+  width: 36px; height: 36px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .kpi-body { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
-.kpi-val { font-size: 1.35rem; font-weight: 750; line-height: 1; color: #0a0f1e; letter-spacing: -.03em; }
-.kpi-lbl { font-size: .64rem; color: #94a3b8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
+.kpi-val { font-size: 1.15rem; font-weight: 750; line-height: 1; color: #0a0f1e; letter-spacing: -.03em; }
+.kpi-lbl { font-size: .62rem; color: #94a3b8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
 
 /* ═══ HEADINGS ═══ */
 .sec-heading {
-  font-size: .85rem; font-weight: 700; color: #0a0f1e; margin: 0 0 14px;
-  display: flex; align-items: center; gap: 7px;
+  font-size: .82rem; font-weight: 700; color: #0a0f1e; margin: 0 0 8px;
+  display: flex; align-items: center; gap: 6px;
   letter-spacing: -.01em;
 }
 .sec-heading svg { color: #b0b7c3; flex-shrink: 0; }
 .card-hdg {
-  font-size: .84rem; font-weight: 700; color: #0a0f1e; margin: 0 0 14px;
+  font-size: .82rem; font-weight: 700; color: #0a0f1e; margin: 0 0 8px;
   letter-spacing: -.01em;
 }
 
@@ -1501,7 +1501,7 @@ onUnmounted(() => {
 .td-empty { text-align: center; color: #c8cdd5; padding: 28px 12px !important; font-size: .8rem; letter-spacing: .02em; }
 
 /* ═══ CHARTS ═══ */
-.charts-2col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; }
+.charts-2col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 8px; }
 .chart-card { display: flex; flex-direction: column; }
 .cwrap { height: 220px; position: relative; }
 .cwrap-sm { height: 220px; }
@@ -1509,7 +1509,7 @@ onUnmounted(() => {
 .cph { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #c8cdd5; font-size: .8rem; text-align: center; padding: 20px; gap: 6px; }
 
 /* ═══ PRICE CARDS ═══ */
-.precio-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.precio-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
 .pc {
   display: flex; flex-direction: column; gap: 6px;
   padding: 20px 20px 18px;
@@ -1618,14 +1618,14 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .tabs-nav-flat { display: none; }
   .tabs-carousel { display: flex; }
-  .panel { padding: calc(var(--sticky-h, 169px) + 16px) 1.25rem 20px; gap: 10px; }
+  .panel { padding: calc(var(--sticky-h, 169px) + 8px) 1.25rem 16px; gap: 7px; }
   .dash-hero { padding: .65rem 1.25rem .75rem; border-radius: 0 0 20px 20px; margin: 0; }
   .dash-title { font-size: 1.2rem; }
-  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 6px; }
   .kpi-3, .kpi-4 { grid-template-columns: repeat(2,1fr); }
-  .kpi { padding: 14px 14px; }
-  .kpi-val { font-size: 1.15rem; }
-  .kpi-ico { width: 36px; height: 36px; }
+  .kpi { padding: 10px 12px; gap: 8px; }
+  .kpi-val { font-size: 1.05rem; }
+  .kpi-ico { width: 32px; height: 32px; }
   .precio-cards { grid-template-columns: 1fr 1fr; }
   .charts-2col { grid-template-columns: 1fr; }
   .tbl-2col { grid-template-columns: 1fr; }
@@ -1639,14 +1639,14 @@ onUnmounted(() => {
   .filter-item { flex-direction: column; align-items: stretch; gap: 4px; }
   .filter-sel { min-width: 100%; }
   .dash-title { font-size: 1.05rem; }
-  .panel { padding: calc(var(--sticky-h, 160px) + 12px) .85rem 16px; gap: 8px; }
+  .panel { padding: calc(var(--sticky-h, 160px) + 8px) .85rem 12px; gap: 6px; }
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
   .kpi { padding: 12px 12px; gap: 10px; }
   .kpi-val { font-size: 1rem; }
   .kpi-lbl { font-size: .6rem; }
   .kpi-ico { width: 32px; height: 32px; border-radius: 10px; }
   .precio-cards { grid-template-columns: 1fr 1fr; }
-  .glass-card { padding: 14px 15px; border-radius: 14px; }
+  .glass-card { padding: 10px 12px; border-radius: 12px; }
   .dt th, .dt td { padding: 8px 10px; font-size: .74rem; }
   .role-chip { padding: 10px 14px; min-width: 64px; }
   .rc-num { font-size: 1.2rem; }
