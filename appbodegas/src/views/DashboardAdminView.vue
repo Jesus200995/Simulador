@@ -2,28 +2,43 @@
   <AppShell>
     <div class="dash">
 
-      <!-- ─── HERO HEADER ─── -->
-      <div class="dash-hero">
-        <div class="dash-hero-inner">
-          <div class="dash-hero-text">
-            <h1 class="dash-title">Dashboard Administrativo</h1>
-            <p class="dash-subtitle">Vision global de la produccion agricola en tiempo real</p>
-          </div>
-          <div class="header-right">
-            <button class="btn-refresh" :class="{ spinning: cargando }" @click="recargarTodo" title="Actualizar datos">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            </button>
+      <!-- ─── STICKY: HERO + TABS ─── -->
+      <div class="dash-sticky">
+        <div class="dash-hero">
+          <div class="dash-hero-inner">
+            <div class="dash-hero-text">
+              <h1 class="dash-title">Dashboard Administrativo</h1>
+              <p class="dash-subtitle">Vision global de la produccion agricola en tiempo real</p>
+            </div>
+            <div class="header-right">
+              <button class="btn-refresh" :class="{ spinning: cargando }" @click="recargarTodo" title="Actualizar datos">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- ─── LOADER INICIAL ─── -->
-      <div v-if="cargandoInicial" class="loader-row">
-        <div class="loader"></div><span>Cargando datos del sistema...</span>
-      </div>
+        <!-- ─── LOADER INICIAL ─── -->
+        <div v-if="cargandoInicial" class="loader-row">
+          <div class="loader"></div><span>Cargando datos del sistema...</span>
+        </div>
 
-      <template v-else>
-        <!-- ─── TABS CAROUSEL ─── -->
+        <template v-if="!cargandoInicial">
+          <!-- ─── TABS: NAV PLANO en desktop ─── -->
+          <nav class="tabs-nav-flat">
+          <button
+            v-for="t in tabs"
+            :key="t.key"
+            class="tnf-btn"
+            :class="{ active: t.key === tabActiva }"
+            @click="tabActiva = t.key"
+          >
+            <span class="tnf-icon" v-html="t.icon"></span>
+            <span class="tnf-lbl">{{ t.label }}</span>
+          </button>
+        </nav>
+
+        <!-- ─── TABS: CARRUSEL solo en móvil ─── -->
         <div class="tabs-carousel" :style="{ opacity: carouselReady ? 1 : 0 }">
           <button class="nav-arr" @click="selectPrev" aria-label="Anterior">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
@@ -50,44 +65,20 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
+        </template>
+      </div><!-- /dash-sticky -->
 
-        <!-- ─── FILTROS (No en Vision) ─── -->
-        <Transition name="fade">
-          <section v-if="tabActiva !== 'vision'" class="filters-bar">
-            <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            <div class="filter-item">
-              <label class="filter-lbl">Estado</label>
-              <select class="filter-sel" v-model="filtros.estado">
-                <option value="">Todos los estados</option>
-                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
-              </select>
-            </div>
-            <div class="filter-item">
-              <label class="filter-lbl">Ciclo</label>
-              <select class="filter-sel" v-model="filtros.ciclo">
-                <option value="">Todos</option>
-                <option value="PV">PV — Primavera/Verano</option>
-                <option value="OI">OI — Otono/Invierno</option>
-              </select>
-            </div>
-            <div class="filter-spacer"></div>
-            <span v-if="filtros.estado || filtros.ciclo" class="filter-badge">Filtros activos</span>
-            <button v-if="filtros.estado || filtros.ciclo" class="btn-clear-f" @click="limpiarFiltros">Limpiar</button>
-          </section>
-        </Transition>
+      <!-- ─── CONTENIDO: PANELES ─── -->
+      <template v-if="!cargandoInicial">
 
         <!-- ════════════ PANEL 1: VISION GENERAL ════════════ -->
         <div v-show="tabActiva === 'vision'" class="panel fade-in">
-          <!-- Section header -->
-          <div class="vision-header">
-            <div class="vision-header-text">
-              <h2 class="vision-title">Vision General</h2>
-              <p class="vision-desc">Resumen en tiempo real del ecosistema agricola</p>
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge live"><span class="live-dot"></span>En vivo</span>
+              <h2 class="p-title">Vision General</h2>
+              <p class="p-desc">Resumen en tiempo real del ecosistema agricola SIMAC</p>
             </div>
-            <span class="vision-badge">
-              <span class="vision-badge-dot"></span>
-              En vivo
-            </span>
           </div>
 
           <!-- KPIs -->
@@ -137,20 +128,20 @@
 
           <!-- Tabla resumen por estado -->
           <section class="glass-card tbl-card">
-            <h2 class="sec-heading">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
-              Resumen por estado
-            </h2>
+            <div class="tbl-hdr">
+              <h2 class="sec-heading mb0">Resumen por estado</h2>
+              <span class="tbl-count">{{ filteredEstadoRows.length }} estados</span>
+            </div>
             <div class="tbl-wrap">
               <table class="dt">
                 <thead><tr><th>Estado</th><th>UPs</th><th>Productores</th><th>Superficie (ha)</th><th>Produccion est. (ton)</th></tr></thead>
                 <tbody>
-                  <tr v-for="row in filteredEstadoRows" :key="row.estado">
-                    <td class="td-b">{{ row.estado || '—' }}</td>
-                    <td>{{ row.ups }}</td>
-                    <td>{{ row.productores }}</td>
-                    <td>{{ fmtNum(row.superficie_ha) }}</td>
-                    <td>{{ fmtNum(row.produccion_ton) }}</td>
+                  <tr v-for="(row, i) in filteredEstadoRows" :key="row.estado" :class="i%2===1?'tr-alt':''">
+                    <td><span class="td-estado">{{ row.estado || '—' }}</span></td>
+                    <td><span class="td-num">{{ row.ups }}</span></td>
+                    <td><span class="td-num">{{ row.productores }}</span></td>
+                    <td class="td-b">{{ fmtNum(row.superficie_ha) }}</td>
+                    <td class="td-b">{{ fmtNum(row.produccion_ton) }}</td>
                   </tr>
                   <tr v-if="!filteredEstadoRows.length"><td colspan="5" class="td-empty">Sin datos disponibles</td></tr>
                 </tbody>
@@ -161,102 +152,158 @@
 
         <!-- ════════════ PANEL 2: PRODUCCION ════════════ -->
         <div v-if="tabActiva === 'produccion'" class="panel fade-in">
-          <div class="panel-header">
-            <div class="panel-header-text">
-              <h2 class="panel-title">Produccion</h2>
-              <p class="panel-desc">Rendimiento agricola, superficie sembrada y ciclos de cultivo</p>
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge green">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>
+                Produccion
+              </span>
+              <h2 class="p-title">Rendimiento Agricola</h2>
+              <p class="p-desc">Superficie sembrada, UPs activas y ciclos de cultivo registrados</p>
             </div>
-            <span class="panel-badge badge-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Activo</span>
+          </div>
+          <div class="inline-filters">
+            <svg class="filter-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <div class="filter-item">
+              <label class="filter-lbl">Estado</label>
+              <select class="filter-sel" v-model="filtros.estado">
+                <option value="">Todos los estados</option>
+                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label class="filter-lbl">Ciclo</label>
+              <select class="filter-sel" v-model="filtros.ciclo">
+                <option value="">Todos</option>
+                <option value="PV">PV — Primavera/Verano</option>
+                <option value="OI">OI — Otono/Invierno</option>
+              </select>
+            </div>
+            <div class="filter-spacer"></div>
+            <span v-if="filtros.estado || filtros.ciclo" class="filter-badge">Filtros activos</span>
+            <button v-if="filtros.estado || filtros.ciclo" class="btn-clear-f" @click="limpiarFiltros">&#10005; Limpiar</button>
           </div>
           <div v-if="!produccion" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="kpi-row kpi-3">
-              <div class="kpi glass-card">
+              <div class="kpi glass-card kpi-green">
                 <div class="kpi-ico" style="background:rgba(26,92,56,.08);color:#15803d"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ fmtCompact(produccion.por_anio?.[0]?.area_ha ?? 0) }} ha</span><span class="kpi-lbl">Superficie sembrada (ano actual)</span></div>
               </div>
-              <div class="kpi glass-card">
+              <div class="kpi glass-card kpi-blue">
                 <div class="kpi-ico" style="background:rgba(37,99,235,.08);color:#2563eb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ produccion.por_anio?.[0]?.ups ?? 0 }}</span><span class="kpi-lbl">UPs con produccion registrada</span></div>
               </div>
-              <div class="kpi glass-card">
+              <div class="kpi glass-card kpi-amber">
                 <div class="kpi-ico" style="background:rgba(217,119,6,.08);color:#d97706"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ produccion.ups_sin_ciclo ?? 0 }}</span><span class="kpi-lbl">UPs sin ciclo registrado</span></div>
               </div>
             </div>
             <div class="charts-2col">
               <div class="glass-card chart-card">
-                <h3 class="card-hdg">Produccion estimada por estado (ton)</h3>
-                <div class="cwrap"><Bar v-if="produccionBarData" :data="produccionBarData" :options="barOpts"/><div v-else class="cph">Sin datos</div></div>
+                <div class="chart-hdr">
+                  <h3 class="card-hdg mb0">Produccion estimada por estado</h3>
+                  <span class="chart-unit">toneladas</span>
+                </div>
+                <div class="cwrap"><Bar v-if="produccionBarData" :data="produccionBarData" :options="barOpts"/><div v-else class="cph"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg><span>Sin datos</span></div></div>
               </div>
               <div class="glass-card chart-card">
-                <h3 class="card-hdg">Distribucion de ciclos (ha sembradas)</h3>
-                <div class="cwrap cwrap-sm"><Doughnut v-if="cicloDonutData" :data="cicloDonutData" :options="donutOpts"/><div v-else class="cph">Sin datos</div></div>
+                <div class="chart-hdr">
+                  <h3 class="card-hdg mb0">Distribucion de ciclos</h3>
+                  <span class="chart-unit">ha sembradas</span>
+                </div>
+                <div class="cwrap cwrap-sm"><Doughnut v-if="cicloDonutData" :data="cicloDonutData" :options="donutOpts"/><div v-else class="cph"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3"><circle cx="12" cy="12" r="10"/></svg><span>Sin datos</span></div></div>
               </div>
             </div>
-            <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>Produccion por estado</h3>
-              <div class="tbl-wrap">
-                <table class="dt">
-                  <thead><tr><th>Estado</th><th>UPs</th><th>Cultivos</th><th>Area (ha)</th><th>Produccion (ton)</th></tr></thead>
-                  <tbody>
-                    <tr v-for="row in filteredProduccionEstado" :key="row.estado">
-                      <td class="td-b">{{ row.estado || '—' }}</td><td>{{ row.ups }}</td><td>{{ row.cultivos }}</td><td>{{ fmtNum(row.area_ha) }}</td><td>{{ fmtNum(row.produccion_ton) }}</td>
-                    </tr>
-                    <tr v-if="!filteredProduccionEstado.length"><td colspan="5" class="td-empty">Sin datos</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-            <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Por tipo de ciclo</h3>
-              <div class="tbl-wrap">
-                <table class="dt">
-                  <thead><tr><th>Tipo</th><th>Ano</th><th>Ciclos</th><th>Cultivos</th><th>Area (ha)</th></tr></thead>
-                  <tbody>
-                    <tr v-for="row in filteredCiclos" :key="`${row.cycle_type}-${row.cycle_year}`">
-                      <td><span class="pill" :class="row.cycle_type==='PV'?'pill-g':'pill-b'">{{ row.cycle_type }}</span></td>
-                      <td>{{ row.cycle_year }}</td><td>{{ row.ciclos }}</td><td>{{ row.cultivos }}</td><td>{{ fmtNum(row.area_ha) }}</td>
-                    </tr>
-                    <tr v-if="!filteredCiclos.length"><td colspan="5" class="td-empty">Sin datos</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <div class="tbl-2col">
+              <section class="glass-card tbl-card">
+                <div class="tbl-hdr">
+                  <h3 class="sec-heading mb0">Produccion por estado</h3>
+                  <span class="tbl-count">{{ filteredProduccionEstado.length }} estados</span>
+                </div>
+                <div class="tbl-wrap">
+                  <table class="dt">
+                    <thead><tr><th>Estado</th><th>UPs</th><th>Cultivos</th><th>Area (ha)</th><th>Ton</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(row,i) in filteredProduccionEstado" :key="row.estado" :class="i%2===1?'tr-alt':''">
+                        <td><span class="td-estado">{{ row.estado || '—' }}</span></td><td>{{ row.ups }}</td><td>{{ row.cultivos }}</td><td class="td-b">{{ fmtNum(row.area_ha) }}</td><td class="td-b">{{ fmtNum(row.produccion_ton) }}</td>
+                      </tr>
+                      <tr v-if="!filteredProduccionEstado.length"><td colspan="5" class="td-empty">Sin datos</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+              <section class="glass-card tbl-card">
+                <div class="tbl-hdr">
+                  <h3 class="sec-heading mb0">Por tipo de ciclo</h3>
+                </div>
+                <div class="tbl-wrap">
+                  <table class="dt">
+                    <thead><tr><th>Tipo</th><th>Ano</th><th>Ciclos</th><th>Cultivos</th><th>Area (ha)</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(row,i) in filteredCiclos" :key="`${row.cycle_type}-${row.cycle_year}`" :class="i%2===1?'tr-alt':''">
+                        <td><span class="pill" :class="row.cycle_type==='PV'?'pill-g':'pill-b'">{{ row.cycle_type }}</span></td>
+                        <td>{{ row.cycle_year }}</td><td>{{ row.ciclos }}</td><td>{{ row.cultivos }}</td><td class="td-b">{{ fmtNum(row.area_ha) }}</td>
+                      </tr>
+                      <tr v-if="!filteredCiclos.length"><td colspan="5" class="td-empty">Sin datos</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
           </template>
         </div>
 
         <!-- ════════════ PANEL 3: INFRAESTRUCTURA ════════════ -->
         <div v-if="tabActiva === 'infraestructura'" class="panel fade-in">
-          <div class="panel-header">
-            <div class="panel-header-text">
-              <h2 class="panel-title">Infraestructura</h2>
-              <p class="panel-desc">Bodegas, capacidad de almacenamiento y nivel de ocupacion</p>
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge purple">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                Infraestructura
+              </span>
+              <h2 class="p-title">Red de Almacenamiento</h2>
+              <p class="p-desc">Bodegas activas, capacidad total, stock actual y nivel de ocupacion</p>
             </div>
-            <span class="panel-badge badge-purple"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>Red activa</span>
+          </div>
+          <div class="inline-filters">
+            <svg class="filter-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <div class="filter-item">
+              <label class="filter-lbl">Estado</label>
+              <select class="filter-sel" v-model="filtros.estado">
+                <option value="">Todos los estados</option>
+                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </div>
+            <div class="filter-spacer"></div>
+            <span v-if="filtros.estado" class="filter-badge">Filtros activos</span>
+            <button v-if="filtros.estado" class="btn-clear-f" @click="limpiarFiltros">&#10005; Limpiar</button>
           </div>
           <div v-if="!infraestructura" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="kpi-row kpi-4">
-              <div class="kpi glass-card">
+              <div class="kpi glass-card kpi-purple">
                 <div class="kpi-ico" style="background:rgba(124,58,237,.08);color:#7c3aed"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ infraestructura.bodegas_aprobadas }}</span><span class="kpi-lbl">Bodegas activas</span></div>
               </div>
-              <div class="kpi glass-card">
+              <div class="kpi glass-card kpi-blue">
                 <div class="kpi-ico" style="background:rgba(37,99,235,.08);color:#2563eb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><line x1="12" y1="3" x2="12" y2="21"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ fmtCompact(infraestructura.capacidad_total_ton) }}</span><span class="kpi-lbl">Capacidad total (ton)</span></div>
               </div>
-              <div class="kpi glass-card">
+              <div class="kpi glass-card kpi-teal">
                 <div class="kpi-ico" style="background:rgba(14,148,148,.08);color:#0e9494"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ fmtCompact(infraestructura.stock_actual_ton) }}</span><span class="kpi-lbl">Stock actual (ton)</span></div>
               </div>
-              <div class="kpi glass-card" :class="infraestructura.ocupacion_pct >= 90 ? 'kpi-alert' : ''">
+              <div class="kpi glass-card" :class="infraestructura.ocupacion_pct >= 90 ? 'kpi-alert kpi-red' : 'kpi-amber'">
                 <div class="kpi-ico" :style="infraestructura.ocupacion_pct>=90?'background:rgba(220,38,38,.08);color:#dc2626':'background:rgba(217,119,6,.08);color:#d97706'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ infraestructura.ocupacion_pct }}%</span><span class="kpi-lbl">Ocupacion bodegas</span></div>
               </div>
             </div>
             <section class="glass-card deficit-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>Produccion estimada vs Capacidad</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Produccion estimada vs Capacidad de almacenamiento</h3>
+                <span class="def-tag" :class="deficitTon>=0?'def-tag-ok':'def-tag-err'">{{ deficitTon>=0?'Superavit':'Deficit' }}</span>
+              </div>
               <div class="def-body">
                 <div class="def-row">
                   <span class="def-lbl">Produccion estimada</span>
@@ -275,66 +322,119 @@
                 </div>
               </div>
             </section>
-            <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bodegas por estado</h3>
-              <div class="tbl-wrap">
-                <table class="dt">
-                  <thead><tr><th>Estado</th><th>Bodegas</th><th>Capacidad (ton)</th></tr></thead>
-                  <tbody>
-                    <tr v-for="row in infraestructura.por_estado" :key="row.estado"><td class="td-b">{{ row.estado||'—' }}</td><td>{{ row.total_bodegas }}</td><td>{{ fmtNum(row.capacidad_ton) }}</td></tr>
-                    <tr v-if="!infraestructura.por_estado?.length"><td colspan="3" class="td-empty">Sin datos</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-            <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Top bodegas por capacidad</h3>
-              <div class="tbl-wrap">
-                <table class="dt">
-                  <thead><tr><th>Bodega</th><th>Estado</th><th>Municipio</th><th>Capacidad (ton)</th><th>Stock (ton)</th><th>Ocupacion</th></tr></thead>
-                  <tbody>
-                    <tr v-for="b in infraestructura.top_bodegas" :key="b.nombre">
-                      <td class="td-b">{{ b.nombre }}</td><td>{{ b.estado }}</td><td>{{ b.municipio }}</td><td>{{ fmtNum(b.capacidad_toneladas) }}</td><td>{{ fmtNum(b.stock_actual) }}</td>
-                      <td><div class="mbar-wrap"><div class="mbar-fill" :class="mbarClass(b)" :style="{ width: mbarPct(b)+'%' }"></div></div><span class="mbar-pct">{{ mbarPct(b) }}%</span></td>
-                    </tr>
-                    <tr v-if="!infraestructura.top_bodegas?.length"><td colspan="6" class="td-empty">Sin datos</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <div class="tbl-2col">
+              <section class="glass-card tbl-card">
+                <div class="tbl-hdr">
+                  <h3 class="sec-heading mb0">Bodegas por estado</h3>
+                  <span class="tbl-count">{{ infraestructura.por_estado?.length ?? 0 }} estados</span>
+                </div>
+                <div class="tbl-wrap">
+                  <table class="dt">
+                    <thead><tr><th>Estado</th><th>Bodegas</th><th>Capacidad (ton)</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(row,i) in infraestructura.por_estado" :key="row.estado" :class="i%2===1?'tr-alt':''"><td><span class="td-estado">{{ row.estado||'—' }}</span></td><td>{{ row.total_bodegas }}</td><td class="td-b">{{ fmtNum(row.capacidad_ton) }}</td></tr>
+                      <tr v-if="!infraestructura.por_estado?.length"><td colspan="3" class="td-empty">Sin datos</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+              <section class="glass-card tbl-card">
+                <div class="tbl-hdr">
+                  <h3 class="sec-heading mb0">Top bodegas por capacidad</h3>
+                </div>
+                <div class="tbl-wrap">
+                  <table class="dt">
+                    <thead><tr><th>Bodega</th><th>Estado</th><th>Cap. (ton)</th><th>Ocupacion</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(b,i) in infraestructura.top_bodegas" :key="b.nombre" :class="i%2===1?'tr-alt':''">
+                        <td class="td-b">{{ b.nombre }}</td><td>{{ b.estado }}</td><td>{{ fmtNum(b.capacidad_toneladas) }}</td>
+                        <td>
+                          <div class="ocu-cell">
+                            <div class="mbar-wrap"><div class="mbar-fill" :class="mbarClass(b)" :style="{ width: mbarPct(b)+'%' }"></div></div>
+                            <span class="mbar-pct">{{ mbarPct(b) }}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="!infraestructura.top_bodegas?.length"><td colspan="4" class="td-empty">Sin datos</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
           </template>
         </div>
 
         <!-- ════════════ PANEL 4: PRECIOS ════════════ -->
         <div v-if="tabActiva === 'precios'" class="panel fade-in">
-          <div class="panel-header">
-            <div class="panel-header-text">
-              <h2 class="panel-title">Precios</h2>
-              <p class="panel-desc">Precios de mercado, tendencias y brechas de comercializacion</p>
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge amber">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Precios
+              </span>
+              <h2 class="p-title">Mercado de Maiz</h2>
+              <p class="p-desc">Precios actuales, tendencias y brechas de comercializacion MXN/ton</p>
             </div>
-            <span class="panel-badge badge-amber"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9.35a4 4 0 0 0-3-1.35c-2.2 0-4 1.34-4 3s1.8 3 4 3a4 4 0 0 0 3-1.35"/></svg>Mercado</span>
+          </div>
+          <div class="inline-filters">
+            <svg class="filter-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <div class="filter-item">
+              <label class="filter-lbl">Estado</label>
+              <select class="filter-sel" v-model="filtros.estado">
+                <option value="">Todos los estados</option>
+                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </div>
+            <div class="filter-spacer"></div>
+            <span v-if="filtros.estado" class="filter-badge">Filtros activos</span>
+            <button v-if="filtros.estado" class="btn-clear-f" @click="limpiarFiltros">&#10005; Limpiar</button>
           </div>
           <div v-if="!precios" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="precio-cards">
-              <div class="pc pc-green"><span class="pc-tipo">Precio a pie de parcela</span><span class="pc-val">${{ fmtPrice(precioParcela) }}</span><span class="pc-unit">MXN/ton — promedio 30 dias</span></div>
-              <div class="pc pc-blue"><span class="pc-tipo">Precio de bodega</span><span class="pc-val">${{ fmtPrice(precioBodega) }}</span><span class="pc-unit">MXN/ton — promedio 30 dias</span></div>
-              <div class="pc pc-purple"><span class="pc-tipo">Precio internacional</span><span class="pc-val">${{ fmtPrice(precioInternacional) }}</span><span class="pc-unit">MXN/ton — ultimo registrado</span></div>
-              <div class="pc pc-amber"><span class="pc-tipo">Brecha (bodega − parcela)</span><span class="pc-val" :class="brechaPrecio>=0?'pc-pos':'pc-neg'">{{ brechaPrecio>=0?'+':'' }}${{ fmtPrice(brechaPrecio) }}</span><span class="pc-unit">Diferencia promedio</span></div>
+              <div class="pc pc-green">
+                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg></div>
+                <span class="pc-tipo">Pie de parcela</span>
+                <span class="pc-val">${{ fmtPrice(precioParcela) }}</span>
+                <span class="pc-unit">MXN/ton · prom. 30 dias</span>
+              </div>
+              <div class="pc pc-blue">
+                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/></svg></div>
+                <span class="pc-tipo">Precio bodega</span>
+                <span class="pc-val">${{ fmtPrice(precioBodega) }}</span>
+                <span class="pc-unit">MXN/ton · prom. 30 dias</span>
+              </div>
+              <div class="pc pc-purple">
+                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+                <span class="pc-tipo">Internacional</span>
+                <span class="pc-val">${{ fmtPrice(precioInternacional) }}</span>
+                <span class="pc-unit">MXN/ton · ultimo registro</span>
+              </div>
+              <div class="pc pc-amber">
+                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+                <span class="pc-tipo">Brecha bodega vs parcela</span>
+                <span class="pc-val" :class="brechaPrecio>=0?'pc-pos':'pc-neg'">{{ brechaPrecio>=0?'+':'' }}${{ fmtPrice(brechaPrecio) }}</span>
+                <span class="pc-unit">Diferencia promedio</span>
+              </div>
             </div>
             <section class="glass-card chart-card chart-tall">
-              <h3 class="card-hdg">Tendencia de los tres precios — ultimas semanas</h3>
-              <div class="cwrap cwrap-lg"><Line v-if="preciosLineData" :data="preciosLineData" :options="lineOpts"/><div v-else class="cph">Sin datos de tendencia. Registre precios para ver la grafica.</div></div>
+              <div class="chart-hdr">
+                <h3 class="card-hdg mb0">Tendencia de precios</h3>
+                <span class="chart-unit">ultimas semanas</span>
+              </div>
+              <div class="cwrap cwrap-lg"><Line v-if="preciosLineData" :data="preciosLineData" :options="lineOpts"/><div v-else class="cph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg><span>Sin datos de tendencia. Registre precios para ver la grafica.</span></div></div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>Promedios ultimos 30 dias</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Promedios ultimos 30 dias</h3>
+              </div>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Tipo</th><th>Maiz</th><th>Promedio</th><th>Minimo</th><th>Maximo</th><th>Registros</th><th>Ultima act.</th></tr></thead>
                   <tbody>
-                    <tr v-for="row in precios.promedios" :key="`${row.tipo_precio}-${row.tipo_maiz}`">
+                    <tr v-for="(row,i) in precios.promedios" :key="`${row.tipo_precio}-${row.tipo_maiz}`" :class="i%2===1?'tr-alt':''">
                       <td><span class="pill" :class="tipoPrecioClass(row.tipo_precio)">{{ tipoPrecioLabel(row.tipo_precio) }}</span></td>
-                      <td>{{ row.tipo_maiz }}</td><td class="td-b">${{ fmtPrice(row.promedio) }}</td><td>${{ fmtPrice(row.minimo) }}</td><td>${{ fmtPrice(row.maximo) }}</td><td>{{ row.registros }}</td><td>{{ fmtFecha(row.ultima_fecha) }}</td>
+                      <td>{{ row.tipo_maiz }}</td><td class="td-b td-price">${{ fmtPrice(row.promedio) }}</td><td class="td-muted">${{ fmtPrice(row.minimo) }}</td><td class="td-muted">${{ fmtPrice(row.maximo) }}</td><td>{{ row.registros }}</td><td class="td-muted">{{ fmtFecha(row.ultima_fecha) }}</td>
                     </tr>
                     <tr v-if="!precios.promedios?.length"><td colspan="7" class="td-empty">Sin registros en los ultimos 30 dias</td></tr>
                   </tbody>
@@ -346,56 +446,81 @@
 
         <!-- ════════════ PANEL 5: ALERTAS ════════════ -->
         <div v-if="tabActiva === 'alertas'" class="panel fade-in">
-          <div class="panel-header">
-            <div class="panel-header-text">
-              <h2 class="panel-title">Alertas</h2>
-              <p class="panel-desc">Monitoreo de incidencias, niveles de severidad y seguimiento</p>
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge red">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                Alertas
+              </span>
+              <h2 class="p-title">Centro de Monitoreo</h2>
+              <p class="p-desc">Incidencias activas, niveles de severidad y seguimiento de alertas criticas</p>
             </div>
-            <span class="panel-badge badge-red"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Monitoreo</span>
+          </div>
+          <div class="inline-filters">
+            <svg class="filter-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <div class="filter-item">
+              <label class="filter-lbl">Estado</label>
+              <select class="filter-sel" v-model="filtros.estado">
+                <option value="">Todos los estados</option>
+                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </div>
+            <div class="filter-spacer"></div>
+            <span v-if="filtros.estado" class="filter-badge">Filtros activos</span>
+            <button v-if="filtros.estado" class="btn-clear-f" @click="limpiarFiltros">&#10005; Limpiar</button>
           </div>
           <div v-if="!alertasData" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <div class="kpi-row kpi-4">
-              <div v-for="n in alertasData.por_nivel" :key="n.nivel_alerta" class="kpi glass-card">
+              <div v-for="n in alertasData.por_nivel" :key="n.nivel_alerta" class="kpi glass-card" :class="`kpi-nivel-${n.nivel_alerta}`">
                 <div class="kpi-ico" :style="nivelStyle(n.nivel_alerta)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
                 <div class="kpi-body"><span class="kpi-val">{{ n.total }}</span><span class="kpi-lbl">{{ nivelLabel(n.nivel_alerta) }}</span></div>
               </div>
             </div>
-            <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Estado de alertas</h3>
-              <div class="estado-bars">
-                <div v-for="e in alertasData.por_estado" :key="e.estado_alerta" class="ebar-row">
-                  <span class="ebar-lbl">{{ e.estado_alerta }}</span>
-                  <div class="ebar-track"><div class="ebar-fill" :class="estadoAlertaClass(e.estado_alerta)" :style="{ width: maxAlertaEstado>0 ? Math.round((e.total/maxAlertaEstado)*100)+'%':'0%' }"></div></div>
-                  <span class="ebar-val">{{ e.total }}</span>
+            <div class="tbl-2col">
+              <section class="glass-card tbl-card">
+                <div class="tbl-hdr">
+                  <h3 class="sec-heading mb0">Estado de alertas</h3>
                 </div>
-              </div>
-            </section>
+                <div class="estado-bars">
+                  <div v-for="e in alertasData.por_estado" :key="e.estado_alerta" class="ebar-row">
+                    <span class="ebar-lbl">{{ e.estado_alerta }}</span>
+                    <div class="ebar-track"><div class="ebar-fill" :class="estadoAlertaClass(e.estado_alerta)" :style="{ width: maxAlertaEstado>0 ? Math.round((e.total/maxAlertaEstado)*100)+'%':'0%' }"></div></div>
+                    <span class="ebar-val">{{ e.total }}</span>
+                  </div>
+                </div>
+              </section>
+              <section class="glass-card tbl-card">
+                <div class="tbl-hdr">
+                  <h3 class="sec-heading mb0">Tipos de alerta pendientes</h3>
+                </div>
+                <div class="tbl-wrap">
+                  <table class="dt">
+                    <thead><tr><th>Tipo de alerta</th><th>Nivel</th><th>Total</th></tr></thead>
+                    <tbody>
+                      <tr v-for="(t,i) in alertasData.por_tipo" :key="`${t.tipo_alerta}-${t.nivel_alerta}`" :class="i%2===1?'tr-alt':''">
+                        <td>{{ t.tipo_alerta }}</td><td><span class="pill" :class="nivelPillClass(t.nivel_alerta)">{{ nivelLabel(t.nivel_alerta) }}</span></td><td class="td-b">{{ t.total }}</td>
+                      </tr>
+                      <tr v-if="!alertasData.por_tipo?.length"><td colspan="3" class="td-empty">Sin alertas pendientes</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Alertas pendientes — mas criticas</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Alertas pendientes mas criticas</h3>
+                <span class="tbl-count">{{ alertasData.recientes_pendientes?.length ?? 0 }} alertas</span>
+              </div>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Severidad</th><th>Tipo</th><th>Productor</th><th>UP</th><th>Estado</th><th>Fecha</th></tr></thead>
                   <tbody>
-                    <tr v-for="a in alertasData.recientes_pendientes" :key="a.id">
+                    <tr v-for="(a,i) in alertasData.recientes_pendientes" :key="a.id" :class="i%2===1?'tr-alt':''">
                       <td><span class="pill" :class="nivelPillClass(a.nivel_alerta)">{{ nivelLabel(a.nivel_alerta) }}</span></td>
-                      <td>{{ a.tipo_alerta }}</td><td>{{ a.nombres ? `${a.nombres} ${a.apellido_paterno}` : '—' }}</td><td>{{ a.up_name||'—' }}</td><td>{{ a.state_name||'—' }}</td><td>{{ fmtFecha(a.fecha_alerta) }}</td>
+                      <td>{{ a.tipo_alerta }}</td><td class="td-b">{{ a.nombres ? `${a.nombres} ${a.apellido_paterno}` : '—' }}</td><td>{{ a.up_name||'—' }}</td><td>{{ a.state_name||'—' }}</td><td class="td-muted">{{ fmtFecha(a.fecha_alerta) }}</td>
                     </tr>
                     <tr v-if="!alertasData.recientes_pendientes?.length"><td colspan="6" class="td-empty">No hay alertas pendientes</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-            <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>Tipos de alerta pendientes</h3>
-              <div class="tbl-wrap">
-                <table class="dt">
-                  <thead><tr><th>Tipo de alerta</th><th>Nivel</th><th>Total</th></tr></thead>
-                  <tbody>
-                    <tr v-for="t in alertasData.por_tipo" :key="`${t.tipo_alerta}-${t.nivel_alerta}`">
-                      <td>{{ t.tipo_alerta }}</td><td><span class="pill" :class="nivelPillClass(t.nivel_alerta)">{{ nivelLabel(t.nivel_alerta) }}</span></td><td>{{ t.total }}</td>
-                    </tr>
-                    <tr v-if="!alertasData.por_tipo?.length"><td colspan="3" class="td-empty">Sin alertas pendientes</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -405,41 +530,56 @@
 
         <!-- ════════════ PANEL 6: OPERACION ════════════ -->
         <div v-if="tabActiva === 'operacion'" class="panel fade-in">
-          <div class="panel-header">
-            <div class="panel-header-text">
-              <h2 class="panel-title">Operacion</h2>
-              <p class="panel-desc">Usuarios, calidad de datos, supervisores y visitas de campo</p>
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge blue">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Operacion
+              </span>
+              <h2 class="p-title">Equipo y Calidad</h2>
+              <p class="p-desc">Usuarios del sistema, calidad de datos, supervisores y visitas de campo</p>
             </div>
-            <span class="panel-badge badge-blue"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Sistema</span>
           </div>
           <div v-if="!operacion" class="loader-row"><div class="loader"></div></div>
           <template v-else>
             <section class="glass-card roles-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuarios activos por rol</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Usuarios activos por rol</h3>
+                <span class="tbl-count">{{ operacion.usuarios_por_rol?.reduce((a:number,r:any)=>a+r.total,0) }} usuarios</span>
+              </div>
               <div class="roles-row">
                 <div v-for="r in operacion.usuarios_por_rol" :key="r.rol" class="role-chip">
+                  <div class="rc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                   <span class="rc-num">{{ r.total }}</span>
                   <span class="rc-lbl">{{ rolLabel(r.rol) }}</span>
                 </div>
               </div>
             </section>
             <section class="glass-card quality-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Calidad de datos — UPs ({{ operacion.calidad_datos.total_ups }} total)</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Calidad de datos — UPs</h3>
+                <span class="tbl-count">{{ operacion.calidad_datos.total_ups }} UPs totales</span>
+              </div>
               <div class="q-bars">
                 <div v-for="q in calidadItems" :key="q.label" class="q-row">
                   <span class="q-lbl">{{ q.label }}</span>
-                  <div class="q-track"><div class="q-fill" :class="q.pct>=80?'qg':q.pct>=50?'qa':'qr'" :style="{ width: q.pct+'%' }"></div></div>
+                  <div class="q-track">
+                    <div class="q-fill" :class="q.pct>=80?'qg':q.pct>=50?'qa':'qr'" :style="{ width: q.pct+'%' }"></div>
+                  </div>
                   <span class="q-pct" :class="q.pct>=80?'tc-g':q.pct>=50?'tc-a':'tc-r'">{{ q.pct }}%</span>
                 </div>
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Ranking de supervisores — ultimos 30 dias</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Ranking de supervisores — ultimos 30 dias</h3>
+                <span class="tbl-count">{{ operacion.supervisores?.length ?? 0 }} supervisores</span>
+              </div>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>#</th><th>Supervisor</th><th>Email</th><th>Productores</th><th>Visitas</th></tr></thead>
                   <tbody>
-                    <tr v-for="(s, i) in operacion.supervisores" :key="s.supervisor_id">
+                    <tr v-for="(s, i) in operacion.supervisores" :key="s.supervisor_id" :class="i%2===1?'tr-alt':''">
                       <td class="td-rank">{{ (i as number)+1 }}</td><td class="td-b">{{ s.nombre_completo }}</td><td class="td-muted">{{ s.email }}</td><td>{{ s.productores_asignados }}</td>
                       <td><span class="pill" :class="s.visitas_mes>0?'pill-g':'pill-gray'">{{ s.visitas_mes }} visita{{ s.visitas_mes!==1?'s':'' }}</span></td>
                     </tr>
@@ -449,7 +589,9 @@
               </div>
             </section>
             <section class="glass-card tbl-card">
-              <h3 class="sec-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Ultimas visitas de campo</h3>
+              <div class="tbl-hdr">
+                <h3 class="sec-heading mb0">Ultimas visitas de campo</h3>
+              </div>
               <div class="tbl-wrap">
                 <table class="dt">
                   <thead><tr><th>Fecha</th><th>Productor</th><th>UP</th><th>Tipo</th><th>Tecnico</th></tr></thead>
@@ -867,13 +1009,16 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 /* ═══ BASE ═══ */
 .dash {
   width: 100%;
-  padding: 0 0 100px;
+  padding: 0 0 80px;
   display: flex;
   flex-direction: column;
   gap: 0;
   box-sizing: border-box;
-  background: #f2f4f7;
+  background: #f6f8fa;
   min-height: 100vh;
+}
+/* Tipografía base */
+.dash {
   font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 .glass-card {
@@ -885,19 +1030,32 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   transition: box-shadow .2s ease;
 }
 .glass-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.04); }
-.panel { display: flex; flex-direction: column; gap: 12px; padding: 16px 3rem 28px; }
+/* padding-top compensa: topbar(60px) + hero(~72px) + tabs(~50px) = ~182px */
+.panel { display: flex; flex-direction: column; gap: 12px; padding: 182px 3rem 28px; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 .fade-in { animation: fadeIn .22s cubic-bezier(.4,0,.2,1) both; }
+
+/* ═══ STICKY WRAPPER (hero + tabs fijos arriba) ═══ */
+.dash-sticky {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
 
 /* ═══ HERO HEADER ═══ */
 .dash-hero {
   background: linear-gradient(160deg, var(--color-primary-darker) 0%, var(--color-primary) 55%, var(--color-primary-hover) 100%);
-  padding: .75rem 2.5rem .85rem;
+  padding: .75rem 3rem .85rem;
   border-radius: 0 0 24px 24px;
-  margin: 0 1.5rem 0;
+  margin: 0;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(26,92,56,.15);
+  box-shadow: 0 4px 20px rgba(26,92,56,.18);
 }
 .dash-hero::before {
   content: '';
@@ -931,53 +1089,91 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 .btn-refresh:hover { background: rgba(255,255,255,.22); transform: scale(1.05); }
 .btn-refresh.spinning svg { animation: spin .8s linear infinite; }
 
-/* ═══ FILTERS ═══ */
-.filters-bar {
+/* ═══ INLINE FILTERS (dentro de cada panel) ═══ */
+.inline-filters {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 9px 16px;
-  background: rgba(255,255,255,.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  padding: 10px 16px;
+  background: #fff;
   border: 1px solid rgba(0,0,0,.07);
-  border-radius: 99px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.05);
-  margin: 10px 3rem 0;
-  z-index: 10;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
 .filter-icon { color: #b0b7c3; flex-shrink: 0; }
-.filter-item { display: flex; align-items: center; gap: 6px; }
-.filter-lbl { font-size: .67rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; }
+.filter-item { display: flex; align-items: center; gap: 8px; }
+.filter-lbl { font-size: .67rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .filter-sel {
-  font-size: .78rem; border: none; border-radius: 99px;
-  padding: 5px 12px; background: rgba(0,0,0,.04); color: #1e293b; outline: none;
-  min-width: 130px; cursor: pointer; transition: all .18s; font-weight: 500;
-  appearance: none;
+  font-size: .78rem; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 6px 12px; background: #f9fafb; color: #1e293b; outline: none;
+  min-width: 160px; cursor: pointer; transition: all .18s; font-weight: 500;
 }
-.filter-sel:hover { background: rgba(0,0,0,.07); }
-.filter-sel:focus { background: #fff; box-shadow: 0 0 0 2px rgba(27,107,58,.2); }
+.filter-sel:hover { background: #f1f5f9; border-color: #d1d5db; }
+.filter-sel:focus { background: #fff; border-color: #1B6B3A; box-shadow: 0 0 0 3px rgba(27,107,58,.1); }
 .filter-spacer { flex: 1; }
 .filter-badge {
-  font-size: .67rem; font-weight: 600; padding: 3px 10px;
+  font-size: .67rem; font-weight: 600; padding: 4px 11px;
   border-radius: 99px; background: rgba(27,107,58,.08); color: #15803d;
-  letter-spacing: .01em;
+  letter-spacing: .01em; border: 1px solid rgba(27,107,58,.15);
 }
 .btn-clear-f {
-  font-size: .73rem; padding: 5px 12px; border-radius: 99px; font-weight: 600;
-  border: none; background: rgba(0,0,0,.05); color: #6b7280; cursor: pointer;
-  transition: all .18s;
+  font-size: .72rem; padding: 5px 12px; border-radius: 8px; font-weight: 600;
+  border: 1px solid #e5e7eb; background: #fff; color: #6b7280; cursor: pointer;
+  transition: all .18s; display: flex; align-items: center; gap: 4px;
 }
-.btn-clear-f:hover { background: rgba(220,38,38,.08); color: #dc2626; }
+.btn-clear-f:hover { background: rgba(220,38,38,.06); border-color: rgba(220,38,38,.2); color: #dc2626; }
 
 /* ═══ LOADER ═══ */
 .loader-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px 16px; color: #94a3b8; font-size: .85rem; }
 .loader { width: 22px; height: 22px; border: 2.5px solid #e2e8f0; border-top-color: #1a5c38; border-radius: 50%; animation: spin .7s linear infinite; }
 
-/* ═══ TABS CAROUSEL ═══ */
-.tabs-carousel {
+/* ═══ TABS FLAT NAV (desktop) ═══ */
+.tabs-nav-flat {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 3rem 12px;
+  background: linear-gradient(180deg, rgba(26,92,56,.08) 0%, rgba(26,92,56,.03) 100%);
+  border-bottom: 1px solid rgba(26,92,56,.1);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-nav-flat::-webkit-scrollbar { display: none; }
+.tnf-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 18px;
+  border: 1.5px solid rgba(26,92,56,.15);
+  background: rgba(255,255,255,.7);
+  font-size: .8rem; font-weight: 600;
+  color: #3d7a57;
+  cursor: pointer;
+  border-radius: 10px;
+  white-space: nowrap;
+  transition: all .18s ease;
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+}
+.tnf-btn:hover:not(.active) {
+  color: #1B6B3A;
+  border-color: rgba(26,92,56,.3);
+  background: rgba(255,255,255,.9);
+}
+.tnf-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, #1B6B3A 0%, #15843F 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(27,107,58,.3);
+}
+.tnf-icon { display: flex; align-items: center; opacity: .75; }
+.tnf-btn.active .tnf-icon { opacity: 1; }
+.tnf-lbl { letter-spacing: -.01em; }
+
+/* ═══ TABS CAROUSEL (mobile only) ═══ */
+.tabs-carousel {
+  display: none;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -1066,62 +1262,121 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 .tab-btn.active .tab-icon { opacity: 1; }
 .tab-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ═══ VISION HEADER ═══ */
-.vision-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0; gap: 12px;
+/* ═══ PANEL HEADER (universal) ═══ */
+.p-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 4px 0 2px; gap: 12px;
 }
-.vision-header-text { flex: 1; min-width: 0; }
-.vision-title {
-  font-size: 1.15rem; font-weight: 700; color: #0f172a;
-  margin: 0 0 2px; letter-spacing: -.02em; line-height: 1.2;
+.p-header-left { display: flex; flex-direction: column; gap: 4px; }
+.p-header-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: .67rem; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; align-self: flex-start;
 }
-.vision-desc {
-  font-size: .72rem; color: #94a3b8; margin: 0;
-  font-weight: 500; line-height: 1;
-}
-.vision-badge {
-  display: flex; align-items: center; gap: 5px;
-  padding: 4px 12px; border-radius: 99px;
-  background: rgba(34,197,94,.08); color: #16a34a;
-  font-size: .68rem; font-weight: 600;
-  letter-spacing: .02em;
-}
-.vision-badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #22c55e;
+.p-header-badge.live  { background: rgba(34,197,94,.1);   color: #16a34a; }
+.p-header-badge.green { background: rgba(22,163,74,.1);   color: #15803d; }
+.p-header-badge.purple{ background: rgba(124,58,237,.1);  color: #7c3aed; }
+.p-header-badge.amber { background: rgba(217,119,6,.1);   color: #b45309; }
+.p-header-badge.red   { background: rgba(239,68,68,.1);   color: #dc2626; }
+.p-header-badge.blue  { background: rgba(37,99,235,.1);   color: #1d4ed8; }
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
   animation: pulse-dot 2s ease-in-out infinite;
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .5; transform: scale(1.3); }
+  50% { opacity: .5; transform: scale(1.35); }
+}
+.p-title {
+  font-size: 1.3rem; font-weight: 750; color: #0a0f1e;
+  margin: 0; letter-spacing: -.025em; line-height: 1.15;
+}
+.p-desc {
+  font-size: .73rem; color: #94a3b8; margin: 0;
+  font-weight: 500; line-height: 1.3;
 }
 
-/* ═══ PANEL HEADER (shared) ═══ */
-.panel-header {
+/* ═══ TABLE HEADER row ═══ */
+.tbl-hdr {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 12px;
+  margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
 }
-.panel-header-text { flex: 1; min-width: 0; }
-.panel-title {
-  font-size: 1.15rem; font-weight: 700; color: #0f172a;
-  margin: 0 0 2px; letter-spacing: -.02em; line-height: 1.2;
-}
-.panel-desc {
-  font-size: .72rem; color: #94a3b8; margin: 0;
-  font-weight: 500; line-height: 1;
-}
-.panel-badge {
-  display: flex; align-items: center; gap: 5px;
-  padding: 4px 12px; border-radius: 99px;
-  font-size: .68rem; font-weight: 600;
+.tbl-count {
+  font-size: .67rem; font-weight: 600; color: #94a3b8;
+  background: rgba(0,0,0,.04); padding: 3px 10px; border-radius: 99px;
   letter-spacing: .02em; flex-shrink: 0;
 }
-.badge-green  { background: rgba(34,197,94,.08);  color: #16a34a; }
-.badge-purple { background: rgba(124,58,237,.08); color: #7c3aed; }
-.badge-amber  { background: rgba(217,119,6,.08);  color: #d97706; }
-.badge-red    { background: rgba(239,68,68,.08);  color: #dc2626; }
-.badge-blue   { background: rgba(37,99,235,.08);  color: #2563eb; }
+.mb0 { margin-bottom: 0 !important; }
+
+/* ═══ 2-column table grid ═══ */
+.tbl-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ═══ CHART HEADER ═══ */
+.chart-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; gap: 8px;
+}
+.chart-unit {
+  font-size: .67rem; color: #94a3b8; font-weight: 600;
+  background: rgba(0,0,0,.04); padding: 3px 10px; border-radius: 99px;
+}
+
+/* ═══ DEFICIT TAG ═══ */
+.def-tag {
+  font-size: .67rem; font-weight: 700; padding: 3px 10px;
+  border-radius: 99px; flex-shrink: 0; letter-spacing: .02em;
+}
+.def-tag-ok  { background: rgba(22,163,74,.1);  color: #15803d; }
+.def-tag-err { background: rgba(220,38,38,.1);  color: #dc2626; }
+
+/* ═══ OCU CELL ═══ */
+.ocu-cell { display: flex; align-items: center; gap: 6px; }
+
+/* ═══ PRICE CARD ICON ═══ */
+.pc-icon-wrap {
+  width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 6px; opacity: .7;
+}
+.pc-green  .pc-icon-wrap { background: rgba(22,163,74,.12);  color: #15803d; }
+.pc-blue   .pc-icon-wrap { background: rgba(37,99,235,.12);  color: #1d4ed8; }
+.pc-purple .pc-icon-wrap { background: rgba(124,58,237,.12); color: #6d28d9; }
+.pc-amber  .pc-icon-wrap { background: rgba(217,119,6,.12);  color: #92400e; }
+
+/* ═══ TABLE ALTERNATING ROWS ═══ */
+.tr-alt td { background: rgba(0,0,0,.015) !important; }
+
+/* ═══ TABLE ESTADO CHIP ═══ */
+.td-estado {
+  display: inline-flex; align-items: center;
+  font-weight: 600; color: #0f172a;
+}
+.td-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; height: 22px; border-radius: 6px;
+  background: rgba(0,0,0,.04); font-size: .75rem; font-weight: 600; color: #374151;
+}
+.td-price { font-size: .9rem; letter-spacing: -.01em; }
+
+/* ═══ ROLE CHIP ICON ═══ */
+.rc-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(27,107,58,.08); color: #1B6B3A; margin-bottom: 4px;
+}
+
+/* ═══ KPI COLOR ACCENTS (bottom border) ═══ */
+.kpi-green  { border-bottom: 3px solid rgba(22,163,74,.3); }
+.kpi-blue   { border-bottom: 3px solid rgba(37,99,235,.3); }
+.kpi-amber  { border-bottom: 3px solid rgba(217,119,6,.3); }
+.kpi-purple { border-bottom: 3px solid rgba(124,58,237,.3); }
+.kpi-teal   { border-bottom: 3px solid rgba(14,148,148,.3); }
+.kpi-red    { border-bottom: 3px solid rgba(220,38,38,.3); }
+.kpi-nivel-critico { border-bottom: 3px solid rgba(220,38,38,.4); }
+.kpi-nivel-alto    { border-bottom: 3px solid rgba(217,119,6,.4); }
+.kpi-nivel-medio   { border-bottom: 3px solid rgba(37,99,235,.3); }
+.kpi-nivel-bajo    { border-bottom: 3px solid rgba(22,163,74,.3); }
 
 /* ═══ KPI ROW ═══ */
 .kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
@@ -1331,15 +1586,24 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 @media (max-width: 1100px) {
   .kpi-row { grid-template-columns: repeat(3,1fr); }
   .charts-2col { grid-template-columns: 1fr; }
+  .tbl-2col { grid-template-columns: 1fr; }
   .precio-cards { grid-template-columns: repeat(2,1fr); }
   .map-body { flex-direction: column; }
   .side-panel { width: 100%; border-left: none; border-top: 1px solid rgba(0,0,0,.05); }
 }
+/* iPad/tablet: topbar baja a 52px desde 1024px */
+@media (max-width: 1024px) {
+  .dash-sticky { top: 52px; }
+  /* topbar(52) + hero(~72px) + tabs(~50px) = ~174px */
+  .panel { padding-top: 174px; }
+}
 @media (max-width: 768px) {
-  .dash-hero { padding: .65rem .85rem .75rem; border-radius: 0 0 20px 20px; margin: 0 1rem 0; }
-  .filters-bar { margin: 10px 1.25rem 0; padding: 9px 14px; border-radius: 22px; }
+  .tabs-nav-flat { display: none; }
+  .tabs-carousel { display: flex; }
+  /* topbar(52) + hero(~65px) + carousel(~52px) = ~169px */
+  .panel { padding: 169px 1.25rem 20px; gap: 10px; }
+  .dash-hero { padding: .65rem 1.25rem .75rem; border-radius: 0 0 20px 20px; margin: 0; }
   .dash-title { font-size: 1.2rem; }
-  .panel { padding: 12px 1.25rem 20px; gap: 10px; }
   .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; }
   .kpi-3, .kpi-4 { grid-template-columns: repeat(2,1fr); }
   .kpi { padding: 14px 14px; }
@@ -1347,13 +1611,13 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   .kpi-ico { width: 36px; height: 36px; }
   .precio-cards { grid-template-columns: 1fr 1fr; }
   .charts-2col { grid-template-columns: 1fr; }
+  .tbl-2col { grid-template-columns: 1fr; }
   .def-lbl { min-width: 120px; }
   .q-lbl { min-width: 130px; }
-  .panel-title { font-size: 1rem; }
-  .vision-title { font-size: 1rem; }
+  .p-title { font-size: 1.1rem; }
 }
 @media (max-width: 480px) {
-  .dash-hero { padding: .55rem .75rem .65rem; border-radius: 0 0 16px 16px; margin: 0 .75rem 0; }
+  .dash-hero { padding: .55rem .85rem .65rem; border-radius: 0 0 16px 16px; margin: 0; }
   .filters-bar { margin: 8px .85rem 0; flex-direction: column; align-items: stretch; gap: 8px; border-radius: 18px; }
   .filter-item { flex-direction: column; align-items: stretch; gap: 4px; }
   .filter-sel { min-width: 100%; }
