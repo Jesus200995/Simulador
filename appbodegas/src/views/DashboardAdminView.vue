@@ -765,7 +765,7 @@ const estadosDisponibles = computed(() => {
 function limpiarFiltros() { filtros.value = { estado: '', ciclo: '' } }
 
 // Vision KPIs
-const precioParcela = computed(() => { const v = Number(precios.value?.promedios?.find((x: any) => x.tipo_precio === 'observado')?.promedio ?? 0); return v > 0 ? v : 5000 })
+const precioParcela = computed(() => 5000)
 const precioBodega = computed(() => Number(precios.value?.promedios?.find((x: any) => x.tipo_precio === 'bodega')?.promedio ?? 0))
 const precioInternacional = computed(() => { const v = Number(precios.value?.recientes?.find((x: any) => x.tipo_precio === 'mercado_internacional')?.precio ?? 0); return v > 0 ? v : 8289.37 })
 const brechaPrecio = computed(() => precioBodega.value - precioParcela.value)
