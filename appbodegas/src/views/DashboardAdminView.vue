@@ -1,9 +1,9 @@
 <template>
   <AppShell>
-    <div class="dash">
+    <div class="dash" :style="{ '--sticky-h': stickyH + 'px' }">
 
       <!-- ─── STICKY: HERO + TABS ─── -->
-      <div class="dash-sticky">
+      <div class="dash-sticky" ref="stickyRef">
         <div class="dash-hero">
           <div class="dash-hero-inner">
             <div class="dash-hero-text">
@@ -639,6 +639,11 @@ const operacion = ref<any>(null)
 const mapaData = ref<any>(null)
 const filtros = ref({ estado: '', ciclo: '' })
 
+// ── Sticky height tracker ──
+const stickyRef = ref<HTMLElement | null>(null)
+const stickyH = ref(120)
+let stickyObserver: ResizeObserver | null = null
+
 // ── Map ──
 const mapContainer = ref<HTMLElement | null>(null)
 let map: mapboxgl.Map | null = null
@@ -997,8 +1002,21 @@ watch(tabActiva, async (tab) => {
   if (tab === 'vision') { await nextTick(); if (!map) initMap(); else if (map.loaded()) updateMarkers() }
 })
 
-onMounted(() => loadAll())
-onUnmounted(() => { if (map) { map.remove(); map = null } })
+onMounted(() => {
+  loadAll()
+  nextTick(() => {
+    if (stickyRef.value) {
+      stickyObserver = new ResizeObserver(entries => {
+        for (const e of entries) stickyH.value = Math.round(e.contentRect.height)
+      })
+      stickyObserver.observe(stickyRef.value)
+    }
+  })
+})
+onUnmounted(() => {
+  if (map) { map.remove(); map = null }
+  if (stickyObserver) stickyObserver.disconnect()
+})
 </script>
 
 <style scoped>
@@ -1030,8 +1048,8 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   transition: box-shadow .2s ease;
 }
 .glass-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.04); }
-/* padding-top compensa: topbar(60px) + hero(~72px) + tabs(~50px) = ~182px */
-.panel { display: flex; flex-direction: column; gap: 12px; padding: 182px 3rem 28px; }
+/* padding-top = altura real del sticky + 16px de respiro */
+.panel { display: flex; flex-direction: column; gap: 12px; padding: calc(var(--sticky-h, 120px) + 16px) 3rem 28px; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 .fade-in { animation: fadeIn .22s cubic-bezier(.4,0,.2,1) both; }
 
@@ -1134,7 +1152,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 3rem 12px;
+  padding: 7px 3rem 8px;
   background: linear-gradient(180deg, rgba(26,92,56,.08) 0%, rgba(26,92,56,.03) 100%);
   border-bottom: 1px solid rgba(26,92,56,.1);
   flex-wrap: nowrap;
@@ -1264,22 +1282,24 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 
 /* ═══ PANEL HEADER (universal) ═══ */
 .p-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 4px 0 2px; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0; gap: 16px; flex-wrap: wrap;
 }
-.p-header-left { display: flex; flex-direction: column; gap: 4px; }
+.p-header-left {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0;
+}
 .p-header-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 99px;
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  padding: 4px 11px; border-radius: 99px;
   font-size: .67rem; font-weight: 700; letter-spacing: .05em;
-  text-transform: uppercase; align-self: flex-start;
+  text-transform: uppercase;
 }
-.p-header-badge.live  { background: rgba(34,197,94,.1);   color: #16a34a; }
-.p-header-badge.green { background: rgba(22,163,74,.1);   color: #15803d; }
-.p-header-badge.purple{ background: rgba(124,58,237,.1);  color: #7c3aed; }
-.p-header-badge.amber { background: rgba(217,119,6,.1);   color: #b45309; }
-.p-header-badge.red   { background: rgba(239,68,68,.1);   color: #dc2626; }
-.p-header-badge.blue  { background: rgba(37,99,235,.1);   color: #1d4ed8; }
+.p-header-badge.live  { background: rgba(34,197,94,.12);  color: #16a34a; border: 1px solid rgba(34,197,94,.2); }
+.p-header-badge.green { background: rgba(22,163,74,.10);  color: #15803d; border: 1px solid rgba(22,163,74,.2); }
+.p-header-badge.purple{ background: rgba(124,58,237,.10); color: #7c3aed; border: 1px solid rgba(124,58,237,.2); }
+.p-header-badge.amber { background: rgba(217,119,6,.10);  color: #b45309; border: 1px solid rgba(217,119,6,.2); }
+.p-header-badge.red   { background: rgba(239,68,68,.10);  color: #dc2626; border: 1px solid rgba(239,68,68,.2); }
+.p-header-badge.blue  { background: rgba(37,99,235,.10);  color: #1d4ed8; border: 1px solid rgba(37,99,235,.2); }
 .live-dot {
   width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
   animation: pulse-dot 2s ease-in-out infinite;
@@ -1289,12 +1309,12 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   50% { opacity: .5; transform: scale(1.35); }
 }
 .p-title {
-  font-size: 1.3rem; font-weight: 750; color: #0a0f1e;
-  margin: 0; letter-spacing: -.025em; line-height: 1.15;
+  font-size: 1.05rem; font-weight: 700; color: #0a0f1e;
+  margin: 0; letter-spacing: -.02em; line-height: 1.2; white-space: nowrap;
 }
 .p-desc {
-  font-size: .73rem; color: #94a3b8; margin: 0;
-  font-weight: 500; line-height: 1.3;
+  font-size: .75rem; color: #94a3b8; margin: 0;
+  font-weight: 500; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 /* ═══ TABLE HEADER row ═══ */
@@ -1594,14 +1614,11 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 /* iPad/tablet: topbar baja a 52px desde 1024px */
 @media (max-width: 1024px) {
   .dash-sticky { top: 52px; }
-  /* topbar(52) + hero(~72px) + tabs(~50px) = ~174px */
-  .panel { padding-top: 174px; }
 }
 @media (max-width: 768px) {
   .tabs-nav-flat { display: none; }
   .tabs-carousel { display: flex; }
-  /* topbar(52) + hero(~65px) + carousel(~52px) = ~169px */
-  .panel { padding: 169px 1.25rem 20px; gap: 10px; }
+  .panel { padding: calc(var(--sticky-h, 169px) + 16px) 1.25rem 20px; gap: 10px; }
   .dash-hero { padding: .65rem 1.25rem .75rem; border-radius: 0 0 20px 20px; margin: 0; }
   .dash-title { font-size: 1.2rem; }
   .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; }
@@ -1622,7 +1639,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   .filter-item { flex-direction: column; align-items: stretch; gap: 4px; }
   .filter-sel { min-width: 100%; }
   .dash-title { font-size: 1.05rem; }
-  .panel { padding: 10px .85rem 16px; gap: 8px; }
+  .panel { padding: calc(var(--sticky-h, 160px) + 12px) .85rem 16px; gap: 8px; }
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
   .kpi { padding: 12px 12px; gap: 10px; }
   .kpi-val { font-size: 1rem; }
