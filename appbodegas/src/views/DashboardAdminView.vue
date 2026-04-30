@@ -702,8 +702,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 
 /* ═══ BASE ═══ */
 .dash {
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 0 80px;
   display: flex;
   flex-direction: column;
@@ -719,14 +718,15 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
   padding: 16px 18px;
 }
-.panel { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 16px; }
+.panel { display: flex; flex-direction: column; gap: 10px; padding: 14px 3rem 24px; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
 .fade-in { animation: fadeIn .18s ease; }
 
 /* ═══ HERO HEADER ═══ */
 .dash-hero {
-  background: linear-gradient(135deg, #0f3d25 0%, #1a5c38 50%, #166534 100%);
-  padding: 20px 20px 28px;
+  background: linear-gradient(160deg, var(--color-primary-darker) 0%, var(--color-primary) 55%, var(--color-primary-hover) 100%);
+  padding: 1.5rem 3rem 1.75rem;
+  border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;
 }
@@ -734,16 +734,8 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 80% 0%, rgba(255,255,255,.07) 0%, transparent 60%);
+  background: radial-gradient(circle at 85% 15%, rgba(255,255,255,.08), transparent 45%);
   pointer-events: none;
-}
-.dash-hero::after {
-  content: '';
-  position: absolute;
-  bottom: -1px; left: 0; right: 0;
-  height: 20px;
-  background: #f6f8fa;
-  border-radius: 14px 14px 0 0;
 }
 .dash-hero-inner {
   display: flex;
@@ -751,8 +743,6 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  max-width: 1280px;
-  margin: 0 auto;
   position: relative;
   z-index: 1;
 }
@@ -779,7 +769,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 10px 16px;
+  padding: 10px 3rem;
   background: #fff;
   border-bottom: 1px solid #e8edf2;
   border-radius: 0;
@@ -817,7 +807,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   gap: 0;
   background: #fff;
   border-bottom: 1px solid #e8edf2;
-  padding: 0 16px;
+  padding: 0 3rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -842,7 +832,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 .tab-lbl { white-space: nowrap; }
 
 /* ═══ KPI ROW ═══ */
-.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; padding: 14px 16px 0; }
+.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; padding: 14px 3rem 0; }
 .kpi-3 { grid-template-columns: repeat(3,1fr); }
 .kpi-4 { grid-template-columns: repeat(4,1fr); }
 .kpi {
@@ -1018,10 +1008,10 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   .side-panel { width: 100%; border-left: none; border-top: 1px solid #e8edf2; }
 }
 @media (max-width: 768px) {
-  .dash-hero { padding: 16px 14px 24px; }
+  .dash-hero { padding: 1.25rem 1rem 1.5rem; border-radius: 0 0 22px 22px; }
   .dash-title { font-size: 1.2rem; }
-  .panel { padding: 10px 12px 0; gap: 8px; }
-  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px 12px 0; }
+  .panel { padding: 10px 1.25rem 16px; gap: 8px; }
+  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px 1.25rem 0; }
   .kpi-3, .kpi-4 { grid-template-columns: repeat(2,1fr); }
   .kpi { padding: 12px 13px; }
   .kpi-val { font-size: 1.1rem; }
@@ -1031,14 +1021,14 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
   .def-lbl { min-width: 120px; }
   .q-lbl { min-width: 130px; }
   .tab-btn { padding: 8px 10px; font-size: .76rem; }
-  .tabs-nav { padding: 0 10px; }
-  .filters-bar { padding: 8px 12px; }
+  .tabs-nav { padding: 0 1rem; }
+  .filters-bar { padding: 8px 1.25rem; }
 }
 @media (max-width: 480px) {
-  .dash-hero { padding: 14px 12px 22px; }
+  .dash-hero { padding: 1rem .85rem 1.35rem; border-radius: 0 0 18px 18px; }
   .dash-title { font-size: 1.08rem; }
-  .panel { padding: 8px 10px 0; gap: 7px; }
-  .kpi-row { grid-template-columns: 1fr 1fr; gap: 7px; padding: 8px 10px 0; }
+  .panel { padding: 8px .85rem 14px; gap: 7px; }
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 7px; padding: 8px .85rem 0; }
   .kpi { padding: 10px 11px; gap: 8px; }
   .kpi-val { font-size: .96rem; }
   .kpi-lbl { font-size: .62rem; }
