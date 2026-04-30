@@ -400,21 +400,29 @@ router.get('/operacion', authMiddleware, async (req: AuthRequest, res: Response)
 router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!adminOnly(req, res)) return;
   try {
-    const [upsGeo, bodegasGeo, porEstado] = await Promise.all([
+    const [upsGeo, bodegasGeo, porEstado, alertasGeo] = await Promise.all([
       pool.query(`
         SELECT
           u.up_id, u.up_name, u.state_name, u.municipality_name,
-          u.area_ha_calc,
-          ST_X(u.centroid) AS lng, ST_Y(u.centroid) AS lat
+          u.area_ha_calc AS area_ha,
+          ST_X(u.centroid) AS lng, ST_Y(u.centroid) AS lat,
+          COUNT(a.id)::int AS alertas,
+          COUNT(CASE WHEN a.nivel_alerta IN ('critico','alto') THEN 1 END)::int AS alertas_criticas
         FROM up u
+        LEFT JOIN alertas a ON a.up_id = u.up_id AND a.estado_alerta = 'pendiente'
         WHERE u.centroid IS NOT NULL
+        GROUP BY u.up_id, u.up_name, u.state_name, u.municipality_name, u.area_ha_calc, u.centroid
         LIMIT 500
       `),
       pool.query(`
         SELECT
           b.id, b.nombre, b.estado, b.municipio,
           b.latitud AS lat, b.longitud AS lng,
-          b.capacidad_toneladas
+          b.capacidad_toneladas,
+          COALESCE(b.stock_actual, 0)::numeric(10,2) AS stock_actual,
+          CASE WHEN b.capacidad_toneladas > 0
+            THEN ROUND((COALESCE(b.stock_actual,0) / b.capacidad_toneladas) * 100)::int
+            ELSE 0 END AS ocupacion_pct
         FROM bodegas b
         WHERE b.estatus = 'aprobada' AND b.activo = true
           AND b.latitud IS NOT NULL AND b.longitud IS NOT NULL
@@ -435,12 +443,24 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
         GROUP BY u.state_name
         ORDER BY produccion_ton DESC
       `),
+      pool.query(`
+        SELECT
+          a.id, a.tipo_alerta, a.nivel_alerta, a.estado_alerta,
+          u.up_name, u.state_name, u.municipality_name,
+          ST_X(u.centroid) AS lng, ST_Y(u.centroid) AS lat
+        FROM alertas a
+        JOIN up u ON u.up_id = a.up_id AND u.centroid IS NOT NULL
+        WHERE a.estado_alerta = 'pendiente'
+        ORDER BY CASE a.nivel_alerta WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 WHEN 'medio' THEN 3 ELSE 4 END
+        LIMIT 300
+      `),
     ]);
 
     res.json({
       ups: upsGeo.rows,
       bodegas: bodegasGeo.rows,
       por_estado: porEstado.rows,
+      alertas: alertasGeo.rows,
     });
   } catch (error) {
     console.error('Error dashboard mapa:', error);

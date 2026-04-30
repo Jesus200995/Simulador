@@ -937,30 +937,170 @@ function initMap() {
   map.on('load', () => updateMarkers())
 }
 
-function clearMarkers() { markers.forEach(m => m.remove()); markers.length = 0 }
+let activePopup: mapboxgl.Popup | null = null
+let hoveredFid: number | null = null
+const MAP_SRC  = 'dash-points-src'
+const MAP_GLOW = 'dash-points-glow'
+const MAP_PTS  = 'dash-points'
+
+function clearMarkers() {
+  markers.forEach(m => m.remove()); markers.length = 0
+  if (!map) return
+  if (map.getLayer(MAP_GLOW)) map.removeLayer(MAP_GLOW)
+  if (map.getLayer(MAP_PTS))  map.removeLayer(MAP_PTS)
+  if (map.getSource(MAP_SRC)) map.removeSource(MAP_SRC)
+  if (activePopup) { activePopup.remove(); activePopup = null }
+  hoveredFid = null
+}
+
+function nivelColor(nivel: string) {
+  return ({ critico: '#dc2626', alto: '#d97706', medio: '#2563eb', bajo: '#16a34a' } as any)[nivel] || '#64748b'
+}
+function nivelBg(nivel: string) {
+  return ({ critico: 'rgba(220,38,38,.08)', alto: 'rgba(217,119,6,.08)', medio: 'rgba(37,99,235,.08)', bajo: 'rgba(22,163,74,.08)' } as any)[nivel] || 'rgba(0,0,0,.05)'
+}
+function nivelBorder(nivel: string) {
+  return ({ critico: 'rgba(220,38,38,.2)', alto: 'rgba(217,119,6,.2)', medio: 'rgba(37,99,235,.2)', bajo: 'rgba(22,163,74,.2)' } as any)[nivel] || 'rgba(0,0,0,.1)'
+}
+
+function row(icon: string, label: string, value: string) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.04);">
+    <span style="display:flex;align-items:center;gap:5px;font-size:.7rem;color:#94a3b8;white-space:nowrap;">${icon}${label}</span>
+    <span style="font-size:.74rem;font-weight:600;color:#1e293b;text-align:right;">${value}</span>
+  </div>`
+}
+
+function buildPopupHTML(item: any, color: string): string {
+  const isAlerta = !!item.tipo_alerta
+  const isBodega = !!item.capacidad_toneladas
+  const isUP     = !isAlerta && !isBodega
+
+  const iconSVG = (path: string) => `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${path}</svg>`
+  const pinIcon  = iconSVG('<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>')
+  const areaIcon = iconSVG('<rect x="3" y="3" width="18" height="18" rx="2"/>')
+  const capIcon  = iconSVG('<path d="M3 21V8l9-5 9 5v13"/>')
+  const stcIcon  = iconSVG('<path d="M22 12H2"/><path d="M5 12V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6"/>')
+  const alertIcon= iconSVG('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>')
+  const typeIcon = iconSVG('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>')
+
+  let title = '', subtitle = '', badge = '', rows = ''
+
+  if (isUP) {
+    title    = item.up_name || '—'
+    subtitle = [item.municipality_name, item.state_name].filter(Boolean).join(', ')
+    const alertas = Number(item.alertas || 0)
+    badge = alertas > 0
+      ? `<span style="background:rgba(220,38,38,.1);color:#dc2626;border:1px solid rgba(220,38,38,.2);border-radius:99px;padding:2px 9px;font-size:.64rem;font-weight:700;">${alertIcon} ${alertas} alerta${alertas>1?'s':''}</span>`
+      : `<span style="background:rgba(22,163,74,.08);color:#15803d;border:1px solid rgba(22,163,74,.2);border-radius:99px;padding:2px 9px;font-size:.64rem;font-weight:700;">Sin alertas</span>`
+    rows += row(areaIcon, 'Superficie', item.area_ha ? `${Number(item.area_ha).toLocaleString('es-MX',{maximumFractionDigits:1})} ha` : '—')
+    if (Number(item.alertas_criticas) > 0)
+      rows += row(alertIcon, 'Críticas/Altas', `${item.alertas_criticas}`)
+
+  } else if (isBodega) {
+    title    = item.nombre || '—'
+    subtitle = [item.municipio, item.estado].filter(Boolean).join(', ')
+    const pct = Number(item.ocupacion_pct || 0)
+    const pctColor = pct >= 90 ? '#dc2626' : pct >= 70 ? '#d97706' : '#15803d'
+    badge = `<span style="background:rgba(124,58,237,.08);color:#7c3aed;border:1px solid rgba(124,58,237,.2);border-radius:99px;padding:2px 9px;font-size:.64rem;font-weight:700;">Bodega</span>`
+    rows += row(capIcon, 'Capacidad', `${Number(item.capacidad_toneladas||0).toLocaleString('es-MX')} ton`)
+    rows += row(stcIcon, 'Stock actual', `${Number(item.stock_actual||0).toLocaleString('es-MX',{maximumFractionDigits:1})} ton`)
+    rows += `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0;">
+      <span style="font-size:.7rem;color:#94a3b8;">Ocupación</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:60px;height:5px;border-radius:99px;background:rgba(0,0,0,.07);">
+          <div style="width:${pct}%;height:100%;border-radius:99px;background:${pctColor};"></div>
+        </div>
+        <span style="font-size:.74rem;font-weight:700;color:${pctColor};">${pct}%</span>
+      </div>
+    </div>`
+
+  } else if (isAlerta) {
+    const nivel = item.nivel_alerta || 'bajo'
+    title    = item.up_name || '—'
+    subtitle = [item.municipality_name, item.state_name].filter(Boolean).join(', ')
+    badge = `<span style="background:${nivelBg(nivel)};color:${nivelColor(nivel)};border:1px solid ${nivelBorder(nivel)};border-radius:99px;padding:2px 9px;font-size:.64rem;font-weight:700;text-transform:capitalize;">${nivel}</span>`
+    rows += row(typeIcon, 'Tipo', (item.tipo_alerta||'—').replace(/_/g,' '))
+    rows += row(alertIcon, 'Nivel', nivel.charAt(0).toUpperCase()+nivel.slice(1))
+  }
+
+  return `
+    <div style="font-family:-apple-system,'Segoe UI',sans-serif;width:240px;">
+      <div style="padding:10px 38px 8px 14px;border-bottom:1px solid rgba(0,0,0,.06);">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;box-shadow:0 0 0 3px ${color}28;"></div>
+          <span style="font-size:.82rem;font-weight:700;color:#0a0f1e;line-height:1.2;flex:1;min-width:0;">${title}</span>
+        </div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding-left:14px;">
+          ${badge}
+          ${subtitle ? `<span style="display:flex;align-items:center;gap:4px;font-size:.7rem;color:#64748b;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${subtitle}</span>` : ''}
+        </div>
+      </div>
+      ${rows ? `<div style="padding:6px 14px 10px;">${rows}</div>` : ''}
+    </div>`
+}
 
 function updateMarkers() {
   clearMarkers()
   if (!map || !mapaData.value) return
-  const cfg: Record<string, { items: any[]; color: string }> = {
-    'UPs':     { items: mapaData.value.ups     || [], color: '#15803d' },
-    'Bodegas': { items: mapaData.value.bodegas || [], color: '#7c3aed' },
-    'Alertas': { items: (mapaData.value.ups    || []).filter((u: any) => u.alertas > 0), color: '#ef4444' },
+  const cfg: Record<string, { items: any[]; color: string; tipo: string }> = {
+    'UPs':     { items: mapaData.value.ups     || [], color: '#15803d', tipo: 'up' },
+    'Bodegas': { items: mapaData.value.bodegas || [], color: '#7c3aed', tipo: 'bodega' },
+    'Alertas': { items: mapaData.value.alertas || [], color: '#ef4444', tipo: 'alerta' },
   }
-  const { items, color } = cfg[mapTab.value] || cfg['UPs']
-  items.forEach((item: any) => {
-    if (!item.lng || !item.lat) return
-    const el = document.createElement('div')
-    el.style.cssText = `width:11px;height:11px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.3);cursor:pointer;transition:transform .15s;`
-    el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.6)' })
-    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)' })
-    const name = item.up_name || item.nombre || '—'
-    const sub = item.state_name || item.estado || ''
-    const marker = new mapboxgl.Marker({ element: el })
-      .setLngLat([Number(item.lng), Number(item.lat)])
-      .setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<strong style="font-size:13px">${name}</strong><br><span style="font-size:12px;color:#555">${sub}</span>`))
+  const { items, color, tipo } = cfg[mapTab.value] || cfg['UPs']
+
+  const features = items
+    .filter((it: any) => it.lng && it.lat)
+    .map((it: any, i: number) => ({
+      type: 'Feature' as const,
+      id: i,
+      properties: { ...it, _color: color },
+      geometry: { type: 'Point' as const, coordinates: [Number(it.lng), Number(it.lat)] },
+    }))
+
+  map.addSource(MAP_SRC, { type: 'geojson', data: { type: 'FeatureCollection', features }, generateId: true })
+
+  map.addLayer({ id: MAP_GLOW, type: 'circle', source: MAP_SRC, paint: {
+    'circle-radius': ['case', ['boolean', ['feature-state', 'hover'], false], 18, 13],
+    'circle-color': color,
+    'circle-opacity': 0.15,
+    'circle-blur': 1,
+  }})
+
+  map.addLayer({ id: MAP_PTS, type: 'circle', source: MAP_SRC, paint: {
+    'circle-radius': ['case', ['boolean', ['feature-state', 'hover'], false], 9, 6],
+    'circle-color': color,
+    'circle-stroke-color': '#ffffff',
+    'circle-stroke-width': 2.5,
+    'circle-opacity': 0.92,
+  }})
+
+  const activeColor = color
+  map.on('click', MAP_PTS, (e) => {
+    if (!e.features?.length) return
+    const f    = e.features[0]
+    const item = f.properties as any
+    const coords = (f.geometry as any).coordinates.slice() as [number, number]
+    while (Math.abs(e.lngLat.lng - coords[0]) > 180) coords[0] += e.lngLat.lng > coords[0] ? 360 : -360
+    if (activePopup) activePopup.remove()
+    activePopup = new mapboxgl.Popup({ offset: 16, maxWidth: '260px', className: 'map-popup-custom' })
+      .setLngLat(coords)
+      .setHTML(buildPopupHTML(item, activeColor))
       .addTo(map!)
-    markers.push(marker)
+  })
+
+  map.on('mousemove', MAP_PTS, (e) => {
+    if (!e.features?.length) return
+    if (hoveredFid !== null) map!.setFeatureState({ source: MAP_SRC, id: hoveredFid }, { hover: false })
+    hoveredFid = e.features[0].id as number
+    map!.setFeatureState({ source: MAP_SRC, id: hoveredFid }, { hover: true })
+    map!.getCanvas().style.cursor = 'pointer'
+  })
+
+  map.on('mouseleave', MAP_PTS, () => {
+    if (hoveredFid !== null) map!.setFeatureState({ source: MAP_SRC, id: hoveredFid }, { hover: false })
+    hoveredFid = null
+    map!.getCanvas().style.cursor = ''
   })
 }
 
@@ -1014,6 +1154,7 @@ onMounted(() => {
   })
 })
 onUnmounted(() => {
+  if (activePopup) { activePopup.remove(); activePopup = null }
   if (map) { map.remove(); map = null }
   if (stickyObserver) stickyObserver.disconnect()
 })
@@ -1654,5 +1795,41 @@ onUnmounted(() => {
   .vision-title { font-size: .95rem; }
   .panel-badge, .vision-badge { display: none; }
   .roles-row { gap: 6px; }
+}
+</style>
+
+<style>
+/* ── Mapbox popup global overrides ── */
+.map-popup-custom .mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.08) !important;
+  border: 1px solid rgba(0,0,0,.07) !important;
+  overflow: hidden;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+}
+.map-popup-custom .mapboxgl-popup-close-button {
+  font-size: 14px;
+  line-height: 1;
+  color: #94a3b8;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  top: 8px;
+  right: 8px;
+  border-radius: 6px;
+  transition: background .15s, color .15s;
+  z-index: 10;
+}
+.map-popup-custom .mapboxgl-popup-close-button:hover {
+  background: rgba(0,0,0,.07);
+  color: #0a0f1e;
+}
+.map-popup-custom .mapboxgl-popup-tip {
+  border-top-color: #fff !important;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.08));
 }
 </style>
