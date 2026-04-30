@@ -284,7 +284,7 @@
             <div class="kpi-row kpi-4">
               <div class="kpi glass-card kpi-purple">
                 <div class="kpi-ico" style="background:rgba(124,58,237,.08);color:#7c3aed"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
-                <div class="kpi-body"><span class="kpi-val">{{ infraestructura.bodegas_aprobadas }}</span><span class="kpi-lbl">Bodegas aprobadas</span></div>
+                <div class="kpi-body"><span class="kpi-val">{{ infraestructura.bodegas_aprobadas }}</span><span class="kpi-lbl">Total bodegas</span></div>
               </div>
               <div class="kpi glass-card kpi-blue">
                 <div class="kpi-ico" style="background:rgba(37,99,235,.08);color:#2563eb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><line x1="12" y1="3" x2="12" y2="21"/></svg></div>
@@ -400,7 +400,7 @@
               </div>
               <div class="pc pc-blue">
                 <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/></svg></div>
-                <span class="pc-tipo">Precio bodega <span style="font-size:.75em;font-weight:400;opacity:.7;">(igual precio en zona de consumo)</span></span>
+                <span class="pc-tipo">Precio bodega <span style="font-size:.75em;font-weight:400;opacity:.7;">(precio en zona de consumo)</span></span>
                 <span class="pc-val">${{ fmtPrice(precioBodega) }}</span>
                 <span class="pc-unit">MXN/ton · prom. 30 dias</span>
               </div>
