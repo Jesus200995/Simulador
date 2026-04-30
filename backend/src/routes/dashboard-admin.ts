@@ -31,7 +31,7 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
         JOIN cycle c ON c.cycle_id = ec.ciclo_id
         WHERE c.cycle_year = EXTRACT(YEAR FROM NOW())::int
       `),
-      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'aprobada' AND activo = true`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'aprobada'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM alertas WHERE estado_alerta = 'pendiente'`),
       pool.query(`
         SELECT COUNT(DISTINCT c.cycle_id)::int AS total
@@ -134,7 +134,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
           COUNT(*)::int AS total_bodegas,
           COALESCE(SUM(capacidad_toneladas), 0)::numeric(12,2) AS capacidad_ton
         FROM bodegas
-        WHERE estatus = 'aprobada' AND activo = true
+        WHERE estatus = 'aprobada'
         GROUP BY estado
         ORDER BY capacidad_ton DESC
         LIMIT 20
@@ -144,7 +144,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
           COUNT(*)::int AS bodegas_aprobadas,
           COALESCE(SUM(capacidad_toneladas), 0)::numeric(12,2) AS capacidad_total_ton
         FROM bodegas
-        WHERE estatus = 'aprobada' AND activo = true
+        WHERE estatus = 'aprobada'
       `),
       pool.query(`
         SELECT COALESCE(SUM(i.volumen_almacenamiento), 0)::numeric(12,2) AS stock_actual_ton
@@ -155,7 +155,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
           GROUP BY bodega_id
         ) latest ON latest.bodega_id = i.bodega_id AND latest.max_fecha = i.fecha
         JOIN bodegas b ON b.id = i.bodega_id
-        WHERE b.estatus = 'aprobada' AND b.activo = true
+        WHERE b.estatus = 'aprobada'
       `),
       pool.query(`
         SELECT
@@ -168,7 +168,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
              WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
           )::numeric(10,2) AS stock_actual
         FROM bodegas b
-        WHERE b.estatus = 'aprobada' AND b.activo = true
+        WHERE b.estatus = 'aprobada'
         ORDER BY b.capacidad_toneladas DESC
         LIMIT 10
       `),
@@ -412,7 +412,7 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
         LEFT JOIN alertas a ON a.up_id = u.up_id AND a.estado_alerta = 'pendiente'
         WHERE u.centroid IS NOT NULL
         GROUP BY u.up_id, u.up_name, u.state_name, u.municipality_name, u.area_ha_calc, u.centroid
-        LIMIT 500
+        LIMIT 2000
       `),
       pool.query(`
         SELECT
@@ -430,9 +430,8 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
             ) / b.capacidad_toneladas) * 100)::int
             ELSE 0 END AS ocupacion_pct
         FROM bodegas b
-        WHERE b.estatus = 'aprobada' AND b.activo = true
-          AND b.latitud IS NOT NULL AND b.longitud IS NOT NULL
-        LIMIT 200
+        WHERE b.latitud IS NOT NULL AND b.longitud IS NOT NULL
+        LIMIT 1000
       `),
       pool.query(`
         SELECT
