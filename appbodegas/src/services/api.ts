@@ -144,14 +144,14 @@ export const api = {
 
   inventarios: {
     registrar(bodegaId: number, payload: InventarioPayload): Promise<{ message: string; inventario: Inventario }> {
-      return request(`/bodegas/${bodegaId}/inventario`, {
+      return request(`/infraestructura/${bodegaId}/inventario`, {
         method: 'POST',
         body: JSON.stringify(payload),
       })
     },
 
     listar(bodegaId: number): Promise<{ inventarios: Inventario[] }> {
-      return request(`/bodegas/${bodegaId}/inventarios`)
+      return request(`/infraestructura/${bodegaId}/inventarios`)
     },
   },
 

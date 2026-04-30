@@ -123,11 +123,17 @@
               <div class="form-row-2">
                 <div class="form-group">
                   <label class="form-label" for="cat-vol">Volumen almacenamiento (ton) *</label>
-                  <input id="cat-vol" v-model.number="invForm.volumen_almacenamiento" type="number" min="1" step="any" class="form-input" placeholder="Toneladas" />
+                  <input id="cat-vol" v-model.number="invForm.volumen_almacenado" type="number" min="1" step="any" class="form-input" placeholder="Toneladas" />
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="cat-prob">Volumen con problemas (ton)</label>
-                  <input id="cat-prob" v-model.number="invForm.volumen_problemas" type="number" min="0" step="any" class="form-input" placeholder="Opcional" />
+                  <input id="cat-prob" v-model.number="invForm.volumen_problema" type="number" min="0" step="any" class="form-input" placeholder="Opcional" />
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="cat-fecha">Fecha de registro *</label>
+                  <input id="cat-fecha" v-model="invForm.fecha" type="date" :max="todayStr()" class="form-input" required />
                 </div>
               </div>
               <button type="submit" class="btn btn-primary" :disabled="invLoading">
@@ -287,7 +293,8 @@ const selectedCatBodega = ref<Bodega | null>(null)
 let catTimer: ReturnType<typeof setTimeout> | null = null
 
 // Inline inventory form
-const invForm = reactive({ ciclo: '', tipo_maiz: '', origen: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null })
+const todayStr = () => new Date().toISOString().split('T')[0]
+const invForm = reactive({ ciclo: '', tipo_maiz: '', origen: '', volumen_almacenado: null as number | null, volumen_problema: null as number | null, fecha: todayStr() })
 const invLoading = ref(false)
 const invError = ref('')
 const invSuccess = ref('')
@@ -316,8 +323,9 @@ function selectCatBodega(b: Bodega) {
   invForm.ciclo = ''
   invForm.tipo_maiz = ''
   invForm.origen = ''
-  invForm.volumen_almacenamiento = null
-  invForm.volumen_problemas = null
+  invForm.volumen_almacenado = null
+  invForm.volumen_problema = null
+  invForm.fecha = todayStr()
   invError.value = ''
   invSuccess.value = ''
 }
@@ -328,7 +336,8 @@ async function handleInventario() {
   if (!invForm.ciclo) { invError.value = 'Selecciona un ciclo'; return }
   if (!invForm.tipo_maiz) { invError.value = 'Selecciona un tipo de maiz'; return }
   if (!invForm.origen) { invError.value = 'Selecciona el origen'; return }
-  if (!invForm.volumen_almacenamiento || invForm.volumen_almacenamiento <= 0) { invError.value = 'Ingresa un volumen valido'; return }
+  if (!invForm.volumen_almacenado || invForm.volumen_almacenado <= 0) { invError.value = 'Ingresa un volumen valido'; return }
+  if (!invForm.fecha) { invError.value = 'Selecciona una fecha'; return }
   if (!selectedCatBodega.value) return
 
   invLoading.value = true
@@ -337,15 +346,17 @@ async function handleInventario() {
       ciclo: invForm.ciclo,
       tipo_maiz: invForm.tipo_maiz,
       origen: invForm.origen,
-      volumen_almacenamiento: invForm.volumen_almacenamiento,
-      volumen_problemas: invForm.volumen_problemas || 0,
+      volumen_almacenado: invForm.volumen_almacenado,
+      volumen_problema: invForm.volumen_problema || 0,
+      fecha: invForm.fecha,
     })
     invSuccess.value = 'Inventario registrado exitosamente'
     invForm.ciclo = ''
     invForm.tipo_maiz = ''
     invForm.origen = ''
-    invForm.volumen_almacenamiento = null
-    invForm.volumen_problemas = null
+    invForm.volumen_almacenado = null
+    invForm.volumen_problema = null
+    invForm.fecha = todayStr()
     // Refresh inventarios
     const invRes = await api.misInventarios.listar()
     inventarios.value = invRes.inventarios

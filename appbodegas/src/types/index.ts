@@ -117,8 +117,9 @@ export interface InventarioPayload {
   ciclo: string
   tipo_maiz: string
   origen: string
-  volumen_almacenamiento: number
-  volumen_problemas?: number
+  volumen_almacenado: number
+  volumen_problema?: number
+  fecha: string
 }
 
 export interface Inventario {
