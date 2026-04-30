@@ -400,7 +400,7 @@
               </div>
               <div class="pc pc-blue">
                 <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/></svg></div>
-                <span class="pc-tipo">Precio bodega</span>
+                <span class="pc-tipo">Precio bodega <span style="font-size:.75em;font-weight:400;opacity:.7;">(igual precio en zona de consumo)</span></span>
                 <span class="pc-val">${{ fmtPrice(precioBodega) }}</span>
                 <span class="pc-unit">MXN/ton · prom. 30 dias</span>
               </div>
@@ -413,7 +413,7 @@
               <div class="pc pc-amber">
                 <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
                 <span class="pc-tipo">Brecha bodega vs parcela</span>
-                <span class="pc-val" :class="brechaPrecio>=0?'pc-pos':'pc-neg'">{{ brechaPrecio>=0?'+':'' }}${{ fmtPrice(brechaPrecio) }}</span>
+                <span class="pc-val" :class="brechaPrecio>=0?'pc-pos':'pc-neg'">{{ brechaPrecio>=0?'+':'-' }}${{ fmtPrice(Math.abs(brechaPrecio)) }}</span>
                 <span class="pc-unit">Diferencia promedio</span>
               </div>
             </div>
@@ -768,7 +768,7 @@ function limpiarFiltros() { filtros.value = { estado: '', ciclo: '' } }
 const precioParcela = computed(() => 5000)
 const precioBodega = computed(() => 6200)
 const precioInternacional = computed(() => { const v = Number(precios.value?.recientes?.find((x: any) => x.tipo_precio === 'mercado_internacional')?.precio ?? 0); return v > 0 ? v : 8289.37 })
-const brechaPrecio = computed(() => precioBodega.value - precioParcela.value)
+const brechaPrecio = computed(() => precioParcela.value - precioBodega.value)
 
 const kpisVision = computed(() => {
   if (!resumen.value) return []
@@ -778,7 +778,7 @@ const kpisVision = computed(() => {
     { key: 'produccion', label: 'Produccion est. (ton)', val: fmtCompact(resumen.value.produccion_estimada_ton), bg: 'rgba(14,148,148,.08)', color: '#0e9494', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg>' },
     { key: 'stock', label: 'Stock en bodegas (ton)', val: fmtCompact(infraestructura.value?.stock_actual_ton ?? 0), bg: 'rgba(124,58,237,.08)', color: '#7c3aed', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>' },
     { key: 'alertas', label: 'Alertas activas', val: String(resumen.value.alertas_pendientes), bg: 'rgba(220,38,38,.08)', color: '#dc2626', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
-    { key: 'precio', label: 'Precio parcela (MXN/ton)', val: precioParcela.value > 0 ? `$${fmtPrice(precioParcela.value)}` : 'N/D', bg: 'rgba(217,119,6,.08)', color: '#d97706', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
+    { key: 'precio', label: 'Precio en zona de consumo (MXN/ton)', val: precioBodega.value > 0 ? `$${fmtPrice(precioBodega.value)}` : 'N/D', bg: 'rgba(217,119,6,.08)', color: '#d97706', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
   ]
 })
 
