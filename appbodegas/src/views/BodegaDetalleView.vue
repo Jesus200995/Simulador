@@ -282,7 +282,7 @@ async function handleInventario() {
       tipo_maiz: invForm.tipo_maiz,
       origen: invForm.origen,
       volumen_almacenado: invForm.volumen_almacenamiento,
-      volumen_problemas: invForm.volumen_problemas || 0,
+      volumen_problema: invForm.volumen_problemas || 0,
     })
     invSuccess.value = 'Inventario registrado exitosamente'
     invForm.ciclo = ''
