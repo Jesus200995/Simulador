@@ -173,6 +173,10 @@
                 <label class="form-label" for="problemas">Volumen en toneladas con problemas para su venta</label>
                 <input id="problemas" v-model.number="invForm.volumen_problemas" type="number" min="0" step="any" class="form-input" placeholder="Opcional" />
               </div>
+              <div class="form-group">
+                <label class="form-label" for="fecha_inv">Fecha de registro *</label>
+                <input id="fecha_inv" v-model="invForm.fecha" type="date" class="form-input" />
+              </div>
               <button type="submit" class="btn btn-primary btn-block" :disabled="invLoading">
                 <span v-if="invLoading" class="spinner"></span>
                 <span v-else>Guardar</span>
@@ -244,7 +248,7 @@ let minimap: mapboxgl.Map | null = null
 
 // Inventario
 const inventarios = ref<Inventario[]>([])
-const invForm = reactive({ ciclo: '', tipo_maiz: '', origen: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null })
+const invForm = reactive({ ciclo: '', tipo_maiz: '', origen: '', volumen_almacenamiento: null as number | null, volumen_problemas: null as number | null, fecha: new Date().toISOString().slice(0, 10) })
 const invLoading = ref(false)
 const invError = ref('')
 const invSuccess = ref('')
@@ -283,6 +287,7 @@ async function handleInventario() {
       origen: invForm.origen,
       volumen_almacenado: invForm.volumen_almacenamiento,
       volumen_problema: invForm.volumen_problemas || 0,
+      fecha: invForm.fecha,
     })
     invSuccess.value = 'Inventario registrado exitosamente'
     invForm.ciclo = ''
@@ -290,6 +295,7 @@ async function handleInventario() {
     invForm.origen = ''
     invForm.volumen_almacenamiento = null
     invForm.volumen_problemas = null
+    invForm.fecha = new Date().toISOString().slice(0, 10)
     await fetchInventarios()
   } catch (err: any) {
     invError.value = err.message || 'Error al registrar inventario'
