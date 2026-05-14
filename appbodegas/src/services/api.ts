@@ -226,6 +226,48 @@ export const api = {
     },
   },
 
+  // =============================================
+  // Módulo A4 — Precio Sistema
+  // =============================================
+  preciosSistema: {
+    hoy(params?: Record<string, string>): Promise<any> {
+      const qs = new URLSearchParams(params || {})
+      return request(`/precios/sistema/hoy${qs.toString() ? '?' + qs : ''}`)
+    },
+    tendencia(params?: Record<string, string>): Promise<{ tendencia: any[] }> {
+      const qs = new URLSearchParams(params || {})
+      return request(`/precios/tendencia${qs.toString() ? '?' + qs : ''}`)
+    },
+    componentesDetalle(params?: Record<string, string>): Promise<{ componentes: any[]; ps: number }> {
+      const qs = new URLSearchParams(params || {})
+      return request(`/precios/componentes/detalle${qs.toString() ? '?' + qs : ''}`)
+    },
+    brechasEstados(params?: Record<string, string>): Promise<{ brechas: any[] }> {
+      const qs = new URLSearchParams(params || {})
+      return request(`/precios/brechas/estados${qs.toString() ? '?' + qs : ''}`)
+    },
+    referenciasExternas(): Promise<any> {
+      return request('/precios/referencias/externas')
+    },
+    parametros(): Promise<{ parametros: any }> {
+      return request('/precios/parametros')
+    },
+    actualizarParametros(payload: Record<string, any>): Promise<{ mensaje: string }> {
+      return request('/precios/parametros', { method: 'PUT', body: JSON.stringify(payload) })
+    },
+    discrepancias(params?: Record<string, string>): Promise<{ discrepancias: any[] }> {
+      const qs = new URLSearchParams(params || {})
+      return request(`/precios/discrepancias${qs.toString() ? '?' + qs : ''}`)
+    },
+    resolverDiscrepancia(id: number, payload: { resolucion: string; notas: string }): Promise<any> {
+      return request(`/precios/discrepancias/${id}/resolver`, { method: 'PUT', body: JSON.stringify(payload) })
+    },
+    transaccionesResumen(params?: Record<string, string>): Promise<any> {
+      const qs = new URLSearchParams(params || {})
+      return request(`/precios/transacciones/resumen${qs.toString() ? '?' + qs : ''}`)
+    },
+  },
+
   admin: {
     listarUsuarios(): Promise<{ usuarios: AdminUsuario[] }> {
       return request('/admin/usuarios')

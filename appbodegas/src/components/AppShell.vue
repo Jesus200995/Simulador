@@ -64,7 +64,7 @@
           <span>Inventarios</span>
         </router-link>
         <!-- 8. Precios (no-bodeguero) -->
-        <router-link v-if="!authStore.isBodeguero" to="/precios" class="nav-pill nav-blue">
+        <router-link v-if="!authStore.isBodeguero" to="/precios/dashboard" class="nav-pill nav-blue">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span>Precios</span>
         </router-link>
@@ -216,7 +216,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
                 Inventarios
               </router-link>
-              <router-link to="/precios" class="more-link more-blue" @click="moreOpen = false">
+              <router-link to="/precios/dashboard" class="more-link more-blue" @click="moreOpen = false">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 Precios
               </router-link>
@@ -239,7 +239,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 Alertas
               </router-link>
-              <router-link v-if="!authStore.isBodeguero" to="/precios" class="more-link more-blue" @click="moreOpen = false">
+              <router-link v-if="!authStore.isBodeguero" to="/precios/dashboard" class="more-link more-blue" @click="moreOpen = false">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 Precios
               </router-link>
