@@ -589,19 +589,6 @@
                 </div>
                 <div class="ps-heatmap">
                   <div class="ps-heat-layout">
-                    <!-- Mapa Mexico SVG simplificado -->
-                    <div class="ps-heat-map-wrap">
-                      <svg viewBox="0 0 320 220" class="ps-mexico-svg" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20,60 L60,30 L120,25 L180,35 L230,20 L280,30 L300,55 L295,90 L270,110 L240,130 L220,160 L200,185 L180,195 L160,200 L140,190 L120,185 L100,175 L80,165 L60,150 L40,130 L20,110 Z" fill="#E5E7EB" stroke="#fff" stroke-width="1.5"/>
-                        <circle cx="90" cy="110" r="18" fill="#EF4444" opacity=".85"/>
-                        <circle cx="130" cy="85" r="14" fill="#EF4444" opacity=".75"/>
-                        <circle cx="110" cy="75" r="12" fill="#F59E0B" opacity=".8"/>
-                        <circle cx="175" cy="95" r="11" fill="#F59E0B" opacity=".75"/>
-                        <circle cx="145" cy="105" r="10" fill="#4A9B6A" opacity=".8"/>
-                        <circle cx="195" cy="130" r="9" fill="#9CA3AF" opacity=".75"/>
-                        <text x="160" y="215" text-anchor="middle" font-size="9" fill="#9CA3AF">México</text>
-                      </svg>
-                    </div>
                     <!-- Tabla brechas -->
                     <div class="ps-heat-grid">
                       <div v-for="b in psBrechas" :key="b.estado" class="ps-heat-cell" :class="`heat-${b.nivel_criticidad.toLowerCase()}`">
@@ -1401,7 +1388,13 @@ async function recargarTodo() {
 
 watch(tabActiva, async (tab) => {
   if (tab === 'vision') { await nextTick(); if (!map) initMap(); else if (map.loaded()) updateMarkers() }
-  if (tab === 'precios') { await nextTick(); if (!psHoy.value) cargarPreciosSistema(); else if (!chartPS) { await nextTick(); renderChartPS() } else { chartPS.resize() } }
+  if (tab === 'precios') {
+    await nextTick()
+    await new Promise(r => setTimeout(r, 60))
+    if (!psHoy.value) { cargarPreciosSistema() }
+    else if (!chartPS) { renderChartPS() }
+    else { try { chartPS.resize() } catch { renderChartPS() } }
+  }
 })
 
 watch(mapaData, async () => {
@@ -1467,7 +1460,7 @@ const psRegionLabel = computed(() => {
 })
 
 const psPRef    = computed(() => !psHoy.value ? 0 : Math.round((psHoy.value.ps - psHoy.value.m - psHoy.value.f) * 100) / 100)
-const psBrecha  = computed(() => !psHoy.value ? 0 : Math.round((psPRef.value - psHoy.value.po) * 100) / 100)
+const psBrecha  = computed(() => !psHoy.value ? 0 : Math.round((psHoy.value.po - psPRef.value) * 100) / 100)
 const psUtilidad = computed(() => (!psHoy.value || !psRefs.value) ? 0 : Math.round((psHoy.value.po - psRefs.value.costo_fira) * 100) / 100)
 const psDiscsAlta = computed(() => psDiscs.value.filter((d: any) => d.prioridad === 'ALTA').length)
 
@@ -1552,38 +1545,53 @@ async function cargarPreciosSistema() {
 
 function renderChartPS(retries = 0) {
   if (!chartCanvasPS.value || psTendencia.value.length === 0) {
-    if (retries < 5 && psTendencia.value.length > 0) { setTimeout(() => renderChartPS(retries + 1), 100); }
+    if (retries < 10) setTimeout(() => renderChartPS(retries + 1), 150)
     return
   }
-  if (chartPS) { chartPS.destroy(); chartPS = null }
+  try { if (chartPS) { chartPS.destroy(); chartPS = null } } catch (e) { chartPS = null }
   const canvas = chartCanvasPS.value
   if (canvas.clientWidth === 0 || canvas.clientHeight === 0) {
-    if (retries < 5) { setTimeout(() => renderChartPS(retries + 1), 150); }
+    if (retries < 10) setTimeout(() => renderChartPS(retries + 1), 150)
     return
   }
   const labels = psTendencia.value.map((t: any) => {
     const d = new Date(t.fecha)
     return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
   })
-  chartPS = new ChartJS(canvas, {
-    type: 'line',
-    data: { labels, datasets: [
-      { label: 'Precio Sistema', data: psTendencia.value.map((t: any) => t.ps), borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Chicago', data: psTendencia.value.map((t: any) => t.chicago), borderColor: '#2563EB', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,3], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Precio Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [8,4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4 },
-    ]},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { display: false },
-        tooltip: { backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
-          callbacks: { label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
-        y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v) => '$' + Number(v).toLocaleString('es-MX') } },
-      },
-    },
-  } as any)
+  const psData      = psTendencia.value.map((t: any) => t.ps)
+  const chicagoData = psTendencia.value.map((t: any) => t.chicago)
+  const garantData  = psTendencia.value.map((t: any) => t.garantia)
+  requestAnimationFrame(() => {
+    try {
+      chartPS = new ChartJS(canvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Precio Sistema', data: psData,      borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2,   fill: true,  tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+            { label: 'Chicago',        data: chicagoData, borderColor: '#2563EB', backgroundColor: 'transparent',          borderWidth: 1.5, fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4, borderDash: [4,3] },
+            { label: 'Precio Garantía',data: garantData,  borderColor: '#D97706', backgroundColor: 'transparent',          borderWidth: 1.5, fill: false, tension: 0,    pointRadius: 0, pointHoverRadius: 4, borderDash: [8,4] },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
+              callbacks: { label: (ctx: any) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` },
+            },
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
+            y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v: any) => '$' + Number(v).toLocaleString('es-MX') } },
+          },
+        },
+      } as any)
+    } catch (err) { console.error('Chart render error:', err) }
+  })
 }
 
 function psAplicarFiltros() { cargarPreciosSistema() }
@@ -2378,10 +2386,8 @@ function psExportarCSV() {
 .ps-btn-export:hover { background:#F9FAFB; }
 
 .ps-heatmap { padding:.6rem .85rem .65rem; }
-.ps-heat-layout { display:grid;grid-template-columns:180px 1fr auto;gap:1rem;align-items:start; }
-@media(max-width:1100px){.ps-heat-layout{grid-template-columns:1fr}}
-.ps-heat-map-wrap { display:flex;align-items:center;justify-content:center; }
-.ps-mexico-svg { width:100%;max-width:180px;height:auto; }
+.ps-heat-layout { display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start; }
+@media(max-width:900px){.ps-heat-layout{grid-template-columns:1fr}}
 .ps-heat-grid { display:grid;grid-template-columns:1fr 1fr;gap:.35rem .7rem; }
 @media(max-width:900px){.ps-heat-grid{grid-template-columns:1fr}}
 .ps-heat-cell { display:grid;grid-template-columns:90px 1fr 65px 60px;align-items:center;gap:.4rem;padding:.4rem .35rem;border-radius:7px; }
