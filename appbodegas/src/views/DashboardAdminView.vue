@@ -531,7 +531,9 @@
                     <span class="ps-leg-chip ps-leg-dash" style="--c:#D97706">Precio Garantía</span>
                   </div>
                 </div>
-                <div class="ps-chart-wrap"><canvas ref="chartCanvasPS" height="160"></canvas></div>
+                <div class="ps-chart-wrap">
+                  <Line v-if="psTendencia.length > 0" :data="psChartData" :options="psChartOptions as any" />
+                </div>
               </div>
 
               <!-- Tabla desglose -->
@@ -1389,11 +1391,7 @@ async function recargarTodo() {
 watch(tabActiva, async (tab) => {
   if (tab === 'vision') { await nextTick(); if (!map) initMap(); else if (map.loaded()) updateMarkers() }
   if (tab === 'precios') {
-    await nextTick()
-    await new Promise(r => setTimeout(r, 60))
-    if (!psHoy.value) { cargarPreciosSistema() }
-    else if (!chartPS) { renderChartPS() }
-    else { try { chartPS.resize() } catch { renderChartPS() } }
+    if (!psHoy.value) cargarPreciosSistema()
   }
 })
 
@@ -1434,10 +1432,8 @@ const psRefs        = ref<any>(null)
 const psParams      = ref<any>(null)
 const psDiscs       = ref<any[]>([])
 const psTxns        = ref<any>(null)
-const psCargando    = ref(false)
-const chartCanvasPS = ref<HTMLCanvasElement | null>(null)
-const discRefsEl    = ref<HTMLElement | null>(null)
-let   chartPS: InstanceType<typeof ChartJS> | null = null
+const psCargando = ref(false)
+const discRefsEl = ref<HTMLElement | null>(null)
 
 const psFiltros = reactive({
   region: 'bajio_sinaloa', estado: 'todos', municipio: 'todos', variedad: 'todos', periodo: '30',
@@ -1538,60 +1534,36 @@ async function cargarPreciosSistema() {
       { id: 7, tipo: 'variedad_sin_homologar',   descripcion: 'Variedad nativo sin homologar en Degollado',                      prioridad: 'BAJA',  accion: 'Homologar' },
     ]
     psTxns.value = { total: 312, trianguladas_pct: 68, nuevas_hoy: 23 }
-    await nextTick(); renderChartPS()
   } catch (e) { console.error('Precios Sistema error:', e) }
   finally { psCargando.value = false }
 }
 
-function renderChartPS(retries = 0) {
-  if (!chartCanvasPS.value || psTendencia.value.length === 0) {
-    if (retries < 10) setTimeout(() => renderChartPS(retries + 1), 150)
-    return
-  }
-  try { if (chartPS) { chartPS.destroy(); chartPS = null } } catch (e) { chartPS = null }
-  const canvas = chartCanvasPS.value
-  if (canvas.clientWidth === 0 || canvas.clientHeight === 0) {
-    if (retries < 10) setTimeout(() => renderChartPS(retries + 1), 150)
-    return
-  }
-  const labels = psTendencia.value.map((t: any) => {
+const psChartData = computed(() => ({
+  labels: psTendencia.value.map((t: any) => {
     const d = new Date(t.fecha)
     return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
-  })
-  const psData      = psTendencia.value.map((t: any) => t.ps)
-  const chicagoData = psTendencia.value.map((t: any) => t.chicago)
-  const garantData  = psTendencia.value.map((t: any) => t.garantia)
-  requestAnimationFrame(() => {
-    try {
-      chartPS = new ChartJS(canvas, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            { label: 'Precio Sistema', data: psData,      borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2,   fill: true,  tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-            { label: 'Chicago',        data: chicagoData, borderColor: '#2563EB', backgroundColor: 'transparent',          borderWidth: 1.5, fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4, borderDash: [4,3] },
-            { label: 'Precio Garantía',data: garantData,  borderColor: '#D97706', backgroundColor: 'transparent',          borderWidth: 1.5, fill: false, tension: 0,    pointRadius: 0, pointHoverRadius: 4, borderDash: [8,4] },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
-              callbacks: { label: (ctx: any) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` },
-            },
-          },
-          scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
-            y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v: any) => '$' + Number(v).toLocaleString('es-MX') } },
-          },
-        },
-      } as any)
-    } catch (err) { console.error('Chart render error:', err) }
-  })
+  }),
+  datasets: [
+    { label: 'Precio Sistema',  data: psTendencia.value.map((t: any) => t.ps),       borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2,   fill: true,  tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+    { label: 'Chicago',         data: psTendencia.value.map((t: any) => t.chicago),  borderColor: '#2563EB', backgroundColor: 'transparent',          borderWidth: 1.5, fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4, borderDash: [4, 3] },
+    { label: 'Precio Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent',          borderWidth: 1.5, fill: false, tension: 0,    pointRadius: 0, pointHoverRadius: 4, borderDash: [8, 4] },
+  ],
+}))
+const psChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
+      callbacks: { label: (ctx: any) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` },
+    },
+  },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
+    y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v: any) => '$' + Number(v).toLocaleString('es-MX') } },
+  },
 }
 
 function psAplicarFiltros() { cargarPreciosSistema() }
