@@ -364,84 +364,298 @@
           </template>
         </div>
 
-        <!-- ════════════ PANEL 4: PRECIOS ════════════ -->
-        <div v-if="tabActiva === 'precios'" class="panel fade-in">
-          <div class="p-header">
-            <div class="p-header-left">
-              <span class="p-header-badge amber">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Precios
-              </span>
-              <h2 class="p-title">Mercado de Maiz</h2>
-              <p class="p-desc">Precios actuales, tendencias y brechas de comercializacion MXN/ton</p>
+        <!-- ════════════ PANEL 4: PRECIO SISTEMA (A4) ════════════ -->
+        <div v-if="tabActiva === 'precios'" class="panel fade-in ps-panel">
+
+          <!-- Filtros -->
+          <div class="ps-filters">
+            <span class="ps-filters-label">Filtros</span>
+            <select v-model="psFiltros.region" class="ps-select">
+              <option value="bajio_sinaloa">Bajío + Sinaloa (piloto)</option>
+              <option value="bajio">Solo Bajío</option>
+              <option value="sinaloa">Solo Sinaloa</option>
+              <option value="nacional">Nacional</option>
+            </select>
+            <select v-model="psFiltros.estado" class="ps-select">
+              <option value="todos">Todos los estados</option>
+              <option v-for="e in psEstados" :key="e" :value="e">{{ e }}</option>
+            </select>
+            <select v-model="psFiltros.municipio" class="ps-select">
+              <option value="todos">Todos los municipios</option>
+              <option v-for="m in psMunicipiosFiltrados" :key="m" :value="m">{{ m }}</option>
+            </select>
+            <select v-model="psFiltros.variedad" class="ps-select">
+              <option value="todos">Maíz blanco (todos)</option>
+              <option value="blanco">Híbrido</option>
+              <option value="nativo">Nativo</option>
+              <option value="amarillo">Amarillo</option>
+            </select>
+            <select v-model="psFiltros.periodo" class="ps-select">
+              <option value="7">Últimos 7 días</option>
+              <option value="30">Últimos 30 días</option>
+              <option value="ciclo">Ciclo PV 2026</option>
+            </select>
+            <button class="ps-btn-apply" @click="psAplicarFiltros">Aplicar</button>
+            <button class="ps-btn-clear-f" @click="psLimpiarFiltros">Limpiar</button>
+            <span class="ps-live-badge"><span class="ps-live-dot"></span>EN VIVO</span>
+          </div>
+
+          <!-- Barra fórmula -->
+          <div class="ps-formula-bar">
+            <div class="ps-formula-item ps-formula-total">
+              <div class="ps-f-label">PRECIO SISTEMA HOY</div>
+              <div class="ps-f-value ps-f-accent">{{ psFmt(psHoy?.ps) }}</div>
+              <div class="ps-f-sub">MXN / tonelada</div>
+            </div>
+            <div class="ps-formula-eq">=</div>
+            <div class="ps-formula-item">
+              <div class="ps-f-label">PO · PRECIO ORIGEN</div>
+              <div class="ps-f-value">{{ psFmt(psHoy?.po) }}</div>
+              <div class="ps-f-sub">Promedio {{ psParams?.ventana_dias ?? 7 }} días</div>
+            </div>
+            <div class="ps-formula-op">+</div>
+            <div class="ps-formula-item">
+              <div class="ps-f-label">S · SERVICIOS BODEGA</div>
+              <div class="ps-f-value">{{ psFmt(psHoy?.s) }}</div>
+              <div class="ps-f-sub">Promedio regional</div>
+            </div>
+            <div class="ps-formula-op">+</div>
+            <div class="ps-formula-item">
+              <div class="ps-f-label">M · MARGEN ({{ psParams?.margen_pct ?? 10 }}%)</div>
+              <div class="ps-f-value">{{ psFmt(psHoy?.m) }}</div>
+              <div class="ps-f-sub">Parámetro config.</div>
+            </div>
+            <div class="ps-formula-op">+</div>
+            <div class="ps-formula-item">
+              <div class="ps-f-label">F · FLETE GIS</div>
+              <div class="ps-f-value">{{ psFmt(psHoy?.f) }}</div>
+              <div class="ps-f-sub">Promedio regional</div>
             </div>
           </div>
-          <div class="inline-filters">
-            <svg class="filter-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            <div class="filter-item">
-              <label class="filter-lbl">Estado</label>
-              <select class="filter-sel" v-model="filtros.estado">
-                <option value="">Todos los estados</option>
-                <option v-for="e in estadosDisponibles" :key="e" :value="e">{{ e }}</option>
-              </select>
+
+          <!-- KPI Cards -->
+          <div class="ps-kpi-grid">
+            <div class="ps-kpi-card" style="--bar:#1A5C38">
+              <div class="ps-kpi-icon" style="color:#1A5C38"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="ps-kpi-body">
+                <div class="ps-kpi-value" style="color:#1A5C38">{{ psFmt(psHoy?.ps) }}</div>
+                <div class="ps-kpi-label">Precio Sistema</div>
+                <div class="ps-kpi-sub">MXN/ton · Bajío+Sinaloa</div>
+                <span class="ps-delta" :class="(psHoy?.delta_vs_ayer ?? 0) >= 0 ? 'ps-delta-up' : 'ps-delta-down'">{{ (psHoy?.delta_vs_ayer ?? 0) >= 0 ? '↑' : '↓' }} {{ psFmt(Math.abs(psHoy?.delta_vs_ayer ?? 0)) }} vs ayer</span>
+              </div>
             </div>
-            <div class="filter-spacer"></div>
-            <span v-if="filtros.estado" class="filter-badge">Filtros activos</span>
-            <button v-if="filtros.estado" class="btn-clear-f" @click="limpiarFiltros">&#10005; Limpiar</button>
+            <div class="ps-kpi-card" style="--bar:#DC2626">
+              <div class="ps-kpi-icon" style="color:#DC2626"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
+              <div class="ps-kpi-body">
+                <div class="ps-kpi-value" style="color:#DC2626">{{ psFmtBrecha(psBrecha) }}</div>
+                <div class="ps-kpi-label">Brecha de Mercado</div>
+                <div class="ps-kpi-sub">P.Ref ({{ psFmt(psPRef) }}) − PO real</div>
+                <span class="ps-delta ps-delta-down">↓ Productor pierde {{ psFmt(Math.abs(psBrecha)) }}/ton</span>
+              </div>
+            </div>
+            <div class="ps-kpi-card" style="--bar:#D97706">
+              <div class="ps-kpi-icon" style="color:#D97706"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="ps-kpi-body">
+                <div class="ps-kpi-value" style="color:#D97706">{{ psFmtBrecha(psUtilidad) }}</div>
+                <div class="ps-kpi-label">Utilidad Estimada</div>
+                <div class="ps-kpi-sub">PO real − Costo FIRA ({{ psFmt(psRefs?.costo_fira) }})</div>
+                <span class="ps-delta" :class="psUtilidad >= 0 ? 'ps-delta-up' : 'ps-delta-down'">{{ psUtilidad >= 0 ? 'Ganancia' : 'Pérdida' }} por tonelada</span>
+              </div>
+            </div>
+            <div class="ps-kpi-card" style="--bar:#2563EB">
+              <div class="ps-kpi-icon" style="color:#2563EB"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+              <div class="ps-kpi-body">
+                <div class="ps-kpi-value" style="color:#2563EB">{{ psFmt(psRefs?.chicago_mxn) }}</div>
+                <div class="ps-kpi-label">Chicago (ref.)</div>
+                <div class="ps-kpi-sub">Maíz amarillo · TC ${{ psRefs?.tc_banxico }}</div>
+                <span class="ps-delta ps-delta-neutral">▸ {{ psFmt((psRefs?.chicago_mxn ?? 0) - (psHoy?.ps ?? 0)) }} vs P.Sistema</span>
+              </div>
+            </div>
+            <div class="ps-kpi-card" style="--bar:#4A9B6A">
+              <div class="ps-kpi-icon" style="color:#4A9B6A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div class="ps-kpi-body">
+                <div class="ps-kpi-value" style="color:#4A9B6A">{{ psTxns?.total ?? 312 }}</div>
+                <div class="ps-kpi-label">Transacciones (7d)</div>
+                <div class="ps-kpi-sub">Trianguladas: {{ psTxns?.trianguladas_pct ?? 68 }}% · Confianza: Alta</div>
+                <span class="ps-delta ps-delta-up">↑ {{ psTxns?.nuevas_hoy ?? 23 }} nuevas hoy</span>
+              </div>
+            </div>
+            <div class="ps-kpi-card ps-kpi-link" style="--bar:#6B7280" @click="psScrollDiscs">
+              <div class="ps-kpi-icon" style="color:#6B7280"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div class="ps-kpi-body">
+                <div class="ps-kpi-value" style="color:#6B7280">{{ psDiscs.length }}</div>
+                <div class="ps-kpi-label">Discrepancias</div>
+                <div class="ps-kpi-sub">Pendientes de revisión</div>
+                <span class="ps-delta ps-delta-warn">{{ psDiscsAlta }} de alta prioridad</span>
+              </div>
+            </div>
           </div>
-          <div v-if="!precios" class="loader-row"><div class="loader"></div></div>
-          <template v-else>
-            <div class="precio-cards">
-              <div class="pc pc-green">
-                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><polyline points="18 9 12 15 8 11 3 16"/></svg></div>
-                <span class="pc-tipo">Pie de parcela</span>
-                <span class="pc-val">${{ fmtPrice(precioParcela) }}</span>
-                <span class="pc-unit">MXN/ton · prom. 30 dias</span>
+
+          <!-- Layout dos columnas -->
+          <div class="ps-two-col">
+            <!-- Columna izquierda -->
+            <div class="ps-col-left">
+
+              <!-- Gráfica tendencia -->
+              <div class="ps-card">
+                <div class="ps-card-hdr">
+                  <div class="ps-card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Tendencia del Precio Sistema
+                    <span class="ps-card-sub">— últimos {{ psFiltros.periodo }} días</span>
+                  </div>
+                  <div class="ps-chart-legend">
+                    <span class="ps-leg-chip" style="--c:#1A5C38">Precio Sistema</span>
+                    <span class="ps-leg-chip" style="--c:#2563EB">Chicago</span>
+                    <span class="ps-leg-chip ps-leg-dash" style="--c:#D97706">Garantía</span>
+                  </div>
+                </div>
+                <div class="ps-chart-wrap"><canvas ref="chartCanvasPS" height="160"></canvas></div>
               </div>
-              <div class="pc pc-blue">
-                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/></svg></div>
-                <span class="pc-tipo">Precio bodega <span style="font-size:.75em;font-weight:400;opacity:.7;">(precio en zona de consumo)</span></span>
-                <span class="pc-val">${{ fmtPrice(precioBodega) }}</span>
-                <span class="pc-unit">MXN/ton · prom. 30 dias</span>
+
+              <!-- Tabla desglose -->
+              <div class="ps-card">
+                <div class="ps-card-hdr">
+                  <div class="ps-card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    Desglose por eslabón de la cadena
+                  </div>
+                  <button class="ps-btn-export" @click="psExportarCSV">⬇ Exportar</button>
+                </div>
+                <div class="ps-tbl-wrap">
+                  <table class="ps-tbl">
+                    <thead><tr><th>COMP.</th><th>DESCRIPCIÓN</th><th class="tar">VALOR</th><th class="tac">%</th><th>DIST.</th><th>FUENTE</th><th class="tac">CONF.</th></tr></thead>
+                    <tbody>
+                      <tr v-for="c in psComponentes" :key="c.componente">
+                        <td><span class="ps-comp-badge" :class="`comp-${c.componente.toLowerCase()}`">{{ c.componente }}</span></td>
+                        <td class="ps-tdesc">{{ c.descripcion }}</td>
+                        <td class="tar ps-tvalor" :class="`val-${c.componente.toLowerCase()}`"><strong>{{ psFmt(c.valor) }}</strong></td>
+                        <td class="tac">{{ c.pct }}%</td>
+                        <td><div class="ps-bar-wrap"><div class="ps-bar" :class="`bar-${c.componente.toLowerCase()}`" :style="{ width: c.pct + '%' }"></div></div></td>
+                        <td><span class="ps-fuente-badge">{{ c.fuente }}</span></td>
+                        <td class="tac">{{ '★'.repeat(c.confianza) }}<span style="color:#e2e8f0">{{ '★'.repeat(5-c.confianza) }}</span></td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="ps-total-row">
+                        <td colspan="2"><strong>PRECIO SISTEMA TOTAL</strong></td>
+                        <td class="tar"><strong>{{ psFmt(psHoy?.ps) }}</strong></td>
+                        <td class="tac">100%</td>
+                        <td></td>
+                        <td><span class="ps-fuente-badge">Publicado 7:00 am</span></td>
+                        <td class="tac">★★★★★</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                  <div class="ps-info-box">
+                    ℹ️ <strong>P. Origen Referencial:</strong> {{ psFmt(psPRef) }}/ton (PS−S−M−F) ·
+                    <span style="color:#DC2626"><strong>Brecha: {{ psFmtBrecha(psBrecha) }}/ton</strong></span> ·
+                    <strong>Garantía SADER:</strong> {{ psFmt(psRefs?.garantia_sader) }}/ton
+                  </div>
+                </div>
               </div>
-              <div class="pc pc-purple">
-                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-                <span class="pc-tipo">Internacional (Bolsa de Chicago, EUA)</span>
-                <span class="pc-val">${{ fmtPrice(precioInternacional) }}</span>
-                <span class="pc-unit">MXN/ton · ultimo registro</span>
-              </div>
-              <div class="pc pc-amber">
-                <div class="pc-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-                <span class="pc-tipo">Brecha bodega vs parcela</span>
-                <span class="pc-val" :class="brechaPrecio>=0?'pc-pos':'pc-neg'">{{ brechaPrecio>=0?'+':'-' }}${{ fmtPrice(Math.abs(brechaPrecio)) }}</span>
-                <span class="pc-unit">Diferencia promedio</span>
+
+              <!-- Mapa de calor brechas -->
+              <div class="ps-card">
+                <div class="ps-card-hdr">
+                  <div class="ps-card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                    Mapa de calor — Brecha por estado
+                    <span class="ps-card-sub">— P. Origen Ref. vs PO real</span>
+                  </div>
+                </div>
+                <div class="ps-heatmap">
+                  <div v-for="b in psBrechas" :key="b.estado" class="ps-heat-row" :class="`heat-${b.nivel_criticidad.toLowerCase()}`">
+                    <span class="ps-heat-estado">{{ b.estado }}</span>
+                    <div class="ps-heat-bar-wrap"><div class="ps-heat-bar" :style="{ width: psHeatWidth(b.brecha) + '%' }"></div></div>
+                    <span class="ps-heat-val">{{ psFmtBrecha(b.brecha) }}</span>
+                    <span class="ps-heat-badge" :class="`nivel-${b.nivel_criticidad.toLowerCase()}`">{{ b.nivel_criticidad }}</span>
+                  </div>
+                  <div class="ps-heat-legend">
+                    <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#EF4444"></span>Crítica (&gt;$1,000)</span>
+                    <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#F59E0B"></span>Alta ($500–$1,000)</span>
+                    <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#4A9B6A"></span>Media/Baja (&lt;$500)</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <section class="glass-card chart-card chart-tall">
-              <div class="chart-hdr">
-                <h3 class="card-hdg mb0">Tendencia de precios</h3>
-                <span class="chart-unit">ultimas semanas</span>
+
+            <!-- Columna derecha -->
+            <div class="ps-col-right">
+
+              <!-- Referencias externas -->
+              <div class="ps-card">
+                <div class="ps-card-title" style="padding:1rem 1rem 0.75rem">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Referencias de mercado
+                </div>
+                <div class="ps-refs">
+                  <div class="ps-ref-row"><div class="ps-ref-key"><span class="ps-ref-dot" style="background:#2563EB"></span>Precio Chicago</div><div class="ps-ref-vals"><span class="ps-ref-main">${{ psRefs?.chicago_usd_bushel }} USD/bushel</span><span class="ps-ref-sub">≈ {{ psFmt(psRefs?.chicago_mxn) }} MXN/ton</span></div></div>
+                  <div class="ps-ref-row"><div class="ps-ref-key"><span class="ps-ref-dot" style="background:#6B7280"></span>Tipo de cambio Banxico</div><div class="ps-ref-vals"><span class="ps-ref-main">${{ psRefs?.tc_banxico }} MXN/USD</span><span class="ps-ref-sub">Actualización diaria</span></div></div>
+                  <div class="ps-ref-row"><div class="ps-ref-key"><span class="ps-ref-dot" style="background:#D97706"></span>Precio Garantía SADER</div><div class="ps-ref-vals"><span class="ps-ref-main">{{ psFmt(psRefs?.garantia_sader) }}</span><span class="ps-ref-sub">MXN/ton · referencia oficial</span></div></div>
+                  <div class="ps-ref-row ps-ref-highlight"><div class="ps-ref-key"><span class="ps-ref-dot" style="background:#1A5C38"></span>P. Origen Referencial</div><div class="ps-ref-vals"><span class="ps-ref-main" style="color:#1A5C38;font-size:1.1rem">{{ psFmt(psPRef) }}</span><span class="ps-ref-sub">PS−S−M−F · valor justo productor</span></div></div>
+                </div>
               </div>
-              <div class="cwrap cwrap-lg"><Line v-if="preciosLineData" :data="preciosLineData" :options="lineOpts"/><div v-else class="cph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg><span>Sin datos de tendencia. Registre precios para ver la grafica.</span></div></div>
-            </section>
-            <section class="glass-card tbl-card">
-              <div class="tbl-hdr">
-                <h3 class="sec-heading mb0">Promedios ultimos 30 dias</h3>
+
+              <!-- Parámetros del modelo -->
+              <div class="ps-card">
+                <div class="ps-card-hdr" style="padding:1rem 1rem 0.5rem">
+                  <div class="ps-card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Parámetros del modelo
+                  </div>
+                </div>
+                <div class="ps-params">
+                  <div v-for="p in psParamsList" :key="p.key" class="ps-param-row">
+                    <div class="ps-param-info"><span class="ps-param-label">{{ p.label }}</span><span class="ps-param-hint">{{ p.hint }}</span></div>
+                    <div class="ps-param-val-wrap">
+                      <span v-if="!p.editando" class="ps-param-val">{{ psParams?.[p.key] }}{{ p.unit }}</span>
+                      <div v-else class="ps-param-edit"><input v-model="p.tmpVal" class="ps-param-input" type="number"/><button class="ps-pbtn-save" @click="psGuardarParam(p)">✓</button><button class="ps-pbtn-cancel" @click="p.editando = false">✕</button></div>
+                      <button v-if="!p.editando" class="ps-pbtn-edit" @click="psEditarParam(p)">✏</button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="tbl-wrap">
-                <table class="dt">
-                  <thead><tr><th>Tipo</th><th>Maiz</th><th>Promedio</th><th>Minimo</th><th>Maximo</th><th>Registros</th><th>Ultima act.</th></tr></thead>
-                  <tbody>
-                    <tr v-for="(row,i) in precios.promedios" :key="`${row.tipo_precio}-${row.tipo_maiz}`" :class="i%2===1?'tr-alt':''">
-                      <td><span class="pill" :class="tipoPrecioClass(row.tipo_precio)">{{ tipoPrecioLabel(row.tipo_precio) }}</span></td>
-                      <td>{{ row.tipo_maiz }}</td><td class="td-b td-price">${{ fmtPrice(row.promedio) }}</td><td class="td-muted">${{ fmtPrice(row.minimo) }}</td><td class="td-muted">${{ fmtPrice(row.maximo) }}</td><td>{{ row.registros }}</td><td class="td-muted">{{ fmtFecha(row.ultima_fecha) }}</td>
-                    </tr>
-                    <tr v-if="!precios.promedios?.length"><td colspan="7" class="td-empty">Sin registros en los ultimos 30 dias</td></tr>
-                  </tbody>
-                </table>
+
+              <!-- Discrepancias -->
+              <div class="ps-card" ref="discRefsEl">
+                <div class="ps-card-hdr" style="padding:1rem 1rem 0.5rem">
+                  <div class="ps-card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Discrepancias pendientes
+                  </div>
+                  <span class="ps-disc-count">{{ psDiscs.length }}</span>
+                </div>
+                <div v-if="psDiscs.length === 0" class="ps-disc-empty">✓ Sin discrepancias pendientes.</div>
+                <div v-else class="ps-disc-list">
+                  <div v-for="d in psDiscs" :key="d.id" class="ps-disc-item" :class="`disc-${d.prioridad.toLowerCase()}`">
+                    <div class="ps-disc-hdr"><span class="ps-disc-badge" :class="`badge-${d.prioridad.toLowerCase()}`">{{ d.prioridad }}</span><span class="ps-disc-tipo">{{ psDiscLabel(d.tipo) }}</span></div>
+                    <p class="ps-disc-desc">{{ d.descripcion }}</p>
+                    <button class="ps-disc-action" @click="psResolverDisc(d)">{{ d.accion }}</button>
+                  </div>
+                </div>
               </div>
-            </section>
-          </template>
+
+            </div>
+          </div>
+
+          <!-- Modal confirmar parámetro -->
+          <Transition name="modal-fade">
+            <div v-if="psModalConfirm.show" class="ps-modal-backdrop" @click.self="psModalConfirm.show = false">
+              <div class="ps-modal">
+                <h3>Confirmar cambio</h3>
+                <p>Cambiar <strong>{{ psModalConfirm.label }}</strong> de <code>{{ psModalConfirm.anterior }}</code> a <code>{{ psModalConfirm.nuevo }}</code></p>
+                <p class="ps-modal-warn">Aplica desde el siguiente ciclo nocturno. El histórico no se recalcula.</p>
+                <div class="ps-modal-actions">
+                  <button class="ps-btn-apply" @click="psConfirmarParam">Confirmar</button>
+                  <button class="ps-btn-clear-f" @click="psModalConfirm.show = false">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Spinner carga -->
+          <div v-if="psCargando" class="ps-skeleton-overlay"><div class="ps-skeleton-spinner"></div></div>
         </div>
 
         <!-- ════════════ PANEL 5: ALERTAS ════════════ -->
@@ -613,9 +827,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch, reactive } from 'vue'
 import AppShell from '@/components/AppShell.vue'
 import { api } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 import mapboxgl from 'mapbox-gl'
 import { Bar, Doughnut, Line } from 'vue-chartjs'
 import {
@@ -625,6 +840,8 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, LineElement, PointElement, Title, Tooltip, Legend, Filler)
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
+
+const authStore = useAuthStore()
 
 // ── State ──
 const cargando = ref(false)
@@ -1140,6 +1357,7 @@ async function recargarTodo() {
 
 watch(tabActiva, async (tab) => {
   if (tab === 'vision') { await nextTick(); if (!map) initMap(); else if (map.loaded()) updateMarkers() }
+  if (tab === 'precios') { await nextTick(); if (!psHoy.value) cargarPreciosSistema(); else { await nextTick(); renderChartPS() } }
 })
 
 watch(mapaData, async () => {
@@ -1164,7 +1382,155 @@ onUnmounted(() => {
   if (activePopup) { activePopup.remove(); activePopup = null }
   if (map) { map.remove(); map = null }
   if (stickyObserver) stickyObserver.disconnect()
+  if (chartPS) { chartPS.destroy(); chartPS = null }
 })
+
+// ═══════════════════════════════════════════════════
+// MÓDULO A4 — PRECIO SISTEMA
+// ═══════════════════════════════════════════════════
+
+const psHoy         = ref<any>(null)
+const psTendencia   = ref<any[]>([])
+const psComponentes = ref<any[]>([])
+const psBrechas     = ref<any[]>([])
+const psRefs        = ref<any>(null)
+const psParams      = ref<any>(null)
+const psDiscs       = ref<any[]>([])
+const psTxns        = ref<any>(null)
+const psCargando    = ref(false)
+const chartCanvasPS = ref<HTMLCanvasElement | null>(null)
+const discRefsEl    = ref<HTMLElement | null>(null)
+let   chartPS: InstanceType<typeof ChartJS> | null = null
+
+const psFiltros = reactive({
+  region: 'bajio_sinaloa', estado: 'todos', municipio: 'todos', variedad: 'todos', periodo: '30',
+})
+const psEstados = ['Guanajuato', 'Jalisco', 'Michoacán', 'Sinaloa', 'Querétaro', 'Colima']
+const psMunicipios: Record<string, string[]> = {
+  Guanajuato: ['Celaya', 'Salvatierra', 'León', 'Irapuato'],
+  Jalisco:    ['La Piedad', 'Lagos de Moreno', 'Degollado'],
+  Michoacán:  ['Apatzingán', 'Zamora', 'Uruapan'],
+  Sinaloa:    ['Los Mochis', 'Culiacán', 'Guasave'],
+  Querétaro:  ['Querétaro', 'San Juan del Río'],
+  Colima:     ['Colima', 'Manzanillo'],
+}
+const psMunicipiosFiltrados = computed(() =>
+  psFiltros.estado !== 'todos' ? (psMunicipios[psFiltros.estado] || []) : []
+)
+
+const psPRef    = computed(() => !psHoy.value ? 0 : Math.round((psHoy.value.ps - psHoy.value.s - psHoy.value.m - psHoy.value.f) * 100) / 100)
+const psBrecha  = computed(() => !psHoy.value ? 0 : Math.round((psPRef.value - psHoy.value.po) * 100) / 100)
+const psUtilidad = computed(() => (!psHoy.value || !psRefs.value) ? 0 : Math.round((psHoy.value.po - psRefs.value.costo_fira) * 100) / 100)
+const psDiscsAlta = computed(() => psDiscs.value.filter((d: any) => d.prioridad === 'ALTA').length)
+
+const psParamsList = reactive([
+  { key: 'margen_pct',      label: '% Margen intermediación',         hint: 'Default 10%. Rango 0–30%',       unit: '%',     editando: false, tmpVal: '' },
+  { key: 'ventana_dias',    label: 'Ventana promedio PO (días)',       hint: 'Default 7. Rango 1–30',          unit: ' días', editando: false, tmpVal: '' },
+  { key: 'min_txns',        label: 'Mín. transacciones municipio',     hint: 'Default 10',                     unit: '',      editando: false, tmpVal: '' },
+  { key: 'harineras_n',     label: 'Harineras en cálculo de flete',   hint: 'Default 3 (GIS)',                unit: '',      editando: false, tmpVal: '' },
+  { key: 'servicios_default', label: 'Servicios bodega (S) default',  hint: 'MXN/ton promedio regional',     unit: ' $/ton', editando: false, tmpVal: '' },
+  { key: 'flete_default',   label: 'Flete GIS (F) default',           hint: 'MXN/ton promedio regional',     unit: ' $/ton', editando: false, tmpVal: '' },
+])
+const psModalConfirm = reactive({ show: false, label: '', anterior: '', nuevo: '', paramRef: null as any })
+
+function psFmt(n: number | null | undefined) {
+  if (n == null) return '—'
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
+}
+function psFmtBrecha(n: number | null | undefined) {
+  if (n == null) return '—'
+  const sign = n < 0 ? '-' : '+'
+  return sign + new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.abs(n))
+}
+function psHeatWidth(b: number) {
+  const max = Math.max(...psBrechas.value.map((x: any) => Math.abs(x.brecha)), 1)
+  return Math.round((Math.abs(b) / max) * 100)
+}
+function psDiscLabel(tipo: string) {
+  const map: Record<string, string> = {
+    precio_diferencia: 'Precio bodeguero ≠ productor', precio_fuera_rango: 'Precio fuera de rango',
+    sin_tecnico_activo: 'Zona sin técnico activo', datos_insuficientes: 'Sin datos suficientes',
+    tarifario_desactualizado: 'Tarifario desactualizado', ventanilla_pendiente: 'Ventanilla pendiente',
+    variedad_sin_homologar: 'Variedad sin homologar',
+  }
+  return map[tipo] || tipo
+}
+
+async function cargarPreciosSistema() {
+  psCargando.value = true
+  try {
+    const q: Record<string, string> = { region: psFiltros.region, dias: psFiltros.periodo }
+    if (psFiltros.estado !== 'todos') q.estado = psFiltros.estado
+    if (psFiltros.municipio !== 'todos') q.municipio = psFiltros.municipio
+    if (psFiltros.variedad !== 'todos') q.variedad = psFiltros.variedad
+    const [hoyD, tendD, compD, brechasD, refsD, paramsD, discD, txnsD] = await Promise.all([
+      api.preciosSistema.hoy(q), api.preciosSistema.tendencia(q),
+      api.preciosSistema.componentesDetalle(q), api.preciosSistema.brechasEstados(q),
+      api.preciosSistema.referenciasExternas(), api.preciosSistema.parametros(),
+      api.preciosSistema.discrepancias(), api.preciosSistema.transaccionesResumen(q),
+    ])
+    psHoy.value = hoyD; psTendencia.value = tendD.tendencia || []
+    psComponentes.value = compD.componentes || []; psBrechas.value = brechasD.brechas || []
+    psRefs.value = refsD; psParams.value = paramsD.parametros
+    psDiscs.value = discD.discrepancias || []; psTxns.value = txnsD
+    await nextTick(); renderChartPS()
+  } catch (e) { console.error('Precios Sistema error:', e) }
+  finally { psCargando.value = false }
+}
+
+function renderChartPS() {
+  if (!chartCanvasPS.value || psTendencia.value.length === 0) return
+  if (chartPS) { chartPS.destroy(); chartPS = null }
+  const labels = psTendencia.value.map((t: any) => {
+    const d = new Date(t.fecha)
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+  })
+  chartPS = new ChartJS(chartCanvasPS.value, {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Precio Sistema', data: psTendencia.value.map((t: any) => t.ps), borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+      { label: 'Chicago', data: psTendencia.value.map((t: any) => t.chicago), borderColor: '#2563EB', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,3], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+      { label: 'Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [8,4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4 },
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false },
+        tooltip: { backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
+          callbacks: { label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
+        y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v) => '$' + Number(v).toLocaleString('es-MX') } },
+      },
+    },
+  } as any)
+}
+
+function psAplicarFiltros() { cargarPreciosSistema() }
+function psLimpiarFiltros() {
+  Object.assign(psFiltros, { region: 'bajio_sinaloa', estado: 'todos', municipio: 'todos', variedad: 'todos', periodo: '30' })
+  cargarPreciosSistema()
+}
+function psScrollDiscs() { discRefsEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+function psEditarParam(p: any) { p.tmpVal = psParams.value?.[p.key] ?? ''; p.editando = true }
+function psGuardarParam(p: any) {
+  psModalConfirm.label = p.label; psModalConfirm.anterior = String(psParams.value?.[p.key] ?? '')
+  psModalConfirm.nuevo = String(p.tmpVal); psModalConfirm.paramRef = p; psModalConfirm.show = true
+}
+async function psConfirmarParam() {
+  const p = psModalConfirm.paramRef; if (!p) return
+  try { await api.preciosSistema.actualizarParametros({ [p.key]: p.tmpVal }); p.editando = false; psModalConfirm.show = false; await cargarPreciosSistema() }
+  catch (e) { console.error(e) }
+}
+async function psResolverDisc(d: any) {
+  try { await api.preciosSistema.resolverDiscrepancia(d.id, { resolucion: 'resuelto_manual', notas: '' }); psDiscs.value = psDiscs.value.filter((x: any) => x.id !== d.id) }
+  catch (e) { console.error(e) }
+}
+function psExportarCSV() {
+  const rows = [['Componente','Descripción','Valor MXN/ton','%','Fuente'], ...psComponentes.value.map((c: any) => [c.componente, c.descripcion, c.valor, c.pct+'%', c.fuente]), ['TOTAL','Precio Sistema', psHoy.value?.ps,'100%','Publicado 7:00 am']]
+  const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' })
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `precio_sistema_${new Date().toISOString().split('T')[0]}.csv`; a.click()
+}
 </script>
 
 <style scoped>
@@ -1839,4 +2205,170 @@ onUnmounted(() => {
   border-top-color: #fff !important;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.08));
 }
+
+/* ═══ MÓDULO A4 — PRECIO SISTEMA ═══════════════════════════ */
+.ps-panel { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+.ps-filters { display:flex;align-items:center;gap:.5rem;background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:.65rem 1rem;flex-wrap:wrap;margin-bottom:.5rem; }
+.ps-filters-label { font-size:.78rem;font-weight:600;color:#6B7280; }
+.ps-select { border:1px solid #E5E7EB;border-radius:6px;padding:.32rem .55rem;font-size:.8rem;background:#fff;color:#374151; }
+.ps-btn-apply { background:#1A5C38;color:#fff;border:none;border-radius:6px;padding:.35rem .85rem;font-size:.8rem;font-weight:600;cursor:pointer; }
+.ps-btn-apply:hover { background:#2E7D52; }
+.ps-btn-clear-f { background:none;border:1px solid #E5E7EB;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;color:#6B7280;cursor:pointer; }
+.ps-btn-clear-f:hover { background:#f9fafb; }
+.ps-live-badge { display:flex;align-items:center;gap:.35rem;margin-left:auto;font-size:.75rem;font-weight:700;color:#1A5C38; }
+.ps-live-dot { width:8px;height:8px;border-radius:50%;background:#1A5C38;animation:psDot 1.5s ease-in-out infinite; }
+@keyframes psDot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)} }
+
+.ps-formula-bar { display:flex;align-items:stretch;background:#1A5C38;border-radius:12px;margin-bottom:.75rem;overflow:hidden; }
+.ps-formula-item { flex:1;padding:.85rem 1rem; }
+.ps-formula-total { border-right:1px solid rgba(255,255,255,.15); }
+.ps-formula-eq,.ps-formula-op { display:flex;align-items:center;padding:0 .55rem;color:rgba(255,255,255,.5);font-size:1.1rem;font-weight:300; }
+.ps-f-label { font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.6);margin-bottom:.3rem; }
+.ps-f-value { font-size:1.35rem;font-weight:800;color:#fff;line-height:1; }
+.ps-f-accent { color:#7EC89A !important;font-size:1.55rem !important; }
+.ps-f-sub { font-size:.65rem;color:rgba(255,255,255,.55);margin-top:.2rem; }
+
+.ps-kpi-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:.65rem;margin-bottom:.75rem; }
+@media(max-width:1280px){.ps-kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.ps-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.ps-kpi-card { background:#fff;border:1px solid #E5E7EB;border-radius:10px;border-left:3px solid var(--bar);padding:.8rem;display:flex;align-items:flex-start;gap:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.ps-kpi-link { cursor:pointer; }
+.ps-kpi-link:hover { box-shadow:0 4px 12px rgba(0,0,0,.1); }
+.ps-kpi-icon { flex-shrink:0;margin-top:.1rem; }
+.ps-kpi-body { min-width:0; }
+.ps-kpi-value { font-size:1.2rem;font-weight:800;line-height:1.1; }
+.ps-kpi-label { font-size:.72rem;font-weight:700;color:#374151;margin:.12rem 0 .08rem; }
+.ps-kpi-sub { font-size:.68rem;color:#9CA3AF;margin-bottom:.25rem; }
+.ps-delta { font-size:.68rem;font-weight:600; }
+.ps-delta-up { color:#1A5C38; }
+.ps-delta-down { color:#DC2626; }
+.ps-delta-warn { color:#D97706; }
+.ps-delta-neutral { color:#6B7280; }
+
+.ps-two-col { display:grid;grid-template-columns:1fr 370px;gap:.85rem; }
+@media(max-width:1200px){.ps-two-col{grid-template-columns:1fr}}
+.ps-col-left,.ps-col-right { display:flex;flex-direction:column;gap:.85rem; }
+
+.ps-card { background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden; }
+.ps-card-hdr { display:flex;align-items:center;justify-content:space-between;padding:.85rem .85rem .45rem; }
+.ps-card-title { display:flex;align-items:center;gap:.4rem;font-size:.82rem;font-weight:700;color:#111827; }
+.ps-card-sub { font-size:.72rem;font-weight:400;color:#6B7280; }
+
+.ps-chart-legend { display:flex;gap:.5rem;flex-shrink:0; }
+.ps-leg-chip { font-size:.68rem;font-weight:600;color:var(--c);display:flex;align-items:center;gap:.3rem; }
+.ps-leg-chip::before { content:'';display:inline-block;width:14px;height:2px;background:var(--c);border-radius:2px; }
+.ps-leg-dash::before { background:repeating-linear-gradient(to right,var(--c) 0,var(--c) 4px,transparent 4px,transparent 7px); }
+.ps-chart-wrap { padding:.4rem .85rem .85rem;height:175px; }
+
+.ps-tbl-wrap { overflow-x:auto; }
+.ps-tbl { width:100%;border-collapse:collapse;font-size:.8rem; }
+.ps-tbl thead th { padding:.55rem .75rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6B7280;border-bottom:1.5px solid #F3F4F6;white-space:nowrap; }
+.ps-tbl tbody tr { border-bottom:1px solid #F9FAFB; }
+.ps-tbl tbody tr:hover { background:#F9FAFB; }
+.ps-tbl td { padding:.6rem .75rem;vertical-align:middle; }
+.tar { text-align:right !important; }
+.tac { text-align:center !important; }
+.ps-tdesc { font-size:.74rem;color:#6B7280; }
+.ps-tvalor { font-size:.9rem; }
+.val-po { color:#1A5C38 !important; }
+.val-s  { color:#D97706 !important; }
+.val-m  { color:#DC2626 !important; }
+.val-f  { color:#2563EB !important; }
+.ps-comp-badge { display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;font-size:.72rem;font-weight:800; }
+.comp-po { background:#E8F5EE;color:#1A5C38; }
+.comp-s  { background:#FEF3C7;color:#D97706; }
+.comp-m  { background:#FEF2F2;color:#DC2626; }
+.comp-f  { background:#EFF6FF;color:#2563EB; }
+.ps-bar-wrap { width:70px;height:5px;background:#F3F4F6;border-radius:3px;overflow:hidden; }
+.ps-bar { height:100%;border-radius:3px;transition:width .5s; }
+.bar-po { background:#1A5C38; }
+.bar-s  { background:#D97706; }
+.bar-m  { background:#DC2626; }
+.bar-f  { background:#2563EB; }
+.ps-fuente-badge { display:inline-block;background:#F3F4F6;border:1px solid #E5E7EB;border-radius:5px;padding:.12rem .45rem;font-size:.68rem;color:#374151;white-space:nowrap; }
+.ps-total-row { background:#E8F5EE !important; }
+.ps-total-row td { font-size:.85rem;color:#1A5C38;border-top:1.5px solid #c6e6d4; }
+.ps-info-box { margin:.6rem .85rem;padding:.55rem .85rem;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:7px;font-size:.72rem;color:#374151;line-height:1.6; }
+.ps-btn-export { background:none;border:1px solid #E5E7EB;border-radius:5px;padding:.25rem .6rem;font-size:.72rem;color:#6B7280;cursor:pointer; }
+.ps-btn-export:hover { background:#F9FAFB; }
+
+.ps-heatmap { padding:.6rem .85rem .45rem; }
+.ps-heat-row { display:grid;grid-template-columns:110px 1fr 70px 75px;align-items:center;gap:.6rem;padding:.45rem .4rem;border-radius:7px;margin-bottom:.28rem; }
+.heat-critica { background:#FEF2F2; }
+.heat-alta    { background:#FFFBEB; }
+.heat-media   { background:#E8F5EE; }
+.heat-baja    { background:#F9FAFB; }
+.ps-heat-estado { font-size:.78rem;font-weight:600;color:#374151; }
+.ps-heat-bar-wrap { height:7px;background:#F3F4F6;border-radius:4px;overflow:hidden; }
+.ps-heat-bar { height:100%;border-radius:4px; }
+.heat-critica .ps-heat-bar { background:#EF4444; }
+.heat-alta    .ps-heat-bar { background:#F59E0B; }
+.heat-media   .ps-heat-bar { background:#4A9B6A; }
+.heat-baja    .ps-heat-bar { background:#9CA3AF; }
+.ps-heat-val { font-size:.78rem;font-weight:700;color:#111827;text-align:right; }
+.heat-critica .ps-heat-val { color:#DC2626; }
+.heat-alta    .ps-heat-val { color:#D97706; }
+.ps-heat-badge { font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:4px;text-align:center; }
+.nivel-critica { background:#FEE2E2;color:#DC2626; }
+.nivel-alta    { background:#FEF3C7;color:#D97706; }
+.nivel-media   { background:#D1FAE5;color:#065F46; }
+.nivel-baja    { background:#F3F4F6;color:#6B7280; }
+.ps-heat-legend { display:flex;gap:.85rem;padding:.4rem 0;margin-top:.3rem;border-top:1px solid #F3F4F6;flex-wrap:wrap; }
+.ps-hleg-item { display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:#6B7280; }
+.ps-hleg-dot { width:7px;height:7px;border-radius:50%; }
+
+.ps-refs { padding:0 .85rem .85rem; }
+.ps-ref-row { display:flex;align-items:center;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid #F3F4F6;gap:.65rem; }
+.ps-ref-row:last-child { border-bottom:none; }
+.ps-ref-highlight { background:#F0FDF4;border-radius:7px;padding:.55rem .45rem;margin:.2rem -.45rem; }
+.ps-ref-key { display:flex;align-items:center;gap:.45rem;font-size:.76rem;color:#374151;font-weight:500;flex-shrink:0; }
+.ps-ref-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.ps-ref-vals { text-align:right; }
+.ps-ref-main { display:block;font-size:.87rem;font-weight:700;color:#111827; }
+.ps-ref-sub  { display:block;font-size:.68rem;color:#9CA3AF; }
+
+.ps-params { padding:0 .85rem .65rem; }
+.ps-param-row { display:flex;align-items:center;justify-content:space-between;padding:.48rem 0;border-bottom:1px solid #F9FAFB;gap:.65rem; }
+.ps-param-row:last-child { border-bottom:none; }
+.ps-param-info { flex:1;min-width:0; }
+.ps-param-label { display:block;font-size:.75rem;font-weight:600;color:#374151; }
+.ps-param-hint  { display:block;font-size:.65rem;color:#9CA3AF;margin-top:.08rem; }
+.ps-param-val-wrap { display:flex;align-items:center;gap:.3rem;flex-shrink:0; }
+.ps-param-val { font-size:.85rem;font-weight:700;color:#1A5C38; }
+.ps-param-edit { display:flex;align-items:center;gap:.25rem; }
+.ps-param-input { width:65px;border:1.5px solid #1A5C38;border-radius:5px;padding:.22rem .35rem;font-size:.8rem; }
+.ps-pbtn-edit   { background:none;border:1px solid #E5E7EB;border-radius:4px;padding:.18rem .38rem;font-size:.72rem;cursor:pointer;color:#6B7280; }
+.ps-pbtn-save   { background:#1A5C38;color:#fff;border:none;border-radius:4px;padding:.18rem .4rem;font-size:.72rem;cursor:pointer; }
+.ps-pbtn-cancel { background:none;border:1px solid #E5E7EB;border-radius:4px;padding:.18rem .35rem;font-size:.72rem;cursor:pointer;color:#6B7280; }
+
+.ps-disc-count { background:#FEF2F2;color:#DC2626;font-size:.7rem;font-weight:700;border-radius:99px;padding:.12rem .45rem; }
+.ps-disc-empty { padding:.85rem;font-size:.8rem;color:#1A5C38;background:#F0FDF4;margin:.4rem;border-radius:7px;text-align:center; }
+.ps-disc-list { max-height:320px;overflow-y:auto;padding:.4rem;display:flex;flex-direction:column;gap:.4rem; }
+.ps-disc-item { border-radius:7px;padding:.6rem .75rem;border:1px solid; }
+.disc-alta  { background:#FEF2F2;border-color:#FECACA; }
+.disc-media { background:#FFFBEB;border-color:#FDE68A; }
+.disc-baja  { background:#F9FAFB;border-color:#E5E7EB; }
+.ps-disc-hdr { display:flex;align-items:center;gap:.45rem;margin-bottom:.28rem; }
+.ps-disc-badge { font-size:.62rem;font-weight:700;padding:.12rem .38rem;border-radius:3px; }
+.badge-alta  { background:#FEE2E2;color:#DC2626; }
+.badge-media { background:#FEF3C7;color:#D97706; }
+.badge-baja  { background:#F3F4F6;color:#6B7280; }
+.ps-disc-tipo { font-size:.74rem;font-weight:600;color:#374151; }
+.ps-disc-desc { font-size:.72rem;color:#6B7280;margin:0 0 .35rem;line-height:1.45; }
+.ps-disc-action { background:#fff;border:1px solid #E5E7EB;border-radius:5px;padding:.22rem .6rem;font-size:.7rem;font-weight:600;color:#374151;cursor:pointer; }
+.ps-disc-action:hover { background:#F3F4F6; }
+
+.ps-skeleton-overlay { position:fixed;inset:0;background:rgba(255,255,255,.6);z-index:100;display:flex;align-items:center;justify-content:center; }
+.ps-skeleton-spinner { width:32px;height:32px;border:3px solid #E5E7EB;border-top-color:#1A5C38;border-radius:50%;animation:psSpin .7s linear infinite; }
+@keyframes psSpin { to{transform:rotate(360deg)} }
+
+.ps-modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center; }
+.ps-modal { background:#fff;border-radius:12px;padding:1.4rem;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.ps-modal h3 { margin:0 0 .65rem;font-size:.95rem;color:#111827; }
+.ps-modal p  { font-size:.82rem;color:#374151;margin:.25rem 0; }
+.ps-modal-warn { color:#D97706;font-size:.75rem !important; }
+.ps-modal code { background:#F3F4F6;border-radius:3px;padding:.08rem .28rem;font-family:monospace; }
+.ps-modal-actions { display:flex;gap:.45rem;margin-top:.85rem; }
+.modal-fade-enter-active,.modal-fade-leave-active { transition:opacity .2s; }
+.modal-fade-enter-from,.modal-fade-leave-to { opacity:0; }
 </style>
