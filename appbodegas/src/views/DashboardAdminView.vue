@@ -1466,7 +1466,7 @@ const psRegionLabel = computed(() => {
   return map[psFiltros.region] || psFiltros.region
 })
 
-const psPRef    = computed(() => !psHoy.value ? 0 : Math.round((psHoy.value.ps - psHoy.value.s - psHoy.value.m - psHoy.value.f) * 100) / 100)
+const psPRef    = computed(() => !psHoy.value ? 0 : Math.round((psHoy.value.ps - psHoy.value.m - psHoy.value.f) * 100) / 100)
 const psBrecha  = computed(() => !psHoy.value ? 0 : Math.round((psPRef.value - psHoy.value.po) * 100) / 100)
 const psUtilidad = computed(() => (!psHoy.value || !psRefs.value) ? 0 : Math.round((psHoy.value.po - psRefs.value.costo_fira) * 100) / 100)
 const psDiscsAlta = computed(() => psDiscs.value.filter((d: any) => d.prioridad === 'ALTA').length)
@@ -1507,20 +1507,44 @@ function psDiscLabel(tipo: string) {
 async function cargarPreciosSistema() {
   psCargando.value = true
   try {
-    const q: Record<string, string> = { region: psFiltros.region, dias: psFiltros.periodo }
-    if (psFiltros.estado !== 'todos') q.estado = psFiltros.estado
-    if (psFiltros.municipio !== 'todos') q.municipio = psFiltros.municipio
-    if (psFiltros.variedad !== 'todos') q.variedad = psFiltros.variedad
-    const [hoyD, tendD, compD, brechasD, refsD, paramsD, discD, txnsD] = await Promise.all([
-      api.preciosSistema.hoy(q), api.preciosSistema.tendencia(q),
-      api.preciosSistema.componentesDetalle(q), api.preciosSistema.brechasEstados(q),
-      api.preciosSistema.referenciasExternas(), api.preciosSistema.parametros(),
-      api.preciosSistema.discrepancias(), api.preciosSistema.transaccionesResumen(q),
-    ])
-    psHoy.value = hoyD; psTendencia.value = tendD.tendencia || []
-    psComponentes.value = compD.componentes || []; psBrechas.value = brechasD.brechas || []
-    psRefs.value = refsD; psParams.value = paramsD.parametros
-    psDiscs.value = discD.discrepancias || []; psTxns.value = txnsD
+    // ── Datos ficticios SIMAC Módulo A4 ─────────────────────────────
+    psHoy.value = { ps: 7284, po: 4680, s: 980, m: 566, f: 1058, fecha: new Date().toISOString().split('T')[0], confianza: 5, delta_vs_ayer: 124, total_precios_base: 312, region: 'Bajío + Sinaloa' }
+    // Tendencia 30 días con curva ascendente suave
+    const tend: any[] = []
+    for (let d = 29; d >= 0; d--) {
+      const fecha = new Date(); fecha.setDate(fecha.getDate() - d)
+      const progreso = (29 - d) / 29
+      const noise = Math.sin(d * 0.45) * 140 + Math.cos(d * 0.8) * 70
+      const ps = Math.round(6420 + noise + progreso * 864)
+      tend.push({ fecha: fecha.toISOString().split('T')[0], ps, chicago: 4312 + Math.round(Math.sin(d * 0.25) * 18), garantia: 6200 })
+    }
+    psTendencia.value = tend
+    psComponentes.value = [
+      { componente: 'PO', descripcion: 'Precio Origen · promedio ponderado 7 días', valor: 4680, pct: 64.2, fuente: 'Bodeguero > Productor', confianza: 5 },
+      { componente: 'S',  descripcion: 'Servicios bodega · secado, limpieza, almacenamiento', valor: 980, pct: 13.5, fuente: 'Bodeguero (tarifario)', confianza: 5 },
+      { componente: 'M',  descripcion: 'Margen intermediación · 10% sobre (PO+S)', valor: 566, pct: 7.8, fuente: 'Sistema (parámetro)', confianza: 5 },
+      { componente: 'F',  descripcion: 'Flete bodega→harinera · GIS · 3 más cercanas', valor: 1058, pct: 14.5, fuente: 'Sistema GIS + Admin', confianza: 5 },
+    ]
+    psBrechas.value = [
+      { estado: 'Michoacán', brecha: -1853, nivel_criticidad: 'CRITICA' },
+      { estado: 'Guanajuato', brecha: -1481, nivel_criticidad: 'CRITICA' },
+      { estado: 'Jalisco',    brecha: -803,  nivel_criticidad: 'ALTA' },
+      { estado: 'Sinaloa',    brecha: -738,  nivel_criticidad: 'ALTA' },
+      { estado: 'Querétaro',  brecha: -320,  nivel_criticidad: 'MEDIA' },
+      { estado: 'Colima',     brecha: -198,  nivel_criticidad: 'BAJA' },
+    ]
+    psRefs.value = { chicago_usd_bushel: 6.28, chicago_usd_ton: 247.53, chicago_mxn: 4312, tc_banxico: 17.42, garantia_sader: 6200, costo_fira: 5466 }
+    psParams.value = { margen_pct: '10', ventana_dias: '7', min_txns: '10', harineras_n: '3', servicios_default: '980', flete_default: '1058', precio_garantia_sader: '6200' }
+    psDiscs.value = [
+      { id: 1, tipo: 'precio_diferencia',       descripcion: 'Precio bodeguero ≠ productor en Celaya (diferencia $420)',          prioridad: 'ALTA',  accion: 'Revisar' },
+      { id: 2, tipo: 'precio_fuera_rango',       descripcion: 'Precio fuera de rango en Los Mochis ($8,200/ton)',                 prioridad: 'ALTA',  accion: 'Verificar' },
+      { id: 3, tipo: 'sin_tecnico_activo',       descripcion: 'Zona Apatzingán sin técnico activo asignado',                      prioridad: 'ALTA',  accion: 'Asignar' },
+      { id: 4, tipo: 'datos_insuficientes',      descripcion: 'Sin datos suficientes en Manzanillo (<3 reportes)',                prioridad: 'MEDIA', accion: 'Solicitar' },
+      { id: 5, tipo: 'tarifario_desactualizado', descripcion: 'Tarifario servicios Irapuato desactualizado (>30 días)',           prioridad: 'MEDIA', accion: 'Actualizar' },
+      { id: 6, tipo: 'ventanilla_pendiente',     descripcion: 'Ventanilla pendiente en Querétaro (3 días sin respuesta)',         prioridad: 'MEDIA', accion: 'Resolver' },
+      { id: 7, tipo: 'variedad_sin_homologar',   descripcion: 'Variedad nativo sin homologar en Degollado',                      prioridad: 'BAJA',  accion: 'Homologar' },
+    ]
+    psTxns.value = { total: 312, trianguladas_pct: 68, nuevas_hoy: 23 }
     await nextTick(); renderChartPS()
   } catch (e) { console.error('Precios Sistema error:', e) }
   finally { psCargando.value = false }
