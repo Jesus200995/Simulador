@@ -367,6 +367,12 @@
         <!-- ════════════ PANEL 4: PRECIO SISTEMA (A4) ════════════ -->
         <div v-show="tabActiva === 'precios'" class="panel fade-in ps-panel">
 
+          <!-- Encabezado módulo -->
+          <div class="ps-module-header">
+            <div class="ps-module-title"><span class="ps-live-dot" style="margin-right:.35rem"></span>Precio Sistema <span style="font-weight:400;color:#6B7280">— Módulo A4 · Datos en tiempo real de la cadena maíz blanco</span></div>
+            <div class="ps-module-date">{{ new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) }} · Publicado 7:00 am</div>
+          </div>
+
           <!-- Filtros -->
           <div class="ps-filters">
             <span class="ps-filters-label">Filtros</span>
@@ -519,19 +525,20 @@
                   <div class="ps-card-title">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
                     Desglose por eslabón de la cadena
+                    <span class="ps-card-sub">— ponderado regional · PV 2026</span>
                   </div>
                   <button class="ps-btn-export" @click="psExportarCSV">⬇ Exportar</button>
                 </div>
                 <div class="ps-tbl-wrap">
                   <table class="ps-tbl">
-                    <thead><tr><th>COMP.</th><th>DESCRIPCIÓN</th><th class="tar">VALOR</th><th class="tac">%</th><th>DIST.</th><th>FUENTE</th><th class="tac">CONF.</th></tr></thead>
+                    <thead><tr><th>COMPONENTE</th><th>DESCRIPCIÓN</th><th class="tar">VALOR (MXN/TON)</th><th class="tac">% DEL PS</th><th>DISTRIBUCIÓN</th><th>FUENTE PRINCIPAL</th><th class="tac">CONFIANZA</th></tr></thead>
                     <tbody>
                       <tr v-for="c in psComponentes" :key="c.componente">
                         <td><span class="ps-comp-badge" :class="`comp-${c.componente.toLowerCase()}`">{{ c.componente }}</span></td>
                         <td class="ps-tdesc">{{ c.descripcion }}</td>
                         <td class="tar ps-tvalor" :class="`val-${c.componente.toLowerCase()}`"><strong>{{ psFmt(c.valor) }}</strong></td>
                         <td class="tac">{{ c.pct }}%</td>
-                        <td><div class="ps-bar-wrap"><div class="ps-bar" :class="`bar-${c.componente.toLowerCase()}`" :style="{ width: c.pct + '%' }"></div></div></td>
+                        <td><div style="display:flex;align-items:center;gap:.4rem"><div class="ps-bar-wrap"><div class="ps-bar" :class="`bar-${c.componente.toLowerCase()}`" :style="{ width: c.pct + '%' }"></div></div><span style="font-size:.7rem;color:#6B7280;white-space:nowrap">{{ Math.round(c.pct) }}%</span></div></td>
                         <td><span class="ps-fuente-badge">{{ c.fuente }}</span></td>
                         <td class="tac">{{ '★'.repeat(c.confianza) }}<span style="color:#e2e8f0">{{ '★'.repeat(5-c.confianza) }}</span></td>
                       </tr>
@@ -543,14 +550,15 @@
                         <td class="tac">100%</td>
                         <td></td>
                         <td><span class="ps-fuente-badge">Publicado 7:00 am</span></td>
-                        <td class="tac">★★★★★</td>
+                        <td class="tac">★★★★<span style="color:#e2e8f0">★</span></td>
                       </tr>
                     </tfoot>
                   </table>
                   <div class="ps-info-box">
-                    ℹ️ <strong>P. Origen Referencial:</strong> {{ psFmt(psPRef) }}/ton (PS−S−M−F) ·
-                    <span style="color:#DC2626"><strong>Brecha: {{ psFmtBrecha(psBrecha) }}/ton</strong></span> ·
-                    <strong>Garantía SADER:</strong> {{ psFmt(psRefs?.garantia_sader) }}/ton
+                    ℹ️ <strong>Precio Origen Referencial:</strong> {{ psFmt(psPRef) }}/ton (PS – S – M – F) ·
+                    <span style="color:#DC2626"><strong>Brecha de Mercado: {{ psFmtBrecha(psBrecha) }}/ton</strong></span>
+                    <span style="font-size:.68rem">(el productor recibe {{ psFmt(Math.abs(psBrecha)) }} menos de lo que le correspondería según la cadena)</span> ·
+                    <strong>Precio de Garantía SADER:</strong> {{ psFmt(psRefs?.garantia_sader) }}/ton <span style="font-size:.68rem">(referencia externa)</span>
                   </div>
                 </div>
               </div>
@@ -560,18 +568,21 @@
                 <div class="ps-card-hdr">
                   <div class="ps-card-title">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-                    Mapa de calor — Brecha por estado
-                    <span class="ps-card-sub">— P. Origen Ref. vs PO real</span>
+                    Mapa de calor — Brecha de Mercado por estado
+                    <span class="ps-card-sub">— Precio Origen Referencial vs. PO real</span>
                   </div>
                 </div>
                 <div class="ps-heatmap">
-                  <div v-for="b in psBrechas" :key="b.estado" class="ps-heat-row" :class="`heat-${b.nivel_criticidad.toLowerCase()}`">
-                    <span class="ps-heat-estado">{{ b.estado }}</span>
-                    <div class="ps-heat-bar-wrap"><div class="ps-heat-bar" :style="{ width: psHeatWidth(b.brecha) + '%' }"></div></div>
-                    <span class="ps-heat-val">{{ psFmtBrecha(b.brecha) }}</span>
-                    <span class="ps-heat-badge" :class="`nivel-${b.nivel_criticidad.toLowerCase()}`">{{ b.nivel_criticidad }}</span>
+                  <div class="ps-heat-grid">
+                    <div v-for="b in psBrechas" :key="b.estado" class="ps-heat-cell" :class="`heat-${b.nivel_criticidad.toLowerCase()}`">
+                      <span class="ps-heat-estado">{{ b.estado }}</span>
+                      <div class="ps-heat-bar-wrap"><div class="ps-heat-bar" :style="{ width: psHeatWidth(b.brecha) + '%' }"></div></div>
+                      <span class="ps-heat-val">{{ psFmtBrecha(b.brecha) }}</span>
+                      <span class="ps-heat-badge" :class="`nivel-${b.nivel_criticidad.toLowerCase()}`">{{ b.nivel_criticidad }}</span>
+                    </div>
                   </div>
                   <div class="ps-heat-legend">
+                    <span class="ps-hleg-item">Leyenda de brechas:</span>
                     <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#EF4444"></span>Crítica (&gt;$1,000)</span>
                     <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#F59E0B"></span>Alta ($500–$1,000)</span>
                     <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#4A9B6A"></span>Media/Baja (&lt;$500)</span>
@@ -2220,6 +2231,9 @@ function psExportarCSV() {
 
 /* ═══ MÓDULO A4 — PRECIO SISTEMA ═══════════════════════════ */
 .ps-panel { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+.ps-module-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;padding:.2rem 0; }
+.ps-module-title { font-size:.95rem;font-weight:700;color:#111827;display:flex;align-items:center; }
+.ps-module-date { font-size:.75rem;color:#6B7280;white-space:nowrap; }
 .ps-filters { display:flex;align-items:center;gap:.5rem;background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:.65rem 1rem;flex-wrap:wrap;margin-bottom:.5rem; }
 .ps-filters-label { font-size:.78rem;font-weight:600;color:#6B7280; }
 .ps-select { border:1px solid #E5E7EB;border-radius:6px;padding:.32rem .55rem;font-size:.8rem;background:#fff;color:#374151; }
@@ -2305,7 +2319,9 @@ function psExportarCSV() {
 .ps-btn-export:hover { background:#F9FAFB; }
 
 .ps-heatmap { padding:.6rem .85rem .45rem; }
-.ps-heat-row { display:grid;grid-template-columns:110px 1fr 70px 75px;align-items:center;gap:.6rem;padding:.45rem .4rem;border-radius:7px;margin-bottom:.28rem; }
+.ps-heat-grid { display:grid;grid-template-columns:1fr 1fr;gap:.4rem .85rem; }
+@media(max-width:900px){.ps-heat-grid{grid-template-columns:1fr}}
+.ps-heat-cell { display:grid;grid-template-columns:100px 1fr 68px 65px;align-items:center;gap:.5rem;padding:.45rem .4rem;border-radius:7px; }
 .heat-critica { background:#FEF2F2; }
 .heat-alta    { background:#FFFBEB; }
 .heat-media   { background:#E8F5EE; }

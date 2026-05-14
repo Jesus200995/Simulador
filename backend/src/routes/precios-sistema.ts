@@ -199,7 +199,7 @@ router.get('/componentes/detalle', authMiddleware, async (req: AuthRequest, res:
       {
         componente: 'M', descripcion: `Margen intermediación · ${params.margen_pct}% sobre (PO+S)`,
         valor: m, pct: Math.round((m / ps) * 1000) / 10,
-        fuente: 'Sistema (parámetro)', confianza: 1,
+        fuente: 'Sistema (parámetro)', confianza: 2,
       },
       {
         componente: 'F', descripcion: 'Flete bodega→harinera · GIS · 3 más cercanas',
