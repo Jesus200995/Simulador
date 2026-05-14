@@ -365,7 +365,7 @@
         </div>
 
         <!-- ════════════ PANEL 4: PRECIO SISTEMA (A4) ════════════ -->
-        <div v-if="tabActiva === 'precios'" class="panel fade-in ps-panel">
+        <div v-show="tabActiva === 'precios'" class="panel fade-in ps-panel">
 
           <!-- Filtros -->
           <div class="ps-filters">
@@ -1357,7 +1357,7 @@ async function recargarTodo() {
 
 watch(tabActiva, async (tab) => {
   if (tab === 'vision') { await nextTick(); if (!map) initMap(); else if (map.loaded()) updateMarkers() }
-  if (tab === 'precios') { await nextTick(); if (!psHoy.value) cargarPreciosSistema(); else { await nextTick(); renderChartPS() } }
+  if (tab === 'precios') { await nextTick(); if (!psHoy.value) cargarPreciosSistema(); else if (!chartPS) { await nextTick(); renderChartPS() } else { chartPS.resize() } }
 })
 
 watch(mapaData, async () => {
@@ -1481,29 +1481,32 @@ async function cargarPreciosSistema() {
 function renderChartPS() {
   if (!chartCanvasPS.value || psTendencia.value.length === 0) return
   if (chartPS) { chartPS.destroy(); chartPS = null }
-  const labels = psTendencia.value.map((t: any) => {
-    const d = new Date(t.fecha)
-    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
-  })
-  chartPS = new ChartJS(chartCanvasPS.value, {
-    type: 'line',
-    data: { labels, datasets: [
-      { label: 'Precio Sistema', data: psTendencia.value.map((t: any) => t.ps), borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Chicago', data: psTendencia.value.map((t: any) => t.chicago), borderColor: '#2563EB', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,3], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [8,4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4 },
-    ]},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { display: false },
-        tooltip: { backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
-          callbacks: { label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
-        y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v) => '$' + Number(v).toLocaleString('es-MX') } },
+  requestAnimationFrame(() => {
+    if (!chartCanvasPS.value) return
+    const labels = psTendencia.value.map((t: any) => {
+      const d = new Date(t.fecha)
+      return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+    })
+    chartPS = new ChartJS(chartCanvasPS.value, {
+      type: 'line',
+      data: { labels, datasets: [
+        { label: 'Precio Sistema', data: psTendencia.value.map((t: any) => t.ps), borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+        { label: 'Chicago', data: psTendencia.value.map((t: any) => t.chicago), borderColor: '#2563EB', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,3], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+        { label: 'Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [8,4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4 },
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false },
+          tooltip: { backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
+            callbacks: { label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
+          y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v) => '$' + Number(v).toLocaleString('es-MX') } },
+        },
       },
-    },
-  } as any)
+    } as any)
+  })
 }
 
 function psAplicarFiltros() { cargarPreciosSistema() }
