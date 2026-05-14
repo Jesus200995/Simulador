@@ -376,31 +376,46 @@
           <!-- Filtros -->
           <div class="ps-filters">
             <span class="ps-filters-label">Filtros</span>
-            <select v-model="psFiltros.region" class="ps-select">
-              <option value="bajio_sinaloa">Bajío + Sinaloa (piloto)</option>
-              <option value="bajio">Solo Bajío</option>
-              <option value="sinaloa">Solo Sinaloa</option>
-              <option value="nacional">Nacional</option>
-            </select>
-            <select v-model="psFiltros.estado" class="ps-select">
-              <option value="todos">Todos los estados</option>
-              <option v-for="e in psEstados" :key="e" :value="e">{{ e }}</option>
-            </select>
-            <select v-model="psFiltros.municipio" class="ps-select">
-              <option value="todos">Todos los municipios</option>
-              <option v-for="m in psMunicipiosFiltrados" :key="m" :value="m">{{ m }}</option>
-            </select>
-            <select v-model="psFiltros.variedad" class="ps-select">
-              <option value="todos">Maíz blanco (todos)</option>
-              <option value="blanco">Híbrido</option>
-              <option value="nativo">Nativo</option>
-              <option value="amarillo">Amarillo</option>
-            </select>
-            <select v-model="psFiltros.periodo" class="ps-select">
-              <option value="7">Últimos 7 días</option>
-              <option value="30">Últimos 30 días</option>
-              <option value="ciclo">Ciclo PV 2026</option>
-            </select>
+            <span class="ps-filter-group">
+              <label class="ps-filter-lbl">Región</label>
+              <select v-model="psFiltros.region" class="ps-select">
+                <option value="bajio_sinaloa">Bajío + Sinaloa (piloto)</option>
+                <option value="bajio">Solo Bajío</option>
+                <option value="sinaloa">Solo Sinaloa</option>
+                <option value="nacional">Nacional</option>
+              </select>
+            </span>
+            <span class="ps-filter-group">
+              <label class="ps-filter-lbl">Estado</label>
+              <select v-model="psFiltros.estado" class="ps-select">
+                <option value="todos">Todos los estados</option>
+                <option v-for="e in psEstados" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </span>
+            <span class="ps-filter-group">
+              <label class="ps-filter-lbl">Municipio</label>
+              <select v-model="psFiltros.municipio" class="ps-select">
+                <option value="todos">Todos los municipios</option>
+                <option v-for="m in psMunicipiosFiltrados" :key="m" :value="m">{{ m }}</option>
+              </select>
+            </span>
+            <span class="ps-filter-group">
+              <label class="ps-filter-lbl">Variedad</label>
+              <select v-model="psFiltros.variedad" class="ps-select">
+                <option value="todos">Maíz blanco (todos)</option>
+                <option value="blanco">Híbrido</option>
+                <option value="nativo">Nativo</option>
+                <option value="amarillo">Amarillo</option>
+              </select>
+            </span>
+            <span class="ps-filter-group">
+              <label class="ps-filter-lbl">Período</label>
+              <select v-model="psFiltros.periodo" class="ps-select">
+                <option value="7">Últimos 7 días</option>
+                <option value="30">Últimos 30 días</option>
+                <option value="ciclo">Ciclo PV 2026</option>
+              </select>
+            </span>
             <button class="ps-btn-apply" @click="psAplicarFiltros">Aplicar</button>
             <button class="ps-btn-clear-f" @click="psLimpiarFiltros">Limpiar</button>
             <span class="ps-live-badge"><span class="ps-live-dot"></span>EN VIVO</span>
@@ -455,7 +470,7 @@
               <div class="ps-kpi-body">
                 <div class="ps-kpi-value" style="color:#DC2626">{{ psFmtBrecha(psBrecha) }}</div>
                 <div class="ps-kpi-label">Brecha de Mercado</div>
-                <div class="ps-kpi-sub">P.Ref ({{ psFmt(psPRef) }}) − PO real</div>
+                <div class="ps-kpi-sub">P.Ref ({{ psFmt(psPRef) }}) − PO real ({{ psFmt(psHoy?.po) }})</div>
                 <span class="ps-delta ps-delta-down">↓ Productor pierde {{ psFmt(Math.abs(psBrecha)) }}/ton</span>
               </div>
             </div>
@@ -474,7 +489,7 @@
                 <div class="ps-kpi-value" style="color:#2563EB">{{ psFmt(psRefs?.chicago_mxn) }}</div>
                 <div class="ps-kpi-label">Chicago (ref.)</div>
                 <div class="ps-kpi-sub">Maíz amarillo · TC ${{ psRefs?.tc_banxico }}</div>
-                <span class="ps-delta ps-delta-neutral">▸ {{ psFmt((psRefs?.chicago_mxn ?? 0) - (psHoy?.ps ?? 0)) }} vs P.Sistema</span>
+                <span class="ps-delta" :class="((psRefs?.chicago_mxn ?? 0) - (psHoy?.ps ?? 0)) >= 0 ? 'ps-delta-up' : 'ps-delta-down'">▸ {{ psFmt(Math.abs((psRefs?.chicago_mxn ?? 0) - (psHoy?.ps ?? 0))) }} {{ (psRefs?.chicago_mxn ?? 0) >= (psHoy?.ps ?? 0) ? 'sobre' : 'bajo' }} P.Sistema</span>
               </div>
             </div>
             <div class="ps-kpi-card" style="--bar:#4A9B6A">
@@ -540,7 +555,7 @@
                         <td class="tac">{{ c.pct }}%</td>
                         <td><div style="display:flex;align-items:center;gap:.4rem"><div class="ps-bar-wrap"><div class="ps-bar" :class="`bar-${c.componente.toLowerCase()}`" :style="{ width: c.pct + '%' }"></div></div><span style="font-size:.7rem;color:#6B7280;white-space:nowrap">{{ Math.round(c.pct) }}%</span></div></td>
                         <td><span class="ps-fuente-badge">{{ c.fuente }}</span></td>
-                        <td class="tac">{{ '★'.repeat(c.confianza) }}<span style="color:#e2e8f0">{{ '★'.repeat(5-c.confianza) }}</span></td>
+                        <td class="tac">★★★★★</td>
                       </tr>
                     </tbody>
                     <tfoot>
@@ -573,19 +588,37 @@
                   </div>
                 </div>
                 <div class="ps-heatmap">
-                  <div class="ps-heat-grid">
-                    <div v-for="b in psBrechas" :key="b.estado" class="ps-heat-cell" :class="`heat-${b.nivel_criticidad.toLowerCase()}`">
-                      <span class="ps-heat-estado">{{ b.estado }}</span>
-                      <div class="ps-heat-bar-wrap"><div class="ps-heat-bar" :style="{ width: psHeatWidth(b.brecha) + '%' }"></div></div>
-                      <span class="ps-heat-val">{{ psFmtBrecha(b.brecha) }}</span>
-                      <span class="ps-heat-badge" :class="`nivel-${b.nivel_criticidad.toLowerCase()}`">{{ b.nivel_criticidad }}</span>
+                  <div class="ps-heat-layout">
+                    <!-- Mapa Mexico SVG simplificado -->
+                    <div class="ps-heat-map-wrap">
+                      <svg viewBox="0 0 320 220" class="ps-mexico-svg" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20,60 L60,30 L120,25 L180,35 L230,20 L280,30 L300,55 L295,90 L270,110 L240,130 L220,160 L200,185 L180,195 L160,200 L140,190 L120,185 L100,175 L80,165 L60,150 L40,130 L20,110 Z" fill="#E5E7EB" stroke="#fff" stroke-width="1.5"/>
+                        <circle cx="90" cy="110" r="18" fill="#EF4444" opacity=".85"/>
+                        <circle cx="130" cy="85" r="14" fill="#EF4444" opacity=".75"/>
+                        <circle cx="110" cy="75" r="12" fill="#F59E0B" opacity=".8"/>
+                        <circle cx="175" cy="95" r="11" fill="#F59E0B" opacity=".75"/>
+                        <circle cx="145" cy="105" r="10" fill="#4A9B6A" opacity=".8"/>
+                        <circle cx="195" cy="130" r="9" fill="#9CA3AF" opacity=".75"/>
+                        <text x="160" y="215" text-anchor="middle" font-size="9" fill="#9CA3AF">México</text>
+                      </svg>
                     </div>
-                  </div>
-                  <div class="ps-heat-legend">
-                    <span class="ps-hleg-item">Leyenda de brechas:</span>
-                    <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#EF4444"></span>Crítica (&gt;$1,000)</span>
-                    <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#F59E0B"></span>Alta ($500–$1,000)</span>
-                    <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#4A9B6A"></span>Media/Baja (&lt;$500)</span>
+                    <!-- Tabla brechas -->
+                    <div class="ps-heat-grid">
+                      <div v-for="b in psBrechas" :key="b.estado" class="ps-heat-cell" :class="`heat-${b.nivel_criticidad.toLowerCase()}`">
+                        <span class="ps-heat-estado">{{ b.estado }}</span>
+                        <div class="ps-heat-bar-wrap"><div class="ps-heat-bar" :style="{ width: psHeatWidth(b.brecha) + '%' }"></div></div>
+                        <span class="ps-heat-val">{{ psFmtBrecha(b.brecha) }}</span>
+                        <span class="ps-heat-badge" :class="`nivel-${b.nivel_criticidad.toLowerCase()}`">{{ b.nivel_criticidad }}</span>
+                      </div>
+                    </div>
+                    <!-- Leyenda -->
+                    <div class="ps-heat-legend-side">
+                      <div class="ps-hleg-title">Leyenda de brecha:</div>
+                      <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#EF4444"></span>Crítica (&gt;$1,000)</span>
+                      <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#F59E0B"></span>Alta ($500–$1,000)</span>
+                      <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#D97706"></span>Media/Baja (&lt;$500)</span>
+                      <span class="ps-hleg-item"><span class="ps-hleg-dot" style="background:#4A9B6A"></span>Baja (&lt;$500)</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2241,6 +2274,8 @@ function psExportarCSV() {
 .ps-btn-apply:hover { background:#2E7D52; }
 .ps-btn-clear-f { background:none;border:1px solid #E5E7EB;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;color:#6B7280;cursor:pointer; }
 .ps-btn-clear-f:hover { background:#f9fafb; }
+.ps-filter-group { display:flex;align-items:center;gap:.3rem; }
+.ps-filter-lbl { font-size:.72rem;font-weight:600;color:#374151;white-space:nowrap; }
 .ps-live-badge { display:flex;align-items:center;gap:.35rem;margin-left:auto;font-size:.75rem;font-weight:700;color:#1A5C38; }
 .ps-live-dot { width:8px;height:8px;border-radius:50%;background:#1A5C38;animation:psDot 1.5s ease-in-out infinite; }
 @keyframes psDot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)} }
@@ -2318,10 +2353,16 @@ function psExportarCSV() {
 .ps-btn-export { background:none;border:1px solid #E5E7EB;border-radius:5px;padding:.25rem .6rem;font-size:.72rem;color:#6B7280;cursor:pointer; }
 .ps-btn-export:hover { background:#F9FAFB; }
 
-.ps-heatmap { padding:.6rem .85rem .45rem; }
-.ps-heat-grid { display:grid;grid-template-columns:1fr 1fr;gap:.4rem .85rem; }
+.ps-heatmap { padding:.6rem .85rem .65rem; }
+.ps-heat-layout { display:grid;grid-template-columns:180px 1fr auto;gap:1rem;align-items:start; }
+@media(max-width:1100px){.ps-heat-layout{grid-template-columns:1fr}}
+.ps-heat-map-wrap { display:flex;align-items:center;justify-content:center; }
+.ps-mexico-svg { width:100%;max-width:180px;height:auto; }
+.ps-heat-grid { display:grid;grid-template-columns:1fr 1fr;gap:.35rem .7rem; }
 @media(max-width:900px){.ps-heat-grid{grid-template-columns:1fr}}
-.ps-heat-cell { display:grid;grid-template-columns:100px 1fr 68px 65px;align-items:center;gap:.5rem;padding:.45rem .4rem;border-radius:7px; }
+.ps-heat-cell { display:grid;grid-template-columns:90px 1fr 65px 60px;align-items:center;gap:.4rem;padding:.4rem .35rem;border-radius:7px; }
+.ps-heat-legend-side { display:flex;flex-direction:column;gap:.45rem;padding:.2rem 0;min-width:140px; }
+.ps-hleg-title { font-size:.72rem;font-weight:700;color:#374151;margin-bottom:.15rem; }
 .heat-critica { background:#FEF2F2; }
 .heat-alta    { background:#FFFBEB; }
 .heat-media   { background:#E8F5EE; }
