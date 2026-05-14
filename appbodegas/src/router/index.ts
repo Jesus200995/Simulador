@@ -149,12 +149,6 @@ const routes: RouteRecordRaw[] = [
     redirect: '/precios/dashboard',
   },
   {
-    path: '/precios/lista',
-    name: 'Precios',
-    component: () => import('@/views/PreciosView.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
     path: '/precios/dashboard',
     name: 'PreciosDashboard',
     component: () => import('@/views/PreciosDashboardView.vue'),
