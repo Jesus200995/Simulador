@@ -245,7 +245,7 @@ router.get('/brechas/estados', authMiddleware, async (req: AuthRequest, res: Res
       const pRef   = ps - s - m - f; // = poReal
       const brecha = Math.round((pRef - poReal - (s * 0.15)) * 100) / 100; // brecha estimada
       let nivel: string;
-      if (brecha < -1000) nivel = 'CRÍTICA';
+      if (brecha < -1000) nivel = 'CRITICA';
       else if (brecha < -500) nivel = 'ALTA';
       else if (brecha < -100) nivel = 'MEDIA';
       else nivel = 'BAJA';
@@ -256,8 +256,8 @@ router.get('/brechas/estados', authMiddleware, async (req: AuthRequest, res: Res
     if (brechas.length === 0) {
       res.json({
         brechas: [
-          { estado: 'Michoacán',  brecha: -1853, nivel_criticidad: 'CRÍTICA', txns: 45 },
-          { estado: 'Guanajuato', brecha: -1481, nivel_criticidad: 'CRÍTICA', txns: 62 },
+          { estado: 'Michoacán',  brecha: -1853, nivel_criticidad: 'CRITICA', txns: 45 },
+          { estado: 'Guanajuato', brecha: -1481, nivel_criticidad: 'CRITICA', txns: 62 },
           { estado: 'Jalisco',    brecha: -803,  nivel_criticidad: 'ALTA',    txns: 38 },
           { estado: 'Sinaloa',    brecha: -738,  nivel_criticidad: 'ALTA',    txns: 29 },
           { estado: 'Querétaro',  brecha: -320,  nivel_criticidad: 'MEDIA',   txns: 15 },

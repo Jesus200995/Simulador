@@ -63,25 +63,25 @@
           <div class="ps-f-value ps-f-accent">{{ fmt(hoy?.ps) }}</div>
           <div class="ps-f-sub">MXN / tonelada</div>
         </div>
-        <div class="ps-formula-eq">= =</div>
+        <div class="ps-formula-eq">=</div>
         <div class="ps-formula-item">
           <div class="ps-f-label">PO · PRECIO ORIGEN</div>
           <div class="ps-f-value">{{ fmt(hoy?.po) }}</div>
           <div class="ps-f-sub">Promedio {{ params?.ventana_dias ?? 7 }} días</div>
         </div>
-        <div class="ps-formula-op">+ +</div>
+        <div class="ps-formula-op">+</div>
         <div class="ps-formula-item">
           <div class="ps-f-label">S · SERVICIOS BODEGA</div>
           <div class="ps-f-value">{{ fmt(hoy?.s) }}</div>
           <div class="ps-f-sub">Promedio regional</div>
         </div>
-        <div class="ps-formula-op">+ +</div>
+        <div class="ps-formula-op">+</div>
         <div class="ps-formula-item">
           <div class="ps-f-label">M · MARGEN ({{ params?.margen_pct ?? 10 }}%)</div>
           <div class="ps-f-value">{{ fmt(hoy?.m) }}</div>
           <div class="ps-f-sub">Parámetro config.</div>
         </div>
-        <div class="ps-formula-op">+ +</div>
+        <div class="ps-formula-op">+</div>
         <div class="ps-formula-item">
           <div class="ps-f-label">F · FLETE GIS</div>
           <div class="ps-f-value">{{ fmt(hoy?.f) }}</div>
@@ -850,22 +850,22 @@ onMounted(cargarTodo)
 /* ─── Mapa de calor ──────────────────────────────────── */
 .ps-heatmap { padding: 0.75rem 1rem 0.5rem; }
 .ps-heat-row { display: grid; grid-template-columns: 110px 1fr 70px 80px; align-items: center; gap: 0.75rem; padding: 0.55rem 0.5rem; border-radius: 8px; margin-bottom: 0.35rem; }
-.heat-crítica { background: #FEF2F2; }
+.heat-critica { background: #FEF2F2; }
 .heat-alta    { background: #FFFBEB; }
 .heat-media   { background: #E8F5EE; }
 .heat-baja    { background: #F9FAFB; }
 .ps-heat-estado { font-size: 0.8rem; font-weight: 600; color: #374151; }
 .ps-heat-bar-wrap { height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
 .ps-heat-bar { height: 100%; border-radius: 4px; }
-.heat-crítica .ps-heat-bar { background: #EF4444; }
+.heat-critica .ps-heat-bar { background: #EF4444; }
 .heat-alta    .ps-heat-bar { background: #F59E0B; }
 .heat-media   .ps-heat-bar { background: #4A9B6A; }
 .heat-baja    .ps-heat-bar { background: #9CA3AF; }
 .ps-heat-val { font-size: 0.82rem; font-weight: 700; color: #111827; text-align: right; }
-.heat-crítica .ps-heat-val { color: #DC2626; }
+.heat-critica .ps-heat-val { color: #DC2626; }
 .heat-alta    .ps-heat-val { color: #D97706; }
 .ps-heat-badge { font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.45rem; border-radius: 4px; text-align: center; }
-.nivel-crítica { background: #FEE2E2; color: #DC2626; }
+.nivel-critica { background: #FEE2E2; color: #DC2626; }
 .nivel-alta    { background: #FEF3C7; color: #D97706; }
 .nivel-media   { background: #D1FAE5; color: #065F46; }
 .nivel-baja    { background: #F3F4F6; color: #6B7280; }

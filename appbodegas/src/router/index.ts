@@ -146,14 +146,12 @@ const routes: RouteRecordRaw[] = [
   // ── Precios de Maíz ─────────────────────────
   {
     path: '/precios',
-    name: 'Precios',
-    component: () => import('@/views/PreciosView.vue'),
-    meta: { requiresAuth: true }
+    redirect: '/precios/dashboard',
   },
   {
-    path: '/precios/registrar',
-    name: 'PreciosRegistro',
-    component: () => import('@/views/PreciosRegistroView.vue'),
+    path: '/precios/lista',
+    name: 'Precios',
+    component: () => import('@/views/PreciosView.vue'),
     meta: { requiresAuth: true }
   },
   {
