@@ -109,7 +109,7 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
     const TC = 17.42;
     // Chicago reference (maíz amarillo CME) en USD/bushel → MXN/ton: 1 bushel = 0.0254 ton → $/ton = $/bushel / 0.0254
     // Usamos un precio base simulado ~170 USD/ton = $4,312 MXN a TC 17.42 / aproximado
-    const chicagoBase = 247.4; // USD/ton aproximado
+    const chicagoBase = 247.53; // USD/ton → $4,312 MXN a TC 17.42
     const chicagoMxn  = Math.round(chicagoBase * TC);
 
     const tendencia = poTrend.rows.map((row: any, i: number) => {
@@ -189,22 +189,22 @@ router.get('/componentes/detalle', authMiddleware, async (req: AuthRequest, res:
       {
         componente: 'PO', descripcion: 'Precio Origen · promedio ponderado 7 días',
         valor: po, pct: Math.round((po / ps) * 1000) / 10,
-        fuente: 'Bodeguero + Productor', confianza: 5,
+        fuente: 'Bodeguero > Productor', confianza: 3,
       },
       {
         componente: 'S', descripcion: 'Servicios bodega · secado, limpieza, almacenamiento',
         valor: s, pct: Math.round((s / ps) * 1000) / 10,
-        fuente: 'Bodeguero (tarifario)', confianza: 5,
+        fuente: 'Bodeguero (tarifario)', confianza: 4,
       },
       {
         componente: 'M', descripcion: `Margen intermediación · ${params.margen_pct}% sobre (PO+S)`,
         valor: m, pct: Math.round((m / ps) * 1000) / 10,
-        fuente: 'Sistema (parámetro)', confianza: 5,
+        fuente: 'Sistema (parámetro)', confianza: 1,
       },
       {
         componente: 'F', descripcion: 'Flete bodega→harinera · GIS · 3 más cercanas',
         valor: f, pct: Math.round((f / ps) * 1000) / 10,
-        fuente: 'Sistema GIS + Admin', confianza: 5,
+        fuente: 'Sistema GIS + Admin', confianza: 4,
       },
     ];
 
@@ -281,7 +281,7 @@ router.get('/referencias/externas', authMiddleware, async (req: AuthRequest, res
   try {
     const params = await getParametros();
     const TC = 17.42;
-    const chicagoUsd = 247.4; // USD/ton aprox a precio actual
+    const chicagoUsd = 247.53; // USD/ton → $4,312 MXN a TC 17.42
     const chicagoBushel = 6.28; // USD/bushel aprox
     const chicagoMxn  = Math.round(chicagoUsd * TC);
 

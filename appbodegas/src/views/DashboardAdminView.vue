@@ -502,12 +502,12 @@
                   <div class="ps-card-title">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     Tendencia del Precio Sistema
-                    <span class="ps-card-sub">— últimos {{ psFiltros.periodo }} días</span>
+                    <span class="ps-card-sub">— últimos {{ psFiltros.periodo }} días · {{ psRegionLabel }}</span>
                   </div>
                   <div class="ps-chart-legend">
                     <span class="ps-leg-chip" style="--c:#1A5C38">Precio Sistema</span>
                     <span class="ps-leg-chip" style="--c:#2563EB">Chicago</span>
-                    <span class="ps-leg-chip ps-leg-dash" style="--c:#D97706">Garantía</span>
+                    <span class="ps-leg-chip ps-leg-dash" style="--c:#D97706">Precio Garantía</span>
                   </div>
                 </div>
                 <div class="ps-chart-wrap"><canvas ref="chartCanvasPS" height="160"></canvas></div>
@@ -1417,6 +1417,10 @@ const psMunicipios: Record<string, string[]> = {
 const psMunicipiosFiltrados = computed(() =>
   psFiltros.estado !== 'todos' ? (psMunicipios[psFiltros.estado] || []) : []
 )
+const psRegionLabel = computed(() => {
+  const map: Record<string, string> = { bajio_sinaloa: 'Bajío + Sinaloa', bajio: 'Bajío', sinaloa: 'Sinaloa', nacional: 'Nacional' }
+  return map[psFiltros.region] || psFiltros.region
+})
 
 const psPRef    = computed(() => !psHoy.value ? 0 : Math.round((psHoy.value.ps - psHoy.value.s - psHoy.value.m - psHoy.value.f) * 100) / 100)
 const psBrecha  = computed(() => !psHoy.value ? 0 : Math.round((psPRef.value - psHoy.value.po) * 100) / 100)
@@ -1478,35 +1482,40 @@ async function cargarPreciosSistema() {
   finally { psCargando.value = false }
 }
 
-function renderChartPS() {
-  if (!chartCanvasPS.value || psTendencia.value.length === 0) return
+function renderChartPS(retries = 0) {
+  if (!chartCanvasPS.value || psTendencia.value.length === 0) {
+    if (retries < 5 && psTendencia.value.length > 0) { setTimeout(() => renderChartPS(retries + 1), 100); }
+    return
+  }
   if (chartPS) { chartPS.destroy(); chartPS = null }
-  requestAnimationFrame(() => {
-    if (!chartCanvasPS.value) return
-    const labels = psTendencia.value.map((t: any) => {
-      const d = new Date(t.fecha)
-      return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
-    })
-    chartPS = new ChartJS(chartCanvasPS.value, {
-      type: 'line',
-      data: { labels, datasets: [
-        { label: 'Precio Sistema', data: psTendencia.value.map((t: any) => t.ps), borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-        { label: 'Chicago', data: psTendencia.value.map((t: any) => t.chicago), borderColor: '#2563EB', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,3], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
-        { label: 'Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [8,4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4 },
-      ]},
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { display: false },
-          tooltip: { backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
-            callbacks: { label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` } } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
-          y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v) => '$' + Number(v).toLocaleString('es-MX') } },
-        },
-      },
-    } as any)
+  const canvas = chartCanvasPS.value
+  if (canvas.clientWidth === 0 || canvas.clientHeight === 0) {
+    if (retries < 5) { setTimeout(() => renderChartPS(retries + 1), 150); }
+    return
+  }
+  const labels = psTendencia.value.map((t: any) => {
+    const d = new Date(t.fecha)
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
   })
+  chartPS = new ChartJS(canvas, {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Precio Sistema', data: psTendencia.value.map((t: any) => t.ps), borderColor: '#1A5C38', backgroundColor: 'rgba(26,92,56,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+      { label: 'Chicago', data: psTendencia.value.map((t: any) => t.chicago), borderColor: '#2563EB', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,3], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+      { label: 'Precio Garantía', data: psTendencia.value.map((t: any) => t.garantia), borderColor: '#D97706', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [8,4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4 },
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false },
+        tooltip: { backgroundColor: '#111827', titleColor: '#fff', bodyColor: '#d1d5db', padding: 10,
+          callbacks: { label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString('es-MX')}/ton` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 8 } },
+        y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 }, color: '#9ca3af', callback: (v) => '$' + Number(v).toLocaleString('es-MX') } },
+      },
+    },
+  } as any)
 }
 
 function psAplicarFiltros() { cargarPreciosSistema() }
@@ -2261,7 +2270,7 @@ function psExportarCSV() {
 .ps-leg-chip { font-size:.68rem;font-weight:600;color:var(--c);display:flex;align-items:center;gap:.3rem; }
 .ps-leg-chip::before { content:'';display:inline-block;width:14px;height:2px;background:var(--c);border-radius:2px; }
 .ps-leg-dash::before { background:repeating-linear-gradient(to right,var(--c) 0,var(--c) 4px,transparent 4px,transparent 7px); }
-.ps-chart-wrap { padding:.4rem .85rem .85rem;height:175px; }
+.ps-chart-wrap { padding:.4rem .85rem .85rem;height:220px;position:relative; }
 
 .ps-tbl-wrap { overflow-x:auto; }
 .ps-tbl { width:100%;border-collapse:collapse;font-size:.8rem; }
