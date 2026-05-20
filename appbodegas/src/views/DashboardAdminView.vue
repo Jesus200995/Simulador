@@ -7,7 +7,7 @@
         <div class="dash-hero">
           <div class="dash-hero-inner">
             <div class="dash-hero-text">
-              <h1 class="dash-title">Dashboard Administrativo</h1>
+              <h1 class="dash-title">Resumen Estadístico</h1>
               <p class="dash-subtitle">Vision global de la produccion agricola en tiempo real</p>
             </div>
             <div class="header-right">

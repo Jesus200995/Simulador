@@ -15,7 +15,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           </div>
           <div class="adb-body">
-            <p class="adb-title">Dashboard Administrativo</p>
+            <p class="adb-title">Resumen Estadístico</p>
             <p class="adb-sub">Monitoreo completo del sistema</p>
           </div>
           <svg class="adb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>

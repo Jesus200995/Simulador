@@ -3,7 +3,7 @@
     <!-- ── Header ─────────────────────────────────────── -->
     <div class="ps-header">
       <div class="ps-header-left">
-        <h1 class="ps-title">Dashboard Administrativo</h1>
+        <h1 class="ps-title">Resumen Estadístico</h1>
         <p class="ps-subtitle">Módulo de Precios — Precio Sistema en tiempo real</p>
       </div>
       <button class="ps-refresh-btn" @click="cargarTodo" title="Actualizar">
