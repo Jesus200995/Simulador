@@ -42,11 +42,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex flex-col leading-none min-w-0">
             <span className="text-[16px] font-black text-[#1A5C38] tracking-tight leading-none">SOMEC</span>
-            <span className="text-[9.5px] text-gray-400 font-medium leading-tight mt-[2px] hidden sm:block max-w-[280px] truncate">
+            <span className="text-[9px] text-gray-400 font-medium leading-tight mt-[2px] truncate max-w-[200px] sm:max-w-[320px]">
               {SYSTEM_NAME}
-            </span>
-            <span className="text-[9.5px] text-gray-400 font-medium leading-tight mt-[2px] sm:hidden">
-              Plan Nacional Maíz 2026
             </span>
           </div>
         </div>

@@ -57,10 +57,10 @@ export default function B04Dashboard() {
               </span>
             </div>
             <div className="min-w-0">
-              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight truncate">
-                {saludo}, {user?.nombre_completo?.split(' ')[0] || 'Bodeguero'}
+              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight">
+                {saludo}
               </h1>
-              <p className="text-[11px] text-white/60 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
+              <p className="text-[13px] font-semibold text-white/90 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
             </div>
           </div>
           {/* Role badge + date row */}
