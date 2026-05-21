@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '../components/Layout';
+import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { CheckCircle2 } from 'lucide-react';
 
 type Sem = 'verde' | 'amarillo' | 'rojo';
 
-const OPTIONS: { key: Sem; emoji: string; label: string; desc: string; activeBg: string; activeBorder: string }[] = [
-  { key: 'verde', emoji: '🟢', label: 'Estoy comprando maíz esta semana', desc: 'Visible para productores', activeBg: 'bg-green-50', activeBorder: 'border-green-500' },
-  { key: 'amarillo', emoji: '🟡', label: 'Comprando con capacidad limitada', desc: 'Espacio limitado disponible', activeBg: 'bg-yellow-50', activeBorder: 'border-yellow-500' },
-  { key: 'rojo', emoji: '🔴', label: 'No estoy comprando esta semana', desc: 'Sin compras por ahora', activeBg: 'bg-red-50', activeBorder: 'border-red-500' },
+const OPTIONS: { key: Sem; dotColor: string; label: string; desc: string; activeBg: string; activeBorder: string; activeText: string }[] = [
+  { key: 'verde',    dotColor: 'bg-emerald-500', label: 'Comprando esta semana',          desc: 'Visible para productores en el mapa', activeBg: 'bg-emerald-50', activeBorder: 'border-emerald-400', activeText: 'text-emerald-700' },
+  { key: 'amarillo', dotColor: 'bg-amber-400',   label: 'Comprando con capacidad limitada', desc: 'Espacio reducido disponible',          activeBg: 'bg-amber-50',   activeBorder: 'border-amber-400',   activeText: 'text-amber-700' },
+  { key: 'rojo',     dotColor: 'bg-red-500',     label: 'No compro esta semana',           desc: 'Sin compras por el momento',          activeBg: 'bg-red-50',     activeBorder: 'border-red-400',     activeText: 'text-red-700' },
 ];
 
 export default function B08Semaforo() {
@@ -33,12 +34,12 @@ export default function B08Semaforo() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
-      <PageHeader title="Estado de Compra" back={`/bodegas/${id}`} />
+    <div className="w-full">
+      <PageBanner title="Estado de Compra" subtitle="Visible para productores" back={`/bodegas/${id}`} />
 
-      <div className="px-4 sm:px-6 py-6 space-y-3">
-        <p className="text-[15px] text-gray-500 text-center mb-2">
-          Este estado es visible para los productores que buscan dónde vender su maíz
+      <div className="max-w-lg mx-auto px-4 sm:px-6 py-6 space-y-3">
+        <p className="text-[14px] text-gray-400 text-center mb-4">
+          Indica si tu bodega está comprando maíz esta semana
         </p>
 
         {OPTIONS.map(opt => (
@@ -46,16 +47,15 @@ export default function B08Semaforo() {
             key={opt.key}
             onClick={() => setSelected(opt.key)}
             className={`w-full p-5 rounded-2xl border-2 text-left transition-all active:scale-[0.98]
-              ${selected === opt.key
-                ? `${opt.activeBg} ${opt.activeBorder}`
-                : 'bg-white border-gray-200/80 shadow-sm'}`}
+              ${selected === opt.key ? `${opt.activeBg} ${opt.activeBorder}` : 'bg-white border-gray-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.06)]'}`}
           >
             <div className="flex items-center gap-4">
-              <span className="text-3xl flex-shrink-0">{opt.emoji}</span>
-              <div>
-                <p className="font-bold text-[16px] text-gray-900">{opt.label}</p>
-                <p className="text-[13px] text-gray-500 mt-0.5">{opt.desc}</p>
+              <div className={`w-4 h-4 rounded-full flex-shrink-0 ${opt.dotColor} shadow-sm`} />
+              <div className="flex-1">
+                <p className={`font-bold text-[15px] ${selected === opt.key ? opt.activeText : 'text-gray-900'}`}>{opt.label}</p>
+                <p className="text-[12px] text-gray-400 mt-0.5">{opt.desc}</p>
               </div>
+              {selected === opt.key && <CheckCircle2 size={20} className={opt.activeText} />}
             </div>
           </button>
         ))}
@@ -65,7 +65,7 @@ export default function B08Semaforo() {
           disabled={saving}
           className="w-full mt-2 bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
         >
-          {saving ? 'Guardando…' : 'Guardar'}
+          {saving ? 'Guardando…' : 'Guardar estado'}
         </button>
       </div>
     </div>

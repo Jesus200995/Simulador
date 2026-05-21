@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
-import { PageHeader } from '../components/Layout';
+import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 
 const REGIONES_RADIO: Record<string, [number, number, number]> = {
@@ -62,10 +62,10 @@ export default function B10SenalCompra() {
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
-      <PageHeader title="Publicar Señal de Compra" subtitle="Notifica a productores en tu área" back="/oferta" />
+    <div className="w-full">
+      <PageBanner title="Publicar Señal de Compra" subtitle="Notifica a productores en tu área" back="/oferta" />
 
-      <form onSubmit={handleSubmit} className="px-4 sm:px-6 py-5 space-y-4">
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
         {/* Bodega y maíz */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y tipo de maíz</p>
@@ -148,14 +148,14 @@ export default function B10SenalCompra() {
 
       {/* Señales activas */}
       {senales.length > 0 && (
-        <div className="px-4 sm:px-6 pb-8">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide mb-3">Señales activas</p>
-          <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-8">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Señales activas</p>
+          <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
             {senales.slice(0, 5).map(s => (
               <div key={s.id} className="flex items-center gap-3 px-4 py-3.5">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[15px] font-semibold text-gray-800">{s.tipo_maiz} · ${s.precio_ofrecido}/ton</p>
-                  <p className="text-[13px] text-gray-500">{s.bodega_nombre} · {s.interesados_count} interesados</p>
+                  <p className="text-[14px] font-semibold text-gray-800">{s.tipo_maiz} · ${s.precio_ofrecido}/ton</p>
+                  <p className="text-[12px] text-gray-400">{s.bodega_nombre} · {s.interesados_count} interesados</p>
                 </div>
                 <button onClick={() => cancelar(s.id)} className="text-red-400 active:text-red-600 p-2 flex-shrink-0">
                   <Trash2 size={16} />

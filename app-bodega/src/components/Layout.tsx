@@ -158,28 +158,73 @@ export function PageHeader({
   title,
   subtitle,
   back,
+  action,
 }: {
   title: string;
   subtitle?: string;
   back?: string | number;
+  action?: ReactNode;
 }) {
   const navigate = useNavigate();
   return (
-    <div className="bg-white/80 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-4">
-      {back !== undefined && (
-        <button
-          onClick={() => {
-            if (typeof back === 'number') navigate(back);
-            else navigate(back);
-          }}
-          className="flex items-center gap-0.5 text-[#1A5C38] text-[15px] font-medium mb-2 active:opacity-60 transition-opacity"
-        >
-          <ChevronLeft size={20} strokeWidth={2.5} className="-ml-1" />
-          Volver
-        </button>
-      )}
-      <h1 className="text-[22px] font-bold text-gray-900 leading-tight">{title}</h1>
-      {subtitle && <p className="text-[14px] text-gray-500 mt-0.5">{subtitle}</p>}
+    <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            {back !== undefined && (
+              <button
+                onClick={() => typeof back === 'number' ? navigate(back) : navigate(back)}
+                className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-medium mb-1.5 active:opacity-60 transition-opacity"
+              >
+                <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" />
+                Volver
+              </button>
+            )}
+            <h1 className="text-[20px] font-bold text-gray-900 leading-tight truncate">{title}</h1>
+            {subtitle && <p className="text-[13px] text-gray-400 mt-0.5 truncate">{subtitle}</p>}
+          </div>
+          {action && <div className="flex-shrink-0 pt-1">{action}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PageBanner({
+  title,
+  subtitle,
+  back,
+  badge,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  back?: string | number;
+  badge?: ReactNode;
+  action?: ReactNode;
+}) {
+  const navigate = useNavigate();
+  return (
+    <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-5 pb-6">
+        {back !== undefined && (
+          <button
+            onClick={() => typeof back === 'number' ? navigate(back) : navigate(back)}
+            className="flex items-center gap-0.5 text-green-200/80 text-[14px] font-medium mb-3 active:opacity-60 transition-opacity"
+          >
+            <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" />
+            Volver
+          </button>
+        )}
+        <div className="flex items-end justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            {badge && <div className="mb-2">{badge}</div>}
+            <h1 className="text-[24px] sm:text-[28px] font-black text-white leading-tight">{title}</h1>
+            {subtitle && <p className="text-green-200/80 text-[14px] mt-1 leading-snug">{subtitle}</p>}
+          </div>
+          {action && <div className="flex-shrink-0">{action}</div>}
+        </div>
+      </div>
     </div>
   );
 }

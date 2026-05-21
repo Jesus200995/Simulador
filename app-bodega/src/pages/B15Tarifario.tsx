@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
-import { PageHeader } from '../components/Layout';
+import { Plus, Truck, Scale, Wind, Sun, Package, Shield, Tag } from 'lucide-react';
+import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 
 export default function B15Tarifario() {
@@ -25,7 +25,10 @@ export default function B15Tarifario() {
     }
   }, [bodegaId]);
 
-  const iconMap: Record<string, string> = { truck: '🚛', scale: '⚖️', wind: '💨', sun: '☀️', box: '📦', shield: '🛡️', package: '📦' };
+  const iconMap: Record<string, React.ReactNode> = {
+    truck: <Truck size={18} />, scale: <Scale size={18} />, wind: <Wind size={18} />,
+    sun: <Sun size={18} />, box: <Package size={18} />, shield: <Shield size={18} />, package: <Package size={18} />,
+  };
 
   function getTarifa(conceptoId: number) {
     return tarifas.find(t => t.concepto_id === conceptoId);
@@ -51,10 +54,10 @@ export default function B15Tarifario() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
-      <PageHeader title="Tarifario de Servicios" subtitle="Precios que ofreces en tu bodega" back="/mas" />
+    <div className="w-full">
+      <PageBanner title="Tarifario de Servicios" subtitle="Precios que ofreces en tu bodega" back="/mas" />
 
-      <div className="px-4 sm:px-6 py-5 space-y-4">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
         {/* Selector de bodega */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5">
           <label className="block text-[15px] font-medium text-gray-600 mb-1.5">Bodega</label>
@@ -77,7 +80,7 @@ export default function B15Tarifario() {
               return (
                 <div key={c.id} className="p-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl flex-shrink-0">{iconMap[c.icono] || '📋'}</span>
+                    <span className="w-9 h-9 rounded-xl bg-[#1A5C38]/[0.08] text-[#1A5C38] flex items-center justify-center flex-shrink-0">{iconMap[c.icono] || <Tag size={18} />}</span>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[15px] text-gray-900">{c.nombre}</p>
                       <p className="text-[12px] text-gray-400">{c.unidad_default}</p>

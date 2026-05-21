@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '../components/Layout';
+import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 
 export default function B13Transaccion() {
@@ -35,10 +35,10 @@ export default function B13Transaccion() {
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
-      <PageHeader title="Registrar Transacción" subtitle="Nueva compra de maíz" back="/transacciones" />
+    <div className="w-full">
+      <PageBanner title="Registrar Transacción" subtitle="Nueva compra de maíz" back="/transacciones" />
 
-      <form onSubmit={handleSubmit} className="px-4 sm:px-6 py-5 space-y-4">
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
         {/* Bodega y productor */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y productor</p>

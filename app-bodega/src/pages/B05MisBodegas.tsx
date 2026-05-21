@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronRight, MapPin } from 'lucide-react';
+import { Plus, ChevronRight, MapPin, Warehouse, Circle } from 'lucide-react';
 import { api } from '../services/api';
 
 interface Bodega {
@@ -8,10 +8,10 @@ interface Bodega {
   semaforo_compra: string; ocupacion_pct: number; stock_actual: number; capacidad_ton: number;
 }
 
-const semaforoMap: Record<string, { label: string; dot: string; badge: string }> = {
-  verde: { label: 'Comprando', dot: '🟢', badge: 'bg-green-100 text-green-700' },
-  amarillo: { label: 'Cap. limitada', dot: '🟡', badge: 'bg-yellow-100 text-yellow-700' },
-  rojo: { label: 'No compra', dot: '🔴', badge: 'bg-red-100 text-red-700' },
+const semaforoMap: Record<string, { label: string; color: string; dot: string; badge: string }> = {
+  verde:    { label: 'Comprando',       color: 'bg-emerald-500', dot: 'text-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  amarillo: { label: 'Cap. limitada',   color: 'bg-amber-400',  dot: 'text-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+  rojo:     { label: 'No compra',       color: 'bg-red-500',    dot: 'text-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 export default function B05MisBodegas() {
@@ -26,72 +26,89 @@ export default function B05MisBodegas() {
       .finally(() => setLoading(false));
   }, []);
 
-  const barColor = (p: number) => p < 70 ? 'bg-[#1A5C38]' : p < 90 ? 'bg-yellow-400' : 'bg-red-500';
+  const barColor = (p: number) => p < 70 ? 'bg-[#1A5C38]' : p < 90 ? 'bg-amber-400' : 'bg-red-500';
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
-      {/* Page header */}
-      <div className="bg-gradient-to-r from-[#1A5C38] to-[#2d7a52] px-4 sm:px-6 pt-6 pb-7 text-white">
-        <h1 className="text-[22px] font-bold">Mis Bodegas</h1>
-        <p className="text-green-200 text-[14px] mt-0.5">{bodegas.length} bodegas asociadas</p>
+    <div className="w-full">
+      {/* Banner full-bleed */}
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8">
+          <p className="text-[13px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Módulo</p>
+          <h1 className="text-[26px] sm:text-[30px] font-black text-white leading-tight">Mis Bodegas</h1>
+          <p className="text-green-200/70 text-[14px] mt-1">
+            {loading ? 'Cargando…' : `${bodegas.length} bodega${bodegas.length !== 1 ? 's' : ''} asociada${bodegas.length !== 1 ? 's' : ''}`}
+          </p>
+        </div>
       </div>
 
-      <div className="px-4 sm:px-6 py-5 space-y-3">
-        {loading && <p className="text-center text-[14px] text-gray-400 py-10">Cargando…</p>}
+      {/* Contenido */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+        {loading && (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
+          </div>
+        )}
 
-        {bodegas.map(b => {
-          const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
-          const pct = b.ocupacion_pct ?? 0;
-          return (
-            <div key={b.id} className="bg-white rounded-2xl shadow-sm border border-black/5 p-4">
-              {/* Top row */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[17px] text-gray-900 truncate">{b.nombre}</p>
-                  <p className="text-[13px] text-gray-500 flex items-center gap-1 mt-0.5">
-                    <MapPin size={11} />{b.municipio}, {b.estado}
-                  </p>
+        {/* Grid: 1 col mobile → 2 cols tablet → 3 cols desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {bodegas.map(b => {
+            const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
+            const pct = b.ocupacion_pct ?? 0;
+            return (
+              <div key={b.id} className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] p-5 flex flex-col gap-4">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[16px] text-gray-900 leading-tight">{b.nombre}</p>
+                    <p className="text-[13px] text-gray-400 flex items-center gap-1 mt-1">
+                      <MapPin size={12} className="flex-shrink-0" />
+                      <span className="truncate">{b.municipio}, {b.estado}</span>
+                    </p>
+                  </div>
+                  <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border flex-shrink-0 ${sem.badge}`}>
+                    <Circle size={7} fill="currentColor" className={sem.dot} />
+                    {sem.label}
+                  </span>
                 </div>
-                <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ml-2 ${sem.badge}`}>
-                  {sem.dot} {sem.label}
-                </span>
-              </div>
 
-              {/* Barra ocupación */}
-              <div className="mb-3">
-                <div className="flex justify-between text-[12px] text-gray-400 mb-1.5">
-                  <span>Ocupación {pct}%</span>
-                  <span>{(b.stock_actual || 0).toLocaleString()} / {(b.capacidad_ton || 0).toLocaleString()} ton</span>
+                {/* Barra ocupación */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-gray-400 mb-1.5">
+                    <span className="font-medium">Ocupación {pct}%</span>
+                    <span>{(b.stock_actual || 0).toLocaleString()} / {(b.capacidad_ton || 0).toLocaleString()} ton</span>
+                  </div>
+                  <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                    <div className={`h-full rounded-full ${barColor(pct)} transition-all`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                  </div>
                 </div>
-                <div className="bg-gray-100 rounded-full h-2">
-                  <div className={`h-2 rounded-full transition-all ${barColor(pct)}`} style={{ width: `${Math.min(pct, 100)}%` }} />
-                </div>
-              </div>
 
-              {/* Botones */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigate(`/bodegas/${b.id}`)}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#F2F2F7] text-[#1A5C38] rounded-xl py-2.5 text-[14px] font-semibold active:opacity-70 transition-opacity"
-                >
-                  Ver detalle <ChevronRight size={14} />
-                </button>
-                <button
-                  onClick={() => navigate(`/bodegas/${b.id}/semaforo`)}
-                  className="flex-1 bg-[#F2F2F7] text-gray-700 rounded-xl py-2.5 text-[14px] font-semibold active:opacity-70 transition-opacity"
-                >
-                  Actualizar semáforo
-                </button>
+                {/* Botones */}
+                <div className="flex gap-2 mt-auto">
+                  <button
+                    onClick={() => navigate(`/bodegas/${b.id}`)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A5C38]/[0.08] text-[#1A5C38] rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity"
+                  >
+                    Detalle <ChevronRight size={13} />
+                  </button>
+                  <button
+                    onClick={() => navigate(`/bodegas/${b.id}/semaforo`)}
+                    className="flex-1 bg-gray-100 text-gray-700 rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity"
+                  >
+                    Semáforo
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
 
         {!loading && bodegas.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
-            <p className="text-5xl mb-3">🏪</p>
-            <p className="font-semibold text-[16px] text-gray-600">Sin bodegas asociadas</p>
-            <p className="text-[14px] mt-1">Agrega las bodegas que operas</p>
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
+              <Warehouse size={32} className="text-gray-300" />
+            </div>
+            <p className="font-semibold text-[16px] text-gray-700">Sin bodegas asociadas</p>
+            <p className="text-[14px] text-gray-400">Toca + para agregar las bodegas que operas</p>
           </div>
         )}
       </div>
@@ -99,7 +116,7 @@ export default function B05MisBodegas() {
       {/* FAB */}
       <button
         onClick={() => navigate('/bodegas/seleccionar')}
-        className="fixed bottom-24 right-5 w-14 h-14 bg-[#1A5C38] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform"
+        className="fixed bottom-24 right-5 w-14 h-14 bg-[#1A5C38] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform z-10"
       >
         <Plus size={24} />
       </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { PageHeader } from '../components/Layout';
+import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 
 export default function B09PrecioCompra() {
@@ -60,10 +60,10 @@ export default function B09PrecioCompra() {
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
-      <PageHeader title="Publicar Precio de Compra" subtitle="Precio diario que ofreces al productor" back="/dashboard" />
+    <div className="w-full">
+      <PageBanner title="Publicar Precio de Compra" subtitle="Precio diario que ofreces al productor" back="/dashboard" />
 
-      <form onSubmit={handleSubmit} className="px-4 sm:px-6 py-5 space-y-4">
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
         {/* Bodega y tipo */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y tipo de maíz</p>
