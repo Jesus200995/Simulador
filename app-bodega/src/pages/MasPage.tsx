@@ -20,14 +20,14 @@ export default function MasPage() {
   return (
     <div className="w-full">
       {/* Banner de perfil full-bleed */}
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-            <span className="text-[22px] font-black text-white">{initials}</span>
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+            <span className="text-[18px] font-black text-white">{initials}</span>
           </div>
           <div>
-            <p className="text-[20px] font-black text-white leading-tight">{user?.nombre_completo || 'Bodeguero'}</p>
-            <p className="text-green-200/80 text-[13px] mt-0.5">{user?.email || ''}</p>
+            <p className="text-[18px] font-black text-white leading-tight">{user?.nombre_completo || 'Bodeguero'}</p>
+            <p className="text-green-200/80 text-[12px] mt-0.5">{user?.email || ''}</p>
             <span className="inline-block mt-1.5 bg-white/20 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Bodeguero</span>
           </div>
         </div>

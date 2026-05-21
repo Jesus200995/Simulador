@@ -24,11 +24,11 @@ export default function B11OfertaTabla() {
   return (
     <div className="w-full">
       {/* Banner full-bleed */}
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8">
-          <p className="text-[13px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Módulo</p>
-          <h1 className="text-[26px] sm:text-[30px] font-black text-white leading-tight">Oferta de Productores</h1>
-          <p className="text-green-200/70 text-[14px] mt-1">Datos agregados por municipio</p>
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-0.5">Módulo</p>
+          <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight">Oferta de Productores</h1>
+          <p className="text-green-200/70 text-[13px] mt-0.5">Datos agregados por municipio</p>
         </div>
       </div>
 
