@@ -1,0 +1,151 @@
+import { Router, Response } from 'express';
+import pool from '../config/database';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
+
+const router = Router();
+
+// GET /api/ventanillas
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  try {
+    const result = await pool.query(
+      `SELECT v.*, b.nombre AS bodega_nombre,
+              (SELECT COUNT(*) FROM solicitudes_apoyo sa
+               JOIN apoyos_ventanilla av ON av.id = sa.apoyo_id
+               WHERE av.ventanilla_id = v.id AND sa.estado = 'recibida') AS solicitudes_pendientes
+       FROM ventanillas v
+       JOIN bodegas b ON b.id = v.bodega_id
+       WHERE v.usuario_id = $1
+       ORDER BY v.created_at DESC`,
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/ventanillas
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const { bodega_id, nombre_enlace_agricultura, nombre_ventanilla, telefono_responsable, correo_responsable, tipo } = req.body;
+
+  if (!bodega_id || !nombre_enlace_agricultura || !telefono_responsable || !correo_responsable || !tipo) {
+    res.status(400).json({ error: 'Campos requeridos: bodega_id, nombre_enlace_agricultura, telefono_responsable, correo_responsable, tipo' });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO ventanillas (bodega_id, usuario_id, nombre_enlace_agricultura, nombre_ventanilla, telefono_responsable, correo_responsable, tipo)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [bodega_id, userId, nombre_enlace_agricultura, nombre_ventanilla || null, telefono_responsable, correo_responsable, tipo]
+    );
+    await pool.query('UPDATE bodegas SET es_ventanilla = TRUE WHERE id = $1', [bodega_id]);
+    res.status(201).json(result.rows[0]);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/ventanillas/:id/apoyos
+router.get('/:id/apoyos', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM apoyos_ventanilla WHERE ventanilla_id = $1 ORDER BY created_at DESC',
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/ventanillas/:id/apoyos
+router.post('/:id/apoyos', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { nombre_apoyo, descripcion, requisitos, cupo_disponible, vigencia_fin } = req.body;
+  if (!nombre_apoyo) { res.status(400).json({ error: 'nombre_apoyo requerido' }); return; }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO apoyos_ventanilla (ventanilla_id, nombre_apoyo, descripcion, requisitos, cupo_disponible, vigencia_fin)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [req.params.id, nombre_apoyo, descripcion || null, requisitos || null, cupo_disponible || null, vigencia_fin || null]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// PATCH /api/ventanillas/:id/apoyos/:aid
+router.patch('/:id/apoyos/:aid', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { disponible, cupo_disponible } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE apoyos_ventanilla
+       SET disponible = COALESCE($1, disponible),
+           cupo_disponible = COALESCE($2, cupo_disponible)
+       WHERE id = $3 AND ventanilla_id = $4 RETURNING *`,
+      [disponible ?? null, cupo_disponible ?? null, req.params.aid, req.params.id]
+    );
+    if (result.rows.length === 0) { res.status(404).json({ error: 'Apoyo no encontrado' }); return; }
+    res.json(result.rows[0]);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/ventanillas/:id/solicitudes
+router.get('/:id/solicitudes', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { estado } = req.query;
+  try {
+    let where = 'WHERE av.ventanilla_id = $1';
+    const params: any[] = [req.params.id];
+    if (estado) { params.push(estado); where += ` AND sa.estado = $${params.length}`; }
+
+    const result = await pool.query(
+      `SELECT sa.*, av.nombre_apoyo,
+              p.nombre_completo AS productor_nombre,
+              p.municipio_nombre AS municipio
+       FROM solicitudes_apoyo sa
+       JOIN apoyos_ventanilla av ON av.id = sa.apoyo_id
+       LEFT JOIN producer p ON p.producer_id = sa.producer_id
+       ${where}
+       ORDER BY sa.created_at DESC`,
+      params
+    );
+    res.json(result.rows);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// PATCH /api/ventanillas/:id/solicitudes/:sid
+router.patch('/:id/solicitudes/:sid', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { estado, notas } = req.body;
+  const validEstados = ['contactado', 'agendada', 'canalizada', 'cerrada'];
+  if (!estado || !validEstados.includes(estado)) {
+    res.status(400).json({ error: `estado debe ser uno de: ${validEstados.join(', ')}` });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE solicitudes_apoyo SET estado = $1, notas = COALESCE($2, notas), updated_at = NOW()
+       WHERE id = $3 RETURNING *`,
+      [estado, notas || null, req.params.sid]
+    );
+    if (result.rows.length === 0) { res.status(404).json({ error: 'Solicitud no encontrada' }); return; }
+
+    // Notificar al productor (best-effort)
+    try {
+      const sol = result.rows[0];
+      if (sol.producer_id) {
+        const prod = await pool.query(
+          'SELECT u.id FROM usuarios u JOIN producer p ON p.email = u.email WHERE p.producer_id = $1 LIMIT 1',
+          [sol.producer_id]
+        );
+        if (prod.rows.length > 0) {
+          await pool.query(
+            `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+             VALUES ($1, 'cambio_estado_solicitud', $2, $3, 'solicitudes_apoyo')`,
+            [prod.rows[0].id, `Tu solicitud cambió a: ${estado}`, sol.id]
+          );
+        }
+      }
+    } catch (_) { /* best-effort */ }
+
+    res.json(result.rows[0]);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+export default router;

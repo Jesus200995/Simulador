@@ -20,6 +20,13 @@ import misUpsRoutes from './routes/mis-ups';
 import misProductoresRoutes from './routes/mis-productores';
 import homeRoutes from './routes/home';
 import dashboardAdminRoutes from './routes/dashboard-admin';
+import bodegueroRoutes from './routes/bodeguero';
+import senalesCompraRoutes from './routes/senales-compra';
+import transaccionesRoutes from './routes/transacciones';
+import tarifarioRoutes from './routes/tarifario';
+import catConceptosRoutes from './routes/cat-conceptos-servicio';
+import ventanillasRoutes from './routes/ventanillas';
+import ofertaRoutes from './routes/oferta';
 import pool from './config/database';
 
 dotenv.config();
@@ -54,6 +61,13 @@ app.use('/api/mis-ups', misUpsRoutes);
 app.use('/api/mis-productores', misProductoresRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/dashboard/admin', dashboardAdminRoutes);
+app.use('/api/bodeguero', bodegueroRoutes);
+app.use('/api/senales-compra', senalesCompraRoutes);
+app.use('/api/transacciones', transaccionesRoutes);
+app.use('/api/tarifario', tarifarioRoutes);
+app.use('/api/cat-conceptos-servicio', catConceptosRoutes);
+app.use('/api/ventanillas', ventanillasRoutes);
+app.use('/api/oferta', ofertaRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

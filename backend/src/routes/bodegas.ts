@@ -190,6 +190,29 @@ router.patch('/:id/aprobar', authMiddleware, async (req: AuthRequest, res: Respo
 });
 
 // =============================================
+// PATCH /api/bodegas/:id/semaforo — actualizar semáforo de compra
+// =============================================
+router.patch('/:id/semaforo', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { semaforo } = req.body;
+  if (!['verde', 'amarillo', 'rojo'].includes(semaforo)) {
+    res.status(400).json({ error: "semaforo debe ser 'verde', 'amarillo' o 'rojo'" });
+    return;
+  }
+  try {
+    const result = await pool.query(
+      `UPDATE bodegas
+       SET semaforo_compra = $1, semaforo_updated_at = NOW(), semaforo_usuario_id = $2
+       WHERE id = $3 RETURNING id, nombre, semaforo_compra, semaforo_updated_at`,
+      [semaforo, req.user?.userId, req.params.id]
+    );
+    if (result.rows.length === 0) { res.status(404).json({ error: 'Bodega no encontrada' }); return; }
+    res.json(result.rows[0]);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =============================================
 // PATCH /api/bodegas/:id/rechazar
 // =============================================
 router.patch('/:id/rechazar', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {

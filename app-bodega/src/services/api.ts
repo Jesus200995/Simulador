@@ -1,0 +1,130 @@
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+function getToken() {
+  return localStorage.getItem('simac_token');
+}
+
+async function request<T = any>(path: string, opts: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(opts.headers as Record<string, string>),
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE}${path}`, { ...opts, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export const api = {
+  auth: {
+    login: (email: string, password: string, rol: string) =>
+      request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, rol }) }),
+    registro: (data: any) =>
+      request('/auth/registro', { method: 'POST', body: JSON.stringify(data) }),
+    perfil: () => request('/auth/perfil'),
+    states: () => request('/auth/states'),
+    municipalities: (state_id: string) => request(`/auth/municipalities?state_id=${state_id}`),
+  },
+  bodegas: {
+    list: (params?: { q?: string; estado?: string; municipio?: string }) => {
+      const qs = new URLSearchParams(params as any).toString();
+      return request(`/bodegas${qs ? '?' + qs : ''}`);
+    },
+    get: (id: number) => request(`/bodegas/${id}`),
+    semaforo: (id: number, semaforo: string) =>
+      request(`/bodegas/${id}/semaforo`, { method: 'PATCH', body: JSON.stringify({ semaforo }) }),
+  },
+  bodeguero: {
+    solicitar: (bodega_id: number) =>
+      request('/bodeguero/bodegas/solicitar', { method: 'POST', body: JSON.stringify({ bodega_id }) }),
+    misBodegas: () => request('/bodeguero/mis-bodegas'),
+  },
+  infraestructura: {
+    get: (id: number) => request(`/infraestructura/${id}`),
+    inventario: (id: number, data: any) =>
+      request(`/infraestructura/${id}/inventario`, { method: 'POST', body: JSON.stringify(data) }),
+    precios: (id: number) => request(`/infraestructura/${id}/precios`),
+    publicarPrecio: (id: number, data: any) =>
+      request(`/infraestructura/${id}/precios`, { method: 'POST', body: JSON.stringify(data) }),
+    contactos: (id: number) => request(`/infraestructura/${id}/contactos`),
+    agregarContacto: (id: number, data: any) =>
+      request(`/infraestructura/${id}/contactos`, { method: 'POST', body: JSON.stringify(data) }),
+    eliminarContacto: (id: number, cid: number) =>
+      request(`/infraestructura/${id}/contactos/${cid}`, { method: 'DELETE' }),
+  },
+  senales: {
+    list: (params?: { bodega_id?: number; tipo_maiz?: string }) => {
+      const qs = new URLSearchParams(params as any).toString();
+      return request(`/senales-compra${qs ? '?' + qs : ''}`);
+    },
+    create: (data: any) =>
+      request('/senales-compra', { method: 'POST', body: JSON.stringify(data) }),
+    cancel: (id: number) =>
+      request(`/senales-compra/${id}`, { method: 'DELETE' }),
+    interes: (id: number) =>
+      request(`/senales-compra/${id}/interes`, { method: 'POST' }),
+  },
+  transacciones: {
+    list: (params?: any) => {
+      const qs = new URLSearchParams(params).toString();
+      return request(`/transacciones${qs ? '?' + qs : ''}`);
+    },
+    create: (data: any) =>
+      request('/transacciones', { method: 'POST', body: JSON.stringify(data) }),
+    confirmar: (id: number, confirmacion: string) =>
+      request(`/transacciones/${id}/confirmar`, { method: 'PATCH', body: JSON.stringify({ confirmacion }) }),
+  },
+  tarifario: {
+    get: (bodegaId: number) => request(`/tarifario/${bodegaId}`),
+    create: (bodegaId: number, data: any) =>
+      request(`/tarifario/${bodegaId}`, { method: 'POST', body: JSON.stringify(data) }),
+    update: (bodegaId: number, tarifaId: number, data: any) =>
+      request(`/tarifario/${bodegaId}/${tarifaId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  conceptos: {
+    list: () => request('/cat-conceptos-servicio'),
+    proponer: (data: any) =>
+      request('/cat-conceptos-servicio/proponer', { method: 'POST', body: JSON.stringify(data) }),
+  },
+  ventanillas: {
+    list: () => request('/ventanillas'),
+    create: (data: any) =>
+      request('/ventanillas', { method: 'POST', body: JSON.stringify(data) }),
+    apoyos: (id: number) => request(`/ventanillas/${id}/apoyos`),
+    crearApoyo: (id: number, data: any) =>
+      request(`/ventanillas/${id}/apoyos`, { method: 'POST', body: JSON.stringify(data) }),
+    toggleApoyo: (id: number, aid: number, data: any) =>
+      request(`/ventanillas/${id}/apoyos/${aid}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    solicitudes: (id: number, estado?: string) => {
+      const qs = estado ? `?estado=${estado}` : '';
+      return request(`/ventanillas/${id}/solicitudes${qs}`);
+    },
+    cambiarEstado: (id: number, sid: number, data: any) =>
+      request(`/ventanillas/${id}/solicitudes/${sid}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  },
+  oferta: {
+    municipios: (params?: any) => {
+      const qs = new URLSearchParams(params).toString();
+      return request(`/oferta/municipios${qs ? '?' + qs : ''}`);
+    },
+  },
+  precios: {
+    dashboard: () => request('/precios/dashboard'),
+  },
+  home: {
+    stats: () => request('/home/stats'),
+  },
+  notificaciones: {
+    mis: () => request('/alertas/notificaciones/mis'),
+    leerTodas: () => request('/alertas/notificaciones/leer-todas', { method: 'PATCH' }),
+  },
+  catalogos: {
+    tipoMaiz: () => request('/bodegas/catalogos'),
+    variedades: () => request('/infraestructura/catalogos'),
+  },
+};
