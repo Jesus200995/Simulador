@@ -31,89 +31,94 @@ export default function B01Login() {
   }
 
   return (
-    <div className="min-h-svh bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
-        {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="flex justify-center mb-3">
-            <img src="/favicon.svg" alt="SIMAC" className="w-16 h-16" />
+    <div className="min-h-dvh bg-gradient-to-b from-[#1A5C38] via-[#1e6b42] to-[#2d7a52] flex flex-col items-center justify-center px-4 py-10">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Logo section */}
+        <div className="px-8 pt-10 pb-6 text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/favicon.svg" alt="SOMAC" className="w-20 h-20" />
           </div>
-          <h1 className="text-2xl font-black text-[#1A5C38]">SIMAC</h1>
-          <p className="text-xs text-gray-500 mt-1 leading-snug px-2">
+          <h1 className="text-[28px] font-black text-[#1A5C38] tracking-tight">SOMAC</h1>
+          <p className="text-[13px] text-gray-400 mt-1 leading-snug">
             Sistema de Ordenamiento de la Producción<br />
             y Comercialización del Maíz Blanco en México
           </p>
         </div>
 
-        {/* Selector de rol */}
-        <p className="text-sm font-semibold text-gray-700 mb-3">¿Quién eres?</p>
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          {([
-            { key: 'bodega', emoji: '🏪', label: 'Soy Bodega' },
-            { key: 'industria', emoji: '🏭', label: 'Soy Industria' },
-          ] as const).map(({ key, emoji, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setRol(key)}
-              className={`flex flex-col items-center gap-1 p-4 rounded-xl border-2 transition-all font-medium text-sm
-                ${rol === key
-                  ? 'border-[#1A5C38] bg-green-50 text-[#1A5C38]'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
-            >
-              <span className="text-2xl">{emoji}</span>
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="px-6 pb-8 space-y-5">
+          {/* Selector de rol */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="correo@ejemplo.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">
-              {error}
+            <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide mb-2.5">Tipo de cuenta</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              {([
+                { key: 'bodega', emoji: '🏪', label: 'Soy Bodega' },
+                { key: 'industria', emoji: '🏭', label: 'Soy Industria' },
+              ] as const).map(({ key, emoji, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setRol(key)}
+                  className={`flex flex-col items-center gap-1.5 py-4 rounded-2xl border-2 transition-all font-semibold text-[15px]
+                    ${rol === key
+                      ? 'border-[#1A5C38] bg-[#1A5C38]/5 text-[#1A5C38]'
+                      : 'border-gray-200 text-gray-500 bg-[#F2F2F7]'}`}
+                >
+                  <span className="text-2xl">{emoji}</span>
+                  <span>{label}</span>
+                </button>
+              ))}
             </div>
+          </div>
+
+          {/* Form */}
+          {rol && (
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="block text-[15px] font-medium text-gray-600 mb-1.5">Correo electrónico</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  placeholder="correo@ejemplo.com"
+                  className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
+                />
+              </div>
+              <div>
+                <label className="block text-[15px] font-medium text-gray-600 mb-1.5">Contraseña</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 text-red-700 text-[14px] rounded-xl px-4 py-3">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40 mt-1"
+              >
+                {loading ? 'Ingresando…' : 'Entrar'}
+              </button>
+            </form>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#1A5C38] text-white py-3 rounded-xl font-semibold text-sm
-              hover:bg-[#16503.1] active:scale-95 transition-all disabled:opacity-60"
-          >
-            {loading ? 'Ingresando…' : 'Entrar'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
-          ¿Aún no tienes cuenta?{' '}
-          <Link to="/registro" className="text-[#1A5C38] font-semibold hover:underline">
-            Regístrate
-          </Link>
-        </p>
+          <p className="text-center text-[15px] text-gray-500">
+            ¿Aún no tienes cuenta?{' '}
+            <Link to="/registro" className="text-[#1A5C38] font-semibold">
+              Regístrate
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

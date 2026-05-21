@@ -1,0 +1,36 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy SOMAC to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 31.97.8.51
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd /var/www/Simulador
+            git pull origin main
+
+            # Frontend — rebuild con nuevo codigo
+            cd app-bodega
+            npm install
+            npm run build
+            cd ..
+
+            # Backend — compilar si hubo cambios
+            cd backend
+            npm install
+            npx tsc
+            cd ..
+
+            pm2 restart bodegas-api
+            echo "Deploy SOMAC completado: $(date)"

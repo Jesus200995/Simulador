@@ -48,83 +48,93 @@ export default function B09PrecioCompra() {
     } finally { setLoading(false); }
   }
 
+  const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
+  const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
+
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-2xl mx-auto overflow-x-hidden">
       <PageHeader title="Publicar Precio de Compra" subtitle="Precio diario que ofreces al productor" back="/dashboard" />
 
-      <form onSubmit={handleSubmit} className="px-4 py-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bodega</label>
-          <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]">
-            <option value="">Selecciona bodega</option>
-            {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de maíz</label>
-          <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]">
-            <option value="">Selecciona tipo</option>
-            {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)}
-          </select>
-        </div>
-
-        {/* Variedad — NUEVO */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Variedad ✨</label>
-          <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]">
-            <option value="">Sin especificar</option>
-            <option value="NO_SABE">No sabe</option>
-            <option value="CRIOLLO_LOCAL">Criollo / local</option>
-            <option value="H-40">H-40</option>
-            <option value="H-48">H-48</option>
-            <option value="H-50">H-50</option>
-            <option value="H-52">H-52</option>
-            <option value="H-66">H-66</option>
-            <option value="H-70">H-70</option>
-            <option value="VS-22">VS-22</option>
-            <option value="VS-23">VS-23</option>
-            <option value="OTRA">Otra</option>
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
+      <form onSubmit={handleSubmit} className="px-4 sm:px-6 py-5 space-y-4">
+        {/* Bodega y tipo */}
+        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
+          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y tipo de maíz</p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Humedad base (%) ✨</label>
-            <input type="number" value={form.humedad_pct} onChange={e => set('humedad_pct', e.target.value)} step="0.1" placeholder="14.0"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Calidad ✨</label>
-            <select value={form.calidad} onChange={e => set('calidad', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]">
-              <option value="">Sin especificar</option>
-              <option value="primera">Primera</option>
-              <option value="segunda">Segunda</option>
+            <label className={labelClass}>Bodega</label>
+            <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
+              <option value="">Selecciona bodega</option>
+              {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
             </select>
           </div>
+          <div>
+            <label className={labelClass}>Tipo de maíz</label>
+            <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
+              <option value="">Selecciona tipo</option>
+              {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Variedad</label>
+            <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)} className={inputClass}>
+              <option value="">Sin especificar</option>
+              <option value="NO_SABE">No sabe</option>
+              <option value="CRIOLLO_LOCAL">Criollo / local</option>
+              <option value="H-40">H-40</option>
+              <option value="H-48">H-48</option>
+              <option value="H-50">H-50</option>
+              <option value="H-52">H-52</option>
+              <option value="H-66">H-66</option>
+              <option value="H-70">H-70</option>
+              <option value="VS-22">VS-22</option>
+              <option value="VS-23">VS-23</option>
+              <option value="OTRA">Otra</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Humedad base (%)</label>
+              <input type="number" value={form.humedad_pct} onChange={e => set('humedad_pct', e.target.value)} step="0.1" placeholder="14.0" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Calidad</label>
+              <select value={form.calidad} onChange={e => set('calidad', e.target.value)} className={inputClass}>
+                <option value="">Sin especificar</option>
+                <option value="primera">Primera</option>
+                <option value="segunda">Segunda</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Precio (MXN/ton)
-            {precioAnterior && <span className="ml-2 text-gray-400 text-xs">Ayer: ${precioAnterior.toLocaleString()}</span>}
-          </label>
-          <input type="number" value={form.precio} onChange={e => set('precio', e.target.value)} required step="1" placeholder="6200"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38] text-lg font-bold" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-          <textarea value={form.observaciones} onChange={e => set('observaciones', e.target.value)} rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+        {/* Precio destacado */}
+        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
+          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Precio</p>
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className={labelClass + ' mb-0'}>Precio (MXN/ton)</label>
+              {precioAnterior && (
+                <span className="text-[13px] text-gray-400">Ayer: ${precioAnterior.toLocaleString()}</span>
+              )}
+            </div>
+            <input
+              type="number"
+              value={form.precio}
+              onChange={e => set('precio', e.target.value)}
+              required
+              step="1"
+              placeholder="6200"
+              className="w-full bg-[#F2F2F7] rounded-xl px-4 py-4 text-[28px] font-bold outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 text-[#1A5C38]"
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Observaciones</label>
+            <textarea value={form.observaciones} onChange={e => set('observaciones', e.target.value)} rows={2}
+              className={`${inputClass} resize-none`} />
+          </div>
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1A5C38] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+          className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40">
           {loading ? 'Publicando…' : 'Publicar precio'}
         </button>
       </form>

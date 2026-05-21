@@ -5,10 +5,10 @@ import { api } from '../services/api';
 
 type Sem = 'verde' | 'amarillo' | 'rojo';
 
-const OPTIONS: { key: Sem; emoji: string; label: string; desc: string; bg: string; border: string }[] = [
-  { key: 'verde', emoji: '🟢', label: 'Estoy comprando maíz esta semana', desc: 'Visible para productores', bg: 'bg-green-50', border: 'border-green-500' },
-  { key: 'amarillo', emoji: '🟡', label: 'Comprando con capacidad limitada', desc: 'Espacio limitado disponible', bg: 'bg-yellow-50', border: 'border-yellow-500' },
-  { key: 'rojo', emoji: '🔴', label: 'No estoy comprando esta semana', desc: 'Sin compras por ahora', bg: 'bg-red-50', border: 'border-red-500' },
+const OPTIONS: { key: Sem; emoji: string; label: string; desc: string; activeBg: string; activeBorder: string }[] = [
+  { key: 'verde', emoji: '🟢', label: 'Estoy comprando maíz esta semana', desc: 'Visible para productores', activeBg: 'bg-green-50', activeBorder: 'border-green-500' },
+  { key: 'amarillo', emoji: '🟡', label: 'Comprando con capacidad limitada', desc: 'Espacio limitado disponible', activeBg: 'bg-yellow-50', activeBorder: 'border-yellow-500' },
+  { key: 'rojo', emoji: '🔴', label: 'No estoy comprando esta semana', desc: 'Sin compras por ahora', activeBg: 'bg-red-50', activeBorder: 'border-red-500' },
 ];
 
 export default function B08Semaforo() {
@@ -33,11 +33,11 @@ export default function B08Semaforo() {
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-2xl mx-auto overflow-x-hidden">
       <PageHeader title="Estado de Compra" back={`/bodegas/${id}`} />
 
-      <div className="px-4 py-6 space-y-3">
-        <p className="text-sm text-gray-500 text-center mb-4">
+      <div className="px-4 sm:px-6 py-6 space-y-3">
+        <p className="text-[15px] text-gray-500 text-center mb-2">
           Este estado es visible para los productores que buscan dónde vender su maíz
         </p>
 
@@ -45,14 +45,16 @@ export default function B08Semaforo() {
           <button
             key={opt.key}
             onClick={() => setSelected(opt.key)}
-            className={`w-full p-5 rounded-xl border-2 text-left transition-all
-              ${selected === opt.key ? `${opt.bg} ${opt.border}` : 'bg-white border-gray-200 hover:border-gray-300'}`}
+            className={`w-full p-5 rounded-2xl border-2 text-left transition-all active:scale-[0.98]
+              ${selected === opt.key
+                ? `${opt.activeBg} ${opt.activeBorder}`
+                : 'bg-white border-gray-200/80 shadow-sm'}`}
           >
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{opt.emoji}</span>
+            <div className="flex items-center gap-4">
+              <span className="text-3xl flex-shrink-0">{opt.emoji}</span>
               <div>
-                <p className="font-bold text-gray-900">{opt.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
+                <p className="font-bold text-[16px] text-gray-900">{opt.label}</p>
+                <p className="text-[13px] text-gray-500 mt-0.5">{opt.desc}</p>
               </div>
             </div>
           </button>
@@ -61,7 +63,7 @@ export default function B08Semaforo() {
         <button
           onClick={guardar}
           disabled={saving}
-          className="w-full mt-4 bg-[#1A5C38] text-white py-3 rounded-xl font-semibold disabled:opacity-60"
+          className="w-full mt-2 bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
         >
           {saving ? 'Guardando…' : 'Guardar'}
         </button>

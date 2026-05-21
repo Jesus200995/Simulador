@@ -51,41 +51,46 @@ export default function B15Tarifario() {
   }
 
   return (
-    <div className="max-w-lg mx-auto">
-      <PageHeader title="Tarifario de Servicios" subtitle="Precios que ofreces en tu bodega" />
+    <div className="max-w-2xl mx-auto overflow-x-hidden">
+      <PageHeader title="Tarifario de Servicios" subtitle="Precios que ofreces en tu bodega" back="/mas" />
 
-      <div className="px-4 py-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bodega</label>
-          <select value={bodegaId} onChange={e => setBodegaId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]">
+      <div className="px-4 sm:px-6 py-5 space-y-4">
+        {/* Selector de bodega */}
+        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5">
+          <label className="block text-[15px] font-medium text-gray-600 mb-1.5">Bodega</label>
+          <select
+            value={bodegaId}
+            onChange={e => setBodegaId(e.target.value)}
+            className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
+          >
             <option value="">Selecciona bodega</option>
             {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
         </div>
 
+        {/* Lista de conceptos */}
         {bodegaId && (
-          <div className="space-y-2">
+          <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
             {conceptos.map(c => {
               const tarifa = getTarifa(c.id);
               const isEdit = editando === c.id;
               return (
-                <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                <div key={c.id} className="p-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{iconMap[c.icono] || '📋'}</span>
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-gray-900">{c.nombre}</p>
-                      <p className="text-xs text-gray-400">{c.unidad_default}</p>
+                    <span className="text-2xl flex-shrink-0">{iconMap[c.icono] || '📋'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-[15px] text-gray-900">{c.nombre}</p>
+                      <p className="text-[12px] text-gray-400">{c.unidad_default}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       {tarifa ? (
-                        <p className="font-bold text-[#1A5C38]">${Number(tarifa.precio).toLocaleString()}</p>
+                        <p className="font-bold text-[16px] text-[#1A5C38]">${Number(tarifa.precio).toLocaleString()}</p>
                       ) : (
-                        <p className="text-xs text-gray-400">Sin precio</p>
+                        <p className="text-[13px] text-gray-400">Sin precio</p>
                       )}
                       <button
                         onClick={() => { setEditando(isEdit ? null : c.id); setPrecio(tarifa?.precio || ''); }}
-                        className="text-xs text-[#1A5C38] font-semibold hover:underline"
+                        className="text-[13px] text-[#1A5C38] font-semibold mt-0.5"
                       >
                         {isEdit ? 'Cancelar' : tarifa ? 'Editar' : 'Agregar'}
                       </button>
@@ -94,12 +99,17 @@ export default function B15Tarifario() {
                   {isEdit && (
                     <div className="flex gap-2 mt-3">
                       <input
-                        type="number" value={precio} onChange={e => setPrecio(e.target.value)}
+                        type="number"
+                        value={precio}
+                        onChange={e => setPrecio(e.target.value)}
                         placeholder={`Precio en ${c.unidad_default}`}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+                        className="flex-1 bg-[#F2F2F7] rounded-xl px-4 py-3 text-[16px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
                       />
-                      <button onClick={() => guardar(c.id)} disabled={saving}
-                        className="bg-[#1A5C38] text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-60">
+                      <button
+                        onClick={() => guardar(c.id)}
+                        disabled={saving}
+                        className="bg-[#1A5C38] text-white px-5 py-3 rounded-xl text-[15px] font-semibold disabled:opacity-40 active:opacity-80 transition-opacity"
+                      >
                         {saving ? '…' : 'Guardar'}
                       </button>
                     </div>
@@ -110,9 +120,11 @@ export default function B15Tarifario() {
           </div>
         )}
 
-        <button onClick={() => navigate('/tarifario/proponer')}
-          className="w-full text-sm text-[#1A5C38] font-semibold border border-dashed border-[#1A5C38] rounded-xl py-3 hover:bg-green-50">
-          <Plus size={14} className="inline mr-1" />
+        <button
+          onClick={() => navigate('/tarifario/proponer')}
+          className="w-full text-[15px] text-[#1A5C38] font-semibold border border-dashed border-[#1A5C38]/40 rounded-2xl py-4 active:opacity-70 transition-opacity flex items-center justify-center gap-2"
+        >
+          <Plus size={16} />
           Proponer nuevo servicio
         </button>
       </div>

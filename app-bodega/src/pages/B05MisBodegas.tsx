@@ -8,10 +8,10 @@ interface Bodega {
   semaforo_compra: string; ocupacion_pct: number; stock_actual: number; capacidad_ton: number;
 }
 
-const semaforoMap: Record<string, { label: string; dot: string }> = {
-  verde: { label: 'Comprando', dot: '🟢' },
-  amarillo: { label: 'Cap. limitada', dot: '🟡' },
-  rojo: { label: 'No compra', dot: '🔴' },
+const semaforoMap: Record<string, { label: string; dot: string; badge: string }> = {
+  verde: { label: 'Comprando', dot: '🟢', badge: 'bg-green-100 text-green-700' },
+  amarillo: { label: 'Cap. limitada', dot: '🟡', badge: 'bg-yellow-100 text-yellow-700' },
+  rojo: { label: 'No compra', dot: '🔴', badge: 'bg-red-100 text-red-700' },
 };
 
 export default function B05MisBodegas() {
@@ -26,53 +26,59 @@ export default function B05MisBodegas() {
       .finally(() => setLoading(false));
   }, []);
 
-  const barColor = (p: number) => p < 70 ? 'bg-green-500' : p < 90 ? 'bg-yellow-400' : 'bg-red-500';
+  const barColor = (p: number) => p < 70 ? 'bg-[#1A5C38]' : p < 90 ? 'bg-yellow-400' : 'bg-red-500';
 
   return (
-    <div className="max-w-lg mx-auto">
-      <div className="bg-[#1A5C38] text-white px-4 pt-5 pb-4">
-        <h1 className="text-xl font-bold">Mis Bodegas</h1>
-        <p className="text-green-200 text-sm">{bodegas.length} bodegas asociadas</p>
+    <div className="max-w-2xl mx-auto overflow-x-hidden">
+      {/* Page header */}
+      <div className="bg-gradient-to-r from-[#1A5C38] to-[#2d7a52] px-4 sm:px-6 pt-6 pb-7 text-white">
+        <h1 className="text-[22px] font-bold">Mis Bodegas</h1>
+        <p className="text-green-200 text-[14px] mt-0.5">{bodegas.length} bodegas asociadas</p>
       </div>
 
-      <div className="px-4 py-4 space-y-3">
-        {loading && <p className="text-center text-gray-400 py-8">Cargando…</p>}
+      <div className="px-4 sm:px-6 py-5 space-y-3">
+        {loading && <p className="text-center text-[14px] text-gray-400 py-10">Cargando…</p>}
 
         {bodegas.map(b => {
           const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
           const pct = b.ocupacion_pct ?? 0;
           return (
-            <div key={b.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-start justify-between">
+            <div key={b.id} className="bg-white rounded-2xl shadow-sm border border-black/5 p-4">
+              {/* Top row */}
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 truncate">{b.nombre}</p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                  <p className="font-bold text-[17px] text-gray-900 truncate">{b.nombre}</p>
+                  <p className="text-[13px] text-gray-500 flex items-center gap-1 mt-0.5">
                     <MapPin size={11} />{b.municipio}, {b.estado}
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs font-semibold">{sem.dot} {sem.label}</span>
-                  </div>
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>Ocupación {pct}%</span>
-                      <span>{(b.stock_actual || 0).toLocaleString()} / {(b.capacidad_ton || 0).toLocaleString()} ton</span>
-                    </div>
-                    <div className="bg-gray-100 rounded-full h-1.5">
-                      <div className={`h-1.5 rounded-full ${barColor(pct)}`} style={{ width: `${Math.min(pct, 100)}%` }} />
-                    </div>
-                  </div>
+                </div>
+                <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ml-2 ${sem.badge}`}>
+                  {sem.dot} {sem.label}
+                </span>
+              </div>
+
+              {/* Barra ocupación */}
+              <div className="mb-3">
+                <div className="flex justify-between text-[12px] text-gray-400 mb-1.5">
+                  <span>Ocupación {pct}%</span>
+                  <span>{(b.stock_actual || 0).toLocaleString()} / {(b.capacidad_ton || 0).toLocaleString()} ton</span>
+                </div>
+                <div className="bg-gray-100 rounded-full h-2">
+                  <div className={`h-2 rounded-full transition-all ${barColor(pct)}`} style={{ width: `${Math.min(pct, 100)}%` }} />
                 </div>
               </div>
-              <div className="flex gap-2 mt-3">
+
+              {/* Botones */}
+              <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/bodegas/${b.id}`)}
-                  className="flex-1 text-sm font-semibold text-[#1A5C38] border border-[#1A5C38] rounded-lg py-2 hover:bg-green-50 flex items-center justify-center gap-1"
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#F2F2F7] text-[#1A5C38] rounded-xl py-2.5 text-[14px] font-semibold active:opacity-70 transition-opacity"
                 >
                   Ver detalle <ChevronRight size={14} />
                 </button>
                 <button
                   onClick={() => navigate(`/bodegas/${b.id}/semaforo`)}
-                  className="flex-1 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg py-2 hover:bg-gray-50"
+                  className="flex-1 bg-[#F2F2F7] text-gray-700 rounded-xl py-2.5 text-[14px] font-semibold active:opacity-70 transition-opacity"
                 >
                   Actualizar semáforo
                 </button>
@@ -82,10 +88,10 @@ export default function B05MisBodegas() {
         })}
 
         {!loading && bodegas.length === 0 && (
-          <div className="text-center py-10 text-gray-400">
-            <p className="text-4xl mb-3">🏪</p>
-            <p className="font-semibold">Sin bodegas asociadas</p>
-            <p className="text-sm mt-1">Agrega las bodegas que operas</p>
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-5xl mb-3">🏪</p>
+            <p className="font-semibold text-[16px] text-gray-600">Sin bodegas asociadas</p>
+            <p className="text-[14px] mt-1">Agrega las bodegas que operas</p>
           </div>
         )}
       </div>
@@ -93,7 +99,7 @@ export default function B05MisBodegas() {
       {/* FAB */}
       <button
         onClick={() => navigate('/bodegas/seleccionar')}
-        className="fixed bottom-24 right-4 w-14 h-14 bg-[#1A5C38] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-900 active:scale-95 transition-all"
+        className="fixed bottom-24 right-5 w-14 h-14 bg-[#1A5C38] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform"
       >
         <Plus size={24} />
       </button>

@@ -11,32 +11,40 @@ interface KPICardProps {
   onClick?: () => void;
 }
 
-const colorMap = {
-  green: 'bg-green-50 border-green-200',
-  yellow: 'bg-yellow-50 border-yellow-200',
-  red: 'bg-red-50 border-red-200',
-  blue: 'bg-blue-50 border-blue-200',
+const iconBg: Record<string, string> = {
+  green: 'bg-[#1A5C38]/10 text-[#1A5C38]',
+  yellow: 'bg-yellow-100 text-yellow-700',
+  red: 'bg-red-100 text-red-600',
+  blue: 'bg-blue-100 text-blue-600',
 };
 
-const trendColor = { up: 'text-green-600', down: 'text-red-500', neutral: 'text-gray-400' };
+const trendColor = {
+  up: 'text-[#1A5C38]',
+  down: 'text-red-500',
+  neutral: 'text-gray-400',
+};
 
 export function KPICard({ title, value, subtitle, icon, trend, trendText, color = 'green', onClick }: KPICardProps) {
   return (
     <div
-      className={`rounded-xl border p-4 shadow-sm ${colorMap[color]} ${onClick ? 'cursor-pointer active:scale-95 transition-transform' : ''}`}
+      className={`bg-white rounded-2xl shadow-sm border border-black/5 p-4 ${onClick ? 'cursor-pointer active:scale-[0.97] transition-transform' : ''}`}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between mb-2">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{title}</p>
-        {icon && <span className="text-gray-400">{icon}</span>}
+      <div className="flex items-start justify-between mb-2.5">
+        <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide leading-tight flex-1 pr-2">{title}</p>
+        {icon && (
+          <span className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${iconBg[color]}`}>
+            {icon}
+          </span>
+        )}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <p className="text-[26px] font-bold text-gray-900 leading-none">{value}</p>
       {trendText && trend && (
-        <p className={`text-xs font-medium mt-1 ${trendColor[trend]}`}>
+        <p className={`text-[12px] font-semibold mt-1.5 ${trendColor[trend]}`}>
           {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '—'} {trendText}
         </p>
       )}
-      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+      {subtitle && <div className="text-[12px] text-gray-500 mt-1.5">{subtitle}</div>}
     </div>
   );
 }
