@@ -53,9 +53,9 @@ export default function MasPage() {
 
         {/* Info app */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 px-4 py-4 flex items-center gap-3">
-          <img src="/favicon.svg" alt="SOMAC" className="w-9 h-9 flex-shrink-0" />
+          <img src="/icono.png" alt="SIMAC" className="w-9 h-9 flex-shrink-0 rounded-lg ring-1 ring-[#4ade80]" />
           <div>
-            <p className="text-[15px] font-bold text-[#1A5C38]">SOMAC</p>
+            <p className="text-[15px] font-bold text-[#1A5C38]">SIMAC</p>
             <p className="text-[12px] text-gray-400">Ordenamiento Maíz Blanco México</p>
           </div>
         </div>

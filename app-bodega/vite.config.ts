@@ -10,18 +10,20 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'icons.svg'],
+      includeAssets: ['icono.png'],
       manifest: {
-        name: 'Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México',
-        short_name: 'SOMAC',
-        description: 'Módulo Bodega — SOMAC',
+        name: 'SIMAC — Plan Nacional Maíz 2026',
+        short_name: 'SIMAC',
+        description: 'Sistema de Información para la Comercialización del Maíz — Módulo Bodega',
         start_url: '/',
         display: 'standalone',
         background_color: '#1A5C38',
         theme_color: '#1A5C38',
         lang: 'es',
         icons: [
-          { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
+          { src: '/icono.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icono.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/icono.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {

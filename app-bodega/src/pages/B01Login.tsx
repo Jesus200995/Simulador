@@ -37,9 +37,9 @@ export default function B01Login() {
         {/* Logo section */}
         <div className="px-8 pt-10 pb-6 text-center">
           <div className="flex justify-center mb-4">
-            <img src="/favicon.svg" alt="SOMAC" className="w-20 h-20" />
+            <img src="/icono.png" alt="SIMAC" className="w-20 h-20 rounded-2xl ring-2 ring-[#4ade80]" />
           </div>
-          <h1 className="text-[28px] font-black text-[#1A5C38] tracking-tight">SOMAC</h1>
+          <h1 className="text-[28px] font-black text-[#1A5C38] tracking-tight">SIMAC</h1>
           <p className="text-[13px] text-gray-400 mt-1 leading-snug">
             Sistema de Ordenamiento de la Producción<br />
             y Comercialización del Maíz Blanco en México

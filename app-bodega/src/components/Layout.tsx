@@ -26,9 +26,9 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <img src="/favicon.svg" alt="SOMAC" className="w-7 h-7" />
+          <img src="/icono.png" alt="SIMAC" className="w-8 h-8 rounded-lg ring-1 ring-[#4ade80]" />
           <div className="flex flex-col leading-none">
-            <span className="text-[15px] font-bold text-[#1A5C38] tracking-tight">SOMAC</span>
+            <span className="text-[15px] font-bold text-[#1A5C38] tracking-tight">SIMAC</span>
             <span className="hidden sm:block text-[11px] text-gray-400 font-medium leading-tight">
               Maíz Blanco México
             </span>

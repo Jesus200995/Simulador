@@ -82,7 +82,7 @@ export default function B02Register() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-5">
         <div>
           <h1 className="text-[28px] font-bold text-gray-900">Crear cuenta</h1>
-          <p className="text-[15px] text-gray-500 mt-1">Módulo Bodega — SOMAC</p>
+          <p className="text-[15px] text-gray-500 mt-1">Módulo Bodega — SIMAC</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
