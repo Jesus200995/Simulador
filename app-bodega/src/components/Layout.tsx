@@ -30,7 +30,7 @@ export function Layout({ children }: { children: ReactNode }) {
     : 'U';
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F2F2F7] overflow-x-hidden">
+    <div className="flex flex-col min-h-dvh bg-[#F2F2F7] overflow-x-hidden w-full">
 
       {/* ── Header ─────────────────────────────────────── */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] px-4 sm:px-6 h-[60px] flex items-center justify-between shadow-sm shadow-black/[0.03]">
@@ -63,7 +63,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </header>
 
       {/* ── Main content ───────────────────────────────── */}
-      <main className="flex-1 pb-[72px]">
+      <main className="flex-1 pb-[72px] overflow-x-hidden min-w-0 w-full">
         {children}
       </main>
 

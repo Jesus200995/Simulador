@@ -7,6 +7,8 @@
 
 html {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -15,13 +17,19 @@ body {
   color: #1C1C1E;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 #root {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Leaflet fix */
