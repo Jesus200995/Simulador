@@ -41,7 +41,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <img src="/icono.png" alt="SOMEC" className="w-9 h-9 rounded-[10px] ring-[1.5px] ring-[#4ade80]/70 shadow-sm" />
           </div>
           <div className="flex flex-col leading-none min-w-0">
-            <span className="text-[16px] font-black text-[#1A5C38] tracking-tight leading-none">SOMEC</span>
+            <span className="text-[16px] font-black tracking-tight leading-none somec-shimmer">SOMEC</span>
             <span className="text-[9px] text-gray-400 font-medium leading-tight mt-[2px] truncate max-w-[200px] sm:max-w-[320px]">
               {SYSTEM_NAME}
             </span>

@@ -44,3 +44,27 @@ body {
 
 /* Press animation */
 .press:active { opacity: 0.7; transform: scale(0.98); transition: opacity 0.1s, transform 0.1s; }
+
+/* SOMEC title shimmer — subtle green-diamond sweep */
+@keyframes somec-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.somec-shimmer {
+  background: linear-gradient(
+    90deg,
+    #1A5C38 0%,
+    #1A5C38 35%,
+    #5db87a 48%,
+    #7dd49a 50%,
+    #5db87a 52%,
+    #1A5C38 65%,
+    #1A5C38 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: somec-shimmer 3.5s linear infinite;
+}

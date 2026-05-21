@@ -29,7 +29,7 @@ export default function B04Dashboard() {
   }, []);
 
   const hora = new Date().getHours();
-  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const saludo = hora < 12 ? '¡Buenos días!' : hora < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
   const hoy = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   const ocupPct = stats.ocupacion_pct ?? 0;
@@ -57,10 +57,10 @@ export default function B04Dashboard() {
               </span>
             </div>
             <div className="min-w-0">
-              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight">
+              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
                 {saludo}
               </h1>
-              <p className="text-[13px] font-semibold text-white/90 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
+              <p className="text-[13px] font-medium text-white/40 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
             </div>
           </div>
           {/* Role badge + date row */}
