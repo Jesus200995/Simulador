@@ -35,8 +35,14 @@ export default function B01Login() {
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
         {/* Logo */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-black text-[#1A5C38]">SIMAC</h1>
-          <p className="text-sm text-gray-500 mt-1">Plan Nacional Maíz 2026</p>
+          <div className="flex justify-center mb-3">
+            <img src="/favicon.svg" alt="SIMAC" className="w-16 h-16" />
+          </div>
+          <h1 className="text-2xl font-black text-[#1A5C38]">SIMAC</h1>
+          <p className="text-xs text-gray-500 mt-1 leading-snug px-2">
+            Sistema de Ordenamiento de la Producción<br />
+            y Comercialización del Maíz Blanco en México
+          </p>
         </div>
 
         {/* Selector de rol */}
