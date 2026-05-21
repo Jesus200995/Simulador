@@ -2,12 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
-import { Warehouse, Factory, Eye, EyeOff, Wheat } from 'lucide-react';
-
-type Rol = 'bodega' | 'industria';
+import { Eye, EyeOff, Wheat, Warehouse, Factory } from 'lucide-react';
 
 export default function B01Login() {
-  const [rol, setRol] = useState<Rol | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
@@ -18,11 +15,10 @@ export default function B01Login() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!rol) { setError('Selecciona tu tipo de cuenta para continuar'); return; }
     setError('');
     setLoading(true);
     try {
-      const res = await api.auth.login(email, password, rol);
+      const res = await api.auth.login(email, password);
       const u = res.usuario || res.user;
       setAuth(res.token, { ...u, userId: u?.id ?? u?.userId });
       navigate('/dashboard');
@@ -104,40 +100,12 @@ export default function B01Login() {
               {/* Card top stripe */}
               <div className="h-1 bg-gradient-to-r from-[#1A5C38] via-[#4ade80] to-[#1A5C38]" />
 
-              <div className="px-7 pt-6 pb-3">
-                <p className="text-[20px] font-black text-gray-900">Iniciar sesión</p>
-                <p className="text-[13px] text-gray-400 mt-0.5">Selecciona tu tipo de cuenta</p>
+              <div className="px-7 pt-7 pb-3">
+                <p className="text-[22px] font-black text-gray-900">Bienvenido</p>
+                <p className="text-[13px] text-gray-400 mt-0.5">Ingresa con tu cuenta registrada</p>
               </div>
 
               <div className="px-7 pb-7 space-y-4">
-                {/* Selector de rol */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  {([
-                    { key: 'bodega' as Rol, icon: Warehouse, label: 'Bodega', desc: 'Almacenista · Acopiador' },
-                    { key: 'industria' as Rol, icon: Factory, label: 'Industria', desc: 'Tortillería · Nixtamal' },
-                  ]).map(({ key, icon: Icon, label, desc }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setRol(key)}
-                      className={`group flex flex-col items-center gap-2 py-4 px-2 rounded-2xl border-2 transition-all duration-150 active:scale-[0.97]
-                        ${rol === key
-                          ? 'border-[#1A5C38] bg-[#1A5C38]/[0.07] text-[#1A5C38]'
-                          : 'border-gray-100 text-gray-400 bg-gray-50 hover:border-gray-200'}`}
-                    >
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
-                        rol === key ? 'bg-[#1A5C38]/[0.12]' : 'bg-white'
-                      }`}>
-                        <Icon size={22} strokeWidth={rol === key ? 2.2 : 1.5} />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[14px] font-bold leading-none">{label}</p>
-                        <p className="text-[10px] mt-1 leading-tight opacity-60">{desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div>

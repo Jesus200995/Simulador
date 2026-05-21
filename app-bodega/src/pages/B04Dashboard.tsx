@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity } from 'lucide-react';
+import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity, BadgeCheck, Factory } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
 import { useAuthStore } from '../store/auth';
 import { api } from '../services/api';
@@ -48,11 +48,32 @@ export default function B04Dashboard() {
       {/* ── Banner full-bleed ── */}
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-0.5">Tablero</p>
-          <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight">
-            {saludo}, {user?.nombre_completo?.split(' ')[0] || 'Bodeguero'}
-          </h1>
-          <p className="text-green-200/70 text-[14px] capitalize mt-1">{hoy}</p>
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Tablero</p>
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 ring-2 ring-white/20">
+              <span className="text-white text-[15px] font-black">
+                {(user?.nombre_completo || 'B').split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight truncate">
+                {saludo}, {user?.nombre_completo?.split(' ')[0] || 'Bodeguero'}
+              </h1>
+              <p className="text-[11px] text-white/60 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
+            </div>
+          </div>
+          {/* Role badge + date row */}
+          <div className="flex items-center gap-3 mt-3">
+            <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1">
+              {user?.rol === 'industria'
+                ? <Factory size={11} className="text-green-200" />
+                : <Warehouse size={11} className="text-green-200" />}
+              <span className="text-[11px] font-bold text-white capitalize">{user?.rol || 'bodega'}</span>
+              <BadgeCheck size={11} className="text-green-300" />
+            </div>
+            <p className="text-green-200/60 text-[11px] capitalize">{hoy}</p>
+          </div>
         </div>
       </div>
 
