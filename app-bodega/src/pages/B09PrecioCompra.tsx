@@ -7,6 +7,8 @@ export default function B09PrecioCompra() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [bodegas, setBodegas] = useState<any[]>([]);
+  const [tiposMaiz, setTiposMaiz] = useState<any[]>([]);
+  const [variedades, setVariedades] = useState<any[]>([]);
   const [form, setForm] = useState({
     bodega_id: params.get('bodega_id') || '',
     tipo_maiz: '', variedad_code: '', humedad_pct: '', calidad: '',
@@ -17,6 +19,12 @@ export default function B09PrecioCompra() {
 
   useEffect(() => {
     api.bodeguero.misBodegas().then((r: any) => setBodegas(r)).catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/infraestructura/catalogos`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('simac_token')}` }
+    }).then(r => r.json()).then(r => {
+      setTiposMaiz(r.tipos_maiz || r.tipo_maiz || []);
+      setVariedades(r.variedades || []);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -70,24 +78,20 @@ export default function B09PrecioCompra() {
             <label className={labelClass}>Tipo de maíz</label>
             <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
               <option value="">Selecciona tipo</option>
-              {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)}
+              {tiposMaiz.length > 0
+                ? tiposMaiz.map((t: {code: string; label: string}) => <option key={t.code} value={t.code}>{t.label}</option>)
+                : [['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)
+              }
             </select>
           </div>
           <div>
             <label className={labelClass}>Variedad</label>
             <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)} className={inputClass}>
               <option value="">Sin especificar</option>
-              <option value="NO_SABE">No sabe</option>
-              <option value="CRIOLLO_LOCAL">Criollo / local</option>
-              <option value="H-40">H-40</option>
-              <option value="H-48">H-48</option>
-              <option value="H-50">H-50</option>
-              <option value="H-52">H-52</option>
-              <option value="H-66">H-66</option>
-              <option value="H-70">H-70</option>
-              <option value="VS-22">VS-22</option>
-              <option value="VS-23">VS-23</option>
-              <option value="OTRA">Otra</option>
+              {variedades.length > 0
+                ? variedades.map((v: {code: string; label: string}) => <option key={v.code} value={v.code}>{v.label}</option>)
+                : ['NO_SABE','CRIOLLO_LOCAL','H-40','H-48','H-50','H-52','H-66','H-70','VS-22','VS-23','OTRA'].map(c => <option key={c} value={c}>{c}</option>)
+              }
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">

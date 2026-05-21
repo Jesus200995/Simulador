@@ -18,14 +18,13 @@ export default function B07Inventario() {
 
   useEffect(() => {
     api.bodeguero.misBodegas().then((r: any) => setBodegas(r)).catch(() => {});
-    Promise.all([api.bodegas.list(), api.infraestructura.get(1)]).catch(() => {});
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/infraestructura/catalogos`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('simac_token')}` }
     }).then(r => r.json()).then(r => {
       setConceptos({
-        tipoMaiz: r.tipo_maiz || [],
-        variedades: r.variedades || r.crop_variety || [],
-        ciclos: r.ciclos || r.cycle_type || [],
+        tipoMaiz: r.tipos_maiz || r.tipo_maiz || [],
+        variedades: r.variedades || [],
+        ciclos: r.ciclos || [],
       });
     }).catch(() => {});
   }, []);

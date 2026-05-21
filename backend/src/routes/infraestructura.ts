@@ -6,29 +6,29 @@ import { requireRole } from '../middleware/roles';
 const router = Router();
 
 // Roles que pueden operar bodegas (Reajustes.pdf §13)
-const BODEGA_WRITE = requireRole('bodeguero', 'responsable', 'admin');
+const BODEGA_WRITE = requireRole('bodega', 'bodeguero', 'responsable', 'admin');
 
 // =============================================
 // GET /api/infraestructura/catalogos
 // =============================================
 router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const regiones = await pool.query('SELECT id, nombre FROM regiones ORDER BY nombre');
-    const estados = await pool.query(
-      'SELECT DISTINCT estado FROM bodegas WHERE estado IS NOT NULL ORDER BY estado'
-    );
-    const municipios = await pool.query(
-      'SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio'
-    );
-    const tiposMaiz = await pool.query(
-      "SELECT code, label FROM cat_catalog WHERE catalog='tipo_maiz' ORDER BY id"
-    );
+    const [regiones, estados, municipios, tiposMaiz, variedades, ciclos] = await Promise.all([
+      pool.query('SELECT id, nombre FROM regiones ORDER BY nombre'),
+      pool.query('SELECT DISTINCT estado FROM bodegas WHERE estado IS NOT NULL ORDER BY estado'),
+      pool.query('SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio'),
+      pool.query("SELECT code, label FROM cat_catalog WHERE catalog='tipo_maiz' ORDER BY sort_order"),
+      pool.query("SELECT code, label FROM cat_crop_variety WHERE crop='maiz' ORDER BY sort_order"),
+      pool.query("SELECT code, label FROM cat_catalog WHERE catalog='cycle_type' ORDER BY sort_order"),
+    ]);
 
     res.json({
       regiones: regiones.rows,
       estados: estados.rows.map((r: any) => r.estado),
       municipios: municipios.rows,
       tipos_maiz: tiposMaiz.rows,
+      variedades: variedades.rows,
+      ciclos: ciclos.rows,
     });
   } catch (error) {
     console.error('Error al obtener catálogos:', error);
@@ -324,7 +324,8 @@ router.delete('/:id/contactos/:cid', authMiddleware, BODEGA_WRITE, async (req: A
 router.post('/:id/inventario', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { ciclo, tipo_maiz, volumen_almacenado, volumen_problema, fecha, observaciones } = req.body;
+    const { ciclo, tipo_maiz, origen, volumen_almacenado, volumen_problema, fecha, observaciones,
+            variedad_code, humedad_pct, calidad } = req.body;
 
     if (!ciclo || !tipo_maiz || volumen_almacenado == null || !fecha) {
       res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -344,11 +345,13 @@ router.post('/:id/inventario', authMiddleware, BODEGA_WRITE, async (req: AuthReq
 
     const result = await pool.query(`
       INSERT INTO inventarios
-        (bodega_id, usuario_id, ciclo, tipo_maiz, volumen_almacenamiento,
-         volumen_problema, fecha, observaciones, fecha_registro)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP)
+        (bodega_id, usuario_id, ciclo, tipo_maiz, origen, volumen_almacenamiento,
+         volumen_problema, fecha, observaciones, variedad_code, humedad_pct, calidad, fecha_registro)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, req.user?.userId, ciclo, tipo_maiz, volumen_almacenado, volumen_problema || 0, fecha, observaciones || null]);
+    `, [id, req.user?.userId, ciclo, tipo_maiz, origen || null, volumen_almacenado,
+        volumen_problema || 0, fecha, observaciones || null,
+        variedad_code || null, humedad_pct || null, calidad || null]);
 
     res.status(201).json({ inventario: result.rows[0] });
   } catch (error) {
@@ -387,7 +390,7 @@ router.get('/:id/precios', authMiddleware, async (req: AuthRequest, res: Respons
 router.post('/:id/precios', authMiddleware, BODEGA_WRITE, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { precio, tipo_maiz, fecha, observaciones } = req.body;
+    const { precio, tipo_maiz, fecha, observaciones, variedad_code, humedad_pct, calidad } = req.body;
 
     if (!precio || !tipo_maiz || !fecha) {
       res.status(400).json({ error: 'Precio, tipo de maíz y fecha son obligatorios' });
@@ -407,10 +410,12 @@ router.post('/:id/precios', authMiddleware, BODEGA_WRITE, async (req: AuthReques
 
     const result = await pool.query(`
       INSERT INTO precios
-        (tipo_precio, fuente, precio, tipo_maiz, fecha, observaciones, bodega_id, usuario_captura)
-      VALUES ('bodega','bodeguero',$1,$2,$3,$4,$5,$6)
+        (tipo_precio, fuente, precio, tipo_maiz, fecha, observaciones,
+         bodega_id, usuario_captura, variedad_code, humedad_pct, calidad)
+      VALUES ('bodega','bodeguero',$1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
-    `, [precio, tipo_maiz, fecha, observaciones || null, id, req.user?.userId]);
+    `, [precio, tipo_maiz, fecha, observaciones || null, id, req.user?.userId,
+        variedad_code || null, humedad_pct || null, calidad || null]);
 
     res.status(201).json({ precio: result.rows[0] });
   } catch (error) {

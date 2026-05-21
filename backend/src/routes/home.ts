@@ -158,8 +158,8 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
       return;
     }
 
-    // ── BODEGUERO / RESPONSABLE ─────────────────────────────────
-    if (role === 'bodeguero' || role === 'responsable') {
+    // ── BODEGA / BODEGUERO / RESPONSABLE ─────────────────────────────────
+    if (role === 'bodega' || role === 'bodeguero' || role === 'responsable') {
       const [kpiRow, ventRow, solRow] = await Promise.all([
         pool.query(
           `SELECT

@@ -76,7 +76,7 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const rolesValidos = ['productor', 'supervisor', 'bodeguero', 'responsable', 'admin'];
+    const rolesValidos = ['productor', 'supervisor', 'bodeguero', 'bodega', 'industria', 'responsable', 'admin'];
     if (!rolesValidos.includes(rol)) {
       res.status(400).json({ error: 'Rol no válido' });
       return;
