@@ -6,7 +6,7 @@ import { useAuthStore } from '../store/auth';
 
 export default function B02Register() {
   const [form, setForm] = useState({
-    nombre_completo: '', email: '', telefono: '',
+    nombre_completo: '', email: '', telefono: '', curp: '',
     state_id: '', municipality_id: '', password: '', confirm: '',
   });
   const [states, setStates] = useState<any[]>([]);
@@ -37,17 +37,21 @@ export default function B02Register() {
     setError('');
     setLoading(true);
     try {
-      const res = await api.auth.registro({
+      const payload: any = {
         nombre_completo: form.nombre_completo,
         email: form.email,
         telefono: form.telefono,
         state_id: form.state_id,
         municipality_id: form.municipality_id,
         password: form.password,
-        rol: 'bodega',
-      });
+        rol: 'bodeguero',
+      };
+      if (form.curp.trim()) payload.curp = form.curp.trim().toUpperCase();
+
+      const res = await api.auth.registro(payload);
       if (res.token) {
-        setAuth(res.token, res.user || res);
+        const u = res.usuario || res.user;
+        setAuth(res.token, { ...u, userId: u?.id ?? u?.userId });
         navigate('/bodegas/seleccionar');
       } else {
         navigate('/login');
@@ -99,6 +103,14 @@ export default function B02Register() {
               <label className={labelClass}>Teléfono celular</label>
               <input type="tel" value={form.telefono} onChange={e => set('telefono', e.target.value)}
                 placeholder="6671234567" required className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>
+                CURP <span className="text-gray-400 font-normal">(opcional)</span>
+              </label>
+              <input type="text" value={form.curp} onChange={e => set('curp', e.target.value.toUpperCase())}
+                placeholder="XXXX000000XXXXXXX0" maxLength={18}
+                className={`${inputClass} font-mono tracking-widest`} />
             </div>
           </div>
 

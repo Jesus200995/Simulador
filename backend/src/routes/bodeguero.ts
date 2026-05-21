@@ -5,7 +5,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 const router = Router();
 
 function bodegaOnly(req: AuthRequest, res: Response, next: Function) {
-  if (!req.user || !['bodega', 'admin', 'responsable'].includes(req.user.rol)) {
+  if (!req.user || !['bodega', 'bodeguero', 'admin', 'responsable'].includes(req.user.rol)) {
     res.status(403).json({ error: 'Acceso restringido a usuarios bodega' });
     return;
   }

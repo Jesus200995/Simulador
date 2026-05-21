@@ -11,12 +11,18 @@ export default function B06BodegaDetalle() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('general');
   const [bodega, setBodega] = useState<any>(null);
+  const [inventarios, setInventarios] = useState<any[]>([]);
+  const [contactos, setContactos] = useState<any[]>([]);
   const [precios, setPrecios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.infraestructura.get(Number(id))
-      .then((r: any) => setBodega(r.bodega || r))
+      .then((r: any) => {
+        setBodega(r.bodega || r);
+        setInventarios(r.inventarios || []);
+        setContactos(r.contactos || []);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
@@ -35,6 +41,8 @@ export default function B06BodegaDetalle() {
     { key: 'precios', label: 'Precios' },
     { key: 'senales', label: 'Señales' },
   ];
+
+  const ultimoInventario = inventarios[0] || null;
 
   if (loading) return <div className="p-10 text-center text-gray-400 text-[15px]">Cargando…</div>;
   if (!bodega) return <div className="p-10 text-center text-red-500 text-[15px]">Bodega no encontrada</div>;
@@ -63,20 +71,36 @@ export default function B06BodegaDetalle() {
 
       <div className="px-4 sm:px-6 py-5 space-y-3">
         {tab === 'general' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
-            {[
-              ['Capacidad', `${(bodega.capacidad_ton || 0).toLocaleString()} ton`],
-              ['Localidad', bodega.localidad || '—'],
-              ['Latitud', bodega.latitud?.toFixed(5) || '—'],
-              ['Longitud', bodega.longitud?.toFixed(5) || '—'],
-              ['Estatus operativo', bodega.estatus_operativo || '—'],
-            ].map(([k, v]) => (
-              <div key={k} className="flex justify-between items-center px-4 py-3.5">
-                <span className="text-[15px] text-gray-500">{k}</span>
-                <span className="text-[15px] font-semibold text-gray-800">{v}</span>
+          <>
+            <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
+              {[
+                ['Capacidad', `${(bodega.capacidad_ton || 0).toLocaleString()} ton`],
+                ['Localidad', bodega.localidad || '—'],
+                ['Estatus operativo', bodega.estatus_operativo || '—'],
+                ['Latitud', bodega.latitud?.toFixed(5) || '—'],
+                ['Longitud', bodega.longitud?.toFixed(5) || '—'],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between items-center px-4 py-3.5">
+                  <span className="text-[15px] text-gray-500">{k}</span>
+                  <span className="text-[15px] font-semibold text-gray-800">{v}</span>
+                </div>
+              ))}
+            </div>
+            {contactos.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
+                <div className="px-4 py-3">
+                  <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Contactos</p>
+                </div>
+                {contactos.map((c: any) => (
+                  <div key={c.id} className="px-4 py-3.5">
+                    <p className="text-[15px] font-semibold text-gray-800">{c.nombre}</p>
+                    {c.cargo && <p className="text-[13px] text-gray-500">{c.cargo}</p>}
+                    {c.telefono && <p className="text-[13px] text-[#1A5C38]">{c.telefono}</p>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         {tab === 'inventario' && (
@@ -87,17 +111,31 @@ export default function B06BodegaDetalle() {
             >
               Actualizar inventario
             </button>
-            {bodega.ultimo_inventario ? (
+            {ultimoInventario ? (
               <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
                 <div className="px-4 py-3">
                   <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Último registro</p>
+                  <p className="text-[12px] text-gray-400 mt-0.5">{ultimoInventario.fecha || '—'}</p>
                 </div>
-                {Object.entries(bodega.ultimo_inventario).map(([k, v]) => (
+                {[
+                  ['Tipo de maíz', ultimoInventario.tipo_maiz || '—'],
+                  ['Vol. almacenado', `${(ultimoInventario.volumen_almacenamiento || 0).toLocaleString()} ton`],
+                  ['Vol. con problema', `${(ultimoInventario.volumen_problema || 0).toLocaleString()} ton`],
+                  ['Humedad', ultimoInventario.humedad_pct ? `${ultimoInventario.humedad_pct}%` : '—'],
+                  ['Calidad', ultimoInventario.calidad || '—'],
+                  ['Ciclo', ultimoInventario.ciclo || '—'],
+                ].map(([k, v]) => (
                   <div key={k} className="flex justify-between items-center px-4 py-3.5">
                     <span className="text-[15px] text-gray-500">{k}</span>
-                    <span className="text-[15px] font-semibold text-gray-800">{String(v)}</span>
+                    <span className="text-[15px] font-semibold text-gray-800">{v}</span>
                   </div>
                 ))}
+                {ultimoInventario.observaciones && (
+                  <div className="px-4 py-3.5">
+                    <p className="text-[13px] text-gray-400">Observaciones</p>
+                    <p className="text-[14px] text-gray-700 mt-0.5">{ultimoInventario.observaciones}</p>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-center text-gray-400 text-[14px] py-6">Sin registros de inventario</p>
@@ -124,6 +162,14 @@ export default function B06BodegaDetalle() {
                     <Line type="monotone" dataKey="precio" stroke="#1A5C38" dot={false} strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
+                <div className="mt-2 bg-white rounded-2xl divide-y divide-gray-100">
+                  {precios.slice(0, 5).map((p: any) => (
+                    <div key={p.id} className="flex justify-between items-center px-1 py-2.5">
+                      <span className="text-[13px] text-gray-500">{p.fecha} · {p.tipo_maiz}</span>
+                      <span className="text-[15px] font-bold text-[#1A5C38]">${p.precio?.toLocaleString()}/ton</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             {precios.length === 0 && (

@@ -21,7 +21,8 @@ export default function B01Login() {
     setLoading(true);
     try {
       const res = await api.auth.login(email, password, rol);
-      setAuth(res.token, res.user || res);
+      const u = res.usuario || res.user;
+      setAuth(res.token, { ...u, userId: u?.id ?? u?.userId });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');

@@ -11,7 +11,7 @@ export default function B07Inventario() {
   const [form, setForm] = useState({
     bodega_id: params.get('bodega_id') || '',
     ciclo: '', tipo_maiz: '', variedad_code: '', origen: 'local',
-    volumen_almacenamiento: '', volumen_problema: '',
+    volumen_almacenado: '', volumen_problema: '',
     humedad_pct: '', calidad: '', fecha: new Date().toISOString().slice(0, 10), observaciones: '',
   });
   const [loading, setLoading] = useState(false);
@@ -115,8 +115,8 @@ export default function B07Inventario() {
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volúmenes</p>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Vol. almacenamiento (ton)</label>
-              <input type="number" value={form.volumen_almacenamiento} onChange={e => set('volumen_almacenamiento', e.target.value)} required min="0" step="0.1" className={inputClass} />
+              <label className={labelClass}>Vol. almacenado (ton)</label>
+              <input type="number" value={form.volumen_almacenado} onChange={e => set('volumen_almacenado', e.target.value)} required min="0" step="0.1" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Vol. con problema (ton)</label>

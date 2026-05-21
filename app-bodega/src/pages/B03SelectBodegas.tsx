@@ -135,12 +135,12 @@ export default function B03SelectBodegas() {
           })}
         </div>
 
-        {/* Mi bodega no está */}
+        {/* Continuar sin seleccionar bodega */}
         <button
-          onClick={() => navigate('/infraestructura/nueva')}
-          className="w-full text-[15px] text-[#1A5C38] font-semibold border border-dashed border-[#1A5C38]/40 rounded-2xl py-4 active:opacity-70 transition-opacity"
+          onClick={() => navigate('/dashboard')}
+          className="w-full text-[15px] text-gray-400 font-medium py-2 active:opacity-70 transition-opacity"
         >
-          + Mi bodega no está en la lista
+          Continuar sin asociar bodega por ahora
         </button>
       </div>
 

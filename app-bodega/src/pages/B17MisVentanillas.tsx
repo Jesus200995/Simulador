@@ -38,7 +38,7 @@ export default function B17MisVentanillas() {
         {ventanillas.map(v => (
           <button
             key={v.id}
-            onClick={() => navigate(`/ventanillas/${v.id}`)}
+            onClick={() => navigate(`/ventanillas/${v.id}/solicitudes`)}
             className="w-full bg-white rounded-2xl shadow-sm border border-black/5 p-4 text-left active:bg-gray-50 transition-colors"
           >
             <div className="flex items-center gap-3">

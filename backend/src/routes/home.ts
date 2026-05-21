@@ -160,31 +160,58 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
 
     // ── BODEGUERO / RESPONSABLE ─────────────────────────────────
     if (role === 'bodeguero' || role === 'responsable') {
-      const [misBodegas, misInventarios, totalBodegas] = await Promise.all([
+      const [kpiRow, ventRow, solRow] = await Promise.all([
         pool.query(
-          `SELECT COUNT(*)::int AS c FROM bodegas WHERE creado_por = $1`,
+          `SELECT
+             COUNT(bb.id)::int AS mis_bodegas,
+             COALESCE(SUM(b.capacidad_ton), 0)::float AS total_capacidad,
+             COALESCE(SUM(COALESCE(inv.volumen_almacenamiento, 0)), 0)::float AS total_stock,
+             CASE WHEN SUM(b.capacidad_ton) > 0
+               THEN ROUND((SUM(COALESCE(inv.volumen_almacenamiento, 0)) / SUM(b.capacidad_ton)) * 100, 1)
+               ELSE 0 END AS ocupacion_pct,
+             COALESCE(MAX(pr.precio), 0)::float AS ultimo_precio
+           FROM bodeguero_bodegas bb
+           JOIN bodegas b ON b.id = bb.bodega_id
+           LEFT JOIN LATERAL (
+             SELECT volumen_almacenamiento
+             FROM inventarios
+             WHERE bodega_id = b.id
+             ORDER BY fecha DESC NULLS LAST LIMIT 1
+           ) inv ON TRUE
+           LEFT JOIN LATERAL (
+             SELECT precio
+             FROM precios
+             WHERE bodega_id = b.id AND tipo_precio = 'bodega'
+             ORDER BY fecha DESC LIMIT 1
+           ) pr ON TRUE
+           WHERE bb.usuario_id = $1 AND bb.estatus = 'aprobada'`,
           [userId]
         ),
         pool.query(
-          `SELECT COUNT(*)::int AS c FROM inventarios WHERE usuario_id = $1`,
+          `SELECT COUNT(*)::int AS c FROM ventanillas WHERE usuario_id = $1`,
+          [userId]
+        ),
+        pool.query(
+          `SELECT COUNT(*)::int AS c
+           FROM solicitudes_apoyo sa
+           JOIN apoyos_ventanilla av ON av.id = sa.apoyo_id
+           JOIN ventanillas v ON v.id = av.ventanilla_id
+           WHERE v.usuario_id = $1 AND sa.estado = 'recibida'`,
           [userId]
         ).catch(() => ({ rows: [{ c: 0 }] } as any)),
-        pool.query(`SELECT COUNT(*)::int AS c FROM bodegas`),
       ]);
 
+      const kpi = kpiRow.rows[0];
       res.json({
         role,
         stats: {
-          productores: misBodegas.rows[0].c,
-          productores_label: 'Mis bodegas',
-          seguimientos: misInventarios.rows[0].c,
-          seguimientos_label: 'Inventarios',
-          seguimientos_pendientes: 0,
-          alertas: 0,
-          alertas_hidden: true,
-          bodegas: totalBodegas.rows[0].c,
-          bodegas_label: 'En sistema',
-          recientes: [],
+          mis_bodegas: kpi.mis_bodegas,
+          total_stock: kpi.total_stock,
+          total_capacidad: kpi.total_capacidad,
+          ocupacion_pct: kpi.ocupacion_pct,
+          ultimo_precio: kpi.ultimo_precio,
+          tiene_ventanilla: ventRow.rows[0].c > 0,
+          solicitudes_pendientes: solRow.rows[0].c,
         },
       });
       return;

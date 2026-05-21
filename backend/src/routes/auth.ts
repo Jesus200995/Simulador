@@ -42,7 +42,7 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
     const { email, curp, nombre_completo, password, telefono, rol, state_id, municipality_id }: RegistroPayload = req.body;
 
     // Validaciones
-    if (!email || !curp || !nombre_completo || !password || !telefono || !rol) {
+    if (!email || !nombre_completo || !password || !telefono || !rol) {
       res.status(400).json({ error: 'Todos los campos son obligatorios' });
       return;
     }
@@ -52,9 +52,16 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const curpUpper = curp.toUpperCase();
-    if (!validarCURP(curpUpper)) {
-      res.status(400).json({ error: 'Formato de CURP inválido. Debe ser 18 caracteres alfanuméricos' });
+    const rolesConCURP = ['productor', 'supervisor'];
+    let curpUpper: string | null = null;
+    if (curp) {
+      curpUpper = curp.toUpperCase();
+      if (!validarCURP(curpUpper)) {
+        res.status(400).json({ error: 'Formato de CURP inválido. Debe ser 18 caracteres alfanuméricos' });
+        return;
+      }
+    } else if (rolesConCURP.includes(rol)) {
+      res.status(400).json({ error: 'CURP obligatorio para productores y supervisores' });
       return;
     }
 
@@ -76,10 +83,15 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
     }
 
     // Verificar si ya existe
-    const existente = await pool.query(
-      'SELECT id FROM usuarios WHERE email = $1 OR curp = $2',
-      [email.toLowerCase().trim(), curpUpper]
-    );
+    const existente = curpUpper
+      ? await pool.query(
+          'SELECT id FROM usuarios WHERE email = $1 OR curp = $2',
+          [email.toLowerCase().trim(), curpUpper]
+        )
+      : await pool.query(
+          'SELECT id FROM usuarios WHERE email = $1',
+          [email.toLowerCase().trim()]
+        );
 
     if (existente.rows.length > 0) {
       res.status(409).json({ error: 'Ya existe un usuario con ese email o CURP' });
@@ -98,7 +110,7 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
       `INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono, rol, state_id, municipality_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id, created_at`,
-      [email.toLowerCase().trim(), curpUpper, nombreNormalizado, passwordHash, telefonoLimpio, rol, state_id || null, municipality_id || null]
+      [email.toLowerCase().trim(), curpUpper || null, nombreNormalizado, passwordHash, telefonoLimpio, rol, state_id || null, municipality_id || null]
     );
 
     const usuario = result.rows[0];
