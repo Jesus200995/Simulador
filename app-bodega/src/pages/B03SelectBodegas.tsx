@@ -12,25 +12,27 @@ export default function B03SelectBodegas() {
   const [selected, setSelected] = useState<Bodega[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [states, setStates] = useState<any[]>([]);
   const navigate = useNavigate();
 
+  async function search(q = query, est = estado) {
+    setLoading(true);
+    try {
+      const res = await api.bodegas.list({ q, estado: est });
+      setResults((res.bodegas || res).slice(0, 30));
+    } catch { /* ignore */ } finally { setLoading(false); }
+  }
+
   useEffect(() => {
     api.auth.states().then((r: any) => setStates(r.states || r)).catch(() => {});
+    search('', '');
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => search(), 400);
+    const t = setTimeout(() => search(query, estado), 400);
     return () => clearTimeout(t);
   }, [query, estado]);
-
-  async function search() {
-    setLoading(true);
-    try {
-      const res = await api.bodegas.list({ q: query, estado });
-      setResults((res.bodegas || res).slice(0, 20));
-    } catch (_) {} finally { setLoading(false); }
-  }
 
   function toggle(b: Bodega) {
     setSelected(s =>
@@ -41,14 +43,21 @@ export default function B03SelectBodegas() {
   async function continuar() {
     if (selected.length === 0) return;
     setSaving(true);
-    try {
-      for (const b of selected) {
+    setError('');
+    const failed: string[] = [];
+    for (const b of selected) {
+      try {
         await api.bodeguero.solicitar(b.id);
+      } catch (err: any) {
+        failed.push(`${b.nombre}: ${err.message}`);
       }
-      navigate('/dashboard');
-    } catch (err: any) {
-      alert(err.message);
-    } finally { setSaving(false); }
+    }
+    setSaving(false);
+    if (failed.length > 0) {
+      setError(failed.join('\n'));
+      return;
+    }
+    navigate('/mis-bodegas');
   }
 
   return (
@@ -145,14 +154,19 @@ export default function B03SelectBodegas() {
       </div>
 
       {/* Botón continuar fijo abajo */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200/50 px-4 py-4 pb-safe">
-        <div className="max-w-2xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200/50 px-4 py-3 pb-safe">
+        <div className="max-w-2xl mx-auto space-y-2">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+              <p className="text-[12px] text-red-600 whitespace-pre-line">{error}</p>
+            </div>
+          )}
           <button
             onClick={continuar}
             disabled={selected.length === 0 || saving}
             className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
           >
-            {saving ? 'Guardando…' : `Continuar (${selected.length} bodega${selected.length !== 1 ? 's' : ''})`}
+            {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
           </button>
         </div>
       </div>

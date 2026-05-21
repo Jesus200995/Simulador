@@ -53,7 +53,7 @@ router.get('/mis-bodegas', authMiddleware, bodegaOnly, async (req: AuthRequest, 
               bb.estatus AS asociacion_estatus,
               COALESCE(inv.volumen_almacenamiento, 0) AS stock_actual,
               CASE WHEN b.capacidad_ton > 0
-                   THEN ROUND((COALESCE(inv.volumen_almacenamiento,0) / b.capacidad_ton::NUMERIC) * 100, 1)
+                   THEN ROUND(((COALESCE(inv.volumen_almacenamiento,0) / b.capacidad_ton::NUMERIC) * 100)::NUMERIC, 1)
                    ELSE 0 END AS ocupacion_pct
        FROM bodeguero_bodegas bb
        JOIN bodegas b ON b.id = bb.bodega_id

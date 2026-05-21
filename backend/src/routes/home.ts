@@ -167,7 +167,7 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
              COALESCE(SUM(b.capacidad_ton), 0)::float AS total_capacidad,
              COALESCE(SUM(COALESCE(inv.volumen_almacenamiento, 0)), 0)::float AS total_stock,
              CASE WHEN SUM(b.capacidad_ton) > 0
-               THEN ROUND((SUM(COALESCE(inv.volumen_almacenamiento, 0)) / SUM(b.capacidad_ton)) * 100, 1)
+               THEN ROUND(((SUM(COALESCE(inv.volumen_almacenamiento, 0)) / SUM(b.capacidad_ton)) * 100)::NUMERIC, 1)
                ELSE 0 END AS ocupacion_pct,
              COALESCE(MAX(pr.precio), 0)::float AS ultimo_precio
            FROM bodeguero_bodegas bb
