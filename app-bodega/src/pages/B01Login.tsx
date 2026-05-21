@@ -30,9 +30,9 @@ export default function B01Login() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-hidden">
       {/* Fixed background — prevents white on any scroll */}
-      <div className="fixed inset-0">
+      <div className="fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#071f12] via-[#0f3d22] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_60%_30%,rgba(45,122,80,0.6),transparent)]" />
         {/* Decorative bottom wheat row */}
@@ -45,7 +45,7 @@ export default function B01Login() {
       </div>
 
       {/* Scrollable overlay */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16 sm:py-20">
+      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16 sm:py-20 overflow-x-hidden">
 
         {/* ── Logo + brand ── */}
         <div className="flex items-center gap-3.5 mb-8">

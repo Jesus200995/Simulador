@@ -33,25 +33,54 @@ export default function B02Register() {
     }
   }, [form.state_id]);
 
+  function normalizarTexto(v: string) {
+    return v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  }
+
+  function setNombre(v: string) {
+    setForm(f => ({ ...f, nombre_completo: normalizarTexto(v) }));
+  }
+
+  function setTelefono(v: string) {
+    const solo = v.replace(/\D/g, '').slice(0, 10);
+    setForm(f => ({ ...f, telefono: solo }));
+  }
+
+  function setCurp(v: string) {
+    const upper = normalizarTexto(v).replace(/[^A-Z0-9]/g, '').slice(0, 18);
+    setForm(f => ({ ...f, curp: upper }));
+  }
+
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
+
+  const CURP_REGEX = /^[A-Z]{4}\d{6}[HM][A-Z]{2}[A-Z]{3}[A-Z0-9]\d$/;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.nombre_completo.trim()) { setError('El nombre es obligatorio'); return; }
+    if (form.telefono.length !== 10) { setError('El teléfono debe tener exactamente 10 dígitos'); return; }
+    if (!form.curp.trim()) { setError('La CURP es obligatoria'); return; }
+    if (form.curp.length !== 18 || !CURP_REGEX.test(form.curp)) {
+      setError('CURP inválida. Formato: 4 letras + 6 dígitos + H/M + 2 letras + 3 letras + 1 alfanum. + 1 dígito');
+      return;
+    }
+    if (!form.state_id) { setError('Selecciona tu estado'); return; }
+    if (!form.municipality_id) { setError('Selecciona tu municipio'); return; }
     if (form.password !== form.confirm) { setError('Las contraseñas no coinciden'); return; }
     if (form.password.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
     setError('');
     setLoading(true);
     try {
       const payload: any = {
-        nombre_completo: form.nombre_completo,
-        email: form.email,
+        nombre_completo: form.nombre_completo.trim(),
+        email: form.email.trim(),
         telefono: form.telefono,
+        curp: form.curp,
         state_id: form.state_id,
         municipality_id: form.municipality_id,
         password: form.password,
         rol,
       };
-      if (form.curp.trim()) payload.curp = form.curp.trim().toUpperCase();
 
       const res = await api.auth.registro(payload);
       if (res.token) {
@@ -72,9 +101,9 @@ export default function B02Register() {
   const lbl = 'text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]';
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-hidden">
       {/* Fixed background — same as login */}
-      <div className="fixed inset-0">
+      <div className="fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#071f12] via-[#0f3d22] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_60%_30%,rgba(45,122,80,0.6),transparent)]" />
         <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-6 opacity-[0.06]">
@@ -86,7 +115,7 @@ export default function B02Register() {
       </div>
 
       {/* Scrollable overlay */}
-      <div className="relative min-h-screen flex flex-col items-center px-4 py-10">
+      <div className="relative min-h-screen flex flex-col items-center px-4 py-10 overflow-x-hidden">
 
         {/* Back button */}
         <div className="w-full max-w-[440px] mb-4">
@@ -149,15 +178,29 @@ export default function B02Register() {
             {/* Datos personales */}
             <div className="space-y-2.5">
               <p className={lbl}>Datos personales</p>
-              <input type="text" value={form.nombre_completo} onChange={e => set('nombre_completo', e.target.value)}
-                placeholder="Nombre completo" required className={inp} />
+              <input type="text" value={form.nombre_completo}
+                onChange={e => setNombre(e.target.value)}
+                placeholder="NOMBRE COMPLETO" required autoCapitalize="characters"
+                className={`${inp} uppercase tracking-wide`} />
               <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
                 placeholder="Correo electrónico" required className={inp} />
-              <input type="tel" value={form.telefono} onChange={e => set('telefono', e.target.value)}
-                placeholder="Teléfono (10 dígitos)" required className={inp} />
-              <input type="text" value={form.curp} onChange={e => set('curp', e.target.value.toUpperCase())}
-                placeholder="CURP (opcional)" maxLength={18}
-                className={`${inp} font-mono`} />
+              <input type="tel" value={form.telefono}
+                onChange={e => setTelefono(e.target.value)}
+                placeholder="10 dígitos" required maxLength={10} inputMode="numeric"
+                className={inp} />
+              <input type="text" value={form.curp}
+                onChange={e => setCurp(e.target.value)}
+                placeholder="18 caracteres" required maxLength={18} autoCapitalize="characters"
+                className={`${inp} font-mono tracking-widest uppercase`} />
+              {form.curp.length > 0 && form.curp.length < 18 && (
+                <p className="text-[11px] text-orange-500 mt-1">{form.curp.length}/18 caracteres</p>
+              )}
+              {form.curp.length === 18 && !CURP_REGEX.test(form.curp) && (
+                <p className="text-[11px] text-red-500 mt-1">Formato de CURP inválido</p>
+              )}
+              {form.curp.length === 18 && CURP_REGEX.test(form.curp) && (
+                <p className="text-[11px] text-[#1A5C38] mt-1">CURP válida</p>
+              )}
             </div>
 
             {/* Ubicación */}
