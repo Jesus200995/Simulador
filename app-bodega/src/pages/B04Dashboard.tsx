@@ -88,9 +88,9 @@ export default function B04Dashboard() {
             {/* KPIs: 2 cols mobile → 4 cols desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <KPICard
-                title="Precio bodega"
+                title="Precio promedio de maíz al productor hoy"
                 value={stats.ultimo_precio ? `$${stats.ultimo_precio.toLocaleString()}` : '—'}
-                subtitle="MXN/ton · último registrado"
+                subtitle="MXN/ton · último publicado"
                 icon={<DollarSign size={15} />}
                 color="green"
                 onClick={() => navigate('/precio-diario')}
@@ -114,23 +114,24 @@ export default function B04Dashboard() {
                   onClick={() => navigate('/mis-bodegas')}
                 />
               )}
+
               <KPICard
-                title="Stock total"
-                value={`${(stats.total_stock ?? 0).toLocaleString()} ton`}
-                subtitle={`de ${(stats.total_capacidad ?? 0).toLocaleString()} ton capacidad`}
+                title="Productores cercanos a tus bodegas"
+                value={(stats as any).productores_cercanos ?? (stats.mis_bodegas ?? 0)}
+                subtitle={`~${(stats.total_stock ?? 0).toLocaleString()} ton disponibles en el área`}
                 icon={<Package size={15} />}
                 color="green"
-                onClick={() => navigate('/mis-bodegas')}
+                onClick={() => navigate('/oferta')}
               />
               <KPICard
-                title="Ocupación"
+                title="Ocupación del almacén"
                 value={`${ocupPct}%`}
                 subtitle={
                   <div className="space-y-1 mt-0.5">
                     <div className="bg-gray-100 rounded-full h-1.5 w-full overflow-hidden">
                       <div className={`h-full rounded-full ${barColor} transition-all`} style={{ width: `${Math.min(ocupPct, 100)}%` }} />
                     </div>
-                    <span className="block">promedio de tus bodegas</span>
+                    <span className="block text-[10px]">{(stats.total_stock ?? 0).toLocaleString()} ton de {(stats.total_capacidad ?? 0).toLocaleString()} ton · {Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0)).toLocaleString()} ton libres</span>
                   </div>
                 }
                 icon={<Activity size={15} />}

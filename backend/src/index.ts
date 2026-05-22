@@ -27,6 +27,7 @@ import tarifarioRoutes from './routes/tarifario';
 import catConceptosRoutes from './routes/cat-conceptos-servicio';
 import ventanillasRoutes from './routes/ventanillas';
 import ofertaRoutes from './routes/oferta';
+import productoresRoutes from './routes/productores';
 import pool from './config/database';
 
 dotenv.config();
@@ -68,6 +69,7 @@ app.use('/api/tarifario', tarifarioRoutes);
 app.use('/api/cat-conceptos-servicio', catConceptosRoutes);
 app.use('/api/ventanillas', ventanillasRoutes);
 app.use('/api/oferta', ofertaRoutes);
+app.use('/api/productores', productoresRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

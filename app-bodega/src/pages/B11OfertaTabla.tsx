@@ -41,7 +41,7 @@ export default function B11OfertaTabla() {
             className="w-full sm:w-60 bg-[#F2F2F7] rounded-xl px-4 py-2.5 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
           >
             <option value="">Todos los tipos de maíz</option>
-            {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Forrajero'],['criollo','Criollo']].map(([c,l]) => (
+            {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['criollo','Criollo / Local']].map(([c,l]) => (
               <option key={c} value={c}>{l}</option>
             ))}
           </select>
@@ -91,7 +91,7 @@ export default function B11OfertaTabla() {
                   onClick={() => navigate(`/senales/nueva?municipio=${d.municipio}`)}
                   className="flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] text-[#1A5C38] rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity"
                 >
-                  <Signal size={14} /> Publicar señal
+                  <Signal size={14} /> Publicar requerimiento
                 </button>
               </div>
             ))}

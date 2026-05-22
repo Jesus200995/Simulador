@@ -11,7 +11,7 @@ import B06BodegaDetalle from './pages/B06BodegaDetalle';
 import B07Inventario from './pages/B07Inventario';
 import B08Semaforo from './pages/B08Semaforo';
 import B09PrecioCompra from './pages/B09PrecioCompra';
-import B10SenalCompra from './pages/B10SenalCompra';
+import B10Requerimiento from './pages/B10Requerimiento';
 import B11OfertaTabla from './pages/B11OfertaTabla';
 import B13Transaccion from './pages/B13Transaccion';
 import B14HistorialTransacciones from './pages/B14HistorialTransacciones';
@@ -22,6 +22,7 @@ import B18AltaVentanilla from './pages/B18AltaVentanilla';
 import B20Solicitudes from './pages/B20Solicitudes';
 import B21DetalleSolicitud from './pages/B21DetalleSolicitud';
 import MasPage from './pages/MasPage';
+import B22PreciosMercado from './pages/B22PreciosMercado';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -67,7 +68,11 @@ export const router = createBrowserRouter([
   },
   {
     path: '/senales/nueva',
-    element: <ProtectedLayout><B10SenalCompra /></ProtectedLayout>,
+    element: <ProtectedLayout><B10Requerimiento /></ProtectedLayout>,
+  },
+  {
+    path: '/requerimientos',
+    element: <ProtectedLayout><B10Requerimiento /></ProtectedLayout>,
   },
   {
     path: '/oferta',
@@ -108,6 +113,10 @@ export const router = createBrowserRouter([
   {
     path: '/mas',
     element: <ProtectedLayout><MasPage /></ProtectedLayout>,
+  },
+  {
+    path: '/precios-mercado',
+    element: <ProtectedLayout><B22PreciosMercado /></ProtectedLayout>,
   },
   { path: '/', element: <Navigate to="/dashboard" replace /> },
   { path: '*', element: <Navigate to="/dashboard" replace /> },

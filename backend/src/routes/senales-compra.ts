@@ -28,49 +28,80 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 // POST /api/senales-compra
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.user!.userId;
-  const { bodega_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido, radio_km, vigencia } = req.body;
+  const { bodega_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido, radio_km,
+          vigencia, vigencia_inicio, vigencia_fin } = req.body;
 
-  if (!bodega_id || !tipo_maiz || !precio_ofrecido || !vigencia) {
-    res.status(400).json({ error: 'Campos requeridos: bodega_id, tipo_maiz, precio_ofrecido, vigencia' });
+  if (!bodega_id || !tipo_maiz || !precio_ofrecido) {
+    res.status(400).json({ error: 'Campos requeridos: bodega_id, tipo_maiz, precio_ofrecido' });
     return;
   }
 
   try {
-    // Validar máx 5 señales activas por bodega
+    // Validar máx 5 requerimientos activos por bodega
     const count = await pool.query(
       'SELECT COUNT(*) FROM senales_compra WHERE bodega_id = $1 AND activa = TRUE',
       [bodega_id]
     );
     if (parseInt(count.rows[0].count) >= 5) {
-      res.status(400).json({ error: 'Ya tienes 5 señales activas. Cancela una antes de publicar una nueva.' });
+      res.status(400).json({ error: 'Ya tienes 5 requerimientos activos. Cancela uno antes de publicar un nuevo.' });
       return;
     }
 
-    // Calcular fecha_vencimiento en SQL
-    const fechaExpr = vigencia === 'esta_semana'
-      ? `date_trunc('week', CURRENT_DATE) + INTERVAL '6 days'`
-      : `CURRENT_DATE + INTERVAL '15 days'`;
+    // Fecha de vencimiento: usar vigencia_fin si se proporciona, si no calcular por vigencia legacy
+    let fechaVencExpr: string;
+    let fechaVencParam: string | null = null;
+    if (vigencia_fin) {
+      fechaVencParam = vigencia_fin;
+      fechaVencExpr = `$10`;
+    } else if (vigencia === 'esta_semana') {
+      fechaVencExpr = `date_trunc('week', CURRENT_DATE) + INTERVAL '6 days'`;
+    } else {
+      fechaVencExpr = `CURRENT_DATE + INTERVAL '15 days'`;
+    }
 
+    const params: any[] = [
+      bodega_id, userId, tipo_maiz, variedad_code || null, volumen_ton || null,
+      precio_ofrecido, radio_km || 50, vigencia || 'rango',
+      vigencia_inicio || null,
+    ];
+    if (fechaVencParam) params.push(fechaVencParam);
+
+    // Insert con columnas opcionales vigencia_inicio (if column exists, safe fallback)
     const result = await pool.query(
       `INSERT INTO senales_compra
-         (bodega_id, usuario_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido, radio_km, vigencia, fecha_vencimiento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, (${fechaExpr}))
+         (bodega_id, usuario_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido,
+          radio_km, vigencia, vigencia_inicio, fecha_vencimiento)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, (${fechaVencExpr}))
        RETURNING *`,
-      [bodega_id, userId, tipo_maiz, variedad_code || null, volumen_ton || null, precio_ofrecido, radio_km || 50, vigencia]
+      params
     );
 
     const senal = result.rows[0];
 
-    // Notificar productores (best-effort)
+    // C-14: Notificar productores con info completa de bodega (best-effort)
     try {
-      const bodega = await pool.query('SELECT nombre FROM bodegas WHERE id = $1', [bodega_id]);
-      const msg = `🔔 Bodega ${bodega.rows[0]?.nombre} busca ${volumen_ton || '?'} ton de ${tipo_maiz} a $${precio_ofrecido}/ton.`;
-      await pool.query(
-        `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-         SELECT id, 'senal_compra', $1, $2, 'senales_compra'
-         FROM usuarios WHERE rol IN ('productor','tecnico') AND activo = TRUE`,
-        [msg, senal.id]
+      const bodegaR = await pool.query(
+        `SELECT b.nombre, b.municipio, b.estado, b.localidad,
+                ic.telefono, ic.correo, ic.nombre AS contacto_nombre
+         FROM bodegas b
+         LEFT JOIN infraestructura_contactos ic ON ic.bodega_id = b.id AND ic.es_principal = TRUE
+         WHERE b.id = $1 LIMIT 1`,
+        [bodega_id]
       );
+      const b = bodegaR.rows[0];
+      if (b) {
+        const tipoLabel: Record<string, string> = { blanco: 'Maíz Blanco', amarillo: 'Maíz Amarillo', criollo: 'Criollo / Local' };
+        const vigLabel = vigencia_fin
+          ? `del ${(vigencia_inicio || '').slice(0,10)} al ${vigencia_fin.slice(0,10)}`
+          : '15 días';
+        const msg = `🔔 Requerimiento de maíz en ${b.nombre} (${b.municipio}, ${b.estado}): ${volumen_ton || '?'} ton de ${tipoLabel[tipo_maiz] || tipo_maiz} a $${Number(precio_ofrecido).toLocaleString()}/ton. Vigencia: ${vigLabel}.${b.telefono ? ` Contacto: ${b.contacto_nombre || b.nombre} — ${b.telefono}` : ''}${b.correo ? ` / ${b.correo}` : ''}`;
+        await pool.query(
+          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+           SELECT id, 'senal_compra', $1, $2, 'senales_compra'
+           FROM usuarios WHERE rol IN ('productor','tecnico') AND activo = TRUE`,
+          [msg, senal.id]
+        );
+      }
     } catch (_) { /* best-effort */ }
 
     res.status(201).json(senal);

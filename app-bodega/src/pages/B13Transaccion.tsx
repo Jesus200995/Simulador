@@ -1,31 +1,94 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, UserCheck, PenLine } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+const TIPOS_MAIZ = [
+  { code: 'blanco', label: 'Maíz Blanco' },
+  { code: 'amarillo', label: 'Maíz Amarillo' },
+  { code: 'criollo', label: 'Criollo / Local' },
+];
+
+interface ProducerSuggestion {
+  producer_id: number;
+  nombre_completo: string;
+  municipio: string;
+  curp_parcial: string;
+}
 
 export default function B13Transaccion() {
   const navigate = useNavigate();
   const [bodegas, setBodegas] = useState<any[]>([]);
+  const [variedades, setVariedades] = useState<{code: string; label: string; tipo_maiz?: string}[]>([]);
   const [form, setForm] = useState({
-    bodega_id: '', nombre_productor_libre: '', tipo_maiz: '', variedad_code: '',
+    bodega_id: '', producer_id: '', nombre_productor_libre: '', tipo_maiz: '', variedad_code: '',
     volumen_ton: '', precio_ton: '',
     fecha: new Date().toISOString().slice(0, 10), notas: '',
   });
   const [loading, setLoading] = useState(false);
+  const [busqueda, setBusqueda] = useState('');
+  const [sugerencias, setSugerencias] = useState<ProducerSuggestion[]>([]);
+  const [producerSeleccionado, setProducerSeleccionado] = useState<ProducerSuggestion | null>(null);
+  const [modoLibre, setModoLibre] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     api.bodeguero.misBodegas().then((r: any) => setBodegas(r)).catch(() => {});
+    fetch(`${BASE}/infraestructura/catalogos`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('simac_token')}` }
+    }).then(r => r.json()).then(r => setVariedades(r.variedades || [])).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (modoLibre || busqueda.length < 3) { setSugerencias([]); return; }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const qs = `q=${encodeURIComponent(busqueda)}${form.bodega_id ? `&bodega_id=${form.bodega_id}` : ''}`;
+        const r = await fetch(`${BASE}/productores/buscar?${qs}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('simac_token')}` }
+        });
+        const data = await r.json();
+        setSugerencias(Array.isArray(data) ? data : []);
+      } catch (_) { setSugerencias([]); }
+    }, 320);
+  }, [busqueda, form.bodega_id, modoLibre]);
+
+  function seleccionarProducer(p: ProducerSuggestion) {
+    setProducerSeleccionado(p);
+    setBusqueda(p.nombre_completo);
+    setSugerencias([]);
+    setForm(f => ({ ...f, producer_id: String(p.producer_id), nombre_productor_libre: p.nombre_completo }));
+  }
+
+  function activarModoLibre() {
+    setModoLibre(true);
+    setSugerencias([]);
+    setProducerSeleccionado(null);
+    setForm(f => ({ ...f, producer_id: '' }));
+    setBusqueda('');
+  }
 
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
+  const filteredVars = form.tipo_maiz === 'criollo'
+    ? variedades.filter(v => ['CRIOLLO_LOCAL','NO_SABE'].includes(v.code))
+    : variedades.filter(v => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const payload = {
+      ...form,
+      producer_id: form.producer_id ? Number(form.producer_id) : undefined,
+    };
     setLoading(true);
     try {
-      await api.transacciones.create(form);
+      await api.transacciones.create(payload);
       alert('Transacción registrada. El productor recibirá notificación si está en el sistema.');
-      navigate('/transacciones');
+      navigate('/transacciones', { replace: true });
     } catch (err: any) {
       alert(err.message);
     } finally { setLoading(false); }
@@ -49,15 +112,63 @@ export default function B13Transaccion() {
               {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
             </select>
           </div>
-          <div>
-            <label className={labelClass}>Nombre del productor</label>
-            <input
-              type="text"
-              value={form.nombre_productor_libre}
-              onChange={e => set('nombre_productor_libre', e.target.value)}
-              placeholder="Busca por nombre o CURP, o escribe libremente"
-              className={inputClass}
-            />
+          <div className="relative">
+            <label className={labelClass}>Productor</label>
+            {!modoLibre ? (
+              <>
+                <div className="relative">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={busqueda}
+                    onChange={e => { setBusqueda(e.target.value); setProducerSeleccionado(null); setForm(f => ({...f, producer_id: '', nombre_productor_libre: e.target.value})); }}
+                    placeholder="Busca por nombre o CURP (mín. 3 caracteres)"
+                    className={`${inputClass} pl-10`}
+                  />
+                  {producerSeleccionado && (
+                    <UserCheck size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1A5C38]" />
+                  )}
+                </div>
+                {sugerencias.length > 0 && (
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-black/[0.06] overflow-hidden">
+                    {sugerencias.map(p => (
+                      <button type="button" key={p.producer_id}
+                        onClick={() => seleccionarProducer(p)}
+                        className="w-full text-left px-4 py-3 hover:bg-[#F2F2F7] active:bg-[#F2F2F7] border-b border-gray-50 last:border-0">
+                        <p className="text-[14px] font-semibold text-gray-900">{p.nombre_completo}</p>
+                        <p className="text-[12px] text-gray-400">{p.municipio} · CURP: …{p.curp_parcial}</p>
+                      </button>
+                    ))}
+                    <button type="button"
+                      onClick={activarModoLibre}
+                      className="w-full text-left px-4 py-3 text-[#1A5C38] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#F2F2F7]">
+                      <PenLine size={14} /> + Registrar nombre manualmente
+                    </button>
+                  </div>
+                )}
+                {busqueda.length >= 3 && sugerencias.length === 0 && !producerSeleccionado && (
+                  <button type="button" onClick={activarModoLibre}
+                    className="mt-1.5 text-[13px] text-[#1A5C38] font-semibold flex items-center gap-1.5">
+                    <PenLine size={13} /> + Registrar nombre manualmente
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="relative">
+                <input
+                  type="text"
+                  value={form.nombre_productor_libre}
+                  onChange={e => set('nombre_productor_libre', e.target.value)}
+                  placeholder="Escribe el nombre del productor"
+                  autoFocus
+                  className={inputClass}
+                />
+                <button type="button" onClick={() => { setModoLibre(false); setBusqueda(''); }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-gray-400 hover:text-gray-600">
+                  Buscar
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -66,25 +177,20 @@ export default function B13Transaccion() {
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Tipo de maíz</p>
           <div>
             <label className={labelClass}>Tipo de maíz</label>
-            <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
+            <select value={form.tipo_maiz} onChange={e => { set('tipo_maiz', e.target.value); set('variedad_code', ''); }} required className={inputClass}>
               <option value="">Selecciona tipo</option>
-              {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)}
+              {TIPOS_MAIZ.map(t => <option key={t.code} value={t.code}>{t.label}</option>)}
             </select>
           </div>
-          <div>
-            <label className={labelClass}>Variedad</label>
-            <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)} className={inputClass}>
-              <option value="">Sin especificar</option>
-              <option value="CRIOLLO_LOCAL">Criollo / local</option>
-              <option value="H-40">H-40</option>
-              <option value="H-48">H-48</option>
-              <option value="H-50">H-50</option>
-              <option value="H-52">H-52</option>
-              <option value="VS-22">VS-22</option>
-              <option value="VS-23">VS-23</option>
-              <option value="OTRA">Otra</option>
-            </select>
-          </div>
+          {form.tipo_maiz && (
+            <div>
+              <label className={labelClass}>Variedad <span className="text-gray-400 font-normal">(opcional)</span></label>
+              <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)} className={inputClass}>
+                <option value="">Sin especificar / No sabe</option>
+                {filteredVars.map(v => <option key={v.code} value={v.code}>{v.label}</option>)}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Volumen, precio y fecha */}

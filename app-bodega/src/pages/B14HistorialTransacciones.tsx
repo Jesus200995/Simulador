@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, ClipboardList } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -14,13 +14,17 @@ export default function B14HistorialTransacciones() {
   const [txs, setTxs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
+  const cargar = useCallback(() => {
+    setLoading(true);
     api.transacciones.list()
-      .then((r: any) => setTxs(r))
+      .then((r: any) => setTxs(Array.isArray(r) ? r : []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { cargar(); }, [cargar, location.key]);
 
   return (
     <div className="w-full">

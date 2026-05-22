@@ -40,7 +40,7 @@ export default function B06BodegaDetalle() {
     { key: 'general', label: 'General' },
     { key: 'inventario', label: 'Inventario' },
     { key: 'precios', label: 'Precios' },
-    { key: 'senales', label: 'Señales' },
+    { key: 'senales', label: 'Requerimientos' },
   ];
 
   const ultimoInventario = inventarios[0] || null;
@@ -94,7 +94,8 @@ export default function B06BodegaDetalle() {
             <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
               <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Información</p>
               {[
-                ['Capacidad', `${(bodega.capacidad_ton || 0).toLocaleString()} ton`],
+                ['Capacidad', bodega.capacidad_ton ? `${Number(bodega.capacidad_ton).toLocaleString()} ton` : '—'],
+
                 ['Localidad', bodega.localidad || '—'],
                 ['Estatus operativo', bodega.estatus_operativo || '—'],
                 ['Coordenadas', `${bodega.latitud?.toFixed(4) || '—'}, ${bodega.longitud?.toFixed(4) || '—'}`],
@@ -143,8 +144,6 @@ export default function B06BodegaDetalle() {
                 {[
                   ['Tipo de maíz', ultimoInventario.tipo_maiz || '—'],
                   ['Vol. almacenado', `${(ultimoInventario.volumen_almacenamiento || 0).toLocaleString()} ton`],
-                  ['Vol. con problema', `${(ultimoInventario.volumen_problema || 0).toLocaleString()} ton`],
-                  ['Humedad', ultimoInventario.humedad_pct ? `${ultimoInventario.humedad_pct}%` : '—'],
                   ['Calidad', ultimoInventario.calidad || '—'],
                   ['Ciclo', ultimoInventario.ciclo || '—'],
                 ].map(([k, v]) => (

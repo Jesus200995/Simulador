@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Receipt, Tag, Store, FileText, Warehouse } from 'lucide-react';
+import { ChevronRight, Receipt, Tag, Store, FileText, Warehouse, TrendingUp } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
 const ACCIONES = [
@@ -7,7 +7,8 @@ const ACCIONES = [
   { icon: Receipt,   label: 'Historial de transacciones', desc: 'Compras registradas',         path: '/transacciones', iconBg: 'bg-blue-50',           iconColor: 'text-blue-600' },
   { icon: Store,     label: 'Tarifario de servicios',     desc: 'Precios de servicios',        path: '/tarifario',     iconBg: 'bg-purple-50',         iconColor: 'text-purple-600' },
   { icon: Warehouse, label: 'Mis ventanillas',            desc: 'Apoyos para productores',    path: '/ventanillas',   iconBg: 'bg-orange-50',         iconColor: 'text-orange-500' },
-  { icon: FileText,  label: 'Señales de compra',          desc: 'Notifica a productores',     path: '/senales/nueva', iconBg: 'bg-cyan-50',           iconColor: 'text-cyan-600' },
+  { icon: FileText,    label: 'Requerimientos de maíz',      desc: 'Notifica a productores',     path: '/senales/nueva',     iconBg: 'bg-cyan-50',         iconColor: 'text-cyan-600' },
+  { icon: TrendingUp,  label: 'Precios de mercado',          desc: 'Bodega vs gobierno vs mercado', path: '/precios-mercado', iconBg: 'bg-indigo-50',       iconColor: 'text-indigo-600' },
 ];
 
 export default function MasPage() {
@@ -26,9 +27,9 @@ export default function MasPage() {
             <span className="text-[18px] font-black text-white">{initials}</span>
           </div>
           <div>
-            <p className="text-[18px] font-black text-white leading-tight">{user?.nombre_completo || 'Bodeguero'}</p>
+            <p className="text-[18px] font-black text-white leading-tight">{user?.nombre_completo || 'Usuario'}</p>
             <p className="text-green-200/80 text-[12px] mt-0.5">{user?.email || ''}</p>
-            <span className="inline-block mt-1.5 bg-white/20 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Bodeguero</span>
+            <span className="inline-block mt-1.5 bg-white/20 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize">{user?.rol || 'Bodega'}</span>
           </div>
         </div>
       </div>

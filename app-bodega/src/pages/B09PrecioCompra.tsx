@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 
@@ -11,11 +12,13 @@ export default function B09PrecioCompra() {
   const [variedades, setVariedades] = useState<any[]>([]);
   const [form, setForm] = useState({
     bodega_id: params.get('bodega_id') || '',
-    tipo_maiz: '', variedad_code: '', humedad_pct: '', calidad: '',
+    tipo_maiz: '', variedad_code: '', calidad: '',
     precio: '', observaciones: '',
   });
   const [loading, setLoading] = useState(false);
   const [precioAnterior, setPrecioAnterior] = useState<number | null>(null);
+  const [historialPrecios, setHistorialPrecios] = useState<{fecha: string; precio: number}[]>([]);
+  const precioPreloaded = useRef(false);
 
   useEffect(() => {
     api.bodeguero.misBodegas().then((r: any) => setBodegas(r)).catch(() => {});
@@ -31,8 +34,18 @@ export default function B09PrecioCompra() {
     if (form.bodega_id) {
       api.infraestructura.precios(Number(form.bodega_id))
         .then((r: any) => {
-          const precios = r.precios || r;
+          const precios: {precio: number; fecha: string}[] = r.precios || r;
           if (precios[0]?.precio) setPrecioAnterior(precios[0].precio);
+          const ultimos30 = precios
+            .filter(p => p.fecha)
+            .slice(0, 30)
+            .reverse()
+            .map(p => ({ fecha: p.fecha.slice(5), precio: Number(p.precio) }));
+          setHistorialPrecios(ultimos30);
+          if (!precioPreloaded.current && precios[0]?.precio) {
+            precioPreloaded.current = true;
+            setForm(f => ({ ...f, precio: String(precios[0].precio) }));
+          }
         }).catch(() => {});
     }
   }, [form.bodega_id]);
@@ -78,27 +91,19 @@ export default function B09PrecioCompra() {
             <label className={labelClass}>Tipo de maíz</label>
             <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
               <option value="">Selecciona tipo</option>
-              {tiposMaiz.length > 0
-                ? tiposMaiz.map((t: {code: string; label: string}) => <option key={t.code} value={t.code}>{t.label}</option>)
-                : [['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)
-              }
+              {(tiposMaiz.length > 0 ? tiposMaiz : [{code:'blanco',label:'Maíz Blanco'},{code:'amarillo',label:'Maíz Amarillo'},{code:'criollo',label:'Criollo / Local'}])
+                .map((t: {code: string; label: string}) => <option key={t.code} value={t.code}>{t.label}</option>)}
             </select>
           </div>
           <div>
             <label className={labelClass}>Variedad</label>
             <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)} className={inputClass}>
               <option value="">Sin especificar</option>
-              {variedades.length > 0
-                ? variedades.map((v: {code: string; label: string}) => <option key={v.code} value={v.code}>{v.label}</option>)
-                : ['NO_SABE','CRIOLLO_LOCAL','H-40','H-48','H-50','H-52','H-66','H-70','VS-22','VS-23','OTRA'].map(c => <option key={c} value={c}>{c}</option>)
-              }
+              {variedades
+                .filter((v: {tipo_maiz?: string}) => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz || form.tipo_maiz === '')
+                .map((v: {code: string; label: string}) => <option key={v.code} value={v.code}>{v.label}</option>)}
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Humedad base (%)</label>
-              <input type="number" value={form.humedad_pct} onChange={e => set('humedad_pct', e.target.value)} step="0.1" placeholder="14.0" className={inputClass} />
-            </div>
             <div>
               <label className={labelClass}>Calidad</label>
               <select value={form.calidad} onChange={e => set('calidad', e.target.value)} className={inputClass}>
@@ -107,7 +112,6 @@ export default function B09PrecioCompra() {
                 <option value="segunda">Segunda</option>
               </select>
             </div>
-          </div>
         </div>
 
         {/* Precio destacado */}
@@ -142,6 +146,24 @@ export default function B09PrecioCompra() {
           {loading ? 'Publicando…' : 'Publicar precio'}
         </button>
       </form>
+
+      {/* C-08: Historial de precios — gráfica últimos 30 días */}
+      {historialPrecios.length > 1 && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-8 mt-2">
+          <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5">
+            <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Historial de precios — últimos 30 días</p>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={historialPrecios} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${v.toLocaleString()}`} width={72} />
+                <Tooltip formatter={(v) => [`$${Number(v).toLocaleString()}/ton`, 'Precio']} labelStyle={{ fontSize: 12 }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }} />
+                <Line type="monotone" dataKey="precio" stroke="#1A5C38" strokeWidth={2} dot={{ r: 3, fill: '#1A5C38' }} activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

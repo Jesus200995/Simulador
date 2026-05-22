@@ -40,6 +40,31 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       [bodega_id, userId, nombre_enlace_agricultura, nombre_ventanilla || null, telefono_responsable, correo_responsable, tipo]
     );
     await pool.query('UPDATE bodegas SET es_ventanilla = TRUE WHERE id = $1', [bodega_id]);
+
+    // C-20: Notificar productores cercanos (best-effort)
+    try {
+      const ventanilla = result.rows[0];
+      const bodegaR = await pool.query(
+        'SELECT nombre, municipio, estado, localidad FROM bodegas WHERE id = $1',
+        [bodega_id]
+      );
+      const b = bodegaR.rows[0];
+      if (b) {
+        const tipoLabel: Record<string, string> = {
+          coberturas: 'Coberturas',
+          incentivos: 'Incentivos',
+          ambos: 'Coberturas e Incentivos',
+        };
+        const msg = `🏦 Nueva ventanilla de apoyos disponible en ${b.nombre} (${b.municipio}, ${b.estado}): ${tipoLabel[tipo] || tipo}. Contacto: ${nombre_enlace_agricultura} — Tel: ${telefono_responsable}.`;
+        await pool.query(
+          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+           SELECT id, 'nueva_ventanilla', $1, $2, 'ventanillas'
+           FROM usuarios WHERE rol IN ('productor','tecnico') AND activo = TRUE`,
+          [msg, ventanilla.id]
+        );
+      }
+    } catch (_) { /* best-effort */ }
+
     res.status(201).json(result.rows[0]);
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });

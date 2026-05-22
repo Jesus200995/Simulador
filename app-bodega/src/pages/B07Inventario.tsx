@@ -11,8 +11,8 @@ export default function B07Inventario() {
   const [form, setForm] = useState({
     bodega_id: params.get('bodega_id') || '',
     ciclo: '', tipo_maiz: '', variedad_code: '', origen: 'local',
-    volumen_almacenado: '', volumen_problema: '',
-    humedad_pct: '', calidad: '', fecha: new Date().toISOString().slice(0, 10), observaciones: '',
+    volumen_almacenado: '',
+    calidad: '', fecha: new Date().toISOString().slice(0, 10), observaciones: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -44,9 +44,11 @@ export default function B07Inventario() {
     } finally { setLoading(false); }
   }
 
+  const TIPOS_MAIZ_DEFAULT = [['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['criollo','Criollo / Local']];
+
   const filteredVars = form.tipo_maiz === 'criollo'
-    ? conceptos.variedades.filter(v => ['CRIOLLO_LOCAL', 'OTRA'].includes(v.code))
-    : conceptos.variedades;
+    ? conceptos.variedades.filter((v: {code: string}) => ['CRIOLLO_LOCAL','NO_SABE'].includes(v.code))
+    : conceptos.variedades.filter((v: {tipo_maiz?: string}) => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz);
 
   const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
@@ -85,10 +87,7 @@ export default function B07Inventario() {
             <label className={labelClass}>Tipo de maíz</label>
             <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
               <option value="">Selecciona tipo</option>
-              {conceptos.tipoMaiz.length > 0
-                ? conceptos.tipoMaiz.map(t => <option key={t.code} value={t.code}>{t.label}</option>)
-                : [['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['forrajero','Maíz Forrajero'],['palomero','Maíz Palomero'],['morado','Maíz Morado'],['criollo','Maíz Criollo']].map(([c,l]) => <option key={c} value={c}>{l}</option>)
-              }
+              {(conceptos.tipoMaiz.length > 0 ? conceptos.tipoMaiz : TIPOS_MAIZ_DEFAULT).map(([c,l]: [string,string]) => <option key={c} value={c}>{l}</option>)}
             </select>
           </div>
           {form.tipo_maiz && (
@@ -109,37 +108,20 @@ export default function B07Inventario() {
           </div>
         </div>
 
-        {/* Volúmenes */}
+        {/* Volumen y calidad */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volúmenes</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Vol. almacenado (ton)</label>
-              <input type="number" value={form.volumen_almacenado} onChange={e => set('volumen_almacenado', e.target.value)} required min="0" step="0.1" className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Vol. con problema (ton)</label>
-              <input type="number" value={form.volumen_problema} onChange={e => set('volumen_problema', e.target.value)} min="0" step="0.1" className={inputClass} />
-            </div>
+          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volumen y calidad</p>
+          <div>
+            <label className={labelClass}>Vol. almacenado (ton)</label>
+            <input type="number" value={form.volumen_almacenado} onChange={e => set('volumen_almacenado', e.target.value)} required min="0" step="0.1" className={inputClass} />
           </div>
-        </div>
-
-        {/* Calidad */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Calidad</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Humedad (%)</label>
-              <input type="number" value={form.humedad_pct} onChange={e => set('humedad_pct', e.target.value)} min="0" max="100" step="0.1" placeholder="14.5" className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Calidad</label>
-              <select value={form.calidad} onChange={e => set('calidad', e.target.value)} className={inputClass}>
-                <option value="">Sin especificar</option>
-                <option value="primera">Primera</option>
-                <option value="segunda">Segunda</option>
-              </select>
-            </div>
+          <div>
+            <label className={labelClass}>Calidad</label>
+            <select value={form.calidad} onChange={e => set('calidad', e.target.value)} required className={inputClass}>
+              <option value="">Selecciona calidad</option>
+              <option value="primera">Primera</option>
+              <option value="segunda">Segunda</option>
+            </select>
           </div>
         </div>
 

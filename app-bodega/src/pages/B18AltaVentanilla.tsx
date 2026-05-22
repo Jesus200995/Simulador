@@ -48,7 +48,7 @@ export default function B18AltaVentanilla() {
             </select>
           </div>
           <div>
-            <label className={labelClass}>Tipo de ventanilla</label>
+            <label className={labelClass}>Tipos de apoyos que hay en esta ventanilla</label>
             <div className="grid grid-cols-3 gap-2">
               {[['coberturas', 'Coberturas'], ['incentivos', 'Incentivos'], ['ambos', 'Ambos']].map(([k, l]) => (
                 <button
@@ -64,6 +64,7 @@ export default function B18AltaVentanilla() {
                 </button>
               ))}
             </div>
+            <p className="text-[12px] text-gray-400 mt-1.5">Selecciona qué apoyos del gobierno se gestionan en esta ventanilla</p>
           </div>
         </div>
 

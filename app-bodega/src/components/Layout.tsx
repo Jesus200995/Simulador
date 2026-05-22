@@ -7,7 +7,7 @@ const NAV = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Tablero' },
   { path: '/mis-bodegas', icon: Warehouse, label: 'Bodegas' },
   { path: '/oferta', icon: Users, label: 'Oferta' },
-  { path: '/transacciones', icon: Receipt, label: 'Historial' },
+  { path: '/transacciones', icon: Receipt, label: 'Transacciones' },
   { path: '/mas', icon: MoreHorizontal, label: 'Más' },
 ];
 
