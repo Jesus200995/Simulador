@@ -136,26 +136,47 @@ export default function B06BodegaDetalle() {
               <Zap size={16} /> Actualizar inventario
             </button>
             {ultimoInventario ? (
-              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
-                <div className="px-4 py-3 flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Último registro</p>
-                  <span className="text-[12px] text-gray-400">{ultimoInventario.fecha || '—'}</span>
-                </div>
-                {[
-                  ['Tipo de maíz', ultimoInventario.tipo_maiz || '—'],
-                  ['Vol. almacenado', `${(ultimoInventario.volumen_almacenamiento || 0).toLocaleString()} ton`],
-                  ['Calidad', ultimoInventario.calidad || '—'],
-                  ['Ciclo', ultimoInventario.ciclo || '—'],
-                ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between items-center px-4 py-3.5">
-                    <span className="text-[14px] text-gray-500">{k}</span>
-                    <span className="text-[14px] font-semibold text-gray-800">{v}</span>
+              <div className="space-y-3">
+                {/* Último inventario destacado */}
+                <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
+                  <div className="px-4 py-3 flex items-center justify-between">
+                    <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Último registro</p>
+                    <span className="text-[12px] text-gray-400">{ultimoInventario.fecha || '—'}</span>
                   </div>
-                ))}
-                {ultimoInventario.observaciones && (
-                  <div className="px-4 py-3.5">
-                    <p className="text-[11px] text-gray-400 uppercase tracking-widest mb-1">Observaciones</p>
-                    <p className="text-[14px] text-gray-700">{ultimoInventario.observaciones}</p>
+                  {[
+                    ['Tipo de maíz', ultimoInventario.tipo_maiz || '—'],
+                    ['Vol. almacenado', `${(ultimoInventario.volumen_almacenamiento || 0).toLocaleString()} ton`],
+                    ['Calidad', ultimoInventario.calidad || '—'],
+                    ['Ciclo', ultimoInventario.ciclo || '—'],
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex justify-between items-center px-4 py-3.5">
+                      <span className="text-[14px] text-gray-500">{k}</span>
+                      <span className="text-[14px] font-semibold text-gray-800">{v}</span>
+                    </div>
+                  ))}
+                  {ultimoInventario.observaciones && (
+                    <div className="px-4 py-3.5">
+                      <p className="text-[11px] text-gray-400 uppercase tracking-widest mb-1">Observaciones</p>
+                      <p className="text-[14px] text-gray-700">{ultimoInventario.observaciones}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Historial de inventarios (C-03) */}
+                {inventarios.length > 1 && (
+                  <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-50">
+                    <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Historial de inventarios</p>
+                    {inventarios.slice(1).map((inv: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between px-4 py-3">
+                        <div>
+                          <p className="text-[13px] font-semibold text-gray-800">
+                            {(inv.volumen_almacenamiento || 0).toLocaleString()} ton · {inv.tipo_maiz || '—'}
+                          </p>
+                          <p className="text-[11px] text-gray-400">{inv.calidad || 'Sin calidad'} · {inv.ciclo || ''}</p>
+                        </div>
+                        <span className="text-[12px] text-gray-400 flex-shrink-0 ml-2">{inv.fecha || '—'}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
