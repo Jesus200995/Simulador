@@ -151,6 +151,29 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 });
 
 // =============================================
+// GET /api/precios/series — Daily time-series for chart (last 30 days)
+// =============================================
+router.get('/series', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        fecha::text AS fecha,
+        ROUND(AVG(precio) FILTER (WHERE tipo_precio = 'bodega')::numeric, 2)    AS precio_bodega,
+        ROUND(AVG(precio) FILTER (WHERE tipo_precio = 'gobierno')::numeric, 2)  AS precio_gobierno,
+        ROUND(AVG(precio) FILTER (WHERE tipo_precio IN ('observado','mercado_internacional'))::numeric, 2) AS precio_mercado
+      FROM precios
+      WHERE fecha >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY fecha
+      ORDER BY fecha ASC
+    `);
+    res.json(result.rows);
+  } catch (err: any) {
+    console.error('Error en /precios/series:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
 // GET /api/precios/dashboard — KPIs y resumen
 // =============================================
 router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {

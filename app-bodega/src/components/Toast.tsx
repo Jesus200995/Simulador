@@ -1,94 +1,109 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { CheckCircle2, XCircle, Info, X } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'info';
 
-interface ToastItem {
-  id: number;
-  message: string;
-  type: ToastType;
-}
-
-interface ToastContextValue {
-  toast: (message: string, type?: ToastType) => void;
+interface ToastItem { id: number; message: string; type: ToastType; }
+interface ToastCtx {
+  toast:   (message: string, type?: ToastType) => void;
   confirm: (message: string) => Promise<boolean>;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+const ToastContext = createContext<ToastCtx | null>(null);
+let _n = 0;
 
-let _counter = 0;
+/* ─── Icon & accent per type ─── */
+const CFG: Record<ToastType, { icon: React.ReactNode; bar: string; bg: string }> = {
+  success: {
+    icon: <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />,
+    bar:  'bg-emerald-400',
+    bg:   'bg-white',
+  },
+  error: {
+    icon: <XCircle size={20} className="text-red-500 shrink-0" />,
+    bar:  'bg-red-400',
+    bg:   'bg-white',
+  },
+  info: {
+    icon: <Info size={20} className="text-blue-500 shrink-0" />,
+    bar:  'bg-blue-400',
+    bg:   'bg-white',
+  },
+};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const [dialog, setDialog] = useState<{ message: string; resolve: (v: boolean) => void } | null>(null);
+  const [toasts, setToasts]   = useState<ToastItem[]>([]);
+  const [dialog, setDialog]   = useState<{ msg: string } | null>(null);
   const resolveRef = useRef<((v: boolean) => void) | null>(null);
 
-  const removeToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
+  const remove = useCallback((id: number) =>
+    setToasts(p => p.filter(t => t.id !== id)), []);
 
   const toast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = ++_counter;
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => removeToast(id), 3500);
-  }, [removeToast]);
+    const id = ++_n;
+    setToasts(p => [...p, { id, message, type }]);
+    setTimeout(() => remove(id), 4000);
+  }, [remove]);
 
-  const confirm = useCallback((message: string): Promise<boolean> => {
-    return new Promise(resolve => {
-      resolveRef.current = resolve;
-      setDialog({ message, resolve });
-    });
-  }, []);
+  const confirm = useCallback((msg: string): Promise<boolean> =>
+    new Promise(res => { resolveRef.current = res; setDialog({ msg }); }), []);
 
-  function closeDialog(value: boolean) {
-    resolveRef.current?.(value);
+  function closeDialog(val: boolean) {
+    resolveRef.current?.(val);
     setDialog(null);
   }
-
-  const icons: Record<ToastType, React.ReactNode> = {
-    success: <CheckCircle size={18} className="shrink-0 text-emerald-500" />,
-    error:   <XCircle    size={18} className="shrink-0 text-red-500" />,
-    info:    <AlertCircle size={18} className="shrink-0 text-blue-500" />,
-  };
-
-  const borders: Record<ToastType, string> = {
-    success: 'border-l-4 border-emerald-400',
-    error:   'border-l-4 border-red-400',
-    info:    'border-l-4 border-blue-400',
-  };
 
   return (
     <ToastContext.Provider value={{ toast, confirm }}>
       {children}
 
-      {/* Toast container */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-[calc(100vw-32px)] max-w-sm pointer-events-none">
-        {toasts.map(t => (
-          <div key={t.id}
-            className={`pointer-events-auto flex items-start gap-3 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.14)] px-4 py-3.5 ${borders[t.type]} animate-slide-down`}>
-            {icons[t.type]}
-            <p className="flex-1 text-[14px] leading-snug text-gray-800 font-medium">{t.message}</p>
-            <button onClick={() => removeToast(t.id)} className="text-gray-300 hover:text-gray-500 mt-0.5">
-              <X size={14} />
-            </button>
-          </div>
-        ))}
+      {/* ── Toast stack (top-center) ── */}
+      <div className="fixed top-[env(safe-area-inset-top,0px)] left-0 right-0 z-[9999] flex flex-col items-center gap-2 pt-4 px-4 pointer-events-none">
+        {toasts.map(t => {
+          const c = CFG[t.type];
+          return (
+            <div key={t.id}
+              className={`animate-toast-in pointer-events-auto w-full max-w-[380px] ${c.bg}
+                rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.18)] overflow-hidden
+                flex items-stretch`}>
+              {/* left accent bar */}
+              <div className={`w-1 shrink-0 ${c.bar}`} />
+              <div className="flex items-center gap-3 px-4 py-3.5 flex-1 min-w-0">
+                {c.icon}
+                <p className="flex-1 text-[14px] font-medium text-gray-800 leading-snug">{t.message}</p>
+                <button onClick={() => remove(t.id)}
+                  className="text-gray-300 hover:text-gray-500 transition-colors shrink-0 ml-1">
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Confirm dialog */}
+      {/* ── Confirm dialog (always centered, strong blur) ── */}
       {dialog && (
-        <div className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <div className="px-6 pt-6 pb-4">
-              <p className="text-[16px] font-semibold text-gray-800 leading-snug text-center">{dialog.message}</p>
+        <div
+          className="animate-backdrop-in fixed inset-0 z-[9998] flex items-center justify-center p-5"
+          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+        >
+          <div className="animate-modal-in w-full max-w-[320px] bg-white rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.22)] overflow-hidden">
+            {/* Header */}
+            <div className="px-6 pt-7 pb-5 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                <XCircle size={26} className="text-red-400" />
+              </div>
+              <p className="text-[16px] font-semibold text-gray-900 leading-snug">{dialog.msg}</p>
+              <p className="text-[13px] text-gray-400 mt-1.5">Esta acción no se puede deshacer.</p>
             </div>
-            <div className="flex border-t border-gray-100">
+            {/* Buttons */}
+            <div className="flex divide-x divide-gray-100 border-t border-gray-100">
               <button onClick={() => closeDialog(false)}
-                className="flex-1 py-4 text-[16px] text-gray-500 font-medium border-r border-gray-100 active:bg-gray-50">
+                className="flex-1 py-4 text-[16px] font-medium text-gray-500 active:bg-gray-50 transition-colors">
                 Cancelar
               </button>
               <button onClick={() => closeDialog(true)}
-                className="flex-1 py-4 text-[16px] text-red-500 font-semibold active:bg-red-50">
+                className="flex-1 py-4 text-[16px] font-bold text-red-500 active:bg-red-50 transition-colors">
                 Confirmar
               </button>
             </div>
