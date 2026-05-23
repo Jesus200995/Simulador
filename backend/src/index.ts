@@ -72,7 +72,7 @@ app.use('/api/cat-conceptos-servicio', catConceptosRoutes);
 app.use('/api/ventanillas', ventanillasRoutes);
 app.use('/api/oferta', ofertaRoutes);
 app.use('/api/productores', productoresRoutes);
-app.use('/api/disponibilidad', disponibilidadRoutes);
+app.use('/api/productor/disponibilidad', disponibilidadRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

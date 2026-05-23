@@ -4,12 +4,12 @@ export interface Usuario {
   curp: string
   nombre_completo: string
   telefono: string
-  rol: 'productor' | 'supervisor' | 'bodeguero' | 'responsable' | 'admin'
+  rol: UserRole
   state_id?: string
   municipality_id?: string
 }
 
-export type UserRole = 'productor' | 'supervisor' | 'bodeguero' | 'responsable' | 'admin'
+export type UserRole = 'productor' | 'supervisor' | 'bodeguero' | 'responsable' | 'admin' | 'bodega'
 
 export interface LoginPayload {
   email: string

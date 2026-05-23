@@ -94,7 +94,7 @@ export default function B06BodegaDetalle() {
             <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
               <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Información</p>
               {[
-                ['Capacidad', bodega.capacidad_ton ? `${Number(bodega.capacidad_ton).toLocaleString()} ton` : 'Sin datos registrados'],
+                ['Capacidad', (bodega.capacidad_ton != null && bodega.capacidad_ton > 0) ? `${Number(bodega.capacidad_ton).toLocaleString()} ton` : 'Sin datos registrados'],
 
                 ['Localidad', bodega.localidad || '—'],
                 ['Estatus operativo', bodega.estatus_operativo || '—'],
@@ -236,8 +236,17 @@ export default function B06BodegaDetalle() {
             >
               <Signal size={16} /> Nueva señal de compra
             </button>
-            <div className="bg-white rounded-2xl border border-black/[0.06] p-4 text-center">
-              <p className="text-[14px] text-gray-400">Las señales activas se ven en la sección Oferta</p>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6 text-center">
+              <Signal size={32} className="text-gray-200 mx-auto mb-2" />
+              <p className="text-[14px] text-gray-400">
+                No hay requerimientos activos para esta bodega.
+              </p>
+              <button
+                onClick={() => navigate('/requerimientos')}
+                className="text-[14px] text-[#1A5C38] font-semibold underline mt-2 active:opacity-70"
+              >
+                Publicar un requerimiento
+              </button>
             </div>
           </div>
         )}

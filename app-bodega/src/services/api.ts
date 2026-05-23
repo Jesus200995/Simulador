@@ -142,9 +142,9 @@ export const api = {
       request(`/oferta/municipios/${encodeURIComponent(municipio)}/interes`, { method: 'POST', body: JSON.stringify(data) }),
   },
   disponibilidad: {
-    list: () => request('/disponibilidad'),
-    create: (data: any) => request('/disponibilidad', { method: 'POST', body: JSON.stringify(data) }),
-    cancel: (id: number) => request(`/disponibilidad/${id}`, { method: 'DELETE' }),
+    list: () => request('/productor/disponibilidad'),
+    create: (data: any) => request('/productor/disponibilidad', { method: 'POST', body: JSON.stringify(data) }),
+    cancel: (id: number) => request(`/productor/disponibilidad/${id}`, { method: 'DELETE' }),
   },
   precios: {
     dashboard: () => request('/precios/dashboard'),

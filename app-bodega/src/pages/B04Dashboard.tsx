@@ -117,9 +117,9 @@ export default function B04Dashboard() {
               />
               {stats.tiene_ventanilla ? (
                 <KPICard
-                  title="Solicitudes"
+                  title="Solicitudes a ventanillas"
                   value={stats.solicitudes_pendientes ?? 0}
-                  subtitle="pendientes en ventanilla"
+                  subtitle="pendientes de atención"
                   icon={<FileText size={15} />}
                   color="blue"
                   onClick={() => navigate('/ventanillas')}
@@ -136,9 +136,9 @@ export default function B04Dashboard() {
               )}
 
               <KPICard
-                title="Productores cercanos"
+                title="Productores de maíz cercanos"
                 value={stats.productores_cercanos ?? 0}
-                subtitle={`~${(stats.toneladas_cercanas ?? 0).toLocaleString()} ton disponibles`}
+                subtitle={`a tus bodegas · ~${(stats.toneladas_cercanas ?? 0).toLocaleString()} ton disponibles`}
                 icon={<Package size={15} />}
                 color="green"
                 onClick={() => navigate('/oferta')}

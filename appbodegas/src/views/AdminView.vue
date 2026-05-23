@@ -543,7 +543,7 @@ onMounted(fetchData)
 .usr-avatar--supervisor { background: linear-gradient(135deg, #2563EB, #1D4ED8); }
 .usr-avatar--responsable { background: linear-gradient(135deg, #EA580C, #C2410C); }
 .usr-avatar--admin { background: linear-gradient(135deg, #0F5132, #064E3B); }
-.usr-avatar--bodeguero { background: linear-gradient(135deg, #D97706, #B45309); }
+.usr-avatar--bodeguero, .usr-avatar--bodega { background: linear-gradient(135deg, #D97706, #B45309); }
 
 .usr-body { flex: 1; min-width: 0; }
 .usr-row-top { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
@@ -573,7 +573,7 @@ onMounted(fetchData)
 .usr-role-tag--supervisor { background: #DBEAFE; color: #1D4ED8; }
 .usr-role-tag--responsable { background: #FFF7ED; color: #C2410C; }
 .usr-role-tag--admin { background: #ECFDF5; color: #065F46; }
-.usr-role-tag--bodeguero { background: #FFFBEB; color: #B45309; }
+.usr-role-tag--bodeguero, .usr-role-tag--bodega { background: #FFFBEB; color: #B45309; }
 .usr-role-group .usr-btn--role {
   border-radius: 0; width: 34px; height: 100%;
   background: rgba(0,0,0,.05);

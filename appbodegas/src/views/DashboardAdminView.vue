@@ -1169,7 +1169,7 @@ function nivelLabel(n: string): string { return ({ critico: 'Critico', alto: 'Al
 function nivelPillClass(n: string): string { return ({ critico: 'pill-r', alto: 'pill-amber', medio: 'pill-b', bajo: 'pill-g' } as any)[n] || 'pill-gray' }
 function nivelStyle(n: string): string { return ({ critico: 'background:rgba(220,38,38,.08);color:#dc2626', alto: 'background:rgba(217,119,6,.08);color:#d97706', medio: 'background:rgba(37,99,235,.08);color:#2563eb', bajo: 'background:rgba(22,163,74,.08);color:#16a34a' } as any)[n] || '' }
 function estadoAlertaClass(e: string): string { return ({ pendiente: 'ebar-amber', confirmada: 'ebar-blue', atendida: 'ebar-green', descartada: 'ebar-gray' } as any)[e] || 'ebar-gray' }
-function rolLabel(r: string): string { return ({ admin: 'Admin', supervisor: 'Supervisor', productor: 'Productor', bodeguero: 'Bodeguero', responsable: 'Responsable', tecnico: 'Tecnico' } as any)[r] || r }
+function rolLabel(r: string): string { return ({ admin: 'Admin', supervisor: 'Supervisor', productor: 'Productor', bodega: 'Bodega', bodeguero: 'Bodega', responsable: 'Responsable', tecnico: 'Tecnico' } as any)[r] || r }
 function mbarPct(b: any): number { return b.capacidad_toneladas > 0 ? Math.min(100, Math.round((b.stock_actual / b.capacidad_toneladas) * 100)) : 0 }
 function mbarClass(b: any): string { const p = mbarPct(b); return p >= 90 ? 'mbar-r' : p >= 70 ? 'mbar-a' : 'mbar-g' }
 

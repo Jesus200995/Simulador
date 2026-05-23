@@ -13,8 +13,8 @@ export const useAuthStore = defineStore('auth', () => {
   const rol = computed<UserRole>(() => usuario.value?.rol || 'productor')
   const isProductor = computed(() => rol.value === 'productor')
   const isSupervisor = computed(() => rol.value === 'supervisor')
-  const isBodeguero = computed(() => rol.value === 'bodeguero' || rol.value === 'responsable')
-  const isResponsable = computed(() => rol.value === 'responsable' || rol.value === 'bodeguero')
+  const isBodeguero = computed(() => rol.value === 'bodega' || rol.value === 'bodeguero' || rol.value === 'responsable')
+  const isResponsable = computed(() => rol.value === 'responsable' || rol.value === 'bodeguero' || rol.value === 'bodega')
   const isAdmin = computed(() => rol.value === 'admin')
   const canCapture = computed(() => isProductor.value || isBodeguero.value || isAdmin.value)
 

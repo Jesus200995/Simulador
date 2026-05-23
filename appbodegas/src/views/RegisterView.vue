@@ -76,7 +76,7 @@
                 <option value="">Selecciona un rol</option>
                 <option value="productor">Productor / Sembrador</option>
                 <option value="supervisor">Supervisor</option>
-                <option value="bodeguero">Bodeguero</option>
+                <option value="bodega">Bodega</option>
               </select>
               <p v-if="errors.rol" class="rp-err">{{ errors.rol }}</p>
             </div>

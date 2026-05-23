@@ -131,7 +131,7 @@ const firstName = computed(() => {
 const roleLabel = computed(() => {
   const m: Record<string, string> = {
     productor: 'Productor', supervisor: 'Supervisor',
-    bodeguero: 'Bodeguero', responsable: 'Responsable', admin: 'Administrador',
+    bodega: 'Bodega', bodeguero: 'Bodega', responsable: 'Responsable', admin: 'Administrador',
   }
   return m[auth.rol] || 'Usuario'
 })
