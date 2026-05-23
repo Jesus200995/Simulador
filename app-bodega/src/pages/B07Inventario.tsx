@@ -92,7 +92,7 @@ export default function B07Inventario() {
               {(conceptos.tipoMaiz.length > 0
                 ? conceptos.tipoMaiz.map((t: any) => Array.isArray(t) ? t : [t.code || t.id, t.label || t.nombre || t.code])
                 : TIPOS_MAIZ_DEFAULT
-              ).map(([c, l]: [string, string]) => <option key={c} value={c}>{l}</option>)}
+              ).map((item: any) => <option key={item[0]} value={item[0]}>{item[1]}</option>)}
             </select>
           </div>
           {form.tipo_maiz && (
