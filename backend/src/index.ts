@@ -28,6 +28,7 @@ import catConceptosRoutes from './routes/cat-conceptos-servicio';
 import ventanillasRoutes from './routes/ventanillas';
 import ofertaRoutes from './routes/oferta';
 import productoresRoutes from './routes/productores';
+import { scheduleBodegaDailyJobs } from './jobs/bodegaDailyJobs';
 import pool from './config/database';
 
 dotenv.config();
@@ -85,6 +86,7 @@ app.get('/api/health', async (_req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📦 API disponible en http://localhost:${PORT}/api`);
+  scheduleBodegaDailyJobs();
 });
 
 export default app;

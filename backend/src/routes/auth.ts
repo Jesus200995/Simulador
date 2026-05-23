@@ -119,8 +119,7 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
     const secret = process.env.JWT_SECRET || 'default_secret';
     const token = jwt.sign(
       { userId: usuario.id, email: usuario.email, rol: usuario.rol },
-      secret,
-      { expiresIn: '30d' }
+      secret
     );
 
     res.status(201).json({
@@ -183,8 +182,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     const secret = process.env.JWT_SECRET || 'default_secret';
     const token = jwt.sign(
       { userId: usuario.id, email: usuario.email, rol: usuario.rol },
-      secret,
-      { expiresIn: '30d' }
+      secret
     );
 
     res.json({

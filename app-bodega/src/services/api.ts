@@ -13,7 +13,7 @@ function getToken(): string | null {
       localStorage.setItem('simac_token', t);
       return t;
     }
-  } catch (_) { /* ignore */ }
+  } catch { /* ignore */ }
   return null;
 }
 
@@ -34,7 +34,7 @@ async function request<T = any>(path: string, opts: RequestInit = {}): Promise<T
 
   const res = await fetch(`${BASE}${path}`, { ...opts, headers });
 
-  if (res.status === 401) {
+  if (res.status === 401 && !path.startsWith('/auth/')) {
     handle401();
     throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
   }
