@@ -89,7 +89,10 @@ export default function B07Inventario() {
             <label className={labelClass}>Tipo de maíz</label>
             <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
               <option value="">Selecciona tipo</option>
-              {(conceptos.tipoMaiz.length > 0 ? conceptos.tipoMaiz : TIPOS_MAIZ_DEFAULT).map(([c,l]: [string,string]) => <option key={c} value={c}>{l}</option>)}
+              {(conceptos.tipoMaiz.length > 0
+                ? conceptos.tipoMaiz.map((t: any) => Array.isArray(t) ? t : [t.code || t.id, t.label || t.nombre || t.code])
+                : TIPOS_MAIZ_DEFAULT
+              ).map(([c, l]: [string, string]) => <option key={c} value={c}>{l}</option>)}
             </select>
           </div>
           {form.tipo_maiz && (
