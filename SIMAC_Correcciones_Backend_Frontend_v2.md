@@ -2,8 +2,6 @@
 **Backend + Frontend — Módulo Bodega**  
 **Versión:** 2.0 · **Fecha:** Mayo 2026  
 **Para:** Equipo de desarrollo frontend/backend  
-**Repo:** github.com/Jesus200995/Simulador  
-**Auditoría realizada con:** Claude Code sobre el repositorio completo
 
 > ⚠️ Este documento consolida los errores detectados en la auditoría de backend (Claude Code) y las observaciones visuales del frontend. Está organizado por prioridad de impacto. Resolver primero los marcados como 🔴 CRÍTICO.
 

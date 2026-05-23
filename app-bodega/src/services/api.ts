@@ -138,6 +138,13 @@ export const api = {
       const qs = new URLSearchParams(params).toString();
       return request(`/oferta/municipios${qs ? '?' + qs : ''}`);
     },
+    interesMunicipio: (municipio: string, data: { bodega_id: number; tipo_maiz?: string; precio_ofrecido?: number }) =>
+      request(`/oferta/municipios/${encodeURIComponent(municipio)}/interes`, { method: 'POST', body: JSON.stringify(data) }),
+  },
+  disponibilidad: {
+    list: () => request('/disponibilidad'),
+    create: (data: any) => request('/disponibilidad', { method: 'POST', body: JSON.stringify(data) }),
+    cancel: (id: number) => request(`/disponibilidad/${id}`, { method: 'DELETE' }),
   },
   precios: {
     dashboard: () => request('/precios/dashboard'),

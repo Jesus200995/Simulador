@@ -80,10 +80,10 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 
     const senal = result.rows[0];
 
-    // C-14: Notificar productores con info completa de bodega (best-effort)
+    // C-14 + B-05 + F-06: Notificar productores filtrados por radio con info completa
     try {
       const bodegaR = await pool.query(
-        `SELECT b.nombre, b.municipio, b.estado, b.localidad,
+        `SELECT b.nombre, b.municipio, b.estado, b.localidad, b.latitud, b.longitud,
                 ic.telefono, ic.correo, ic.nombre AS contacto_nombre
          FROM bodegas b
          LEFT JOIN infraestructura_contactos ic ON ic.bodega_id = b.id AND ic.es_principal = TRUE
@@ -96,13 +96,67 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
         const vigLabel = vigencia_fin
           ? `del ${(vigencia_inicio || '').slice(0,10)} al ${vigencia_fin.slice(0,10)}`
           : '15 días';
-        const msg = `🔔 Requerimiento de maíz en ${b.nombre} (${b.municipio}, ${b.estado}): ${volumen_ton || '?'} ton de ${tipoLabel[tipo_maiz] || tipo_maiz} a $${Number(precio_ofrecido).toLocaleString()}/ton. Vigencia: ${vigLabel}.${b.telefono ? ` Contacto: ${b.contacto_nombre || b.nombre} — ${b.telefono}` : ''}${b.correo ? ` / ${b.correo}` : ''}`;
-        await pool.query(
-          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-           SELECT id, 'senal_compra', $1, $2, 'senales_compra'
-           FROM usuarios WHERE rol IN ('productor','tecnico') AND activo = TRUE`,
-          [msg, senal.id]
-        );
+        const radioReal = Number(radio_km) || 50;
+        const radioMetros = radioReal * 1000;
+
+        // Intentar filtrar por radio si hay coordenadas
+        let productoresNotif: { usuario_id: number; distancia_km: number }[] = [];
+        if (b.latitud && b.longitud) {
+          try {
+            const pgR = await pool.query(`
+              SELECT DISTINCT u2.id AS usuario_id,
+                ROUND((ST_Distance(
+                  ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                  ST_SetSRID(ST_Point($1, $2), 4326)::geography
+                ) / 1000)::numeric, 0) AS distancia_km
+              FROM up u
+              JOIN producer p ON p.producer_id = u.producer_id
+              JOIN usuarios u2 ON (u2.curp = p.curp OR u2.email = p.email)
+              WHERE u2.rol = 'productor' AND u2.activo = TRUE
+                AND ST_DWithin(
+                  ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                  ST_SetSRID(ST_Point($1, $2), 4326)::geography,
+                  $3
+                )
+              ORDER BY distancia_km ASC
+            `, [b.longitud, b.latitud, radioMetros]);
+            productoresNotif = pgR.rows;
+          } catch (_) { /* PostGIS no disponible */ }
+        }
+
+        // Fallback al estado si PostGIS no disponible o pocos resultados
+        if (productoresNotif.length < 5) {
+          const fallR = await pool.query(`
+            SELECT DISTINCT u2.id AS usuario_id, 0 AS distancia_km
+            FROM up u
+            JOIN producer p ON p.producer_id = u.producer_id
+            JOIN usuarios u2 ON (u2.curp = p.curp OR u2.email = p.email)
+            WHERE u2.rol = 'productor' AND u2.activo = TRUE
+              AND u.state_name ILIKE $1
+          `, [b.estado]);
+          productoresNotif = fallR.rows;
+        }
+
+        // Insertar notificación por productor con distancia real
+        for (const prod of productoresNotif) {
+          const distTxt = prod.distancia_km > 0
+            ? `a ${prod.distancia_km} km de tu parcela`
+            : `en tu estado`;
+          const msg =
+            `🔔 La bodega "${b.nombre}" busca maíz ${distTxt}.\n\n` +
+            `📍 ${b.municipio}, ${b.estado}\n` +
+            (b.telefono ? `📞 ${b.contacto_nombre || b.nombre} — ${b.telefono}\n` : '') +
+            `💰 Precio ofrecido: $${Number(precio_ofrecido).toLocaleString()}/ton\n` +
+            `🌽 Busca: ${volumen_ton || '?'} ton de ${tipoLabel[tipo_maiz] || tipo_maiz}\n` +
+            `📅 Vigencia: ${vigLabel}`;
+          try {
+            await pool.query(
+              `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+               VALUES ($1, 'senal_compra', $2, $3, 'senales_compra')`,
+              [prod.usuario_id, msg, senal.id]
+            );
+          } catch (_) { /* best-effort per user */ }
+        }
       }
     } catch (_) { /* best-effort */ }
 

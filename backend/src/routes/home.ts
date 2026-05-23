@@ -205,6 +205,64 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
       ]);
 
       const kpi = kpiRow.rows[0];
+
+      // B-06: productores cercanos KPI (PostGIS → fallback estado)
+      let productores_cercanos = 0;
+      let toneladas_cercanas = 0;
+      try {
+        // Check if disponibilidad_productor table exists
+        const hasDisp = await pool.query(
+          "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'disponibilidad_productor') AS e"
+        );
+        if (hasDisp.rows[0].e) {
+          // Try PostGIS-based distance query first
+          let pcR: any = null;
+          try {
+            pcR = await pool.query(`
+              SELECT
+                COUNT(DISTINCT dp.producer_id)::int AS cnt,
+                COALESCE(SUM(dp.volumen_estimado_ton), 0)::float AS ton
+              FROM disponibilidad_productor dp
+              JOIN up u ON u.up_id = dp.up_id
+              WHERE dp.activa = TRUE AND dp.fecha_vencimiento >= CURRENT_DATE
+                AND EXISTS (
+                  SELECT 1 FROM bodegas b
+                  JOIN bodeguero_bodegas bb ON bb.bodega_id = b.id
+                  WHERE bb.usuario_id = $1 AND bb.estatus = 'aprobada'
+                    AND b.latitud IS NOT NULL
+                    AND ST_DWithin(
+                      ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                      ST_SetSRID(ST_Point(b.longitud, b.latitud), 4326)::geography,
+                      50000
+                    )
+                )
+            `, [userId]);
+          } catch (_) { /* PostGIS not available */ }
+
+          if (pcR && pcR.rows[0].cnt > 0) {
+            productores_cercanos = pcR.rows[0].cnt;
+            toneladas_cercanas = pcR.rows[0].ton;
+          } else {
+            // Fallback: count by same state as bodega
+            const stR = await pool.query(`
+              SELECT
+                COUNT(DISTINCT dp.producer_id)::int AS cnt,
+                COALESCE(SUM(dp.volumen_estimado_ton), 0)::float AS ton
+              FROM disponibilidad_productor dp
+              JOIN up u ON u.up_id = dp.up_id
+              WHERE dp.activa = TRUE AND dp.fecha_vencimiento >= CURRENT_DATE
+                AND u.state_name ILIKE (
+                  SELECT b.estado FROM bodegas b
+                  JOIN bodeguero_bodegas bb ON bb.bodega_id = b.id
+                  WHERE bb.usuario_id = $1 AND bb.estatus = 'aprobada' LIMIT 1
+                )
+            `, [userId]);
+            productores_cercanos = stR.rows[0].cnt;
+            toneladas_cercanas = stR.rows[0].ton;
+          }
+        }
+      } catch (_) { /* ignore KPI calculation errors */ }
+
       res.json({
         role,
         stats: {
@@ -212,9 +270,12 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
           total_stock: kpi.total_stock,
           total_capacidad: kpi.total_capacidad,
           ocupacion_pct: kpi.ocupacion_pct,
+          espacio_libre: Math.max(0, (kpi.total_capacidad || 0) - (kpi.total_stock || 0)),
           ultimo_precio: kpi.ultimo_precio,
           tiene_ventanilla: ventRow.rows[0].c > 0,
           solicitudes_pendientes: solRow.rows[0].c,
+          productores_cercanos,
+          toneladas_cercanas,
         },
       });
       return;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../components/Toast';
 import { useSearchParams } from 'react-router-dom';
 import { Trash2, Wheat } from 'lucide-react';
@@ -36,6 +36,8 @@ export default function B10Requerimiento() {
   });
   const [loading, setLoading] = useState(false);
 
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     api.bodeguero.misBodegas().then((r: any) => setBodegas(r)).catch(() => {});
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/infraestructura/catalogos`, {
@@ -44,6 +46,12 @@ export default function B10Requerimiento() {
       setVariedades(r.variedades || []);
     }).catch(() => {});
     cargarRequerimientos();
+  }, []);
+
+  // F-05: Poll every 30s for interesados count updates
+  useEffect(() => {
+    pollRef.current = setInterval(() => cargarRequerimientos(), 30000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 
   async function cargarRequerimientos() {

@@ -144,6 +144,15 @@ export default function B03SelectBodegas() {
           })}
         </div>
 
+        {/* Leyenda F-07 */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mt-2">
+          <p className="text-[13px] text-amber-800 font-medium">¿Tu bodega no aparece en la lista?</p>
+          <p className="text-[12px] text-amber-700 mt-1">
+            Contacta al administrador del sistema para que registre tu bodega en el catálogo nacional.
+            Una vez registrada podrás asociarla a tu cuenta desde aquí.
+          </p>
+        </div>
+
         {/* Continuar sin seleccionar bodega */}
         <button
           onClick={() => navigate('/dashboard')}

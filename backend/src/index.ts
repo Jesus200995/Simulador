@@ -28,6 +28,7 @@ import catConceptosRoutes from './routes/cat-conceptos-servicio';
 import ventanillasRoutes from './routes/ventanillas';
 import ofertaRoutes from './routes/oferta';
 import productoresRoutes from './routes/productores';
+import disponibilidadRoutes from './routes/disponibilidad';
 import { scheduleBodegaDailyJobs } from './jobs/bodegaDailyJobs';
 import pool from './config/database';
 
@@ -71,6 +72,7 @@ app.use('/api/cat-conceptos-servicio', catConceptosRoutes);
 app.use('/api/ventanillas', ventanillasRoutes);
 app.use('/api/oferta', ofertaRoutes);
 app.use('/api/productores', productoresRoutes);
+app.use('/api/disponibilidad', disponibilidadRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

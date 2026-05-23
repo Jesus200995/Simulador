@@ -10,9 +10,12 @@ interface Stats {
   total_stock: number;
   total_capacidad: number;
   ocupacion_pct: number;
+  espacio_libre: number;
   ultimo_precio: number;
   tiene_ventanilla: boolean;
   solicitudes_pendientes: number;
+  productores_cercanos: number;
+  toneladas_cercanas: number;
 }
 
 export default function B04Dashboard() {
@@ -116,9 +119,9 @@ export default function B04Dashboard() {
               )}
 
               <KPICard
-                title="Productores cercanos a tus bodegas"
-                value={(stats as any).productores_cercanos ?? (stats.mis_bodegas ?? 0)}
-                subtitle={`~${(stats.total_stock ?? 0).toLocaleString()} ton disponibles en el área`}
+                title="Productores cercanos"
+                value={stats.productores_cercanos ?? 0}
+                subtitle={`~${(stats.toneladas_cercanas ?? 0).toLocaleString()} ton disponibles`}
                 icon={<Package size={15} />}
                 color="green"
                 onClick={() => navigate('/oferta')}
@@ -131,7 +134,7 @@ export default function B04Dashboard() {
                     <div className="bg-gray-100 rounded-full h-1.5 w-full overflow-hidden">
                       <div className={`h-full rounded-full ${barColor} transition-all`} style={{ width: `${Math.min(ocupPct, 100)}%` }} />
                     </div>
-                    <span className="block text-[10px]">{(stats.total_stock ?? 0).toLocaleString()} ton de {(stats.total_capacidad ?? 0).toLocaleString()} ton · {Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0)).toLocaleString()} ton libres</span>
+                    <span className="block text-[10px]">{(stats.total_stock ?? 0).toLocaleString()} ton de {(stats.total_capacidad ?? 0).toLocaleString()} ton · {(stats.espacio_libre ?? Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0))).toLocaleString()} ton libres</span>
                   </div>
                 }
                 icon={<Activity size={15} />}
