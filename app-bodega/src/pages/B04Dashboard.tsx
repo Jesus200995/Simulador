@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity, BadgeCheck, Factory } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
@@ -31,9 +31,20 @@ export default function B04Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const hora = new Date().getHours();
+  // Mexico timezone clock (always Mexico, not device)
+  const getMexicoTime = () => new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour: 'numeric', minute: '2-digit', hour12: true });
+  const getMexicoHour = () => Number(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City', hour: 'numeric', hour12: false }));
+  const [reloj, setReloj] = useState(getMexicoTime());
+  const clockRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    clockRef.current = setInterval(() => setReloj(getMexicoTime()), 1000);
+    return () => { if (clockRef.current) clearInterval(clockRef.current); };
+  }, []);
+
+  const hora = getMexicoHour();
   const saludo = hora < 12 ? '¡Buenos días!' : hora < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
-  const hoy = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
 
   const ocupPct = stats.ocupacion_pct ?? 0;
   const barColor = ocupPct < 70 ? 'bg-[#1A5C38]' : ocupPct < 90 ? 'bg-amber-400' : 'bg-red-500';
@@ -66,8 +77,8 @@ export default function B04Dashboard() {
               <p className="text-[13px] font-medium text-white/40 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
             </div>
           </div>
-          {/* Role badge + date row */}
-          <div className="flex items-center gap-3 mt-3">
+          {/* Role badge + date + Mexico clock row */}
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1">
               {user?.rol === 'industria'
                 ? <Factory size={11} className="text-green-200" />
@@ -76,6 +87,12 @@ export default function B04Dashboard() {
               <BadgeCheck size={11} className="text-green-300" />
             </div>
             <p className="text-green-200/60 text-[11px] capitalize">{hoy}</p>
+            {/* Reloj tiempo real México */}
+            <div className="ml-auto bg-[#22c55e]/20 border border-[#22c55e]/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+              <span className="text-[11px] font-bold text-white tracking-wide">{reloj}</span>
+              <span className="text-[9px] text-green-200/70 font-medium">MX</span>
+            </div>
           </div>
         </div>
       </div>
