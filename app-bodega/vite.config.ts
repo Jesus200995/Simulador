@@ -12,9 +12,9 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['icono.png'],
       manifest: {
-        name: 'SIMAC — Plan Nacional Maíz 2026',
-        short_name: 'SIMAC',
-        description: 'Sistema de Información para la Comercialización del Maíz — Módulo Bodega',
+        name: 'SOMEC — Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México',
+        short_name: 'SOMEC',
+        description: 'Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México — Módulo Bodega',
         start_url: '/',
         display: 'standalone',
         background_color: '#1A5C38',
