@@ -22,7 +22,7 @@ interface ProducerSuggestion {
 
 export default function B13Transaccion() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [variedades, setVariedades] = useState<{code: string; label: string; tipo_maiz?: string}[]>([]);
   const [form, setForm] = useState({
@@ -82,6 +82,11 @@ export default function B13Transaccion() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const productor = form.nombre_productor_libre || (producerSeleccionado?.nombre_completo ?? 'productor libre');
+    const ok = await confirm(
+      `¿Registrar compra de ${form.volumen_ton || '?'} ton a $${form.precio_ton || '?'}/ton\npara ${productor}?`
+    );
+    if (!ok) return;
     const payload = {
       ...form,
       producer_id: form.producer_id ? Number(form.producer_id) : undefined,

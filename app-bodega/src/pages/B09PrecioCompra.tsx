@@ -8,7 +8,7 @@ import { api } from '../services/api';
 export default function B09PrecioCompra() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [tiposMaiz, setTiposMaiz] = useState<any[]>([]);
   const [variedades, setVariedades] = useState<any[]>([]);
@@ -57,6 +57,8 @@ export default function B09PrecioCompra() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.bodega_id || !form.precio) { toast('Bodega y precio son requeridos', 'error'); return; }
+    const ok = await confirm(`¿Publicar precio $${form.precio}/ton para ${form.tipo_maiz || 'maíz'} hoy?`);
+    if (!ok) return;
     setLoading(true);
     try {
       await api.infraestructura.publicarPrecio(Number(form.bodega_id), {

@@ -14,7 +14,7 @@ const OPTIONS: { key: Sem; dotColor: string; label: string; desc: string; active
 ];
 
 export default function B08Semaforo() {
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Sem>('verde');
@@ -27,6 +27,9 @@ export default function B08Semaforo() {
   }, [id]);
 
   async function guardar() {
+    const labels: Record<string, string> = { verde: 'Comprando esta semana', amarillo: 'Capacidad limitada', rojo: 'No compro esta semana' };
+    const ok = await confirm(`¿Cambiar estado a "${labels[selected] || selected}"?`);
+    if (!ok) return;
     setSaving(true);
     try {
       await api.bodegas.semaforo(Number(id), selected);
