@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { CheckCircle2 } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 type Sem = 'verde' | 'amarillo' | 'rojo';
 
@@ -13,6 +14,7 @@ const OPTIONS: { key: Sem; dotColor: string; label: string; desc: string; active
 ];
 
 export default function B08Semaforo() {
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Sem>('verde');
@@ -29,7 +31,7 @@ export default function B08Semaforo() {
     try {
       await api.bodegas.semaforo(Number(id), selected);
       navigate(-1);
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) { toast(err.message, 'error'); }
     finally { setSaving(false); }
   }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useToast } from '../components/Toast';
 import { useSearchParams } from 'react-router-dom';
 import { Trash2, Wheat } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
@@ -18,6 +19,7 @@ const REGIONES_RADIO: Record<string, [number, number, number]> = {
 const today = new Date().toISOString().slice(0, 10);
 
 export default function B10Requerimiento() {
+  const { toast, confirm } = useToast();
   const [searchParams] = useSearchParams();
   const municipioPre = searchParams.get('municipio') || '';
 
@@ -64,28 +66,29 @@ export default function B10Requerimiento() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.vigencia_fin) { alert('Selecciona la fecha de fin'); return; }
-    if (form.vigencia_fin < form.vigencia_inicio) { alert('La fecha de fin no puede ser anterior al inicio'); return; }
+    if (!form.vigencia_fin) { toast('Selecciona la fecha de fin', 'error'); return; }
+    if (form.vigencia_fin < form.vigencia_inicio) { toast('La fecha de fin no puede ser anterior al inicio', 'error'); return; }
     setLoading(true);
     try {
       await api.senales.create({
         ...form,
         vigencia: 'rango',
       });
-      alert('Requerimiento publicado. Los productores en el radio serán notificados.');
+      toast('Requerimiento publicado. Los productores en el radio serán notificados.', 'success');
       setForm(f => ({ ...f, tipo_maiz: '', volumen_ton: '', precio_ofrecido: '', vigencia_fin: '' }));
       cargarRequerimientos();
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 
   async function cancelar(id: number) {
-    if (!confirm('¿Cancelar este requerimiento?')) return;
+    const ok = await confirm('¿Cancelar este requerimiento?');
+    if (!ok) return;
     try {
       await api.senales.cancel(id);
       cargarRequerimientos();
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) { toast(err.message, 'error'); }
   }
 
   const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';

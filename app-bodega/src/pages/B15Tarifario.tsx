@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import { Plus, Truck, Scale, Wind, Sun, Package, Shield, Tag } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 
 export default function B15Tarifario() {
+  const { toast } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [bodegaId, setBodegaId] = useState('');
   const [conceptos, setConceptos] = useState<any[]>([]);
@@ -49,7 +51,7 @@ export default function B15Tarifario() {
       setEditando(null);
       setPrecio('');
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setSaving(false); }
   }
 

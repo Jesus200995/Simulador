@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { useToast } from '../components/Toast';
 
 const REGIONES_RADIO: Record<string, [number, number, number]> = {
   Sinaloa: [30, 80, 200], Sonora: [30, 80, 200], Nayarit: [30, 80, 200],
@@ -10,6 +11,7 @@ const REGIONES_RADIO: Record<string, [number, number, number]> = {
 };
 
 export default function B10SenalCompra() {
+  const { toast, confirm } = useToast();
   const [params] = useSearchParams();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [senales, setSenales] = useState<any[]>([]);
@@ -42,20 +44,21 @@ export default function B10SenalCompra() {
     setLoading(true);
     try {
       await api.senales.create(form);
-      alert('Señal publicada. Los productores en el radio serán notificados.');
+      toast('Señal publicada. Los productores en el radio serán notificados.', 'success');
       setForm(f => ({ ...f, tipo_maiz: '', volumen_ton: '', precio_ofrecido: '' }));
       cargarSenales();
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 
   async function cancelar(id: number) {
-    if (!confirm('¿Cancelar esta señal?')) return;
+    const ok = await confirm('¿Cancelar esta señal?');
+    if (!ok) return;
     try {
       await api.senales.cancel(id);
       cargarSenales();
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) { toast(err.message, 'error'); }
   }
 
   const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';

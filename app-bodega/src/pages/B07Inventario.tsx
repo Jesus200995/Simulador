@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { useToast } from '../components/Toast';
 
 export default function B07Inventario() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [conceptos, setConceptos] = useState<{ tipoMaiz: any[]; variedades: any[]; ciclos: any[] }>({ tipoMaiz: [], variedades: [], ciclos: [] });
   const [form, setForm] = useState({
@@ -33,14 +35,14 @@ export default function B07Inventario() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.bodega_id) { alert('Selecciona una bodega'); return; }
+    if (!form.bodega_id) { toast('Selecciona una bodega', 'error'); return; }
     setLoading(true);
     try {
       await api.infraestructura.inventario(Number(form.bodega_id), form);
-      alert('Inventario guardado');
+      toast('Inventario guardado', 'success');
       navigate(-1);
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 

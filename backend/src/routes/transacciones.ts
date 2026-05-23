@@ -21,7 +21,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 
     const result = await pool.query(
       `SELECT t.*, b.nombre AS bodega_nombre,
-              COALESCE(p.nombre_completo, t.nombre_productor_libre) AS nombre_productor
+              COALESCE(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), t.nombre_productor_libre) AS nombre_productor
        FROM transacciones t
        JOIN bodegas b ON b.id = t.bodega_id
        LEFT JOIN producer p ON p.producer_id = t.producer_id

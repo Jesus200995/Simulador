@@ -10,27 +10,29 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
   const { tipo_maiz } = req.query;
 
   try {
-    let where = `WHERE cy.activo = TRUE`;
+    // cycle table has no 'activo' column; filter by recent cycle_year instead
+    let where = `WHERE cy.cycle_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1`;
     const params: any[] = [];
 
     if (tipo_maiz) {
+      // cycle_crop.crop contains the crop name (e.g. 'maiz'); tipo_maiz is an extra hint
       params.push(tipo_maiz);
-      where += ` AND cc.tipo_maiz = $${params.length}`;
+      where += ` AND (cc.variety_id = $${params.length} OR $${params.length}::text = 'all')`;
     }
 
     const result = await pool.query(
       `SELECT
-         u.municipio_nombre AS municipio,
-         u.estado_nombre AS estado,
+         COALESCE(u.municipality_name, u.municipality_id, 'Sin municipio') AS municipio,
+         COALESCE(u.state_name, u.state_id, 'Sin estado') AS estado,
          COUNT(DISTINCT p.producer_id) AS productores_disponibles,
-         COALESCE(SUM(cc.rendimiento_estimado_ton), 0) AS toneladas_estimadas,
+         COALESCE(SUM(cc.yield_expected), 0)::numeric(12,2) AS toneladas_estimadas,
          'esta_semana' AS ventana_predominante
        FROM up u
        JOIN producer p ON p.producer_id = u.producer_id
        JOIN cycle cy ON cy.up_id = u.up_id
-       LEFT JOIN cycle_crop cc ON cc.cycle_id = cy.cycle_id
+       LEFT JOIN cycle_crop cc ON cc.cycle_id = cy.cycle_id AND cc.crop = 'maiz'
        ${where}
-       GROUP BY u.municipio_nombre, u.estado_nombre
+       GROUP BY u.municipality_name, u.municipality_id, u.state_name, u.state_id
        HAVING COUNT(DISTINCT p.producer_id) > 0
        ORDER BY productores_disponibles DESC
        LIMIT 50`,

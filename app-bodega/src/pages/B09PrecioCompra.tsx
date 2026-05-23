@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
@@ -7,6 +8,7 @@ import { api } from '../services/api';
 export default function B09PrecioCompra() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [tiposMaiz, setTiposMaiz] = useState<any[]>([]);
   const [variedades, setVariedades] = useState<any[]>([]);
@@ -54,7 +56,7 @@ export default function B09PrecioCompra() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.bodega_id || !form.precio) { alert('Bodega y precio son requeridos'); return; }
+    if (!form.bodega_id || !form.precio) { toast('Bodega y precio son requeridos', 'error'); return; }
     setLoading(true);
     try {
       await api.infraestructura.publicarPrecio(Number(form.bodega_id), {
@@ -62,10 +64,10 @@ export default function B09PrecioCompra() {
         tipo_precio: 'bodega',
         fecha: new Date().toISOString().slice(0, 10),
       });
-      alert('Precio publicado correctamente');
+      toast('Precio publicado correctamente', 'success');
       navigate(-1);
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 

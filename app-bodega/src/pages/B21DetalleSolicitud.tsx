@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
+import { useToast } from '../components/Toast';
 
 const FLUJO = ['contactado', 'agendada', 'canalizada', 'cerrada'];
+
 
 const flujoColor: Record<string, string> = {
   contactado: 'border-yellow-400 bg-yellow-50 text-yellow-800',
@@ -13,6 +15,7 @@ const flujoColor: Record<string, string> = {
 };
 
 export default function B21DetalleSolicitud() {
+  const { toast } = useToast();
   const { id, sid } = useParams<{ id: string; sid: string }>();
   const [solicitud, setSolicitud] = useState<any>(null);
   const [nuevoEstado, setNuevoEstado] = useState('');
@@ -34,7 +37,7 @@ export default function B21DetalleSolicitud() {
       await api.ventanillas.cambiarEstado(Number(id), Number(sid), { estado: nuevoEstado, notas });
       navigate(`/ventanillas/${id}/solicitudes`);
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setSaving(false); }
   }
 

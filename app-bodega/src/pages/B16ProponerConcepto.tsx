@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
+import { useToast } from '../components/Toast';
 
 export default function B16ProponerConcepto() {
+  const { toast } = useToast();
   const [nombre, setNombre] = useState('');
   const [unidad, setUnidad] = useState('MXN/ton');
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ export default function B16ProponerConcepto() {
       await api.conceptos.proponer({ nombre, unidad_default: unidad });
       setOk(true);
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, UserCheck, PenLine } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { useToast } from '../components/Toast';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -21,6 +22,7 @@ interface ProducerSuggestion {
 
 export default function B13Transaccion() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [variedades, setVariedades] = useState<{code: string; label: string; tipo_maiz?: string}[]>([]);
   const [form, setForm] = useState({
@@ -87,10 +89,10 @@ export default function B13Transaccion() {
     setLoading(true);
     try {
       await api.transacciones.create(payload);
-      alert('Transacción registrada. El productor recibirá notificación si está en el sistema.');
+      toast('Transacción registrada. El productor recibirá notificación si está en el sistema.', 'success');
       navigate('/transacciones', { replace: true });
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 
@@ -196,7 +198,7 @@ export default function B13Transaccion() {
         {/* Volumen, precio y fecha */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volumen, precio y fecha</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Volumen (ton)</label>
               <input type="number" value={form.volumen_ton} onChange={e => set('volumen_ton', e.target.value)} required step="0.1" placeholder="50" className={inputClass} />
@@ -209,7 +211,7 @@ export default function B13Transaccion() {
           <div>
             <label className={labelClass}>Fecha de compra</label>
             <input type="date" value={form.fecha} onChange={e => set('fecha', e.target.value)} required
-              max={new Date().toISOString().slice(0, 10)} className={inputClass} />
+              max={new Date().toISOString().slice(0, 10)} className={`${inputClass} min-w-0`} style={{ WebkitAppearance: 'none', appearance: 'none' }} />
           </div>
           <div>
             <label className={labelClass}>Notas</label>

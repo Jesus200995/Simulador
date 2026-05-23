@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
+import { useToast } from '../components/Toast';
 
 export default function B18AltaVentanilla() {
+  const { toast } = useToast();
   const [bodegas, setBodegas] = useState<any[]>([]);
   const [form, setForm] = useState({
     bodega_id: '', tipo: '', nombre_enlace_agricultura: '',
@@ -25,7 +27,7 @@ export default function B18AltaVentanilla() {
       await api.ventanillas.create({ ...form, bodega_id: Number(form.bodega_id) });
       navigate('/ventanillas');
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     } finally { setLoading(false); }
   }
 
