@@ -30,7 +30,10 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
     // ── PRODUCTOR ──────────────────────────────────────────────
     if (role === 'productor') {
       const producerRow = await pool.query(
-        'SELECT producer_id, state_name, municipality_name FROM producer WHERE usuario_id = $1',
+        `SELECT p.producer_id, gs.name AS state_name
+         FROM producer p
+         LEFT JOIN geo_state gs ON gs.state_id = p.state_id
+         WHERE p.usuario_id = $1`,
         [userId]
       );
 

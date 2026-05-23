@@ -30,16 +30,17 @@ router.get('/buscar', authMiddleware, async (req: AuthRequest, res: Response): P
     const result = await pool.query(
       `SELECT
          p.producer_id,
-         p.nombre_completo,
-         COALESCE(p.municipio_nombre, p.municipality_name, '') AS municipio,
-         RIGHT(COALESCE(p.curp, ''), 4) AS curp_parcial
+         TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)) AS nombre_completo,
+         COALESCE(gm.name, p.municipality_id, '') AS municipio,
+         RIGHT(TRIM(COALESCE(p.curp, '')), 4) AS curp_parcial
        FROM producer p
+       LEFT JOIN geo_municipality gm ON gm.municipality_id = p.municipality_id
        WHERE (
-         UPPER(p.nombre_completo) LIKE $1
-         OR UPPER(COALESCE(p.curp, '')) LIKE $1
+         UPPER(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)) LIKE $1
+         OR UPPER(TRIM(COALESCE(p.curp, ''))) LIKE $1
          ${extra}
        )
-       ORDER BY p.nombre_completo
+       ORDER BY p.nombres, p.apellido_paterno
        LIMIT 10`,
       params
     );

@@ -47,33 +47,35 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       return;
     }
 
-    // Fecha de vencimiento: usar vigencia_fin si se proporciona, si no calcular por vigencia legacy
-    let fechaVencExpr: string;
-    let fechaVencParam: string | null = null;
+    // Calcular fecha_vencimiento: usar vigencia_fin si se proporciona, si no según vigencia
+    let fechaVenc: string;
     if (vigencia_fin) {
-      fechaVencParam = vigencia_fin;
-      fechaVencExpr = `$10`;
+      fechaVenc = vigencia_fin;
     } else if (vigencia === 'esta_semana') {
-      fechaVencExpr = `date_trunc('week', CURRENT_DATE) + INTERVAL '6 days'`;
+      // Domingo de esta semana
+      const d = new Date();
+      d.setDate(d.getDate() + (7 - d.getDay()) % 7 || 7);
+      fechaVenc = d.toISOString().slice(0, 10);
     } else {
-      fechaVencExpr = `CURRENT_DATE + INTERVAL '15 days'`;
+      // Default: 15 días
+      const d = new Date();
+      d.setDate(d.getDate() + 15);
+      fechaVenc = d.toISOString().slice(0, 10);
     }
 
-    const params: any[] = [
-      bodega_id, userId, tipo_maiz, variedad_code || null, volumen_ton || null,
-      precio_ofrecido, radio_km || 50, vigencia || 'rango',
-      vigencia_inicio || null,
-    ];
-    if (fechaVencParam) params.push(fechaVencParam);
+    // Mapear vigencia a valores permitidos por el CHECK constraint
+    const vigenciaDb = vigencia === 'rango' || vigencia === 'esta_semana' ? vigencia
+      : '15_dias';
 
-    // Insert con columnas opcionales vigencia_inicio (if column exists, safe fallback)
     const result = await pool.query(
       `INSERT INTO senales_compra
          (bodega_id, usuario_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido,
           radio_km, vigencia, vigencia_inicio, fecha_vencimiento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, (${fechaVencExpr}))
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
-      params
+      [bodega_id, userId, tipo_maiz, variedad_code || null, volumen_ton || null,
+       precio_ofrecido, radio_km || 50, vigenciaDb,
+       vigencia_inicio || null, fechaVenc]
     );
 
     const senal = result.rows[0];

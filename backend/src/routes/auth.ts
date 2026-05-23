@@ -120,7 +120,7 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
     const token = jwt.sign(
       { userId: usuario.id, email: usuario.email, rol: usuario.rol },
       secret,
-      { expiresIn: '24h' }
+      { expiresIn: '30d' }
     );
 
     res.status(201).json({
@@ -184,7 +184,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     const token = jwt.sign(
       { userId: usuario.id, email: usuario.email, rol: usuario.rol },
       secret,
-      { expiresIn: '24h' }
+      { expiresIn: '30d' }
     );
 
     res.json({

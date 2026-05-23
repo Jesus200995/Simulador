@@ -1,7 +1,27 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-function getToken() {
-  return localStorage.getItem('simac_token');
+function getToken(): string | null {
+  // Primary: directly stored key
+  const direct = localStorage.getItem('simac_token');
+  if (direct) return direct;
+  // Fallback: from zustand persisted state (in case simac_token was cleared)
+  try {
+    const persisted = JSON.parse(localStorage.getItem('simac-auth') || '{}');
+    const t = persisted?.state?.token as string | undefined;
+    if (t) {
+      // Re-sync the direct key so future calls are faster
+      localStorage.setItem('simac_token', t);
+      return t;
+    }
+  } catch (_) { /* ignore */ }
+  return null;
+}
+
+function handle401(): void {
+  // Clear all auth state and redirect to login
+  localStorage.removeItem('simac_token');
+  localStorage.removeItem('simac-auth');
+  window.location.href = '/login';
 }
 
 async function request<T = any>(path: string, opts: RequestInit = {}): Promise<T> {
@@ -13,6 +33,12 @@ async function request<T = any>(path: string, opts: RequestInit = {}): Promise<T
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}${path}`, { ...opts, headers });
+
+  if (res.status === 401) {
+    handle401();
+    throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || `HTTP ${res.status}`);
