@@ -162,7 +162,7 @@ export default function B09PrecioCompra() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#9ca3af' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${formatNum(v)}`} width={72} />
-                <Tooltip formatter={(v) => [`$${formatNum(v)}/ton`, 'Precio']} labelStyle={{ fontSize: 12 }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }} />
+                <Tooltip formatter={(v) => [`$${formatNum(Number(v))}/ton`, 'Precio']} labelStyle={{ fontSize: 12 }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }} />
                 <Line type="monotone" dataKey="precio" stroke="#1A5C38" strokeWidth={2} dot={{ r: 3, fill: '#1A5C38' }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
