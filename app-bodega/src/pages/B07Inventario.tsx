@@ -49,7 +49,9 @@ export default function B07Inventario() {
   const TIPOS_MAIZ_DEFAULT = [['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['criollo','Criollo / Local']];
 
   const filteredVars = form.tipo_maiz === 'criollo'
-    ? conceptos.variedades.filter((v: {code: string}) => ['CRIOLLO_LOCAL','NO_SABE'].includes(v.code))
+    ? conceptos.variedades.filter((v: {code: string; tipo_maiz?: string}) =>
+        ['MC_CRIOLLO', 'MC_NOSABE', 'CRIOLLO_LOCAL', 'NO_SABE'].includes(v.code) || v.tipo_maiz === 'criollo'
+      )
     : conceptos.variedades.filter((v: {tipo_maiz?: string}) => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz);
 
   const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
@@ -116,9 +118,26 @@ export default function B07Inventario() {
         {/* Volumen y calidad */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volumen y calidad</p>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-green-800 mb-1">
+              ¿Qué número debo escribir?
+            </p>
+            <p className="text-sm text-green-700 leading-relaxed">
+              Escribe el <strong>total de toneladas que tienes almacenadas
+              en este momento</strong> en la bodega — no solo lo que llegó hoy.
+            </p>
+            <p className="text-sm text-green-600 mt-2">
+              Ejemplo: Si tenías 800 ton y llegaron 200 ton más hoy,
+              escribe <strong>1,000</strong> (el total actual).
+            </p>
+          </div>
           <div>
-            <label className={labelClass}>Vol. almacenado (ton)</label>
-            <input type="number" value={form.volumen_almacenado} onChange={e => set('volumen_almacenado', e.target.value)} required min="0" step="0.1" className={inputClass} />
+            <label className={labelClass}>Stock actual total (ton)</label>
+            <input type="number" value={form.volumen_almacenado} onChange={e => set('volumen_almacenado', e.target.value)} required min="0" step="0.1" placeholder="Ej: 1,500" className={inputClass} />
+            <p className="text-xs text-gray-400 mt-1">
+              Este número reemplaza el registro anterior y representa
+              el total que hay en tu bodega ahora mismo.
+            </p>
           </div>
           <div>
             <label className={labelClass}>Calidad</label>

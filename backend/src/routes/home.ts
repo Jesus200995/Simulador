@@ -206,6 +206,29 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
 
       const kpi = kpiRow.rows[0];
 
+      // C-02: precio promedio regional (últimos 7 días, mismo estado)
+      let precio_promedio_regional = 0;
+      let bodegas_en_calculo = 0;
+      try {
+        const precioReg = await pool.query(`
+          SELECT
+            ROUND(AVG(pr.precio)::numeric, 2) AS precio_promedio_regional,
+            COUNT(DISTINCT pr.bodega_id)::int AS bodegas_en_calculo
+          FROM precios pr
+          JOIN bodegas b ON b.id = pr.bodega_id
+          WHERE pr.created_at >= CURRENT_DATE - INTERVAL '7 days'
+            AND pr.tipo_precio = 'bodega'
+            AND b.estado ILIKE (
+              SELECT b2.estado FROM bodegas b2
+              JOIN bodeguero_bodegas bb2 ON bb2.bodega_id = b2.id
+              WHERE bb2.usuario_id = $1 AND bb2.estatus = 'aprobada'
+              LIMIT 1
+            )
+        `, [userId]);
+        precio_promedio_regional = precioReg.rows[0]?.precio_promedio_regional || 0;
+        bodegas_en_calculo = precioReg.rows[0]?.bodegas_en_calculo || 0;
+      } catch (_) { /* ignore */ }
+
       // B-06: productores cercanos KPI (PostGIS → fallback estado)
       let productores_cercanos = 0;
       let toneladas_cercanas = 0;
@@ -272,6 +295,8 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
           ocupacion_pct: kpi.ocupacion_pct,
           espacio_libre: Math.max(0, (kpi.total_capacidad || 0) - (kpi.total_stock || 0)),
           ultimo_precio: kpi.ultimo_precio,
+          precio_promedio_regional,
+          bodegas_en_calculo,
           tiene_ventanilla: ventRow.rows[0].c > 0,
           solicitudes_pendientes: solRow.rows[0].c,
           productores_cercanos,

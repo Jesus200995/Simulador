@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 import { useToast } from '../components/Toast';
 import { Users, Wheat, Signal, Heart, MapPin } from 'lucide-react';
 
@@ -145,7 +146,7 @@ export default function B11OfertaTabla() {
                     <p className={`text-[22px] font-black ${
                       Number(d.toneladas_estimadas) >= 500 ? 'text-green-700' :
                       Number(d.toneladas_estimadas) >= 100 ? 'text-amber-700' : 'text-gray-800'
-                    }`}>{Number(d.toneladas_estimadas).toLocaleString()}</p>
+                    }`}>{formatNum(d.toneladas_estimadas)}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">

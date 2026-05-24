@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, ClipboardList } from 'lucide-react';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 const estadoBadge: Record<string, string> = {
   pendiente:    'bg-amber-50 text-amber-700 border border-amber-200',
@@ -59,7 +60,7 @@ export default function B14HistorialTransacciones() {
               </div>
               <p className="text-[12px] text-gray-400">{tx.bodega_nombre} · {tx.fecha}</p>
               <p className="text-[16px] font-bold text-[#1A5C38] mt-2">
-                {tx.volumen_ton} ton · ${tx.precio_ton?.toLocaleString()}/ton
+                {tx.volumen_ton} ton · ${formatNum(tx.precio_ton)}/ton
               </p>
               <p className="text-[11px] text-gray-400 mt-0.5">{tx.tipo_maiz}</p>
             </div>

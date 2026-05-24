@@ -4,6 +4,7 @@ import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehou
 import { KPICard } from '../components/KPICard';
 import { useAuthStore } from '../store/auth';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 interface Stats {
   mis_bodegas: number;
@@ -12,6 +13,8 @@ interface Stats {
   ocupacion_pct: number;
   espacio_libre: number;
   ultimo_precio: number;
+  precio_promedio_regional: number;
+  bodegas_en_calculo: number;
   tiene_ventanilla: boolean;
   solicitudes_pendientes: number;
   productores_cercanos: number;
@@ -105,12 +108,38 @@ export default function B04Dashboard() {
           </div>
         ) : (
           <>
+            {/* C-11: Onboarding cuando no tiene bodegas */}
+            {(stats.mis_bodegas ?? 0) === 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                <p className="font-semibold text-amber-800 mb-1">
+                  ¡Bienvenido a SIMAC!
+                </p>
+                <p className="text-[13px] text-amber-700 mb-3 leading-relaxed">
+                  Para comenzar necesitas asociar las bodegas que operas.
+                  Sin bodegas no podrás registrar inventarios, precios
+                  ni requerimientos de maíz.
+                </p>
+                <button
+                  onClick={() => navigate('/bodegas/seleccionar')}
+                  className="bg-amber-600 text-white text-[14px] font-semibold px-5 py-2.5 rounded-xl active:opacity-80 transition-opacity"
+                >
+                  Asociar mis bodegas →
+                </button>
+              </div>
+            )}
+
             {/* KPIs: 2 cols mobile → 4 cols desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <KPICard
                 title="Precio promedio de maíz al productor hoy"
-                value={stats.ultimo_precio ? `$${stats.ultimo_precio.toLocaleString()}` : '—'}
-                subtitle="MXN/ton · último publicado"
+                value={stats.precio_promedio_regional ? `$${Number(stats.precio_promedio_regional).toLocaleString('en-US')}` : (stats.ultimo_precio ? `$${Number(stats.ultimo_precio).toLocaleString('en-US')}` : '—')}
+                subtitle={
+                  stats.precio_promedio_regional && (stats.bodegas_en_calculo ?? 0) >= 3
+                    ? `MXN/ton · promedio regional · ${stats.bodegas_en_calculo} bodegas`
+                    : (stats.bodegas_en_calculo ?? 0) > 0 && (stats.bodegas_en_calculo ?? 0) < 3
+                      ? 'Sin suficientes datos regionales'
+                      : 'MXN/ton · último publicado'
+                }
                 icon={<DollarSign size={15} />}
                 color="green"
                 onClick={() => navigate('/precio-diario')}
@@ -138,7 +167,7 @@ export default function B04Dashboard() {
               <KPICard
                 title="Productores de maíz cercanos"
                 value={stats.productores_cercanos ?? 0}
-                subtitle={`a tus bodegas · ~${(stats.toneladas_cercanas ?? 0).toLocaleString()} ton disponibles`}
+                subtitle={`a tus bodegas · ~${formatNum(stats.toneladas_cercanas ?? 0)} ton disponibles`}
                 icon={<Package size={15} />}
                 color="green"
                 onClick={() => navigate('/oferta')}
@@ -151,7 +180,7 @@ export default function B04Dashboard() {
                     <div className="bg-gray-100 rounded-full h-1.5 w-full overflow-hidden">
                       <div className={`h-full rounded-full ${barColor} transition-all`} style={{ width: `${Math.min(ocupPct, 100)}%` }} />
                     </div>
-                    <span className="block text-[10px]">{(stats.total_stock ?? 0).toLocaleString()} ton de {(stats.total_capacidad ?? 0).toLocaleString()} ton · {(stats.espacio_libre ?? Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0))).toLocaleString()} ton libres</span>
+                    <span className="block text-[10px]">{formatNum(stats.total_stock ?? 0)} ton de {formatNum(stats.total_capacidad ?? 0)} ton · {formatNum(stats.espacio_libre ?? Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0)))} ton libres</span>
                   </div>
                 }
                 icon={<Activity size={15} />}

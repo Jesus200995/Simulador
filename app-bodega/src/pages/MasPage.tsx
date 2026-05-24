@@ -1,12 +1,14 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Receipt, Tag, Store, FileText, Warehouse, TrendingUp } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
+import { api } from '../services/api';
 
 const ACCIONES = [
   { icon: Tag,       label: 'Publicar precio del día',    desc: 'Precio diario al productor',  path: '/precio-diario',  iconBg: 'bg-[#1A5C38]/[0.08]', iconColor: 'text-[#1A5C38]' },
   { icon: Receipt,   label: 'Historial de transacciones', desc: 'Compras registradas',         path: '/transacciones', iconBg: 'bg-blue-50',           iconColor: 'text-blue-600' },
   { icon: Store,     label: 'Tarifario de servicios',     desc: 'Precios de servicios',        path: '/tarifario',     iconBg: 'bg-purple-50',         iconColor: 'text-purple-600' },
-  { icon: Warehouse, label: 'Mis ventanillas',            desc: 'Apoyos para productores',    path: '/ventanillas',   iconBg: 'bg-orange-50',         iconColor: 'text-orange-500' },
+  { icon: Warehouse, label: 'Mis ventanillas',            desc: null,                         path: '/ventanillas',   iconBg: 'bg-orange-50',         iconColor: 'text-orange-500' },
   { icon: FileText,    label: 'Requerimientos de maíz',      desc: 'Notifica a productores',     path: '/senales/nueva',     iconBg: 'bg-cyan-50',         iconColor: 'text-cyan-600' },
   { icon: TrendingUp,  label: 'Precios de mercado',          desc: 'Bodega vs gobierno vs mercado', path: '/precios-mercado', iconBg: 'bg-indigo-50',       iconColor: 'text-indigo-600' },
 ];
@@ -14,6 +16,13 @@ const ACCIONES = [
 export default function MasPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const [ventCount, setVentCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.ventanillas.list().then((r: any) => {
+      setVentCount(Array.isArray(r) ? r.length : (r?.ventanillas?.length ?? 0));
+    }).catch(() => {});
+  }, []);
 
   const initials = (user?.nombre_completo || 'B')
     .split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase();
@@ -49,7 +58,13 @@ export default function MasPage() {
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-semibold text-gray-900">{label}</p>
-                <p className="text-[12px] text-gray-400">{desc}</p>
+                <p className="text-[12px] text-gray-400">
+                  {desc !== null ? desc : (
+                    ventCount != null && ventCount > 0
+                      ? `${ventCount} ventanilla${ventCount !== 1 ? 's' : ''} activa${ventCount !== 1 ? 's' : ''}`
+                      : 'Toca para configurar una ventanilla de apoyo'
+                  )}
+                </p>
               </div>
               <ChevronRight size={16} className="text-gray-300 flex-shrink-0" />
             </button>

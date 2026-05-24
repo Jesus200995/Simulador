@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft } from 'lucide-react';
+import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft, Warehouse } from 'lucide-react';
+import { useToast } from '../components/Toast';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 interface Bodega { id: number; nombre: string; municipio: string; estado: string; capacidad_ton: number; }
 
@@ -14,25 +16,47 @@ export default function B03SelectBodegas() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [states, setStates] = useState<any[]>([]);
+  const [municipios, setMunicipios] = useState<any[]>([]);
+  const [municipio, setMunicipio] = useState('');
+  const [mostrarAlta, setMostrarAlta] = useState(false);
+  const [altaForm, setAltaForm] = useState({ nombre: '', estado: '', municipio: '', localidad: '', capacidad_ton: '', responsable: '', telefono: '', email: '' });
+  const [altaEstados, setAltaEstados] = useState<any[]>([]);
+  const [altaMunicipios, setAltaMunicipios] = useState<any[]>([]);
+  const [enviandoAlta, setEnviandoAlta] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  async function search(q = query, est = estado) {
+  async function search(q = query, est = estado, mun = municipio) {
     setLoading(true);
     try {
-      const res = await api.bodegas.list({ q, estado: est });
+      const res = await api.bodegas.list({ q, estado: est, municipio: mun });
       setResults((res.bodegas || res).slice(0, 30));
     } catch { /* ignore */ } finally { setLoading(false); }
   }
 
   useEffect(() => {
-    api.auth.states().then((r: any) => setStates(r.states || r)).catch(() => {});
-    search('', '');
+    api.auth.states().then((r: any) => { setStates(r.states || r); setAltaEstados(r.states || r); }).catch(() => {});
+    search('', '', '');
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => search(query, estado), 400);
+    if (estado) {
+      const st = states.find((s: any) => s.name === estado);
+      if (st) api.auth.municipalities(st.state_id).then((r: any) => setMunicipios(r.municipalities || [])).catch(() => {});
+    } else { setMunicipios([]); setMunicipio(''); }
+  }, [estado, states]);
+
+  useEffect(() => {
+    if (altaForm.estado) {
+      const st = altaEstados.find((s: any) => s.name === altaForm.estado || String(s.state_id) === altaForm.estado);
+      if (st) api.auth.municipalities(st.state_id).then((r: any) => setAltaMunicipios(r.municipalities || [])).catch(() => {});
+    } else { setAltaMunicipios([]); }
+  }, [altaForm.estado, altaEstados]);
+
+  useEffect(() => {
+    const t = setTimeout(() => search(query, estado, municipio), 400);
     return () => clearTimeout(t);
-  }, [query, estado]);
+  }, [query, estado, municipio]);
 
   function toggle(b: Bodega) {
     setSelected(s =>
@@ -109,13 +133,23 @@ export default function B03SelectBodegas() {
           </div>
           <select
             value={estado}
-            onChange={e => setEstado(e.target.value)}
+            onChange={e => { setEstado(e.target.value); setMunicipio(''); }}
             className="bg-white rounded-xl px-3 py-3.5 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm min-w-0 max-w-28"
           >
             <option value="">Estado</option>
             {states.map((s: any) => <option key={s.state_id} value={s.name}>{s.name}</option>)}
           </select>
         </div>
+        {estado && municipios.length > 0 && (
+          <select
+            value={municipio}
+            onChange={e => setMunicipio(e.target.value)}
+            className="w-full bg-white rounded-xl px-3 py-3.5 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm"
+          >
+            <option value="">Todos los municipios</option>
+            {municipios.map((m: any) => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
+          </select>
+        )}
 
         {/* Resultados */}
         {loading && <p className="text-center text-[14px] text-gray-400 py-4">Buscando…</p>}
@@ -129,7 +163,7 @@ export default function B03SelectBodegas() {
                   <p className="font-semibold text-[15px] text-gray-900 truncate">{b.nombre}</p>
                   <p className="text-[13px] text-gray-500 flex items-center gap-1 mt-0.5">
                     <MapPin size={11} />{b.municipio}, {b.estado}
-                    {b.capacidad_ton > 0 && ` · ${b.capacidad_ton.toLocaleString()} ton`}
+                    {b.capacidad_ton > 0 && ` · ${formatNum(b.capacidad_ton)} ton`}
                   </p>
                 </div>
                 <button
@@ -144,14 +178,89 @@ export default function B03SelectBodegas() {
           })}
         </div>
 
-        {/* Leyenda F-07 */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mt-2">
-          <p className="text-[13px] text-amber-800 font-medium">¿Tu bodega no aparece en la lista?</p>
-          <p className="text-[12px] text-amber-700 mt-1">
-            Contacta al administrador del sistema para que registre tu bodega en el catálogo nacional.
-            Una vez registrada podrás asociarla a tu cuenta desde aquí.
-          </p>
+        {/* C-07: Solicitar alta de bodega nueva */}
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <p className="text-[13px] text-gray-500 mb-3">¿No encontraste tu bodega en el catálogo?</p>
+          <button
+            onClick={() => setMostrarAlta(true)}
+            className="w-full border-2 border-dashed border-green-300 rounded-xl py-3 px-4 text-green-700 font-medium text-[14px] active:bg-green-50 transition-colors flex items-center justify-center gap-2"
+          >
+            <Warehouse size={16} /> Solicitar alta de bodega nueva
+          </button>
         </div>
+
+        {mostrarAlta && (
+          <div className="bg-white rounded-2xl border border-[#1A5C38]/20 shadow-md p-5 space-y-3">
+            <div className="flex justify-between items-center">
+              <p className="text-[15px] font-bold text-[#1A5C38]">Nueva bodega</p>
+              <button onClick={() => setMostrarAlta(false)} className="text-gray-400 active:text-red-500"><X size={18} /></button>
+            </div>
+            <p className="text-[12px] text-gray-400">Llena los datos y un administrador aprobará tu solicitud.</p>
+            {[
+              { k: 'nombre', label: 'Nombre de la bodega *', type: 'text' },
+            ].map(({ k, label, type }) => (
+              <div key={k}>
+                <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
+                <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
+              </div>
+            ))}
+            <div>
+              <label className="block text-[13px] font-medium text-gray-600 mb-1">Estado *</label>
+              <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
+                <option value="">Selecciona estado</option>
+                {altaEstados.map((s: any) => <option key={s.state_id} value={s.name}>{s.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[13px] font-medium text-gray-600 mb-1">Municipio *</label>
+              <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
+                <option value="">Selecciona municipio</option>
+                {altaMunicipios.map((m: any) => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
+              </select>
+            </div>
+            {[
+              { k: 'localidad', label: 'Localidad', type: 'text' },
+              { k: 'capacidad_ton', label: 'Capacidad total (ton) *', type: 'number' },
+              { k: 'responsable', label: 'Nombre del responsable *', type: 'text' },
+              { k: 'telefono', label: 'Teléfono (10 dígitos) *', type: 'tel' },
+              { k: 'email', label: 'Correo electrónico', type: 'email' },
+            ].map(({ k, label, type }) => (
+              <div key={k}>
+                <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
+                <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
+              </div>
+            ))}
+            <button
+              disabled={enviandoAlta || !altaForm.nombre || !altaForm.estado || !altaForm.municipio || !altaForm.capacidad_ton || !altaForm.responsable || !altaForm.telefono}
+              onClick={async () => {
+                setEnviandoAlta(true);
+                try {
+                  await api.bodegas.create({
+                    nombre: altaForm.nombre,
+                    estado: altaForm.estado,
+                    municipio: altaForm.municipio,
+                    localidad: altaForm.localidad,
+                    capacidad_ton: Number(altaForm.capacidad_ton),
+                    latitud: 0,
+                    longitud: 0,
+                    responsable: altaForm.responsable,
+                    telefono: altaForm.telefono,
+                    email: altaForm.email,
+                    estatus: 'pendiente',
+                  });
+                  toast('Tu solicitud fue enviada. Te notificaremos cuando sea aprobada.', 'success');
+                  setMostrarAlta(false);
+                  setAltaForm({ nombre: '', estado: '', municipio: '', localidad: '', capacidad_ton: '', responsable: '', telefono: '', email: '' });
+                } catch (err: any) {
+                  toast(err.message || 'Error al enviar solicitud', 'error');
+                } finally { setEnviandoAlta(false); }
+              }}
+              className="w-full bg-[#1A5C38] text-white rounded-2xl py-3.5 text-[15px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
+            >
+              {enviandoAlta ? 'Enviando…' : 'Enviar solicitud de alta'}
+            </button>
+          </div>
+        )}
 
         {/* Continuar sin seleccionar bodega */}
         <button

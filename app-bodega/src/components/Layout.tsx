@@ -1,7 +1,8 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Warehouse, Users, Receipt, MoreHorizontal, ChevronLeft, X, LogOut, User, Bell, Settings, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
+import { api } from '../services/api';
 
 const NAV = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Tablero' },
@@ -18,6 +19,18 @@ export function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [noLeidas, setNoLeidas] = useState(0);
+
+  useEffect(() => {
+    const fetchNotifs = () => {
+      api.notificaciones.mis()
+        .then((r: any) => setNoLeidas(r.total_no_leidas || 0))
+        .catch(() => {});
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   function handleLogout() {
     logout();
@@ -48,15 +61,28 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* Right: Avatar button */}
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 ml-3 flex-shrink-0 active:opacity-70 transition-opacity"
-        >
-          <div className="w-8 h-8 rounded-full bg-[#1A5C38] flex items-center justify-center shadow-sm">
-            <span className="text-white text-[12px] font-bold">{initials}</span>
-          </div>
-        </button>
+        {/* Right: Bell + Avatar */}
+        <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+          <button
+            onClick={() => navigate('/notificaciones')}
+            className="relative w-8 h-8 flex items-center justify-center rounded-full active:opacity-70 transition-opacity"
+          >
+            <Bell size={20} className="text-gray-500" />
+            {noLeidas > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold leading-none">
+                {noLeidas > 9 ? '9+' : noLeidas}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="active:opacity-70 transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-full bg-[#1A5C38] flex items-center justify-center shadow-sm">
+              <span className="text-white text-[12px] font-bold">{initials}</span>
+            </div>
+          </button>
+        </div>
       </header>
 
       {/* ── Main content ───────────────────────────────── */}
@@ -114,7 +140,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
           {[
             { icon: User, label: 'Mi perfil', action: () => {} },
-            { icon: Bell, label: 'Notificaciones', action: () => {} },
+            { icon: Bell, label: 'Notificaciones', action: () => { setDrawerOpen(false); navigate('/notificaciones'); } },
             { icon: Settings, label: 'Configuración', action: () => {} },
           ].map(({ icon: Icon, label, action }) => (
             <button key={label} onClick={action}

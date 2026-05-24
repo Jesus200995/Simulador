@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 import { Phone, MapPin, Zap, Package, BarChart2, Signal } from 'lucide-react';
 
 type Tab = 'general' | 'inventario' | 'precios' | 'senales';
@@ -94,7 +95,7 @@ export default function B06BodegaDetalle() {
             <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
               <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Información</p>
               {[
-                ['Capacidad', (bodega.capacidad_ton != null && bodega.capacidad_ton > 0) ? `${Number(bodega.capacidad_ton).toLocaleString()} ton` : 'Sin datos registrados'],
+                ['Capacidad', (bodega.capacidad_ton != null && bodega.capacidad_ton > 0) ? `${formatNum(bodega.capacidad_ton)} ton` : 'Sin datos registrados'],
 
                 ['Localidad', bodega.localidad || '—'],
                 ['Estatus operativo', bodega.estatus_operativo || '—'],
@@ -145,7 +146,7 @@ export default function B06BodegaDetalle() {
                   </div>
                   {[
                     ['Tipo de maíz', ultimoInventario.tipo_maiz || '—'],
-                    ['Vol. almacenado', `${(ultimoInventario.volumen_almacenamiento || 0).toLocaleString()} ton`],
+                    ['Vol. almacenado', `${formatNum(ultimoInventario.volumen_almacenamiento || 0)} ton`],
                     ['Calidad', ultimoInventario.calidad || '—'],
                     ['Ciclo', ultimoInventario.ciclo || '—'],
                   ].map(([k, v]) => (
@@ -170,7 +171,7 @@ export default function B06BodegaDetalle() {
                       <div key={i} className="flex items-center justify-between px-4 py-3">
                         <div>
                           <p className="text-[13px] font-semibold text-gray-800">
-                            {(inv.volumen_almacenamiento || 0).toLocaleString()} ton · {inv.tipo_maiz || '—'}
+                            {formatNum(inv.volumen_almacenamiento || 0)} ton · {inv.tipo_maiz || '—'}
                           </p>
                           <p className="text-[11px] text-gray-400">{inv.calidad || 'Sin calidad'} · {inv.ciclo || ''}</p>
                         </div>
@@ -213,7 +214,7 @@ export default function B06BodegaDetalle() {
                   {precios.slice(0, 5).map((p: any) => (
                     <div key={p.id} className="flex justify-between items-center py-2.5">
                       <span className="text-[13px] text-gray-400">{p.fecha} · {p.tipo_maiz}</span>
-                      <span className="text-[14px] font-bold text-[#1A5C38]">${p.precio?.toLocaleString()}/ton</span>
+                      <span className="text-[14px] font-bold text-[#1A5C38]">${formatNum(p.precio)}/ton</span>
                     </div>
                   ))}
                 </div>

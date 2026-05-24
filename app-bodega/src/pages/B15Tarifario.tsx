@@ -4,6 +4,7 @@ import { useToast } from '../components/Toast';
 import { Plus, Truck, Scale, Wind, Sun, Package, Shield, Tag } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 export default function B15Tarifario() {
   const { toast } = useToast();
@@ -89,7 +90,7 @@ export default function B15Tarifario() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       {tarifa ? (
-                        <p className="font-bold text-[16px] text-[#1A5C38]">${Number(tarifa.precio).toLocaleString()}</p>
+                        <p className="font-bold text-[16px] text-[#1A5C38]">${formatNum(tarifa.precio)}</p>
                       ) : (
                         <p className="text-[13px] text-gray-400">Sin precio</p>
                       )}

@@ -22,6 +22,7 @@ import B18AltaVentanilla from './pages/B18AltaVentanilla';
 import B20Solicitudes from './pages/B20Solicitudes';
 import B21DetalleSolicitud from './pages/B21DetalleSolicitud';
 import MasPage from './pages/MasPage';
+import B23Notificaciones from './pages/B23Notificaciones';
 import B22PreciosMercado from './pages/B22PreciosMercado';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -117,6 +118,10 @@ export const router = createBrowserRouter([
   {
     path: '/precios-mercado',
     element: <ProtectedLayout><B22PreciosMercado /></ProtectedLayout>,
+  },
+  {
+    path: '/notificaciones',
+    element: <ProtectedLayout><B23Notificaciones /></ProtectedLayout>,
   },
   { path: '/', element: <Navigate to="/dashboard" replace /> },
   { path: '*', element: <Navigate to="/dashboard" replace /> },

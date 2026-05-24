@@ -24,9 +24,9 @@ interface DashData {
 
 const COLORS = { precio_bodega: '#1A5C38', precio_gobierno: '#2563eb', precio_mercado: '#d97706' };
 const LABELS = {
-  precio_bodega:   'Bodega (precio pagado)',
-  precio_gobierno: 'Gobierno (ref.)',
-  precio_mercado:  'Mercado regional',
+  precio_bodega:   'Precio del Maíz',
+  precio_gobierno: 'Precio Internacional',
+  precio_mercado:  'Precio de Venta',
 };
 
 function trend(vals: (number | null)[]): 'up' | 'down' | 'flat' {
@@ -37,7 +37,7 @@ function trend(vals: (number | null)[]): 'up' | 'down' | 'flat' {
 
 function fmt(v: number | null) {
   if (v === null || v === 0) return '—';
-  return `$${Number(v).toLocaleString('es-MX', { minimumFractionDigits: 0 })}`;
+  return `$${Number(v).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
 }
 
 function TrendIcon({ dir }: { dir: 'up' | 'down' | 'flat' }) {
@@ -88,9 +88,9 @@ export default function B22PreciosMercado() {
   /* KPI cards */
   const ultimo = series[series.length - 1] ?? null;
   const kpis = ([
-    ['precio_bodega',   'Precio Bodega', 'Lo que pagas al productor'],
-    ['precio_gobierno', 'Precio Gobierno', 'Precio de referencia oficial'],
-    ['precio_mercado',  'Precio Mercado', 'Promedio regional observado'],
+    ['precio_bodega',   'Precio del Maíz', 'Lo que la bodega paga al productor'],
+    ['precio_gobierno', 'Precio Internacional', 'Referencia Chicago CME + margen'],
+    ['precio_mercado',  'Precio de Venta', 'Precio total de la cadena'],
   ] as [keyof SerieItem, string, string][]).map(([k, titulo, sub]) => {
     const vals = series.map(d => d[k] as number | null);
     const val  = vals.filter((v): v is number => v !== null).pop() ?? null;
@@ -143,6 +143,41 @@ export default function B22PreciosMercado() {
             </div>
           ))}
         </div>
+
+        {/* Despiece visual — cómo se construye el precio de venta */}
+        {pb && pm && (
+          <div className="bg-gray-50 rounded-2xl border border-black/[0.06] p-5">
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3">
+              ¿Cómo se construye el Precio de Venta?
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="bg-green-100 rounded-lg px-3 py-2 text-center">
+                <p className="text-[10px] text-green-700 font-medium">PO</p>
+                <p className="text-[15px] font-bold text-green-800">{fmt(pb)}</p>
+                <p className="text-[10px] text-green-600">Precio al productor</p>
+              </div>
+              <span className="text-gray-400 font-bold">+</span>
+              <div className="bg-blue-100 rounded-lg px-3 py-2 text-center">
+                <p className="text-[10px] text-blue-700 font-medium">S</p>
+                <p className="text-[15px] font-bold text-blue-800">—</p>
+                <p className="text-[10px] text-blue-600">Servicios bodega</p>
+              </div>
+              <span className="text-gray-400 font-bold">+</span>
+              <div className="bg-orange-100 rounded-lg px-3 py-2 text-center">
+                <p className="text-[10px] text-orange-700 font-medium">T+F</p>
+                <p className="text-[15px] font-bold text-orange-800">—</p>
+                <p className="text-[10px] text-orange-600">Transporte + flete</p>
+              </div>
+              <span className="text-gray-400 font-bold">=</span>
+              <div className="bg-amber-100 rounded-lg px-3 py-2 text-center">
+                <p className="text-[10px] text-amber-700 font-medium">PV</p>
+                <p className="text-[15px] font-bold text-amber-800">{fmt(pm)}</p>
+                <p className="text-[10px] text-amber-600">Precio de Venta</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-2">PV = PO + Servicios + Transporte + Margen</p>
+          </div>
+        )}
 
         {/* Posición vs mercado */}
         {pb && pm && (
@@ -206,7 +241,7 @@ export default function B22PreciosMercado() {
                 <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#9ca3af' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${(v/1000).toFixed(1)}k`} width={52} />
                 <Tooltip
-                  formatter={(v, name) => [`$${Number(v).toLocaleString()}/ton`, LABELS[String(name) as keyof typeof LABELS] || String(name)]}
+                  formatter={(v, name) => [`$${Number(v).toLocaleString('en-US')}/ton`, LABELS[String(name) as keyof typeof LABELS] || String(name)]}
                   labelStyle={{ fontSize: 12 }}
                   contentStyle={{ borderRadius: 14, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)', fontSize: 13 }}
                 />

@@ -4,6 +4,7 @@ import { useToast } from '../components/Toast';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 export default function B09PrecioCompra() {
   const [params] = useSearchParams();
@@ -125,7 +126,7 @@ export default function B09PrecioCompra() {
             <div className="flex items-center justify-between mb-1.5">
               <label className={labelClass + ' mb-0'}>Precio (MXN/ton)</label>
               {precioAnterior && (
-                <span className="text-[13px] text-gray-400">Ayer: ${precioAnterior.toLocaleString()}</span>
+                <span className="text-[13px] text-gray-400">Ayer: ${formatNum(precioAnterior)}</span>
               )}
             </div>
             <input
@@ -160,8 +161,8 @@ export default function B09PrecioCompra() {
               <LineChart data={historialPrecios} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${v.toLocaleString()}`} width={72} />
-                <Tooltip formatter={(v) => [`$${Number(v).toLocaleString()}/ton`, 'Precio']} labelStyle={{ fontSize: 12 }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${formatNum(v)}`} width={72} />
+                <Tooltip formatter={(v) => [`$${formatNum(v)}/ton`, 'Precio']} labelStyle={{ fontSize: 12 }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }} />
                 <Line type="monotone" dataKey="precio" stroke="#1A5C38" strokeWidth={2} dot={{ r: 3, fill: '#1A5C38' }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>

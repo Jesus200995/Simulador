@@ -36,11 +36,12 @@ router.get('/notificaciones/mis', authMiddleware, async (req: AuthRequest, res: 
     const result = await pool.query(`
       SELECT
         n.id, n.leida, n.created_at,
+        n.titulo, n.mensaje, n.tipo, n.referencia_id, n.referencia_tipo,
         a.id as alerta_id, a.tipo_alerta, a.nivel_alerta, a.estado_alerta, a.fecha_alerta,
         p.nombres, p.apellido_paterno,
         u.up_name
       FROM notificaciones n
-      JOIN alertas a ON n.alerta_id = a.id
+      LEFT JOIN alertas a ON n.alerta_id = a.id
       LEFT JOIN producer p ON a.producer_id = p.producer_id
       LEFT JOIN up u ON a.up_id = u.up_id
       WHERE n.usuario_id = $1
@@ -48,7 +49,7 @@ router.get('/notificaciones/mis', authMiddleware, async (req: AuthRequest, res: 
       LIMIT 50
     `, [req.user!.userId]);
 
-    const total_no_leidas = result.rows.filter(r => !r.leida).length;
+    const total_no_leidas = result.rows.filter((r: any) => !r.leida).length;
     res.json({ notificaciones: result.rows, total_no_leidas });
   } catch (error) {
     console.error('Error al obtener notificaciones:', error);

@@ -44,6 +44,43 @@ export async function runBodegaDailyJobs(): Promise<void> {
       );
     } catch (_) { /* table may not exist yet */ }
 
+    // 4. C-12: Alerta 30 días sin actualizar tarifario
+    try {
+      const tarifasViejas = await pool.query(`
+        SELECT DISTINCT ts.bodega_id, bb.usuario_id
+        FROM tarifario_servicios ts
+        JOIN bodeguero_bodegas bb ON bb.bodega_id = ts.bodega_id
+        WHERE ts.activo = TRUE
+          AND CURRENT_DATE - ts.updated_at::date > 30
+        GROUP BY ts.bodega_id, bb.usuario_id
+      `);
+
+      let alertasCreadas = 0;
+      for (const tarifa of tarifasViejas.rows) {
+        const alertaReciente = await pool.query(`
+          SELECT id FROM notificaciones
+          WHERE usuario_id = $1 AND tipo = 'alerta_tarifario'
+            AND created_at > NOW() - INTERVAL '7 days'
+          LIMIT 1
+        `, [tarifa.usuario_id]);
+
+        if (alertaReciente.rows.length === 0) {
+          await pool.query(`
+            INSERT INTO notificaciones (usuario_id, titulo, mensaje, tipo, leida)
+            VALUES ($1, $2, $3, 'alerta_tarifario', FALSE)
+          `, [
+            tarifa.usuario_id,
+            'Tu tarifario lleva más de 30 días sin actualizar',
+            'Actualiza tu tarifario de servicios para seguir apareciendo en el Precio del Maíz de tu región.'
+          ]);
+          alertasCreadas++;
+        }
+      }
+      if (alertasCreadas > 0) {
+        console.log(`[CRON] Alertas tarifario creadas: ${alertasCreadas}`);
+      }
+    } catch (_) { /* tarifario_servicios table may not exist yet */ }
+
     console.log(`[CRON] Jobs diarios ejecutados: ${new Date().toISOString()}`);
   } catch (err) {
     console.error('[CRON] Error en jobs diarios de bodega:', err);

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ChevronRight, MapPin, Warehouse, Circle } from 'lucide-react';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 interface Bodega {
   id: number; nombre: string; municipio: string; estado: string;
@@ -75,7 +76,7 @@ export default function B05MisBodegas() {
                 <div>
                   <div className="flex justify-between text-[11px] text-gray-400 mb-1.5">
                     <span className="font-medium">Ocupación {pct}%</span>
-                    <span>{(b.stock_actual || 0).toLocaleString()} / {(b.capacidad_ton || 0).toLocaleString()} ton</span>
+                    <span>{formatNum(b.stock_actual || 0)} / {formatNum(b.capacidad_ton || 0)} ton</span>
                   </div>
                   <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
                     <div className={`h-full rounded-full ${barColor(pct)} transition-all`} style={{ width: `${Math.min(pct, 100)}%` }} />

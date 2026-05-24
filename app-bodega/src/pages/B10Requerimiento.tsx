@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Trash2, Wheat } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
+import { formatNum } from '../utils/format';
 
 const TIPOS_MAIZ = [
   { code: 'blanco', label: 'Maíz Blanco' },
@@ -69,7 +70,9 @@ export default function B10Requerimiento() {
     : REGIONES_RADIO.default;
 
   const filteredVars = form.tipo_maiz === 'criollo'
-    ? variedades.filter(v => ['CRIOLLO_LOCAL', 'NO_SABE'].includes(v.code))
+    ? variedades.filter(v =>
+        ['MC_CRIOLLO', 'MC_NOSABE', 'CRIOLLO_LOCAL', 'NO_SABE'].includes(v.code) || v.tipo_maiz === 'criollo'
+      )
     : variedades.filter(v => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -207,7 +210,7 @@ export default function B10Requerimiento() {
                   <p className="text-[14px] font-semibold text-gray-800">
                     {TIPOS_MAIZ.find(t => t.code === s.tipo_maiz)?.label || s.tipo_maiz}
                     {s.variedad_code ? ` · ${s.variedad_code}` : ''}
-                    {' '}<span className="text-[#1A5C38]">${Number(s.precio_ofrecido).toLocaleString()}/ton</span>
+                    {' '}<span className="text-[#1A5C38]">${formatNum(s.precio_ofrecido)}/ton</span>
                   </p>
                   <p className="text-[12px] text-gray-400">{s.bodega_nombre}</p>
                   {(s.vigencia_inicio || s.vigencia_fin) && (

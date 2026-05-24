@@ -64,6 +64,8 @@ export const api = {
     get: (id: number) => request(`/bodegas/${id}`),
     semaforo: (id: number, semaforo: string) =>
       request(`/bodegas/${id}/semaforo`, { method: 'PATCH', body: JSON.stringify({ semaforo }) }),
+    create: (data: Record<string, unknown>) =>
+      request('/bodegas', { method: 'POST', body: JSON.stringify(data) }),
   },
   bodeguero: {
     solicitar: (bodega_id: number) =>
@@ -154,6 +156,7 @@ export const api = {
   },
   notificaciones: {
     mis: () => request('/alertas/notificaciones/mis'),
+    leer: (id: number) => request(`/alertas/notificaciones/${id}/leer`, { method: 'PATCH' }),
     leerTodas: () => request('/alertas/notificaciones/leer-todas', { method: 'PATCH' }),
   },
   catalogos: {
