@@ -132,7 +132,7 @@ export default function B04Dashboard() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <KPICard
                 title="Precio promedio de maíz al productor hoy"
-                value={stats.precio_promedio_regional ? `$${Number(stats.precio_promedio_regional).toLocaleString('en-US')}` : (stats.ultimo_precio ? `$${Number(stats.ultimo_precio).toLocaleString('en-US')}` : '—')}
+                value={stats.precio_promedio_regional ? `$${formatNum(stats.precio_promedio_regional, 2)}` : (stats.ultimo_precio ? `$${formatNum(stats.ultimo_precio, 2)}` : '—')}
                 subtitle={
                   stats.precio_promedio_regional && (stats.bodegas_en_calculo ?? 0) >= 3
                     ? `MXN/ton · promedio regional · ${stats.bodegas_en_calculo} bodegas`
