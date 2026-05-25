@@ -21,6 +21,7 @@ interface DashData {
   }[];
   nombres: string;
   apellido_paterno?: string;
+  apellido_materno?: string;
   estado_validacion: string;
 }
 
@@ -77,7 +78,7 @@ export default function DashboardProductorPage() {
   const hora = getMexicoHour();
   const saludo = hora < 12 ? '¡Buenos días!' : hora < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
   const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
-  const nombreCompleto = [data?.nombres, data?.apellido_paterno].filter(Boolean).join(' ')
+  const nombreCompleto = [data?.nombres, data?.apellido_paterno, data?.apellido_materno].filter(Boolean).join(' ')
     || user?.nombres || user?.nombre_completo || 'Productor';
   const initials = nombreCompleto.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
 

@@ -375,7 +375,7 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
 
     // Datos del productor (nombres, estado_validacion)
     const prodRes = await pool.query(
-      `SELECT nombres, apellido_paterno, estado_validacion FROM producer WHERE producer_id = $1`,
+      `SELECT nombres, apellido_paterno, apellido_materno, estado_validacion FROM producer WHERE producer_id = $1`,
       [producerId]
     );
 
@@ -390,6 +390,7 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
       bodegas_cercanas,
       nombres: prodRes.rows[0]?.nombres,
       apellido_paterno: prodRes.rows[0]?.apellido_paterno,
+      apellido_materno: prodRes.rows[0]?.apellido_materno,
       estado_validacion: prodRes.rows[0]?.estado_validacion,
     });
   } catch (error) {
