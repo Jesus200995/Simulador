@@ -30,13 +30,14 @@ export default function DetalleBodegaPage() {
 
   return (
     <div className="bg-[#F2F2F7]">
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.15)]">
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
             <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <h1 className="text-[20px] font-bold text-white leading-tight truncate">{bodega.nombre}</h1>
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Mapa</p>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight truncate">{bodega.nombre}</h1>
         </div>
       </div>
 

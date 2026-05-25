@@ -74,7 +74,7 @@ export default function DashboardProductorPage() {
 
   const delta = (data?.precio_hoy ?? 0) - (data?.precio_ayer ?? 0);
   const hora = getMexicoHour();
-  const saludo = hora < 12 ? 'Buenos dias' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const saludo = hora < 12 ? '¡Buenos días!' : hora < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
   const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
   const nombres = data?.nombres || user?.nombres || user?.nombre_completo || 'Productor';
   const initials = nombres.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
@@ -103,7 +103,7 @@ export default function DashboardProductorPage() {
             </div>
             <div className="min-w-0">
               <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
-                {saludo}, {nombres.split(' ')[0]}
+                {saludo}
               </h1>
               <p className="text-[13px] font-medium text-white/40 mt-0.5 truncate">{nombres}</p>
             </div>
@@ -124,8 +124,8 @@ export default function DashboardProductorPage() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
-        <div className="-mt-4 bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm ring-1 ring-zinc-100">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm ring-1 ring-zinc-100">
           <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1 font-medium">
             Precio de compra hoy - tu region
           </p>

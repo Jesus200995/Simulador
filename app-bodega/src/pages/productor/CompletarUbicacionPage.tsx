@@ -45,14 +45,15 @@ export default function CompletarUbicacionPage() {
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-2xl shadow-[0_4px_20px_rgba(26,92,56,0.15)]">
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-2xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-4">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1 active:opacity-60 transition-opacity">
             <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <h1 className="text-[18px] font-bold text-white">Marca tu parcela</h1>
-          <p className="text-[12px] text-green-200/60 mt-0.5">Toca el mapa donde esta tu terreno</p>
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Ubicacion</p>
+          <h1 className="text-[18px] font-black text-white tracking-tight">Marca tu parcela</h1>
+          <p className="text-[12px] font-medium text-white/40 mt-0.5">Toca el mapa donde esta tu terreno</p>
         </div>
       </div>
 
