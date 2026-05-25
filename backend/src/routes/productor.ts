@@ -389,6 +389,7 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
       alerta_activa,
       bodegas_cercanas,
       nombres: prodRes.rows[0]?.nombres,
+      apellido_paterno: prodRes.rows[0]?.apellido_paterno,
       estado_validacion: prodRes.rows[0]?.estado_validacion,
     });
   } catch (error) {

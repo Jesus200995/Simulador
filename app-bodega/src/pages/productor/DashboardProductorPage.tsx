@@ -20,6 +20,7 @@ interface DashData {
     estado_compra: string; distancia_km: number;
   }[];
   nombres: string;
+  apellido_paterno?: string;
   estado_validacion: string;
 }
 
@@ -76,8 +77,9 @@ export default function DashboardProductorPage() {
   const hora = getMexicoHour();
   const saludo = hora < 12 ? '¡Buenos días!' : hora < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
   const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
-  const nombres = data?.nombres || user?.nombres || user?.nombre_completo || 'Productor';
-  const initials = nombres.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
+  const nombreCompleto = [data?.nombres, data?.apellido_paterno].filter(Boolean).join(' ')
+    || user?.nombres || user?.nombre_completo || 'Productor';
+  const initials = nombreCompleto.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
 
   return (
     <div className="bg-zinc-50">
@@ -105,7 +107,7 @@ export default function DashboardProductorPage() {
               <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
                 {saludo}
               </h1>
-              <p className="text-[13px] font-medium text-white/40 mt-0.5 truncate">{nombres}</p>
+              <p className="text-[13px] font-medium text-white/40 mt-0.5">{nombreCompleto}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
