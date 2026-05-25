@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Edit2, MapPin, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
+import MapaUP from '../../components/productor/MapaUP';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -21,6 +22,7 @@ interface Perfil {
   programas_beneficiario: string[];
   state_name: string; municipality_name: string;
   location_confirmed: boolean; centroid_source: string;
+  lat: number; lng: number;
 }
 
 export default function MiPerfilPage() {
@@ -152,6 +154,22 @@ export default function MiPerfilPage() {
         {/* Mi parcela */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Mi parcela</p>
+
+          {/* Mapa mini de la UP */}
+          {perfil.lat && perfil.lng && (
+            <div className="mb-4">
+              <MapaUP
+                lat={perfil.lat}
+                lng={perfil.lng}
+                locationConfirmed={perfil.location_confirmed}
+                centroidSource={perfil.centroid_source}
+                radioKm={5}
+                height="160px"
+                zoom={13}
+              />
+            </div>
+          )}
+
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Estado</span>

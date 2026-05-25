@@ -553,7 +553,9 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
               p.telefono, p.estado_validacion, p.tipo_registro,
               p.programas_beneficiario,
               u.state_name AS state_name, u.municipality_name AS municipality_name,
-              u.location_confirmed, u.centroid_source
+              u.location_confirmed, u.centroid_source,
+              ST_Y(u.centroid::geometry) AS lat,
+              ST_X(u.centroid::geometry) AS lng
        FROM producer p
        LEFT JOIN up u ON u.producer_id = p.id
        WHERE p.id = $1`,
