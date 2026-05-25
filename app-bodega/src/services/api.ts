@@ -163,4 +163,24 @@ export const api = {
     tipoMaiz: () => request('/bodegas/catalogos'),
     variedades: () => request('/infraestructura/catalogos'),
   },
+  productor: {
+    buscarCurp: (curp: string) =>
+      request('/productor/auth/buscar-curp', { method: 'POST', body: JSON.stringify({ curp }) }),
+    activarCuenta: (producer_id: number, pin: string) =>
+      request('/productor/auth/activar-cuenta', { method: 'POST', body: JSON.stringify({ producer_id, pin }) }),
+    loginPin: (curp: string, pin: string) =>
+      request('/productor/auth/login-pin', { method: 'POST', body: JSON.stringify({ curp, pin }) }),
+    registroNuevo: (data: Record<string, unknown>) =>
+      request('/productor/auth/registro-nuevo', { method: 'POST', body: JSON.stringify(data) }),
+    dashboard: () => request('/productor/dashboard'),
+    precios: () => request('/productor/precios'),
+    actualizarUbicacion: (lat: number, lng: number) =>
+      request('/productor/ubicacion', { method: 'PATCH', body: JSON.stringify({ lat, lng }) }),
+    solicitarApoyo: (data: { infraestructura_id: number; tipo_apoyo: string; notas?: string }) =>
+      request('/productor/solicitar-apoyo', { method: 'POST', body: JSON.stringify(data) }),
+    misSolicitudes: () => request('/productor/mis-solicitudes'),
+    perfil: () => request('/productor/perfil'),
+    actualizarPerfil: (data: { telefono?: string; programas_beneficiario?: string[] }) =>
+      request('/productor/perfil', { method: 'PATCH', body: JSON.stringify(data) }),
+  },
 };

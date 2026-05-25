@@ -65,8 +65,9 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (password.length < 6) {
-      res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    const minLength = rol === 'productor' ? 4 : 6;
+    if (password.length < minLength) {
+      res.status(400).json({ error: `La credencial debe tener al menos ${minLength} caracteres` });
       return;
     }
 

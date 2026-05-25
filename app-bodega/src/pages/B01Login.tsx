@@ -21,7 +21,7 @@ export default function B01Login() {
       const res = await api.auth.login(email, password);
       const u = res.usuario || res.user;
       setAuth(res.token, { ...u, userId: u?.id ?? u?.userId });
-      navigate('/dashboard');
+      navigate(u.rol === 'productor' ? '/productor' : '/dashboard');
     } catch (err: any) {
       setError(err.message || 'Credenciales incorrectas');
     } finally {
@@ -114,6 +114,11 @@ export default function B01Login() {
             <p className="text-center text-[13px] text-gray-400 pt-1">
               ¿No tienes cuenta?{' '}
               <Link to="/registro" className="text-[#1A5C38] font-semibold hover:underline">Regístrate</Link>
+            </p>
+
+            <p className="text-center text-[13px] text-gray-400">
+              ¿Eres productor?{' '}
+              <Link to="/activar" className="text-[#1A5C38] font-semibold hover:underline">Activa tu cuenta aquí</Link>
             </p>
 
           </form>

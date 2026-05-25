@@ -29,6 +29,7 @@ import ventanillasRoutes from './routes/ventanillas';
 import ofertaRoutes from './routes/oferta';
 import productoresRoutes from './routes/productores';
 import disponibilidadRoutes from './routes/disponibilidad';
+import productorRoutes from './routes/productor';
 import { scheduleBodegaDailyJobs } from './jobs/bodegaDailyJobs';
 import pool from './config/database';
 
@@ -73,6 +74,7 @@ app.use('/api/ventanillas', ventanillasRoutes);
 app.use('/api/oferta', ofertaRoutes);
 app.use('/api/productores', productoresRoutes);
 app.use('/api/productor/disponibilidad', disponibilidadRoutes);
+app.use('/api/productor', productorRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

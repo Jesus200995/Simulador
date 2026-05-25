@@ -1,9 +1,31 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { useAuthStore } from './store/auth';
 
 import B01Login from './pages/B01Login';
 import B02Register from './pages/B02Register';
+
+// Productor — onboarding
+import ActivarCuentaPage from './pages/auth/ActivarCuentaPage';
+import CrearPinPage from './pages/auth/CrearPinPage';
+import RegistroNuevoPage from './pages/auth/RegistroNuevoPage';
+import LoginPinPage from './pages/auth/LoginPinPage';
+// Productor — páginas
+import DashboardProductorPage from './pages/productor/DashboardProductorPage';
+import DisponibilidadTipoPage from './pages/productor/DisponibilidadTipoPage';
+import DisponibilidadVariedadPage from './pages/productor/DisponibilidadVariedadPage';
+import DisponibilidadVolumenPage from './pages/productor/DisponibilidadVolumenPage';
+import DisponibilidadConfirmPage from './pages/productor/DisponibilidadConfirmPage';
+import MapaBodegasPage from './pages/productor/MapaBodegasPage';
+import DetalleBodegaPage from './pages/productor/DetalleBodegaPage';
+import CompletarUbicacionPage from './pages/productor/CompletarUbicacionPage';
+import PreciosProductorPage from './pages/productor/PreciosProductorPage';
+import ConfirmarTransaccionPage from './pages/productor/ConfirmarTransaccionPage';
+import AlertasPage from './pages/productor/AlertasPage';
+import IncentivosPage from './pages/productor/IncentivosPage';
+import VentanillasPage from './pages/productor/VentanillasPage';
+import EstadoSolicitudPage from './pages/productor/EstadoSolicitudPage';
+import MiPerfilPage from './pages/productor/MiPerfilPage';
 import B03SelectBodegas from './pages/B03SelectBodegas';
 import B04Dashboard from './pages/B04Dashboard';
 import B05MisBodegas from './pages/B05MisBodegas';
@@ -31,8 +53,18 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 function GuestOnly({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore();
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+  const { isAuthenticated, user } = useAuthStore();
+  if (isAuthenticated) {
+    return <Navigate to={user?.rol === 'productor' ? '/productor' : '/dashboard'} replace />;
+  }
+  return <>{children}</>;
+}
+
+function RequireProductor({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.rol !== 'productor') return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
 }
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -123,6 +155,35 @@ export const router = createBrowserRouter([
     path: '/notificaciones',
     element: <ProtectedLayout><B23Notificaciones /></ProtectedLayout>,
   },
+  // Onboarding productor (sin auth)
+  { path: '/activar', element: <ActivarCuentaPage /> },
+  { path: '/activar/pin', element: <CrearPinPage /> },
+  { path: '/registro-nuevo', element: <RegistroNuevoPage /> },
+  { path: '/login-productor', element: <LoginPinPage /> },
+
+  // Rutas del productor (requieren auth + rol productor)
+  {
+    path: '/productor',
+    element: <RequireProductor><Outlet /></RequireProductor>,
+    children: [
+      { index: true, element: <DashboardProductorPage /> },
+      { path: 'disponibilidad/tipo', element: <DisponibilidadTipoPage /> },
+      { path: 'disponibilidad/variedad', element: <DisponibilidadVariedadPage /> },
+      { path: 'disponibilidad/volumen', element: <DisponibilidadVolumenPage /> },
+      { path: 'disponibilidad/confirmar', element: <DisponibilidadConfirmPage /> },
+      { path: 'mapa', element: <MapaBodegasPage /> },
+      { path: 'mapa/bodega/:id', element: <DetalleBodegaPage /> },
+      { path: 'ubicacion', element: <CompletarUbicacionPage /> },
+      { path: 'precios', element: <PreciosProductorPage /> },
+      { path: 'transaccion/:id/confirmar', element: <ConfirmarTransaccionPage /> },
+      { path: 'alertas', element: <AlertasPage /> },
+      { path: 'incentivos', element: <IncentivosPage /> },
+      { path: 'ventanillas', element: <VentanillasPage /> },
+      { path: 'solicitud/:id', element: <EstadoSolicitudPage /> },
+      { path: 'perfil', element: <MiPerfilPage /> },
+    ],
+  },
+
   { path: '/', element: <Navigate to="/dashboard" replace /> },
   { path: '*', element: <Navigate to="/dashboard" replace /> },
 ]);
