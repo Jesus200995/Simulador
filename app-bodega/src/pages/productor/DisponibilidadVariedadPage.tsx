@@ -35,12 +35,14 @@ export default function DisponibilidadVariedadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
-        <button onClick={() => navigate(-1)}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-          <ChevronLeft size={22} className="text-zinc-600" />
-        </button>
+    <div className="bg-[#F2F2F7]">
+      <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-3">
+        <div className="max-w-5xl mx-auto">
+          <button onClick={() => navigate(-1)}
+            className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-medium active:opacity-60 transition-opacity">
+            <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" /> Volver
+          </button>
+        </div>
       </div>
       <DisponibilidadStepper paso={2} />
       <div className="max-w-lg mx-auto px-4 sm:px-6">

@@ -6,6 +6,9 @@ interface User {
   email: string;
   rol: string;
   nombre_completo?: string;
+  nombres?: string;
+  apellido_paterno?: string;
+  producer_id?: number;
 }
 
 interface AuthState {

@@ -44,20 +44,14 @@ export default function CompletarUbicacionPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+    <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
+      <div className="px-4 sm:px-6 py-3 bg-white border-b border-black/[0.06]">
         <button onClick={() => navigate(-1)}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-          <ChevronLeft size={22} className="text-zinc-600" />
+          className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-medium mb-1 active:opacity-60 transition-opacity">
+          <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" /> Volver
         </button>
-        <h1 className="flex-1 text-center font-semibold text-zinc-800">Marca tu parcela</h1>
-        <div className="w-8" />
-      </div>
-
-      <div className="px-4 sm:px-6 py-3 bg-white">
-        <p className="text-sm text-zinc-500">
-          Toca el mapa donde esta tu terreno. Puedes buscar con la lupa.
-        </p>
+        <h1 className="text-[18px] font-bold text-gray-900">Marca tu parcela</h1>
+        <p className="text-[13px] text-gray-400 mt-0.5">Toca el mapa donde esta tu terreno</p>
       </div>
 
       <div className="flex-1 relative">

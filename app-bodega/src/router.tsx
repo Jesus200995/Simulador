@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { LayoutProductor } from './components/LayoutProductor';
 import { useAuthStore } from './store/auth';
 
 import B01Login from './pages/B01Login';
@@ -164,7 +165,7 @@ export const router = createBrowserRouter([
   // Rutas del productor (requieren auth + rol productor)
   {
     path: '/productor',
-    element: <RequireProductor><Outlet /></RequireProductor>,
+    element: <RequireProductor><LayoutProductor><Outlet /></LayoutProductor></RequireProductor>,
     children: [
       { index: true, element: <DashboardProductorPage /> },
       { path: 'disponibilidad/tipo', element: <DisponibilidadTipoPage /> },

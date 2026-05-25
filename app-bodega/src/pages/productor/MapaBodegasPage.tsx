@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+// Icons removed - layout provides header
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -63,16 +63,7 @@ export default function MapaBodegasPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl z-10">
-        <button onClick={() => navigate('/productor')}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-          <ChevronLeft size={22} className="text-zinc-600" />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-zinc-800">Mapa de bodegas</h1>
-        <div className="w-8" />
-      </div>
-
+    <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
       <div className="flex-1 relative">
         <MapContainer
           center={[23.6345, -102.5528]}

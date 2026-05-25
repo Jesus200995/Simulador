@@ -54,7 +54,7 @@ export default function DisponibilidadConfirmPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center px-6 sm:px-8 text-center">
+      <div className="bg-[#F2F2F7] flex flex-col items-center justify-center px-6 sm:px-8 text-center py-12">
         <CheckCircle size={64} className="text-[#1A5C38] mb-4" />
         <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-2">Listo!</h2>
         <p className="text-zinc-500 text-sm sm:text-base mb-6 max-w-sm">
@@ -70,14 +70,15 @@ export default function DisponibilidadConfirmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
-      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
-        <button onClick={() => navigate(-1)}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-          <ChevronLeft size={22} className="text-zinc-600" />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-zinc-800">Confirmar disponibilidad</h1>
-        <div className="w-8" />
+    <div className="bg-[#F2F2F7] flex flex-col">
+      <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-3">
+        <div className="max-w-5xl mx-auto">
+          <button onClick={() => navigate(-1)}
+            className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-medium active:opacity-60 transition-opacity">
+            <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" /> Volver
+          </button>
+          <h1 className="text-[20px] font-bold text-gray-900 leading-tight mt-1">Confirmar disponibilidad</h1>
+        </div>
       </div>
 
       <div className="flex-1">

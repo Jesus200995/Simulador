@@ -41,7 +41,7 @@ export default function ConfirmarTransaccionPage() {
   const total = (txn.volumen_ton || 0) * (txn.precio_ton || 0);
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col px-4 sm:px-6 pt-10">
+    <div className="bg-[#F2F2F7] flex flex-col px-4 sm:px-6 pt-10">
       <div className="max-w-lg mx-auto w-full">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">

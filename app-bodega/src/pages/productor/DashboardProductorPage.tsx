@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MapPin, ChevronRight, Wheat, Home, Map, TrendingUp, Award, User, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatNum } from '../../utils/format';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -63,7 +63,7 @@ export default function DashboardProductorPage() {
   const hoy = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-24">
+    <div className="bg-zinc-50">
       {data?.alerta_activa && (
         <div className={`px-4 sm:px-6 py-3 flex items-center justify-between
           ${data.alerta_activa.tipo === 'alerta_climatica' ? 'bg-orange-500' : 'bg-red-600'}`}>
@@ -77,18 +77,12 @@ export default function DashboardProductorPage() {
         </div>
       )}
 
-      <div className="bg-[#1A5C38] px-4 sm:px-6 pt-5 pb-6">
-        <div className="max-w-2xl mx-auto flex items-start justify-between">
-          <div>
-            <p className="text-green-200 text-sm">{data?.municipio} - {hoy}</p>
-            <p className="text-white text-lg sm:text-xl font-semibold mt-0.5">
-              Buenos dias, {data?.nombres?.split(' ')[0]}
-            </p>
-          </div>
-          <button onClick={() => navigate('/productor/alertas')}
-            className="relative p-2 rounded-lg hover:bg-white/10 transition-colors">
-            <Bell size={22} className="text-white" />
-          </button>
+      <div className="bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] px-4 sm:px-6 pt-5 pb-6 rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-green-200/80 text-[13px]">{data?.municipio} - {hoy}</p>
+          <p className="text-white text-lg sm:text-xl font-semibold mt-0.5">
+            Buenos dias, {data?.nombres?.split(' ')[0]}
+          </p>
         </div>
       </div>
 
@@ -201,24 +195,6 @@ export default function DashboardProductorPage() {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-zinc-200 z-50">
-        <div className="max-w-2xl mx-auto flex">
-          {[
-            { path: '/productor', icon: Home, label: 'Inicio', active: true },
-            { path: '/productor/mapa', icon: Map, label: 'Mapa', active: false },
-            { path: '/productor/precios', icon: TrendingUp, label: 'Precios', active: false },
-            { path: '/productor/incentivos', icon: Award, label: 'Apoyos', active: false },
-            { path: '/productor/perfil', icon: User, label: 'Perfil', active: false },
-          ].map(item => (
-            <button key={item.path} onClick={() => navigate(item.path)}
-              className={`flex-1 py-3 flex flex-col items-center gap-0.5 transition-colors
-                ${item.active ? 'text-[#1A5C38]' : 'text-zinc-400 hover:text-zinc-600'}`}>
-              <item.icon size={20} strokeWidth={item.active ? 2.5 : 1.5} />
-              <span className="text-[10px] sm:text-xs font-medium">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

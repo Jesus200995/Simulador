@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { formatNum } from '../../utils/format';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -22,7 +21,6 @@ const PRECIOS_CONFIG = [
 ];
 
 export default function PreciosProductorPage() {
-  const navigate = useNavigate();
   const [data, setData] = useState<PrecioData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,14 +35,12 @@ export default function PreciosProductorPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Cargando precios...</div>;
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-24">
-      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
-        <button onClick={() => navigate('/productor')}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-          <ChevronLeft size={22} className="text-zinc-600" />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-zinc-800">Precios</h1>
-        <div className="w-8" />
+    <div className="bg-[#F2F2F7]">
+      <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-4">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-[20px] font-bold text-gray-900 leading-tight">Precios</h1>
+          <p className="text-[13px] text-gray-400 mt-0.5">Tu region</p>
+        </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4">

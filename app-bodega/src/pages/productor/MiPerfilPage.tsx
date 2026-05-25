@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Edit2, MapPin, LogOut, Check, CircleDot } from 'lucide-react';
+import { Edit2, MapPin, LogOut, Check, CircleDot } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import MapaUP from '../../components/productor/MapaUP';
 
@@ -84,13 +84,11 @@ export default function MiPerfilPage() {
   if (!perfil) return <div className="min-h-screen flex items-center justify-center text-gray-400">Error</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="flex items-center px-4 py-3 border-b bg-white">
-        <button onClick={() => navigate('/productor')} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-800">Mi perfil</h1>
-        <div className="w-8" />
+    <div className="bg-[#F2F2F7]">
+      <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-4">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-[20px] font-bold text-gray-900 leading-tight">Mi perfil</h1>
+        </div>
       </div>
 
       <div className="px-4 pt-4 space-y-4">
