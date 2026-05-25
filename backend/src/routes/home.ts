@@ -224,6 +224,9 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res: Response): Pr
               WHERE bb2.usuario_id = $1 AND bb2.estatus = 'aprobada'
               LIMIT 1
             )
+            AND pr.bodega_id NOT IN (
+              SELECT bodega_id FROM bodeguero_bodegas WHERE usuario_id = $1
+            )
         `, [userId]);
         precio_promedio_regional = precioReg.rows[0]?.precio_promedio_regional || 0;
         bodegas_en_calculo = precioReg.rows[0]?.bodegas_en_calculo || 0;

@@ -1,9 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft, Warehouse } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { useToast } from '../components/Toast';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
+
+// Fix default marker icon for Leaflet + bundler
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+function MapClickHandler({ onCoords }: { onCoords: (lat: number, lon: number) => void }) {
+  useMapEvents({ click(e) { onCoords(e.latlng.lat, e.latlng.lng); } });
+  return null;
+}
 
 interface Bodega { id: number; nombre: string; municipio: string; estado: string; capacidad_ton: number; }
 
@@ -23,6 +39,7 @@ export default function B03SelectBodegas() {
   const [altaEstados, setAltaEstados] = useState<any[]>([]);
   const [altaMunicipios, setAltaMunicipios] = useState<any[]>([]);
   const [enviandoAlta, setEnviandoAlta] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -230,6 +247,22 @@ export default function B03SelectBodegas() {
                 <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
               </div>
             ))}
+            <div>
+              <label className="block text-[13px] font-medium text-gray-600 mb-1">Ubicación de la bodega</label>
+              <p className="text-[11px] text-gray-500 mb-2">Toca el mapa para marcar la ubicación de tu bodega</p>
+              <div className="rounded-xl overflow-hidden border border-gray-200" style={{ height: '180px' }}>
+                <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }} attributionControl={false}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <MapClickHandler onCoords={(lat, lon) => setCoords({ lat, lon })} />
+                  {coords && <Marker position={[coords.lat, coords.lon]} />}
+                </MapContainer>
+              </div>
+              {coords ? (
+                <p className="text-[11px] text-green-600 mt-1">✓ Ubicación marcada: {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</p>
+              ) : (
+                <p className="text-[11px] text-gray-400 mt-1">Sin ubicación — el administrador la completará al aprobar</p>
+              )}
+            </div>
             <button
               disabled={enviandoAlta || !altaForm.nombre || !altaForm.estado || !altaForm.municipio || !altaForm.capacidad_ton || !altaForm.responsable || !altaForm.telefono}
               onClick={async () => {
@@ -241,8 +274,8 @@ export default function B03SelectBodegas() {
                     municipio: altaForm.municipio,
                     localidad: altaForm.localidad,
                     capacidad_ton: Number(altaForm.capacidad_ton),
-                    latitud: 0,
-                    longitud: 0,
+                    latitud: coords?.lat ?? 0,
+                    longitud: coords?.lon ?? 0,
                     responsable: altaForm.responsable,
                     telefono: altaForm.telefono,
                     email: altaForm.email,
@@ -250,6 +283,7 @@ export default function B03SelectBodegas() {
                   });
                   toast('Tu solicitud fue enviada. Te notificaremos cuando sea aprobada.', 'success');
                   setMostrarAlta(false);
+                  setCoords(null);
                   setAltaForm({ nombre: '', estado: '', municipio: '', localidad: '', capacidad_ton: '', responsable: '', telefono: '', email: '' });
                 } catch (err: any) {
                   toast(err.message || 'Error al enviar solicitud', 'error');

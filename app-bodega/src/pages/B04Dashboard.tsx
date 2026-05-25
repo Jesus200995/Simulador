@@ -133,13 +133,33 @@ export default function B04Dashboard() {
               <KPICard
                 title="Precio promedio de maíz al productor hoy"
                 value={stats.precio_promedio_regional ? `$${formatNum(stats.precio_promedio_regional, 2)}` : (stats.ultimo_precio ? `$${formatNum(stats.ultimo_precio, 2)}` : '—')}
-                subtitle={
-                  stats.precio_promedio_regional && (stats.bodegas_en_calculo ?? 0) >= 3
-                    ? `MXN/ton · promedio regional · ${stats.bodegas_en_calculo} bodegas`
-                    : (stats.bodegas_en_calculo ?? 0) > 0 && (stats.bodegas_en_calculo ?? 0) < 3
+                subtitle={(() => {
+                  const miPrecio = stats.ultimo_precio || 0;
+                  const promedio = stats.precio_promedio_regional || 0;
+                  const bodegas = stats.bodegas_en_calculo || 0;
+                  const base = promedio && bodegas >= 3
+                    ? `MXN/ton · promedio regional · ${bodegas} bodegas`
+                    : bodegas > 0 && bodegas < 3
                       ? 'Sin suficientes datos regionales'
-                      : 'MXN/ton · último publicado'
-                }
+                      : 'MXN/ton · último publicado';
+
+                  if (bodegas < 3 || promedio === 0) {
+                    return <>{base}<p className="text-[10px] text-gray-400 mt-0.5">Sin suficientes datos regionales hoy</p></>;
+                  }
+                  if (miPrecio === 0) {
+                    return <>{base}<p className="text-[10px] text-gray-400 mt-0.5">Sin precio publicado hoy</p></>;
+                  }
+                  const diferencia = miPrecio - promedio;
+                  const esArriba = diferencia >= 0;
+                  return (
+                    <>
+                      {base}
+                      <p className={`text-[10px] font-medium mt-0.5 ${esArriba ? 'text-green-600' : 'text-red-500'}`}>
+                        {esArriba ? '↑' : '↓'} Tu precio está ${formatNum(Math.abs(diferencia), 0)} {esArriba ? 'por encima' : 'por debajo'} del promedio regional
+                      </p>
+                    </>
+                  );
+                })()}
                 icon={<DollarSign size={15} />}
                 color="green"
                 onClick={() => navigate('/precio-diario')}

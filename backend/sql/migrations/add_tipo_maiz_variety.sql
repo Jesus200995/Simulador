@@ -1,3 +1,15 @@
+-- ⚠️ DEPRECATED — NO APLICAR EN PRODUCCIÓN
+-- Este archivo fue reemplazado por:
+-- backend/migrations/migrate_v11_variedades_correctas.sql
+--
+-- Si se aplica después de v11, revertirá las variedades
+-- de Maíz Amarillo a valores INCORRECTOS (H-40 Amarillo,
+-- H-59C, DK 2020) y los codes de Criollo a los viejos.
+--
+-- Conservado solo como referencia histórica.
+-- Fecha de deprecación: Mayo 2026
+-- ─────────────────────────────────────────────────────
+
 -- C-12: Add tipo_maiz column to cat_crop_variety and seed correct varieties
 ALTER TABLE cat_crop_variety ADD COLUMN IF NOT EXISTS tipo_maiz VARCHAR(20);
 
