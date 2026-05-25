@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Wheat, Check, X } from 'lucide-react';
 import { formatNum } from '../../utils/format';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -40,10 +41,11 @@ export default function ConfirmarTransaccionPage() {
   const total = (txn.volumen_ton || 0) * (txn.precio_ton || 0);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col px-4 pt-10">
+    <div className="min-h-screen bg-zinc-50 flex flex-col px-4 sm:px-6 pt-10">
+      <div className="max-w-lg mx-auto w-full">
       <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
-          🌽
+        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Wheat size={36} className="text-[#1A5C38]" />
         </div>
         <h2 className="text-xl font-bold text-gray-800">
           {txn.bodega_nombre} registró una compra
@@ -69,18 +71,19 @@ export default function ConfirmarTransaccionPage() {
       </div>
 
       <button onClick={() => confirmar(true)} disabled={sending}
-        className="w-full bg-[#1A5C38] text-white py-5 rounded-2xl text-lg
-                   font-bold active:scale-95 transition-transform mb-3 shadow-lg disabled:opacity-50">
-        ✓ Sí, es correcto
+        className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-5 rounded-2xl text-lg
+                   font-semibold active:scale-[0.98] transition-all duration-200 mb-3 shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+        <Check size={20} /> Si, es correcto
       </button>
       <button onClick={() => confirmar(false)} disabled={sending}
-        className="w-full border-2 border-red-400 text-red-600 py-5 rounded-2xl
-                   text-lg font-bold active:scale-95 transition-transform disabled:opacity-50">
-        ✗ Los datos no son correctos
+        className="w-full ring-2 ring-red-400 text-red-600 py-5 rounded-2xl
+                   text-lg font-semibold active:scale-[0.98] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2">
+        <X size={20} /> Los datos no son correctos
       </button>
-      <p className="text-center text-xs text-gray-400 mt-4">
-        Si hay un error, el equipo técnico lo revisará y te contactará.
+      <p className="text-center text-xs text-zinc-400 mt-4">
+        Si hay un error, el equipo tecnico lo revisara y te contactara.
       </p>
+      </div>
     </div>
   );
 }

@@ -1,13 +1,15 @@
+import { Delete } from 'lucide-react';
+
 interface PinInputProps {
   value: string;
   onChange: (pin: string) => void;
 }
 
 export default function PinInput({ value, onChange }: PinInputProps) {
-  const keys: (number | string)[] = [1,2,3,4,5,6,7,8,9,'',0,'⌫'];
+  const keys: (number | string)[] = [1,2,3,4,5,6,7,8,9,'',0,'del'];
 
   const handlePress = (key: number | string) => {
-    if (key === '⌫') onChange(value.slice(0, -1));
+    if (key === 'del') onChange(value.slice(0, -1));
     else if (typeof key === 'number' && value.length < 4) onChange(value + key);
   };
 
@@ -16,10 +18,10 @@ export default function PinInput({ value, onChange }: PinInputProps) {
       <div className="flex justify-center gap-5 mb-10">
         {[0,1,2,3].map(i => (
           <div key={i}
-            className={`w-5 h-5 rounded-full border-2 transition-all duration-150
+            className={`w-5 h-5 rounded-full ring-2 transition-all duration-200
               ${i < value.length
-                ? 'bg-[#1A5C38] border-[#1A5C38] scale-110'
-                : 'border-gray-300 bg-white'}`}
+                ? 'bg-[#1A5C38] ring-[#1A5C38] scale-110'
+                : 'ring-zinc-300 bg-white'}`}
           />
         ))}
       </div>
@@ -28,12 +30,12 @@ export default function PinInput({ value, onChange }: PinInputProps) {
           <button key={i} onClick={() => handlePress(k)}
             disabled={k === ''}
             className={`h-16 rounded-2xl text-2xl font-semibold
-              active:scale-90 transition-all select-none
-              ${k === ''   ? 'invisible'
-              : k === '⌫' ? 'bg-gray-100 text-gray-600'
-              : 'bg-gray-50 text-gray-800 border border-gray-200 shadow-sm'}`}
+              active:scale-90 transition-all duration-150 select-none flex items-center justify-center
+              ${k === ''    ? 'invisible'
+              : k === 'del' ? 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+              : 'bg-white text-zinc-800 ring-1 ring-zinc-200 shadow-sm hover:bg-zinc-50'}`}
           >
-            {k}
+            {k === 'del' ? <Delete size={22} /> : k}
           </button>
         ))}
       </div>

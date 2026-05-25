@@ -35,33 +35,34 @@ export default function DisponibilidadVariedadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="flex items-center px-4 py-3 border-b">
-        <button onClick={() => navigate(-1)} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate(-1)}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
       </div>
       <DisponibilidadStepper paso={2} />
-      <div className="px-4">
-        <h2 className="text-xl font-bold text-gray-800 text-center mb-1">
-          ¿Qué variedad?
+      <div className="max-w-lg mx-auto px-4 sm:px-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 text-center mb-1">
+          Que variedad?
         </h2>
-        <p className="text-gray-500 text-sm text-center mb-6">
+        <p className="text-zinc-500 text-sm text-center mb-6">
           Tipo: {tipoMaiz.charAt(0).toUpperCase() + tipoMaiz.slice(1)}
         </p>
         {loading ? (
-          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-14 bg-gray-100 rounded-2xl animate-pulse" />)}</div>
+          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-14 bg-zinc-100 rounded-2xl animate-pulse" />)}</div>
         ) : (
           <div className="space-y-2">
             {variedades.map(v => (
               <button key={v.id} onClick={() => seleccionar(v)}
-                className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl
-                           py-4 px-5 text-left active:border-[#1A5C38] active:bg-green-50 transition-all">
-                <p className="font-semibold text-gray-800">{v.nombre_variedad}</p>
+                className="w-full bg-white ring-1 ring-zinc-200 rounded-2xl
+                           py-4 px-5 text-left hover:ring-zinc-300 active:ring-2 active:ring-[#1A5C38] active:bg-emerald-50 transition-all duration-200">
+                <p className="font-semibold text-zinc-800">{v.nombre_variedad}</p>
               </button>
             ))}
             {variedades.length === 0 && (
-              <p className="text-gray-400 text-center py-6">No hay variedades registradas para este tipo</p>
+              <p className="text-zinc-400 text-center py-6">No hay variedades registradas para este tipo</p>
             )}
           </div>
         )}

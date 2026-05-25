@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Edit2, MapPin, LogOut } from 'lucide-react';
+import { ChevronLeft, Edit2, MapPin, LogOut, Check, CircleDot } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import MapaUP from '../../components/productor/MapaUP';
 
@@ -181,8 +181,8 @@ export default function MiPerfilPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Ubicación</span>
-              <span className={`text-xs ${perfil.location_confirmed ? 'text-green-600' : 'text-amber-600'}`}>
-                {perfil.location_confirmed ? '✓ Confirmada' : 'Aproximada'}
+              <span className={`text-xs flex items-center gap-1 ${perfil.location_confirmed ? 'text-green-600' : 'text-amber-600'}`}>
+                {perfil.location_confirmed ? <><Check size={12} /> Confirmada</> : 'Aproximada'}
               </span>
             </div>
           </div>
@@ -204,9 +204,10 @@ export default function MiPerfilPage() {
             <div className="space-y-2">
               {PROGRAMAS_GOBIERNO.map(p => (
                 <button key={p.clave} onClick={() => togglePrograma(p.clave)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl border-2 text-sm transition-all
-                    ${programas.includes(p.clave) ? 'border-[#1A5C38] bg-green-50 text-green-800 font-medium' : 'border-gray-200 text-gray-700'}`}>
-                  {programas.includes(p.clave) ? '✓ ' : ''}{p.nombre}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl ring-1 text-sm transition-all duration-200 flex items-center gap-2
+                    ${programas.includes(p.clave) ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-emerald-800 font-medium' : 'ring-zinc-200 text-zinc-700 hover:bg-zinc-50'}`}>
+                  <CircleDot size={14} className={programas.includes(p.clave) ? 'text-[#1A5C38]' : 'text-zinc-300'} />
+                  {p.nombre}
                 </button>
               ))}
               <button onClick={guardarProgramas}
@@ -221,7 +222,7 @@ export default function MiPerfilPage() {
               )}
               {(perfil.programas_beneficiario || []).map(clave => {
                 const prog = PROGRAMAS_GOBIERNO.find(p => p.clave === clave);
-                return <p key={clave} className="text-sm text-gray-800">• {prog?.nombre || clave}</p>;
+                return <p key={clave} className="text-sm text-zinc-800 flex items-center gap-2"><CircleDot size={12} className="text-[#1A5C38]" /> {prog?.nombre || clave}</p>;
               })}
             </div>
           )}

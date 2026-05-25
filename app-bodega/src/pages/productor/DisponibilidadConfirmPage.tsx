@@ -54,15 +54,15 @@ export default function DisponibilidadConfirmPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center px-6 sm:px-8 text-center">
         <CheckCircle size={64} className="text-[#1A5C38] mb-4" />
-        <h2 className="text-xl font-bold text-gray-800 mb-2">¡Listo!</h2>
-        <p className="text-gray-500 text-sm mb-6">
-          Las bodegas cercanas a tu zona podrán ver que tienes maíz disponible.
-          Te notificamos si alguna está interesada.
+        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-2">Listo!</h2>
+        <p className="text-zinc-500 text-sm sm:text-base mb-6 max-w-sm">
+          Las bodegas cercanas a tu zona podran ver que tienes maiz disponible.
+          Te notificamos si alguna esta interesada.
         </p>
         <button onClick={() => navigate('/productor')}
-          className="bg-[#1A5C38] text-white px-8 py-3 rounded-2xl font-semibold">
+          className="bg-[#1A5C38] hover:bg-[#15482d] text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
           Volver al inicio
         </button>
       </div>
@@ -70,55 +70,60 @@ export default function DisponibilidadConfirmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex items-center px-4 py-3 border-b">
-        <button onClick={() => navigate(-1)} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50 flex flex-col">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate(-1)}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-800">Confirmar disponibilidad</h1>
+        <h1 className="flex-1 text-center font-semibold text-zinc-800">Confirmar disponibilidad</h1>
         <div className="w-8" />
       </div>
 
-      <div className="flex-1 px-5 py-6">
-        <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
-          <div className="flex justify-between">
-            <span className="text-gray-500 text-sm">Tipo de maíz</span>
-            <span className="font-medium text-gray-800 text-sm capitalize">{tipo}</span>
+      <div className="flex-1">
+        <div className="max-w-lg mx-auto px-5 sm:px-8 py-6">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm ring-1 ring-zinc-100">
+            <div className="flex justify-between">
+              <span className="text-zinc-500 text-sm">Tipo de maiz</span>
+              <span className="font-medium text-zinc-800 text-sm capitalize">{tipo}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500 text-sm">Variedad</span>
+              <span className="font-medium text-zinc-800 text-sm">{variedadNombre}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500 text-sm">Volumen</span>
+              <span className="font-bold text-zinc-900">{volumen} toneladas</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500 text-sm">Disponible</span>
+              <span className="font-medium text-zinc-800 text-sm">{fechaDesde} -- {fechaHasta}</span>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500 text-sm">Variedad</span>
-            <span className="font-medium text-gray-800 text-sm">{variedadNombre}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500 text-sm">Volumen</span>
-            <span className="font-bold text-gray-900">{volumen} toneladas</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500 text-sm">Disponible</span>
-            <span className="font-medium text-gray-800 text-sm">{fechaDesde} — {fechaHasta}</span>
-          </div>
-        </div>
 
-        <div className="mt-6 bg-green-50 border border-green-200 rounded-2xl p-4">
-          <p className="text-green-800 text-sm">
-            Las bodegas cercanas a tu zona podrán ver que tienes maíz disponible.
-            Te notificamos si alguna está interesada.
-          </p>
-        </div>
-
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            {error}
+          <div className="mt-6 bg-emerald-50 ring-1 ring-emerald-200 rounded-2xl p-4">
+            <p className="text-emerald-800 text-sm">
+              Las bodegas cercanas a tu zona podran ver que tienes maiz disponible.
+              Te notificamos si alguna esta interesada.
+            </p>
           </div>
-        )}
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="px-5 py-4 border-t">
-        <button onClick={enviar} disabled={loading}
-          className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl text-base font-bold
-                     disabled:opacity-40 active:scale-95 transition-transform">
-          {loading ? 'Enviando...' : 'Confirmar y publicar'}
-        </button>
+      <div className="px-5 sm:px-8 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <div className="max-w-lg mx-auto">
+          <button onClick={enviar} disabled={loading}
+            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
+                       disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
+            {loading ? 'Enviando...' : 'Confirmar y publicar'}
+          </button>
+        </div>
       </div>
     </div>
   );

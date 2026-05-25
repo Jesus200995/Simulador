@@ -20,7 +20,7 @@ router.post('/auth/buscar-curp', async (req, res): Promise<void> => {
     }
 
     const { rows } = await pool.query(
-      `SELECT p.id, p.nombres, p.apellido_paterno, p.estado_validacion,
+      `SELECT p.producer_id, p.nombres, p.apellido_paterno, p.estado_validacion,
               u.id AS usuario_id
        FROM producer p
        LEFT JOIN usuarios u ON u.id = p.usuario_id
@@ -37,7 +37,7 @@ router.post('/auth/buscar-curp', async (req, res): Promise<void> => {
       encontrado: true,
       nombres: rows[0].nombres,
       apellido: rows[0].apellido_paterno,
-      producer_id: rows[0].id,
+      producer_id: rows[0].producer_id,
       ya_tiene_cuenta: !!rows[0].usuario_id,
     });
   } catch (error) {
@@ -57,7 +57,7 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
     }
 
     const existing = await pool.query(
-      `SELECT u.id FROM usuarios u JOIN producer p ON p.usuario_id = u.id WHERE p.id = $1`,
+      `SELECT u.id FROM usuarios u JOIN producer p ON p.usuario_id = u.id WHERE p.producer_id = $1`,
       [producer_id]
     );
     if (existing.rows.length) {
@@ -80,7 +80,7 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
       const producer = await client.query(
         `UPDATE producer
          SET usuario_id = $1, tipo_registro = 'A', estado_validacion = 'activo'
-         WHERE id = $2 RETURNING nombres, apellido_paterno`,
+         WHERE producer_id = $2 RETURNING nombres, apellido_paterno`,
         [u.rows[0].id, producer_id]
       );
 
@@ -126,7 +126,7 @@ router.post('/auth/login-pin', async (req, res): Promise<void> => {
     }
 
     const { rows } = await pool.query(
-      `SELECT p.id AS producer_id, p.nombres, p.apellido_paterno, p.estado_validacion,
+      `SELECT p.producer_id, p.nombres, p.apellido_paterno, p.estado_validacion,
               u.id AS user_id, u.password_hash, u.rol
        FROM producer p
        JOIN usuarios u ON u.id = p.usuario_id
@@ -191,7 +191,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
     }
 
     const existe = await pool.query(
-      `SELECT id FROM producer WHERE UPPER(curp) = UPPER($1)`, [curp]
+      `SELECT producer_id FROM producer WHERE UPPER(curp) = UPPER($1)`, [curp]
     );
     if (existe.rows.length) {
       res.status(409).json({ error: 'Esta CURP ya está registrada' });
@@ -213,8 +213,8 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       const p = await client.query(
         `INSERT INTO producer
            (usuario_id, curp, nombres, apellido_paterno, apellido_materno,
-            telefono, tipo_registro, estado_validacion, programas_beneficiario)
-         VALUES ($1,$2,$3,$4,$5,$6,'B','pendiente',$7) RETURNING id`,
+            phone, tipo_registro, estado_validacion, programas_beneficiario)
+         VALUES ($1,$2,$3,$4,$5,$6,'B','pendiente',$7) RETURNING producer_id`,
         [u.rows[0].id, curp.toUpperCase(), nombres, apellido_paterno,
          apellido_materno, telefono, programas_beneficiario || []]
       );
@@ -224,10 +224,12 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       if (hasCoords) {
         await client.query(
           `INSERT INTO up
-             (producer_id, state_name, municipality_name, centroid,
+             (producer_id, up_name, up_type, production_system, water_regime,
+              state_name, municipality_name, centroid,
               location_confirmed, centroid_source)
-           VALUES ($1, $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326)::geography, TRUE, 'productor')`,
-          [p.rows[0].id, estado_up, municipio_up, lng, lat]
+           VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+                   $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), TRUE, 'productor')`,
+          [p.rows[0].producer_id, estado_up, municipio_up, lng, lat]
         );
       } else {
         // Intentar centroide del municipio desde municipios_referencia
@@ -239,10 +241,12 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
         const centroidVal = muni.rows[0]?.centroid || null;
         await client.query(
           `INSERT INTO up
-             (producer_id, state_name, municipality_name, centroid,
+             (producer_id, up_name, up_type, production_system, water_regime,
+              state_name, municipality_name, centroid,
               location_confirmed, centroid_source)
-           VALUES ($1, $2, $3, $4, FALSE, 'municipio')`,
-          [p.rows[0].id, estado_up, municipio_up, centroidVal]
+           VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+                   $2, $3, $4::geometry, FALSE, 'municipio')`,
+          [p.rows[0].producer_id, estado_up, municipio_up, centroidVal]
         );
       }
 
@@ -273,8 +277,8 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
 
 // Helper para obtener producer_id del token
 async function getProducerId(userId: number): Promise<number | null> {
-  const r = await pool.query('SELECT id FROM producer WHERE usuario_id = $1 LIMIT 1', [userId]);
-  return r.rows[0]?.id || null;
+  const r = await pool.query('SELECT producer_id FROM producer WHERE usuario_id = $1 LIMIT 1', [userId]);
+  return r.rows[0]?.producer_id || null;
 }
 
 // GET /api/productor/dashboard
@@ -355,7 +359,7 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
 
     // Datos del productor (nombres, estado_validacion)
     const prodRes = await pool.query(
-      `SELECT nombres, apellido_paterno, estado_validacion FROM producer WHERE id = $1`,
+      `SELECT nombres, apellido_paterno, estado_validacion FROM producer WHERE producer_id = $1`,
       [producerId]
     );
 
@@ -464,7 +468,7 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
 
     await pool.query(
       `UPDATE up SET
-         centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+         centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
          location_confirmed = TRUE,
          centroid_source = 'productor'
        WHERE producer_id = $3`,
@@ -529,9 +533,9 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
 
     await pool.query(
       `UPDATE producer SET
-         telefono               = COALESCE($1, telefono),
+         phone                  = COALESCE($1, phone),
          programas_beneficiario = COALESCE($2, programas_beneficiario)
-       WHERE id = $3`,
+       WHERE producer_id = $3`,
       [telefono, programas_beneficiario, producerId]
     );
     res.json({ ok: true });
@@ -549,16 +553,16 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
     const { rows } = await pool.query(
-      `SELECT p.id, p.curp, p.nombres, p.apellido_paterno, p.apellido_materno,
-              p.telefono, p.estado_validacion, p.tipo_registro,
+      `SELECT p.producer_id, p.curp, p.nombres, p.apellido_paterno, p.apellido_materno,
+              p.phone AS telefono, p.estado_validacion, p.tipo_registro,
               p.programas_beneficiario,
               u.state_name AS state_name, u.municipality_name AS municipality_name,
               u.location_confirmed, u.centroid_source,
-              ST_Y(u.centroid::geometry) AS lat,
-              ST_X(u.centroid::geometry) AS lng
+              ST_Y(u.centroid) AS lat,
+              ST_X(u.centroid) AS lng
        FROM producer p
-       LEFT JOIN up u ON u.producer_id = p.id
-       WHERE p.id = $1`,
+       LEFT JOIN up u ON u.producer_id = p.producer_id
+       WHERE p.producer_id = $1`,
       [producerId]
     );
     res.json(rows[0] || {});

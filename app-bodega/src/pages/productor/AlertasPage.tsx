@@ -50,20 +50,21 @@ export default function AlertasPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Cargando...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="flex items-center px-4 py-3 border-b bg-white">
-        <button onClick={() => navigate('/productor')} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50 pb-24">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate('/productor')}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-800">Alertas</h1>
+        <h1 className="flex-1 text-center font-semibold text-zinc-800">Alertas</h1>
         <div className="w-8" />
       </div>
 
-      <div className="px-4 pt-4 space-y-3">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         {notifs.length === 0 && (
           <div className="text-center py-12">
-            <Bell size={40} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-400">No tienes alertas por ahora</p>
+            <Bell size={40} className="text-zinc-300 mx-auto mb-3" />
+            <p className="text-zinc-400">No tienes alertas por ahora</p>
           </div>
         )}
 
@@ -73,25 +74,25 @@ export default function AlertasPage() {
           return (
             <button key={n.id}
               onClick={() => { setExpanded(isOpen ? null : n.id); if (!n.leida) marcarLeida(n.id); }}
-              className={`w-full bg-white rounded-2xl p-4 shadow-sm border text-left transition-all
-                ${n.leida ? 'border-gray-100' : 'border-l-4 border-l-[#1A5C38] border-gray-100'}`}>
+              className={`w-full bg-white rounded-2xl p-4 shadow-sm ring-1 text-left transition-all duration-200
+                ${n.leida ? 'ring-zinc-100' : 'ring-zinc-100 border-l-4 border-l-[#1A5C38]'}`}>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${cfg.color}`}>
                       {cfg.label}
                     </span>
-                    <span className="text-xs text-gray-400">{timeAgo(n.created_at)}</span>
+                    <span className="text-xs text-zinc-400">{timeAgo(n.created_at)}</span>
                   </div>
-                  <p className={`text-sm leading-snug ${n.leida ? 'text-gray-600' : 'text-gray-800 font-medium'}`}>
+                  <p className={`text-sm leading-snug ${n.leida ? 'text-zinc-600' : 'text-zinc-800 font-medium'}`}>
                     {n.mensaje}
                   </p>
                 </div>
-                {isOpen ? <ChevronUp size={16} className="text-gray-400 shrink-0 mt-1" />
-                         : <ChevronDown size={16} className="text-gray-400 shrink-0 mt-1" />}
+                {isOpen ? <ChevronUp size={16} className="text-zinc-400 shrink-0 mt-1" />
+                         : <ChevronDown size={16} className="text-zinc-400 shrink-0 mt-1" />}
               </div>
               {isOpen && n.titulo && (
-                <p className="mt-2 text-xs text-gray-500 border-t pt-2">{n.titulo}</p>
+                <p className="mt-2 text-xs text-zinc-500 border-t border-zinc-100 pt-2">{n.titulo}</p>
               )}
             </button>
           );

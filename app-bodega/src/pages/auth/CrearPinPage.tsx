@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import PinInput from '../../components/productor/PinInput';
 import { useAuthStore } from '../../store/auth';
 
@@ -67,7 +68,7 @@ export default function CrearPinPage() {
       });
       navigate('/productor');
     } catch {
-      setError('Error de conexión.');
+      setError('Error de conexion.');
       setPin(''); setConfirmPin(''); setStep('crear');
     } finally {
       setLoading(false);
@@ -77,35 +78,42 @@ export default function CrearPinPage() {
   if (!activacion) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
-      <div className="mb-6 text-center">
-        <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-          ✓
+    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center px-5 sm:px-8 py-10">
+      <div className="w-full max-w-md text-center">
+        <div className="mb-8">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={32} className="text-[#1A5C38]" />
+          </div>
+          <p className="text-zinc-900 font-bold text-xl sm:text-2xl">
+            Hola, {activacion.nombres}
+          </p>
+          <p className="text-zinc-500 text-sm sm:text-base mt-1.5">
+            {step === 'crear'
+              ? 'Crea un PIN de 4 numeros para entrar a tu cuenta'
+              : 'Repite tu PIN para confirmar'}
+          </p>
         </div>
-        <p className="text-gray-800 font-semibold text-lg">
-          Hola, {activacion.nombres}
-        </p>
-        <p className="text-gray-500 text-sm mt-1">
-          {step === 'crear'
-            ? 'Crea un PIN de 4 números para entrar a tu cuenta'
-            : 'Repite tu PIN para confirmar'}
-        </p>
+
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-sm
+                          flex items-start gap-2 text-left max-w-sm mx-auto">
+            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 text-zinc-500">
+            <Loader2 size={20} className="animate-spin" />
+            <span>Activando tu cuenta...</span>
+          </div>
+        ) : (
+          <PinInput
+            value={step === 'crear' ? pin : confirmPin}
+            onChange={handlePinChange}
+          />
+        )}
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm max-w-sm w-full">
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <p className="text-gray-500">Activando tu cuenta...</p>
-      ) : (
-        <PinInput
-          value={step === 'crear' ? pin : confirmPin}
-          onChange={handlePinChange}
-        />
-      )}
     </div>
   );
 }

@@ -34,28 +34,29 @@ export default function EstadoSolicitudPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Cargando...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="flex items-center px-4 py-3 border-b bg-white">
-        <button onClick={() => navigate('/productor/incentivos')} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50 pb-24">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate('/productor/incentivos')}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-800">Mis solicitudes</h1>
+        <h1 className="flex-1 text-center font-semibold text-zinc-800">Mis solicitudes</h1>
         <div className="w-8" />
       </div>
 
-      <div className="px-4 pt-4 space-y-4">
+      <div className="max-w-lg mx-auto px-4 sm:px-6 pt-4 space-y-4">
         {solicitudes.length === 0 && (
-          <p className="text-gray-400 text-center py-8">No tienes solicitudes aún</p>
+          <p className="text-zinc-400 text-center py-8">No tienes solicitudes aun</p>
         )}
 
         {solicitudes.map(s => {
           const currentIdx = ESTADOS.indexOf(s.estado);
           return (
-            <div key={s.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div key={s.id} className="bg-white rounded-2xl p-5 shadow-sm ring-1 ring-zinc-100">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="font-bold text-gray-800 capitalize">{s.tipo_apoyo}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="font-bold text-zinc-800 capitalize">{s.tipo_apoyo}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">
                     {new Date(s.created_at).toLocaleDateString('es-MX')}
                   </p>
                 </div>
@@ -76,13 +77,13 @@ export default function EstadoSolicitudPage() {
                       <div className="flex flex-col items-center">
                         {done
                           ? <CheckCircle size={18} className="text-[#1A5C38]" />
-                          : <Circle size={18} className="text-gray-300" />
+                          : <Circle size={18} className="text-zinc-300" />
                         }
                         {i < ESTADOS.length - 1 && (
-                          <div className={`w-0.5 h-6 ${i < currentIdx ? 'bg-[#1A5C38]' : 'bg-gray-200'}`} />
+                          <div className={`w-0.5 h-6 ${i < currentIdx ? 'bg-[#1A5C38]' : 'bg-zinc-200'}`} />
                         )}
                       </div>
-                      <p className={`text-sm ${done ? 'text-gray-800 font-medium' : 'text-gray-400'}`}>
+                      <p className={`text-sm ${done ? 'text-zinc-800 font-medium' : 'text-zinc-400'}`}>
                         {ESTADO_LABELS[e]}
                       </p>
                     </div>

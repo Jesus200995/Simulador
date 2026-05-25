@@ -50,62 +50,65 @@ export default function DisponibilidadVolumenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex items-center px-4 py-3 border-b">
-        <button onClick={() => navigate(-1)} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50 flex flex-col">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate(-1)}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
       </div>
       <DisponibilidadStepper paso={3} />
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
-        {/* Volumen */}
-        <h2 className="text-xl font-bold text-gray-800 text-center mb-1">¿Cuántas toneladas?</h2>
-        <div className="text-center mt-4 mb-2">
-          <span className="text-5xl font-bold text-[#1A5C38]">{volumen}</span>
-          <span className="text-xl text-gray-400 ml-1">ton</span>
-        </div>
-        <input type="range" min={1} max={200} step={1} value={volumen}
-          onChange={e => setVolumen(Number(e.target.value))}
-          className="w-full accent-[#1A5C38]" />
-        <div className="flex justify-between text-xs text-gray-400 mt-1">
-          <span>1 ton</span><span>200 ton</span>
-        </div>
-
-        {/* Fecha */}
-        <h3 className="text-base font-bold text-gray-800 mt-8 mb-3">¿Cuándo estará disponible?</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {RANGOS_RAPIDOS.map((r, i) => (
-            <button key={i} onClick={() => selectRango(i)}
-              className={`py-3 rounded-xl text-sm font-medium border-2 transition-all
-                ${rangoIdx === i ? 'border-[#1A5C38] bg-green-50 text-[#1A5C38]' : 'border-gray-200 text-gray-600'}`}>
-              {r.label}
-            </button>
-          ))}
-        </div>
-
-        {custom && (
-          <div className="mt-4 space-y-3">
-            <div>
-              <label className="text-xs text-gray-500">Desde</label>
-              <input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#1A5C38] focus:outline-none" />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500">Hasta</label>
-              <input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#1A5C38] focus:outline-none" />
-            </div>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 sm:px-6 pb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 text-center mb-1">Cuantas toneladas?</h2>
+          <div className="text-center mt-4 mb-2">
+            <span className="text-5xl font-bold text-[#1A5C38]">{volumen}</span>
+            <span className="text-xl text-zinc-400 ml-1">ton</span>
           </div>
-        )}
+          <input type="range" min={1} max={200} step={1} value={volumen}
+            onChange={e => setVolumen(Number(e.target.value))}
+            className="w-full accent-[#1A5C38]" />
+          <div className="flex justify-between text-xs text-zinc-400 mt-1">
+            <span>1 ton</span><span>200 ton</span>
+          </div>
+
+          <h3 className="text-base font-bold text-zinc-800 mt-8 mb-3">Cuando estara disponible?</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {RANGOS_RAPIDOS.map((r, i) => (
+              <button key={i} onClick={() => selectRango(i)}
+                className={`py-3 rounded-xl text-sm font-medium ring-1 transition-all duration-200
+                  ${rangoIdx === i ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-[#1A5C38]' : 'ring-zinc-200 text-zinc-600 hover:bg-zinc-50'}`}>
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          {custom && (
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="text-xs text-zinc-500 font-medium">Desde</label>
+                <input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)}
+                  className="w-full bg-white ring-1 ring-zinc-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5C38] focus:outline-none transition-shadow" />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 font-medium">Hasta</label>
+                <input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)}
+                  className="w-full bg-white ring-1 ring-zinc-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5C38] focus:outline-none transition-shadow" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="px-4 py-4 border-t">
-        <button onClick={confirmar} disabled={!canContinue}
-          className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl text-base font-bold
-                     disabled:opacity-40 active:scale-95 transition-transform">
-          Continuar
-        </button>
+      <div className="px-4 sm:px-6 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <div className="max-w-lg mx-auto">
+          <button onClick={confirmar} disabled={!canContinue}
+            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
+                       disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
+            Continuar
+          </button>
+        </div>
       </div>
     </div>
   );

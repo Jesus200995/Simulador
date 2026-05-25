@@ -37,29 +37,30 @@ export default function PreciosProductorPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Cargando precios...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="flex items-center px-4 py-3 border-b bg-white">
-        <button onClick={() => navigate('/productor')} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50 pb-24">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate('/productor')}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-800">Precios</h1>
+        <h1 className="flex-1 text-center font-semibold text-zinc-800">Precios</h1>
         <div className="w-8" />
       </div>
 
-      <div className="px-4 pt-4">
-        <p className="text-xs text-gray-400 mb-4">{data?.estado} · {data?.fecha}</p>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4">
+        <p className="text-xs text-zinc-400 mb-4">{data?.estado} - {data?.fecha}</p>
 
         {/* Tres precios */}
         <div className="space-y-3">
           {PRECIOS_CONFIG.map(cfg => {
             const val = data?.[cfg.clave as keyof PrecioData] as number | null;
             return (
-              <div key={cfg.clave} className={`${cfg.bg} rounded-2xl p-4 ${cfg.importante ? 'border-2 border-green-200' : ''}`}>
-                <p className="text-xs text-gray-500 font-medium">{cfg.etiqueta}</p>
+              <div key={cfg.clave} className={`${cfg.bg} rounded-2xl p-4 ${cfg.importante ? 'ring-2 ring-emerald-200' : 'ring-1 ring-zinc-100'}`}>
+                <p className="text-xs text-zinc-500 font-medium">{cfg.etiqueta}</p>
                 <p className={`text-2xl font-bold mt-1 ${cfg.color}`}>
-                  {val ? `$${formatNum(val, 0)}` : '—'} <span className="text-sm font-normal text-gray-400">/ton</span>
+                  {val ? `$${formatNum(val, 0)}` : '--'} <span className="text-sm font-normal text-zinc-400">/ton</span>
                 </p>
-                <p className="text-xs text-gray-500 mt-1">{cfg.desc}</p>
+                <p className="text-xs text-zinc-500 mt-1">{cfg.desc}</p>
               </div>
             );
           })}
@@ -67,8 +68,8 @@ export default function PreciosProductorPage() {
 
         {/* Tendencia */}
         {data?.tendencia && data.tendencia.length > 1 && (
-          <div className="mt-5 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-sm font-bold text-gray-700 flex items-center gap-1 mb-3">
+          <div className="mt-5 bg-white rounded-2xl p-4 shadow-sm ring-1 ring-zinc-100">
+            <p className="text-sm font-bold text-zinc-700 flex items-center gap-1 mb-3">
               <TrendingUp size={14} /> Tendencia 30 días
             </p>
             <div className="flex items-end gap-0.5 h-24">
@@ -85,7 +86,7 @@ export default function PreciosProductorPage() {
                 );
               })}
             </div>
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <div className="flex justify-between text-xs text-zinc-400 mt-1">
               <span>{data.tendencia[0]?.fecha?.slice(5)}</span>
               <span>{data.tendencia[data.tendencia.length - 1]?.fecha?.slice(5)}</span>
             </div>
@@ -94,25 +95,25 @@ export default function PreciosProductorPage() {
 
         {/* FIRA */}
         {data?.fira && (
-          <div className="mt-4 bg-blue-50 border border-blue-100 rounded-2xl p-4">
+          <div className="mt-4 bg-blue-50 ring-1 ring-blue-100 rounded-2xl p-4">
             <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-3">
               Referencia de costos FIRA · {data.estado}
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Modalidad</span>
+                <span className="text-zinc-600">Modalidad</span>
                 <span className="font-medium">{data.fira.modalidad}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Costo por hectárea</span>
+                <span className="text-zinc-600">Costo por hectarea</span>
                 <span className="font-semibold">${formatNum(data.fira.costo_por_ha, 0)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Precio FIRA de referencia</span>
+                <span className="text-zinc-600">Precio FIRA de referencia</span>
                 <span className="font-semibold text-[#1A5C38]">${formatNum(data.fira.precio_fira, 0)}/ton</span>
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-3">
+            <p className="text-xs text-zinc-400 mt-3">
               Fuente: FIRA · Ciclo PV 2026. Solo disponible para estados con datos reportados.
             </p>
           </div>

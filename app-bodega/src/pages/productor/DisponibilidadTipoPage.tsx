@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Wheat } from 'lucide-react';
 import DisponibilidadStepper from '../../components/productor/DisponibilidadStepper';
 
 const TIPOS = [
-  { valor: 'blanco',   etiqueta: 'Maíz Blanco',   emoji: '⬜', descripcion: 'H-40, H-59, H-564C y otros' },
-  { valor: 'amarillo', etiqueta: 'Maíz Amarillo',  emoji: '🟡', descripcion: 'H-384A, H-385, Búho y otros' },
-  { valor: 'criollo',  etiqueta: 'Maíz Criollo',   emoji: '🌽', descripcion: 'Criollo local o nativo' },
+  { valor: 'blanco',   etiqueta: 'Maiz Blanco',   bg: 'bg-zinc-100',    descripcion: 'H-40, H-59, H-564C y otros' },
+  { valor: 'amarillo', etiqueta: 'Maiz Amarillo',  bg: 'bg-amber-100',   descripcion: 'H-384A, H-385, Buho y otros' },
+  { valor: 'criollo',  etiqueta: 'Maiz Criollo',   bg: 'bg-emerald-100', descripcion: 'Criollo local o nativo' },
 ];
 
 export default function DisponibilidadTipoPage() {
@@ -17,28 +17,31 @@ export default function DisponibilidadTipoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="flex items-center px-4 py-3 border-b">
-        <button onClick={() => navigate('/productor')} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+    <div className="min-h-screen bg-zinc-50">
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
+        <button onClick={() => navigate('/productor')}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
       </div>
       <DisponibilidadStepper paso={1} />
-      <div className="px-4">
-        <h2 className="text-xl font-bold text-gray-800 text-center mb-1">
-          ¿Qué tipo de maíz tienes?
+      <div className="max-w-lg mx-auto px-4 sm:px-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 text-center mb-1">
+          Que tipo de maiz tienes?
         </h2>
-        <p className="text-gray-500 text-sm text-center mb-6">Toca una opción para continuar</p>
+        <p className="text-zinc-500 text-sm text-center mb-6">Toca una opcion para continuar</p>
         <div className="space-y-3">
           {TIPOS.map(t => (
             <button key={t.valor} onClick={() => seleccionar(t.valor)}
-              className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl
+              className="w-full bg-white ring-1 ring-zinc-200 rounded-2xl
                          py-5 px-5 flex items-center gap-4 text-left
-                         active:border-[#1A5C38] active:bg-green-50 transition-all">
-              <span className="text-4xl">{t.emoji}</span>
+                         hover:ring-zinc-300 active:ring-2 active:ring-[#1A5C38] active:bg-emerald-50 transition-all duration-200">
+              <div className={`w-12 h-12 ${t.bg} rounded-xl flex items-center justify-center shrink-0`}>
+                <Wheat size={24} className="text-zinc-600" />
+              </div>
               <div>
-                <p className="text-lg font-semibold text-gray-800">{t.etiqueta}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t.descripcion}</p>
+                <p className="text-lg font-semibold text-zinc-800">{t.etiqueta}</p>
+                <p className="text-xs text-zinc-500 mt-0.5">{t.descripcion}</p>
               </div>
             </button>
           ))}

@@ -19,7 +19,7 @@ const iconBodega = (estado: string) => new L.DivIcon({
   className: '',
   html: `<div class="w-10 h-10 rounded-full flex items-center justify-center shadow-md
     ${estado === 'comprando' ? 'bg-green-600' : estado === 'limitado' ? 'bg-yellow-500' : 'bg-red-500'}">
-    <span class="text-white text-lg">🏪</span></div>`,
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V12a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10"/><path d="M2 22h20"/><path d="M12 2l10 10H2L12 2z"/></svg></div>`,
   iconSize: [40, 40], iconAnchor: [20, 20],
 });
 
@@ -64,11 +64,12 @@ export default function MapaBodegasPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex items-center px-4 py-3 border-b bg-white z-10">
-        <button onClick={() => navigate('/productor')} className="p-1">
-          <ChevronLeft size={24} className="text-gray-600" />
+      <div className="flex items-center px-4 sm:px-6 py-3 border-b border-zinc-200 bg-white/80 backdrop-blur-xl z-10">
+        <button onClick={() => navigate('/productor')}
+          className="p-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+          <ChevronLeft size={22} className="text-zinc-600" />
         </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-800">Mapa de bodegas</h1>
+        <h1 className="flex-1 text-center font-semibold text-zinc-800">Mapa de bodegas</h1>
         <div className="w-8" />
       </div>
 
