@@ -6,6 +6,15 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Normalizar texto: MAYÚSCULAS y sin tildes/acentos
+function normalizeText(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .trim();
+}
+
 // ─────────────────────────────────────────────
 // AUTH — Activación por CURP (Tipo A)
 // ─────────────────────────────────────────────
@@ -204,10 +213,17 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
     try {
       await client.query('BEGIN');
 
+      // Normalizar nombres: MAYÚSCULAS sin acentos
+      const nombresN = normalizeText(nombres || '');
+      const apPaternoN = normalizeText(apellido_paterno || '');
+      const apMaternoN = normalizeText(apellido_materno || '');
+      const curpN = curp.toUpperCase().trim();
+      const nombreCompleto = [nombresN, apPaternoN, apMaternoN].filter(Boolean).join(' ');
+
       const u = await client.query(
-        `INSERT INTO usuarios (password_hash, rol, telefono, activo)
-         VALUES ($1, 'productor', $2, true) RETURNING id`,
-        [hashedPin, telefono]
+        `INSERT INTO usuarios (curp, nombre_completo, password_hash, rol, telefono, activo)
+         VALUES ($1, $2, $3, 'productor', $4, true) RETURNING id`,
+        [curpN, nombreCompleto, hashedPin, telefono]
       );
 
       const p = await client.query(
@@ -215,8 +231,8 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
            (usuario_id, curp, nombres, apellido_paterno, apellido_materno,
             phone, tipo_registro, estado_validacion, programas_beneficiario)
          VALUES ($1,$2,$3,$4,$5,$6,'B','pendiente',$7) RETURNING producer_id`,
-        [u.rows[0].id, curp.toUpperCase(), nombres, apellido_paterno,
-         apellido_materno, telefono, programas_beneficiario || []]
+        [u.rows[0].id, curpN, nombresN, apPaternoN,
+         apMaternoN, telefono, programas_beneficiario || []]
       );
 
       // UP: si marcó en mapa usar coordenadas, si no usar centroide del municipio

@@ -33,6 +33,14 @@ const PROGRAMAS = [
 
 const MAIZ_ICONS: Record<string, string> = { blanco: 'bg-zinc-100', amarillo: 'bg-amber-100', criollo: 'bg-emerald-100' };
 
+// Normalizar: MAYUSCULAS sin tildes/acentos
+function normalizeText(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
+}
+
 export default function RegistroNuevoPage() {
   const navigate = useNavigate();
   const mapRef = useRef<L.Map>(null);
@@ -163,11 +171,11 @@ export default function RegistroNuevoPage() {
             <div className="space-y-4">
               <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">Tus datos personales</h2>
               <p className="text-sm text-zinc-500">Escribelos como aparecen en tu INE</p>
-              <input value={nombres} onChange={e => setNombres(e.target.value)}
+              <input value={nombres} onChange={e => setNombres(normalizeText(e.target.value))}
                 placeholder="Nombre(s)" className={inputCls} />
-              <input value={apPaterno} onChange={e => setApPaterno(e.target.value)}
+              <input value={apPaterno} onChange={e => setApPaterno(normalizeText(e.target.value))}
                 placeholder="Apellido paterno" className={inputCls} />
-              <input value={apMaterno} onChange={e => setApMaterno(e.target.value)}
+              <input value={apMaterno} onChange={e => setApMaterno(normalizeText(e.target.value))}
                 placeholder="Apellido materno" className={inputCls} />
               <div>
                 <input value={curp}
