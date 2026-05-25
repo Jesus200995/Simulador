@@ -51,12 +51,13 @@ export default function DisponibilidadVolumenPage() {
 
   return (
     <div className="bg-[#F2F2F7] flex flex-col min-h-0">
-      <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-3">
-        <div className="max-w-5xl mx-auto">
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.15)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
-            className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-medium active:opacity-60 transition-opacity">
-            <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" /> Volver
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
+          <h1 className="text-[20px] font-bold text-white leading-tight">Disponibilidad</h1>
         </div>
       </div>
       <DisponibilidadStepper paso={3} />

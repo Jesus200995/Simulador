@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight, BadgeCheck } from 'lucide-react';
 import { formatNum } from '../../utils/format';
+import { useAuthStore } from '../../store/auth';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -44,11 +45,23 @@ function SkeletonDashboard() {
 }
 
 export default function DashboardProductorPage() {
+  const { user } = useAuthStore();
   const [data, setData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const isPendiente = data?.estado_validacion === 'pendiente';
   const [dismissed, setDismissed] = useState(() => localStorage.getItem('dismiss_ubicacion') === '1');
+
+  // Mexico timezone clock
+  const getMexicoTime = () => new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour: 'numeric', minute: '2-digit', hour12: true });
+  const getMexicoHour = () => Number(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City', hour: 'numeric', hour12: false }));
+  const [reloj, setReloj] = useState(getMexicoTime());
+  const clockRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    clockRef.current = setInterval(() => setReloj(getMexicoTime()), 1000);
+    return () => { if (clockRef.current) clearInterval(clockRef.current); };
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -60,7 +73,11 @@ export default function DashboardProductorPage() {
   if (loading) return <SkeletonDashboard />;
 
   const delta = (data?.precio_hoy ?? 0) - (data?.precio_ayer ?? 0);
-  const hoy = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  const hora = getMexicoHour();
+  const saludo = hora < 12 ? 'Buenos dias' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
+  const nombres = data?.nombres || user?.nombres || user?.nombre_completo || 'Productor';
+  const initials = nombres.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
 
   return (
     <div className="bg-zinc-50">
@@ -77,12 +94,33 @@ export default function DashboardProductorPage() {
         </div>
       )}
 
-      <div className="bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] px-4 sm:px-6 pt-5 pb-6 rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-green-200/80 text-[13px]">{data?.municipio} - {hoy}</p>
-          <p className="text-white text-lg sm:text-xl font-semibold mt-0.5">
-            Buenos dias, {data?.nombres?.split(' ')[0]}
-          </p>
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Inicio</p>
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 ring-2 ring-white/20">
+              <span className="text-white text-[15px] font-black">{initials}</span>
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
+                {saludo}, {nombres.split(' ')[0]}
+              </h1>
+              <p className="text-[13px] font-medium text-white/40 mt-0.5 truncate">{nombres}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1">
+              <Wheat size={11} className="text-green-200" />
+              <span className="text-[11px] font-bold text-white">Productor</span>
+              <BadgeCheck size={11} className="text-green-300" />
+            </div>
+            <p className="text-green-200/60 text-[11px] capitalize">{hoy}</p>
+            <div className="ml-auto bg-[#22c55e]/20 border border-[#22c55e]/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+              <span className="text-[11px] font-bold text-white tracking-wide">{reloj}</span>
+              <span className="text-[9px] text-green-200/70 font-medium">MX</span>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -49,10 +49,10 @@ export default function AlertasPage() {
 
   return (
     <div className="bg-[#F2F2F7]">
-      <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-4">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-[20px] font-bold text-gray-900 leading-tight">Alertas</h1>
-          <p className="text-[13px] text-gray-400 mt-0.5">Notificaciones recientes</p>
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.15)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+          <h1 className="text-[20px] font-bold text-white leading-tight">Alertas</h1>
+          <p className="text-[13px] text-green-200/60 mt-0.5">Notificaciones recientes</p>
         </div>
       </div>
 

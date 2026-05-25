@@ -68,8 +68,22 @@ function RequireProductor({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireBodeguero({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
+  return <>{children}</>;
+}
+
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  return <RequireAuth><Layout>{children}</Layout></RequireAuth>;
+  return <RequireBodeguero><Layout>{children}</Layout></RequireBodeguero>;
+}
+
+function SmartRedirect() {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
+  return <Navigate to="/dashboard" replace />;
 }
 
 export const router = createBrowserRouter([
@@ -185,6 +199,6 @@ export const router = createBrowserRouter([
     ],
   },
 
-  { path: '/', element: <Navigate to="/dashboard" replace /> },
-  { path: '*', element: <Navigate to="/dashboard" replace /> },
+  { path: '/', element: <SmartRedirect /> },
+  { path: '*', element: <SmartRedirect /> },
 ]);
