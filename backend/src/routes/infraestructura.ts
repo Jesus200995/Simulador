@@ -18,7 +18,7 @@ router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response
       pool.query('SELECT DISTINCT estado FROM bodegas WHERE estado IS NOT NULL ORDER BY estado'),
       pool.query('SELECT DISTINCT municipio, estado FROM bodegas WHERE municipio IS NOT NULL ORDER BY municipio'),
       pool.query("SELECT code, label FROM cat_catalog WHERE catalog='tipo_maiz' ORDER BY sort_order"),
-      pool.query("SELECT code, label FROM cat_crop_variety WHERE crop='maiz' ORDER BY sort_order"),
+      pool.query("SELECT code, label, tipo_maiz FROM cat_crop_variety WHERE crop='maiz' AND tipo_maiz IS NOT NULL ORDER BY tipo_maiz, sort_order"),
       pool.query("SELECT code, label FROM cat_catalog WHERE catalog='cycle_type' ORDER BY sort_order"),
     ]);
 

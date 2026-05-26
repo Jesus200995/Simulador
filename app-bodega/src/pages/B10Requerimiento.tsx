@@ -69,11 +69,7 @@ export default function B10Requerimiento() {
     ? (REGIONES_RADIO[bodegaSel.estado] || REGIONES_RADIO.default)
     : REGIONES_RADIO.default;
 
-  const filteredVars = form.tipo_maiz === 'criollo'
-    ? variedades.filter(v =>
-        ['MC_CRIOLLO', 'MC_NOSABE', 'CRIOLLO_LOCAL', 'NO_SABE'].includes(v.code) || v.tipo_maiz === 'criollo'
-      )
-    : variedades.filter(v => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz);
+  const filteredVars = variedades.filter(v => v.tipo_maiz === form.tipo_maiz);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

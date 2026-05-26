@@ -252,7 +252,17 @@ export default function B03SelectBodegas() {
               <p className="text-[11px] text-gray-500 mb-2">Toca el mapa para marcar la ubicación de tu bodega</p>
               <div className="rounded-xl overflow-hidden border border-gray-200" style={{ height: '180px' }}>
                 <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }} attributionControl={false}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  {import.meta.env.VITE_MAPBOX_TOKEN ? (
+                    <TileLayer
+                      url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}`}
+                      attribution="© Mapbox © OpenStreetMap"
+                    />
+                  ) : (
+                    <TileLayer
+                      url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                      attribution="© CartoDB © OpenStreetMap"
+                    />
+                  )}
                   <MapClickHandler onCoords={(lat, lon) => setCoords({ lat, lon })} />
                   {coords && <Marker position={[coords.lat, coords.lon]} />}
                 </MapContainer>

@@ -48,11 +48,7 @@ export default function B07Inventario() {
 
   const TIPOS_MAIZ_DEFAULT = [['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['criollo','Criollo / Local']];
 
-  const filteredVars = form.tipo_maiz === 'criollo'
-    ? conceptos.variedades.filter((v: {code: string; tipo_maiz?: string}) =>
-        ['MC_CRIOLLO', 'MC_NOSABE', 'CRIOLLO_LOCAL', 'NO_SABE'].includes(v.code) || v.tipo_maiz === 'criollo'
-      )
-    : conceptos.variedades.filter((v: {tipo_maiz?: string}) => !v.tipo_maiz || v.tipo_maiz === form.tipo_maiz);
+  const filteredVars = conceptos.variedades.filter((v: {tipo_maiz?: string}) => v.tipo_maiz === form.tipo_maiz);
 
   const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
