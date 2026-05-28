@@ -65,8 +65,8 @@ export default function CompletarUbicacionPage() {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-2xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+    <div className="flex flex-col overflow-y-auto" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-2xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] flex-shrink-0">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-4">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1 active:opacity-60 transition-opacity">
@@ -78,7 +78,7 @@ export default function CompletarUbicacionPage() {
         </div>
       </div>
 
-      <div className="flex-1 relative">
+      <div className="flex-1 relative min-h-[300px] flex-shrink-0">
         <MapContainer ref={mapRef} center={[center.lat, center.lng]} zoom={poligonoExistente ? 13 : 5}
           style={{ height: '100%', width: '100%' }} zoomControl={false} attributionControl={false}>
           <TileLayer
@@ -107,7 +107,7 @@ export default function CompletarUbicacionPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-zinc-200 space-y-2">
+      <div className="px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-zinc-200 space-y-2 flex-shrink-0">
         {areaCalc && coincideArea === null && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3">
             <p className="text-sm font-semibold text-gray-800 mb-2">Area calculada: {areaCalc} ha. &iquest;Es correcto?</p>

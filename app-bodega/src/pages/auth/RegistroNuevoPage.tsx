@@ -161,8 +161,8 @@ export default function RegistroNuevoPage() {
   // ── PASO 4 — Full-screen polygon ──────────────────────────────────────────
   if (paso === 4) {
     return (
-      <div className="flex flex-col h-screen">
-        <div className="px-4 pt-4 pb-3 bg-white border-b border-gray-100">
+      <div className="flex flex-col h-screen overflow-y-auto">
+        <div className="px-4 pt-4 pb-3 bg-white border-b border-gray-100 flex-shrink-0">
           <p className="text-base font-semibold text-gray-800">Dibuja tu parcela en el mapa</p>
           <p className="text-sm text-gray-500 mt-1">
             Toca el ícono de polígono y traza los límites de tu terreno tocando cada esquina.
@@ -177,7 +177,7 @@ export default function RegistroNuevoPage() {
           )}
         </div>
 
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-h-[300px] flex-shrink-0">
           <MapContainer
             ref={mapRef}
             center={coords ? [coords.lat, coords.lng] : [23.6345, -102.5528]}
@@ -212,7 +212,7 @@ export default function RegistroNuevoPage() {
           </div>
         </div>
 
-        <div className="bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+        <div className="bg-white border-t border-gray-100 px-4 py-4 space-y-3 flex-shrink-0">
           {areaCalc && coincideArea === null && (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
               <p className="text-sm font-semibold text-gray-800 mb-3">
