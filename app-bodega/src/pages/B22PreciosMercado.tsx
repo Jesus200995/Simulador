@@ -3,7 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend,
 } from 'recharts';
-import { TrendingUp, RefreshCw } from 'lucide-react';
+import { TrendingUp, RefreshCw, Wheat, Store, Globe, ArrowLeftRight, DollarSign, Gift, Clock } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -100,7 +100,10 @@ export default function B22PreciosMercado() {
           <div className="grid grid-cols-2 gap-2">
             {/* Card 1 — Precio Chicago */}
             <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Precio Chicago</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Globe size={11} className="text-gray-400" />
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Precio Chicago</p>
+              </div>
               <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">
                 {loading ? '—' : fmtUsd(data?.precio_chicago_usd_bushel ?? 0)}
               </p>
@@ -108,7 +111,10 @@ export default function B22PreciosMercado() {
             </div>
             {/* Card 2 — Conversión */}
             <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Conversión</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <ArrowLeftRight size={11} className="text-gray-400" />
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Conversión</p>
+              </div>
               <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">× 39.368</p>
               <p className="text-[11px] text-gray-400">
                 = {loading ? '—' : fmtUsd((data?.precio_chicago_usd_bushel ?? 0) * 39.368)} USD/ton
@@ -116,7 +122,10 @@ export default function B22PreciosMercado() {
             </div>
             {/* Card 3 — Tipo de cambio */}
             <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tipo de cambio</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <DollarSign size={11} className="text-gray-400" />
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tipo de cambio</p>
+              </div>
               <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">
                 {loading ? '—' : `$${(data?.tipo_cambio_mxn ?? 0).toFixed(2)}`}
               </p>
@@ -124,7 +133,10 @@ export default function B22PreciosMercado() {
             </div>
             {/* Card 4 — Bono Maíz */}
             <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bono Maíz</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Gift size={11} className="text-gray-400" />
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bono Maíz</p>
+              </div>
               <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">+${BONO_MAIZ_USD} USD</p>
               <p className="text-[11px] text-gray-400">
                 = {loading ? '—' : fmt(BONO_MAIZ_USD * (data?.tipo_cambio_mxn ?? 17.42))} MXN/ton
@@ -154,7 +166,9 @@ export default function B22PreciosMercado() {
             {/* PO — verde */}
             <div className="bg-[#1A5C38]/10 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-base">🌽</span>
+                <div className="w-6 h-6 rounded-lg bg-[#1A5C38]/20 flex items-center justify-center flex-shrink-0">
+                  <Wheat size={13} className="text-[#1A5C38]" />
+                </div>
                 <p className="text-[11px] font-bold text-[#1A5C38] uppercase tracking-wider">Lo que gana el productor</p>
               </div>
               {loading
@@ -176,7 +190,9 @@ export default function B22PreciosMercado() {
             {/* S — azul */}
             <div className="bg-[#1B4F8A]/10 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-base">🏪</span>
+                <div className="w-6 h-6 rounded-lg bg-[#1B4F8A]/20 flex items-center justify-center flex-shrink-0">
+                  <Store size={13} className="text-[#1B4F8A]" />
+                </div>
                 <p className="text-[11px] font-bold text-[#1B4F8A] uppercase tracking-wider">Servicios de la bodega</p>
               </div>
               {loading
@@ -299,9 +315,12 @@ export default function B22PreciosMercado() {
           )}
         </div>
 
-        <p className="text-[10px] text-gray-300 text-center pb-4">
-          Precios de referencia · CME Group · Banxico · Actualización diaria 7:00 am
-        </p>
+        <div className="flex items-center justify-center gap-1.5 pb-4">
+          <Clock size={11} className="text-gray-300" />
+          <p className="text-[10px] text-gray-300">
+            Precios de referencia · CME Group · Banxico · Actualización diaria 7:00 am
+          </p>
+        </div>
 
       </div>
     </div>

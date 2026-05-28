@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft, Warehouse, List, Map as MapIcon } from 'lucide-react';
+import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft, Warehouse, List, Map as MapIcon, Layers, AlertCircle } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -185,18 +185,27 @@ export default function B03SelectBodegas() {
 
       <div className="flex-1 px-4 sm:px-6 pt-4 pb-32 space-y-3 max-w-2xl mx-auto w-full">
         {/* KPIs globales del catálogo */}
-        {stats && (
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-              <p className="text-xl font-bold text-green-700">{stats.total_bodegas.toLocaleString('es-MX')}</p>
-              <p className="text-xs text-green-600 mt-1">Bodegas en el catálogo</p>
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-              <p className="text-xl font-bold text-blue-700">{formatNum(stats.total_capacidad_ton)} ton</p>
-              <p className="text-xs text-blue-600 mt-1">Capacidad total registrada</p>
-            </div>
-          </div>
-        )}
+        <div className="grid grid-cols-2 gap-3">
+          {stats ? (
+            <>
+              <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+                <Warehouse size={16} className="text-green-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-green-700">{stats.total_bodegas.toLocaleString('es-MX')}</p>
+                <p className="text-xs text-green-600 mt-0.5">Bodegas en el catálogo</p>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+                <Layers size={16} className="text-blue-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-blue-700">{formatNum(stats.total_capacidad_ton)} ton</p>
+                <p className="text-xs text-blue-600 mt-0.5">Capacidad total registrada</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 h-[72px] animate-pulse" />
+              <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 h-[72px] animate-pulse" />
+            </>
+          )}
+        </div>
 
         {/* Filtros */}
         <div className="flex gap-2">
@@ -252,7 +261,20 @@ export default function B03SelectBodegas() {
 
         {/* Vista Lista */}
         {vista === 'lista' && <>
-        {loading && <p className="text-center text-[14px] text-gray-400 py-4">Buscando…</p>}
+        {loading && (
+          <div className="space-y-2">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-white rounded-2xl border border-black/5 p-4 h-[66px] animate-pulse" />
+            ))}
+          </div>
+        )}
+        {!loading && results.length === 0 && (
+          <div className="text-center py-12">
+            <MapPin size={36} className="text-gray-200 mx-auto mb-3" />
+            <p className="text-[14px] font-medium text-gray-400">Sin resultados</p>
+            <p className="text-[12px] text-gray-300 mt-1">Prueba con otro nombre, estado o municipio</p>
+          </div>
+        )}
         <div className="space-y-2">
           {results.map(b => {
             const isSelected = selected.some(x => x.id === b.id);
@@ -281,6 +303,13 @@ export default function B03SelectBodegas() {
 
         {/* Vista Mapa */}
         {vista === 'mapa' && (
+          <>
+          {!loading && results.filter(b => b.latitud && b.longitud && Math.abs(b.latitud) > 0.001).length === 0 && (
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+              <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />
+              <p className="text-[12px] text-amber-700">Las bodegas filtradas no tienen coordenadas registradas — el mapa permanece en vista general</p>
+            </div>
+          )}
           <div className="rounded-2xl overflow-hidden border border-gray-200" style={{ height: '450px' }}>
             <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }}>
               {import.meta.env.VITE_MAPBOX_TOKEN ? (
@@ -312,10 +341,9 @@ export default function B03SelectBodegas() {
                           <p style={{ fontSize: 11, color: '#374151', margin: '0 0 4px' }}>Capacidad: {formatNum(b.capacidad_ton)} ton</p>
                         )}
                         {b.semaforo_compra && (
-                          <p style={{ fontSize: 11, margin: '0 0 8px' }}>
-                            {b.semaforo_compra === 'verde' && '🟢 Comprando'}
-                            {b.semaforo_compra === 'amarillo' && '🟡 Cap. limitada'}
-                            {b.semaforo_compra === 'rojo' && '🔴 No compra'}
+                          <p style={{ fontSize: 11, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: b.semaforo_compra === 'verde' ? '#22c55e' : b.semaforo_compra === 'amarillo' ? '#f59e0b' : '#ef4444' }} />
+                            {b.semaforo_compra === 'verde' ? 'Comprando' : b.semaforo_compra === 'amarillo' ? 'Cap. limitada' : 'No compra'}
                           </p>
                         )}
                         {selected.some(s => s.id === b.id) ? (
@@ -335,6 +363,7 @@ export default function B03SelectBodegas() {
               }
             </MapContainer>
           </div>
+          </>
         )}
 
         {/* C-07: Solicitar alta de bodega nueva */}
