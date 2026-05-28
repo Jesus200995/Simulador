@@ -602,9 +602,11 @@ router.get('/mis-solicitudes', authMiddleware, async (req: AuthRequest, res: Res
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
     const { rows } = await pool.query(
-      `SELECT s.id, s.tipo_apoyo, s.estado, s.created_at, s.updated_at,
-              s.notas_productor, s.notas_ventanilla
+      `SELECT s.id, s.estado, s.notas, s.created_at, s.updated_at,
+              a.nombre AS tipo_apoyo, v.nombre AS ventanilla_nombre
        FROM solicitudes_apoyo s
+       LEFT JOIN apoyos_ventanilla a ON s.apoyo_id = a.id
+       LEFT JOIN ventanillas v ON s.ventanilla_id = v.id
        WHERE s.producer_id = $1 ORDER BY s.created_at DESC`,
       [producerId]
     );
