@@ -85,6 +85,14 @@ export default function DibujarPoligonoUP({
     });
 
     return () => {
+      if (drawHandlerRef.current) {
+        drawHandlerRef.current.disable();
+        drawHandlerRef.current = null;
+      }
+      if (editHandlerRef.current) {
+        editHandlerRef.current.disable();
+        editHandlerRef.current = null;
+      }
       map.removeLayer(drawnItems);
       map.off((L as any).Draw.Event.CREATED);
       map.off((L as any).Draw.Event.DELETED);

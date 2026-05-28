@@ -521,7 +521,7 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
       await pool.query(
         `UPDATE up SET
            centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
-           geom = ST_SetSRID(ST_GeomFromGeoJSON($3), 4326),
+           geom = ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($3), 4326)),
            area_ha_calc = $4, area_ha_real = $5, coincide_area = $6,
            location_confirmed = TRUE,
            centroid_source = 'productor'
@@ -559,10 +559,9 @@ router.get('/mi-up', authMiddleware, async (req: AuthRequest, res: Response): Pr
               area_ha_calc, area_ha_real, coincide_area,
               ST_AsGeoJSON(geom)::json AS geom_geojson,
               CASE WHEN geom IS NOT NULL THEN
-                (SELECT array_agg(ARRAY[ST_Y(dp), ST_X(dp)] ORDER BY ordinality)
-                 FROM unnest(ST_DumpPoints(ST_ExteriorRing(geom::geometry)).geom)
-                      WITH ORDINALITY AS t(dp, ordinality)
-                 WHERE ordinality < ST_NPoints(ST_ExteriorRing(geom::geometry)))
+                (SELECT array_agg(ARRAY[ST_Y(pt.geom), ST_X(pt.geom)] ORDER BY pt.path[1])
+                 FROM ST_DumpPoints(ST_ExteriorRing(ST_GeometryN(geom::geometry, 1))) AS pt
+                 WHERE pt.path[1] < ST_NPoints(ST_ExteriorRing(ST_GeometryN(geom::geometry, 1))))
               ELSE NULL END AS geom_coordenadas
        FROM up WHERE producer_id = $1 LIMIT 1`,
       [producerId]
