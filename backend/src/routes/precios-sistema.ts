@@ -275,6 +275,84 @@ router.get('/brechas/estados', authMiddleware, async (req: AuthRequest, res: Res
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/precios/mercado — Datos completos para módulo B22PreciosMercado
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const params = await getParametros();
+
+    // Constantes Chicago (actualizadas vía cron diario a las 7:00 am en fase 2)
+    const CHICAGO_USD_BUSHEL = 6.28;
+    const TC_MXN = 17.42;
+    const BONO_MAIZ_USD = 50;
+    const FACTOR_BUSHEL_TON = 39.368;
+
+    // Margen de Negociación = (chicago_usd/bushel × 39.368 + 50 USD) × TC
+    const chicago_usd_ton = CHICAGO_USD_BUSHEL * FACTOR_BUSHEL_TON;
+    const margen_negociacion_mxn = Math.round((chicago_usd_ton + BONO_MAIZ_USD) * TC_MXN);
+
+    // PO — precio origen: promedio últimos N días de precios tipo 'bodega'
+    const ventanaDias = parseFloat(String(params.ventana_dias)) || 7;
+    const poRes = await pool.query(`
+      SELECT ROUND(AVG(precio)::numeric, 0) AS po
+      FROM precios
+      WHERE tipo_precio = 'bodega'
+        AND fecha >= CURRENT_DATE - INTERVAL '${ventanaDias} days'
+    `);
+    const precio_origen_mxn = parseFloat(poRes.rows[0]?.po ?? '4680');
+    const servicios_bodega_mxn = parseFloat(String(params.servicios_default));
+    const precio_compra_mxn = Math.round(precio_origen_mxn + servicios_bodega_mxn);
+
+    const pct_productor = Math.round((precio_origen_mxn / precio_compra_mxn) * 1000) / 10;
+    const pct_servicios = Math.round(100 * 10 - pct_productor * 10) / 10;
+    const precio_venta_mxn = precio_compra_mxn - margen_negociacion_mxn;
+
+    // Series 30 días para la gráfica
+    const seriesRes = await pool.query(`
+      SELECT
+        fecha::text AS fecha,
+        ROUND(AVG(precio)::numeric, 0) AS po_dia
+      FROM precios
+      WHERE tipo_precio = 'bodega'
+        AND fecha >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY fecha
+      ORDER BY fecha ASC
+    `);
+
+    const series = seriesRes.rows.map((row: any) => {
+      const po = parseFloat(row.po_dia ?? String(precio_origen_mxn));
+      const pc = Math.round(po + servicios_bodega_mxn);
+      return {
+        fecha: (row.fecha as string).slice(5),
+        precio_compra: pc,
+        margen_negociacion: margen_negociacion_mxn,
+        precio_venta: pc - margen_negociacion_mxn,
+      };
+    });
+
+    res.json({
+      precio_chicago_usd_bushel: CHICAGO_USD_BUSHEL,
+      tipo_cambio_mxn: TC_MXN,
+      bono_maiz_usd: BONO_MAIZ_USD,
+      margen_negociacion_mxn,
+      timestamp_chicago: new Date().toISOString().split('T')[0] + 'T07:00:00',
+      precio_origen_mxn,
+      servicios_bodega_mxn,
+      precio_compra_mxn,
+      pct_productor,
+      pct_servicios,
+      precio_venta_mxn,
+      precio_cedis_disponible: false,
+      precio_cedis_mxn: null,
+      series,
+    });
+  } catch (error) {
+    console.error('Error /precios/mercado:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET /api/precios/referencias/externas
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/referencias/externas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {

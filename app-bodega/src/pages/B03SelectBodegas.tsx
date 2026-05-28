@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft, Warehouse } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { Search, Plus, X, MapPin, CheckCircle, ChevronLeft, Warehouse, List, Map as MapIcon } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from '../components/Toast';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
+
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Fix default marker icon for Leaflet + bundler
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -21,7 +23,33 @@ function MapClickHandler({ onCoords }: { onCoords: (lat: number, lon: number) =>
   return null;
 }
 
-interface Bodega { id: number; nombre: string; municipio: string; estado: string; capacidad_ton: number; }
+interface Bodega { id: number; nombre: string; municipio: string; estado: string; capacidad_ton: number; latitud?: number; longitud?: number; }
+
+const iconoVerde = L.divIcon({
+  className: '',
+  html: '<div style="width:12px;height:12px;background:#1A5C38;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>',
+  iconSize: [12, 12] as [number, number],
+  iconAnchor: [6, 6] as [number, number],
+});
+const iconoVerdeCheck = L.divIcon({
+  className: '',
+  html: '<div style="width:16px;height:16px;background:#0f3520;border-radius:50%;border:2.5px solid #4ade80;box-shadow:0 1px 4px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center"><span style="color:white;font-size:9px;line-height:1">✓</span></div>',
+  iconSize: [16, 16] as [number, number],
+  iconAnchor: [8, 8] as [number, number],
+});
+
+function MapController({ bounds }: { bounds: [number, number][] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!bounds || bounds.length === 0) return;
+    if (bounds.length === 1) {
+      map.flyTo(bounds[0], 12, { animate: true, duration: 0.8 });
+    } else {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [bounds, map]);
+  return null;
+}
 
 export default function B03SelectBodegas() {
   const [query, setQuery] = useState('');
@@ -42,6 +70,9 @@ export default function B03SelectBodegas() {
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [vista, setVista] = useState<'lista' | 'mapa'>('lista');
+  const [stats, setStats] = useState<{ total_bodegas: number; total_capacidad_ton: number } | null>(null);
+  const [mapBounds, setMapBounds] = useState<[number, number][] | null>(null);
 
   async function search(q = query, est = estado, mun = municipio) {
     setLoading(true);
@@ -74,6 +105,18 @@ export default function B03SelectBodegas() {
     const t = setTimeout(() => search(query, estado, municipio), 400);
     return () => clearTimeout(t);
   }, [query, estado, municipio]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('simac_token');
+    fetch(`${BASE_URL}/bodegas/stats`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(setStats).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (vista !== 'mapa') return;
+    const withCoords = results.filter(b => b.latitud && b.longitud && Math.abs(b.latitud) > 0.001);
+    setMapBounds(withCoords.length > 0 ? withCoords.map(b => [b.latitud!, b.longitud!]) : null);
+  }, [results, vista]);
 
   function toggle(b: Bodega) {
     setSelected(s =>
@@ -136,6 +179,20 @@ export default function B03SelectBodegas() {
       )}
 
       <div className="flex-1 px-4 sm:px-6 pt-4 pb-32 space-y-3 max-w-2xl mx-auto w-full">
+        {/* KPIs globales del catálogo */}
+        {stats && (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+              <p className="text-xl font-bold text-green-700">{stats.total_bodegas.toLocaleString('es-MX')}</p>
+              <p className="text-xs text-green-600 mt-1">Bodegas en el catálogo</p>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+              <p className="text-xl font-bold text-blue-700">{formatNum(stats.total_capacidad_ton)} ton</p>
+              <p className="text-xs text-blue-600 mt-1">Capacidad total registrada</p>
+            </div>
+          </div>
+        )}
+
         {/* Filtros */}
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -168,7 +225,28 @@ export default function B03SelectBodegas() {
           </select>
         )}
 
-        {/* Resultados */}
+        {/* Toggle Lista / Mapa */}
+        <div className="flex border border-gray-200 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setVista('lista')}
+            className={`flex-1 py-2.5 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors ${
+              vista === 'lista' ? 'bg-[#1A5C38] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <List size={15} /> Lista
+          </button>
+          <button
+            onClick={() => setVista('mapa')}
+            className={`flex-1 py-2.5 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors ${
+              vista === 'mapa' ? 'bg-[#1A5C38] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <MapIcon size={15} /> Mapa
+          </button>
+        </div>
+
+        {/* Vista Lista */}
+        {vista === 'lista' && <>
         {loading && <p className="text-center text-[14px] text-gray-400 py-4">Buscando…</p>}
         <div className="space-y-2">
           {results.map(b => {
@@ -194,6 +272,57 @@ export default function B03SelectBodegas() {
             );
           })}
         </div>
+        </>}
+
+        {/* Vista Mapa */}
+        {vista === 'mapa' && (
+          <div className="rounded-2xl overflow-hidden border border-gray-200" style={{ height: '450px' }}>
+            <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }}>
+              {import.meta.env.VITE_MAPBOX_TOKEN ? (
+                <TileLayer
+                  url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}`}
+                  attribution="© Mapbox © OpenStreetMap"
+                />
+              ) : (
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  attribution="© CartoDB © OpenStreetMap"
+                />
+              )}
+              <MapController bounds={mapBounds} />
+              {results
+                .filter(b => b.latitud && b.longitud && Math.abs(b.latitud) > 0.001)
+                .map(b => (
+                  <Marker
+                    key={b.id}
+                    position={[b.latitud!, b.longitud!]}
+                    icon={selected.some(s => s.id === b.id) ? iconoVerdeCheck : iconoVerde}
+                  >
+                    <Popup>
+                      <div style={{ minWidth: 186 }}>
+                        <p style={{ fontWeight: 700, fontSize: 13, margin: '0 0 3px' }}>{b.nombre}</p>
+                        <p style={{ fontSize: 11, color: '#6b7280', margin: '0 0 8px' }}>{b.municipio}, {b.estado}</p>
+                        {b.capacidad_ton > 0 && (
+                          <p style={{ fontSize: 11, color: '#374151', margin: '0 0 4px' }}>Capacidad: {formatNum(b.capacidad_ton)} ton</p>
+                        )}
+                        {selected.some(s => s.id === b.id) ? (
+                          <p style={{ fontSize: 12, color: '#1A5C38', fontWeight: 600, margin: 0 }}>✓ Ya agregada</p>
+                        ) : (
+                          <button
+                            onClick={() => toggle(b)}
+                            style={{ width: '100%', background: '#1A5C38', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', marginTop: 6 }}
+                          >
+                            + Agregar esta bodega
+                          </button>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))
+              }
+            </MapContainer>
+          </div>
+        )}
 
         {/* C-07: Solicitar alta de bodega nueva */}
         <div className="border-t border-gray-200 pt-4 mt-4">

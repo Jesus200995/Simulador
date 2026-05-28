@@ -138,6 +138,25 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 });
 
 // =============================================
+// GET /api/bodegas/stats - KPIs globales del catálogo
+// =============================================
+router.get('/stats', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        COUNT(*)::int AS total_bodegas,
+        COALESCE(SUM(capacidad_ton), 0)::float AS total_capacidad_ton
+      FROM bodegas
+      WHERE estatus = 'aprobada'
+    `);
+    res.json(result.rows[0] ?? { total_bodegas: 0, total_capacidad_ton: 0 });
+  } catch (error) {
+    console.error('Error /bodegas/stats:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
 // GET /api/bodegas/:id - Detalle de bodega
 // =============================================
 router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
