@@ -603,7 +603,7 @@ router.get('/mis-solicitudes', authMiddleware, async (req: AuthRequest, res: Res
 
     const { rows } = await pool.query(
       `SELECT s.id, s.estado, s.notas, s.created_at, s.updated_at,
-              a.nombre AS tipo_apoyo, v.nombre AS ventanilla_nombre
+              a.nombre_apoyo AS tipo_apoyo, v.nombre_ventanilla AS ventanilla_nombre
        FROM solicitudes_apoyo s
        LEFT JOIN apoyos_ventanilla a ON s.apoyo_id = a.id
        LEFT JOIN ventanillas v ON s.ventanilla_id = v.id
