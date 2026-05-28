@@ -72,7 +72,7 @@ export default function B22PreciosMercado() {
     <div className="w-full">
       <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas" back="/dashboard" />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-5">
 
         {/* Encabezado + botón actualizar */}
         <div className="flex items-center justify-between">
@@ -88,10 +88,13 @@ export default function B22PreciosMercado() {
         )}
 
         {/* ── PRECIO 1 — Margen de Negociación ─────────────────── */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest">1 DE 4</span>
-            <h2 className="text-[15px] font-bold text-gray-800">Margen de Negociación</h2>
+        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-gray-800 text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">1</span>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">1 de 4</p>
+              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Margen de Negociación</h2>
+            </div>
           </div>
           <p className="text-[12px] text-gray-400">
             Precio Chicago (CME) convertido a MXN/ton + Bono Maíz fijo de ${BONO_MAIZ_USD} USD/ton
@@ -156,13 +159,16 @@ export default function B22PreciosMercado() {
         </section>
 
         {/* ── PRECIO 2 — Precio de Compra ───────────────────────── */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest">2 DE 4</span>
-            <h2 className="text-[15px] font-bold text-gray-800">Precio de Compra</h2>
+        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-[#1A5C38] text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">2</span>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">2 de 4</p>
+              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Precio de Compra</h2>
+            </div>
           </div>
 
-          <div className="border border-black/[0.06] rounded-2xl overflow-hidden shadow-sm">
+          <div className="rounded-2xl overflow-hidden border border-gray-100">
             {/* PO — verde */}
             <div className="bg-[#1A5C38]/10 p-4">
               <div className="flex items-center gap-2 mb-2">
@@ -224,13 +230,16 @@ export default function B22PreciosMercado() {
         </section>
 
         {/* ── PRECIO 3 — Precio de Venta ────────────────────────── */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest">3 DE 4</span>
-            <h2 className="text-[15px] font-bold text-gray-800">Precio de Venta</h2>
+        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-[#1B4F8A] text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">3</span>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">3 de 4</p>
+              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Precio de Venta</h2>
+            </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-3">
+          <div className="rounded-2xl border border-gray-100 p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-[14px] text-gray-500">Precio de Compra</p>
               <p className="text-[14px] font-semibold text-gray-700">
@@ -260,10 +269,13 @@ export default function B22PreciosMercado() {
         </section>
 
         {/* ── PRECIO 4 — CEDIS En desarrollo ───────────────────── */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest">4 DE 4</span>
-            <h2 className="text-[15px] font-bold text-gray-800">Precio CEDIS</h2>
+        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-amber-400 text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">4</span>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">4 de 4</p>
+              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Precio CEDIS</h2>
+            </div>
           </div>
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -279,9 +291,10 @@ export default function B22PreciosMercado() {
 
         {/* ── Gráfica de tendencia 30 días ─────────────────────── */}
         <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5">
-          <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-widest mb-4">
-            Tendencia de precios (30 días)
-          </p>
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={16} className="text-gray-300" />
+            <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-widest">Tendencia de precios · 30 días</p>
+          </div>
           {loading ? (
             <div className="flex items-center justify-center h-48"><Spinner /></div>
           ) : !data || data.series.length < 2 ? (

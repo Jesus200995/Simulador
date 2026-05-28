@@ -299,6 +299,28 @@ export default function B03SelectBodegas() {
             );
           })}
         </div>
+        {selected.length > 0 && (
+          <div className="bg-white rounded-2xl border border-[#1A5C38]/25 shadow-sm p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0">{selected.length}</span>
+                <p className="text-[13px] font-semibold text-gray-800">
+                  {selected.length === 1 ? '1 bodega seleccionada' : `${selected.length} bodegas seleccionadas`}
+                </p>
+              </div>
+              <button onClick={() => setSelected([])} className="text-[11px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              {selected.map(b => (
+                <span key={b.id} className="flex-shrink-0 flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-xl px-2.5 py-1.5">
+                  <MapPin size={10} className="text-green-600 flex-shrink-0" />
+                  <span className="text-[12px] font-medium text-green-800 whitespace-nowrap max-w-[130px] truncate">{b.nombre}</span>
+                  <button onClick={() => toggle(b)} className="text-green-400 active:text-red-500 flex-shrink-0 ml-0.5"><X size={10} /></button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
         </>}
 
         {/* Vista Mapa */}
@@ -363,6 +385,29 @@ export default function B03SelectBodegas() {
               }
             </MapContainer>
           </div>
+          {selected.length > 0 && (
+            <div className="bg-white rounded-2xl border border-[#1A5C38]/25 shadow-sm p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0">{selected.length}</span>
+                  <p className="text-[13px] font-semibold text-gray-800">
+                    {selected.length === 1 ? '1 bodega seleccionada en el mapa' : `${selected.length} bodegas seleccionadas en el mapa`}
+                  </p>
+                </div>
+                <button onClick={() => setSelected([])} className="text-[11px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                {selected.map(b => (
+                  <span key={b.id} className="flex-shrink-0 flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-xl px-2.5 py-1.5">
+                    <MapPin size={10} className="text-green-600 flex-shrink-0" />
+                    <span className="text-[12px] font-medium text-green-800 whitespace-nowrap max-w-[130px] truncate">{b.nombre}</span>
+                    <button onClick={() => toggle(b)} className="text-green-400 active:text-red-500 flex-shrink-0 ml-0.5"><X size={10} /></button>
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] text-gray-400 text-center">Toca el botón verde de abajo para confirmar</p>
+            </div>
+          )}
           </>
         )}
 
