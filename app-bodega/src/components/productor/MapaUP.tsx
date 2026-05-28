@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Circle, Polygon, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -17,6 +17,15 @@ interface Props {
   radioKm?: number;
   height?: string;
   zoom?: number;
+  poligono?: [number, number][] | null; // coordenadas [lng, lat] de geom_geojson
+}
+
+function FitPolygon({ coords }: { coords: [number, number][] }) {
+  const map = useMap();
+  const positions = coords.map(([lng, lat]) => [lat, lng] as [number, number]);
+  const bounds = L.latLngBounds(positions);
+  map.fitBounds(bounds, { padding: [20, 20] });
+  return null;
 }
 
 // Componente para centrar el mapa automáticamente
@@ -38,10 +47,11 @@ export default function MapaUP({
   centroidSource,
   radioKm = 5,
   height = '200px',
-  zoom = 14
+  zoom = 14,
+  poligono,
 }: Props) {
-  // Si la ubicación no está confirmada por el productor, mostramos radio de incertidumbre
   const showUncertainty = !locationConfirmed || centroidSource !== 'productor';
+  const hasPolygon = poligono && poligono.length >= 3;
 
   return (
     <div style={{ height, width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
@@ -65,24 +75,26 @@ export default function MapaUP({
           url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
           opacity={0.6}
         />
-        <MapCenter lat={lat} lng={lng} />
-        
-        {/* Pin verde en el centroide */}
-        <Marker position={[lat, lng]} />
-        
-        {/* Radio de incertidumbre si la ubicación es aproximada */}
-        {showUncertainty && (
-          <Circle
-            center={[lat, lng]}
-            radius={radioKm * 1000} // convertir km a metros
-            pathOptions={{
-              color: '#1A5C38',
-              fillColor: '#1A5C38',
-              fillOpacity: 0.08,
-              weight: 1.5,
-              dashArray: '6 4'
-            }}
-          />
+        {hasPolygon ? (
+          <>
+            <FitPolygon coords={poligono!} />
+            <Polygon
+              positions={poligono!.map(([lng, lat]) => [lat, lng] as [number, number])}
+              pathOptions={{ color: '#1A5C38', fillColor: '#1A5C38', fillOpacity: 0.2, weight: 2 }}
+            />
+          </>
+        ) : (
+          <>
+            <MapCenter lat={lat} lng={lng} />
+            <Marker position={[lat, lng]} />
+            {showUncertainty && (
+              <Circle
+                center={[lat, lng]}
+                radius={radioKm * 1000}
+                pathOptions={{ color: '#1A5C38', fillColor: '#1A5C38', fillOpacity: 0.08, weight: 1.5, dashArray: '6 4' }}
+              />
+            )}
+          </>
         )}
       </MapContainer>
     </div>

@@ -26,11 +26,16 @@ interface Perfil {
   area_ha_calc: number | null; area_ha_real: number | null;
 }
 
+interface CropInfo {
+  cycle_crop_id: number; crop: string;
+  variety_id: string | null; variety_other: string | null;
+  area_sown_ha: number | null; yield_expected: number | null;
+  planting_date: string | null; estimated_harvest_date: string | null;
+  destination: string | null;
+}
 interface Ciclo {
   cycle_id: number; cycle_year: number; cycle_type: string;
-  hectareas_sembradas: number | null;
-  fecha_siembra: string | null;
-  variedad_nombre: string | null;
+  crops: CropInfo[];
 }
 
 export default function MiPerfilPage() {
@@ -44,7 +49,8 @@ export default function MiPerfilPage() {
   const [correo, setCorreo] = useState('');
   const [editProg, setEditProg] = useState(false);
   const [programas, setProgramas] = useState<string[]>([]);
-  const [ciclo, setCiclo] = useState<Ciclo | null | undefined>(undefined);
+  const [poligono, setPoligono] = useState<[number, number][] | null>(null);
+  const [ciclos, setCiclos] = useState<Ciclo[] | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -58,8 +64,22 @@ export default function MiPerfilPage() {
       })
       .finally(() => setLoading(false));
     const token2 = localStorage.getItem('simac_token');
-    fetch(`${BASE}/productor/mi-ciclo`, { headers: { Authorization: `Bearer ${token2}` } })
-      .then(r => r.json()).then(setCiclo).catch(() => setCiclo(null));
+    fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token2}` } })
+      .then(r => r.json())
+      .then(d => {
+        const up = d.ups?.[0] ?? d[0];
+        if (!up) return;
+        const geom = up.geom_geojson;
+        if (geom?.coordinates) {
+          const ring = geom.type === 'MultiPolygon'
+            ? geom.coordinates[0]?.[0]
+            : geom.coordinates[0];
+          if (ring?.length >= 3) setPoligono(ring as [number, number][]);
+        }
+        return fetch(`${BASE}/ups/${up.up_id}/cycles`, { headers: { Authorization: `Bearer ${token2}` } })
+          .then(r => r.json())
+          .then(d => setCiclos(d.cycles ?? d));
+      }).catch(() => setCiclos([]));
   }, []);
 
   const guardarTelefono = async () => {
@@ -212,6 +232,7 @@ export default function MiPerfilPage() {
                 radioKm={5}
                 height="160px"
                 zoom={13}
+                poligono={poligono}
               />
             </div>
           )}
@@ -238,42 +259,75 @@ export default function MiPerfilPage() {
           </button>
         </div>
 
-        {/* Ciclo activo */}
+        {/* Ciclo productivo */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Ciclo productivo</p>
             <button onClick={() => navigate('/productor/ciclo')} className="text-[#1A5C38]">
-              {ciclo ? <Edit2 size={14} /> : <ChevronRight size={14} />}
+              {ciclos && ciclos.length > 0 ? <Edit2 size={14} /> : <ChevronRight size={14} />}
             </button>
           </div>
-          {ciclo ? (
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Año</span>
-                <span className="font-medium text-gray-800">{ciclo.cycle_year}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Tipo</span>
-                <span className="font-medium text-gray-800">{ciclo.cycle_type}</span>
-              </div>
-              {ciclo.hectareas_sembradas && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Hectáreas</span>
-                  <span className="font-medium text-gray-800">{ciclo.hectareas_sembradas} ha</span>
-                </div>
-              )}
-              {ciclo.variedad_nombre && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Variedad</span>
-                  <span className="font-medium text-gray-800">{ciclo.variedad_nombre}</span>
-                </div>
-              )}
-            </div>
-          ) : (
+          {ciclos === null && <p className="text-xs text-gray-400">Cargando...</p>}
+          {ciclos !== null && ciclos.length === 0 && (
             <button onClick={() => navigate('/productor/ciclo')}
               className="w-full flex items-center gap-2 text-[#1A5C38] text-sm font-semibold">
               <CalendarCheck size={14} /> Declarar ciclo {new Date().getFullYear()}
             </button>
+          )}
+          {ciclos !== null && ciclos.length > 0 && (
+            <div className="space-y-4">
+              {ciclos.map(c => {
+                const crop = c.crops?.[0];
+                const tipoCiclo = c.cycle_type === 'PV' ? 'Primavera-Verano'
+                  : c.cycle_type === 'OI' ? 'Otoño-Invierno' : 'Anual';
+                return (
+                  <div key={c.cycle_id} className="bg-gray-50 rounded-2xl p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <p className="text-sm font-bold text-gray-800">{tipoCiclo} {c.cycle_year}</p>
+                        {crop && <p className="text-xs text-gray-500 mt-0.5">{crop.variety_other || crop.variety_id || 'Maíz'}</p>}
+                      </div>
+                      <button onClick={() => navigate('/productor/ciclo', { state: { cicloId: c.cycle_id } })}
+                        className="text-xs text-[#1A5C38] font-medium border border-[#1A5C38] px-3 py-1 rounded-lg">
+                        Editar
+                      </button>
+                    </div>
+                    {crop && (
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {crop.area_sown_ha && (
+                          <div className="bg-white rounded-xl p-2.5 text-center">
+                            <p className="text-xs text-gray-400">Sembrado</p>
+                            <p className="text-sm font-bold text-gray-800 mt-0.5">{crop.area_sown_ha} ha</p>
+                          </div>
+                        )}
+                        {crop.yield_expected && (
+                          <div className="bg-white rounded-xl p-2.5 text-center">
+                            <p className="text-xs text-gray-400">Esperado</p>
+                            <p className="text-sm font-bold text-gray-800 mt-0.5">{crop.yield_expected} t/ha</p>
+                          </div>
+                        )}
+                        {crop.area_sown_ha && crop.yield_expected && (
+                          <div className="bg-green-50 rounded-xl p-2.5 text-center">
+                            <p className="text-xs text-gray-400">Total est.</p>
+                            <p className="text-sm font-bold text-[#1A5C38] mt-0.5">
+                              {(Number(crop.area_sown_ha) * Number(crop.yield_expected)).toFixed(1)} ton
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {crop?.planting_date && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        Siembra: {new Date(crop.planting_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {crop.estimated_harvest_date && (
+                          <span> · Cosecha: {new Date(crop.estimated_harvest_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
 

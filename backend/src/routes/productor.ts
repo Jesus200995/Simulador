@@ -681,10 +681,12 @@ router.get('/mi-ciclo', authMiddleware, async (req: AuthRequest, res: Response):
 
     const { rows } = await pool.query(
       `SELECT c.cycle_id, c.cycle_year, c.cycle_type,
-              c.declarado_por_productor, c.hectareas_sembradas,
-              c.fecha_siembra, c.variedad_nombre
+              cc.area_sown_ha AS hectareas_sembradas,
+              cc.planting_date AS fecha_siembra,
+              COALESCE(cc.variety_other, cc.variety_id) AS variedad_nombre
        FROM cycle c
-       WHERE c.up_id = $1 AND c.declarado_por_productor = TRUE
+       LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
+       WHERE c.up_id = $1
        ORDER BY c.cycle_year DESC, c.cycle_id DESC
        LIMIT 1`,
       [upId]

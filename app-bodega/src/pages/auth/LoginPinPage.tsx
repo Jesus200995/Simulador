@@ -35,12 +35,40 @@ export default function LoginPinPage() {
         return;
       }
 
-      setAuth(data.token, {
+      const token = data.token;
+      setAuth(token, {
         userId: data.user.id,
         email: '',
         rol: 'productor',
         nombre_completo: `${data.user.nombres} ${data.user.apellido_paterno}`,
       });
+
+      // Verificar completitud: polígono → ciclo → dashboard
+      try {
+        const upsData = await fetch(`${BASE}/mis-ups`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then(r => r.json());
+
+        const up = upsData.ups?.[0] ?? upsData[0];
+        const tienePoligono = up?.area_ha_calc != null;
+
+        if (!tienePoligono) {
+          navigate('/productor/ubicacion', { state: { desde: 'login', siguiente: '/productor/ciclo' } });
+          return;
+        }
+
+        const ciclosData = await fetch(`${BASE}/ups/${up.up_id}/cycles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then(r => r.json());
+        const ciclos = ciclosData.cycles ?? ciclosData;
+
+        if (!ciclos?.length) {
+          localStorage.setItem('ciclo_pendiente', '1');
+          navigate('/productor/ciclo', { state: { desde: 'login' } });
+          return;
+        }
+      } catch { /* si falla la verificación, ir al dashboard normalmente */ }
+
       navigate('/productor');
     } catch {
       setError('Error de conexion.');
