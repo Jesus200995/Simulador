@@ -57,17 +57,16 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
     }
 
     // Filtro por radio (productor) — solo cuando se pasan lat, lng y radio_km
-    let radioExtra = '';
     let distanciaSelect = '0 AS distancia_km';
     if (lat && lng && radio_km) {
       const latNum = Number(lat);
       const lngNum = Number(lng);
       const radioNum = Number(radio_km);
-      radioExtra = `AND ST_DWithin(
+      conditions.push(`ST_DWithin(
         ST_SetSRID(ST_MakePoint(b.longitud, b.latitud), 4326)::geography,
         ST_SetSRID(ST_MakePoint($${idx}, $${idx + 1}), 4326)::geography,
         $${idx + 2} * 1000
-      )`;
+      )`);
       distanciaSelect = `ST_Distance(
         ST_SetSRID(ST_MakePoint(b.longitud, b.latitud), 4326)::geography,
         ST_SetSRID(ST_MakePoint($${idx}, $${idx + 1}), 4326)::geography
@@ -82,7 +81,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       SELECT b.*, r.nombre as region_nombre, ${distanciaSelect}
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
-      ${where} ${radioExtra}
+      ${where}
       ORDER BY ${lat && lng ? 'distancia_km ASC' : 'b.nombre ASC'}
     `;
 
@@ -94,7 +93,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
         COUNT(DISTINCT b.municipio)::int                 AS total_municipios,
         COUNT(*) FILTER (WHERE b.activo = true)::int     AS total_inventarios
       FROM bodegas b
-      ${where} ${radioExtra}
+      ${where}
     `;
 
     const [bodegasResult, kpiResult] = await Promise.all([
