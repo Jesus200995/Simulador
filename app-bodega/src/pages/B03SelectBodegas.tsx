@@ -23,7 +23,7 @@ function MapClickHandler({ onCoords }: { onCoords: (lat: number, lon: number) =>
   return null;
 }
 
-interface Bodega { id: number; nombre: string; municipio: string; estado: string; capacidad_ton: number; latitud?: number; longitud?: number; }
+interface Bodega { id: number; nombre: string; municipio: string; estado: string; capacidad_ton: number; latitud?: number; longitud?: number; semaforo_compra?: string; }
 
 const iconoVerde = L.divIcon({
   className: '',
@@ -38,7 +38,7 @@ const iconoVerdeCheck = L.divIcon({
   iconAnchor: [8, 8] as [number, number],
 });
 
-function MapController({ bounds }: { bounds: [number, number][] | null }) {
+function MapController({ bounds, flyTo }: { bounds: [number, number][] | null; flyTo: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     if (!bounds || bounds.length === 0) return;
@@ -48,6 +48,10 @@ function MapController({ bounds }: { bounds: [number, number][] | null }) {
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [bounds, map]);
+  useEffect(() => {
+    if (!flyTo) return;
+    map.flyTo(flyTo, 14, { animate: true, duration: 0.8 });
+  }, [flyTo, map]);
   return null;
 }
 
@@ -73,6 +77,7 @@ export default function B03SelectBodegas() {
   const [vista, setVista] = useState<'lista' | 'mapa'>('lista');
   const [stats, setStats] = useState<{ total_bodegas: number; total_capacidad_ton: number } | null>(null);
   const [mapBounds, setMapBounds] = useState<[number, number][] | null>(null);
+  const [flyToCoords, setFlyToCoords] = useState<[number, number] | null>(null);
 
   async function search(q = query, est = estado, mun = municipio) {
     setLoading(true);
@@ -289,7 +294,7 @@ export default function B03SelectBodegas() {
                   attribution="© CartoDB © OpenStreetMap"
                 />
               )}
-              <MapController bounds={mapBounds} />
+              <MapController bounds={mapBounds} flyTo={flyToCoords} />
               {results
                 .filter(b => b.latitud && b.longitud && Math.abs(b.latitud) > 0.001)
                 .map(b => (
@@ -297,6 +302,7 @@ export default function B03SelectBodegas() {
                     key={b.id}
                     position={[b.latitud!, b.longitud!]}
                     icon={selected.some(s => s.id === b.id) ? iconoVerdeCheck : iconoVerde}
+                    eventHandlers={{ click: () => setFlyToCoords([b.latitud!, b.longitud!]) }}
                   >
                     <Popup>
                       <div style={{ minWidth: 186 }}>
@@ -304,6 +310,13 @@ export default function B03SelectBodegas() {
                         <p style={{ fontSize: 11, color: '#6b7280', margin: '0 0 8px' }}>{b.municipio}, {b.estado}</p>
                         {b.capacidad_ton > 0 && (
                           <p style={{ fontSize: 11, color: '#374151', margin: '0 0 4px' }}>Capacidad: {formatNum(b.capacidad_ton)} ton</p>
+                        )}
+                        {b.semaforo_compra && (
+                          <p style={{ fontSize: 11, margin: '0 0 8px' }}>
+                            {b.semaforo_compra === 'verde' && '🟢 Comprando'}
+                            {b.semaforo_compra === 'amarillo' && '🟡 Cap. limitada'}
+                            {b.semaforo_compra === 'rojo' && '🔴 No compra'}
+                          </p>
                         )}
                         {selected.some(s => s.id === b.id) ? (
                           <p style={{ fontSize: 12, color: '#1A5C38', fontWeight: 600, margin: 0 }}>✓ Ya agregada</p>
