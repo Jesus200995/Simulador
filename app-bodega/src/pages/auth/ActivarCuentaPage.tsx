@@ -26,7 +26,7 @@ export default function ActivarCuentaPage() {
         return;
       }
       if (data.ya_tiene_cuenta) {
-        navigate('/login', { state: { mensaje: 'Ya tienes cuenta activa. Inicia sesion.' } });
+        navigate('/login-productor', { state: { mensaje: 'Ya tienes cuenta activa. Ingresa tu PIN.' } });
         return;
       }
       sessionStorage.setItem('activacion', JSON.stringify({

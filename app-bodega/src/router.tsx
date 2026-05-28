@@ -20,6 +20,7 @@ import DisponibilidadConfirmPage from './pages/productor/DisponibilidadConfirmPa
 import MapaBodegasPage from './pages/productor/MapaBodegasPage';
 import DetalleBodegaPage from './pages/productor/DetalleBodegaPage';
 import CompletarUbicacionPage from './pages/productor/CompletarUbicacionPage';
+import CicloProductivoPage from './pages/productor/CicloProductivoPage';
 import PreciosProductorPage from './pages/productor/PreciosProductorPage';
 import ConfirmarTransaccionPage from './pages/productor/ConfirmarTransaccionPage';
 import AlertasPage from './pages/productor/AlertasPage';
@@ -189,6 +190,7 @@ export const router = createBrowserRouter([
       { path: 'mapa', element: <MapaBodegasPage /> },
       { path: 'mapa/bodega/:id', element: <DetalleBodegaPage /> },
       { path: 'ubicacion', element: <CompletarUbicacionPage /> },
+      { path: 'ciclo', element: <CicloProductivoPage /> },
       { path: 'precios', element: <PreciosProductorPage /> },
       { path: 'transaccion/:id/confirmar', element: <ConfirmarTransaccionPage /> },
       { path: 'alertas', element: <AlertasPage /> },

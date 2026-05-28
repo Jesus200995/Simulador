@@ -32,7 +32,7 @@ router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response
 // =============================================
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { region_id, estado, municipio, q } = req.query;
+    const { region_id, estado, municipio, q, lat, lng, radio_km } = req.query;
 
     const conditions: string[] = [];
     const params: any[] = [];
@@ -56,14 +56,34 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       idx++;
     }
 
+    // Filtro por radio (productor) — solo cuando se pasan lat, lng y radio_km
+    let radioExtra = '';
+    let distanciaSelect = '0 AS distancia_km';
+    if (lat && lng && radio_km) {
+      const latNum = Number(lat);
+      const lngNum = Number(lng);
+      const radioNum = Number(radio_km);
+      radioExtra = `AND ST_DWithin(
+        ST_SetSRID(ST_MakePoint(b.longitud, b.latitud), 4326)::geography,
+        ST_SetSRID(ST_MakePoint($${idx}, $${idx + 1}), 4326)::geography,
+        $${idx + 2} * 1000
+      )`;
+      distanciaSelect = `ST_Distance(
+        ST_SetSRID(ST_MakePoint(b.longitud, b.latitud), 4326)::geography,
+        ST_SetSRID(ST_MakePoint($${idx}, $${idx + 1}), 4326)::geography
+      ) / 1000 AS distancia_km`;
+      params.push(lngNum, latNum, radioNum);
+      idx += 3;
+    }
+
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const bodegasQuery = `
-      SELECT b.*, r.nombre as region_nombre
+      SELECT b.*, r.nombre as region_nombre, ${distanciaSelect}
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
-      ${where}
-      ORDER BY b.nombre ASC
+      ${where} ${radioExtra}
+      ORDER BY ${lat && lng ? 'distancia_km ASC' : 'b.nombre ASC'}
     `;
 
     const kpiQuery = `
@@ -74,7 +94,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
         COUNT(DISTINCT b.municipio)::int                 AS total_municipios,
         COUNT(*) FILTER (WHERE b.activo = true)::int     AS total_inventarios
       FROM bodegas b
-      ${where}
+      ${where} ${radioExtra}
     `;
 
     const [bodegasResult, kpiResult] = await Promise.all([

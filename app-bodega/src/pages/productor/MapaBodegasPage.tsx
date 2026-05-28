@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Icons removed - layout provides header
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import NominatimSearch from '../../components/productor/NominatimSearch';
@@ -30,6 +29,17 @@ interface Bodega {
 
 interface UpData {
   lat: number; lng: number; location_confirmed: boolean; centroid_source: string;
+  municipio?: string; estado?: string;
+}
+
+function FlyToUP({ up }: { up: UpData | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (up) {
+      map.flyTo([up.lat, up.lng], up.location_confirmed ? 11 : 8, { animate: true, duration: 1.2 });
+    }
+  }, [up, map]);
+  return null;
 }
 
 export default function MapaBodegasPage() {
@@ -37,22 +47,40 @@ export default function MapaBodegasPage() {
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [up, setUp] = useState<UpData | null>(null);
   const [mapRef, setMapRef] = useState<L.Map | null>(null);
+  const [loadingBodegas, setLoadingBodegas] = useState(true);
+  const [radioKm, setRadioKm] = useState(150);
 
+  // 1. Cargar UP con coordenadas reales
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
-    // Cargar bodegas
-    fetch(`${BASE}/bodegas`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => setBodegas(Array.isArray(d) ? d : d.bodegas || []))
-      .catch(() => {});
-    // Cargar UP
     fetch(`${BASE}/productor/dashboard`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
-        if (d.municipio) setUp({ lat: 23.6, lng: -102.5, location_confirmed: d.location_confirmed, centroid_source: d.centroid_source });
+        if (d.municipio) setUp({
+          lat: d.lat ?? 23.6345,
+          lng: d.lng ?? -102.5528,
+          location_confirmed: d.location_confirmed,
+          centroid_source: d.centroid_source,
+          municipio: d.municipio,
+          estado: d.estado,
+        });
       })
       .catch(() => {});
   }, []);
+
+  // 2. Cargar bodegas filtradas por radio cuando tengamos la UP
+  useEffect(() => {
+    if (!up) return;
+    const token = localStorage.getItem('simac_token');
+    setLoadingBodegas(true);
+    fetch(`${BASE}/bodegas?lat=${up.lat}&lng=${up.lng}&radio_km=${radioKm}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(d => setBodegas(Array.isArray(d) ? d : d.bodegas || []))
+      .catch(() => {})
+      .finally(() => setLoadingBodegas(false));
+  }, [up, radioKm]);
 
   const handleMeInteresa = async (senalId: number) => {
     const token = localStorage.getItem('simac_token');
@@ -66,14 +94,23 @@ export default function MapaBodegasPage() {
     <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
       <div className="flex-1 relative">
         <MapContainer
-          center={[23.6345, -102.5528]}
-          zoom={6}
+          center={up ? [up.lat, up.lng] : [23.6345, -102.5528]}
+          zoom={up?.location_confirmed ? 11 : 6}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
           attributionControl={false}
           ref={setMapRef}
         >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution="Tiles &copy; Esri"
+            maxZoom={19}
+          />
+          <TileLayer
+            url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+            opacity={0.6}
+          />
+          <FlyToUP up={up} />
 
           {/* UP del productor */}
           {up && (
@@ -117,6 +154,23 @@ export default function MapaBodegasPage() {
             </Marker>
           ))}
         </MapContainer>
+
+        {/* Sin bodegas en el radio */}
+        {bodegas.length === 0 && up && !loadingBodegas && (
+          <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-white/80 backdrop-blur-sm">
+            <div className="text-center px-6 max-w-xs">
+              <p className="text-4xl mb-3">🗺</p>
+              <p className="font-semibold text-gray-800">No hay bodegas en {radioKm} km</p>
+              <p className="text-sm text-gray-500 mt-2">Estamos ampliando la red. Intenta con un radio mayor.</p>
+              {radioKm < 500 && (
+                <button onClick={() => setRadioKm(500)}
+                  className="mt-4 text-[#1A5C38] font-semibold text-sm underline">
+                  Buscar en 500 km
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Buscador */}
         <div className="absolute top-3 left-3 right-3 z-[1000]">

@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -15,26 +16,46 @@ L.Icon.Default.mergeOptions({
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  useMapEvents({ click: e => onMapClick(e.latlng.lat, e.latlng.lng) });
-  return null;
-}
-
 export default function CompletarUbicacionPage() {
   const navigate = useNavigate();
   const mapRef = useRef<L.Map>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [poligono, setPoligono] = useState<[number, number][] | null>(null);
+  const [areaCalc, setAreaCalc] = useState<number | null>(null);
+  const [areaReal, setAreaReal] = useState('');
+  const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
+  const [poligonoExistente, setPoligonoExistente] = useState<[number, number][] | null>(null);
+  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 23.6345, lng: -102.5528 });
+
+  useEffect(() => {
+    const token = localStorage.getItem('simac_token');
+    fetch(`${BASE}/productor/mi-up`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(up => {
+        if (up?.geom_coordenadas) setPoligonoExistente(up.geom_coordenadas);
+        if (up?.lat && up?.lng) setCenter({ lat: up.lat, lng: up.lng });
+      })
+      .catch(() => {});
+  }, []);
 
   const guardar = async () => {
-    if (!coords) return;
+    if (!coords && !poligono) return;
     setLoading(true);
     try {
       const token = localStorage.getItem('simac_token');
+      const centroide = coords || center;
+      const areaRealNum = coincideArea === false && areaReal ? Number(areaReal) : areaCalc;
       await fetch(`${BASE}/productor/ubicacion`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
+        body: JSON.stringify({
+          lat: centroide.lat, lng: centroide.lng,
+          poligono: poligono || null,
+          area_calc_ha: areaCalc || null,
+          area_real_ha: areaRealNum,
+          coincide_area: coincideArea,
+        }),
       });
       localStorage.removeItem('dismiss_ubicacion');
       navigate('/productor');
@@ -58,11 +79,27 @@ export default function CompletarUbicacionPage() {
       </div>
 
       <div className="flex-1 relative">
-        <MapContainer ref={mapRef} center={[23.6345, -102.5528]} zoom={5}
+        <MapContainer ref={mapRef} center={[center.lat, center.lng]} zoom={poligonoExistente ? 13 : 5}
           style={{ height: '100%', width: '100%' }} zoomControl={false} attributionControl={false}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <ClickHandler onMapClick={(lat, lng) => setCoords({ lat, lng })} />
-          {coords && <Marker position={[coords.lat, coords.lng]} />}
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution="Tiles &copy; Esri"
+            maxZoom={19}
+          />
+          <TileLayer
+            url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+            opacity={0.6}
+          />
+          <DibujarPoligonoUP
+            poligonoInicial={poligonoExistente ?? undefined}
+            onPoligonoCompleto={(coords2, centroide, ha) => {
+              setPoligono(coords2);
+              setCoords(centroide);
+              setAreaCalc(ha);
+              setCoincideArea(null);
+            }}
+            onPoligonoEliminado={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); }}
+          />
         </MapContainer>
         <div className="absolute top-3 left-3 right-3 z-[1000]">
           <NominatimSearch placeholder="Buscar ejido, localidad..."
@@ -71,10 +108,33 @@ export default function CompletarUbicacionPage() {
       </div>
 
       <div className="px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-zinc-200 space-y-2">
-        <button onClick={guardar} disabled={!coords || loading}
+        {areaCalc && coincideArea === null && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3">
+            <p className="text-sm font-semibold text-gray-800 mb-2">Area calculada: {areaCalc} ha. &iquest;Es correcto?</p>
+            <div className="flex gap-2">
+              <button onClick={() => setCoincideArea(true)}
+                className="flex-1 border-2 border-[#1A5C38] text-[#1A5C38] py-2 rounded-xl text-sm font-semibold">
+                Si, correcto
+              </button>
+              <button onClick={() => setCoincideArea(false)}
+                className="flex-1 border-2 border-gray-300 text-gray-600 py-2 rounded-xl text-sm font-semibold">
+                No
+              </button>
+            </div>
+          </div>
+        )}
+        {coincideArea === false && (
+          <div className="flex items-center gap-2">
+            <input type="number" min="0.1" step="0.1"
+              value={areaReal} onChange={e => setAreaReal(e.target.value)}
+              placeholder="Hectareas reales" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-base font-bold text-center focus:border-[#1A5C38] focus:outline-none" />
+            <span className="text-gray-500">ha</span>
+          </div>
+        )}
+        <button onClick={guardar} disabled={(!coords && !poligono) || loading}
           className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
                      disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
-          {loading ? 'Guardando...' : coords ? 'Confirmar ubicacion' : 'Toca el mapa para marcar'}
+          {loading ? 'Guardando...' : poligono ? 'Guardar poligono' : 'Usa las herramientas para dibujar tu parcela'}
         </button>
         <button onClick={() => navigate('/productor')}
           className="w-full text-zinc-400 py-2 text-sm hover:text-zinc-500 transition-colors">

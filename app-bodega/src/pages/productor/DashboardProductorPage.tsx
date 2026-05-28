@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight, BadgeCheck } from 'lucide-react';
+import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight, BadgeCheck, CalendarCheck } from 'lucide-react';
 import { formatNum } from '../../utils/format';
 import { useAuthStore } from '../../store/auth';
 
@@ -50,9 +50,11 @@ export default function DashboardProductorPage() {
   const { user } = useAuthStore();
   const [data, setData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ciclo, setCiclo] = useState<object | null | undefined>(undefined);
   const navigate = useNavigate();
   const isPendiente = data?.estado_validacion === 'pendiente';
   const [dismissed, setDismissed] = useState(() => localStorage.getItem('dismiss_ubicacion') === '1');
+  const [dismissedCiclo, setDismissedCiclo] = useState(() => localStorage.getItem('dismiss_ciclo') === '1');
 
   // Mexico timezone clock
   const getMexicoTime = () => new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour: 'numeric', minute: '2-digit', hour12: true });
@@ -70,6 +72,14 @@ export default function DashboardProductorPage() {
     fetch(`${BASE}/productor/dashboard`, {
       headers: { Authorization: `Bearer ${token}` },
     }).then(r => r.json()).then(setData).finally(() => setLoading(false));
+
+    fetch(`${BASE}/productor/mi-ciclo`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.json()).then(d => {
+      setCiclo(d);
+      if (!d) localStorage.setItem('ciclo_pendiente', '1');
+      else localStorage.removeItem('ciclo_pendiente');
+    }).catch(() => setCiclo(null));
   }, []);
 
   if (loading) return <SkeletonDashboard />;
@@ -230,6 +240,27 @@ export default function DashboardProductorPage() {
               <button onClick={() => { localStorage.setItem('dismiss_ubicacion', '1'); setDismissed(true); }}
                 className="px-4 text-amber-600 text-sm hover:underline">
                 Ahora no
+              </button>
+            </div>
+          </div>
+        )}
+
+        {ciclo === null && !dismissedCiclo && !isPendiente && (
+          <div className="mt-4 bg-emerald-50 ring-2 ring-[#1A5C38]/20 rounded-2xl p-4">
+            <p className="text-[#1A5C38] text-sm font-bold flex items-center gap-1.5">
+              <CalendarCheck size={14} /> Declara tu ciclo productivo
+            </p>
+            <p className="text-emerald-700 text-xs mt-1">
+              Registra tu ciclo {new Date().getFullYear()} para acceder a programas de apoyo y trazabilidad.
+            </p>
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => navigate('/productor/ciclo')}
+                className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white text-sm py-2.5 rounded-xl font-semibold transition-colors">
+                Registrar ciclo
+              </button>
+              <button onClick={() => { localStorage.setItem('dismiss_ciclo', '1'); setDismissedCiclo(true); }}
+                className="px-4 text-[#1A5C38] text-sm hover:underline">
+                Despues
               </button>
             </div>
           </div>

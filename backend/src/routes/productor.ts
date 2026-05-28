@@ -186,7 +186,8 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
     const {
       curp, nombres, apellido_paterno, apellido_materno,
       estado_up, municipio_up, tipo_maiz, variedad_id,
-      lat, lng, telefono, pin, programas_beneficiario
+      lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area,
+      telefono, pin, programas_beneficiario, correo
     } = req.body;
 
     if (!pin || !/^\d{4}$/.test(pin)) {
@@ -229,23 +230,44 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       const p = await client.query(
         `INSERT INTO producer
            (usuario_id, curp, nombres, apellido_paterno, apellido_materno,
-            phone, tipo_registro, estado_validacion, programas_beneficiario)
-         VALUES ($1,$2,$3,$4,$5,$6,'B','pendiente',$7) RETURNING producer_id`,
+            phone, tipo_registro, estado_validacion, programas_beneficiario, correo)
+         VALUES ($1,$2,$3,$4,$5,$6,'B','pendiente',$7,$8) RETURNING producer_id`,
         [u.rows[0].id, curpN, nombresN, apPaternoN,
-         apMaternoN, telefono, programas_beneficiario || []]
+         apMaternoN, telefono, programas_beneficiario || [], correo || null]
       );
 
       // UP: si marcó en mapa usar coordenadas, si no usar centroide del municipio
       const hasCoords = lat && lng && lat !== 0 && lng !== 0;
       if (hasCoords) {
+        const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
+        const geomSql = hasPoligono
+          ? `ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)`
+          : 'NULL';
+        const geomParam = hasPoligono
+          ? JSON.stringify({
+              type: 'Polygon',
+              coordinates: [[
+                ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
+                [poligono[0][1], poligono[0][0]],
+              ]],
+            })
+          : null;
+        const qParams = [
+          p.rows[0].producer_id, estado_up, municipio_up, lng, lat,
+          ...(hasPoligono ? [geomParam] : []),
+          area_calc_ha || null, area_real_ha || null, coincide_area ?? null,
+        ];
+        const aIdx = hasPoligono ? 7 : 6;
         await client.query(
           `INSERT INTO up
              (producer_id, up_name, up_type, production_system, water_regime,
-              state_name, municipality_name, centroid,
+              state_name, municipality_name, centroid, geom,
+              area_ha_calc, area_ha_real, coincide_area,
               location_confirmed, centroid_source)
            VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
-                   $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), TRUE, 'productor')`,
-          [p.rows[0].producer_id, estado_up, municipio_up, lng, lat]
+                   $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), ${geomSql},
+                   $${aIdx}, $${aIdx+1}, $${aIdx+2}, TRUE, 'productor')`,
+          qParams
         );
       } else {
         // Intentar centroide del municipio desde municipios_referencia
@@ -306,7 +328,8 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
 
     // UP del productor
     const upRes = await pool.query(
-      `SELECT state_name, municipality_name, location_confirmed, centroid_source
+      `SELECT state_name, municipality_name, location_confirmed, centroid_source,
+              ST_Y(centroid::geometry) AS lat, ST_X(centroid::geometry) AS lng
        FROM up WHERE producer_id = $1 LIMIT 1`,
       [producerId]
     );
@@ -384,6 +407,8 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
       estado: up?.state_name,
       location_confirmed: up?.location_confirmed || false,
       centroid_source: up?.centroid_source,
+      lat: up?.lat ?? null,
+      lng: up?.lng ?? null,
       precio_hoy,
       precio_ayer,
       alerta_activa,
@@ -479,22 +504,72 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
 // PATCH /api/productor/ubicacion
 router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { lat, lng } = req.body;
+    const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area } = req.body;
     const userId = req.user!.userId;
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
-    await pool.query(
-      `UPDATE up SET
-         centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
-         location_confirmed = TRUE,
-         centroid_source = 'productor'
-       WHERE producer_id = $3`,
-      [lng, lat, producerId]
-    );
+    const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
+    if (hasPoligono) {
+      const geomGeoJSON = JSON.stringify({
+        type: 'Polygon',
+        coordinates: [[
+          ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
+          [poligono[0][1], poligono[0][0]],
+        ]],
+      });
+      await pool.query(
+        `UPDATE up SET
+           centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
+           geom = ST_SetSRID(ST_GeomFromGeoJSON($3), 4326),
+           area_ha_calc = $4, area_ha_real = $5, coincide_area = $6,
+           location_confirmed = TRUE,
+           centroid_source = 'productor'
+         WHERE producer_id = $7`,
+        [lng, lat, geomGeoJSON, area_calc_ha || null, area_real_ha || null, coincide_area ?? null, producerId]
+      );
+    } else {
+      await pool.query(
+        `UPDATE up SET
+           centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
+           location_confirmed = TRUE,
+           centroid_source = 'productor'
+         WHERE producer_id = $3`,
+        [lng, lat, producerId]
+      );
+    }
     res.json({ ok: true });
   } catch (error) {
     console.error('Error en ubicacion:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /api/productor/mi-up — retorna la UP del productor con geom + centroide
+router.get('/mi-up', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user!.userId;
+    const producerId = await getProducerId(userId);
+    if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    const { rows } = await pool.query(
+      `SELECT up_id, up_name, state_name, municipality_name,
+              location_confirmed, centroid_source,
+              ST_Y(centroid::geometry) AS lat, ST_X(centroid::geometry) AS lng,
+              area_ha_calc, area_ha_real, coincide_area,
+              ST_AsGeoJSON(geom)::json AS geom_geojson,
+              CASE WHEN geom IS NOT NULL THEN
+                (SELECT array_agg(ARRAY[ST_Y(dp), ST_X(dp)] ORDER BY ordinality)
+                 FROM unnest(ST_DumpPoints(ST_ExteriorRing(geom::geometry)).geom)
+                      WITH ORDINALITY AS t(dp, ordinality)
+                 WHERE ordinality < ST_NPoints(ST_ExteriorRing(geom::geometry)))
+              ELSE NULL END AS geom_coordenadas
+       FROM up WHERE producer_id = $1 LIMIT 1`,
+      [producerId]
+    );
+    res.json(rows[0] || null);
+  } catch (error) {
+    console.error('Error en mi-up:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -544,7 +619,7 @@ router.get('/mis-solicitudes', authMiddleware, async (req: AuthRequest, res: Res
 // PATCH /api/productor/perfil
 router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { telefono, programas_beneficiario } = req.body;
+    const { telefono, programas_beneficiario, correo } = req.body;
     const userId = req.user!.userId;
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
@@ -552,9 +627,10 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
     await pool.query(
       `UPDATE producer SET
          phone                  = COALESCE($1, phone),
-         programas_beneficiario = COALESCE($2, programas_beneficiario)
-       WHERE producer_id = $3`,
-      [telefono, programas_beneficiario, producerId]
+         programas_beneficiario = COALESCE($2, programas_beneficiario),
+         correo                 = COALESCE($3, correo)
+       WHERE producer_id = $4`,
+      [telefono, programas_beneficiario, correo || null, producerId]
     );
     res.json({ ok: true });
   } catch (error) {
@@ -573,11 +649,12 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
     const { rows } = await pool.query(
       `SELECT p.producer_id, p.curp, p.nombres, p.apellido_paterno, p.apellido_materno,
               p.phone AS telefono, p.estado_validacion, p.tipo_registro,
-              p.programas_beneficiario,
-              u.state_name AS state_name, u.municipality_name AS municipality_name,
+              p.programas_beneficiario, p.correo,
+              u.up_id, u.state_name AS state_name, u.municipality_name AS municipality_name,
               u.location_confirmed, u.centroid_source,
-              ST_Y(u.centroid) AS lat,
-              ST_X(u.centroid) AS lng
+              u.area_ha_calc, u.area_ha_real,
+              ST_Y(u.centroid::geometry) AS lat,
+              ST_X(u.centroid::geometry) AS lng
        FROM producer p
        LEFT JOIN up u ON u.producer_id = p.producer_id
        WHERE p.producer_id = $1`,
@@ -586,6 +663,69 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
     res.json(rows[0] || {});
   } catch (error) {
     console.error('Error en get perfil productor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /api/productor/mi-ciclo — ciclo activo del productor
+router.get('/mi-ciclo', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user!.userId;
+    const producerId = await getProducerId(userId);
+    if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    // Obtener up_id
+    const upRes = await pool.query('SELECT up_id FROM up WHERE producer_id = $1 LIMIT 1', [producerId]);
+    if (!upRes.rows[0]) { res.json(null); return; }
+    const upId = upRes.rows[0].up_id;
+
+    const { rows } = await pool.query(
+      `SELECT c.cycle_id, c.cycle_year, c.cycle_type,
+              c.declarado_por_productor, c.hectareas_sembradas,
+              c.fecha_siembra, c.variedad_nombre
+       FROM cycle c
+       WHERE c.up_id = $1 AND c.declarado_por_productor = TRUE
+       ORDER BY c.cycle_year DESC, c.cycle_id DESC
+       LIMIT 1`,
+      [upId]
+    );
+    res.json(rows[0] || null);
+  } catch (error) {
+    console.error('Error en mi-ciclo:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/productor/ciclo — declarar ciclo productivo
+router.post('/ciclo', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { cycle_year, cycle_type, hectareas_sembradas, fecha_siembra, variedad_nombre } = req.body;
+    const userId = req.user!.userId;
+    const producerId = await getProducerId(userId);
+    if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    if (!cycle_year || !cycle_type) {
+      res.status(400).json({ error: 'cycle_year y cycle_type son requeridos' });
+      return;
+    }
+
+    const upRes = await pool.query('SELECT up_id FROM up WHERE producer_id = $1 LIMIT 1', [producerId]);
+    if (!upRes.rows[0]) { res.status(404).json({ error: 'UP no encontrada' }); return; }
+    const upId = upRes.rows[0].up_id;
+
+    const result = await pool.query(
+      `INSERT INTO cycle
+         (up_id, cycle_year, cycle_type, declarado_por_productor,
+          hectareas_sembradas, fecha_siembra, variedad_nombre)
+       VALUES ($1, $2, $3, TRUE, $4, $5, $6)
+       RETURNING cycle_id, cycle_year, cycle_type`,
+      [upId, cycle_year, cycle_type, hectareas_sembradas || null,
+       fecha_siembra || null, variedad_nombre || null]
+    );
+
+    res.status(201).json({ ok: true, ciclo: result.rows[0] });
+  } catch (error) {
+    console.error('Error en ciclo:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

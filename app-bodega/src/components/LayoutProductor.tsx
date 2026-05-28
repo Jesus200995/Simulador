@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Map, TrendingUp, Award, User, Bell, X, LogOut, Settings, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Home, Map, TrendingUp, Award, User, Bell, X, LogOut, Settings, ChevronRight, ChevronLeft, CalendarCheck } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
 const NAV = [
@@ -18,6 +18,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const cicloPendiente = typeof window !== 'undefined' && localStorage.getItem('ciclo_pendiente') === '1';
 
   function handleLogout() {
     logout();
@@ -78,6 +79,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
         {NAV.map(({ path, icon: Icon, label }) => {
           const active = pathname === path || (path !== '/productor' && pathname.startsWith(path + '/'))
             || (path === '/productor' && pathname === '/productor');
+          const isPerfil = path === '/productor/perfil';
           return (
             <Link
               key={path}
@@ -85,7 +87,12 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
               className={`flex-1 flex flex-col items-center justify-center pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] gap-[3px] transition-colors
                 ${active ? 'text-[#1A5C38]' : 'text-gray-400'}`}
             >
-              <Icon size={23} strokeWidth={active ? 2.4 : 1.7} />
+              <div className="relative">
+                <Icon size={23} strokeWidth={active ? 2.4 : 1.7} />
+                {isPerfil && cicloPendiente && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 border border-white" />
+                )}
+              </div>
               <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{label}</span>
             </Link>
           );
@@ -120,6 +127,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
         <div className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
           {[
             { icon: User, label: 'Mi perfil', action: () => { setDrawerOpen(false); navigate('/productor/perfil'); } },
+            { icon: CalendarCheck, label: 'Ciclo productivo', action: () => { setDrawerOpen(false); navigate('/productor/ciclo'); } },
             { icon: Bell, label: 'Alertas', action: () => { setDrawerOpen(false); navigate('/productor/alertas'); } },
             { icon: Settings, label: 'Configuracion', action: () => {} },
           ].map(({ icon: Icon, label, action }) => (

@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PinInput from '../../components/productor/PinInput';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -61,8 +62,13 @@ export default function RegistroNuevoPage() {
 
   const [tipoMaiz, setTipoMaiz] = useState('');
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [poligono, setPoligono] = useState<[number, number][] | null>(null);
+  const [areaCalc, setAreaCalc] = useState<number | null>(null);
+  const [areaReal, setAreaReal] = useState('');
+  const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
 
   const [telefono, setTelefono] = useState('');
+  const [correo, setCorreo] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [pinStep, setPinStep] = useState<'crear' | 'confirmar'>('crear');
@@ -104,6 +110,11 @@ export default function RegistroNuevoPage() {
     }
   };
 
+  const avanzarPaso5 = (saltar = false) => {
+    if (saltar) { setPaso(5); return; }
+    setPaso(5);
+  };
+
   const enviarRegistro = async () => {
     setLoading(true);
     setError('');
@@ -116,12 +127,17 @@ export default function RegistroNuevoPage() {
           estado_up: estadoUpNombre, municipio_up: municipioUp,
           tipo_maiz: tipoMaiz,
           lat: coords?.lat || null, lng: coords?.lng || null,
+          poligono: poligono || null,
+          area_calc_ha: areaCalc || null,
+          area_real_ha: (coincideArea === false && areaReal) ? Number(areaReal) : areaCalc,
+          coincide_area: coincideArea,
           telefono, pin: confirmPin, programas_beneficiario: programas,
+          correo: correo || null,
         }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Error al registrar'); return; }
-      navigate('/login', { state: { mensaje: data.mensaje } });
+      navigate('/login-productor', { state: { mensaje: data.mensaje } });
     } catch {
       setError('Error de conexion.');
     } finally {
@@ -141,6 +157,104 @@ export default function RegistroNuevoPage() {
   };
 
   const inputCls = 'w-full bg-zinc-50 ring-1 ring-zinc-200 rounded-xl px-4 py-3.5 text-base focus:ring-2 focus:ring-[#1A5C38] focus:outline-none transition-shadow';
+
+  // ── PASO 4 — Full-screen polygon ──────────────────────────────────────────
+  if (paso === 4) {
+    return (
+      <div className="flex flex-col h-screen">
+        <div className="px-4 pt-4 pb-3 bg-white border-b border-gray-100">
+          <p className="text-base font-semibold text-gray-800">Dibuja tu parcela en el mapa</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Toca el ícono de polígono y traza los límites de tu terreno tocando cada esquina.
+          </p>
+          {areaCalc && (
+            <div className="mt-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#1A5C38]">Área calculada: {areaCalc} ha</p>
+              <button
+                onClick={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); }}
+                className="text-xs text-red-500 underline">Redibujar</button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 relative">
+          <MapContainer
+            ref={mapRef}
+            center={coords ? [coords.lat, coords.lng] : [23.6345, -102.5528]}
+            zoom={coords ? 13 : 5}
+            style={{ height: '100%', width: '100%' }}
+            zoomControl={false}
+            attributionControl={false}
+          >
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Tiles &copy; Esri" maxZoom={19}
+            />
+            <TileLayer
+              url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+              opacity={0.6}
+            />
+            <DibujarPoligonoUP
+              onPoligonoCompleto={(coords2, centroide, ha) => {
+                setPoligono(coords2);
+                setCoords(centroide);
+                setAreaCalc(ha);
+                setCoincideArea(null);
+              }}
+              onPoligonoEliminado={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); }}
+            />
+          </MapContainer>
+          <div className="absolute top-3 left-3 right-3 z-[1000]">
+            <NominatimSearch
+              placeholder="Buscar ejido, carretera, localidad..."
+              onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 15)}
+            />
+          </div>
+        </div>
+
+        <div className="bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+          {areaCalc && coincideArea === null && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <p className="text-sm font-semibold text-gray-800 mb-3">
+                El sistema calculó <strong>{areaCalc} ha</strong>. ¿Es correcto?
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setCoincideArea(true)}
+                  className="flex-1 border-2 border-[#1A5C38] text-[#1A5C38] py-2.5 rounded-xl font-semibold text-sm">
+                  ✓ Sí, es correcto
+                </button>
+                <button onClick={() => setCoincideArea(false)}
+                  className="flex-1 border-2 border-gray-300 text-gray-600 py-2.5 rounded-xl font-semibold text-sm">
+                  No, tengo más/menos
+                </button>
+              </div>
+            </div>
+          )}
+          {coincideArea === false && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">¿Cuántas hectáreas tiene tu predio?</label>
+              <div className="flex items-center gap-3">
+                <input type="number" min="0.1" max="9999" step="0.1"
+                  value={areaReal}
+                  onChange={e => setAreaReal(e.target.value)}
+                  placeholder={String(areaCalc ?? '')}
+                  className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-bold text-center focus:border-[#1A5C38] focus:outline-none" />
+                <span className="text-gray-500 font-medium">ha</span>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => avanzarPaso5()}
+            disabled={!poligono || (coincideArea === null && !!areaCalc)}
+            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl text-base font-bold disabled:opacity-40">
+            {poligono ? 'Confirmar y continuar →' : 'Dibuja tu parcela para continuar'}
+          </button>
+          <button onClick={() => avanzarPaso5(true)}
+            className="w-full text-gray-400 py-2 text-sm">Ahora no — completar después</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
@@ -251,7 +365,15 @@ export default function RegistroNuevoPage() {
                   zoomControl={false}
                   attributionControl={false}
                 >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <TileLayer
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    attribution="Tiles &copy; Esri"
+                    maxZoom={19}
+                  />
+                  <TileLayer
+                    url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                    opacity={0.6}
+                  />
                   <ClickHandler onMapClick={(lat, lng) => setCoords({ lat, lng })} />
                   {coords && <Marker position={[coords.lat, coords.lng]} />}
                 </MapContainer>
@@ -287,6 +409,20 @@ export default function RegistroNuevoPage() {
                   onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   type="tel" maxLength={10} placeholder="55 1234 5678"
                   className={`${inputCls} text-lg font-mono`} />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                  Correo electronico <span className="text-zinc-400 font-normal text-xs">(opcional)</span>
+                </label>
+                <p className="text-xs text-zinc-400 mb-2">Para recibir avisos sobre tu cuenta y precios del dia.</p>
+                <input
+                  type="email" value={correo}
+                  onChange={e => setCorreo(e.target.value)}
+                  placeholder="tucorreo@ejemplo.com"
+                  className={inputCls}
+                  autoCapitalize="off" autoCorrect="off" inputMode="email"
+                />
               </div>
 
               <div>

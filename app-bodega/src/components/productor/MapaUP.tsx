@@ -56,7 +56,15 @@ export default function MapaUP({
         doubleClickZoom={false}
         boxZoom={false}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          attribution="Tiles &copy; Esri"
+          maxZoom={19}
+        />
+        <TileLayer
+          url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+          opacity={0.6}
+        />
         <MapCenter lat={lat} lng={lng} />
         
         {/* Pin verde en el centroide */}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit2, MapPin, LogOut, Check, CircleDot } from 'lucide-react';
+import { Edit2, MapPin, LogOut, Check, CircleDot, CalendarCheck, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import MapaUP from '../../components/productor/MapaUP';
 
@@ -18,11 +18,19 @@ const PROGRAMAS_GOBIERNO = [
 
 interface Perfil {
   curp: string; nombres: string; apellido_paterno: string; apellido_materno: string;
-  telefono: string; estado_validacion: string; tipo_registro: string;
+  telefono: string; correo: string | null; estado_validacion: string; tipo_registro: string;
   programas_beneficiario: string[];
   state_name: string; municipality_name: string;
   location_confirmed: boolean; centroid_source: string;
   lat: number; lng: number;
+  area_ha_calc: number | null; area_ha_real: number | null;
+}
+
+interface Ciclo {
+  cycle_id: number; cycle_year: number; cycle_type: string;
+  hectareas_sembradas: number | null;
+  fecha_siembra: string | null;
+  variedad_nombre: string | null;
 }
 
 export default function MiPerfilPage() {
@@ -32,8 +40,11 @@ export default function MiPerfilPage() {
   const [loading, setLoading] = useState(true);
   const [editTel, setEditTel] = useState(false);
   const [telefono, setTelefono] = useState('');
+  const [editCorreo, setEditCorreo] = useState(false);
+  const [correo, setCorreo] = useState('');
   const [editProg, setEditProg] = useState(false);
   const [programas, setProgramas] = useState<string[]>([]);
+  const [ciclo, setCiclo] = useState<Ciclo | null | undefined>(undefined);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -42,9 +53,13 @@ export default function MiPerfilPage() {
       .then(d => {
         setPerfil(d);
         setTelefono(d.telefono || '');
+        setCorreo(d.correo || '');
         setProgramas(d.programas_beneficiario || []);
       })
       .finally(() => setLoading(false));
+    const token2 = localStorage.getItem('simac_token');
+    fetch(`${BASE}/productor/mi-ciclo`, { headers: { Authorization: `Bearer ${token2}` } })
+      .then(r => r.json()).then(setCiclo).catch(() => setCiclo(null));
   }, []);
 
   const guardarTelefono = async () => {
@@ -56,6 +71,17 @@ export default function MiPerfilPage() {
     });
     setEditTel(false);
     setPerfil(prev => prev ? { ...prev, telefono } : prev);
+  };
+
+  const guardarCorreo = async () => {
+    const token = localStorage.getItem('simac_token');
+    await fetch(`${BASE}/productor/perfil`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ correo: correo || null }),
+    });
+    setEditCorreo(false);
+    setPerfil(prev => prev ? { ...prev, correo } : prev);
   };
 
   const guardarProgramas = async () => {
@@ -137,18 +163,38 @@ export default function MiPerfilPage() {
             </button>
           </div>
           {editTel ? (
-            <div className="space-y-2">
+            <div className="space-y-2 mb-3">
               <input value={telefono}
                 onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-[#1A5C38] focus:outline-none" />
               <button onClick={guardarTelefono}
                 className="w-full bg-[#1A5C38] text-white py-2 rounded-xl text-sm font-semibold">
-                Guardar
+                Guardar teléfono
               </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-800">{perfil.telefono || 'Sin teléfono'}</p>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs text-gray-400">Teléfono</span>
+              <span className="text-sm text-gray-800">{perfil.telefono || 'Sin teléfono'}</span>
+            </div>
           )}
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-400">Correo</span>
+            {editCorreo ? (
+              <div className="flex items-center gap-2">
+                <input type="email" value={correo}
+                  onChange={e => setCorreo(e.target.value)}
+                  autoCapitalize="off" autoCorrect="off" inputMode="email"
+                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-[#1A5C38] focus:outline-none" />
+                <button onClick={guardarCorreo} className="text-[#1A5C38] text-xs font-bold">OK</button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-800">{perfil.correo || <span className="text-gray-400 italic text-xs">sin correo</span>}</span>
+                <button onClick={() => setEditCorreo(true)} className="text-[#1A5C38]"><Edit2 size={12} /></button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Mi parcela */}
@@ -190,6 +236,45 @@ export default function MiPerfilPage() {
             className="mt-3 flex items-center gap-1 text-[#1A5C38] text-sm font-semibold">
             <MapPin size={14} /> Actualizar ubicación en el mapa
           </button>
+        </div>
+
+        {/* Ciclo activo */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Ciclo productivo</p>
+            <button onClick={() => navigate('/productor/ciclo')} className="text-[#1A5C38]">
+              {ciclo ? <Edit2 size={14} /> : <ChevronRight size={14} />}
+            </button>
+          </div>
+          {ciclo ? (
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Año</span>
+                <span className="font-medium text-gray-800">{ciclo.cycle_year}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Tipo</span>
+                <span className="font-medium text-gray-800">{ciclo.cycle_type}</span>
+              </div>
+              {ciclo.hectareas_sembradas && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Hectáreas</span>
+                  <span className="font-medium text-gray-800">{ciclo.hectareas_sembradas} ha</span>
+                </div>
+              )}
+              {ciclo.variedad_nombre && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Variedad</span>
+                  <span className="font-medium text-gray-800">{ciclo.variedad_nombre}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button onClick={() => navigate('/productor/ciclo')}
+              className="w-full flex items-center gap-2 text-[#1A5C38] text-sm font-semibold">
+              <CalendarCheck size={14} /> Declarar ciclo {new Date().getFullYear()}
+            </button>
+          )}
         </div>
 
         {/* Programas */}
