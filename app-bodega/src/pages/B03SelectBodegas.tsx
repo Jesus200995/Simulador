@@ -319,6 +319,14 @@ export default function B03SelectBodegas() {
                 </span>
               ))}
             </div>
+            <button
+              onClick={continuar}
+              disabled={saving}
+              className="w-full bg-[#1A5C38] text-white rounded-xl py-3.5 text-[15px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+            >
+              <CheckCircle size={17} />
+              {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
+            </button>
           </div>
         )}
         </>}
@@ -405,7 +413,14 @@ export default function B03SelectBodegas() {
                   </span>
                 ))}
               </div>
-              <p className="text-[11px] text-gray-400 text-center">Toca el botón verde de abajo para confirmar</p>
+              <button
+                onClick={continuar}
+                disabled={saving}
+                className="w-full bg-[#1A5C38] text-white rounded-xl py-3.5 text-[15px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                <CheckCircle size={17} />
+                {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
+              </button>
             </div>
           )}
           </>
@@ -532,7 +547,7 @@ export default function B03SelectBodegas() {
       </div>
 
       {/* Botón continuar fijo abajo */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200/50 px-4 py-3 pb-safe">
+      <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-white/95 backdrop-blur-md border-t border-gray-200/60 px-4 py-3 pb-safe">
         <div className="max-w-2xl mx-auto space-y-2">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2">
