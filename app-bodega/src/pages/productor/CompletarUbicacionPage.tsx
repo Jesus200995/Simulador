@@ -101,7 +101,7 @@ export default function CompletarUbicacionPage() {
             onPoligonoEliminado={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); }}
           />
         </MapContainer>
-        <div className="absolute top-3 left-3 right-3 z-[1000]">
+        <div className="absolute top-3 left-3 max-w-[calc(100%-80px)] w-72 sm:w-80 z-[1000]">
           <NominatimSearch placeholder="Buscar ejido, localidad..."
             onSelect={(lat, lng) => { setCoords({ lat, lng }); mapRef.current?.flyTo([lat, lng], 15); }} />
         </div>

@@ -91,6 +91,80 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
   animation: somec-shimmer 3.5s linear infinite;
 }
+
+/* Leaflet Draw absolute path overrides */
+.leaflet-draw-toolbar a {
+  background-image: url('/images/spritesheet.png') !important;
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .leaflet-draw-toolbar a {
+    background-image: url('/images/spritesheet-2x.png') !important;
+    background-size: 270px 30px !important;
+  }
+}
+
+/* Premium Apple 2026 style custom Leaflet Draw toolbar controls */
+.leaflet-bar {
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background-color: white !important;
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background-color: white !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  transition: background-color 0.15s ease;
+}
+
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
+}
+
+/* Elegant touch-friendly style for leaflet draw actions list */
+.leaflet-draw-actions {
+  left: auto !important;
+  right: 48px !important;
+  margin-top: 2px !important;
+}
+
+.leaflet-draw-actions li {
+  height: 36px !important;
+}
+
+.leaflet-draw-actions a {
+  background-color: #1C1C1E !important;
+  color: white !important;
+  border-radius: 10px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  margin-left: 4px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  transition: background-color 0.15s ease;
+}
+
+.leaflet-draw-actions a:hover {
+  background-color: #2C2C2E !important;
+}
+
+.leaflet-draw-actions-top a {
+  border-radius: 10px !important;
+}
+
+.leaflet-draw-actions-bottom a {
+  border-radius: 10px !important;
+}
+
