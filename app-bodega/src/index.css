@@ -97,74 +97,285 @@ body {
   animation: somec-shimmer 3.5s linear infinite;
 }
 
-/* Leaflet Draw absolute path overrides */
-.leaflet-draw-toolbar a {
-  background-image: url('/images/spritesheet.png') !important;
+/* ═══════ HIDE DEFAULT LEAFLET-DRAW TOOLBAR ═══════ */
+.leaflet-draw-toolbar,
+.leaflet-draw-toolbar-top,
+.leaflet-draw-toolbar-bottom,
+.leaflet-draw.leaflet-control,
+.leaflet-draw-actions,
+.leaflet-draw-section {
+  display: none !important;
 }
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .leaflet-draw-toolbar a {
-    background-image: url('/images/spritesheet-2x.png') !important;
-    background-size: 270px 30px !important;
+
+/* ═══════ SIMAC CUSTOM MAP TOOLBAR — Apple 2026 ═══════ */
+.simac-map-toolbar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+  animation: simac-toolbar-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.simac-toolbar-active {
+  background: rgba(28, 28, 30, 0.88);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes simac-toolbar-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 
-/* Premium Apple 2026 style custom Leaflet Draw toolbar controls */
+/* ── Tool Button ── */
+.simac-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: #3a3a3c;
+  border-radius: 11px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 40px;
+  line-height: 1;
+}
+
+.simac-tool-btn:active {
+  transform: scale(0.94);
+}
+
+.simac-tool-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Primary (draw) */
+.simac-tool-primary {
+  background: #1A5C38;
+  color: white !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(26, 92, 56, 0.25);
+}
+
+.simac-tool-primary:hover {
+  background: #15482d !important;
+}
+
+/* Danger (delete) */
+.simac-tool-danger {
+  color: #ff453a !important;
+}
+
+.simac-tool-danger:hover {
+  background: rgba(255, 69, 58, 0.1) !important;
+}
+
+/* Success (confirm) */
+.simac-tool-success {
+  background: #30d158 !important;
+  color: white !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(48, 209, 88, 0.3);
+}
+
+.simac-tool-success:hover {
+  background: #28b84d !important;
+}
+
+/* Muted (cancel) */
+.simac-tool-muted {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.simac-tool-muted:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ── Active toolbar label ── */
+.simac-toolbar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0 6px;
+  letter-spacing: 0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+/* ── Toolbar active indicator pulse ── */
+.simac-toolbar-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #30d158;
+  margin-left: 4px;
+  animation: simac-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.simac-indicator-edit {
+  background: #ff9f0a;
+}
+
+@keyframes simac-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ── Divider ── */
+.simac-tool-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.simac-toolbar-active .simac-tool-divider {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.simac-toolbar-active .simac-tool-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.simac-toolbar-active .simac-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 480px) {
+  .simac-map-toolbar {
+    bottom: 12px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    transform: none;
+    padding: 4px 5px;
+    border-radius: 14px;
+    gap: 2px;
+    justify-content: center;
+    animation-name: simac-toolbar-in-mobile;
+  }
+
+  @keyframes simac-toolbar-in-mobile {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .simac-tool-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+    min-height: 38px;
+    gap: 4px;
+    border-radius: 10px;
+  }
+
+  .simac-tool-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .simac-tool-btn span {
+    display: inline;
+  }
+
+  .simac-toolbar-label {
+    font-size: 11px;
+    padding: 0 3px;
+  }
+
+  .simac-toolbar-indicator {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .simac-tool-btn span {
+    display: none;
+  }
+  .simac-tool-btn {
+    padding: 7px 9px;
+  }
+  .simac-toolbar-label {
+    display: none;
+  }
+}
+
+/* ═══════ Leaflet zoomControl bar style keep ═══════ */
 .leaflet-bar {
   border: none !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
   border-radius: 12px !important;
   overflow: hidden;
-  background-color: white !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(12px);
 }
 
 .leaflet-bar a,
 .leaflet-bar a:hover {
-  background-color: white !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
-  width: 40px !important;
-  height: 40px !important;
-  line-height: 40px !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  width: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  color: #1C1C1E !important;
+  font-weight: 300 !important;
+  font-size: 18px !important;
   transition: background-color 0.15s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
 .leaflet-bar a:last-child {
   border-bottom: none !important;
 }
 
-/* Elegant touch-friendly style for leaflet draw actions list */
-.leaflet-draw-actions {
-  left: auto !important;
-  right: 48px !important;
-  margin-top: 2px !important;
-}
-
-.leaflet-draw-actions li {
-  height: 36px !important;
-}
-
-.leaflet-draw-actions a {
-  background-color: #1C1C1E !important;
-  color: white !important;
-  border-radius: 10px !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  padding: 0 14px !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  margin-left: 4px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-  transition: background-color 0.15s ease;
-}
-
-.leaflet-draw-actions a:hover {
-  background-color: #2C2C2E !important;
-}
-
-.leaflet-draw-actions-top a {
-  border-radius: 10px !important;
-}
-
-.leaflet-draw-actions-bottom a {
-  border-radius: 10px !important;
+/* ═══════ Leaflet draw vertex & guide markers ═══════ */
+.leaflet-editing-icon {
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+  border-radius: 50% !important;
+  border: 2px solid #1A5C38 !important;
+  background: white !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 }
 

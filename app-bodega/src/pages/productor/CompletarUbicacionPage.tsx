@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MapPin, Maximize2 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -27,6 +27,7 @@ export default function CompletarUbicacionPage() {
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [poligonoExistente, setPoligonoExistente] = useState<[number, number][] | null>(null);
   const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 23.6345, lng: -102.5528 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -64,23 +65,50 @@ export default function CompletarUbicacionPage() {
     }
   };
 
-  return (
-    <div className="flex flex-col overflow-y-auto" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-2xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] flex-shrink-0">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-4">
-          <button onClick={() => navigate(-1)}
-            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1 active:opacity-60 transition-opacity">
-            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
-          </button>
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Ubicacion</p>
-          <h1 className="text-[18px] font-black text-white tracking-tight">Marca tu parcela</h1>
-          <p className="text-[12px] font-medium text-white/40 mt-0.5">Toca el mapa donde esta tu terreno</p>
-        </div>
-      </div>
+  const toggleFullscreen = () => {
+    setIsFullscreen(f => !f);
+    setTimeout(() => mapRef.current?.invalidateSize(), 300);
+  };
 
-      <div className="flex-1 relative min-h-[300px] flex-shrink-0">
-        <MapContainer ref={mapRef} center={[center.lat, center.lng]} zoom={poligonoExistente ? 13 : 5}
-          style={{ height: '100%', width: '100%' }} zoomControl={false} attributionControl={false}>
+  return (
+    <div
+      className="flex flex-col"
+      style={{
+        height: isFullscreen ? '100dvh' : 'calc(100dvh - 60px - 72px)',
+        position: isFullscreen ? 'fixed' : 'relative',
+        inset: isFullscreen ? 0 : undefined,
+        zIndex: isFullscreen ? 9999 : undefined,
+        background: '#F2F2F7',
+      }}
+    >
+      {/* ── Header ── */}
+      {!isFullscreen && (
+        <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-2xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] flex-shrink-0">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-4">
+            <button onClick={() => navigate(-1)}
+              className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1 active:opacity-60 transition-opacity">
+              <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
+            </button>
+            <div className="flex items-center gap-2 mb-1">
+              <MapPin size={16} className="text-green-300/70" />
+              <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest">Ubicación</p>
+            </div>
+            <h1 className="text-[18px] font-black text-white tracking-tight">Marca tu parcela</h1>
+            <p className="text-[12px] font-medium text-white/40 mt-0.5">Dibuja el contorno de tu terreno en el mapa</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Map ── */}
+      <div className="flex-1 relative min-h-0">
+        <MapContainer
+          ref={mapRef}
+          center={[center.lat, center.lng]}
+          zoom={poligonoExistente ? 13 : 5}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          attributionControl={false}
+        >
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             attribution="Tiles &copy; Esri"
@@ -101,46 +129,81 @@ export default function CompletarUbicacionPage() {
             onPoligonoEliminado={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); }}
           />
         </MapContainer>
-        <div className="absolute top-3 left-3 max-w-[calc(100%-80px)] w-72 sm:w-80 z-[1000]">
-          <NominatimSearch placeholder="Buscar ejido, localidad..."
-            onSelect={(lat, lng) => { setCoords({ lat, lng }); mapRef.current?.flyTo([lat, lng], 15); }} />
+
+        {/* Search bar — floats top-left, won't block drawing */}
+        <div className="absolute top-3 left-3 right-16 sm:right-auto sm:w-80 z-[1000]">
+          <NominatimSearch
+            placeholder="Buscar ejido, localidad..."
+            onSelect={(lat, lng) => { setCoords({ lat, lng }); mapRef.current?.flyTo([lat, lng], 15); }}
+          />
         </div>
+
+        {/* Fullscreen toggle */}
+        <button
+          onClick={toggleFullscreen}
+          className="absolute top-3 right-3 z-[1000] w-9 h-9 flex items-center justify-center
+                     bg-white/80 backdrop-blur-lg rounded-xl shadow-md
+                     active:scale-90 transition-transform"
+          title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+        >
+          <Maximize2 size={16} className="text-zinc-700" />
+        </button>
+
+        {/* Back button in fullscreen */}
+        {isFullscreen && (
+          <button
+            onClick={toggleFullscreen}
+            className="absolute top-3 left-[calc(100%-170px)] sm:left-auto sm:right-14 z-[1000]
+                       flex items-center gap-1 px-3 py-2 bg-black/50 backdrop-blur-lg rounded-xl
+                       text-white text-xs font-semibold active:opacity-70 transition-opacity"
+          >
+            <ChevronLeft size={14} /> Salir
+          </button>
+        )}
       </div>
 
-      <div className="px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-zinc-200 space-y-2 flex-shrink-0">
-        {areaCalc && coincideArea === null && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3">
-            <p className="text-sm font-semibold text-gray-800 mb-2">Area calculada: {areaCalc} ha. &iquest;Es correcto?</p>
-            <div className="flex gap-2">
-              <button onClick={() => setCoincideArea(true)}
-                className="flex-1 border-2 border-[#1A5C38] text-[#1A5C38] py-2 rounded-xl text-sm font-semibold">
-                Si, correcto
-              </button>
-              <button onClick={() => setCoincideArea(false)}
-                className="flex-1 border-2 border-gray-300 text-gray-600 py-2 rounded-xl text-sm font-semibold">
-                No
-              </button>
+      {/* ── Bottom panel ── */}
+      {!isFullscreen && (
+        <div className="px-4 sm:px-6 py-3 bg-white/90 backdrop-blur-xl border-t border-zinc-200/80 space-y-2 flex-shrink-0">
+          {areaCalc && coincideArea === null && (
+            <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-3">
+              <p className="text-sm font-semibold text-gray-800 mb-2">Área calculada: {areaCalc} ha. ¿Es correcto?</p>
+              <div className="flex gap-2">
+                <button onClick={() => setCoincideArea(true)}
+                  className="flex-1 border-2 border-[#1A5C38] text-[#1A5C38] py-2 rounded-xl text-sm font-semibold
+                             active:scale-[0.97] transition-transform">
+                  Sí, correcto
+                </button>
+                <button onClick={() => setCoincideArea(false)}
+                  className="flex-1 border-2 border-gray-300 text-gray-600 py-2 rounded-xl text-sm font-semibold
+                             active:scale-[0.97] transition-transform">
+                  No
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        {coincideArea === false && (
-          <div className="flex items-center gap-2">
-            <input type="number" min="0.1" step="0.1"
-              value={areaReal} onChange={e => setAreaReal(e.target.value)}
-              placeholder="Hectareas reales" className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-base font-bold text-center focus:border-[#1A5C38] focus:outline-none" />
-            <span className="text-gray-500">ha</span>
-          </div>
-        )}
-        <button onClick={guardar} disabled={(!coords && !poligono) || loading}
-          className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
-                     disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
-          {loading ? 'Guardando...' : poligono ? 'Guardar poligono' : 'Usa las herramientas para dibujar tu parcela'}
-        </button>
-        <button onClick={() => navigate('/productor')}
-          className="w-full text-zinc-400 py-2 text-sm hover:text-zinc-500 transition-colors">
-          Ahora no
-        </button>
-      </div>
+          )}
+          {coincideArea === false && (
+            <div className="flex items-center gap-2">
+              <input type="number" min="0.1" step="0.1"
+                value={areaReal} onChange={e => setAreaReal(e.target.value)}
+                placeholder="Hectáreas reales"
+                className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-base font-bold text-center
+                           focus:border-[#1A5C38] focus:outline-none transition-colors" />
+              <span className="text-gray-500 text-sm font-medium">ha</span>
+            </div>
+          )}
+          <button onClick={guardar} disabled={(!coords && !poligono) || loading}
+            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-3.5 rounded-2xl text-[15px] font-semibold
+                       disabled:opacity-40 active:scale-[0.98] transition-all duration-200
+                       shadow-[0_4px_16px_rgba(26,92,56,0.2)]">
+            {loading ? 'Guardando...' : poligono ? 'Guardar polígono' : 'Dibuja tu parcela con el botón verde'}
+          </button>
+          <button onClick={() => navigate('/productor')}
+            className="w-full text-zinc-400 py-1.5 text-sm hover:text-zinc-500 transition-colors">
+            Ahora no
+          </button>
+        </div>
+      )}
     </div>
   );
 }
