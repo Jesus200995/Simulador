@@ -59,6 +59,7 @@ import BodegasAdminPage from './pages/admin/BodegasAdminPage';
 import BodegaDetalleAdminPage from './pages/admin/BodegaDetalleAdminPage';
 import AlertasAdminPage from './pages/admin/AlertasAdminPage';
 import PreciosAdminPage from './pages/admin/PreciosAdminPage';
+import RegistroAdminPage from './pages/admin/RegistroAdminPage';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -224,6 +225,7 @@ export const router = createBrowserRouter([
 
   // Rutas administrativas (guardián Apple 2026)
   { path: '/admin/login', element: <LoginAdminPage /> },
+  { path: '/admin/registro', element: <RegistroAdminPage /> },
   {
     path: '/admin',
     element: <RequireAdmin><AdminShell><Outlet /></AdminShell></RequireAdmin>,

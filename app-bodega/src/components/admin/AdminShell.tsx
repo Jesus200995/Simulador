@@ -1,203 +1,300 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
-import { 
-  Home, Users, Warehouse, AlertTriangle, Coins, LogOut, Menu, X, ShieldAlert 
+import {
+  LayoutDashboard, Users, Warehouse, AlertTriangle,
+  TrendingUp, LogOut, Menu, X, ShieldAlert, ChevronRight
 } from 'lucide-react';
 
 interface SidebarItem {
-  name: string;
+  label: string;
   path: string;
   icon: any;
+  exact?: boolean;
 }
 
+const MENU: SidebarItem[] = [
+  { label: 'Resumen', path: '/admin', icon: LayoutDashboard, exact: true },
+  { label: 'Productores', path: '/admin/productores', icon: Users },
+  { label: 'Bodegas', path: '/admin/bodegas', icon: Warehouse },
+  { label: 'Alertas', path: '/admin/alertas', icon: AlertTriangle },
+  { label: 'Precios', path: '/admin/precios', icon: TrendingUp },
+];
+
 export default function AdminShell({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const menuItems: SidebarItem[] = [
-    { name: 'Resumen General', path: '/admin', icon: Home },
-    { name: 'Productores', path: '/admin/productores', icon: Users },
-    { name: 'Bodegas', path: '/admin/bodegas', icon: Warehouse },
-    { name: 'Alertas', path: '/admin/alertas', icon: AlertTriangle },
-    { name: 'Precios', path: '/admin/precios', icon: Coins },
-  ];
+  // Close drawer on route change
+  useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
+
+  // Prevent body scroll when drawer open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
 
   function handleLogout() {
     logout();
     navigate('/admin/login');
   }
 
-  // Get display title based on current path
-  const getPageTitle = () => {
-    const current = menuItems.find(item => item.path === location.pathname);
-    if (current) return current.name;
-    if (location.pathname.startsWith('/admin/productores/')) return 'Detalle de Productor';
-    if (location.pathname.startsWith('/admin/bodegas/')) return 'Detalle de Bodega';
-    return 'Panel de Control';
+  const pageTitle = () => {
+    const m = MENU.find(i => i.exact ? i.path === location.pathname : location.pathname.startsWith(i.path));
+    if (location.pathname.match(/\/admin\/productores\/.+/)) return 'Detalle Productor';
+    if (location.pathname.match(/\/admin\/bodegas\/.+/)) return 'Detalle Bodega';
+    return m?.label ?? 'Panel';
   };
 
-  const navLinkClass = ({ isActive }: { isActive: boolean }) => `
-    flex items-center gap-3 px-4 py-3 rounded-xl text-[13.5px] font-bold transition-all duration-200
-    ${isActive 
-      ? 'bg-[#1A5C38] text-white shadow-md shadow-emerald-950/20' 
-      : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-    }
-  `;
+  const initials = () => {
+    const n = user?.nombres || user?.nombre_completo || 'AD';
+    return n.slice(0, 2).toUpperCase();
+  };
+
+  const navCls = ({ isActive }: { isActive: boolean }) =>
+    `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+      isActive
+        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+        : 'text-gray-400 hover:text-white hover:bg-white/[0.05] border border-transparent'
+    }`;
 
   return (
-    <div className="min-h-screen bg-[#0d131a] text-gray-100 flex relative overflow-x-hidden">
-      
-      {/* ── SIDEBAR DESKTOP ── */}
-      <aside className="hidden lg:flex flex-col w-[260px] h-screen bg-[#090d12] border-r border-white/5 flex-shrink-0 sticky top-0">
-        
-        {/* Logo and Brand */}
-        <div className="p-6 border-b border-white/5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <ShieldAlert className="text-emerald-500" size={16} />
+    <div className="min-h-screen bg-[#0b1117] text-gray-100 flex overflow-x-hidden">
+
+      {/* ══════════════════════════════════════════
+          SIDEBAR — DESKTOP (≥1024px)
+      ══════════════════════════════════════════ */}
+      <aside className="hidden lg:flex flex-col w-[240px] xl:w-[260px] min-h-screen bg-[#080c11] border-r border-white/[0.06] flex-shrink-0 sticky top-0 h-screen">
+
+        {/* Brand */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
+          <div className="w-8 h-8 rounded-[10px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+            <ShieldAlert className="text-emerald-400" size={15} />
           </div>
           <div>
-            <h1 className="text-[15px] font-black tracking-tight leading-none text-white">SIMAC Admin</h1>
-            <p className="text-[10px] text-gray-500 mt-1 font-semibold">PLAN NACIONAL MAÍZ</p>
+            <h1 className="text-[14px] font-black text-white tracking-tight leading-none">SIMAC Admin</h1>
+            <p className="text-[9px] text-gray-500 mt-0.5 font-bold uppercase tracking-widest">Plan Nacional Maíz</p>
           </div>
         </div>
 
-        {/* User Profile Info */}
-        <div className="p-6 border-b border-white/5 flex items-center gap-3 bg-white/[0.01]">
-          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-white font-extrabold text-[14px] uppercase">
-            {user?.nombres ? user.nombres.slice(0, 2) : (user?.nombre_completo ? user.nombre_completo.slice(0, 2) : 'AD')}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[13px] font-bold text-white truncate leading-none mb-1">{user?.nombres || user?.nombre_completo || 'Administrador'}</h3>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full inline-block">
-              {user?.rol || 'Admin'}
-            </span>
-          </div>
-        </div>
-
-        {/* Sidebar Nav Links */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {menuItems.map(item => (
-            <NavLink key={item.path} to={item.path} end={item.path === '/admin'} className={navLinkClass}>
-              <item.icon size={16} />
-              {item.name}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Bottom Actions */}
-        <div className="p-4 border-t border-white/5">
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13.5px] font-bold text-red-400 hover:text-red-300 hover:bg-red-500/5 active:scale-95 transition-all duration-200"
-          >
-            <LogOut size={16} />
-            Cerrar Sesión
-          </button>
-        </div>
-      </aside>
-
-      {/* ── SIDEBAR MOBILE BACKDROP OVERLAY ── */}
-      {isOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* ── SIDEBAR MOBILE DRAWER ── */}
-      <aside 
-        className={`lg:hidden fixed top-0 bottom-0 left-0 w-[260px] bg-[#090d12] border-r border-white/5 z-50 flex flex-col transition-transform duration-300 ease-out transform ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <ShieldAlert className="text-emerald-500" size={16} />
+        {/* User */}
+        <div className="px-4 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5 bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.06]">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-[12px] flex-shrink-0">
+              {initials()}
             </div>
-            <h1 className="text-[15px] font-black text-white">SIMAC Admin</h1>
-          </div>
-          <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white transition-colors p-1">
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="p-5 border-b border-white/5 flex items-center gap-3 bg-white/[0.01]">
-          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-white font-extrabold text-[14px] uppercase">
-            {user?.nombres ? user.nombres.slice(0, 2) : (user?.nombre_completo ? user.nombre_completo.slice(0, 2) : 'AD')}
-          </div>
-          <div>
-            <h3 className="text-[13px] font-bold text-white leading-none mb-1">{user?.nombres || user?.nombre_completo || 'Administrador'}</h3>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full inline-block">
-              {user?.rol || 'Admin'}
-            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-bold text-white truncate leading-none mb-0.5">
+                {user?.nombres || user?.nombre_completo || 'Administrador'}
+              </p>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500">
+                {user?.rol || 'admin'}
+              </span>
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {menuItems.map(item => (
-            <NavLink 
-              key={item.path} 
-              to={item.path} 
-              end={item.path === '/admin'}
-              onClick={() => setIsOpen(false)} 
-              className={navLinkClass}
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {MENU.map(item => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.exact}
+              className={navCls}
             >
-              <item.icon size={16} />
-              {item.name}
+              <item.icon size={15} className="flex-shrink-0" />
+              <span className="truncate">{item.label}</span>
+              <ChevronRight size={12} className="ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
-          <button 
+        {/* Logout */}
+        <div className="px-3 py-4 border-t border-white/[0.06]">
+          <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13.5px] font-bold text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/10 active:scale-[0.98] transition-all duration-200"
           >
-            <LogOut size={16} />
+            <LogOut size={15} className="flex-shrink-0" />
             Cerrar Sesión
           </button>
         </div>
       </aside>
 
-      {/* ── MAIN CONTENT WORKSPACE ── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        
-        {/* Header/Navbar */}
-        <header className="sticky top-0 z-30 bg-[#0d131a]/85 backdrop-blur-md border-b border-white/5 h-[64px] flex items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsOpen(true)}
-              className="lg:hidden p-1.5 -ml-1 text-gray-400 hover:text-white transition-colors"
+      {/* ══════════════════════════════════════════
+          MOBILE DRAWER — Overlay + Sidebar
+      ══════════════════════════════════════════ */}
+      {/* Backdrop */}
+      <div
+        className={`lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
+      {/* Drawer panel */}
+      <aside
+        className={`lg:hidden fixed top-0 bottom-0 left-0 z-50 flex flex-col
+          bg-[#080c11] border-r border-white/[0.08]
+          transition-transform duration-300 ease-out
+          w-[75vw] max-w-[300px]
+          ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+              <ShieldAlert className="text-emerald-400" size={13} />
+            </div>
+            <h1 className="text-[13px] font-black text-white">SIMAC Admin</h1>
+          </div>
+          <button
+            onClick={() => setDrawerOpen(false)}
+            className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
+
+        {/* Drawer user */}
+        <div className="px-4 py-3 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5 bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-[12px] flex-shrink-0">
+              {initials()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[12px] font-bold text-white truncate leading-none mb-0.5">
+                {user?.nombres || user?.nombre_completo || 'Administrador'}
+              </p>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500">
+                {user?.rol || 'admin'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Drawer nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {MENU.map(item => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.exact}
+              className={navCls}
             >
-              <Menu size={20} />
+              <item.icon size={15} className="flex-shrink-0" />
+              <span className="truncate">{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Drawer logout */}
+        <div className="px-3 py-4 border-t border-white/[0.06]">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/[0.06] border border-transparent transition-all"
+          >
+            <LogOut size={14} className="flex-shrink-0" />
+            Cerrar Sesión
+          </button>
+        </div>
+      </aside>
+
+      {/* ══════════════════════════════════════════
+          MAIN CONTENT
+      ══════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
+
+        {/* Top header bar */}
+        <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/[0.06] bg-[#0b1117]/90 backdrop-blur-xl">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="lg:hidden -ml-1 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] transition-colors flex-shrink-0"
+              aria-label="Abrir menú"
+            >
+              <Menu size={18} />
             </button>
-            <h2 className="text-[15px] font-bold text-white tracking-tight leading-none">
-              {getPageTitle()}
-            </h2>
+
+            {/* Breadcrumb / page title */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest hidden sm:inline">Admin</span>
+              <ChevronRight size={11} className="text-gray-700 hidden sm:inline flex-shrink-0" />
+              <h2 className="text-[13px] sm:text-[14px] font-bold text-white tracking-tight truncate">
+                {pageTitle()}
+              </h2>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hidden md:inline-block">
-              Plan Nacional Maíz 2026
-            </span>
-            <div className="h-4 w-px bg-white/10 hidden md:block" />
+          {/* Right side info */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="hidden md:flex items-center gap-2">
+              <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">PNMB 2026</span>
+              <div className="h-3 w-px bg-white/10" />
+            </div>
             <div className="text-right hidden sm:block">
-              <p className="text-[11.5px] text-gray-400 font-semibold">{user?.nombres || user?.nombre_completo || 'Administrador'}</p>
-              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">{user?.rol || 'Admin'}</p>
+              <p className="text-[11px] text-gray-300 font-semibold truncate max-w-[140px]">
+                {user?.nombres || user?.nombre_completo || 'Administrador'}
+              </p>
+              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+                {user?.rol || 'admin'}
+              </p>
+            </div>
+            <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-[10px] flex-shrink-0">
+              {initials()}
             </div>
           </div>
         </header>
 
-        {/* Dynamic Workspace Container */}
-        <main className="flex-1 p-6">
-          {children}
+        {/* Page content */}
+        <main className="flex-1 p-3 sm:p-5 lg:p-6 overflow-x-hidden">
+          <div className="max-w-[1400px] mx-auto">
+            {children}
+          </div>
         </main>
-      </div>
 
+        {/* Mobile bottom nav */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#080c11]/95 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around px-2 py-2 safe-area-bottom">
+          {MENU.map(item => {
+            const isActive = item.exact
+              ? location.pathname === item.path
+              : location.pathname.startsWith(item.path);
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.exact}
+                className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-0 flex-1"
+              >
+                <item.icon
+                  size={18}
+                  className={`flex-shrink-0 ${isActive ? 'text-emerald-400' : 'text-gray-500'}`}
+                />
+                <span className={`text-[9px] font-bold truncate ${isActive ? 'text-emerald-400' : 'text-gray-600'}`}>
+                  {item.label}
+                </span>
+                {isActive && (
+                  <div className="w-1 h-1 rounded-full bg-emerald-400 mt-0.5" />
+                )}
+              </NavLink>
+            );
+          })}
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl min-w-0 flex-1"
+          >
+            <LogOut size={18} className="text-red-400/60" />
+            <span className="text-[9px] font-bold text-red-400/60">Salir</span>
+          </button>
+        </nav>
+
+        {/* Bottom spacer for mobile nav */}
+        <div className="lg:hidden h-[62px]" />
+      </div>
     </div>
   );
 }

@@ -15,6 +15,65 @@ function soloAdmin(req: AuthRequest, res: Response, next: Function): void {
 }
 
 // =============================================
+// POST /api/admin/registro-admin
+// Registro de nuevo admin con código de acceso corporativo
+// =============================================
+router.post('/registro-admin', async (req: any, res: Response): Promise<void> => {
+  try {
+    const { nombre_completo, email, password, codigo_acceso } = req.body;
+
+    if (!nombre_completo || !email || !password || !codigo_acceso) {
+      res.status(400).json({ error: 'Todos los campos son obligatorios' });
+      return;
+    }
+
+    if (password.length < 8) {
+      res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+      return;
+    }
+
+    // Verificar código de acceso corporativo (almacenado en env o en tabla configuracion)
+    const CODIGO_ADMIN = process.env.ADMIN_REGISTRO_CODIGO || 'SIMAC2026';
+    if (codigo_acceso.trim().toUpperCase() !== CODIGO_ADMIN.toUpperCase()) {
+      res.status(403).json({ error: 'Código de acceso corporativo incorrecto' });
+      return;
+    }
+
+    const emailLower = email.toLowerCase().trim();
+    const nombreNorm = nombre_completo.trim();
+
+    // Verificar si ya existe
+    const existente = await pool.query('SELECT id FROM usuarios WHERE email = $1', [emailLower]);
+    if (existente.rows.length > 0) {
+      res.status(409).json({ error: 'Ya existe una cuenta con ese correo' });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const result = await pool.query(
+      `INSERT INTO usuarios (email, nombre_completo, password_hash, rol, activo)
+       VALUES ($1, $2, $3, 'admin', true)
+       RETURNING id, email, nombre_completo, rol`,
+      [emailLower, nombreNorm, passwordHash]
+    );
+
+    res.status(201).json({
+      message: 'Cuenta administrativa creada exitosamente',
+      usuario: result.rows[0]
+    });
+  } catch (error: any) {
+    console.error('Error al registrar admin:', error);
+    if (error.code === '23505') {
+      res.status(409).json({ error: 'Ya existe una cuenta con ese correo' });
+      return;
+    }
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+
+// =============================================
 // GET /api/admin/usuarios
 // Devuelve todos los productores con su estado_validacion, UP y datos del productor
 // =============================================
