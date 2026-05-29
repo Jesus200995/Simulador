@@ -16,20 +16,59 @@ function soloAdmin(req: AuthRequest, res: Response, next: Function): void {
 
 // =============================================
 // GET /api/admin/usuarios
+// Devuelve todos los productores con su estado_validacion, UP y datos del productor
 // =============================================
-router.get('/usuarios', authMiddleware, soloAdmin, async (_req: AuthRequest, res: Response): Promise<void> => {
+router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
+    res.status(403).json({ error: 'Acceso denegado' });
+    return;
+  }
   try {
+    const { estado_validacion, estado, q, tipo_registro } = req.query;
+    const conditions: string[] = [];
+    const params: any[] = [];
+    let idx = 1;
+
+    if (estado_validacion) { conditions.push(`p.estado_validacion = $${idx++}`); params.push(estado_validacion); }
+    if (tipo_registro) { conditions.push(`p.tipo_registro = $${idx++}`); params.push(tipo_registro); }
+    if (estado) { conditions.push(`up.state_name = $${idx++}`); params.push(estado); }
+    if (q) {
+      conditions.push(`(p.nombres ILIKE $${idx} OR p.apellido_paterno ILIKE $${idx} OR p.curp ILIKE $${idx})`);
+      params.push(`%${q}%`);
+      idx++;
+    }
+
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
     const result = await pool.query(`
-      SELECT id, nombre_completo, email, curp, rol, activo, created_at as fecha_registro
-      FROM usuarios
-      ORDER BY created_at DESC
-    `);
-    res.json({ usuarios: result.rows });
+      SELECT
+        p.producer_id AS id,
+        p.nombres,
+        p.apellido_paterno,
+        p.apellido_materno,
+        p.curp,
+        p.phone AS telefono,
+        p.correo,
+        p.estado_validacion,
+        p.tipo_registro,
+        p.created_at AS fecha_registro,
+        up.state_name AS estado_up,
+        up.municipality_name AS municipio_up,
+        up.up_name AS nombre_up,
+        up.area_ha_calc AS superficie_ha
+      FROM producer p
+      LEFT JOIN up ON up.producer_id = p.producer_id
+      ${where}
+      ORDER BY p.created_at DESC
+      LIMIT 500
+    `, params);
+    res.json({ usuarios: result.rows, productores: result.rows });
   } catch (error) {
     console.error('Error al listar usuarios:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 // =============================================
 // PATCH /api/admin/usuarios/:id/rol
@@ -64,14 +103,35 @@ router.patch('/usuarios/:id/rol', authMiddleware, soloAdmin, async (req: AuthReq
 
 // =============================================
 // PATCH /api/admin/usuarios/:id/estatus
+// Maneja tanto activo (usuarios) como estado_validacion (productores)
 // =============================================
-router.patch('/usuarios/:id/estatus', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+router.patch('/usuarios/:id/estatus', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (req.user?.rol !== 'admin') {
+    res.status(403).json({ error: 'Acceso denegado: se requiere rol admin' });
+    return;
+  }
   try {
     const { id } = req.params;
-    const { activo } = req.body;
+    const { activo, estado_validacion, nota } = req.body;
 
+    // Si viene estado_validacion, actualizar en tabla producer (aprobar/rechazar productor)
+    if (estado_validacion !== undefined) {
+      const result = await pool.query(
+        `UPDATE producer SET estado_validacion = $1 WHERE producer_id = $2
+         RETURNING producer_id AS id, nombres, apellido_paterno, estado_validacion`,
+        [estado_validacion, id]
+      );
+      if (result.rows.length === 0) {
+        res.status(404).json({ error: 'Productor no encontrado' });
+        return;
+      }
+      res.json({ message: `Productor ${estado_validacion}`, productor: result.rows[0], nota });
+      return;
+    }
+
+    // Si viene activo, actualizar en tabla usuarios
     if (typeof activo !== 'boolean') {
-      res.status(400).json({ error: 'El campo activo debe ser true o false' });
+      res.status(400).json({ error: 'Debe enviar activo (boolean) o estado_validacion (string)' });
       return;
     }
 
@@ -91,6 +151,7 @@ router.patch('/usuarios/:id/estatus', authMiddleware, soloAdmin, async (req: Aut
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 // =============================================
 // GET /api/admin/bodegas-pendientes
@@ -243,6 +304,97 @@ router.delete('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthReques
       res.status(409).json({ error: 'No se puede eliminar: el usuario tiene registros asociados. Desactívalo en su lugar.' });
       return;
     }
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+
+// =============================================
+// GET /api/admin/usuarios/:id — Detalle de un productor
+// =============================================
+router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
+    res.status(403).json({ error: 'Acceso denegado' });
+    return;
+  }
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT
+        p.producer_id AS id,
+        p.nombres,
+        p.apellido_paterno,
+        p.apellido_materno,
+        p.curp,
+        p.phone AS telefono,
+        p.correo,
+        p.estado_validacion,
+        p.tipo_registro,
+        p.created_at AS fecha_registro,
+        p.programas_beneficiario,
+        up.state_name AS estado_up,
+        up.municipality_name AS municipio_up,
+        up.up_name AS nombre_up,
+        up.area_ha_calc AS superficie_ha,
+        up.lat,
+        up.lng
+      FROM producer p
+      LEFT JOIN up ON up.producer_id = p.producer_id
+      WHERE p.producer_id = $1
+    `, [id]);
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Productor no encontrado' });
+      return;
+    }
+    res.json({ productor: result.rows[0] });
+  } catch (error) {
+    console.error('Error al obtener productor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// GET /api/admin/actividad-reciente
+// =============================================
+router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
+    res.status(403).json({ error: 'Acceso denegado' });
+    return;
+  }
+  try {
+    // Combinamos eventos de diferentes tablas
+    const productoresR = pool.query(`
+      SELECT
+        'validacion' AS tipo,
+        CONCAT(p.nombres, ' ', p.apellido_paterno, ' (Tipo ', COALESCE(p.tipo_registro, 'B'), ') registrado') AS descripcion,
+        'Sistema' AS actor,
+        p.created_at AS fecha,
+        CONCAT('/admin/productores/', p.producer_id) AS link
+      FROM producer p
+      ORDER BY p.created_at DESC
+      LIMIT 10
+    `);
+
+    const alertasR = pool.query(`
+      SELECT
+        'alerta' AS tipo,
+        COALESCE(a.descripcion, a.tipo_alerta) AS descripcion,
+        'Sistema' AS actor,
+        a.fecha_alerta AS fecha,
+        '/admin/alertas' AS link
+      FROM alertas a
+      ORDER BY a.fecha_alerta DESC
+      LIMIT 10
+    `).catch(() => ({ rows: [] as any[] }));
+
+    const [prod, alert] = await Promise.all([productoresR, alertasR]);
+    const eventos = [...prod.rows, ...(alert as any).rows]
+      .sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+      .slice(0, 20);
+
+    res.json({ eventos });
+  } catch (error) {
+    console.error('Error actividad-reciente:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

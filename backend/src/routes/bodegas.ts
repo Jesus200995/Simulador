@@ -56,22 +56,28 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       idx++;
     }
 
-    // Filtro por radio (productor) — solo cuando se pasan lat, lng y radio_km
+    // Filtro por radio (productor) — usa Haversine en SQL puro (sin PostGIS)
     let distanciaSelect = '0 AS distancia_km';
+    let radioCondition = '';
     if (lat && lng && radio_km) {
       const latNum = Number(lat);
       const lngNum = Number(lng);
       const radioNum = Number(radio_km);
-      conditions.push(`ST_DWithin(
-        ST_SetSRID(ST_MakePoint(b.longitud, b.latitud), 4326)::geography,
-        ST_SetSRID(ST_MakePoint($${idx}, $${idx + 1}), 4326)::geography,
-        $${idx + 2} * 1000
-      )`);
-      distanciaSelect = `ST_Distance(
-        ST_SetSRID(ST_MakePoint(b.longitud, b.latitud), 4326)::geography,
-        ST_SetSRID(ST_MakePoint($${idx}, $${idx + 1}), 4326)::geography
-      ) / 1000 AS distancia_km`;
-      params.push(lngNum, latNum, radioNum);
+      // Fórmula Haversine en SQL puro — no requiere PostGIS
+      distanciaSelect = `
+        (6371 * acos(
+          LEAST(1.0, cos(radians($${idx})) * cos(radians(b.latitud))
+          * cos(radians(b.longitud) - radians($${idx + 1}))
+          + sin(radians($${idx})) * sin(radians(b.latitud))
+        ))
+      ) AS distancia_km`;
+      radioCondition = `(6371 * acos(
+          LEAST(1.0, cos(radians($${idx})) * cos(radians(b.latitud))
+          * cos(radians(b.longitud) - radians($${idx + 1}))
+          + sin(radians($${idx})) * sin(radians(b.latitud))
+        )) <= $${idx + 2}`;
+      conditions.push(radioCondition);
+      params.push(latNum, lngNum, radioNum);
       idx += 3;
     }
 
@@ -88,7 +94,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
     const kpiQuery = `
       SELECT
         COUNT(*)::int                                     AS total_bodegas,
-        COALESCE(SUM(b.capacidad_toneladas), 0)::float   AS total_capacidad,
+        COALESCE(SUM(b.capacidad_ton), 0)::float         AS total_capacidad,
         COUNT(DISTINCT b.estado)::int                    AS total_estados,
         COUNT(DISTINCT b.municipio)::int                 AS total_municipios,
         COUNT(*) FILTER (WHERE b.activo = true)::int     AS total_inventarios

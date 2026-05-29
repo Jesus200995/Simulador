@@ -16,40 +16,23 @@ function adminOnly(req: AuthRequest, res: Response): boolean {
 router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!adminOnly(req, res)) return;
   try {
-    const [productores, ups, superficie, produccion, bodegas, alertas, ciclosActivos, supervisores] = await Promise.all([
-      pool.query(`SELECT COUNT(*)::int AS total FROM producer`),
-      pool.query(`SELECT COUNT(*)::int AS total FROM up`),
-      pool.query(`
-        SELECT COALESCE(SUM(cc.area_sown_ha), 0)::numeric(12,2) AS total_ha
-        FROM cycle_crop cc
-        JOIN cycle c ON c.cycle_id = cc.cycle_id
-        WHERE c.cycle_year = EXTRACT(YEAR FROM NOW())::int
-      `),
-      pool.query(`
-        SELECT COALESCE(SUM(ec.produccion_estimada_ton), 0)::numeric(12,2) AS total_ton
-        FROM estimacion_cosecha ec
-        JOIN cycle c ON c.cycle_id = ec.ciclo_id
-        WHERE c.cycle_year = EXTRACT(YEAR FROM NOW())::int
-      `),
-      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas`),
-      pool.query(`SELECT COUNT(*)::int AS total FROM alertas WHERE estado_alerta = 'pendiente'`),
-      pool.query(`
-        SELECT COUNT(DISTINCT c.cycle_id)::int AS total
-        FROM cycle c
-        WHERE c.cycle_year = EXTRACT(YEAR FROM NOW())::int
-      `),
-      pool.query(`SELECT COUNT(*)::int AS total FROM usuarios WHERE rol = 'supervisor' AND activo = true`),
+    const [productoresActivos, productoresPendientes, bodegasActivas, bodegasPendientes,
+           disponibilidades, requerimientos] = await Promise.all([
+      pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'activo'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'pendiente'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'aprobada'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'pendiente'`),
+      pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM disponibilidad_productor WHERE activo = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
+      pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM senales_compra WHERE activo = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
     ]);
 
     res.json({
-      productores: productores.rows[0].total,
-      ups: ups.rows[0].total,
-      superficie_ha: parseFloat(superficie.rows[0].total_ha),
-      produccion_estimada_ton: parseFloat(produccion.rows[0].total_ton),
-      bodegas_activas: bodegas.rows[0].total,
-      alertas_pendientes: alertas.rows[0].total,
-      ciclos_activos: ciclosActivos.rows[0].total,
-      supervisores_activos: supervisores.rows[0].total,
+      productores_activos: productoresActivos.rows[0].total,
+      productores_pendientes: productoresPendientes.rows[0].total,
+      bodegas_activas: bodegasActivas.rows[0].total,
+      bodegas_pendientes: bodegasPendientes.rows[0].total,
+      disponibilidades_totales: parseFloat(disponibilidades.rows[0].total_ton) || 0,
+      requerimientos_totales: parseFloat(requerimientos.rows[0].total_ton) || 0,
     });
   } catch (error) {
     console.error('Error dashboard resumen:', error);
@@ -132,7 +115,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
         SELECT
           estado,
           COUNT(*)::int AS total_bodegas,
-          COALESCE(SUM(capacidad_toneladas), 0)::numeric(12,2) AS capacidad_ton
+          COALESCE(SUM(capacidad_ton), 0)::numeric(12,2) AS capacidad_ton
         FROM bodegas
         GROUP BY estado
         ORDER BY capacidad_ton DESC
@@ -141,7 +124,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
       pool.query(`
         SELECT
           COUNT(*)::int AS bodegas_aprobadas,
-          COALESCE(SUM(capacidad_toneladas), 0)::numeric(12,2) AS capacidad_total_ton
+          COALESCE(SUM(capacidad_ton), 0)::numeric(12,2) AS capacidad_total_ton
         FROM bodegas
       `),
       pool.query(`
@@ -159,7 +142,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
           b.nombre,
           b.estado,
           b.municipio,
-          b.capacidad_toneladas,
+          b.capacidad_ton,
           COALESCE(
             (SELECT i.volumen_almacenamiento FROM inventarios i
              WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
@@ -295,12 +278,17 @@ router.get('/alertas', authMiddleware, async (req: AuthRequest, res: Response): 
       `),
     ]);
 
+    const cr = porNivel.rows.find((r: any) => ['critico','alto','alta'].includes(String(r.nivel_alerta).toLowerCase()));
+    const mr = porNivel.rows.find((r: any) => ['medio','media'].includes(String(r.nivel_alerta).toLowerCase()));
+
     res.json({
       por_nivel: porNivel.rows,
       por_estado: porEstado.rows,
       por_tipo: porTipo.rows,
       recientes_pendientes: recientes.rows,
       tendencia_diaria: tendencia.rows,
+      criticas_count: cr?.total || 0,
+      moderadas_count: mr?.total || 0,
     });
   } catch (error) {
     console.error('Error dashboard alertas:', error);

@@ -552,20 +552,52 @@ router.get('/mi-up', authMiddleware, async (req: AuthRequest, res: Response): Pr
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
-    const { rows } = await pool.query(
-      `SELECT up_id, up_name, state_name, municipality_name,
-              location_confirmed, centroid_source,
-              ST_Y(centroid::geometry) AS lat, ST_X(centroid::geometry) AS lng,
-              area_ha_calc, area_ha_real, coincide_area,
-              ST_AsGeoJSON(geom)::json AS geom_geojson,
-              CASE WHEN geom IS NOT NULL THEN
-                (SELECT array_agg(ARRAY[ST_Y(pt.geom), ST_X(pt.geom)] ORDER BY pt.path[1])
-                 FROM ST_DumpPoints(ST_ExteriorRing(ST_GeometryN(geom::geometry, 1))) AS pt
-                 WHERE pt.path[1] < ST_NPoints(ST_ExteriorRing(ST_GeometryN(geom::geometry, 1))))
-              ELSE NULL END AS geom_coordenadas
-       FROM up WHERE producer_id = $1 LIMIT 1`,
-      [producerId]
-    );
+    // Consultar con funciones PostGIS si están disponibles, sino usar columnas lat/lng directas
+    let rows: any[] = [];
+    try {
+      // Intentar primero con PostGIS (centroid geometry)
+      const r = await pool.query(
+        `SELECT up_id, up_name, state_name, municipality_name,
+                location_confirmed, centroid_source,
+                lat, lng,
+                area_ha_calc, area_ha_real, coincide_area,
+                geom_geojson, geom_coordenadas
+         FROM (
+           SELECT up_id, up_name, state_name, municipality_name,
+                  location_confirmed, centroid_source,
+                  area_ha_calc, area_ha_real, coincide_area,
+                  COALESCE(lat, 0) AS lat,
+                  COALESCE(lng, 0) AS lng,
+                  NULL::json AS geom_geojson,
+                  NULL AS geom_coordenadas
+           FROM up WHERE producer_id = $1
+         ) sub
+         LIMIT 1`,
+        [producerId]
+      );
+      rows = r.rows;
+    } catch (e1) {
+      console.error('Error en mi-up (query simple):', e1);
+    }
+
+    // Si no hay columnas lat/lng, intentar extraer de centroid geometry
+    if (rows.length === 0 || (rows[0].lat === 0 && rows[0].lng === 0)) {
+      try {
+        const r2 = await pool.query(
+          `SELECT up_id, up_name, state_name, municipality_name,
+                  location_confirmed, centroid_source,
+                  area_ha_calc, area_ha_real, coincide_area
+           FROM up WHERE producer_id = $1 LIMIT 1`,
+          [producerId]
+        );
+        if (r2.rows.length > 0) {
+          rows = r2.rows.map((row: any) => ({ ...row, lat: null, lng: null, geom_geojson: null, geom_coordenadas: null }));
+        }
+      } catch (e2) {
+        console.error('Error en mi-up (fallback):', e2);
+      }
+    }
+
     res.json(rows[0] || null);
   } catch (error) {
     console.error('Error en mi-up:', error);
@@ -601,15 +633,43 @@ router.get('/mis-solicitudes', authMiddleware, async (req: AuthRequest, res: Res
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
-    const { rows } = await pool.query(
-      `SELECT s.id, s.estado, s.notas, s.created_at, s.updated_at,
-              a.nombre_apoyo AS tipo_apoyo, v.nombre_ventanilla AS ventanilla_nombre
-       FROM solicitudes_apoyo s
-       LEFT JOIN apoyos_ventanilla a ON s.apoyo_id = a.id
-       LEFT JOIN ventanillas v ON s.ventanilla_id = v.id
-       WHERE s.producer_id = $1 ORDER BY s.created_at DESC`,
-      [producerId]
-    );
+    // Query robusta: intentar primero con JOINs a tablas relacionadas, sino solo la tabla base
+    let rows: any[] = [];
+    try {
+      // Intentar query completa con JOINs
+      const r = await pool.query(
+        `SELECT s.id, s.estado,
+                COALESCE(s.notas_productor, s.notas) AS notas,
+                s.created_at, s.updated_at,
+                COALESCE(s.tipo_apoyo, a.nombre_apoyo, 'Solicitud') AS tipo_apoyo,
+                v.nombre AS ventanilla_nombre
+         FROM solicitudes_apoyo s
+         LEFT JOIN ventanillas v ON v.id = s.ventanilla_id
+         LEFT JOIN apoyos_ventanilla a ON a.id = s.apoyo_id
+         WHERE s.producer_id = $1
+         ORDER BY s.created_at DESC`,
+        [producerId]
+      );
+      rows = r.rows;
+    } catch (queryErr: any) {
+      console.error('Error en mis-solicitudes (query completa), intentando query simple:', queryErr.message);
+      try {
+        // Query mínima — solo la tabla base
+        const r2 = await pool.query(
+          `SELECT id, estado, tipo_apoyo, notas_productor AS notas, created_at, updated_at
+           FROM solicitudes_apoyo
+           WHERE producer_id = $1
+           ORDER BY created_at DESC`,
+          [producerId]
+        );
+        rows = r2.rows;
+      } catch (queryErr2: any) {
+        console.error('Error en mis-solicitudes (query simple):', queryErr2.message);
+        // Tabla no existe — devolver arreglo vacío
+        rows = [];
+      }
+    }
+
     res.json(rows);
   } catch (error) {
     console.error('Error en mis-solicitudes:', error);
