@@ -379,3 +379,17 @@ body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
+/* ═══════ Leaflet Premium Markers ═══════ */
+.custom-leaflet-marker-premium {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.26));
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.custom-leaflet-marker-premium:hover {
+  transform: scale(1.08) translateY(-2px);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+  z-index: 9999 !important;
+}
+
+
