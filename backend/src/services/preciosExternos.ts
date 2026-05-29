@@ -1,43 +1,56 @@
 import axios from 'axios';
-// @ts-ignore
-import yahooFinance from 'yahoo-finance2';
 import pool from '../config/database';
 
 const FACTOR_BUSHEL_TON = 39.368;
-const BONO_MAIZ_USD = 50;
-
-// Turn off yahooFinance warnings to clean up logs if necessary
-yahooFinance.setGlobalConfig({
-  queue: {
-    concurrency: 1
-  }
-});
 
 /**
- * Obtiene el precio actual de futuros de maíz en Chicago (símbolo: ZC=F) en USD/bushel
+ * Obtiene el precio de futuros de maíz en Chicago (ZC=F) usando la API pública de Yahoo Finance v8
+ * No requiere el paquete yahoo-finance2, usa axios directamente
  */
-export async function obtenerChicagoCME(): Promise<number> {
+async function obtenerCotizacionYahoo(symbol: string): Promise<number | null> {
   try {
-    console.log('Consultando futuros de maíz en Chicago (ZC=F) en Yahoo Finance...');
-    const quote = await yahooFinance.quote('ZC=F');
-    const price = quote.regularMarketPrice;
-    if (price && typeof price === 'number') {
-      console.log(`Precio Chicago obtenido: ${price} USD/bushel`);
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`;
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+      timeout: 12000,
+      params: { interval: '1d', range: '1d' }
+    });
+    const meta = response.data?.chart?.result?.[0]?.meta;
+    const price = meta?.regularMarketPrice ?? meta?.previousClose;
+    if (price && typeof price === 'number' && price > 0) {
       return price;
     }
-    throw new Error('No se recibió un precio válido de Yahoo Finance');
-  } catch (error) {
-    console.error('Error al obtener precio de Chicago de Yahoo Finance:', error);
-    // Intentar obtener el último de la BD
-    const lastDb = await obtenerUltimoDeDB();
-    if (lastDb && lastDb.chicago_usd_bushel) {
-      console.log(`Usando fallback de Chicago de BD: ${lastDb.chicago_usd_bushel} USD/bushel`);
-      return parseFloat(lastDb.chicago_usd_bushel);
-    }
-    // Si no hay nada en BD, devolver valor por defecto
-    console.log('Sin fallback en BD para Chicago. Usando por defecto 6.28');
-    return 6.28;
+    return null;
+  } catch (error: any) {
+    console.error(`Error consultando Yahoo Finance para ${symbol}:`, error.message || error);
+    return null;
   }
+}
+
+/**
+ * Obtiene el precio actual de futuros de maíz en Chicago (ZC=F) en USD/bushel
+ */
+export async function obtenerChicagoCME(): Promise<number> {
+  console.log('Consultando futuros de maíz en Chicago (ZC=F) en Yahoo Finance...');
+  
+  const price = await obtenerCotizacionYahoo('ZC=F');
+  if (price !== null) {
+    console.log(`Precio Chicago obtenido: ${price} USD/bushel`);
+    return price;
+  }
+
+  // Intentar obtener el último de la BD
+  const lastDb = await obtenerUltimoDeDB();
+  if (lastDb && lastDb.chicago_usd_bushel) {
+    console.log(`Usando fallback de Chicago de BD: ${lastDb.chicago_usd_bushel} USD/bushel`);
+    return parseFloat(lastDb.chicago_usd_bushel);
+  }
+
+  console.log('Sin fallback en BD para Chicago. Usando por defecto 6.28');
+  return 6.28;
 }
 
 /**
@@ -69,19 +82,17 @@ export async function obtenerTCBanxico(): Promise<number> {
       console.error('Error al consultar Banxico API:', error.message || error);
     }
   } else {
-    console.log('BANXICO_TOKEN no configurado en variables de entorno. Usando fallback de Yahoo Finance...');
+    console.log('BANXICO_TOKEN no configurado. Usando fallback de Yahoo Finance...');
   }
 
   // 2. Fallback a Yahoo Finance (USDMXN=X)
   try {
     console.log('Consultando TC USD/MXN (USDMXN=X) en Yahoo Finance como fallback...');
-    const quote = await yahooFinance.quote('USDMXN=X');
-    const price = quote.regularMarketPrice;
-    if (price && typeof price === 'number') {
-      console.log(`TC Yahoo Finance obtenido con éxito: ${price} MXN/USD`);
-      return price;
+    const tc = await obtenerCotizacionYahoo('USDMXN=X');
+    if (tc !== null) {
+      console.log(`TC Yahoo Finance obtenido con éxito: ${tc} MXN/USD`);
+      return tc;
     }
-    throw new Error('No se recibió un tipo de cambio válido de Yahoo Finance');
   } catch (error) {
     console.error('Error al obtener TC de Yahoo Finance:', error);
   }
@@ -126,14 +137,12 @@ export async function actualizarReferenciasExternas(fuente: string): Promise<any
   let chicagoUsdBushel = 6.28;
   let tc = 17.42;
   let isError = false;
-  let errorMsg = '';
 
   try {
     chicagoUsdBushel = await obtenerChicagoCME();
     tc = await obtenerTCBanxico();
   } catch (e: any) {
     isError = true;
-    errorMsg = e.message || String(e);
     console.error('Error crítico durante la actualización de referencias:', e);
   }
 
@@ -163,7 +172,6 @@ export async function actualizarReferenciasExternas(fuente: string): Promise<any
     return insertRes.rows[0];
   } catch (dbError) {
     console.error('Error al insertar referencias externas en base de datos:', dbError);
-    // Retornamos un objeto manual en caso de fallo catastrófico de BD
     return {
       chicago_usd_bushel: chicagoUsdBushel,
       chicago_usd_ton: chicagoUsdTon,
