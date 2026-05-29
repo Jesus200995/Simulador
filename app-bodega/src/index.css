@@ -392,4 +392,43 @@ body {
   z-index: 9999 !important;
 }
 
+/* ═══════ Leaflet Premium Glassmorphic Popups — Apple 2026 ═══════ */
+.custom-premium-popup .leaflet-popup-content-wrapper {
+  background: rgba(10, 16, 26, 0.86) !important;
+  backdrop-filter: blur(20px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(210%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  box-shadow: 
+    0 12px 36px rgba(0, 0, 0, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.custom-premium-popup .leaflet-popup-content {
+  margin: 0 !important;
+  width: 250px !important;
+  color: #f3f4f6 !important;
+}
+
+.custom-premium-popup .leaflet-popup-tip {
+  background: rgba(10, 16, 26, 0.86) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+.custom-premium-popup .leaflet-popup-close-button {
+  color: rgba(255, 255, 255, 0.5) !important;
+  padding: 12px 12px 0 0 !important;
+  font-size: 16px !important;
+  z-index: 100 !important;
+}
+
+.custom-premium-popup .leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+
 

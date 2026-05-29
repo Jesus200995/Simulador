@@ -294,25 +294,82 @@ export default function BodegasAdminPage() {
                 }
               }}
             >
-              <Popup className="custom-popup">
-                <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '4px', minWidth: '180px' }}>
-                  <div style={{ fontWeight: 900, fontSize: '13px', color: '#111827', marginBottom: '4px', lineHeight: 1.3 }}>{b.nombre}</div>
-                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '6px' }}>📍 {b.municipio}, {b.estado}</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', paddingTop: '6px', borderTop: '1px solid #f3f4f6' }}>
-                    <div>
-                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '20px', backgroundColor: b.estatus === 'aprobada' ? '#d1fae5' : b.estatus === 'pendiente' ? '#fef3c7' : '#f3f4f6', color: b.estatus === 'aprobada' ? '#065f46' : b.estatus === 'pendiente' ? '#92400e' : '#6b7280', textTransform: 'uppercase' }}>
+              <Popup className="custom-premium-popup">
+                <div className="flex flex-col overflow-hidden text-left font-sans">
+                  {/* Color-coded accent line at the top */}
+                  <div className={`h-1.5 w-full ${
+                    b.estatus === 'aprobada' ? 'bg-[#10B981]' : 
+                    b.estatus === 'pendiente' ? 'bg-[#FF9500]' : 'bg-[#EF4444]'
+                  }`} />
+                  
+                  <div className="p-4 space-y-3">
+                    {/* Status Badge & ID */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                        b.estatus === 'aprobada' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
+                        b.estatus === 'pendiente' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 
+                        'text-red-400 bg-red-500/10 border-red-500/20'
+                      }`}>
                         {b.estatus}
                       </span>
+                      <span className="text-[10px] text-gray-500 font-bold">#{b.id}</span>
                     </div>
+
+                    {/* Silo Name & Location */}
+                    <div className="space-y-0.5">
+                      <h4 className="text-[13.5px] font-extrabold text-white leading-tight tracking-tight">{b.nombre}</h4>
+                      <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
+                        <span className="text-gray-500 text-[10px]">📍</span> {b.municipio}, {b.estado}
+                      </p>
+                    </div>
+                    
+                    {/* Capacity & Progress Bar */}
+                    {(() => {
+                      const cap = b.capacidad_total || 0;
+                      const stk = b.stock_actual || 0;
+                      const pct = cap > 0 ? Math.min(100, Math.round((stk / cap) * 100)) : 0;
+                      return (
+                        <div className="space-y-1.5 pt-2.5 border-t border-white/5">
+                          <div className="flex justify-between text-[10.5px]">
+                            <span className="text-gray-400 font-medium">Ocupación del Silo</span>
+                            <span className="text-white font-bold">{pct}%</span>
+                          </div>
+                          
+                          {/* Progress bar container */}
+                          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                pct > 85 ? 'bg-red-500' :
+                                pct > 50 ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-[10px] text-gray-500 font-semibold pt-0.5">
+                            <span>Stock: {stk.toLocaleString()} t</span>
+                            <span>Capac: {cap.toLocaleString()} t</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    
+                    {/* Contact/Responsible info */}
+                    {b.encargado_nombre && (
+                      <div className="text-[10px] text-gray-400 leading-none pt-2 border-t border-white/5 flex items-center gap-1.5">
+                        <span className="text-gray-500 text-[10px]">👤</span>
+                        <span className="truncate">Responsable: <strong className="text-gray-300 font-bold">{b.encargado_nombre}</strong></span>
+                      </div>
+                    )}
+                    
+                    {/* Premium action button */}
                     <button 
                       onClick={() => navigate(`/admin/bodegas/${b.id}`)}
-                      style={{ color: '#059669', fontWeight: 700, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}
+                      className="w-full mt-2 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 text-white hover:text-emerald-400 text-[11px] font-bold py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-1 active:scale-[0.98]"
                     >
-                      Ver detalle →
+                      Ver Ficha Completa
+                      <span className="text-[10px]">➔</span>
                     </button>
-                  </div>
-                  <div style={{ marginTop: '4px', fontSize: '10px', color: '#9ca3af' }}>
-                    🏗️ Capacidad: <strong>{b.capacidad_total.toLocaleString()} t</strong>
                   </div>
                 </div>
               </Popup>
