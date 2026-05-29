@@ -1,8 +1,25 @@
 import { Router, Response } from 'express';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { actualizarReferenciasExternas } from '../services/preciosExternos';
+import multer from 'multer';
+import fs from 'fs';
 
 const router = Router();
+const upload = multer({ dest: 'uploads/' });
+
+// Helper para obtener referencias (crea si no existen)
+async function obtenerReferenciasExternasActuales() {
+  const res = await pool.query(`
+    SELECT * FROM precio_referencias_externas
+    ORDER BY created_at DESC LIMIT 1
+  `);
+  if (res.rows.length === 0) {
+    console.log('No se encontraron referencias en BD, inicializando por primera vez...');
+    return await actualizarReferenciasExternas('primer_arranque');
+  }
+  return res.rows[0];
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -105,12 +122,33 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
       ORDER BY fecha::date
     `, qParams);
 
-    const garantia = parseFloat(params.precio_garantia_sader);
-    const TC = 17.42;
-    // Chicago reference (maíz amarillo CME) en USD/bushel → MXN/ton: 1 bushel = 0.0254 ton → $/ton = $/bushel / 0.0254
-    // Usamos un precio base simulado ~170 USD/ton = $4,312 MXN a TC 17.42 / aproximado
-    const chicagoBase = 247.53; // USD/ton → $4,312 MXN a TC 17.42
-    const chicagoMxn  = Math.round(chicagoBase * TC);
+    const extRef = await obtenerReferenciasExternasActuales();
+    const garantia = parseFloat(params.precio_garantia_sader || extRef.garantia_sader || '6915');
+    const TC = parseFloat(extRef.tc_banxico || '17.42');
+    const chicagoMxn = parseFloat(extRef.chicago_mxn || '4312');
+    const chicagoBushel = parseFloat(extRef.chicago_usd_bushel || '6.28');
+
+    // Obtener historial de referencias de BD
+    const extHistory = await pool.query(`
+      SELECT created_at::date AS fecha,
+             AVG(chicago_usd_bushel) AS chicago_usd_bushel,
+             AVG(tc_banxico) AS tc_banxico,
+             AVG(chicago_mxn) AS chicago_mxn
+      FROM precio_referencias_externas
+      WHERE created_at >= NOW() - INTERVAL '${numDias} days'
+      GROUP BY created_at::date
+      ORDER BY fecha ASC
+    `);
+
+    const extMap = new Map();
+    extHistory.rows.forEach((row: any) => {
+      const dateStr = new Date(row.fecha).toISOString().split('T')[0];
+      extMap.set(dateStr, {
+        chicago_usd_bushel: parseFloat(row.chicago_usd_bushel),
+        tc_banxico: parseFloat(row.tc_banxico),
+        chicago_mxn: parseFloat(row.chicago_mxn)
+      });
+    });
 
     const tendencia = poTrend.rows.map((row: any, i: number) => {
       const po = parseFloat(row.po || '4680');
@@ -118,13 +156,16 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
       const m  = (po + s) * (parseFloat(params.margen_pct) / 100);
       const f  = parseFloat(params.flete_default);
       const ps = Math.round((po + s + m + f) * 100) / 100;
-      // Simular ligera variación en Chicago a lo largo del período
-      const dayOffset = poTrend.rows.length - 1 - i;
-      const chicagoDia = Math.round((chicagoMxn - dayOffset * 4) * 10) / 10;
+
+      const dateStr = new Date(row.fecha).toISOString().split('T')[0];
+      const dayRef = extMap.get(dateStr) || { chicago_usd_bushel: chicagoBushel, tc_banxico: TC, chicago_mxn: chicagoMxn };
+      
       return {
-        fecha: row.fecha,
+        fecha: dateStr,
         ps,
-        chicago: chicagoDia,
+        chicago: dayRef.chicago_mxn,
+        chicago_usd_bushel: dayRef.chicago_usd_bushel,
+        tc_banxico: dayRef.tc_banxico,
         garantia,
       };
     });
@@ -141,10 +182,16 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
         const m  = (po + s) * (parseFloat(params.margen_pct) / 100);
         const f  = parseFloat(params.flete_default);
         const ps = Math.round((po + s + m + f) * 100) / 100;
+        
+        const dateStr = fecha.toISOString().split('T')[0];
+        const dayRef = extMap.get(dateStr) || { chicago_usd_bushel: chicagoBushel, tc_banxico: TC, chicago_mxn: chicagoMxn };
+
         filled.push({
-          fecha: fecha.toISOString().split('T')[0],
+          fecha: dateStr,
           ps,
-          chicago: Math.round((chicagoMxn - d * 4) * 10) / 10,
+          chicago: dayRef.chicago_mxn,
+          chicago_usd_bushel: dayRef.chicago_usd_bushel,
+          tc_banxico: dayRef.tc_banxico,
           garantia,
         });
       }
@@ -280,10 +327,10 @@ router.get('/brechas/estados', authMiddleware, async (req: AuthRequest, res: Res
 router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const params = await getParametros();
+    const extRef = await obtenerReferenciasExternasActuales();
 
-    // Constantes Chicago (actualizadas vía cron diario a las 7:00 am en fase 2)
-    const CHICAGO_USD_BUSHEL = 6.28;
-    const TC_MXN = 17.42;
+    const CHICAGO_USD_BUSHEL = parseFloat(extRef.chicago_usd_bushel);
+    const TC_MXN = parseFloat(extRef.tc_banxico);
     const BONO_MAIZ_USD = 50;
     const FACTOR_BUSHEL_TON = 39.368;
 
@@ -300,7 +347,26 @@ router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response):
         AND fecha >= CURRENT_DATE - INTERVAL '${ventanaDias} days'
     `);
     const precio_origen_mxn = parseFloat(poRes.rows[0]?.po ?? '4680');
-    const servicios_bodega_mxn = parseFloat(String(params.servicios_default));
+
+    // S — servicios de bodega: promedio de tarifario_servicios activos de bodegas en últimos 60 días
+    let servicios_bodega_mxn = parseFloat(String(params.servicios_default));
+    try {
+      const sRes = await pool.query(`
+        SELECT AVG(s_bodega) AS avg_s
+        FROM (
+          SELECT bodega_id, SUM(precio_ton) AS s_bodega
+          FROM tarifario_servicios
+          WHERE activo = TRUE AND updated_at >= NOW() - INTERVAL '60 days'
+          GROUP BY bodega_id
+        ) sub
+      `);
+      if (sRes.rows.length > 0 && sRes.rows[0].avg_s !== null) {
+        servicios_bodega_mxn = Math.round(parseFloat(sRes.rows[0].avg_s));
+      }
+    } catch (e) {
+      console.error('Error al calcular S real de tarifario_servicios:', e);
+    }
+
     const precio_compra_mxn = Math.round(precio_origen_mxn + servicios_bodega_mxn);
 
     const pct_productor = Math.round((precio_origen_mxn / precio_compra_mxn) * 1000) / 10;
@@ -319,14 +385,38 @@ router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response):
       ORDER BY fecha ASC
     `);
 
+    // Obtener historial de referencias para calcular margen dinámico en la gráfica
+    const extHistory = await pool.query(`
+      SELECT created_at::date AS fecha,
+             AVG(chicago_usd_bushel) AS chicago_usd_bushel,
+             AVG(tc_banxico) AS tc_banxico
+      FROM precio_referencias_externas
+      WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY created_at::date
+      ORDER BY fecha ASC
+    `);
+    const extMap = new Map();
+    extHistory.rows.forEach((row: any) => {
+      const dateStr = new Date(row.fecha).toISOString().split('T')[0];
+      extMap.set(dateStr, {
+        chicago_usd_bushel: parseFloat(row.chicago_usd_bushel),
+        tc_banxico: parseFloat(row.tc_banxico)
+      });
+    });
+
     const series = seriesRes.rows.map((row: any) => {
       const po = parseFloat(row.po_dia ?? String(precio_origen_mxn));
       const pc = Math.round(po + servicios_bodega_mxn);
+      
+      const rawDate = row.fecha; // Formato YYYY-MM-DD
+      const dayRef = extMap.get(rawDate) || { chicago_usd_bushel: CHICAGO_USD_BUSHEL, tc_banxico: TC_MXN };
+      const dayMargen = Math.round((dayRef.chicago_usd_bushel * FACTOR_BUSHEL_TON + BONO_MAIZ_USD) * dayRef.tc_banxico);
+
       return {
         fecha: (row.fecha as string).slice(5),
         precio_compra: pc,
-        margen_negociacion: margen_negociacion_mxn,
-        precio_venta: pc - margen_negociacion_mxn,
+        margen_negociacion: dayMargen,
+        precio_venta: pc - dayMargen,
       };
     });
 
@@ -335,7 +425,7 @@ router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response):
       tipo_cambio_mxn: TC_MXN,
       bono_maiz_usd: BONO_MAIZ_USD,
       margen_negociacion_mxn,
-      timestamp_chicago: new Date().toISOString().split('T')[0] + 'T07:00:00',
+      timestamp_chicago: extRef.created_at,
       precio_origen_mxn,
       servicios_bodega_mxn,
       precio_compra_mxn,
@@ -358,19 +448,41 @@ router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response):
 router.get('/referencias/externas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const params = await getParametros();
-    const TC = 17.42;
-    const chicagoUsd = 247.53; // USD/ton → $4,312 MXN a TC 17.42
-    const chicagoBushel = 6.28; // USD/bushel aprox
-    const chicagoMxn  = Math.round(chicagoUsd * TC);
+    const extRef = await obtenerReferenciasExternasActuales();
+    const chicagoUsd = parseFloat(extRef.chicago_usd_ton);
+    const chicagoBushel = parseFloat(extRef.chicago_usd_bushel);
+    const chicagoMxn = parseFloat(extRef.chicago_mxn);
+    const TC = parseFloat(extRef.tc_banxico);
+
+    let costoFira = parseFloat(params.costo_fira);
+
+    if (req.user?.rol === 'admin' || req.user?.rol === 'responsable') {
+      const firaRes = await pool.query('SELECT * FROM costos_fira ORDER BY estado, municipio, ciclo, modalidad');
+      res.json({
+        chicago_usd_bushel: chicagoBushel,
+        chicago_usd_ton: chicagoUsd,
+        chicago_mxn: chicagoMxn,
+        tc_banxico: TC,
+        garantia_sader: parseFloat(params.precio_garantia_sader || extRef.garantia_sader || '6915'),
+        costo_fira: costoFira,
+        costos_fira_detalle: firaRes.rows,
+        actualizacion: extRef.created_at,
+        fuente: extRef.fuente,
+        error: extRef.error
+      });
+      return;
+    }
 
     res.json({
       chicago_usd_bushel: chicagoBushel,
       chicago_usd_ton: chicagoUsd,
       chicago_mxn: chicagoMxn,
       tc_banxico: TC,
-      garantia_sader: parseFloat(params.precio_garantia_sader),
-      costo_fira: parseFloat(params.costo_fira),
-      actualizacion: new Date().toISOString(),
+      garantia_sader: parseFloat(params.precio_garantia_sader || extRef.garantia_sader || '6915'),
+      costo_fira: costoFira,
+      actualizacion: extRef.created_at,
+      fuente: extRef.fuente,
+      error: extRef.error
     });
   } catch (error) {
     console.error('Error /precios/referencias/externas:', error);
@@ -516,6 +628,158 @@ router.get('/transacciones/resumen', authMiddleware, async (req: AuthRequest, re
   } catch (error) {
     console.error('Error /transacciones/resumen:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/precios/actualizar-externas
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/actualizar-externas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
+      res.status(403).json({ error: 'No tienes permisos para realizar esta acción' });
+      return;
+    }
+    const nuevo = await actualizarReferenciasExternas('admin_manual');
+    res.json({ success: true, datos: nuevo });
+  } catch (error) {
+    console.error('Error POST /precios/actualizar-externas:', error);
+    res.status(500).json({ error: 'Error al actualizar referencias externas' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/precios/actualizaciones-log
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/actualizaciones-log', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
+      res.status(403).json({ error: 'No tienes permisos para realizar esta acción' });
+      return;
+    }
+    const log = await pool.query(`
+      SELECT * FROM precio_referencias_externas
+      ORDER BY created_at DESC LIMIT 20
+    `);
+    res.json({ logs: log.rows });
+  } catch (error) {
+    console.error('Error GET /precios/actualizaciones-log:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/precios/fira/upload-csv
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/fira/upload-csv', authMiddleware, upload.single('file'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.rol !== 'admin') {
+      res.status(403).json({ error: 'Solo el administrador puede subir datos FIRA' });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({ error: 'No se subió ningún archivo' });
+      return;
+    }
+
+    const filepath = req.file.path;
+    const content = fs.readFileSync(filepath, 'utf-8');
+    
+    const lines = content.split(/\r?\n/);
+    if (lines.length <= 1) {
+      res.status(400).json({ error: 'El archivo CSV está vacío o no tiene filas' });
+      return;
+    }
+
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    
+    const colEstado = headers.indexOf('estado');
+    const colMunicipio = headers.indexOf('municipio');
+    const colCiclo = headers.indexOf('ciclo');
+    const colModalidad = headers.indexOf('modalidad');
+    const colCosto = headers.indexOf('costo_por_ton');
+
+    if (colEstado === -1 || colCiclo === -1 || colModalidad === -1 || colCosto === -1) {
+      res.status(400).json({ error: 'El CSV debe contener las columnas: estado, ciclo, modalidad, costo_por_ton' });
+      return;
+    }
+
+    let insertados = 0;
+    let actualizados = 0;
+    const errores: string[] = [];
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const row = line.split(',').map(r => r.trim());
+        if (row.length < headers.length) {
+          errores.push(`Fila ${i + 1}: número de columnas incorrecto (${row.length} vs ${headers.length})`);
+          continue;
+        }
+
+        const estado = row[colEstado];
+        const municipio = colMunicipio !== -1 ? (row[colMunicipio] || null) : null;
+        const ciclo = row[colCiclo];
+        const modalidad = row[colModalidad];
+        const costoVal = parseFloat(row[colCosto]);
+
+        if (!estado || !ciclo || !modalidad || isNaN(costoVal)) {
+          errores.push(`Fila ${i + 1}: datos inválidos (estado: ${estado}, ciclo: ${ciclo}, modalidad: ${modalidad}, costo: ${row[colCosto]})`);
+          continue;
+        }
+
+        const cicloClean = ciclo.toUpperCase();
+        if (cicloClean !== 'PV' && cicloClean !== 'OI') {
+          errores.push(`Fila ${i + 1}: ciclo inválido (${ciclo}), debe ser PV u OI`);
+          continue;
+        }
+
+        const modClean = modalidad.toLowerCase();
+        if (modClean !== 'riego' && modClean !== 'temporal') {
+          errores.push(`Fila ${i + 1}: modalidad inválida (${modalidad}), debe ser riego o temporal`);
+          continue;
+        }
+
+        // Buscar si existe para hacer INSERT o UPDATE
+        const queryFind = municipio 
+          ? await client.query('SELECT id FROM costos_fira WHERE estado = $1 AND municipio = $2 AND ciclo = $3 AND modalidad = $4', [estado, municipio, cicloClean, modClean])
+          : await client.query('SELECT id FROM costos_fira WHERE estado = $1 AND (municipio IS NULL OR municipio = \'\') AND ciclo = $2 AND modalidad = $3', [estado, cicloClean, modClean]);
+
+        if (queryFind.rows.length > 0) {
+          await client.query('UPDATE costos_fira SET costo_por_ton = $1, updated_at = NOW() WHERE id = $2', [costoVal, queryFind.rows[0].id]);
+          actualizados++;
+        } else {
+          await client.query('INSERT INTO costos_fira (estado, municipio, ciclo, modalidad, costo_por_ton, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())', [estado, municipio, cicloClean, modClean, costoVal]);
+          insertados++;
+        }
+      }
+
+      await client.query('COMMIT');
+    } catch (e: any) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+      try {
+        fs.unlinkSync(filepath);
+      } catch (_) {}
+    }
+
+    res.json({
+      success: true,
+      insertados,
+      actualizados,
+      errores
+    });
+  } catch (error: any) {
+    console.error('Error POST /precios/fira/upload-csv:', error);
+    res.status(500).json({ error: 'Error al procesar el archivo CSV en el servidor' });
   }
 });
 

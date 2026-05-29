@@ -49,6 +49,17 @@ import MasPage from './pages/MasPage';
 import B23Notificaciones from './pages/B23Notificaciones';
 import B22PreciosMercado from './pages/B22PreciosMercado';
 
+// Panel Administrativo - Importaciones (Apple 2026)
+import AdminShell from './components/admin/AdminShell';
+import LoginAdminPage from './pages/admin/LoginAdminPage';
+import DashboardAdminPage from './pages/admin/DashboardAdminPage';
+import ProductoresAdminPage from './pages/admin/ProductoresAdminPage';
+import ProductorDetalleAdminPage from './pages/admin/ProductorDetalleAdminPage';
+import BodegasAdminPage from './pages/admin/BodegasAdminPage';
+import BodegaDetalleAdminPage from './pages/admin/BodegaDetalleAdminPage';
+import AlertasAdminPage from './pages/admin/AlertasAdminPage';
+import PreciosAdminPage from './pages/admin/PreciosAdminPage';
+
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
@@ -80,10 +91,20 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return <RequireBodeguero><Layout>{children}</Layout></RequireBodeguero>;
 }
 
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
+  if (user?.rol !== 'admin' && user?.rol !== 'responsable') {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+}
+
 function SmartRedirect() {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
+  if (user?.rol === 'admin' || user?.rol === 'responsable') return <Navigate to="/admin" replace />;
   return <Navigate to="/dashboard" replace />;
 }
 
@@ -198,6 +219,22 @@ export const router = createBrowserRouter([
       { path: 'ventanillas', element: <VentanillasPage /> },
       { path: 'solicitud/:id', element: <EstadoSolicitudPage /> },
       { path: 'perfil', element: <MiPerfilPage /> },
+    ],
+  },
+
+  // Rutas administrativas (guardián Apple 2026)
+  { path: '/admin/login', element: <LoginAdminPage /> },
+  {
+    path: '/admin',
+    element: <RequireAdmin><AdminShell><Outlet /></AdminShell></RequireAdmin>,
+    children: [
+      { index: true, element: <DashboardAdminPage /> },
+      { path: 'productores', element: <ProductoresAdminPage /> },
+      { path: 'productores/:id', element: <ProductorDetalleAdminPage /> },
+      { path: 'bodegas', element: <BodegasAdminPage /> },
+      { path: 'bodegas/:id', element: <BodegaDetalleAdminPage /> },
+      { path: 'alertas', element: <AlertasAdminPage /> },
+      { path: 'precios', element: <PreciosAdminPage /> },
     ],
   },
 

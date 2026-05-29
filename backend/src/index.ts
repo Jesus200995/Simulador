@@ -31,6 +31,7 @@ import productoresRoutes from './routes/productores';
 import disponibilidadRoutes from './routes/disponibilidad';
 import productorRoutes from './routes/productor';
 import { scheduleBodegaDailyJobs } from './jobs/bodegaDailyJobs';
+import { schedulePreciosCron } from './jobs/preciosCron';
 import pool from './config/database';
 
 dotenv.config();
@@ -91,6 +92,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📦 API disponible en http://localhost:${PORT}/api`);
   scheduleBodegaDailyJobs();
+  schedulePreciosCron();
 });
 
 export default app;

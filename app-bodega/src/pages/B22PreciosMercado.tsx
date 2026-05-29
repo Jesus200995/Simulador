@@ -3,7 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend,
 } from 'recharts';
-import { TrendingUp, RefreshCw, Wheat, Store, Globe, ArrowLeftRight, DollarSign, Gift, Clock } from 'lucide-react';
+import { TrendingUp, RefreshCw, Wheat, Store, Globe, ArrowLeftRight, DollarSign, Gift, Clock, AlertTriangle, Activity } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -38,7 +38,7 @@ function fmtUsd(v: number) {
 }
 
 function Spinner() {
-  return <div className="w-6 h-6 border-2 border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />;
+  return <div className="w-5 h-5 border-2 border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />;
 }
 
 export default function B22PreciosMercado() {
@@ -68,270 +68,327 @@ export default function B22PreciosMercado() {
     precio_venta:       'Precio de Venta',
   };
 
+  const esDatosDeAyer = data
+    ? (new Date().getTime() - new Date(data.timestamp_chicago).getTime() > 24 * 60 * 60 * 1000)
+    : false;
+
   return (
-    <div className="w-full">
-      <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas" back="/dashboard" />
+    <div className="w-full min-h-screen bg-gradient-to-b from-gray-50/50 to-gray-100/30">
+      <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas en tiempo real" back="/dashboard" />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-5">
-
-        {/* Encabezado + botón actualizar */}
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">MÓDULO DE PRECIOS</p>
-          <button onClick={cargar} disabled={loading}
-            className="flex items-center gap-1.5 text-[13px] text-[#1A5C38] font-semibold disabled:opacity-40">
-            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Actualizar
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+        
+        {/* Top Control Bar */}
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur-md border border-gray-100 rounded-xl px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 relative">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${esDatosDeAyer ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${esDatosDeAyer ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+            </span>
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest leading-none">
+              {esDatosDeAyer ? 'Datos de ayer' : 'Maíz Blanco en Vivo'}
+            </p>
+          </div>
+          <button 
+            onClick={cargar} 
+            disabled={loading}
+            className="flex items-center gap-1.5 text-[12px] text-[#1A5C38] font-bold bg-[#1A5C38]/5 hover:bg-[#1A5C38]/10 px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-200 disabled:opacity-40"
+          >
+            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Actualizar
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-50 rounded-2xl p-4 text-red-600 text-[13px] border border-red-100">{error}</div>
+          <div className="bg-red-50/80 backdrop-blur-md rounded-2xl p-4 text-red-600 text-[13px] border border-red-100/50 flex items-center gap-2">
+            <AlertTriangle size={15} /> {error}
+          </div>
         )}
 
-        {/* ── PRECIO 1 — Margen de Negociación ─────────────────── */}
-        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-gray-800 text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">1</span>
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">1 de 4</p>
-              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Margen de Negociación</h2>
-            </div>
-          </div>
-          <p className="text-[12px] text-gray-400">
-            Precio Chicago (CME) convertido a MXN/ton + Bono Maíz fijo de ${BONO_MAIZ_USD} USD/ton
-          </p>
+        {/* 3 Precios Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          <div className="grid grid-cols-2 gap-2">
-            {/* Card 1 — Precio Chicago */}
-            <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Globe size={11} className="text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Precio Chicago</p>
+          {/* PRECIO 1 — Margen de Negociación */}
+          <section className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-3 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-6 h-6 rounded-full bg-gray-800 text-white text-[11px] font-bold flex items-center justify-center shadow-sm">1</span>
+                <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Margen de Negociación</h2>
               </div>
-              <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">
-                {loading ? '—' : fmtUsd(data?.precio_chicago_usd_bushel ?? 0)}
-              </p>
-              <p className="text-[11px] text-gray-400">USD/bushel · CME Group</p>
-            </div>
-            {/* Card 2 — Conversión */}
-            <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <ArrowLeftRight size={11} className="text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Conversión</p>
-              </div>
-              <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">× 39.368</p>
-              <p className="text-[11px] text-gray-400">
-                = {loading ? '—' : fmtUsd((data?.precio_chicago_usd_bushel ?? 0) * 39.368)} USD/ton
-              </p>
-            </div>
-            {/* Card 3 — Tipo de cambio */}
-            <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <DollarSign size={11} className="text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tipo de cambio</p>
-              </div>
-              <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">
-                {loading ? '—' : `$${(data?.tipo_cambio_mxn ?? 0).toFixed(2)}`}
-              </p>
-              <p className="text-[11px] text-gray-400">MXN/USD · Banxico</p>
-            </div>
-            {/* Card 4 — Bono Maíz */}
-            <div className="bg-white rounded-xl border border-black/[0.06] shadow-sm p-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Gift size={11} className="text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bono Maíz</p>
-              </div>
-              <p className="text-[22px] font-black text-gray-800 leading-tight mt-1">+${BONO_MAIZ_USD} USD</p>
-              <p className="text-[11px] text-gray-400">
-                = {loading ? '—' : fmt(BONO_MAIZ_USD * (data?.tipo_cambio_mxn ?? 17.42))} MXN/ton
-              </p>
-            </div>
-          </div>
-
-          {/* Total Margen */}
-          <div className="bg-gray-800 rounded-2xl p-5 text-center">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">MARGEN DE NEGOCIACIÓN TOTAL</p>
-            {loading
-              ? <div className="flex justify-center py-2"><Spinner /></div>
-              : <p className="text-[40px] font-black text-white leading-none">{fmt(data?.margen_negociacion_mxn)}</p>
-            }
-            <p className="text-[12px] text-gray-400 mt-1">MXN/ton · Chicago convertido + Bono Maíz</p>
-          </div>
-        </section>
-
-        {/* ── PRECIO 2 — Precio de Compra ───────────────────────── */}
-        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-[#1A5C38] text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">2</span>
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">2 de 4</p>
-              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Precio de Compra</h2>
-            </div>
-          </div>
-
-          <div className="rounded-2xl overflow-hidden border border-gray-100">
-            {/* PO — verde */}
-            <div className="bg-[#1A5C38]/10 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-lg bg-[#1A5C38]/20 flex items-center justify-center flex-shrink-0">
-                  <Wheat size={13} className="text-[#1A5C38]" />
-                </div>
-                <p className="text-[11px] font-bold text-[#1A5C38] uppercase tracking-wider">Lo que gana el productor</p>
-              </div>
-              {loading
-                ? <div className="flex py-1"><Spinner /></div>
-                : <p className="text-[34px] font-black text-[#1A5C38] leading-none">{fmt(data?.precio_origen_mxn)}</p>
-              }
-              <p className="text-[11px] text-[#1A5C38]/70 mt-1">MXN/ton · Precio promedio pagado en bodegas · últimos 7 días</p>
-              {!loading && data && (
-                <div className="mt-2 inline-block bg-[#1A5C38]/15 rounded-lg px-2 py-0.5">
-                  <p className="text-[11px] font-bold text-[#1A5C38]">{data.pct_productor}% del precio de compra</p>
-                </div>
+              {esDatosDeAyer && (
+                <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/30">Ayer</span>
               )}
             </div>
-
-            <div className="bg-white py-2 text-center border-y border-black/[0.04]">
-              <span className="text-[22px] font-black text-gray-200">+</span>
-            </div>
-
-            {/* S — azul */}
-            <div className="bg-[#1B4F8A]/10 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-lg bg-[#1B4F8A]/20 flex items-center justify-center flex-shrink-0">
-                  <Store size={13} className="text-[#1B4F8A]" />
-                </div>
-                <p className="text-[11px] font-bold text-[#1B4F8A] uppercase tracking-wider">Servicios de la bodega</p>
-              </div>
-              {loading
-                ? <div className="flex py-1"><Spinner /></div>
-                : <p className="text-[34px] font-black text-[#1B4F8A] leading-none">{fmt(data?.servicios_bodega_mxn)}</p>
-              }
-              <p className="text-[11px] text-[#1B4F8A]/70 mt-1">MXN/ton · Secado, limpieza, almacenamiento, etc.</p>
-              {!loading && data && (
-                <div className="mt-2 inline-block bg-[#1B4F8A]/15 rounded-lg px-2 py-0.5">
-                  <p className="text-[11px] font-bold text-[#1B4F8A]">{data.pct_servicios}% del precio de compra</p>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white py-2 text-center border-y border-black/[0.04]">
-              <span className="text-[22px] font-black text-gray-200">=</span>
-            </div>
-
-            {/* Total compra */}
-            <div className="bg-white p-4 text-center">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PRECIO DE COMPRA TOTAL</p>
-              {loading
-                ? <div className="flex justify-center py-2"><Spinner /></div>
-                : <p className="text-[40px] font-black text-gray-800 leading-none">{fmt(data?.precio_compra_mxn)}</p>
-              }
-              <p className="text-[12px] text-gray-400 mt-1">MXN/ton</p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── PRECIO 3 — Precio de Venta ────────────────────────── */}
-        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-[#1B4F8A] text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">3</span>
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">3 de 4</p>
-              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Precio de Venta</h2>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-100 p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-[14px] text-gray-500">Precio de Compra</p>
-              <p className="text-[14px] font-semibold text-gray-700">
-                {loading ? '—' : fmt(data?.precio_compra_mxn)} MXN/ton
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-[14px] text-gray-500">− Margen Negociación</p>
-              <p className="text-[14px] font-semibold text-gray-700">
-                {loading ? '—' : fmt(data?.margen_negociacion_mxn)} MXN/ton
-              </p>
-            </div>
-            <div className="h-px bg-gray-100" />
-            <div className="flex items-end justify-between">
-              <p className="text-[13px] font-bold text-gray-500 uppercase tracking-wide">Precio de Venta</p>
-              {loading
-                ? <Spinner />
-                : <div className="text-right">
-                    <p className={`text-[34px] font-black leading-none ${(data?.precio_venta_mxn ?? 0) < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
-                      {fmt(data?.precio_venta_mxn)}
-                    </p>
-                    <p className="text-[11px] text-gray-400">MXN/ton</p>
-                  </div>
-              }
-            </div>
-          </div>
-        </section>
-
-        {/* ── PRECIO 4 — CEDIS En desarrollo ───────────────────── */}
-        <section className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-amber-400 text-white text-[12px] font-black flex items-center justify-center flex-shrink-0 shadow-sm">4</span>
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">4 de 4</p>
-              <h2 className="text-[16px] font-bold text-gray-800 leading-tight">Precio CEDIS</h2>
-            </div>
-          </div>
-          <div className="border-2 border-dashed border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">EN DESARROLLO</span>
-              <h3 className="text-sm font-semibold text-gray-600">Precio CEDIS</h3>
-            </div>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Precio de compra en Centrales de Abasto menos el Margen de Negociación. 
-              Próximamente disponible — en proceso de integración con fuentes de datos por contrato con CEDIS.
+            
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Referencia internacional basada en Chicago CME convertido a pesos + Bono Maíz Blanco.
             </p>
-          </div>
-        </section>
 
-        {/* ── Gráfica de tendencia 30 días ─────────────────────── */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={16} className="text-gray-300" />
-            <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-widest">Tendencia de precios · 30 días</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+                <div className="flex items-center gap-1">
+                  <Globe size={10} className="text-gray-400" />
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">CME Chicago</span>
+                </div>
+                <p className="text-[16px] font-black text-gray-850 mt-0.5 leading-tight">
+                  {loading ? '—' : fmtUsd(data?.precio_chicago_usd_bushel ?? 0)}
+                </p>
+                <p className="text-[9px] text-gray-400">USD/bushel</p>
+              </div>
+
+              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+                <div className="flex items-center gap-1">
+                  <ArrowLeftRight size={10} className="text-gray-400" />
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Conversión</span>
+                </div>
+                <p className="text-[16px] font-black text-gray-850 mt-0.5 leading-tight">
+                  {loading ? '—' : fmtUsd((data?.precio_chicago_usd_bushel ?? 0) * 39.368)}
+                </p>
+                <p className="text-[9px] text-gray-400">USD/ton metric</p>
+              </div>
+
+              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+                <div className="flex items-center gap-1">
+                  <DollarSign size={10} className="text-gray-400" />
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Tipo Cambio</span>
+                </div>
+                <p className="text-[16px] font-black text-gray-850 mt-0.5 leading-tight">
+                  {loading ? '—' : `$${(data?.tipo_cambio_mxn ?? 0).toFixed(2)}`}
+                </p>
+                <p className="text-[9px] text-gray-400">MXN/USD</p>
+              </div>
+
+              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+                <div className="flex items-center gap-1">
+                  <Gift size={10} className="text-gray-400" />
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Bono Blanco</span>
+                </div>
+                <p className="text-[16px] font-black text-gray-850 mt-0.5 leading-tight">
+                  +${BONO_MAIZ_USD} USD
+                </p>
+                <p className="text-[9px] text-gray-400">={loading ? '—' : fmt(BONO_MAIZ_USD * (data?.tipo_cambio_mxn ?? 17.42))}/t</p>
+              </div>
+            </div>
+
+            {/* Total Margen Negociación */}
+            <div className="bg-gray-900 rounded-xl p-3.5 text-center shadow-inner relative overflow-hidden">
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Margen de Negociación Total</p>
+              {loading ? (
+                <div className="flex justify-center py-1"><Spinner /></div>
+              ) : (
+                <p className="text-[32px] font-black text-white tracking-tight leading-none">{fmt(data?.margen_negociacion_mxn)}</p>
+              )}
+              <p className="text-[10px] text-gray-400 mt-1">MXN/tonelada métrica</p>
+            </div>
+          </section>
+
+          {/* PRECIO 2 — Precio de Compra (PO + S) */}
+          <section className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-3 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[11px] font-bold flex items-center justify-center shadow-sm">2</span>
+                <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Precio de Compra</h2>
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1A5C38] bg-[#1A5C38]/5 px-2 py-0.5 rounded-full">Bodega</span>
+            </div>
+            
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Costo real del maíz en la cadena, sumando el pago al productor y el costo de servicios.
+            </p>
+
+            <div className="rounded-xl overflow-hidden border border-gray-100 divide-y divide-gray-100 shadow-inner">
+              {/* Productor (PO) */}
+              <div className="bg-[#1A5C38]/5 p-3 flex justify-between items-center">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <Wheat size={12} className="text-[#1A5C38]" />
+                    <span className="text-[10px] font-bold text-[#1A5C38] uppercase tracking-wider">Gana Productor (PO)</span>
+                  </div>
+                  <p className="text-[10px] text-[#1A5C38]/80 leading-snug">Promedio pagado últimos 7 días</p>
+                </div>
+                <div className="text-right">
+                  {loading ? (
+                    <Spinner />
+                  ) : (
+                    <>
+                      <p className="text-[20px] font-black text-[#1A5C38] leading-none">{fmt(data?.precio_origen_mxn)}</p>
+                      <span className="text-[9px] font-bold text-[#1A5C38]/80 mt-0.5 inline-block bg-[#1A5C38]/10 px-1.5 py-0.2 rounded">{data?.pct_productor}%</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Servicios (S) */}
+              <div className="bg-[#1B4F8A]/5 p-3 flex justify-between items-center">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <Store size={12} className="text-[#1B4F8A]" />
+                    <span className="text-[10px] font-bold text-[#1B4F8A] uppercase tracking-wider">Servicios Bodega (S)</span>
+                  </div>
+                  <p className="text-[10px] text-[#1B4F8A]/80 leading-snug">Limpieza, secado y acopio</p>
+                </div>
+                <div className="text-right">
+                  {loading ? (
+                    <Spinner />
+                  ) : (
+                    <>
+                      <p className="text-[20px] font-black text-[#1B4F8A] leading-none">{fmt(data?.servicios_bodega_mxn)}</p>
+                      <span className="text-[9px] font-bold text-[#1B4F8A]/80 mt-0.5 inline-block bg-[#1B4F8A]/10 px-1.5 py-0.2 rounded">{data?.pct_servicios}%</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Total Compra */}
+            <div className="bg-white rounded-xl p-3 border border-gray-100 text-center shadow-sm">
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Precio de Compra Total</p>
+              {loading ? (
+                <div className="flex justify-center py-1"><Spinner /></div>
+              ) : (
+                <p className="text-[32px] font-black text-gray-800 tracking-tight leading-none">{fmt(data?.precio_compra_mxn)}</p>
+              )}
+              <p className="text-[10px] text-gray-400 mt-1">MXN/tonelada métrica</p>
+            </div>
+          </section>
+
+        </div>
+
+        {/* PRECIO 3 — Precio de Venta (Compra - Margen) & PRECIO 4 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* Precio de Venta (Resta Visual) */}
+          <section className="md:col-span-2 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-3 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-[#1B4F8A] text-white text-[11px] font-bold flex items-center justify-center shadow-sm">3</span>
+              <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Precio de Venta (Diferencial de Mercado)</h2>
+            </div>
+
+            <div className="rounded-xl border border-gray-100 p-3 bg-gray-50/30 space-y-2">
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="text-gray-400">Precio de Compra (PO + S)</span>
+                <span className="font-semibold text-gray-700">{loading ? '—' : fmt(data?.precio_compra_mxn)}/t</span>
+              </div>
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="text-gray-400">− Margen de Negociación</span>
+                <span className="font-semibold text-gray-700">{loading ? '—' : fmt(data?.margen_negociacion_mxn)}/t</span>
+              </div>
+              <div className="h-px bg-gray-200/60" />
+              <div className="flex items-end justify-between pt-1">
+                <div>
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block mb-0.5">Precio de Venta</span>
+                  <p className="text-[10px] text-gray-400">Diferencia neta vs mercado global</p>
+                </div>
+                <div className="text-right">
+                  {loading ? (
+                    <Spinner />
+                  ) : (
+                    <>
+                      <p className={`text-[32px] font-black leading-none ${(data?.precio_venta_mxn ?? 0) < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                        {fmt(data?.precio_venta_mxn)}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-1">MXN/tonelada</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Alerta si es negativo */}
+            {!loading && data && data.precio_venta_mxn < 0 && (
+              <div className="flex items-start gap-2 bg-red-50/50 border border-red-100/50 rounded-xl p-2.5 text-red-600 text-[11px] leading-relaxed">
+                <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
+                <p>
+                  <strong>Diferencial negativo detectado:</strong> El costo de compra excede la referencia internacional de Chicago. Ajustar el margen operativo para evitar pérdidas.
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* PRECIO 4 — CEDIS */}
+          <section className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 flex flex-col justify-between hover:shadow-md transition-all duration-300">
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-6 h-6 rounded-full bg-amber-400 text-white text-[11px] font-bold flex items-center justify-center shadow-sm">4</span>
+                <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Precio CEDIS</h2>
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                Referencia de compra directa en Centrales de Abasto menos el Margen de Negociación internacional.
+              </p>
+            </div>
+            
+            <div className="border-2 border-dashed border-gray-200/60 rounded-xl p-3 bg-amber-50/5 text-center mt-3">
+              <span className="bg-amber-100/70 border border-amber-200/40 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mb-1.5 uppercase tracking-wider">
+                En Desarrollo
+              </span>
+              <p className="text-[11px] text-gray-450 leading-normal">
+                Integración de tarifas en centrales metropolitanas próximamente disponible.
+              </p>
+            </div>
+          </section>
+
+        </div>
+
+        {/* Gráfica de Tendencia */}
+        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-4 hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Activity size={14} className="text-emerald-500" />
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Tendencia Histórica · 30 días</p>
+            </div>
+            <span className="text-[10px] text-gray-400">Base: MXN/ton</span>
           </div>
+
           {loading ? (
             <div className="flex items-center justify-center h-48"><Spinner /></div>
           ) : !data || data.series.length < 2 ? (
-            <div className="flex flex-col items-center py-10 gap-3">
-              <TrendingUp size={40} className="text-gray-200" />
-              <p className="text-[13px] text-gray-400 text-center leading-relaxed px-4">
-                Sin datos suficientes para mostrar la gráfica.<br />
-                <span className="text-[#1A5C38] font-semibold">Registra precios diarios</span> para ver la tendencia.
+            <div className="flex flex-col items-center py-8 gap-2">
+              <TrendingUp size={30} className="text-gray-300" />
+              <p className="text-[12px] text-gray-400 text-center leading-normal">
+                Datos históricos en proceso de recopilación.<br />
+                Las tendencias se visualizarán al acumularse más días.
               </p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={data.series} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${(Number(v)/1000).toFixed(1)}k`} width={52} />
-                <Tooltip
-                  formatter={(v: number, name: string) => [
-                    `$${Number(v).toLocaleString('es-MX')}/ton`,
-                    LABEL[name] || name,
-                  ]}
-                  labelStyle={{ fontSize: 12 }}
-                  contentStyle={{ borderRadius: 14, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)', fontSize: 13 }}
-                />
-                <Legend formatter={n => LABEL[n] || n} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="precio_compra"      stroke="#1A5C38" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="margen_negociacion"  stroke="#2563eb" strokeWidth={2}   dot={false} connectNulls strokeDasharray="5 3" />
-                <Line type="monotone" dataKey="precio_venta"        stroke="#d97706" strokeWidth={2}   dot={false} connectNulls strokeDasharray="3 2" />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.series} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                  <XAxis dataKey="fecha" tick={{ fontSize: 10, fill: '#9ca3af' }} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} tickFormatter={v => `$${(Number(v)/1000).toFixed(1)}k`} tickLine={false} axisLine={false} width={45} />
+                  <Tooltip
+                    formatter={(v: any, name: any) => [
+                      `$${Number(v || 0).toLocaleString('es-MX')} MXN`,
+                      LABEL[name] || name,
+                    ]}
+                    labelStyle={{ fontSize: 11, fontWeight: 'bold' }}
+                    contentStyle={{ 
+                      borderRadius: 12, 
+                      border: '1px solid rgba(229, 231, 235, 0.5)', 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                      fontSize: 12,
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                    }}
+                  />
+                  <Legend 
+                    formatter={n => LABEL[n] || n} 
+                    iconType="circle" 
+                    iconSize={8}
+                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }} 
+                  />
+                  <Line type="monotone" name="precio_compra" dataKey="precio_compra" stroke="#1A5C38" strokeWidth={2} dot={false} connectNulls />
+                  <Line type="monotone" name="margen_negociacion" dataKey="margen_negociacion" stroke="#2563eb" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 4" />
+                  <Line type="monotone" name="precio_venta" dataKey="precio_venta" stroke="#d97706" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="3 3" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-1.5 pb-4">
-          <Clock size={11} className="text-gray-300" />
-          <p className="text-[10px] text-gray-300">
-            Precios de referencia · CME Group · Banxico · Actualización diaria 7:00 am
+        {/* Footer Timestamp */}
+        <div className="flex items-center justify-center gap-1.5 pt-2 text-[10px] text-gray-400">
+          <Clock size={10} className="text-gray-300" />
+          <p>
+            Fuentes oficiales: CBOT (Chicago CME ZC=F) · Banco de México (TC SF43718) · Actualizado al día de hoy
           </p>
         </div>
 
