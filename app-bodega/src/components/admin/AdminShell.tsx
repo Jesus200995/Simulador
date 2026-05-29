@@ -61,12 +61,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     }`;
 
   return (
-    <div className="min-h-screen bg-[#0b1117] text-gray-100 flex overflow-x-hidden">
+    <div className="min-h-screen bg-[#0b1117] text-gray-100 overflow-x-hidden">
 
       {/* ══════════════════════════════════════════
           SIDEBAR — DESKTOP (≥1024px)
       ══════════════════════════════════════════ */}
-      <aside className="hidden lg:flex flex-col w-[240px] xl:w-[260px] min-h-screen bg-[#080c11] border-r border-white/[0.06] flex-shrink-0 sticky top-0 h-screen">
+      <aside className="hidden lg:flex flex-col w-[240px] xl:w-[260px] h-screen bg-[#080c11] border-r border-white/[0.06] flex-shrink-0 fixed top-0 left-0 z-30">
 
         {/* Brand */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
@@ -206,7 +206,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       {/* ══════════════════════════════════════════
           MAIN CONTENT
       ══════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden lg:ml-[240px] xl:ml-[260px]">
 
         {/* Top header bar */}
         <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/[0.06] bg-[#0b1117]/90 backdrop-blur-xl">

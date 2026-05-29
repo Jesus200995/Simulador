@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
 import { 
   Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import { createPremiumMarker, variantFromEstatus } from '../../utils/mapMarkers';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -144,24 +144,9 @@ export default function BodegasAdminPage() {
     setActiveZoom(14);
   }
 
-  // Leaflet custom marker icons by status
-  const getMarkerIcon = (status: Bodega['estatus']) => {
-    let color = '#1A5C38'; // Aprobada (Verde)
-    if (status === 'pendiente') color = '#D97706'; // Pendiente (Naranja)
-    if (status === 'rechazada') color = '#9CA3AF'; // Rechazada (Gris)
-
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-      </svg>
-    `;
-    return L.divIcon({
-      html: svg,
-      className: '',
-      iconSize: [28, 28],
-      iconAnchor: [14, 28]
-    });
-  };
+  // Premium marker using shared utility
+  const getMarkerIcon = (status: Bodega['estatus'], isSelected = false) =>
+    createPremiumMarker(variantFromEstatus(status), 34, isSelected);
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-88px)] gap-6 overflow-hidden">
@@ -298,9 +283,9 @@ export default function BodegasAdminPage() {
 
           {filteredList.map(b => (
             <Marker 
-              key={b.id} 
+              key={`${b.id}-${selectedBodegaId === b.id}`}
               position={[b.latitud, b.longitud]}
-              icon={getMarkerIcon(b.estatus)}
+              icon={getMarkerIcon(b.estatus, selectedBodegaId === b.id)}
               eventHandlers={{
                 click: () => {
                   setSelectedBodegaId(b.id);
@@ -309,25 +294,25 @@ export default function BodegasAdminPage() {
                 }
               }}
             >
-              <Popup>
-                <div className="p-1 space-y-1.5 text-zinc-900 leading-snug">
-                  <h4 className="font-extrabold text-[12px] text-zinc-950">{b.nombre}</h4>
-                  <p className="text-[10px] text-zinc-500">{b.municipio}, {b.estado}</p>
-                  <p className="text-[10.5px]">
-                    Capacidad: <strong>{b.capacidad_total.toLocaleString()} t</strong>
-                  </p>
-                  <div className="flex justify-between items-center pt-1 border-t border-zinc-100">
-                    <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded uppercase ${
-                      b.estatus === 'aprobada' ? 'text-green-700 bg-green-50' : 'text-amber-700 bg-amber-50'
-                    }`}>
-                      {b.estatus}
-                    </span>
+              <Popup className="custom-popup">
+                <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '4px', minWidth: '180px' }}>
+                  <div style={{ fontWeight: 900, fontSize: '13px', color: '#111827', marginBottom: '4px', lineHeight: 1.3 }}>{b.nombre}</div>
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '6px' }}>📍 {b.municipio}, {b.estado}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', paddingTop: '6px', borderTop: '1px solid #f3f4f6' }}>
+                    <div>
+                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '20px', backgroundColor: b.estatus === 'aprobada' ? '#d1fae5' : b.estatus === 'pendiente' ? '#fef3c7' : '#f3f4f6', color: b.estatus === 'aprobada' ? '#065f46' : b.estatus === 'pendiente' ? '#92400e' : '#6b7280', textTransform: 'uppercase' }}>
+                        {b.estatus}
+                      </span>
+                    </div>
                     <button 
                       onClick={() => navigate(`/admin/bodegas/${b.id}`)}
-                      className="text-[#1A5C38] font-bold text-[10.5px] hover:underline"
+                      style={{ color: '#059669', fontWeight: 700, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                      Ver Detalle →
+                      Ver detalle →
                     </button>
+                  </div>
+                  <div style={{ marginTop: '4px', fontSize: '10px', color: '#9ca3af' }}>
+                    🏗️ Capacidad: <strong>{b.capacidad_total.toLocaleString()} t</strong>
                   </div>
                 </div>
               </Popup>
