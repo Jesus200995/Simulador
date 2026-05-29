@@ -49,42 +49,33 @@ export default function ProductoresAdminPage() {
   async function cargarProductores() {
     setLoading(true);
     try {
-      // Endpoint admin para listar usuarios
+      // Endpoint admin para listar productores (usa tabla producer con datos de UP)
       const r = await fetch(`${BASE}/admin/usuarios`, { headers: HDR() });
       if (!r.ok) throw new Error(`Error ${r.status}`);
       const data = await r.json();
 
-      // Filtrar solo los que tengan rol 'productor'
-      const prods = data.usuarios || data;
-      const mapeados = prods
-        .filter((u: any) => u.rol === 'productor')
-        .map((u: any) => ({
-          id: u.id || u.usuario_id,
-          nombre: u.nombre || '',
-          apellidos: u.apellidos || '',
-          curp: u.curp || 'No capturado',
-          email: u.email || '',
-          telefono: u.telefono || '',
-          rol: u.rol,
-          estado_validacion: u.estado_validacion || 'pendiente',
-          created_at: u.created_at || new Date().toISOString(),
-          tipo_productor: u.tipo_productor || (u.curp ? 'B' : 'A'),
-          up_estado: u.estado || 'Sinaloa',
-          up_municipio: u.municipio || 'Culiacán',
-          up_cultivo: u.cultivo_principal || 'Maíz Blanco'
-        }));
+      // El nuevo endpoint devuelve productores directamente con sus datos de UP
+      const prods = data.productores || data.usuarios || data;
+      const mapeados = prods.map((u: any) => ({
+        id: u.id || u.producer_id,
+        nombre: u.nombres || u.nombre || '',
+        apellidos: [u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ') || u.apellidos || '',
+        curp: u.curp || 'No capturado',
+        email: u.correo || u.email || '',
+        telefono: u.telefono || '',
+        rol: 'productor',
+        estado_validacion: u.estado_validacion || 'pendiente',
+        created_at: u.fecha_registro || u.created_at || new Date().toISOString(),
+        tipo_productor: (u.tipo_registro || 'B') as 'A' | 'B',
+        up_estado: u.estado_up || '',
+        up_municipio: u.municipio_up || '',
+        up_cultivo: 'Maíz Blanco'
+      }));
 
       setProductores(mapeados);
     } catch (e) {
       console.error('Error al cargar productores:', e);
-      
-      // Fallback local realista para pruebas
-      setProductores([
-        { id: 101, nombre: 'Francisco', apellidos: 'Javier Leyva', curp: 'LEYF650412HDFLLS02', email: 'fco.leyva@gmail.com', telefono: '6671234567', rol: 'productor', estado_validacion: 'pendiente', created_at: '2026-05-28T14:32:00.000Z', tipo_productor: 'B', up_estado: 'Sinaloa', up_municipio: 'Guasave', up_cultivo: 'Maíz Blanco PV' },
-        { id: 102, nombre: 'Ana María', apellidos: 'Salazar Ortiz', curp: 'SAOA720815MDFNRS08', email: 'ana.salazar@live.com', telefono: '3318901234', rol: 'productor', estado_validacion: 'pendiente', created_at: '2026-05-28T09:15:00.000Z', tipo_productor: 'B', up_estado: 'Jalisco', up_municipio: 'Ocotlán', up_cultivo: 'Maíz Blanco temporal' },
-        { id: 103, nombre: 'Roberto', apellidos: 'González Flores', curp: 'GOFR801103HDFNZS01', email: 'roberto.gonzalez@outlook.com', telefono: '4615556789', rol: 'productor', estado_validacion: 'activo', created_at: '2026-05-20T11:00:00.000Z', tipo_productor: 'A', up_estado: 'Guanajuato', up_municipio: 'Celaya', up_cultivo: 'Maíz Blanco riego' },
-        { id: 104, nombre: 'Pedro', apellidos: 'Cárdenas Solís', curp: 'CASP590212HDFMXN03', email: 'pedro.cardenas@gmail.com', telefono: '6677771234', rol: 'productor', estado_validacion: 'suspendido', created_at: '2026-05-15T16:45:00.000Z', tipo_productor: 'B', up_estado: 'Sinaloa', up_municipio: 'Ahome', up_cultivo: 'Maíz Amarillo' }
-      ]);
+      setProductores([]);
     } finally {
       setLoading(false);
     }

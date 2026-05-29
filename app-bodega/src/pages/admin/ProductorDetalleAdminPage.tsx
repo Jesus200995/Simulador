@@ -57,11 +57,12 @@ export default function ProductorDetalleAdminPage() {
   async function cargarDetalle() {
     setLoading(true);
     try {
-      // 1. Cargar datos del productor
+      // 1. Cargar datos del productor desde el nuevo endpoint
       const resU = await fetch(`${BASE}/admin/usuarios/${id}`, { headers: HDR() });
       if (!resU.ok) throw new Error(`Error al cargar usuario: ${resU.status}`);
       const userRes = await resU.json();
-      const u = userRes.usuario || userRes;
+      // El endpoint devuelve { productor: {...} }
+      const u = userRes.productor || userRes.usuario || userRes;
 
       // 2. Cargar UPs de este productor
       let upData = null;
