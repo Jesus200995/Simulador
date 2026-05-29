@@ -1,7 +1,7 @@
 /**
  * Shared premium map marker factory — Apple 2026 style
- * Uses GPU-accelerated CSS effects, rich linear gradients, and highly distinct
- * premium outline symbols (Warehouse for approved, Clock for pending, Cross for rejected).
+ * Uses the EXACT shape from AlertasAdminPage.tsx (teardrop with hole),
+ * but with different colors and a subtle contour (stroke).
  */
 import L from 'leaflet';
 
@@ -22,60 +22,12 @@ const VARIANTS: Record<MarkerVariant, MarkerConfig> = {
   white:  { start: '#FFFFFF', end: '#E5E7EB', border: '#9CA3AF' }, // Blanco
 };
 
-const ICONS: Record<MarkerVariant, (color: string) => string> = {
-  // Silueta de bodega/silo sobre círculo blanco central en (12, 9)
-  green: (color) => `
-    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
-    <path 
-      d="M9.5 10v2.5h5V10m-6 0l3.5-2.5 3.5 2.5" 
-      stroke="${color}" 
-      stroke-width="1.1" 
-      stroke-linecap="round" 
-      stroke-linejoin="round" 
-      fill="none" 
-    />
-  `,
-  
-  // Reloj de espera sobre círculo blanco central en (12, 9)
-  amber: (color) => `
-    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
-    <circle cx="12" cy="9" r="2.8" stroke="${color}" stroke-width="0.9" fill="none" />
-    <path d="M12 7.3V9h1.3" stroke="${color}" stroke-width="0.9" stroke-linecap="round" fill="none" />
-  `,
-  
-  // Usuario sobre círculo blanco central en (12, 9)
-  blue: (color) => `
-    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
-    <circle cx="12" cy="8.2" r="1.5" fill="${color}" />
-    <path d="M9.5 12c0-1.2 1-2 2.5-2s2.5 0.8 2.5 2" stroke="${color}" stroke-width="0.9" stroke-linecap="round" fill="none" />
-  `,
-  
-  // Signo de exclamación sobre círculo blanco central en (12, 9)
-  red: (color) => `
-    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
-    <path d="M12 6.8v2.6" stroke="${color}" stroke-width="1.2" stroke-linecap="round" />
-    <circle cx="12" cy="11.2" r="0.6" fill="${color}" />
-  `,
-  
-  // Cruz limpia sobre círculo blanco central en (12, 9)
-  gray: (color) => `
-    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
-    <path d="M10 7l4 4m0-4l-4 4" stroke="${color}" stroke-width="1.2" stroke-linecap="round" />
-  `,
-  
-  // Círculo pequeño para blanco
-  white: () => `
-    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
-    <circle cx="12" cy="9" r="2.5" fill="#8E8E93" />
-  `
-};
-
 /**
- * Creates an ultra-performant compact teardrop pin marker (identical to AlertasPage size).
- * Sized at a uniform 28px with crisp white outline contours and inside distinct symbols.
+ * Creates an ultra-performant teardrop pin marker (identical to AlertasPage shape & size).
+ * Sized at a uniform 28px with crisp white outline contours.
  * @param variant   Color theme
  * @param size      Outer size (default 28)
- * @param selected  If true, displays a subtle target selector glow behind
+ * @param selected  If true, could change styling but here we stick to the core shape
  */
 export function createPremiumMarker(
   variant: MarkerVariant = 'green',
@@ -83,47 +35,20 @@ export function createPremiumMarker(
   selected = false
 ): L.DivIcon {
   const c = VARIANTS[variant];
-  const s = size;
   
-  const w = s;
-  const h = s;
-  
-  const cx = w / 2;
-  const cy = h;
-  const id = `lg-${variant}`;
-
+  // Mismo diseño exacto que AlertasAdminPage, pero con stroke para "contorno"
   const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 24 24" style="overflow: visible;">
-  <defs>
-    <!-- Linear gradient for deep contrast modern colors -->
-    <linearGradient id="${id}" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="${c.start}"/>
-      <stop offset="100%" stop-color="${c.end}"/>
-    </linearGradient>
-  </defs>
-  
-  <!-- Subtle selection glow circle behind pin -->
-  ${selected ? `<circle cx="12" cy="9" r="10.5" fill="none" stroke="${c.start}" stroke-width="1.8" opacity="0.5" />` : ''}
-  
-  <!-- Classic teardrop pin from AlertasPage with sharp outline contour -->
-  <path 
-    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-    fill="url(#${id})" 
-    stroke="${c.border}" 
-    stroke-width="1.2" 
-    stroke-linejoin="round"
-  />
-  
-  <!-- Precision vector micro-icon centered at (12, 9) inside white circle -->
-  ${ICONS[variant] ? ICONS[variant](c.start) : ''}
-</svg>`.trim();
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${c.start}" stroke="${c.border}" stroke-width="1.2" width="${size}" height="${size}">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+    </svg>
+  `;
 
   return L.divIcon({
     html: svg,
-    className: 'custom-leaflet-marker-premium',
-    iconSize: [w, h],
-    iconAnchor: [cx, cy],
-    popupAnchor: [0, -h + 2],
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -size + 2],
   });
 }
 

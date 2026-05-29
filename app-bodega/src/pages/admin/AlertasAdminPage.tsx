@@ -155,20 +155,20 @@ export default function AlertasAdminPage() {
     setActiveZoom(11);
   }
 
-  // Leaflet div icon centered on severity color
+  // Leaflet div icon centered on severity color with premium borders and hover effect
   const getMarkerIcon = (nivel: Alerta['nivel_criticidad']) => {
     let color = '#3b82f6'; // BAJA (Azul)
     if (nivel === 'MEDIA') color = '#f59e0b'; // MEDIA (Naranja)
     if (nivel === 'ALTA') color = '#ef4444'; // ALTA (Rojo)
 
     const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+        <path stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" paint-order="stroke fill" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
       </svg>
     `;
     return L.divIcon({
       html: svg,
-      className: '',
+      className: 'custom-leaflet-marker-premium',
       iconSize: [28, 28],
       iconAnchor: [14, 28]
     });
@@ -335,20 +335,39 @@ export default function AlertasAdminPage() {
                 }
               }}
             >
-              <Popup>
-                <div className="p-1 space-y-1.5 text-zinc-900 leading-snug">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[8.5px] font-black uppercase px-1.5 py-0.2 rounded ${
-                      a.nivel_criticidad === 'ALTA' ? 'text-red-700 bg-red-50' : 'text-amber-700 bg-amber-50'
+              <Popup className="custom-premium-popup" autoPan={false}>
+                <div className="p-3.5 space-y-2.5 text-white">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
+                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                      a.nivel_criticidad === 'ALTA' ? 'text-red-400 bg-red-500/10 border border-red-500/20' :
+                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20' :
+                      'text-blue-400 bg-blue-500/10 border border-blue-500/20'
                     }`}>
                       {a.nivel_criticidad}
                     </span>
-                    <h4 className="font-extrabold text-[12px] text-zinc-950 truncate max-w-[150px]">{a.titulo}</h4>
+                    <span className="text-[10px] text-gray-500 font-bold">
+                      {new Date(a.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                    </span>
                   </div>
-                  <p className="text-[11px] text-zinc-550 leading-relaxed">{a.descripcion}</p>
-                  <p className="text-[10px] text-zinc-400 border-t border-zinc-100 pt-1">
-                    Zona: <strong>{a.estado_afectado}</strong> · Estatus: <strong>{a.estado}</strong>
-                  </p>
+                  
+                  <div>
+                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{a.titulo}</h4>
+                    <p className="text-[11px] text-gray-300 leading-relaxed font-medium line-clamp-3">{a.descripcion}</p>
+                  </div>
+
+                  <div className="text-[10.5px] text-gray-400 border-t border-white/5 pt-2 flex justify-between items-center">
+                    <span>Zona: <strong className="text-white">{a.estado_afectado}</strong></span>
+                    <span className="capitalize">Estatus: <strong className="text-white">{a.estado}</strong></span>
+                  </div>
+
+                  {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
+                    <button 
+                      onClick={() => setResolvingAlerta(a)}
+                      className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-black py-2.5 px-3 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1 active:scale-95 mt-1"
+                    >
+                      Atender Incidencia ✓
+                    </button>
+                  )}
                 </div>
               </Popup>
             </Marker>

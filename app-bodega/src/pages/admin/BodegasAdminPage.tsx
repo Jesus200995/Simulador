@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { 
   Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
-import { createPremiumMarker, variantFromEstatus } from '../../utils/mapMarkers';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -144,9 +144,24 @@ export default function BodegasAdminPage() {
     setActiveZoom(14);
   }
 
-  // Premium marker using shared utility
-  const getMarkerIcon = (status: Bodega['estatus'], isSelected = false) =>
-    createPremiumMarker(variantFromEstatus(status), 28, isSelected);
+  // Leaflet div icon — EXACT same pattern as AlertasAdminPage with premium borders and hover effect
+  const getMarkerIcon = (estatus: Bodega['estatus']) => {
+    let color = '#10B981'; // aprobada (Verde)
+    if (estatus === 'pendiente') color = '#f59e0b'; // Naranja
+    if (estatus === 'rechazada') color = '#6B7280'; // Gris
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+        <path stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" paint-order="stroke fill" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+    `;
+    return L.divIcon({
+      html: svg,
+      className: 'custom-leaflet-marker-premium',
+      iconSize: [28, 28],
+      iconAnchor: [14, 28]
+    });
+  };
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-88px)] gap-6 overflow-hidden">
@@ -283,9 +298,9 @@ export default function BodegasAdminPage() {
 
           {filteredList.map(b => (
             <Marker 
-              key={`${b.id}-${selectedBodegaId === b.id}`}
+              key={b.id}
               position={[b.latitud, b.longitud]}
-              icon={getMarkerIcon(b.estatus, selectedBodegaId === b.id)}
+              icon={getMarkerIcon(b.estatus)}
               eventHandlers={{
                 click: () => {
                   setSelectedBodegaId(b.id);
@@ -294,83 +309,48 @@ export default function BodegasAdminPage() {
                 }
               }}
             >
-              <Popup className="custom-premium-popup">
-                <div className="flex flex-col overflow-hidden text-left font-sans">
-                  {/* Color-coded accent line at the top */}
-                  <div className={`h-1.5 w-full ${
-                    b.estatus === 'aprobada' ? 'bg-[#10B981]' : 
-                    b.estatus === 'pendiente' ? 'bg-[#FF9500]' : 'bg-[#EF4444]'
-                  }`} />
+              <Popup className="custom-premium-popup" autoPan={false}>
+                <div className="p-3.5 space-y-2.5 text-white">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
+                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                      b.estatus === 'aprobada' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' :
+                      b.estatus === 'pendiente' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20' :
+                      'text-gray-400 bg-white/5 border border-white/10'
+                    }`}>
+                      {b.estatus}
+                    </span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${
+                      b.semaforo_compra === 'verde' ? 'bg-emerald-500 animate-pulse' :
+                      b.semaforo_compra === 'amarillo' ? 'bg-amber-500' : 'bg-red-500'
+                    }`} />
+                  </div>
                   
-                  <div className="p-4 space-y-3">
-                    {/* Status Badge & ID */}
-                    <div className="flex items-center justify-between gap-2">
-                      <span className={`text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                        b.estatus === 'aprobada' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
-                        b.estatus === 'pendiente' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 
-                        'text-red-400 bg-red-500/10 border-red-500/20'
-                      }`}>
-                        {b.estatus}
-                      </span>
-                      <span className="text-[10px] text-gray-500 font-bold">#{b.id}</span>
-                    </div>
+                  <div>
+                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
+                    <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                      📍 {b.municipio}, {b.estado}
+                    </p>
+                  </div>
 
-                    {/* Silo Name & Location */}
-                    <div className="space-y-0.5">
-                      <h4 className="text-[13.5px] font-extrabold text-white leading-tight tracking-tight">{b.nombre}</h4>
-                      <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
-                        <span className="text-gray-500 text-[10px]">📍</span> {b.municipio}, {b.estado}
-                      </p>
+                  <div className="text-[11px] text-gray-300 bg-white/[0.02] border border-white/5 rounded-xl p-2.5 space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 font-medium">Capacidad:</span>
+                      <strong className="text-white font-bold">{b.capacidad_total.toLocaleString()} t</strong>
                     </div>
-                    
-                    {/* Capacity & Progress Bar */}
-                    {(() => {
-                      const cap = b.capacidad_total || 0;
-                      const stk = b.stock_actual || 0;
-                      const pct = cap > 0 ? Math.min(100, Math.round((stk / cap) * 100)) : 0;
-                      return (
-                        <div className="space-y-1.5 pt-2.5 border-t border-white/5">
-                          <div className="flex justify-between text-[10.5px]">
-                            <span className="text-gray-400 font-medium">Ocupación del Silo</span>
-                            <span className="text-white font-bold">{pct}%</span>
-                          </div>
-                          
-                          {/* Progress bar container */}
-                          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                pct > 85 ? 'bg-red-500' :
-                                pct > 50 ? 'bg-amber-500' : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          
-                          <div className="flex justify-between items-center text-[10px] text-gray-500 font-semibold pt-0.5">
-                            <span>Stock: {stk.toLocaleString()} t</span>
-                            <span>Capac: {cap.toLocaleString()} t</span>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    
-                    {/* Contact/Responsible info */}
                     {b.encargado_nombre && (
-                      <div className="text-[10px] text-gray-400 leading-none pt-2 border-t border-white/5 flex items-center gap-1.5">
-                        <span className="text-gray-500 text-[10px]">👤</span>
-                        <span className="truncate">Responsable: <strong className="text-gray-300 font-bold">{b.encargado_nombre}</strong></span>
+                      <div className="flex justify-between gap-1.5">
+                        <span className="text-gray-500 font-medium truncate">Encargado:</span>
+                        <strong className="text-white font-bold truncate max-w-[120px]">{b.encargado_nombre}</strong>
                       </div>
                     )}
-                    
-                    {/* Premium action button */}
-                    <button 
-                      onClick={() => navigate(`/admin/bodegas/${b.id}`)}
-                      className="w-full mt-2 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 text-white hover:text-emerald-400 text-[11px] font-bold py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-1 active:scale-[0.98]"
-                    >
-                      Ver Ficha Completa
-                      <span className="text-[10px]">➔</span>
-                    </button>
                   </div>
+
+                  <button 
+                    onClick={() => navigate(`/admin/bodegas/${b.id}`)}
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-black py-2.5 px-3 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1 active:scale-95"
+                  >
+                    Ver Ficha Completa →
+                  </button>
                 </div>
               </Popup>
             </Marker>
@@ -382,3 +362,4 @@ export default function BodegasAdminPage() {
     </div>
   );
 }
+
