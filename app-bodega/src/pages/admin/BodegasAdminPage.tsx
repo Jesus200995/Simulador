@@ -146,7 +146,7 @@ export default function BodegasAdminPage() {
 
   // Premium marker using shared utility
   const getMarkerIcon = (status: Bodega['estatus'], isSelected = false) =>
-    createPremiumMarker(variantFromEstatus(status), 34, isSelected);
+    createPremiumMarker(variantFromEstatus(status), 28, isSelected);
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-88px)] gap-6 overflow-hidden">

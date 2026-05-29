@@ -23,92 +23,92 @@ const VARIANTS: Record<MarkerVariant, MarkerConfig> = {
 };
 
 const ICONS: Record<MarkerVariant, string> = {
-  // Silueta de bodega/silo premium para aprobada
+  // Silueta de bodega/silo ultra-pequeña y nítida centrada en (12, 9)
   green: `
     <path 
-      d="M9 16.5v6a1 1 0 001 1h12a1 1 0 001-1v-6M6 16.5l10-6 10 6M16 13v10" 
+      d="M7.5 10.5v3a0.5 0.5 0 000.5 0.5h8a0.5 0.5 0 000.5-0.5v-3M5.5 10.5l6.5-4 6.5 4M12 8.5v5" 
       stroke="#ffffff" 
-      stroke-width="1.8" 
+      stroke-width="1.2" 
       stroke-linecap="round" 
       stroke-linejoin="round" 
       fill="none" 
     />
   `,
   
-  // Reloj de espera premium para pendiente
+  // Reloj de espera ultra-pequeño y nítido centrado en (12, 9)
   amber: `
-    <circle cx="16" cy="15.5" r="5.5" stroke="#ffffff" stroke-width="1.8" fill="none" />
-    <path d="M16 12v3.5h2.5" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" />
+    <circle cx="12" cy="9" r="4" stroke="#ffffff" stroke-width="1.2" fill="none" />
+    <path d="M12 6.5V9h2" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" fill="none" />
   `,
   
-  // Usuario premium para azul
+  // Usuario ultra-pequeño y nítido centrado en (12, 9)
   blue: `
-    <circle cx="16" cy="12.5" r="3.5" fill="#ffffff" />
-    <path d="M10 21c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5v0.5H10V21z" fill="#ffffff" />
+    <circle cx="12" cy="7.2" r="2.2" fill="#ffffff" />
+    <path d="M8 12.8c0-1.8 1.8-3 4-3s4 1.2 4 3v0.4H8v-0.4z" fill="#ffffff" />
   `,
   
-  // Signo de exclamación para rojo
+  // Signo de exclamación ultra-pequeño y nítido centrado en (12, 9)
   red: `
-    <path d="M16 10v5.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
-    <circle cx="16" cy="19" r="1.25" fill="#ffffff" />
+    <path d="M12 5.5v4" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+    <circle cx="12" cy="11.5" r="0.75" fill="#ffffff" />
   `,
   
-  // Cruz limpia para rechazada
+  // Cruz limpia ultra-pequeña y nítida centrada en (12, 9)
   gray: `
-    <path d="M11.5 11l9 9M20.5 11l-9 9" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+    <path d="M9 6l6 6M15 6L9 12" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" />
   `,
   
   // Mini círculo para blanco
   white: `
-    <circle cx="16" cy="15.5" r="4.5" fill="#8E8E93" />
+    <circle cx="12" cy="9" r="3" fill="#8E8E93" />
   `
 };
 
 /**
- * Creates a premium Apple-style linear gradient pin marker with distinct inner symbols.
- * Zero filters or animations. Extremely lightweight SVG.
+ * Creates an ultra-performant compact teardrop pin marker (identical to AlertasPage size).
+ * Sized at a uniform 28px with crisp white outline contours and inside distinct symbols.
  * @param variant   Color theme
- * @param size      Outer diameter in px (default 34)
- * @param selected  If true, renders larger and adds a selection ring
+ * @param size      Outer size (default 28)
+ * @param selected  If true, displays a subtle target selector glow behind
  */
 export function createPremiumMarker(
   variant: MarkerVariant = 'green',
-  size = 34,
+  size = 28,
   selected = false
 ): L.DivIcon {
   const c = VARIANTS[variant];
-  const s = selected ? Math.round(size * 1.25) : size;
+  const s = size;
   
-  // viewBox mapping to 32x38
   const w = s;
-  const h = Math.round(s * (38 / 32));
+  const h = s;
   
   const cx = w / 2;
+  const cy = h;
   const id = `lg-${variant}`;
 
   const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 32 38" style="overflow: visible;">
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 24 24" style="overflow: visible;">
   <defs>
-    <!-- Hardware-friendly linear gradient for deep contrast colors -->
+    <!-- Linear gradient for deep contrast modern colors -->
     <linearGradient id="${id}" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="${c.start}"/>
       <stop offset="100%" stop-color="${c.end}"/>
     </linearGradient>
   </defs>
   
-  <!-- Hardware-friendly selection glow ring -->
-  ${selected ? `<circle cx="16" cy="15.5" r="20" fill="none" stroke="${c.start}" stroke-width="2.5" opacity="0.38" />` : ''}
+  <!-- Subtle selection glow circle behind pin -->
+  ${selected ? `<circle cx="12" cy="9" r="10.5" fill="none" stroke="${c.start}" stroke-width="1.8" opacity="0.5" />` : ''}
   
-  <!-- Modern 2.5D teardrop pin with brilliant white stroke -->
+  <!-- Classic teardrop pin from AlertasPage with sharp outline contour -->
   <path 
-    d="M16 2C8.8 2 3 7.8 3 15c0 7.8 11.2 20.3 12 21.2.5.6 1.5.6 2 0 0.8-.9 12-13.4 12-21.2C30 7.8 24.2 2 16 2z" 
+    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
     fill="url(#${id})" 
     stroke="${c.border}" 
-    stroke-width="1.8" 
+    stroke-width="1.2" 
     stroke-linejoin="round"
   />
   
-  <!-- High fidelity white outline icon inside -->
+  <!-- Precision vector micro-icon centered at (12, 9) -->
   ${ICONS[variant] || ''}
 </svg>`.trim();
 
@@ -116,7 +116,7 @@ export function createPremiumMarker(
     html: svg,
     className: 'custom-leaflet-marker-premium',
     iconSize: [w, h],
-    iconAnchor: [cx, h],
+    iconAnchor: [cx, cy],
     popupAnchor: [0, -h + 2],
   });
 }
