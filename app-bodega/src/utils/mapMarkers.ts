@@ -22,45 +22,51 @@ const VARIANTS: Record<MarkerVariant, MarkerConfig> = {
   white:  { start: '#FFFFFF', end: '#E5E7EB', border: '#9CA3AF' }, // Blanco
 };
 
-const ICONS: Record<MarkerVariant, string> = {
-  // Silueta de bodega/silo ultra-pequeña y nítida centrada en (12, 9)
-  green: `
+const ICONS: Record<MarkerVariant, (color: string) => string> = {
+  // Silueta de bodega/silo sobre círculo blanco central en (12, 9)
+  green: (color) => `
+    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
     <path 
-      d="M7.5 10.5v3a0.5 0.5 0 000.5 0.5h8a0.5 0.5 0 000.5-0.5v-3M5.5 10.5l6.5-4 6.5 4M12 8.5v5" 
-      stroke="#ffffff" 
-      stroke-width="1.2" 
+      d="M9.5 10v2.5h5V10m-6 0l3.5-2.5 3.5 2.5" 
+      stroke="${color}" 
+      stroke-width="1.1" 
       stroke-linecap="round" 
       stroke-linejoin="round" 
       fill="none" 
     />
   `,
   
-  // Reloj de espera ultra-pequeño y nítido centrado en (12, 9)
-  amber: `
-    <circle cx="12" cy="9" r="4" stroke="#ffffff" stroke-width="1.2" fill="none" />
-    <path d="M12 6.5V9h2" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" fill="none" />
+  // Reloj de espera sobre círculo blanco central en (12, 9)
+  amber: (color) => `
+    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
+    <circle cx="12" cy="9" r="2.8" stroke="${color}" stroke-width="0.9" fill="none" />
+    <path d="M12 7.3V9h1.3" stroke="${color}" stroke-width="0.9" stroke-linecap="round" fill="none" />
   `,
   
-  // Usuario ultra-pequeño y nítido centrado en (12, 9)
-  blue: `
-    <circle cx="12" cy="7.2" r="2.2" fill="#ffffff" />
-    <path d="M8 12.8c0-1.8 1.8-3 4-3s4 1.2 4 3v0.4H8v-0.4z" fill="#ffffff" />
+  // Usuario sobre círculo blanco central en (12, 9)
+  blue: (color) => `
+    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
+    <circle cx="12" cy="8.2" r="1.5" fill="${color}" />
+    <path d="M9.5 12c0-1.2 1-2 2.5-2s2.5 0.8 2.5 2" stroke="${color}" stroke-width="0.9" stroke-linecap="round" fill="none" />
   `,
   
-  // Signo de exclamación ultra-pequeño y nítido centrado en (12, 9)
-  red: `
-    <path d="M12 5.5v4" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
-    <circle cx="12" cy="11.5" r="0.75" fill="#ffffff" />
+  // Signo de exclamación sobre círculo blanco central en (12, 9)
+  red: (color) => `
+    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
+    <path d="M12 6.8v2.6" stroke="${color}" stroke-width="1.2" stroke-linecap="round" />
+    <circle cx="12" cy="11.2" r="0.6" fill="${color}" />
   `,
   
-  // Cruz limpia ultra-pequeña y nítida centrada en (12, 9)
-  gray: `
-    <path d="M9 6l6 6M15 6L9 12" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" />
+  // Cruz limpia sobre círculo blanco central en (12, 9)
+  gray: (color) => `
+    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
+    <path d="M10 7l4 4m0-4l-4 4" stroke="${color}" stroke-width="1.2" stroke-linecap="round" />
   `,
   
-  // Mini círculo para blanco
-  white: `
-    <circle cx="12" cy="9" r="3" fill="#8E8E93" />
+  // Círculo pequeño para blanco
+  white: () => `
+    <circle cx="12" cy="9" r="4.5" fill="#ffffff" />
+    <circle cx="12" cy="9" r="2.5" fill="#8E8E93" />
   `
 };
 
@@ -108,8 +114,8 @@ export function createPremiumMarker(
     stroke-linejoin="round"
   />
   
-  <!-- Precision vector micro-icon centered at (12, 9) -->
-  ${ICONS[variant] || ''}
+  <!-- Precision vector micro-icon centered at (12, 9) inside white circle -->
+  ${ICONS[variant] ? ICONS[variant](c.start) : ''}
 </svg>`.trim();
 
   return L.divIcon({
