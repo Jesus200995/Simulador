@@ -32,14 +32,17 @@ async function obtenerCotizacionYahoo(symbol: string): Promise<number | null> {
 
 /**
  * Obtiene el precio actual de futuros de maíz en Chicago (ZC=F) en USD/bushel
+ * NOTA: Yahoo Finance ZC=F devuelve el precio en CENTAVOS de dólar (ej: 453.75 = $4.5375/bu)
  */
 export async function obtenerChicagoCME(): Promise<number> {
   console.log('Consultando futuros de maíz en Chicago (ZC=F) en Yahoo Finance...');
   
-  const price = await obtenerCotizacionYahoo('ZC=F');
-  if (price !== null) {
-    console.log(`Precio Chicago obtenido: ${price} USD/bushel`);
-    return price;
+  const priceCents = await obtenerCotizacionYahoo('ZC=F');
+  if (priceCents !== null) {
+    // ZC=F cotiza en centavos/bushel → dividir entre 100 para obtener USD/bushel
+    const priceUsd = priceCents / 100;
+    console.log(`Precio Chicago obtenido: ${priceCents} ¢/bu → ${priceUsd.toFixed(4)} USD/bu`);
+    return priceUsd;
   }
 
   // Intentar obtener el último de la BD
