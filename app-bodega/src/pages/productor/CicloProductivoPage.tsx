@@ -494,9 +494,4 @@ export default function CicloProductivoPage() {
       </div>
     </div>
   );
-}on>
-        </div>
-      </div>
-    </div>
-  );
 }
