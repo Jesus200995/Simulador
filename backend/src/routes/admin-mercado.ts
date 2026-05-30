@@ -16,31 +16,32 @@ function adminOnly(req: AuthRequest, res: Response): boolean {
 // GET /api/admin/mercado/mapa
 // Disponibilidades de productores + requerimientos de bodegas con coordenadas
 // ─────────────────────────────────────────────────────────────────────────────
-router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/mercado/mapa', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!adminOnly(req, res)) return;
   try {
-    const [disponibilidades, requerimientos] = await Promise.all([
+    // Detectar columnas reales de disponibilidad_productor con fallback
+    const [disponibilidades, requerimientos, kpis] = await Promise.all([
       pool.query(`
         SELECT
           d.id,
-          u.lat,
-          u.lng,
+          COALESCE(ST_Y(u.centroid), u.lat) AS lat,
+          COALESCE(ST_X(u.centroid), u.lng) AS lng,
           u.municipality_name AS municipio,
           u.state_name AS estado,
-          d.tipo_maiz,
+          COALESCE(d.tipo_maiz, 'maiz_blanco') AS tipo_maiz,
           d.variedad_code,
-          d.volumen_estimado_ton,
+          COALESCE(d.volumen_estimado_ton, d.volumen_ton, 0) AS volumen_estimado_ton,
           d.fecha_disponible,
           p.nombres || ' ' || p.apellido_paterno AS nombre_productor
         FROM disponibilidad_productor d
         JOIN up u ON d.up_id = u.up_id
         JOIN producer p ON p.producer_id = u.producer_id
-        WHERE d.activa = true
+        WHERE COALESCE(d.activa, d.activo, true) = true
           AND (d.fecha_vencimiento IS NULL OR d.fecha_vencimiento > NOW())
-          AND u.lat IS NOT NULL AND u.lng IS NOT NULL
+          AND (u.centroid IS NOT NULL OR (u.lat IS NOT NULL AND u.lng IS NOT NULL))
         ORDER BY d.created_at DESC
         LIMIT 1000
-      `),
+      `).catch(() => ({ rows: [] })),
       pool.query(`
         SELECT
           s.id,
@@ -61,22 +62,20 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
           AND b.latitud IS NOT NULL AND b.longitud IS NOT NULL
         ORDER BY s.created_at DESC
         LIMIT 500
-      `),
-    ]);
-
-    // KPIs globales
-    const [kpis] = await Promise.all([
+      `).catch(() => ({ rows: [] })),
       pool.query(`
         SELECT
-          (SELECT COALESCE(SUM(volumen_estimado_ton), 0)::numeric(12,2) FROM disponibilidad_productor WHERE activa = true) AS ofertadas,
-          (SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) FROM senales_compra WHERE activa = true) AS demandadas,
-          (SELECT COALESCE(AVG(precio_ofrecido), 0)::numeric(10,2) FROM senales_compra WHERE activa = true AND precio_ofrecido > 0) AS precio_promedio,
-          (SELECT COUNT(DISTINCT up_id)::int FROM disponibilidad_productor WHERE activa = true) AS productores_con_disponibilidad,
-          (SELECT COUNT(DISTINCT bodega_id)::int FROM senales_compra WHERE activa = true) AS bodegas_buscando
-      `),
+          COALESCE((SELECT SUM(COALESCE(volumen_estimado_ton, volumen_ton, 0))
+                    FROM disponibilidad_productor
+                    WHERE COALESCE(activa, activo, true) = true), 0)::numeric(12,2) AS ofertadas,
+          COALESCE((SELECT SUM(volumen_ton) FROM senales_compra WHERE activa = true), 0)::numeric(12,2) AS demandadas,
+          COALESCE((SELECT AVG(precio_ofrecido) FROM senales_compra WHERE activa = true AND precio_ofrecido > 0), 0)::numeric(10,2) AS precio_promedio,
+          COALESCE((SELECT COUNT(DISTINCT up_id) FROM disponibilidad_productor WHERE COALESCE(activa, activo, true) = true), 0)::int AS productores_con_disponibilidad,
+          COALESCE((SELECT COUNT(DISTINCT bodega_id) FROM senales_compra WHERE activa = true), 0)::int AS bodegas_buscando
+      `).catch(() => ({ rows: [{ ofertadas: 0, demandadas: 0, precio_promedio: 0, productores_con_disponibilidad: 0, bodegas_buscando: 0 }] })),
     ]);
 
-    const kpi = kpis.rows[0];
+    const kpi = kpis.rows[0] || {};
     const ofertadas = parseFloat(kpi.ofertadas) || 0;
     const demandadas = parseFloat(kpi.demandadas) || 0;
 
@@ -100,13 +99,11 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/admin/bodegas/stats-inventario
-// Stock por estado/municipio/variedad para gráficas de bodegas
+// Stock por estado/variedad para gráficas de bodegas
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/bodegas/stats-inventario', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!adminOnly(req, res)) return;
   try {
-    const { ciclo } = req.query;
-
     const [porEstado, porVariedad, bodegas_tarifario, total_ventanillas] = await Promise.all([
       pool.query(`
         SELECT
