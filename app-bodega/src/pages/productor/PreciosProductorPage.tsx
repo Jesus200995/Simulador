@@ -55,40 +55,40 @@ export default function PreciosProductorPage() {
   const esFavorable = precioVenta != null && precioVenta >= 0;
 
   return (
-    <div className="flex flex-col font-sans w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-8 space-y-5">
+    <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#f4f5f7]">
       
-      {/* ── HEADER DE PÁGINA ── */}
-      <div className="flex items-center justify-between mb-2">
-        <button onClick={() => navigate('/productor')}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-          <ChevronLeft size={20} strokeWidth={2.5} />
-        </button>
-        <div className="text-[14px] font-bold text-slate-800">
-          Precios del maíz
-        </div>
-        <div className="shrink-0 flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#1A5C38] font-bold bg-green-50 border border-green-100/50 rounded-full px-2.5 py-1.5 shadow-sm">
-          <span className="relative flex h-2 w-2 mr-0.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-          </span>
-          Hoy
+      {/* ── HEADER VERDE ── */}
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={() => navigate('/productor')}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md">
+              <ChevronLeft size={20} strokeWidth={2.5} />
+            </button>
+            <div className="shrink-0 flex items-center gap-1.5 text-[11px] text-green-900 font-bold bg-green-400 border border-green-300 rounded-full px-2.5 py-1.5 shadow-sm">
+              <span className="relative flex h-2 w-2 mr-0.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-100 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              En vivo
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-green-300 shadow-inner border border-white/20 shrink-0">
+              <Wheat size={24} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Precios del Maíz</p>
+              <h1 className="text-[20px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Análisis de Precios</h1>
+              <p className="text-[13px] font-medium text-white/60 mt-0.5">Referencia internacional y rentabilidad</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── HEADER INTRO ── */}
-      <div className="flex items-center gap-4 bg-white/80 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-3xl p-5 sm:p-6 border border-slate-100">
-        <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 shadow-sm border border-amber-100 shrink-0">
-          <Wheat size={24} strokeWidth={2} />
-        </div>
-        <div>
-          <h1 className="text-[18px] sm:text-[20px] font-bold text-slate-900 tracking-tight leading-tight">
-            Análisis de precios
-          </h1>
-          <p className="text-[13px] text-slate-500 mt-0.5 font-medium">
-            Referencia internacional, precio de compra y venta.
-          </p>
-        </div>
-      </div>
+      {/* ── CONTENIDO ── */}
+      <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-6 space-y-5">
 
       {/* ── PRECIO 1 — Referencia internacional ── */}
       <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
@@ -401,6 +401,7 @@ export default function PreciosProductorPage() {
         </div>
       )}
 
+    </div>
     </div>
   );
 }
