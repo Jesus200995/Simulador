@@ -3,7 +3,8 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
   LayoutDashboard, Users, Warehouse, AlertTriangle,
-  TrendingUp, LogOut, Menu, X, ShieldAlert, ChevronRight
+  TrendingUp, LogOut, Menu, X, ShieldAlert, ChevronRight,
+  Sprout, BarChart3, Settings
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -14,11 +15,14 @@ interface SidebarItem {
 }
 
 const MENU: SidebarItem[] = [
-  { label: 'Resumen', path: '/admin', icon: LayoutDashboard, exact: true },
-  { label: 'Productores', path: '/admin/productores', icon: Users },
-  { label: 'Bodegas', path: '/admin/bodegas', icon: Warehouse },
-  { label: 'Alertas', path: '/admin/alertas', icon: AlertTriangle },
-  { label: 'Precios', path: '/admin/precios', icon: TrendingUp },
+  { label: 'Resumen',      path: '/admin',                icon: LayoutDashboard, exact: true },
+  { label: 'Productores',  path: '/admin/productores',    icon: Users },
+  { label: 'Bodegas',      path: '/admin/bodegas',        icon: Warehouse },
+  { label: 'Alertas',      path: '/admin/alertas',        icon: AlertTriangle },
+  { label: 'Precios',      path: '/admin/precios',        icon: TrendingUp },
+  { label: 'Producción',   path: '/admin/produccion',     icon: Sprout },
+  { label: 'Mercado',      path: '/admin/mercado',        icon: BarChart3 },
+  { label: 'Configuración',path: '/admin/configuracion',  icon: Settings },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

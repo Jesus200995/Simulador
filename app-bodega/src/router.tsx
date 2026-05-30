@@ -60,6 +60,9 @@ import BodegaDetalleAdminPage from './pages/admin/BodegaDetalleAdminPage';
 import AlertasAdminPage from './pages/admin/AlertasAdminPage';
 import PreciosAdminPage from './pages/admin/PreciosAdminPage';
 import RegistroAdminPage from './pages/admin/RegistroAdminPage';
+import ProduccionAdminPage from './pages/admin/ProduccionAdminPage';
+import MercadoAdminPage from './pages/admin/MercadoAdminPage';
+import ConfiguracionAdminPage from './pages/admin/ConfiguracionAdminPage';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -237,6 +240,9 @@ export const router = createBrowserRouter([
       { path: 'bodegas/:id', element: <BodegaDetalleAdminPage /> },
       { path: 'alertas', element: <AlertasAdminPage /> },
       { path: 'precios', element: <PreciosAdminPage /> },
+      { path: 'produccion', element: <ProduccionAdminPage /> },
+      { path: 'mercado', element: <MercadoAdminPage /> },
+      { path: 'configuracion', element: <ConfiguracionAdminPage /> },
     ],
   },
 

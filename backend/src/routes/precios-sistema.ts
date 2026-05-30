@@ -61,27 +61,47 @@ router.get('/sistema/hoy', authMiddleware, async (req: AuthRequest, res: Respons
       FROM precios ${where}
     `, qParams);
 
+    // Referencias externas para Margen de Negociación correcto
+    const refs = await obtenerReferenciasExternasActuales();
+    const FACTOR_CONVERSION = 39.368;  // 1 ton métrica = 39.368 bushels — constante fija
+    const BONO_MAIZ_USD     = 50;      // Bono maíz blanco — constante del programa
+    const chicago_usd_bushel = parseFloat(refs.chicago_usd_bushel || '6.28');
+    const tc_banxico         = parseFloat(refs.tc_banxico         || '17.42');
+
+    const chicago_usd_ton    = chicago_usd_bushel * FACTOR_CONVERSION;
+    const chicago_mxn        = chicago_usd_ton * tc_banxico;
+    const bono_mxn           = BONO_MAIZ_USD * tc_banxico;
+    const margen_negociacion = Math.round((chicago_mxn + bono_mxn) * 100) / 100;
+
     const po = parseFloat(poRes.rows[0]?.po || '4680');
     const s  = parseFloat(params.servicios_default);
-    const m  = Math.round((po + s) * (parseFloat(params.margen_pct) / 100) * 100) / 100;
     const f  = parseFloat(params.flete_default);
-    const ps = Math.round((po + s + m + f) * 100) / 100;
+    const precio_compra = Math.round((po + s) * 100) / 100;
+    const precio_venta  = Math.round((precio_compra - margen_negociacion) * 100) / 100;
+    // ps mantiene compatibilidad con el frontend existente
+    const ps = precio_compra;
 
-    // Ayer
-    const conditionsAyer = conditions.map((c, i) =>
-      c.startsWith('fecha') ? `fecha >= NOW() - INTERVAL '${params.ventana_dias + 1} days' AND fecha < NOW() - INTERVAL '0 days'` : c
-    );
+    // Ayer — calcular delta del precio de compra
     const whereAyer = `WHERE (tipo_precio = 'observado' OR tipo_precio = 'bodega') AND fecha >= NOW() - INTERVAL '${params.ventana_dias + 1} days' AND fecha < CURRENT_DATE`;
     const ayerRes = await pool.query(`
       SELECT ROUND(AVG(precio)::numeric, 2) AS po_ayer FROM precios ${whereAyer}
     `);
-    const poAyer  = parseFloat(ayerRes.rows[0]?.po_ayer || String(po));
-    const mAyer   = (poAyer + s) * (parseFloat(params.margen_pct) / 100);
-    const psAyer  = Math.round((poAyer + s + mAyer + f) * 100) / 100;
+    const poAyer   = parseFloat(ayerRes.rows[0]?.po_ayer || String(po));
+    const psAyer   = Math.round((poAyer + s) * 100) / 100;
     const deltaPsAyer = Math.round((ps - psAyer) * 100) / 100;
 
     res.json({
-      ps, po, s, m: Math.round(m * 100) / 100, f,
+      // Campos nuevos — Margen de Negociación correcto
+      margen_negociacion,
+      chicago_usd_bushel,
+      chicago_usd_ton: Math.round(chicago_usd_ton * 100) / 100,
+      chicago_mxn:     Math.round(chicago_mxn * 100) / 100,
+      tc_banxico,
+      bono_mxn:        Math.round(bono_mxn * 100) / 100,
+      precio_compra,
+      precio_venta,
+      // Campos de compatibilidad con el frontend anterior
+      ps, po, s, m: margen_negociacion, f,
       fecha: new Date().toISOString().split('T')[0],
       confianza: 5,
       delta_vs_ayer: deltaPsAyer,
@@ -123,10 +143,14 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
     `, qParams);
 
     const extRef = await obtenerReferenciasExternasActuales();
+    const es_fallback = extRef.fuente === 'fallback_hardcodeado';
     const garantia = parseFloat(params.precio_garantia_sader || extRef.garantia_sader || '6915');
     const TC = parseFloat(extRef.tc_banxico || '17.42');
-    const chicagoMxn = parseFloat(extRef.chicago_mxn || '4312');
     const chicagoBushel = parseFloat(extRef.chicago_usd_bushel || '6.28');
+
+    // Constantes del Margen de Negociación
+    const FACTOR_CONVERSION = 39.368;
+    const BONO_MAIZ_USD     = 50;
 
     // Obtener historial de referencias de BD
     const extHistory = await pool.query(`
@@ -150,20 +174,25 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
       });
     });
 
-    const tendencia = poTrend.rows.map((row: any, i: number) => {
+    const tendencia = poTrend.rows.map((row: any) => {
       const po = parseFloat(row.po || '4680');
       const s  = parseFloat(params.servicios_default);
-      const m  = (po + s) * (parseFloat(params.margen_pct) / 100);
-      const f  = parseFloat(params.flete_default);
-      const ps = Math.round((po + s + m + f) * 100) / 100;
+      const precio_compra = Math.round((po + s) * 100) / 100;
 
       const dateStr = new Date(row.fecha).toISOString().split('T')[0];
-      const dayRef = extMap.get(dateStr) || { chicago_usd_bushel: chicagoBushel, tc_banxico: TC, chicago_mxn: chicagoMxn };
-      
+      const dayRef = extMap.get(dateStr) || { chicago_usd_bushel: chicagoBushel, tc_banxico: TC };
+      // Margen de Negociación correcto por día
+      const dayMargen = Math.round(
+        (dayRef.chicago_usd_bushel * FACTOR_CONVERSION * dayRef.tc_banxico +
+         BONO_MAIZ_USD * dayRef.tc_banxico) * 100
+      ) / 100;
+      const chicagoMxnDia = Math.round(dayRef.chicago_usd_bushel * FACTOR_CONVERSION * dayRef.tc_banxico * 100) / 100;
+
       return {
         fecha: dateStr,
-        ps,
-        chicago: dayRef.chicago_mxn,
+        ps: precio_compra,
+        margen_negociacion: dayMargen,
+        chicago: chicagoMxnDia,
         chicago_usd_bushel: dayRef.chicago_usd_bushel,
         tc_banxico: dayRef.tc_banxico,
         garantia,
@@ -179,27 +208,31 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
         const noise = (Math.sin(d * 0.4) * 150);
         const po = 4680 + noise;
         const s  = parseFloat(params.servicios_default);
-        const m  = (po + s) * (parseFloat(params.margen_pct) / 100);
-        const f  = parseFloat(params.flete_default);
-        const ps = Math.round((po + s + m + f) * 100) / 100;
-        
+        const precio_compra = Math.round((po + s) * 100) / 100;
+
         const dateStr = fecha.toISOString().split('T')[0];
-        const dayRef = extMap.get(dateStr) || { chicago_usd_bushel: chicagoBushel, tc_banxico: TC, chicago_mxn: chicagoMxn };
+        const dayRef = extMap.get(dateStr) || { chicago_usd_bushel: chicagoBushel, tc_banxico: TC };
+        const dayMargen = Math.round(
+          (dayRef.chicago_usd_bushel * FACTOR_CONVERSION * dayRef.tc_banxico +
+           BONO_MAIZ_USD * dayRef.tc_banxico) * 100
+        ) / 100;
+        const chicagoMxnDia = Math.round(dayRef.chicago_usd_bushel * FACTOR_CONVERSION * dayRef.tc_banxico * 100) / 100;
 
         filled.push({
           fecha: dateStr,
-          ps,
-          chicago: dayRef.chicago_mxn,
+          ps: precio_compra,
+          margen_negociacion: dayMargen,
+          chicago: chicagoMxnDia,
           chicago_usd_bushel: dayRef.chicago_usd_bushel,
           tc_banxico: dayRef.tc_banxico,
           garantia,
         });
       }
-      res.json({ tendencia: filled });
+      res.json({ tendencia: filled, es_fallback, ultima_actualizacion: extRef.created_at });
       return;
     }
 
-    res.json({ tendencia });
+    res.json({ tendencia, es_fallback, ultima_actualizacion: extRef.created_at });
   } catch (error) {
     console.error('Error /precios/tendencia:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -228,34 +261,46 @@ router.get('/componentes/detalle', authMiddleware, async (req: AuthRequest, res:
 
     const po = parseFloat(poRes.rows[0]?.po || '4680');
     const s  = parseFloat(params.servicios_default);
-    const m  = Math.round((po + s) * (parseFloat(params.margen_pct) / 100) * 100) / 100;
     const f  = parseFloat(params.flete_default);
-    const ps = po + s + m + f;
+
+    // Margen de Negociación correcto — referencia internacional
+    const refsC = await obtenerReferenciasExternasActuales();
+    const FACTOR_CONVERSION = 39.368;
+    const BONO_MAIZ_USD     = 50;
+    const chicago_usd_bushel_c = parseFloat(refsC.chicago_usd_bushel || '6.28');
+    const tc_banxico_c         = parseFloat(refsC.tc_banxico         || '17.42');
+    const m = Math.round(
+      (chicago_usd_bushel_c * FACTOR_CONVERSION * tc_banxico_c +
+       BONO_MAIZ_USD * tc_banxico_c) * 100
+    ) / 100;
+
+    const precio_compra = Math.round((po + s) * 100) / 100;
+    const ps = precio_compra; // compatibilidad
 
     const componentes = [
       {
         componente: 'PO', descripcion: 'Precio Origen · promedio ponderado 7 días',
-        valor: po, pct: Math.round((po / ps) * 1000) / 10,
+        valor: po, pct: Math.round((po / precio_compra) * 1000) / 10,
         fuente: 'Bodeguero > Productor', confianza: 3,
       },
       {
         componente: 'S', descripcion: 'Servicios bodega · secado, limpieza, almacenamiento',
-        valor: s, pct: Math.round((s / ps) * 1000) / 10,
+        valor: s, pct: Math.round((s / precio_compra) * 1000) / 10,
         fuente: 'Bodeguero (tarifario)', confianza: 4,
       },
       {
-        componente: 'M', descripcion: `Margen intermediación · ${params.margen_pct}% sobre (PO+S)`,
-        valor: m, pct: Math.round((m / ps) * 1000) / 10,
-        fuente: 'Sistema (parámetro)', confianza: 2,
+        componente: 'M', descripcion: 'Margen Negociación · Chicago CME + Bono Maíz Blanco × TC Banxico',
+        valor: m, pct: Math.round((m / precio_compra) * 1000) / 10,
+        fuente: 'CME + Banxico (referencia internacional)', confianza: 5,
       },
       {
         componente: 'F', descripcion: 'Flete bodega→harinera · GIS · 3 más cercanas',
-        valor: f, pct: Math.round((f / ps) * 1000) / 10,
+        valor: f, pct: Math.round((f / precio_compra) * 1000) / 10,
         fuente: 'Sistema GIS + Admin', confianza: 4,
       },
     ];
 
-    res.json({ componentes, ps: Math.round(ps * 100) / 100 });
+    res.json({ componentes, ps, precio_compra, margen_negociacion: m });
   } catch (error) {
     console.error('Error /precios/componentes/detalle:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

@@ -83,7 +83,7 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
     return;
   }
   try {
-    const { estado_validacion, estado, q, tipo_registro } = req.query;
+    const { estado_validacion, estado, q, tipo_registro, rol } = req.query;
     const conditions: string[] = [];
     const params: any[] = [];
     let idx = 1;
@@ -91,6 +91,8 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
     if (estado_validacion) { conditions.push(`p.estado_validacion = $${idx++}`); params.push(estado_validacion); }
     if (tipo_registro) { conditions.push(`p.tipo_registro = $${idx++}`); params.push(tipo_registro); }
     if (estado) { conditions.push(`up.state_name = $${idx++}`); params.push(estado); }
+    // Filtro por rol — busca en tabla usuarios vinculada por curp
+    if (rol) { conditions.push(`u.rol = $${idx++}`); params.push(rol); }
     if (q) {
       conditions.push(`(p.nombres ILIKE $${idx} OR p.apellido_paterno ILIKE $${idx} OR p.curp ILIKE $${idx})`);
       params.push(`%${q}%`);
@@ -111,12 +113,16 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
         p.estado_validacion,
         p.tipo_registro,
         p.created_at AS fecha_registro,
+        p.programas_beneficiario,
+        p.nota_admin,
         up.state_name AS estado_up,
         up.municipality_name AS municipio_up,
         up.up_name AS nombre_up,
-        up.area_ha_calc AS superficie_ha
+        up.area_ha_calc AS superficie_ha,
+        u.rol AS rol_sistema
       FROM producer p
       LEFT JOIN up ON up.producer_id = p.producer_id
+      LEFT JOIN usuarios u ON u.curp = p.curp
       ${where}
       ORDER BY p.created_at DESC
       LIMIT 500
@@ -175,16 +181,20 @@ router.patch('/usuarios/:id/estatus', authMiddleware, async (req: AuthRequest, r
 
     // Si viene estado_validacion, actualizar en tabla producer (aprobar/rechazar productor)
     if (estado_validacion !== undefined) {
+      // Persistir nota_admin si viene en el body
       const result = await pool.query(
-        `UPDATE producer SET estado_validacion = $1 WHERE producer_id = $2
-         RETURNING producer_id AS id, nombres, apellido_paterno, estado_validacion`,
-        [estado_validacion, id]
+        `UPDATE producer
+         SET estado_validacion = $1,
+             nota_admin = CASE WHEN $3::text IS NOT NULL AND $3 != '' THEN $3::text ELSE nota_admin END
+         WHERE producer_id = $2
+         RETURNING producer_id AS id, nombres, apellido_paterno, estado_validacion, nota_admin`,
+        [estado_validacion, id, nota || null]
       );
       if (result.rows.length === 0) {
         res.status(404).json({ error: 'Productor no encontrado' });
         return;
       }
-      res.json({ message: `Productor ${estado_validacion}`, productor: result.rows[0], nota });
+      res.json({ message: `Productor ${estado_validacion}`, productor: result.rows[0] });
       return;
     }
 
@@ -454,6 +464,40 @@ router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: 
     res.json({ eventos });
   } catch (error) {
     console.error('Error actividad-reciente:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// GET /api/admin/ventanillas/resumen
+// Tabla resumen de ventanillas con apoyos solicitados y atendidos
+// =============================================
+router.get('/ventanillas/resumen', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
+    res.status(403).json({ error: 'Acceso denegado' });
+    return;
+  }
+  try {
+    const result = await pool.query(`
+      SELECT
+        v.id AS ventanilla_id,
+        b.nombre AS bodega_nombre,
+        b.estado AS bodega_estado,
+        v.tipo,
+        v.nombre_enlace_agricultura,
+        v.telefono_enlace,
+        v.correo_enlace,
+        COUNT(sa.id) AS apoyos_solicitados,
+        COUNT(sa.id) FILTER (WHERE sa.estado IN ('canalizada', 'cerrada')) AS apoyos_atendidos
+      FROM ventanillas v
+      JOIN bodegas b ON v.bodega_id = b.id
+      LEFT JOIN solicitudes_apoyo sa ON sa.ventanilla_id = v.id
+      GROUP BY v.id, b.nombre, b.estado, v.tipo, v.nombre_enlace_agricultura, v.telefono_enlace, v.correo_enlace
+      ORDER BY b.estado, b.nombre
+    `);
+    res.json({ ventanillas: result.rows, total: result.rows.length });
+  } catch (error) {
+    console.error('Error GET /admin/ventanillas/resumen:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

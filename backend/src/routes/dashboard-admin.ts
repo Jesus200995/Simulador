@@ -17,13 +17,14 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
   if (!adminOnly(req, res)) return;
   try {
     const [productoresActivos, productoresPendientes, bodegasActivas, bodegasPendientes,
-           disponibilidades, requerimientos] = await Promise.all([
+           disponibilidades, requerimientos, transacciones7d] = await Promise.all([
       pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'activo'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'pendiente'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'aprobada'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'pendiente'`),
       pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM disponibilidad_productor WHERE activo = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
       pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM senales_compra WHERE activo = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
+      pool.query(`SELECT COUNT(*)::int AS total FROM transacciones WHERE created_at >= NOW() - INTERVAL '7 days'`).catch(() => ({ rows: [{ total: 0 }] })),
     ]);
 
     res.json({
@@ -33,6 +34,7 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
       bodegas_pendientes: bodegasPendientes.rows[0].total,
       disponibilidades_totales: parseFloat(disponibilidades.rows[0].total_ton) || 0,
       requerimientos_totales: parseFloat(requerimientos.rows[0].total_ton) || 0,
+      transacciones_7dias: transacciones7d.rows[0].total || 0,
     });
   } catch (error) {
     console.error('Error dashboard resumen:', error);
@@ -44,7 +46,7 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
 router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!adminOnly(req, res)) return;
   try {
-    const [porEstado, porCiclo, porAnio, sinCiclo] = await Promise.all([
+    const [porEstado, porCiclo, porAnio, sinCiclo, totalesGlobales] = await Promise.all([
       pool.query(`
         SELECT
           u.state_name AS estado,
@@ -92,13 +94,30 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
         FROM up u
         WHERE NOT EXISTS (SELECT 1 FROM cycle c WHERE c.up_id = u.up_id)
       `),
+      // Totales globales: superficie total de predios, superficie sembrada, produccion esperada
+      pool.query(`
+        SELECT
+          COALESCE(SUM(u.area_ha_calc), 0)::numeric(12,2) AS superficie_total_ha,
+          COALESCE(SUM(cc.area_sown_ha), 0)::numeric(12,2) AS superficie_sembrada_ha,
+          COALESCE(SUM(cc.area_sown_ha * COALESCE(cc.yield_expected, 0)), 0)::numeric(12,2) AS produccion_esperada_ton,
+          COUNT(DISTINCT cc.cycle_crop_id)::int AS productores_con_ciclo
+        FROM up u
+        LEFT JOIN cycle c ON c.up_id = u.up_id
+        LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
+      `),
     ]);
 
+    const tot = totalesGlobales.rows[0];
     res.json({
       por_estado: porEstado.rows,
       por_ciclo: porCiclo.rows,
       por_anio: porAnio.rows,
       ups_sin_ciclo: sinCiclo.rows[0].ups_sin_ciclo,
+      // Nuevos campos globales
+      superficie_total_ha: parseFloat(tot.superficie_total_ha) || 0,
+      superficie_sembrada_ha: parseFloat(tot.superficie_sembrada_ha) || 0,
+      produccion_esperada_ton: parseFloat(tot.produccion_esperada_ton) || 0,
+      productores_con_ciclo: tot.productores_con_ciclo || 0,
     });
   } catch (error) {
     console.error('Error dashboard producción:', error);

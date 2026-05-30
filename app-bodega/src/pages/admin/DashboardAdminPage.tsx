@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Users, Warehouse, Landmark, AlertTriangle, TrendingUp,
   RefreshCw, ChevronRight, Activity, Clock, CheckCircle2,
-  ArrowUpRight, Zap, ShieldAlert
+  Zap, ShieldAlert
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -35,14 +35,7 @@ interface KpiData {
   disponibilidades_ton: number;
 }
 
-interface Precios {
-  chicago_mxn: number;
-  precio_compra: number;
-  precio_venta: number;
-  tipo_cambio: number;
-  chicago_usd: number;
-  timestamp: string;
-}
+
 
 interface Evento {
   tipo: string;
@@ -53,7 +46,6 @@ interface Evento {
 }
 
 export default function DashboardAdminPage() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState<KpiData>({
     productores_activos: 0, productores_pendientes: 0,
@@ -61,16 +53,15 @@ export default function DashboardAdminPage() {
     transacciones_7d: 0, alertas_criticas: 0, alertas_medias: 0,
     requerimientos_ton: 0, disponibilidades_ton: 0,
   });
-  const [precios, setPrecios] = useState<Precios | null>(null);
+
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [lastUpdate, setLastUpdate] = useState('');
 
   async function cargar() {
     setLoading(true);
     try {
-      const [resumen, preciosR, alertasR, actividadR] = await Promise.allSettled([
+      const [resumen, alertasR, actividadR] = await Promise.allSettled([
         fetch(`${BASE}/dashboard/admin/resumen`, { headers: HDR() }).then(r => r.json()),
-        fetch(`${BASE}/precios/mercado`, { headers: HDR() }).then(r => r.json()),
         fetch(`${BASE}/dashboard/admin/alertas`, { headers: HDR() }).then(r => r.json()),
         fetch(`${BASE}/admin/actividad-reciente`, { headers: HDR() }).then(r => r.json()),
       ]);
@@ -85,21 +76,8 @@ export default function DashboardAdminPage() {
           bodegas_pendientes: d.bodegas_pendientes ?? prev.bodegas_pendientes,
           disponibilidades_ton: d.disponibilidades_totales ?? prev.disponibilidades_ton,
           requerimientos_ton: d.requerimientos_totales ?? prev.requerimientos_ton,
+          transacciones_7d: d.transacciones_7dias ?? prev.transacciones_7d,
         }));
-      }
-
-      if (preciosR.status === 'fulfilled') {
-        const m = preciosR.value;
-        if (m.precio_compra_mxn) {
-          setPrecios({
-            chicago_mxn: m.precio_origen_mxn ?? 0,
-            precio_compra: m.precio_compra_mxn,
-            precio_venta: m.precio_venta_mxn,
-            tipo_cambio: m.tipo_cambio_mxn ?? 0,
-            chicago_usd: m.precio_chicago_usd_bushel ?? 0,
-            timestamp: m.timestamp_chicago ?? new Date().toISOString(),
-          });
-        }
       }
 
       if (alertasR.status === 'fulfilled') {
@@ -218,7 +196,7 @@ export default function DashboardAdminPage() {
           <div className="bg-[#080c11] border border-white/[0.06] rounded-2xl p-4 flex flex-col gap-3 hover:border-indigo-500/20 transition-all duration-300">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">Operaciones</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">Transacciones</p>
                 <p className="text-[26px] sm:text-[32px] font-black text-white leading-none tracking-tight">{kpis.transacciones_7d}</p>
                 <p className="text-[10px] text-gray-500 mt-1">últimos 7 días</p>
               </div>
@@ -299,62 +277,7 @@ export default function DashboardAdminPage() {
         </div>
       )}
 
-      {/* ── Precio Banner ───────────────────────────── */}
-      {precios && (
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f3320] via-[#0c2a1a] to-[#081a10] border border-emerald-500/20 p-5 sm:p-6">
-          {/* Glow */}
-          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-500/8 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-emerald-400/5 blur-3xl pointer-events-none" />
 
-          <div className="relative z-10">
-            {/* Header row */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Precios en Vivo</span>
-                </div>
-                <h2 className="text-[15px] sm:text-[17px] font-black text-white tracking-tight">Maíz Blanco · Chicago CME</h2>
-                <p className="text-[10px] text-emerald-300/50 mt-1 flex items-center gap-1">
-                  <Clock size={9} />
-                  {fmtTime(precios.timestamp)} · TC: ${precios.tipo_cambio.toFixed(2)} MXN/USD · Chicago: ${precios.chicago_usd.toFixed(4)} USD/bu
-                </p>
-              </div>
-              <button
-                onClick={() => navigate('/admin/precios')}
-                className="self-start flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-[#0a1f13] text-[12px] sm:text-[13px] font-extrabold px-4 py-2.5 rounded-xl active:scale-95 transition-all duration-200 shadow-lg shadow-emerald-900/50 flex-shrink-0"
-              >
-                Ver detalle
-                <ArrowUpRight size={13} />
-              </button>
-            </div>
-
-            {/* Price columns - horizontal scroll on mobile */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-6">
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3 sm:p-4">
-                <p className="text-[9px] sm:text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider mb-2">Precio Origen</p>
-                <p className="text-[18px] sm:text-[22px] font-black text-white leading-none">{fmt(precios.chicago_mxn)}</p>
-                <p className="text-[9px] sm:text-[10px] text-emerald-300/40 mt-1">Chicago MXN/ton</p>
-              </div>
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3 sm:p-4">
-                <p className="text-[9px] sm:text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider mb-2">Precio Compra</p>
-                <p className="text-[18px] sm:text-[22px] font-black text-white leading-none">{fmt(precios.precio_compra)}</p>
-                <p className="text-[9px] sm:text-[10px] text-emerald-300/40 mt-1">Promedio bodegas</p>
-              </div>
-              <div className="bg-white/[0.04] border border-emerald-500/15 rounded-xl p-3 sm:p-4">
-                <p className="text-[9px] sm:text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider mb-2">Precio Venta</p>
-                <p className={`text-[18px] sm:text-[22px] font-black leading-none ${precios.precio_venta > 0 ? 'text-emerald-300' : 'text-white'}`}>
-                  {fmt(precios.precio_venta)}
-                </p>
-                <p className="text-[9px] sm:text-[10px] text-emerald-300/40 mt-1">Con margen bodega</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── Actividad reciente ──────────────────────── */}
       <section className="bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden">
