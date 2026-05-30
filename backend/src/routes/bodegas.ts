@@ -64,18 +64,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       const lngNum = Number(lng);
       const radioNum = Number(radio_km);
       // Fórmula Haversine en SQL puro — no requiere PostGIS
-      distanciaSelect = `
-        (6371 * acos(
-          LEAST(1.0, cos(radians($${idx})) * cos(radians(b.latitud))
-          * cos(radians(b.longitud) - radians($${idx + 1}))
-          + sin(radians($${idx})) * sin(radians(b.latitud))
-        ))
-      ) AS distancia_km`;
-      radioCondition = `(6371 * acos(
-          LEAST(1.0, cos(radians($${idx})) * cos(radians(b.latitud))
-          * cos(radians(b.longitud) - radians($${idx + 1}))
-          + sin(radians($${idx})) * sin(radians(b.latitud))
-        )) <= $${idx + 2}`;
+      const haversine = `(6371 * acos(LEAST(1.0, cos(radians($${idx})) * cos(radians(b.latitud)) * cos(radians(b.longitud) - radians($${idx + 1})) + sin(radians($${idx})) * sin(radians(b.latitud)))))`;
+      distanciaSelect = `${haversine} AS distancia_km`;
+      radioCondition = `${haversine} <= $${idx + 2}`;
       conditions.push(radioCondition);
       params.push(latNum, lngNum, radioNum);
       idx += 3;
