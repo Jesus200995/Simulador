@@ -157,7 +157,7 @@ export default function CicloProductivoPage() {
           )}
 
           {/* Tarjeta Contenedor */}
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 transition-all duration-300">
+          <div className="bg-white rounded-[20px] p-5 sm:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 transition-all duration-300">
             
             {/* PASO 1 — Tipo de ciclo + año */}
             {paso === 1 && (
@@ -178,7 +178,7 @@ export default function CicloProductivoPage() {
                   <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-[#1A5C38] mb-4 mx-auto sm:mx-0 shadow-sm border border-emerald-100">
                     <Calendar size={24} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[22px] sm:text-[26px] font-bold text-slate-900 tracking-tight leading-none mb-2">
+                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-none mb-2">
                     Tu ciclo productivo
                   </h2>
                   <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium">¿Qué ciclo estás sembrando actualmente?</p>
@@ -236,7 +236,7 @@ export default function CicloProductivoPage() {
                   <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 mb-4 mx-auto sm:mx-0 shadow-sm border border-amber-100">
                     <Leaf size={24} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[22px] sm:text-[26px] font-bold text-slate-900 tracking-tight leading-none mb-2">
+                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-none mb-2">
                     Variedad sembrada
                   </h2>
                   <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium">Selecciona el tipo de maíz que produces.</p>
@@ -319,7 +319,7 @@ export default function CicloProductivoPage() {
                   <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4 mx-auto sm:mx-0 shadow-sm border border-blue-100">
                     <MapPin size={24} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[22px] sm:text-[26px] font-bold text-slate-900 tracking-tight leading-none mb-2">
+                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-none mb-2">
                     Superficie y cálculo
                   </h2>
                   <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium">Estima las dimensiones de tu siembra actual.</p>
@@ -392,7 +392,7 @@ export default function CicloProductivoPage() {
                   <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-4 mx-auto sm:mx-0 shadow-sm border border-indigo-100">
                     <Clock size={24} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[22px] sm:text-[26px] font-bold text-slate-900 tracking-tight leading-none mb-2">
+                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-none mb-2">
                     Fechas y destino
                   </h2>
                   <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium">Confirma los tiempos de tu cosecha.</p>

@@ -151,7 +151,7 @@ export default function DashboardProductorPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm ring-1 ring-zinc-100">
+        <div className="bg-white rounded-[20px] p-5 sm:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
           <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1 font-medium">
             Precio de compra hoy - tu region
           </p>
