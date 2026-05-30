@@ -124,7 +124,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
           } catch (_) { /* PostGIS no disponible */ }
         }
 
-        // Fallback al estado si PostGIS no disponible o pocos resultados
+        // Fallback al estado si PostGIS no disponible o pocos resultados (P-06: con LIMIT)
         if (productoresNotif.length < 5) {
           const fallR = await pool.query(`
             SELECT DISTINCT u2.id AS usuario_id, 0 AS distancia_km
@@ -133,6 +133,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             JOIN usuarios u2 ON (u2.curp = p.curp OR u2.email = p.email)
             WHERE u2.rol = 'productor' AND u2.activo = TRUE
               AND u.state_name ILIKE $1
+            LIMIT 500
           `, [b.estado]);
           productoresNotif = fallR.rows;
         }

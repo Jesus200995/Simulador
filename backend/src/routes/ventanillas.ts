@@ -41,11 +41,11 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     );
     await pool.query('UPDATE bodegas SET es_ventanilla = TRUE WHERE id = $1', [bodega_id]);
 
-    // C-20: Notificar productores cercanos (best-effort)
+    // C-20 + P-04: Notificar productores CERCANOS (no masivo)
     try {
       const ventanilla = result.rows[0];
       const bodegaR = await pool.query(
-        'SELECT nombre, municipio, estado, localidad FROM bodegas WHERE id = $1',
+        'SELECT nombre, municipio, estado, localidad, latitud, longitud FROM bodegas WHERE id = $1',
         [bodega_id]
       );
       const b = bodegaR.rows[0];
@@ -56,12 +56,56 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
           ambos: 'Coberturas e Incentivos',
         };
         const msg = `🏦 Nueva ventanilla de apoyos disponible en ${b.nombre} (${b.municipio}, ${b.estado}): ${tipoLabel[tipo] || tipo}. Contacto: ${nombre_enlace_agricultura} — Tel: ${telefono_responsable}.`;
-        await pool.query(
-          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-           SELECT id, 'nueva_ventanilla', $1, $2, 'ventanillas'
-           FROM usuarios WHERE rol IN ('productor','tecnico') AND activo = TRUE`,
-          [msg, ventanilla.id]
-        );
+
+        // Filtrar productores por proximidad geográfica (Haversine, sin PostGIS)
+        let productorIds: { id: number }[] = [];
+
+        if (b.latitud && b.longitud) {
+          try {
+            const geoR = await pool.query(`
+              SELECT DISTINCT u.id
+              FROM usuarios u
+              JOIN producer p ON p.curp = u.curp
+              JOIN up ON up.producer_id = p.producer_id
+              WHERE u.rol = 'productor' AND u.activo = TRUE
+                AND up.latitud IS NOT NULL AND up.longitud IS NOT NULL
+                AND (6371 * acos(LEAST(1.0,
+                    cos(radians($1)) * cos(radians(up.latitud))
+                    * cos(radians(up.longitud) - radians($2))
+                    + sin(radians($1)) * sin(radians(up.latitud))
+                  ))) <= 50
+              LIMIT 500
+            `, [b.latitud, b.longitud]);
+            productorIds = geoR.rows;
+          } catch (_) { /* Haversine failed, try fallback */ }
+        }
+
+        // Fallback: productores del mismo estado si menos de 5 en radio
+        if (productorIds.length < 5 && b.estado) {
+          try {
+            const fallR = await pool.query(`
+              SELECT DISTINCT u.id
+              FROM usuarios u
+              JOIN producer p ON p.curp = u.curp
+              JOIN up ON up.producer_id = p.producer_id
+              WHERE u.rol = 'productor' AND u.activo = TRUE
+                AND up.state_name ILIKE $1
+              LIMIT 500
+            `, [b.estado]);
+            productorIds = fallR.rows;
+          } catch (_) { /* fallback also failed */ }
+        }
+
+        // Insertar notificación solo para productores filtrados
+        for (const prod of productorIds) {
+          try {
+            await pool.query(
+              `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+               VALUES ($1, 'nueva_ventanilla', $2, $3, 'ventanillas')`,
+              [prod.id, msg, ventanilla.id]
+            );
+          } catch (_) { /* best-effort per user */ }
+        }
       }
     } catch (_) { /* best-effort */ }
 

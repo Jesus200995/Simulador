@@ -116,11 +116,13 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
 
     const usuario = result.rows[0];
 
-    // Generar JWT
-    const secret = process.env.JWT_SECRET || 'default_secret';
+    // Generar JWT — P-01: expira en 8h, P-02: sin fallback inseguro
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('FATAL: JWT_SECRET no está definida en las variables de entorno.');
     const token = jwt.sign(
       { userId: usuario.id, email: usuario.email, rol: usuario.rol },
-      secret
+      secret,
+      { expiresIn: '8h' }
     );
 
     res.status(201).json({
@@ -179,11 +181,13 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Generar JWT
-    const secret = process.env.JWT_SECRET || 'default_secret';
+    // Generar JWT — P-01: expira en 8h, P-02: sin fallback inseguro
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('FATAL: JWT_SECRET no está definida en las variables de entorno.');
     const token = jwt.sign(
       { userId: usuario.id, email: usuario.email, rol: usuario.rol },
-      secret
+      secret,
+      { expiresIn: '8h' }
     );
 
     res.json({

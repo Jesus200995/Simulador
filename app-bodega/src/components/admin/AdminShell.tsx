@@ -61,15 +61,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     }`;
 
   return (
-    <div className="min-h-screen bg-[#0b1117] text-gray-100 overflow-x-hidden">
+    <div className="h-screen w-screen flex overflow-hidden bg-[#0b1117] text-gray-100 select-none">
 
       {/* ══════════════════════════════════════════
           SIDEBAR — DESKTOP (≥1024px)
       ══════════════════════════════════════════ */}
-      <aside className="hidden lg:flex flex-col w-[240px] xl:w-[260px] h-screen bg-[#080c11] border-r border-white/[0.06] flex-shrink-0 fixed top-0 left-0 z-30">
+      <aside className="hidden lg:flex flex-col w-[240px] xl:w-[260px] h-screen bg-[#080c11] border-r border-white/[0.06] flex-shrink-0 select-none">
 
         {/* Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06] flex-shrink-0">
           <div className="w-8 h-8 rounded-[10px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <ShieldAlert className="text-emerald-400" size={15} />
           </div>
@@ -80,7 +80,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* User */}
-        <div className="px-4 py-4 border-b border-white/[0.06]">
+        <div className="px-4 py-4 border-b border-white/[0.06] flex-shrink-0">
           <div className="flex items-center gap-2.5 bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.06]">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-[12px] flex-shrink-0">
               {initials()}
@@ -97,7 +97,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-none">
           {MENU.map(item => (
             <NavLink
               key={item.path}
@@ -113,7 +113,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </nav>
 
         {/* Logout */}
-        <div className="px-3 py-4 border-t border-white/[0.06]">
+        <div className="px-3 py-4 border-t border-white/[0.06] flex-shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/10 active:scale-[0.98] transition-all duration-200"
@@ -144,7 +144,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
               <ShieldAlert className="text-emerald-400" size={13} />
@@ -160,7 +160,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Drawer user */}
-        <div className="px-4 py-3 border-b border-white/[0.06]">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex-shrink-0">
           <div className="flex items-center gap-2.5 bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-[12px] flex-shrink-0">
               {initials()}
@@ -177,7 +177,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Drawer nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-none">
           {MENU.map(item => (
             <NavLink
               key={item.path}
@@ -192,7 +192,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </nav>
 
         {/* Drawer logout */}
-        <div className="px-3 py-4 border-t border-white/[0.06]">
+        <div className="px-3 py-4 border-t border-white/[0.06] flex-shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/[0.06] border border-transparent transition-all"
@@ -206,15 +206,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       {/* ══════════════════════════════════════════
           MAIN CONTENT
       ══════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden lg:ml-[240px] xl:ml-[260px]">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
 
         {/* Top header bar */}
-        <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/[0.06] bg-[#0b1117]/90 backdrop-blur-xl">
+        <header className="h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/[0.06] bg-[#0b1117]/90 backdrop-blur-xl flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             {/* Mobile menu button */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden -ml-1 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] transition-colors flex-shrink-0"
+              className="lg:hidden -ml-1 w-8 h-8 flex items-center justify-center rounded-lg text-gray-450 hover:text-white hover:bg-white/[0.05] transition-colors flex-shrink-0"
               aria-label="Abrir menú"
             >
               <Menu size={18} />
@@ -222,9 +222,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
             {/* Breadcrumb / page title */}
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest hidden sm:inline">Admin</span>
-              <ChevronRight size={11} className="text-gray-700 hidden sm:inline flex-shrink-0" />
-              <h2 className="text-[13px] sm:text-[14px] font-bold text-white tracking-tight truncate">
+              <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest hidden sm:inline">Admin</span>
+              <ChevronRight size={11} className="text-gray-600 hidden sm:inline flex-shrink-0" />
+              <h2 className="text-[13px] sm:text-[14px] font-extrabold text-white tracking-tight truncate">
                 {pageTitle()}
               </h2>
             </div>
@@ -233,14 +233,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           {/* Right side info */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="hidden md:flex items-center gap-2">
-              <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">PNMB 2026</span>
+              <span className="text-[9px] font-black text-gray-550 uppercase tracking-widest">PNMB 2026</span>
               <div className="h-3 w-px bg-white/10" />
             </div>
             <div className="text-right hidden sm:block">
-              <p className="text-[11px] text-gray-300 font-semibold truncate max-w-[140px]">
+              <p className="text-[11px] text-gray-300 font-extrabold truncate max-w-[140px] leading-tight">
                 {user?.nombres || user?.nombre_completo || 'Administrador'}
               </p>
-              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+              <p className="text-[9.5px] text-gray-500 font-black uppercase tracking-wider mt-0.5 leading-none">
                 {user?.rol || 'admin'}
               </p>
             </div>
@@ -251,14 +251,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-3 sm:p-5 lg:p-6 overflow-x-hidden">
-          <div className="max-w-[1400px] mx-auto">
+        <main className="flex-1 p-3 sm:p-5 lg:p-6 overflow-y-auto">
+          <div className="max-w-[1400px] mx-auto h-full">
             {children}
           </div>
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#080c11]/95 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around px-2 py-2 safe-area-bottom">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#080c11]/95 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around px-2 py-2 safe-area-bottom flex-shrink-0">
           {MENU.map(item => {
             const isActive = item.exact
               ? location.pathname === item.path
@@ -293,7 +293,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </nav>
 
         {/* Bottom spacer for mobile nav */}
-        <div className="lg:hidden h-[62px]" />
+        <div className="lg:hidden h-[62px] flex-shrink-0" />
       </div>
     </div>
   );

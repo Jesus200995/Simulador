@@ -17,7 +17,8 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.split(' ')[1];
 
   try {
-    const secret = process.env.JWT_SECRET || 'default_secret';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) { res.status(500).json({ error: 'Error de configuración del servidor' }); return; }
     const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
     next();
