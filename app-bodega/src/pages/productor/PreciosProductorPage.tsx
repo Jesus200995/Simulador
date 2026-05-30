@@ -59,7 +59,7 @@ export default function PreciosProductorPage() {
       
       {/* ── HEADER VERDE ── */}
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
-        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-6">
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-5">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest">Precios del Maíz</p>
@@ -71,64 +71,64 @@ export default function PreciosProductorPage() {
                 En vivo
               </div>
             </div>
-            <h1 className="text-[20px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Análisis de Precios</h1>
-            <p className="text-[13px] font-medium text-white/60 mt-0.5">Referencia internacional y rentabilidad</p>
+            <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Análisis de Precios</h1>
+            <p className="text-[12px] font-medium text-white/60 mt-0.5">Referencia internacional y rentabilidad</p>
           </div>
         </div>
       </div>
 
       {/* ── CONTENIDO ── */}
-      <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-6 space-y-5">
+      <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-5 space-y-4">
 
       {/* ── PRECIO 1 — Referencia internacional ── */}
-      <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
-        <div className="flex items-center gap-3 p-4 sm:p-5">
-          <div className="w-[34px] h-[34px] bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[15px] font-bold shadow-md shrink-0">
+      <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+        <div className="flex items-center gap-3 p-4">
+          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
             1
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-[15px] tracking-tight">
+            <p className="font-bold text-slate-900 text-[14px] tracking-tight">
               Referencia internacional
             </p>
-            <p className="text-[12px] text-slate-500 mt-0.5 font-medium leading-relaxed max-w-lg">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-relaxed max-w-lg">
               Calculado en tiempo real (Chicago + TC + Bono).
             </p>
           </div>
         </div>
 
-        <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 bg-gradient-to-br from-[#1A2F1F] to-[#0f1d13] rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div className="mx-4 mb-4 bg-gradient-to-br from-[#1A2F1F] to-[#0f1d13] rounded-2xl p-4 shadow-lg relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-green-400/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
           
-          <div className="flex flex-col mb-5 relative z-10">
-            <p className="text-[32px] sm:text-[38px] leading-none font-black text-white tracking-tight">
+          <div className="flex flex-col mb-4 relative z-10">
+            <p className="text-[28px] sm:text-[34px] leading-none font-black text-white tracking-tight">
               {margen != null
                 ? `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`
-                : <span className="text-2xl text-slate-400 font-medium tracking-normal">Sin datos</span>
+                : <span className="text-[20px] text-slate-400 font-medium tracking-normal">Sin datos</span>
               }
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="bg-green-500/20 text-green-300 text-[10px] font-bold px-2 py-1 rounded border border-green-400/20 uppercase tracking-wider">
+              <span className="bg-green-500/20 text-green-300 text-[9px] font-bold px-2 py-1 rounded border border-green-400/20 uppercase tracking-wider">
                 Margen de negociación
               </span>
-              <span className="text-slate-400 text-[10px] font-bold tracking-wider uppercase">MXN/ton</span>
+              <span className="text-slate-400 text-[9px] font-bold tracking-wider uppercase">MXN/ton</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 mb-4 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 relative z-10">
             {[
               { icon: TrendingUp, label: 'Futuro Chicago', value: tieneChicago ? `$${chicago} USD/bu` : 'Sin datos' },
               { icon: DollarSign, label: 'Tipo de cambio', value: tipoCambio != null ? `$${tipoCambio} MXN` : 'Sin datos' },
               { icon: Tag, label: 'Bono maíz', value: `+$${BONO_MAIZ_BLANCO_USD} USD` },
             ].map((item, i) => (
-              <div key={item.label} className="bg-white/[0.04] border border-white/10 rounded-[14px] p-3 flex items-center sm:flex-col sm:items-start sm:justify-between transition-colors hover:bg-white/[0.08]">
-                <div className="w-[32px] h-[32px] bg-white/[0.08] text-white rounded-lg flex items-center justify-center shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                  <item.icon size={16} />
+              <div key={item.label} className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 flex items-center sm:flex-col sm:items-start sm:justify-between transition-colors hover:bg-white/[0.08]">
+                <div className="w-[28px] h-[28px] bg-white/[0.08] text-white rounded-md flex items-center justify-center shrink-0 mr-3 sm:mr-0 sm:mb-2">
+                  <item.icon size={14} />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium leading-tight">
+                  <p className="text-[9px] text-slate-400 font-medium leading-tight">
                     {item.label}
                   </p>
-                  <p className="text-[13px] font-bold text-white mt-0.5">
+                  <p className="text-[12px] font-bold text-white mt-0.5">
                     {item.value}
                   </p>
                 </div>
@@ -136,9 +136,9 @@ export default function PreciosProductorPage() {
             ))}
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 flex items-center gap-2 relative z-10 mt-3">
-            <Calculator size={14} className="text-slate-400 shrink-0" />
-            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+          <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 flex items-center gap-2 relative z-10">
+            <Calculator size={12} className="text-slate-400 shrink-0" />
+            <p className="text-[9px] sm:text-[10px] text-slate-400 font-medium">
               <span className="text-white/60">(Futuro × 39.368 × dólar) + bono =</span> <span className="text-green-400 font-bold ml-1">Margen</span>
             </p>
           </div>
@@ -146,71 +146,71 @@ export default function PreciosProductorPage() {
       </div>
 
       {/* ── PRECIO 2 — Precio de compra ── */}
-      <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3">
+      <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-[34px] h-[34px] bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[15px] font-bold shadow-md shrink-0">
+            <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
               2
             </div>
             <div>
-              <p className="font-bold text-slate-900 text-[15px] tracking-tight">
+              <p className="font-bold text-slate-900 text-[14px] tracking-tight">
                 Precio de compra
               </p>
-              <p className="text-[12px] text-slate-500 mt-0.5 font-medium leading-relaxed">
+              <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-relaxed">
                 Pago de la bodega más servicios.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+        <div className="px-4 pb-4">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
 
             {/* PO */}
-            <div className="w-full sm:flex-1 bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
-              <div className="w-[36px] h-[36px] bg-[#1A5C38] text-white rounded-xl flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                <CircleDollarSign size={18} />
+            <div className="w-full sm:flex-1 bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3 sm:p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
+              <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
+                <CircleDollarSign size={16} />
               </div>
               <div>
-                <p className="text-[10px] text-[#1A5C38] font-bold uppercase tracking-wider mb-0.5">
+                <p className="text-[9px] text-[#1A5C38] font-bold uppercase tracking-wider mb-0.5">
                   Pago bodega (PO)
                 </p>
-                <p className="text-[20px] sm:text-[24px] font-black text-[#1A5C38] tracking-tight leading-none">
-                  {tienePO ? `$${po.toLocaleString('es-MX')}` : <span className="text-sm text-slate-400 font-medium tracking-normal">Sin datos</span>}
+                <p className="text-[18px] sm:text-[20px] font-black text-[#1A5C38] tracking-tight leading-none">
+                  {tienePO ? `$${po.toLocaleString('es-MX')}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
                 </p>
               </div>
             </div>
 
-            <div className="text-xl font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-1 sm:my-0">+</div>
+            <div className="text-lg font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-0.5 sm:my-0">+</div>
 
             {/* S */}
-            <div className="w-full sm:flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
-              <div className="w-[36px] h-[36px] bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                <Settings size={18} />
+            <div className="w-full sm:flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-3 sm:p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
+                <Settings size={16} />
               </div>
               <div>
-                <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wider mb-0.5">
+                <p className="text-[9px] text-blue-700 font-bold uppercase tracking-wider mb-0.5">
                   Servicios (S)
                 </p>
-                <p className="text-[20px] sm:text-[24px] font-black text-blue-700 tracking-tight leading-none">
-                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-sm text-slate-400 font-medium tracking-normal">Sin datos</span>}
+                <p className="text-[18px] sm:text-[20px] font-black text-blue-700 tracking-tight leading-none">
+                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
                 </p>
               </div>
             </div>
 
-            <div className="text-xl font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-1 sm:my-0">=</div>
+            <div className="text-lg font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-0.5 sm:my-0">=</div>
 
             {/* Total */}
-            <div className="w-full sm:flex-1 bg-slate-800 rounded-2xl p-4 shadow-md flex items-center sm:flex-col sm:items-start sm:justify-center">
-              <div className="w-[36px] h-[36px] bg-slate-700 text-white rounded-xl flex items-center justify-center shadow-inner shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                <Tag size={18} />
+            <div className="w-full sm:flex-1 bg-slate-800 rounded-2xl p-3 sm:p-4 shadow-md flex items-center sm:flex-col sm:items-start sm:justify-center">
+              <div className="w-8 h-8 bg-slate-700 text-white rounded-lg flex items-center justify-center shadow-inner shrink-0 mr-3 sm:mr-0 sm:mb-2">
+                <Tag size={16} />
               </div>
               <div>
-                <p className="text-[10px] text-slate-300 font-bold uppercase tracking-wider mb-0.5">
+                <p className="text-[9px] text-slate-300 font-bold uppercase tracking-wider mb-0.5">
                   Total Compra
                 </p>
-                <p className="text-[20px] sm:text-[24px] font-black text-white tracking-tight leading-none">
-                  {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : <span className="text-sm text-slate-400 font-medium tracking-normal">Sin datos</span>}
+                <p className="text-[18px] sm:text-[20px] font-black text-white tracking-tight leading-none">
+                  {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
                 </p>
               </div>
             </div>
@@ -219,38 +219,38 @@ export default function PreciosProductorPage() {
       </div>
 
       {/* ── PRECIO 3 — Precio de venta ── */}
-      <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
-        <div className="flex items-center gap-3 p-4 sm:p-5 pb-2">
-          <div className="w-[34px] h-[34px] bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[15px] font-bold shadow-md shrink-0">
+      <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+        <div className="flex items-center gap-3 p-4 pb-2">
+          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
             3
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-[15px] tracking-tight">
+            <p className="font-bold text-slate-900 text-[14px] tracking-tight">
               Precio de venta
             </p>
-            <p className="text-[12px] text-slate-500 mt-0.5 font-medium leading-relaxed">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-relaxed">
               Neto resultante al restar el margen a la compra.
             </p>
           </div>
         </div>
 
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5">
-          <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 mb-4 border border-slate-100 shadow-sm">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">
+        <div className="px-4 pb-4">
+          <div className="bg-slate-50 rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
+            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-3">
               Versión 1 — Productor con servicios
             </p>
-            <div className="space-y-3 mb-4">
-              <div className="flex items-center justify-between text-[14px]">
+            <div className="space-y-2 mb-3">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <CircleDollarSign size={16} className="text-slate-400"/> Precio de compra
+                  <CircleDollarSign size={14} className="text-slate-400"/> Precio de compra
                 </span>
                 <span className="font-bold text-slate-900">
                   {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : '—'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[14px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <TrendingUp size={16} className="text-slate-400"/> Margen de negociación
+                  <TrendingUp size={14} className="text-slate-400"/> Margen de negociación
                 </span>
                 <span className="font-bold text-slate-900">
                   {margen != null ? `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : '—'}
@@ -260,11 +260,11 @@ export default function PreciosProductorPage() {
               <div className="w-full h-px bg-slate-200 my-3"></div>
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
-                <span className="font-black text-slate-900 flex items-center gap-2 text-[15px]">
-                  <Award size={18} className="text-amber-500"/> Diferencial de venta
+                <span className="font-black text-slate-900 flex items-center gap-2 text-[14px]">
+                  <Award size={16} className="text-amber-500"/> Diferencial de venta
                 </span>
                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 w-fit">
-                  <span className={`text-[20px] sm:text-[24px] font-black tracking-tight leading-none
+                  <span className={`text-[18px] sm:text-[20px] font-black tracking-tight leading-none
                     ${precioVenta == null ? 'text-slate-400'
                       : esFavorable ? 'text-[#1A5C38]'
                       : 'text-rose-600'}`}>
@@ -286,8 +286,8 @@ export default function PreciosProductorPage() {
             </div>
             
             {precioVenta != null && !esFavorable && (
-              <div className="flex items-start gap-2 text-[12px] text-rose-700 bg-rose-50 border border-rose-200/60 rounded-xl p-3 font-medium mt-4 shadow-sm">
-                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 text-[11px] text-rose-700 bg-rose-50 border border-rose-200/60 rounded-xl p-3 font-medium mt-3 shadow-sm">
+                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <p>Alerta: El precio de compra actual se encuentra por debajo del margen de negociación sugerido.</p>
               </div>
             )}
@@ -295,14 +295,14 @@ export default function PreciosProductorPage() {
 
           <div className="border border-dashed border-slate-200 rounded-2xl p-4 bg-slate-50/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
-              <p className="text-[13px] font-bold text-slate-600">
+              <p className="text-[12px] font-bold text-slate-600">
                 Versión 2 — Precio CEDIS
               </p>
               <span className="bg-amber-100 text-amber-800 text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded-md w-fit">
                 En desarrollo
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
               Precio en Centrales de Abasto menos el Margen de Negociación. 
               Se habilitará cuando el administrador configure los módulos.
             </p>
@@ -312,7 +312,7 @@ export default function PreciosProductorPage() {
 
       {/* ── HISTÓRICO 30 DÍAS ── */}
       {data.tendencia?.length > 0 && (
-        <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-4 sm:p-5">
+        <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
