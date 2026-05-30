@@ -7,10 +7,17 @@ const router = Router();
 // POST /api/disponibilidad — productor declara maíz disponible
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.user!.userId;
-  const { up_id, tipo_maiz, variedad_code, volumen_estimado_ton, ventana_venta } = req.body;
+  const {
+    up_id: bodyUpId,
+    tipo_maiz,
+    variedad_code, variedad_id,
+    volumen_estimado_ton, volumen_ton,
+    ventana_venta,
+    fecha_disponible_desde, fecha_disponible_hasta,
+  } = req.body;
 
-  if (!up_id || !tipo_maiz || !ventana_venta) {
-    res.status(400).json({ error: 'Campos requeridos: up_id, tipo_maiz, ventana_venta' });
+  if (!tipo_maiz) {
+    res.status(400).json({ error: 'Campo requerido: tipo_maiz' });
     return;
   }
 
@@ -26,19 +33,50 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     }
     const producer_id = prodR.rows[0].producer_id;
 
-    // Verificar que la UP pertenece al productor
-    const upCheck = await pool.query(
-      'SELECT up_id FROM up WHERE up_id = $1 AND producer_id = $2',
-      [up_id, producer_id]
-    );
-    if (upCheck.rows.length === 0) {
-      res.status(403).json({ error: 'La UP no pertenece al productor' });
-      return;
+    // Resolver up_id: si viene en body usarlo, si no obtener del token/producer
+    let up_id = bodyUpId;
+    if (!up_id) {
+      const upR = await pool.query(
+        'SELECT up_id FROM up WHERE producer_id = $1 LIMIT 1',
+        [producer_id]
+      );
+      if (upR.rows.length === 0) {
+        res.status(404).json({ error: 'No se encontró UP vinculada al productor' });
+        return;
+      }
+      up_id = upR.rows[0].up_id;
+    } else {
+      // Verificar que la UP pertenece al productor
+      const upCheck = await pool.query(
+        'SELECT up_id FROM up WHERE up_id = $1 AND producer_id = $2',
+        [up_id, producer_id]
+      );
+      if (upCheck.rows.length === 0) {
+        res.status(403).json({ error: 'La UP no pertenece al productor' });
+        return;
+      }
     }
 
-    // Calcular fecha_vencimiento según ventana_venta
+    // Resolver variedad: aceptar variedad_code o variedad_id
+    const variedadFinal = variedad_code || (variedad_id ? String(variedad_id) : null);
+
+    // Resolver volumen: aceptar volumen_estimado_ton o volumen_ton
+    const volumenFinal = volumen_estimado_ton || volumen_ton || null;
+
+    // Resolver ventana: si hay fechas calcular, si hay ventana_venta usar esa
+    let ventanaFinal = ventana_venta || 'mes';
     let fechaVenc: string;
-    if (ventana_venta === 'esta_semana') {
+
+    if (fecha_disponible_hasta) {
+      fechaVenc = fecha_disponible_hasta;
+      // Calcular ventana_venta desde las fechas
+      const diffDays = Math.ceil(
+        (new Date(fecha_disponible_hasta).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
+      if (diffDays <= 7) ventanaFinal = 'esta_semana';
+      else if (diffDays <= 15) ventanaFinal = 'quincena';
+      else ventanaFinal = 'mes';
+    } else if (ventana_venta === 'esta_semana') {
       const d = new Date();
       d.setDate(d.getDate() + (7 - d.getDay()) % 7 || 7);
       fechaVenc = d.toISOString().slice(0, 10);
@@ -64,15 +102,17 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
          (producer_id, up_id, tipo_maiz, variedad_code, volumen_estimado_ton,
           ventana_venta, fecha_vencimiento)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [producer_id, up_id, tipo_maiz, variedad_code || null,
-       volumen_estimado_ton || null, ventana_venta, fechaVenc]
+      [producer_id, up_id, tipo_maiz, variedadFinal,
+       volumenFinal, ventanaFinal, fechaVenc]
     );
 
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
+    console.error('Error en POST disponibilidad:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // GET /api/disponibilidad — lista disponibilidades activas del productor autenticado
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {

@@ -807,11 +807,26 @@ router.post('/ciclo', authMiddleware, async (req: AuthRequest, res: Response): P
     if (!upRes.rows[0]) { res.status(404).json({ error: 'UP no encontrada' }); return; }
     const upId = upRes.rows[0].up_id;
 
+    // Validar que no exista ya un ciclo activo del mismo tipo+año en esta UP
+    const existente = await pool.query(
+      `SELECT cycle_id FROM cycle
+       WHERE up_id = $1 AND cycle_type = $2 AND cycle_year = $3
+         AND COALESCE(estado_ciclo, 'activo') = 'activo'
+       LIMIT 1`,
+      [upId, cycle_type, cycle_year]
+    );
+    if (existente.rows.length > 0) {
+      res.status(409).json({
+        error: `Ya tienes un ciclo ${cycle_type} ${cycle_year} activo en esta UP`,
+      });
+      return;
+    }
+
     const result = await pool.query(
       `INSERT INTO cycle
          (up_id, cycle_year, cycle_type, declarado_por_productor,
-          hectareas_sembradas, fecha_siembra, variedad_nombre)
-       VALUES ($1, $2, $3, TRUE, $4, $5, $6)
+          hectareas_sembradas, fecha_siembra, variedad_nombre, estado_ciclo)
+       VALUES ($1, $2, $3, TRUE, $4, $5, $6, 'activo')
        RETURNING cycle_id, cycle_year, cycle_type`,
       [upId, cycle_year, cycle_type, hectareas_sembradas || null,
        fecha_siembra || null, variedad_nombre || null]
@@ -823,5 +838,6 @@ router.post('/ciclo', authMiddleware, async (req: AuthRequest, res: Response): P
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 export default router;
