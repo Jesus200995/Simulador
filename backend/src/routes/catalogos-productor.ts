@@ -7,7 +7,7 @@ const router = Router();
 // =============================================
 // GET /api/catalogos-productor - Todos los catálogos del módulo Productor
 // =============================================
-router.get('/', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { tipo_maiz } = req.query;
     const catalogs = await pool.query(
