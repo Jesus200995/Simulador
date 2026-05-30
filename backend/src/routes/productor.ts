@@ -501,6 +501,20 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
       fira = firaRes.rows[0] || null;
     } catch (_) { /* ignore */ }
 
+    // Referencias externas (Chicago y Tipo de Cambio)
+    let precio_chicago_usd_bushel: number | null = null;
+    let tipo_cambio_mxn: number | null = null;
+    try {
+      const refRes = await pool.query(
+        `SELECT clave, valor FROM referencias_externas 
+         WHERE clave IN ('precio_chicago_usd_bushel', 'tipo_cambio_mxn')`
+      );
+      for (const row of refRes.rows) {
+        if (row.clave === 'precio_chicago_usd_bushel') precio_chicago_usd_bushel = Number(row.valor);
+        if (row.clave === 'tipo_cambio_mxn') tipo_cambio_mxn = Number(row.valor);
+      }
+    } catch (_) { /* ignore */ }
+
     res.json({
       estado,
       fecha: new Date().toISOString().split('T')[0],
@@ -508,8 +522,8 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
       precio_bodega,
       precio_mercado,
       servicios_promedio: null,
-      precio_chicago_usd_bushel: null,
-      tipo_cambio_mxn: null,
+      precio_chicago_usd_bushel,
+      tipo_cambio_mxn,
       fira,
       tendencia,
     });
