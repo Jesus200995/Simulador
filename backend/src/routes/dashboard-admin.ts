@@ -22,8 +22,8 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
       pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'pendiente'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'aprobada'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'pendiente'`),
-      pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM disponibilidad_productor WHERE activo = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
-      pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM senales_compra WHERE activo = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
+      pool.query(`SELECT COALESCE(SUM(COALESCE(volumen_estimado_ton, volumen_ton, 0)), 0)::numeric(12,2) AS total_ton FROM disponibilidad_productor WHERE COALESCE(activa, activo, true) = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
+      pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM senales_compra WHERE activa = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
       pool.query(`SELECT COUNT(*)::int AS total FROM transacciones WHERE created_at >= NOW() - INTERVAL '7 days'`).catch(() => ({ rows: [{ total: 0 }] })),
     ]);
 
@@ -167,7 +167,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
              WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
           )::numeric(10,2) AS stock_actual
         FROM bodegas b
-        ORDER BY b.capacidad_toneladas DESC
+        ORDER BY b.capacidad_ton DESC
         LIMIT 10
       `),
     ]);
@@ -421,16 +421,16 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
         SELECT
           b.id, b.nombre, b.estado, b.municipio,
           b.latitud AS lat, b.longitud AS lng,
-          b.capacidad_toneladas,
+          b.capacidad_ton AS capacidad_toneladas,
           COALESCE(
             (SELECT i.volumen_almacenamiento FROM inventarios i
              WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
           )::numeric(10,2) AS stock_actual,
-          CASE WHEN b.capacidad_toneladas > 0
+          CASE WHEN b.capacidad_ton > 0
             THEN ROUND((COALESCE(
               (SELECT i.volumen_almacenamiento FROM inventarios i
                WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
-            ) / b.capacidad_toneladas) * 100)::int
+            ) / b.capacidad_ton) * 100)::int
             ELSE 0 END AS ocupacion_pct
         FROM bodegas b
         WHERE b.latitud IS NOT NULL AND b.longitud IS NOT NULL
