@@ -59,27 +59,22 @@ export default function PreciosProductorPage() {
       
       {/* ── HEADER VERDE ── */}
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
-        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-6">
-          <div className="flex items-center justify-between mb-4">
-            <button onClick={() => navigate('/productor')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md">
-              <ChevronLeft size={20} strokeWidth={2.5} />
-            </button>
-            <div className="shrink-0 flex items-center gap-1.5 text-[11px] text-green-900 font-bold bg-green-400 border border-green-300 rounded-full px-2.5 py-1.5 shadow-sm">
-              <span className="relative flex h-2 w-2 mr-0.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-100 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-              </span>
-              En vivo
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-green-300 shadow-inner border border-white/20 shrink-0">
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 mt-1 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-green-300 shadow-inner border border-white/20 shrink-0">
               <Wheat size={24} strokeWidth={2} />
             </div>
-            <div>
-              <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Precios del Maíz</p>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest">Precios del Maíz</p>
+                <div className="shrink-0 flex items-center gap-1.5 text-[10px] text-green-900 font-bold bg-green-400 border border-green-300 rounded-full px-2 py-0.5 shadow-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-100 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white m-auto"></span>
+                  </span>
+                  En vivo
+                </div>
+              </div>
               <h1 className="text-[20px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Análisis de Precios</h1>
               <p className="text-[13px] font-medium text-white/60 mt-0.5">Referencia internacional y rentabilidad</p>
             </div>
