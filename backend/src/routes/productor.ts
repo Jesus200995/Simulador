@@ -506,7 +506,7 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
     let tipo_cambio_mxn: number | null = null;
     try {
       const refRes = await pool.query(
-        `SELECT clave, valor FROM referencias_externas 
+        `SELECT clave, valor FROM precio_referencias_externas 
          WHERE clave IN ('precio_chicago_usd_bushel', 'tipo_cambio_mxn')`
       );
       for (const row of refRes.rows) {
