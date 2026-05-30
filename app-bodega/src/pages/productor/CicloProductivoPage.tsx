@@ -122,31 +122,33 @@ export default function CicloProductivoPage() {
   const inputCls = 'w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-[14px] sm:text-[15px] font-medium text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-4 focus:ring-green-100 transition-all outline-none shadow-sm';
 
   return (
-    <div className="flex flex-col font-sans w-full max-w-[700px] mx-auto pb-8 relative">
+    <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#f4f5f7]">
       
-      {/* Header Sticky con Progreso */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm pt-4 pb-3 px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-2.5">
-          <button onClick={() => paso > 1 ? setPaso(paso - 1) : navigate('/productor')}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-            <ChevronLeft size={20} strokeWidth={2.5} />
-          </button>
-          <div className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">
-            Paso {paso} de 4
+      {/* Header Verde con Progreso */}
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-6">
+          <div className="flex items-center justify-between mb-5">
+            <button onClick={() => paso > 1 ? setPaso(paso - 1) : navigate('/productor')}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md">
+              <ChevronLeft size={20} strokeWidth={2.5} />
+            </button>
+            <div className="text-[11px] sm:text-xs font-bold text-white/80 uppercase tracking-widest">
+              Paso {paso} de 4
+            </div>
+            <div className="w-9" />
           </div>
-          <div className="w-9" />
-        </div>
-        
-        <div className="w-full flex justify-center gap-1.5">
-          {[1, 2, 3, 4].map(n => (
-            <div key={n} className={`h-1.5 flex-1 max-w-[80px] rounded-full transition-all duration-500 shadow-inner
-              ${n < paso ? 'bg-emerald-500' : n === paso ? 'bg-gradient-to-r from-[#1A5C38] to-emerald-500' : 'bg-slate-200'}`} />
-          ))}
+          
+          <div className="w-full flex justify-center gap-2">
+            {[1, 2, 3, 4].map(n => (
+              <div key={n} className={`h-1.5 flex-1 max-w-[80px] rounded-full transition-all duration-500 shadow-inner
+                ${n < paso ? 'bg-green-400' : n === paso ? 'bg-white' : 'bg-white/20'}`} />
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Contenido */}
-      <div className="px-4 sm:px-6 pt-6 pb-6">
+      <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-6 pb-6">
         <div className="max-w-[500px] mx-auto">
 
           {error && (
