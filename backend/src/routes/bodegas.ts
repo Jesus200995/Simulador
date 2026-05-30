@@ -88,7 +88,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
         (
           SELECT json_build_object(
             'id', sc.id,
-            'precio_oferta', sc.precio_oferta,
+            'precio_oferta', sc.precio_ofrecido,
             'volumen_ton', sc.volumen_ton,
             'tipo_maiz', sc.tipo_maiz
           )
