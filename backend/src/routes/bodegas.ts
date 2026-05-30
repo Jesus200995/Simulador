@@ -81,6 +81,11 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       idx += 3;
     }
 
+    // Construir condiciones sin radio para KPI (el KPI no soporta Haversine)
+    const kpiConditions = conditions.filter(cond => cond !== radioCondition);
+    const kpiParams = lat && lng && radio_km ? params.slice(0, params.length - 3) : [...params];
+    const kpiWhere = kpiConditions.length > 0 ? `WHERE ${kpiConditions.join(' AND ')}` : '';
+
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const bodegasQuery = `
@@ -111,12 +116,12 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
         COUNT(DISTINCT b.municipio)::int                 AS total_municipios,
         COUNT(*) FILTER (WHERE b.activo = true)::int     AS total_inventarios
       FROM bodegas b
-      ${where}
+      ${kpiWhere}
     `;
 
     const [bodegasResult, kpiResult] = await Promise.all([
       pool.query(bodegasQuery, params),
-      pool.query(kpiQuery, params),
+      pool.query(kpiQuery, kpiParams),
     ]);
 
     res.json({

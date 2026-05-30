@@ -502,7 +502,7 @@ router.get('/referencias/externas', authMiddleware, async (req: AuthRequest, res
     let costoFira = parseFloat(params.costo_fira);
 
     if (req.user?.rol === 'admin' || req.user?.rol === 'responsable') {
-      const firaRes = await pool.query('SELECT * FROM costos_fira ORDER BY estado, municipio, ciclo, modalidad');
+      const firaRes = await pool.query('SELECT * FROM costos_fira ORDER BY estado, ciclo, modalidad');
       res.json({
         chicago_usd_bushel: chicagoBushel,
         chicago_usd_ton: chicagoUsd,

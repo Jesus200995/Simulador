@@ -62,9 +62,9 @@ export default function AlertasAdminPage() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const data = await res.json();
 
-      // Mapear el response (el backend tiene campos alertas_recientes o similares)
-      const raw = data.alertas_recientes || data.alertas || data || [];
-      const lista: Alerta[] = raw.map((a: any) => {
+      // Mapear el response — el backend devuelve recientes_pendientes como array
+      const raw = data.recientes_pendientes || data.alertas_recientes || data.alertas || [];
+      const lista: Alerta[] = (Array.isArray(raw) ? raw : []).map((a: any) => {
         // Centroides de estados de fallback para asegurar posicionamiento en mapa
         let lat = 24.8083;
         let lng = -107.3941;
@@ -75,14 +75,14 @@ export default function AlertasAdminPage() {
 
         return {
           id: a.id || a.alerta_id,
-          tipo: a.tipo || 'operativa',
-          nivel_criticidad: (a.nivel || a.nivel_criticidad || 'MEDIA').toUpperCase() as Alerta['nivel_criticidad'],
-          titulo: a.titulo || 'Alerta del Sistema',
+          tipo: a.tipo_alerta || a.tipo || 'operativa',
+          nivel_criticidad: (a.nivel_alerta || a.nivel || a.nivel_criticidad || 'MEDIA').toUpperCase() as Alerta['nivel_criticidad'],
+          titulo: a.titulo || a.tipo_alerta || 'Alerta del Sistema',
           descripcion: a.mensaje || a.descripcion || 'Se detectó una discrepancia operacional.',
-          estado_afectado: est,
+          estado_afectado: a.state_name || a.estado_afectado || est,
           municipio_afectado: a.municipio_afectado || '',
-          created_at: a.created_at || new Date().toISOString(),
-          estado: a.estado || 'activa',
+          created_at: a.fecha_alerta || a.created_at || new Date().toISOString(),
+          estado: a.estado_alerta === 'pendiente' ? 'activa' : (a.estado_alerta || a.estado || 'activa'),
           latitud: parseFloat(a.latitud || lat),
           longitud: parseFloat(a.longitud || lng),
           notas_resolucion: a.notas_resolucion || ''
