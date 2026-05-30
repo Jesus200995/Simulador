@@ -61,6 +61,7 @@ export default function DashboardProductorPage() {
   const getMexicoHour = () => Number(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City', hour: 'numeric', hour12: false }));
   const [reloj, setReloj] = useState(getMexicoTime());
   const clockRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [alertaActiva, setAlertaActiva] = useState<{ mensaje: string; tipo: string } | null>(null);
 
   useEffect(() => {
     clockRef.current = setInterval(() => setReloj(getMexicoTime()), 1000);
@@ -80,6 +81,18 @@ export default function DashboardProductorPage() {
       if (!d) localStorage.setItem('ciclo_pendiente', '1');
       else localStorage.removeItem('ciclo_pendiente');
     }).catch(() => setCiclo(null));
+
+    fetch(`${BASE}/alertas/notificaciones/mis`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(d => {
+        const alerta = d.notificaciones?.find(
+          (n: any) => !n.leida && ['alerta_climatica', 'alerta_sanitaria'].includes(n.tipo)
+        );
+        setAlertaActiva(alerta || null);
+      })
+      .catch(() => {});
   }, []);
 
   if (loading) return <SkeletonDashboard />;
@@ -94,11 +107,11 @@ export default function DashboardProductorPage() {
 
   return (
     <div className="bg-zinc-50">
-      {data?.alerta_activa && (
+      {alertaActiva && (
         <div className={`px-4 sm:px-6 py-3 flex items-center justify-between
-          ${data.alerta_activa.tipo === 'alerta_climatica' ? 'bg-orange-500' : 'bg-red-600'}`}>
+          ${alertaActiva.tipo === 'alerta_climatica' ? 'bg-orange-500' : 'bg-red-600'}`}>
           <p className="text-white text-sm font-medium flex-1 leading-tight flex items-center gap-1.5">
-            <AlertTriangle size={14} className="shrink-0" /> {data.alerta_activa.mensaje}
+            <AlertTriangle size={14} className="shrink-0" /> {alertaActiva.mensaje}
           </p>
           <button onClick={() => navigate('/productor/alertas')}
             className="ml-3 text-white text-xs border border-white/60 rounded-lg px-3 py-1.5 shrink-0 font-medium hover:bg-white/10 transition-colors">

@@ -1,279 +1,398 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, Legend,
+  CartesianGrid,
 } from 'recharts';
-import { TrendingUp, RefreshCw, Clock, AlertTriangle, Activity } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
-
-interface MercadoData {
-  precio_chicago_usd_bushel: number;
-  tipo_cambio_mxn: number;
-  bono_maiz_usd: number;
-  margen_negociacion_mxn: number;
-  timestamp_chicago: string;
-  precio_origen_mxn: number;
-  servicios_bodega_mxn: number;
-  precio_compra_mxn: number;
-  pct_productor: number;
-  pct_servicios: number;
-  precio_venta_mxn: number;
-  precio_cedis_disponible: boolean;
-  precio_cedis_mxn: number | null;
-  series: { fecha: string; precio_compra: number; margen_negociacion: number; precio_venta: number }[];
-}
-
-function fmt(v: number | null | undefined) {
-  if (v === null || v === undefined) return '—';
-  return `$${Number(v).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
-function Spinner() {
-  return <div className="w-5 h-5 border-2 border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />;
-}
+const BONO_MAIZ_BLANCO_USD = 50; // fijo — se configurará desde Admin en el futuro
 
 export default function PreciosProductorPage() {
-  const [data, setData]       = useState<MercadoData | null>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const navigate = useNavigate();
+  const token = localStorage.getItem('simac_token');
 
-  async function cargar() {
-    setLoading(true);
-    setError(null);
-    try {
-      const r = await fetch(`${BASE}/precios/mercado`, { headers: HDR() });
-      if (!r.ok) throw new Error(`Error ${r.status}`);
-      setData(await r.json());
-    } catch {
-      setError('No se pudieron cargar los precios.');
-    } finally {
-      setLoading(false);
-    }
-  }
+  useEffect(() => {
+    fetch(`${BASE}/productor/precios`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, []);
 
-  useEffect(() => { cargar(); }, []);
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="w-6 h-6 border-2 border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" /></div>;
+  if (!data) return null;
 
-  const LABEL: Record<string, string> = {
-    precio_compra:      'Precio de Compra',
-    margen_negociacion: 'Margen de Negociación',
-    precio_venta:       'Precio de Venta',
-  };
+  // ── Cálculos ────────────────────────────────────────────────────────────
+  const chicago     = data.precio_chicago_usd_bushel;
+  const tipoCambio  = data.tipo_cambio_mxn;
+  const po          = data.precio_compra;          // PO — lo que paga la bodega
+  const servicios   = data.servicios_promedio;     // S — tarifario de servicios
+  const tieneChicago   = chicago != null && tipoCambio != null;
+  const tieneServicios = servicios != null;
+  const tienePO        = po != null;
 
-  const esDatosDeAyer = data
-    ? (new Date().getTime() - new Date(data.timestamp_chicago).getTime() > 24 * 60 * 60 * 1000)
-    : false;
+  // Margen de Negociación = (Chicago × 39.368 × tipo_cambio) + (Bono × tipo_cambio)
+  const margen = tieneChicago
+    ? (chicago * 39.368 * tipoCambio) + (BONO_MAIZ_BLANCO_USD * tipoCambio)
+    : null;
 
-  const ventaPositivo = data ? data.precio_venta_mxn >= 0 : true;
+  // Precio de Compra = PO + S
+  const precioCompra = tienePO && tieneServicios ? po + servicios : null;
+
+  // Precio de Venta = Precio de Compra − Margen de Negociación
+  const precioVenta = precioCompra != null && margen != null
+    ? precioCompra - margen
+    : null;
+
+  const esFavorable = precioVenta != null && precioVenta >= 0;
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-gray-50/50 to-gray-100/30">
-      
-      {/* Header — Apple 2026 Glassmorphic Slim header */}
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[24px] shadow-[0_4px_16px_rgba(26,92,56,0.12)]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-5">
-          <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-widest mb-1.5">Productor</p>
-          <h1 className="text-[20px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
-            Precios de Mercado
-          </h1>
-          <p className="text-[12px] font-medium text-white/70 mt-0.5">Referencias del maíz blanco nacional e internacional</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#f4f5f7] pb-24 font-sans selection:bg-[#1A5C38] selection:text-white">
+      <div className="max-w-[800px] mx-auto px-4 sm:px-6 pt-6 space-y-6">
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
-        
-        {/* Top Control Bar */}
-        <div className="flex items-center justify-between bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl px-4 py-2.5 shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${esDatosDeAyer ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${esDatosDeAyer ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
-            </span>
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest leading-none">
-              {esDatosDeAyer ? 'Datos del día anterior' : 'Precios Actualizados'}
-            </p>
-          </div>
-          <button 
-            onClick={cargar} 
-            disabled={loading}
-            className="flex items-center gap-1.5 text-[12px] text-[#1A5C38] font-bold bg-[#1A5C38]/5 hover:bg-[#1A5C38]/10 px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-200"
-          >
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> Actualizar
+        {/* Header */}
+        <div className="bg-white/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[28px] p-5 sm:p-7 border border-white/40">
+          <button onClick={() => navigate('/productor')}
+            className="text-gray-400 hover:text-gray-600 transition-colors text-sm mb-4 flex items-center gap-1 font-medium w-fit">
+            ← Regresar
           </button>
-        </div>
-
-        {error && (
-          <div className="bg-red-50/80 backdrop-blur-md rounded-xl p-3.5 text-red-600 text-[12px] border border-red-100/50 flex items-center gap-2">
-            <AlertTriangle size={14} /> {error}
-          </div>
-        )}
-
-        {/* 3 Precios Stack */}
-        <div className="space-y-3">
-          
-          {/* Precio 1 — Margen de Negociación */}
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-gray-800 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">1</span>
-                <p className="text-[12px] font-bold text-gray-500 uppercase tracking-wider">Margen de Negociación</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[52px] h-[52px] bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center text-[28px] shadow-inner shrink-0">
+                🌽
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">Referencia Internacional</span>
-            </div>
-
-            <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl p-4 flex justify-between items-center text-white">
               <div>
-                <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Margen de Negociación Total</h3>
-                <p className="text-[10px] text-gray-450 mt-0.5">Precio Chicago convertido + Bono SADER</p>
-              </div>
-              <div className="text-right">
-                {loading ? (
-                  <Spinner />
-                ) : (
-                  <>
-                    <p className="text-[28px] font-black tracking-tight leading-none text-white">{fmt(data?.margen_negociacion_mxn)}</p>
-                    <p className="text-[10px] text-gray-450 mt-1">MXN/tonelada</p>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Precio 2 — Precio de Compra (Lo que te pagan las bodegas) */}
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#1A5C38] text-white text-[10px] font-bold flex items-center justify-center shadow-sm">2</span>
-                <p className="text-[12px] font-bold text-gray-500 uppercase tracking-wider">Precio de Compra</p>
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1A5C38] bg-[#1A5C38]/5 px-2 py-0.5 rounded-full">Precio en Bodega</span>
-            </div>
-
-            <div className="bg-[#1A5C38]/5 border border-[#1A5C38]/10 rounded-xl p-4 flex justify-between items-center">
-              <div>
-                <h3 className="text-[11px] font-bold text-[#1A5C38] uppercase tracking-widest">Lo que te pagan las bodegas</h3>
-                <p className="text-[10px] text-[#1A5C38]/70 mt-0.5">Precio Origen (PO) promedio de esta semana</p>
-              </div>
-              <div className="text-right">
-                {loading ? (
-                  <Spinner />
-                ) : (
-                  <>
-                    <p className="text-[28px] font-black tracking-tight leading-none text-[#1A5C38]">{fmt(data?.precio_origen_mxn)}</p>
-                    <p className="text-[10px] text-[#1A5C38]/70 mt-1">MXN/tonelada</p>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Precio 3 — Precio de Venta (Diferencial) */}
-          <div className={`backdrop-blur-md rounded-2xl border p-4 space-y-2.5 ${ventaPositivo ? 'bg-white/80 border-gray-200/50 shadow-sm' : 'bg-red-50/50 border-red-100'}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#1B4F8A] text-white text-[10px] font-bold flex items-center justify-center shadow-sm">3</span>
-                <p className="text-[12px] font-bold text-gray-500 uppercase tracking-wider">Precio de Venta</p>
-              </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${ventaPositivo ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-100/50'}`}>
-                {ventaPositivo ? 'Favorable' : 'Diferencial Crítico'}
-              </span>
-            </div>
-
-            <div className="rounded-xl border border-gray-100/60 bg-gray-50/20 p-3 flex justify-between items-center">
-              <div>
-                <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Precio de Venta Neto</h3>
-                <p className="text-[10px] text-gray-400 mt-0.5">Precio de Compra menos Margen de Negociación</p>
-              </div>
-              <div className="text-right">
-                {loading ? (
-                  <Spinner />
-                ) : (
-                  <>
-                    <p className={`text-[28px] font-black tracking-tight leading-none ${ventaPositivo ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {fmt(data?.precio_venta_mxn)}
-                    </p>
-                    <p className="text-[10px] text-gray-400 mt-1">MXN/tonelada</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {!loading && data && data.precio_venta_mxn < 0 && (
-              <div className="flex items-start gap-1.5 text-[10.5px] text-red-600/90 leading-relaxed bg-red-100/10 rounded-xl p-2.5 border border-red-200/20">
-                <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
-                <p>
-                  El precio promedio de las bodegas está por debajo de la referencia internacional de Chicago.
+                <h1 className="text-[22px] sm:text-2xl font-bold text-gray-900 tracking-tight leading-tight">
+                  Precios del maíz
+                </h1>
+                <p className="text-sm text-gray-500 mt-1 font-medium">
+                  Referencia internacional, precio de compra y venta.
                 </p>
               </div>
-            )}
+            </div>
+            <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#1A5C38] font-bold bg-green-50 border border-green-100/50 rounded-full px-3.5 py-2 shadow-sm">
+              <span className="relative flex h-2 w-2 mr-1">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              Actualizado hoy
+            </div>
           </div>
-
         </div>
 
-        {/* Gráfica de Tendencia */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-4 hover:shadow-md transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity size={14} className="text-emerald-500" />
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Histórico de Precios · 30 días</p>
+        {/* ── PRECIO 1 — Referencia internacional ── */}
+        <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <div className="flex items-center gap-4 p-5 sm:p-7">
+            <div className="w-[42px] h-[42px] bg-gradient-to-br from-[#1A5C38] to-[#124227] text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-md shrink-0">
+              1
             </div>
-            <span className="text-[10px] text-gray-400">Escala: MXN/ton</span>
-          </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center h-48"><Spinner /></div>
-          ) : !data || data.series.length < 2 ? (
-            <div className="flex flex-col items-center py-8 gap-2">
-              <TrendingUp size={30} className="text-gray-300" />
-              <p className="text-[12px] text-gray-400 text-center leading-normal">
-                Datos históricos en proceso de recopilación.<br />
-                Las tendencias se visualizarán próximamente.
+            <div>
+              <p className="font-bold text-gray-900 text-lg tracking-tight">
+                Referencia internacional
+              </p>
+              <p className="text-[13px] text-gray-500 mt-0.5 font-medium leading-relaxed max-w-lg">
+                Se calcula en tiempo real con el futuro de Chicago, tipo de cambio y bono de maíz blanco.
               </p>
             </div>
-          ) : (
-            <div className="h-56">
+          </div>
+
+          <div className="mx-4 sm:mx-7 mb-5 sm:mb-7 bg-gradient-to-br from-[#1A2F1F] to-[#0f1d13] rounded-[24px] p-5 sm:p-7 shadow-xl relative overflow-hidden">
+            {/* Soft Glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-green-400/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            
+            <div className="flex flex-col mb-6 sm:mb-8 relative z-10">
+              <p className="text-[40px] sm:text-[56px] leading-none font-black text-white tracking-tight">
+                {margen != null
+                  ? `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`
+                  : <span className="text-3xl text-gray-400 font-medium tracking-normal">Sin datos</span>
+                }
+              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="bg-green-500/20 text-green-300 text-xs font-bold px-2.5 py-1 rounded-md border border-green-400/20 uppercase tracking-wider">
+                  Margen de negociación
+                </span>
+                <span className="text-gray-400 text-xs font-bold tracking-wider uppercase">MXN/ton</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 mb-4 relative z-10">
+              {[
+                { icon: '📈', label: 'Futuro Chicago', value: tieneChicago ? `$${chicago} USD/bu` : 'Sin datos' },
+                { icon: '💵', label: 'Tipo de cambio', value: tipoCambio != null ? `$${tipoCambio} MXN` : 'Sin datos' },
+                { icon: '🏷', label: 'Bono maíz', value: `+$${BONO_MAIZ_BLANCO_USD} USD` },
+              ].map((item, i) => (
+                <div key={item.label} className="flex-1 bg-white/[0.04] border border-white/10 backdrop-blur-md rounded-[20px] p-4 flex items-center sm:flex-col sm:items-start sm:justify-between transition-colors hover:bg-white/[0.08]">
+                  <div className="w-[42px] h-[42px] bg-white/[0.08] rounded-[14px] flex items-center justify-center text-[22px] shrink-0 mr-3.5 sm:mr-0 sm:mb-3">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-gray-400 font-medium leading-tight">
+                      {item.label}
+                    </p>
+                    <p className="text-[15px] font-bold text-white mt-0.5">
+                      {item.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 relative z-10 mt-5">
+              <p className="text-[11px] sm:text-xs text-gray-400 font-medium text-center sm:text-left">
+                🧮 <span className="text-white/60">(Futuro × 39.368 × dólar) + bono =</span> <span className="text-green-400 font-bold ml-1">Margen</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── PRECIO 2 — Precio de compra ── */}
+        <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-7 gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[42px] h-[42px] bg-gradient-to-br from-[#1A5C38] to-[#124227] text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-md shrink-0">
+                2
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-lg tracking-tight">
+                  Precio de compra
+                </p>
+                <p className="text-[13px] text-gray-500 mt-0.5 font-medium leading-relaxed">
+                  Pago que realiza la bodega más sus servicios de tarifario.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] sm:text-xs font-bold text-[#1A5C38] bg-green-50 border border-green-200/50 rounded-full px-3.5 py-1.5 shrink-0 self-start sm:self-auto shadow-sm tracking-wider uppercase">
+              Precio en Bodega
+            </span>
+          </div>
+
+          <div className="px-4 sm:px-7 pb-5 sm:pb-7">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+
+              {/* PO */}
+              <div className="w-full sm:flex-1 bg-gradient-to-br from-[#E8F5EE] to-[#d8efe3] border border-green-200/60 rounded-[24px] p-5 sm:p-6 shadow-sm relative overflow-hidden group">
+                <div className="w-[46px] h-[46px] bg-[#1A5C38] rounded-2xl flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
+                  <span className="text-white text-xl">💰</span>
+                </div>
+                <p className="text-[11px] text-[#1A5C38] font-black uppercase tracking-wider mb-1">
+                  Pago bodega (PO)
+                </p>
+                <p className="text-[28px] sm:text-[34px] font-black text-[#1A5C38] tracking-tight leading-none">
+                  {tienePO ? `$${po.toLocaleString('es-MX')}` : <span className="text-lg text-gray-400 font-medium tracking-normal">Sin datos</span>}
+                </p>
+              </div>
+
+              <span className="text-3xl font-black text-gray-300 shrink-0 rotate-90 sm:rotate-0 drop-shadow-sm">+</span>
+
+              {/* S */}
+              <div className="w-full sm:flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/60 rounded-[24px] p-5 sm:p-6 shadow-sm relative overflow-hidden group">
+                <div className="w-[46px] h-[46px] bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
+                  <span className="text-white text-xl">⚙️</span>
+                </div>
+                <p className="text-[11px] text-blue-700 font-black uppercase tracking-wider mb-1">
+                  Servicios (S)
+                </p>
+                <p className="text-[28px] sm:text-[34px] font-black text-blue-700 tracking-tight leading-none">
+                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-lg text-gray-400 font-medium tracking-normal">Sin datos</span>}
+                </p>
+              </div>
+
+              <span className="text-3xl font-black text-gray-300 shrink-0 rotate-90 sm:rotate-0 drop-shadow-sm">=</span>
+
+              {/* Total */}
+              <div className="w-full sm:flex-1 bg-gradient-to-br from-gray-800 to-gray-900 rounded-[24px] p-5 sm:p-6 shadow-xl relative overflow-hidden group">
+                <div className="w-[46px] h-[46px] bg-gray-700 rounded-2xl flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition-transform">
+                  <span className="text-white text-xl">🏷</span>
+                </div>
+                <p className="text-[11px] text-gray-300 font-black uppercase tracking-wider mb-1">
+                  Total Compra
+                </p>
+                <p className="text-[28px] sm:text-[34px] font-black text-white tracking-tight leading-none">
+                  {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : <span className="text-lg text-gray-400 font-medium tracking-normal">Sin datos</span>}
+                </p>
+              </div>
+            </div>
+            
+            <p className="mt-5 text-[11px] text-gray-400 font-medium text-center bg-gray-50/80 rounded-xl py-2.5">
+              Si no hay precios recientes o tarifario de servicios, las tarjetas mostrarán "Sin datos".
+            </p>
+          </div>
+        </div>
+
+        {/* ── PRECIO 3 — Precio de venta ── */}
+        <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <div className="flex items-center gap-4 p-5 sm:p-7 pb-2 sm:pb-3">
+            <div className="w-[42px] h-[42px] bg-gradient-to-br from-[#1A5C38] to-[#124227] text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow-md shrink-0">
+              3
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 text-lg tracking-tight">
+                Precio de venta
+              </p>
+              <p className="text-[13px] text-gray-500 mt-0.5 font-medium leading-relaxed">
+                El precio neto resultante al restar el margen de negociación a la compra.
+              </p>
+            </div>
+          </div>
+
+          <div className="px-4 sm:px-7 pb-5 sm:pb-7">
+            <div className="bg-[#f8fafc] rounded-[24px] p-5 sm:p-7 mb-4 border border-gray-100 shadow-sm">
+              <p className="text-[11px] text-gray-400 font-black uppercase tracking-widest mb-5">
+                Versión 1 — Productor con servicios
+              </p>
+              <div className="space-y-3.5 mb-5">
+                <div className="flex items-center justify-between text-[15px]">
+                  <span className="text-gray-600 font-semibold flex items-center gap-2.5">
+                    <span className="bg-white p-1 rounded-md shadow-sm text-sm">🛒</span> Precio de compra
+                  </span>
+                  <span className="font-bold text-gray-900">
+                    {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : '—'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[15px]">
+                  <span className="text-gray-600 font-semibold flex items-center gap-2.5">
+                    <span className="bg-white p-1 rounded-md shadow-sm text-sm">➖</span> Margen de negociación
+                  </span>
+                  <span className="font-bold text-gray-900">
+                    {margen != null ? `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : '—'}
+                  </span>
+                </div>
+                
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent my-4"></div>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+                  <span className="font-black text-gray-900 flex items-center gap-2.5 text-lg">
+                    <span className="text-[22px]">🏆</span> Diferencial de venta
+                  </span>
+                  <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100 w-fit">
+                    <span className={`text-[26px] sm:text-[32px] font-black tracking-tight leading-none
+                      ${precioVenta == null ? 'text-gray-400'
+                        : esFavorable ? 'text-[#1A5C38]'
+                        : 'text-rose-600'}`}>
+                      {precioVenta != null
+                        ? `$${Math.abs(precioVenta).toLocaleString('es-MX', { maximumFractionDigits: 0 })}`
+                        : 'Sin datos'
+                      }
+                    </span>
+                    {precioVenta != null && (
+                      <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider
+                        ${esFavorable
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200/50'}`}>
+                        {esFavorable ? '✓ Favorable' : '⚠ Deficit'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {precioVenta != null && !esFavorable && (
+                <div className="flex items-start gap-2.5 text-[13px] text-rose-700 bg-rose-50 border border-rose-200/60 rounded-2xl p-4 font-semibold mt-6 shadow-sm">
+                  <span className="text-base mt-0.5">⚠</span>
+                  <p>Alerta: El precio de compra actual se encuentra por debajo del margen de negociación internacional sugerido.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="border-2 border-dashed border-gray-200 rounded-[24px] p-5 bg-white/50 relative overflow-hidden group transition-colors hover:border-amber-200 hover:bg-amber-50/30">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 relative z-10">
+                <p className="text-[15px] font-bold text-gray-600 group-hover:text-amber-800 transition-colors">
+                  Versión 2 — Precio CEDIS
+                </p>
+                <span className="bg-amber-100 text-amber-800 text-[10px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full w-fit">
+                  En desarrollo
+                </span>
+              </div>
+              <p className="text-[13px] text-gray-400 font-medium leading-relaxed relative z-10 group-hover:text-amber-700/70 transition-colors">
+                Precio en Centrales de Abasto menos el Margen de Negociación. 
+                Se habilitará dinámicamente cuando el administrador configure los módulos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── HISTÓRICO 30 DÍAS ── */}
+        {data.tendencia?.length > 0 && (
+          <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 p-5 sm:p-7 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-[38px] h-[38px] bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 text-lg">📈</div>
+                <p className="text-lg font-bold text-gray-900 tracking-tight">
+                  Histórico a 30 días
+                </p>
+              </div>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">MXN / TON</p>
+            </div>
+            
+            <div className="h-56 sm:h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.series} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                  <XAxis dataKey="fecha" tick={{ fontSize: 10, fill: '#9ca3af' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} tickFormatter={v => `$${(Number(v)/1000).toFixed(1)}k`} tickLine={false} axisLine={false} width={45} />
+                <LineChart data={data.tendencia} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} tickFormatter={(f) => new Date(f).toLocaleDateString('es-MX', {day: 'numeric', month: 'short'})} dy={10} />
+                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} tickFormatter={v => `$${(Number(v)/1000).toFixed(1)}k`} tickLine={false} axisLine={false} width={50} />
                   <Tooltip
-                    formatter={(v: any, name: any) => [
+                    formatter={(v: any) => [
                       `$${Number(v || 0).toLocaleString('es-MX')} MXN`,
-                      LABEL[name] || name,
+                      'Precio Compra',
                     ]}
-                    labelStyle={{ fontSize: 11, fontWeight: 'bold' }}
+                    labelFormatter={(f) => new Date(f).toLocaleDateString('es-MX', {day: 'numeric', month: 'long', year: 'numeric'})}
+                    labelStyle={{ fontSize: 13, fontWeight: '800', color: '#1e293b', marginBottom: 6 }}
                     contentStyle={{ 
-                      borderRadius: 12, 
-                      border: '1px solid rgba(229, 231, 235, 0.5)', 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
-                      fontSize: 12,
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                      borderRadius: 20, 
+                      border: '1px solid rgba(226, 232, 240, 0.8)', 
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)', 
+                      fontSize: 14,
+                      fontWeight: '600',
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                      padding: '16px 20px'
                     }}
                   />
-                  <Legend 
-                    formatter={n => LABEL[n] || n} 
-                    iconType="circle" 
-                    iconSize={8}
-                    wrapperStyle={{ fontSize: 10, paddingTop: 10 }} 
-                  />
-                  <Line type="monotone" name="precio_compra" dataKey="precio_compra" stroke="#1A5C38" strokeWidth={2} dot={false} connectNulls />
-                  <Line type="monotone" name="margen_negociacion" dataKey="margen_negociacion" stroke="#2563eb" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 4" />
-                  <Line type="monotone" name="precio_venta" dataKey="precio_venta" stroke="#d97706" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="3 3" />
+                  <Line type="monotone" name="precio_compra" dataKey="precio_compra" stroke="#10b981" strokeWidth={4} dot={{ r: 0 }} activeDot={{ r: 7, strokeWidth: 0, fill: '#10b981', style: {filter: 'drop-shadow(0px 4px 6px rgba(16, 185, 129, 0.4))'} }} connectNulls />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Footer Timestamp */}
-        <div className="flex items-center justify-center gap-1.5 pt-2 text-[10px] text-gray-400">
-          <Clock size={10} className="text-gray-300" />
-          <p>
-            CBOT Chicago CME (Maíz Amarillo) · Banxico TC · Actualización automática
-          </p>
-        </div>
+        {/* ── FIRA ── */}
+        {data.fira && (
+          <div className="bg-gradient-to-br from-[#f8fafc] to-[#f1f5f9] border border-slate-200/60 rounded-[32px] p-5 sm:p-7 mb-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+            
+            <div className="flex items-center gap-3 mb-5 relative z-10">
+              <div className="w-[38px] h-[38px] bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 text-lg shadow-inner">📘</div>
+              <p className="text-[17px] font-bold text-slate-800 tracking-tight">
+                Referencia FIRA · {data.estado}
+              </p>
+            </div>
+            
+            <div className="grid gap-3 text-[14px] relative z-10">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white/60 backdrop-blur-sm rounded-[18px] p-4 border border-white/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold mb-1 sm:mb-0">Modalidad de riego</span>
+                <span className="font-bold text-slate-800">{data.fira.modalidad}</span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white/60 backdrop-blur-sm rounded-[18px] p-4 border border-white/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold mb-1 sm:mb-0">Costo productivo por hectárea</span>
+                <span className="font-bold text-slate-800">
+                  ${data.fira.costo_por_ha.toLocaleString('es-MX')}
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white/60 backdrop-blur-sm rounded-[18px] p-4 border border-white/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold mb-1 sm:mb-0">Precio FIRA sugerido</span>
+                <span className="font-black text-[#1A5C38] text-lg sm:text-base">
+                  ${data.fira.precio_fira.toLocaleString('es-MX')} / ton
+                </span>
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400 font-semibold mt-5 text-center tracking-wide uppercase">
+              Fuente: Costos FIRA · Ciclo PV 2026
+            </p>
+          </div>
+        )}
 
       </div>
     </div>

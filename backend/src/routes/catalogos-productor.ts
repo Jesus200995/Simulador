@@ -9,13 +9,20 @@ const router = Router();
 // =============================================
 router.get('/', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
+    const { tipo_maiz } = req.query;
     const catalogs = await pool.query(
       `SELECT catalog, code, label FROM cat_catalog WHERE is_active = true ORDER BY catalog, sort_order, label`
     );
 
-    const varieties = await pool.query(
-      `SELECT crop, code, label FROM cat_crop_variety WHERE is_active = true ORDER BY crop, sort_order, label`
-    );
+    let varQuery = `SELECT crop, code, label FROM cat_crop_variety WHERE is_active = true`;
+    const varParams: any[] = [];
+    if (tipo_maiz) {
+      varQuery += ` AND (crop != 'maiz' OR tipo_maiz = $1)`;
+      varParams.push(tipo_maiz);
+    }
+    varQuery += ` ORDER BY crop, CASE WHEN LOWER(label) = 'no sabe' THEN 1 ELSE 0 END, sort_order, label`;
+    
+    const varieties = await pool.query(varQuery, varParams);
 
     const states = await pool.query(
       `SELECT state_id, name FROM geo_state ORDER BY name`

@@ -239,11 +239,12 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       // UP: si marcó en mapa usar coordenadas, si no usar centroide del municipio
       const hasCoords = lat && lng && lat !== 0 && lng !== 0;
       if (hasCoords) {
+        const postgisDisponible = process.env.POSTGIS_ENABLED === 'true';
         const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
-        const geomSql = hasPoligono
+        const geomSql = hasPoligono && postgisDisponible
           ? `ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)`
           : 'NULL';
-        const geomParam = hasPoligono
+        const geomParam = hasPoligono && postgisDisponible
           ? JSON.stringify({
               type: 'Polygon',
               coordinates: [[
@@ -270,13 +271,18 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
           qParams
         );
       } else {
-        // Intentar centroide del municipio desde municipios_referencia
-        const muni = await client.query(
-          `SELECT centroid FROM municipios_referencia
-           WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
-          [municipio_up, estado_up]
-        );
-        const centroidVal = muni.rows[0]?.centroid || null;
+        let centroidVal = null;
+        try {
+          const muni = await client.query(
+            `SELECT ST_SetSRID(ST_MakePoint(centroid_lng, centroid_lat), 4326) as centroid 
+             FROM municipios_referencia
+             WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado_nombre) = LOWER($2) LIMIT 1`,
+            [municipio_up, estado_up]
+          );
+          centroidVal = muni.rows[0]?.centroid || null;
+        } catch (err) {
+          console.warn('municipios_referencia no disponible:', err);
+        }
         await client.query(
           `INSERT INTO up
              (producer_id, up_name, up_type, production_system, water_regime,
@@ -302,10 +308,19 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
   } catch (error: any) {
     console.error('Error en registro-nuevo:', error);
     if (error.code === '23505') {
-      res.status(409).json({ error: 'Esta CURP ya está registrada' });
+      res.status(409).json({ error: 'Esta CURP ya está registrada en el sistema' });
       return;
     }
-    res.status(500).json({ error: 'Error interno del servidor' });
+    if (error.code === '42P01') {
+      res.status(500).json({ error: 'Configuración de base de datos incompleta. Contacta al administrador.' });
+      return;
+    }
+    if (error.message?.includes('ST_SetSRID') || error.message?.includes('ST_GeomFromGeoJSON') || error.message?.includes('PostGIS')) {
+      console.warn('PostGIS no disponible — registro sin polígono');
+      res.status(201).json({ mensaje: 'Registro enviado. La ubicación se actualizará después.' });
+      return;
+    }
+    res.status(500).json({ error: 'Error al registrar. Intenta de nuevo.' });
   }
 });
 
@@ -492,6 +507,9 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
       precio_compra,
       precio_bodega,
       precio_mercado,
+      servicios_promedio: null,
+      precio_chicago_usd_bushel: null,
+      tipo_cambio_mxn: null,
       fira,
       tendencia,
     });

@@ -84,7 +84,19 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const bodegasQuery = `
-      SELECT b.*, r.nombre as region_nombre, ${distanciaSelect}
+      SELECT b.*, r.nombre as region_nombre, ${distanciaSelect},
+        (
+          SELECT json_build_object(
+            'id', sc.id,
+            'precio_oferta', sc.precio_oferta,
+            'volumen_ton', sc.volumen_ton,
+            'tipo_maiz', sc.tipo_maiz
+          )
+          FROM senales_compra sc
+          WHERE sc.bodega_id = b.id AND sc.activa = true
+          ORDER BY sc.created_at DESC
+          LIMIT 1
+        ) as senal_activa
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
       ${where}

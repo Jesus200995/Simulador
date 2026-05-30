@@ -96,6 +96,8 @@ export default function RegistroNuevoPage() {
   };
 
   const handlePinChange = (val: string) => {
+    if (error) setError('');
+
     if (pinStep === 'crear') {
       setPin(val);
       if (val.length === 4) setTimeout(() => setPinStep('confirmar'), 300);
@@ -103,11 +105,18 @@ export default function RegistroNuevoPage() {
       setConfirmPin(val);
       if (val.length === 4) {
         if (val !== pin) {
-          setError('Los PIN no coinciden.');
-          setPin(''); setConfirmPin(''); setPinStep('crear');
+          setError('Los PIN no coinciden. Intentalo de nuevo.');
+          setConfirmPin('');
         }
       }
     }
+  };
+
+  const reiniciarPin = () => {
+    setPin('');
+    setConfirmPin('');
+    setPinStep('crear');
+    setError('');
   };
 
   const avanzarPaso5 = (saltar = false) => {
@@ -274,7 +283,7 @@ export default function RegistroNuevoPage() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-lg mx-auto px-5 sm:px-8 py-6 sm:py-8">
-          {error && (
+          {error && paso !== 5 && (
             <div className="mb-5 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
@@ -427,13 +436,32 @@ export default function RegistroNuevoPage() {
 
               <div>
                 <p className="text-sm font-semibold text-zinc-700 mb-1">
-                  {pinStep === 'crear' ? 'Crea tu PIN de 4 numeros' : 'Confirma tu PIN'}
+                  {pinStep === 'crear' ? '🔐 Crea tu PIN de 4 numeros' : '🔁 Confirma tu PIN'}
                 </p>
-                <p className="text-xs text-zinc-400 mb-3">Este es tu codigo secreto para entrar a la app</p>
+                <p className="text-xs text-zinc-400 mb-3">
+                  {pinStep === 'crear' 
+                    ? 'Este numero secreto es para entrar a la app. Recuerdalo bien.' 
+                    : 'Escribe exactamente los mismos 4 numeros para confirmar.'}
+                </p>
+                {error && (
+                  <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm text-center flex items-center justify-center gap-2">
+                    <span>⚠</span>
+                    <span>{error}</span>
+                  </div>
+                )}
                 <PinInput
                   value={pinStep === 'crear' ? pin : confirmPin}
                   onChange={handlePinChange}
                 />
+                {error && error.includes('PIN') && (
+                  <div className="text-center mt-3">
+                    <button
+                      onClick={reiniciarPin}
+                      className="text-[#1A5C38] text-sm font-semibold underline">
+                      Volver a crear mi PIN desde cero
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div>

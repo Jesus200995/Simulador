@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { useEffect, type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Map, TrendingUp, Award, User, Bell, X, LogOut, Settings, ChevronRight, ChevronLeft, CalendarCheck } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
@@ -19,6 +19,30 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const cicloPendiente = typeof window !== 'undefined' && localStorage.getItem('ciclo_pendiente') === '1';
+
+  const [notifNoLeidas, setNotifNoLeidas] = useState(0);
+  const token = localStorage.getItem('simac_token');
+  const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const r = await fetch(`${BASE}/alertas/notificaciones/mis`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (r.ok) {
+          const d = await r.json();
+          setNotifNoLeidas(d.total_no_leidas ?? 0);
+        }
+      } catch { /* silencioso */ }
+    };
+
+    if (token) {
+      fetchNotifs();
+      const interval = setInterval(fetchNotifs, 60_000);
+      return () => clearInterval(interval);
+    }
+  }, [token, BASE]);
 
   function handleLogout() {
     logout();
@@ -54,9 +78,16 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2 ml-3 flex-shrink-0">
           <button
             onClick={() => navigate('/productor/alertas')}
-            className="relative w-8 h-8 flex items-center justify-center rounded-full active:opacity-70 transition-opacity"
+            className="relative w-8 h-8 flex items-center justify-center rounded-full active:opacity-70 transition-opacity hover:bg-black/5"
           >
             <Bell size={20} className="text-gray-500" />
+            {notifNoLeidas > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px]
+                               bg-red-500 text-white text-[10px] font-bold rounded-full
+                               flex items-center justify-center px-1 border-2 border-white">
+                {notifNoLeidas > 9 ? '9+' : notifNoLeidas}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setDrawerOpen(true)}

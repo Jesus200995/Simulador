@@ -14,17 +14,28 @@ L.Icon.Default.mergeOptions({
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-const iconBodega = (estado: string) => new L.DivIcon({
-  className: '',
-  html: `<div class="w-10 h-10 rounded-full flex items-center justify-center shadow-md
-    ${estado === 'comprando' ? 'bg-green-600' : estado === 'limitado' ? 'bg-yellow-500' : 'bg-red-500'}">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V12a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10"/><path d="M2 22h20"/><path d="M12 2l10 10H2L12 2z"/></svg></div>`,
-  iconSize: [40, 40], iconAnchor: [20, 20],
-});
+const iconBodega = (estado: string) => {
+  let color = '#10B981'; // comprando (Verde)
+  if (estado === 'limitado') color = '#f59e0b'; // Naranja
+  if (estado === 'no_compra') color = '#ef4444'; // Rojo
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+      <path stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" paint-order="stroke fill" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+    </svg>
+  `;
+  return L.divIcon({
+    html: svg,
+    className: 'custom-leaflet-marker-premium',
+    iconSize: [28, 28],
+    iconAnchor: [14, 28]
+  });
+};
 
 interface Bodega {
   id: number; nombre: string; municipio: string; latitud: number; longitud: number;
   estado_compra: string; precio_compra_hoy: number; is_ventanilla: boolean;
+  senal_activa?: { id: number; precio_oferta: number; volumen_ton: number; tipo_maiz: string } | null;
 }
 
 interface UpData {
@@ -130,23 +141,44 @@ export default function MapaBodegasPage() {
           {bodegas.filter(b => b.latitud && b.longitud).map(b => (
             <Marker key={b.id} position={[b.latitud, b.longitud]}
               icon={iconBodega(b.estado_compra || 'comprando')}>
-              <Popup>
-                <div className="p-1 min-w-48">
-                  <p className="font-bold text-gray-800 text-sm">{b.nombre}</p>
-                  <p className="text-xs text-gray-500">{b.municipio}</p>
-                  {b.precio_compra_hoy > 0 && (
-                    <p className="text-sm font-semibold text-[#1A5C38] mt-1">
-                      ${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton
+              <Popup className="custom-premium-popup" autoPan={false}>
+                <div className="p-3.5 space-y-2.5 text-white">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
+                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                      b.estado_compra === 'comprando' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' :
+                      b.estado_compra === 'limitado' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20' :
+                      'text-red-400 bg-red-500/10 border border-red-500/20'
+                    }`}>
+                      {b.estado_compra || 'comprando'}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
+                    <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                      📍 {b.municipio}
                     </p>
-                  )}
-                  <div className="flex gap-2 mt-2">
-                    <button onClick={() => handleMeInteresa(b.id)}
-                      className="flex-1 bg-[#1A5C38] text-white text-xs py-2 rounded-lg font-semibold">
-                      Me interesa
-                    </button>
+                  </div>
+
+                  <div className="text-[11px] text-gray-300 bg-white/[0.02] border border-white/5 rounded-xl p-2.5 space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 font-medium">Precio hoy:</span>
+                      <strong className="text-emerald-400 font-bold">
+                        {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton` : '--'}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-1">
+                    {b.senal_activa && (
+                      <button onClick={() => handleMeInteresa(b.senal_activa!.id)}
+                        className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center">
+                        Me interesa ✓
+                      </button>
+                    )}
                     <button onClick={() => navigate(`/productor/mapa/bodega/${b.id}`)}
-                      className="flex-1 border border-gray-300 text-gray-700 text-xs py-2 rounded-lg">
-                      Detalle
+                      className="flex-1 bg-white/[0.05] hover:bg-white/[0.1] text-white text-[10px] font-black py-2.5 rounded-xl transition-all border border-white/10 flex items-center justify-center">
+                        Detalle →
                     </button>
                   </div>
                 </div>

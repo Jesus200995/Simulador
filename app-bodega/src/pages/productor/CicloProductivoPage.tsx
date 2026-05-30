@@ -32,6 +32,8 @@ export default function CicloProductivoPage() {
   const [upId, setUpId] = useState<number | null>(null);
   const [areaHaCalc, setAreaHaCalc] = useState<number | null>(null);
   const [variedades, setVariedades] = useState<Variedad[]>([]);
+  const [tipoMaiz, setTipoMaiz] = useState<'blanco' | 'amarillo' | 'criollo' | ''>('');
+  const [esCriollo, setEsCriollo] = useState(false);
 
   const [form, setForm] = useState({
     cycle_year:             AÑO_ACTUAL,
@@ -56,14 +58,18 @@ export default function CicloProductivoPage() {
           setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
         }
       }).catch(() => {});
+  }, []);
 
-    fetch(`${BASE}/catalogos-productor`, { headers: { Authorization: `Bearer ${token}` } })
+  useEffect(() => {
+    if (!tipoMaiz) return;
+    const token = localStorage.getItem('simac_token');
+    fetch(`${BASE}/catalogos-productor?tipo_maiz=${tipoMaiz}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
         const maiz: Variedad[] = d.varieties?.maiz ?? [];
         setVariedades(maiz);
       }).catch(() => {});
-  }, []);
+  }, [tipoMaiz]);
 
   const guardar = async () => {
     if (!upId) { setError('No se encontró tu unidad productiva.'); return; }
@@ -187,33 +193,48 @@ export default function CicloProductivoPage() {
             <div className="space-y-3">
               <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">¿Qué variedad siembras?</h2>
               <p className="text-sm text-zinc-500 mb-4">Toca la que más se acerca a tu semilla</p>
-              {variedades.map(v => (
-                <button key={v.code}
-                  onClick={() => setForm(f => ({...f, variety_id: v.code, variety_other: ''}))}
-                  className={`w-full rounded-xl p-3.5 border-2 text-left transition-all flex items-center gap-2
-                    ${form.variety_id === v.code && form.variety_other === ''
-                      ? 'border-[#1A5C38] bg-green-50'
-                      : 'border-gray-200 bg-white'}`}>
-                  {form.variety_id === v.code && !form.variety_other && <Check size={14} className="text-[#1A5C38] shrink-0" />}
-                  <span className="text-sm font-medium text-gray-800">{v.label}</span>
-                </button>
-              ))}
-              <button
-                onClick={() => setForm(f => ({...f, variety_id: 'CRIOLLO_LOCAL', variety_other: 'CRIOLLO_LOCAL'}))}
-                className={`w-full rounded-xl p-3.5 border-2 text-left transition-all
-                  ${form.variety_id === 'CRIOLLO_LOCAL'
-                    ? 'border-[#1A5C38] bg-green-50'
-                    : 'border-gray-200 bg-white'}`}>
-                <p className="text-sm font-medium text-gray-800">Criollo / Local</p>
-                <p className="text-xs text-gray-400 mt-0.5">Semilla propia o de la región</p>
-              </button>
-              {form.variety_id === 'CRIOLLO_LOCAL' && (
-                <input type="text"
-                  value={form.variety_other === 'CRIOLLO_LOCAL' ? '' : form.variety_other}
-                  onChange={e => setForm(f => ({...f, variety_other: e.target.value || 'CRIOLLO_LOCAL'}))}
-                  placeholder="Ej: Olotillo, Pepitilla, Olotón..."
-                  className={inputCls}
-                />
+              
+              {!tipoMaiz ? (
+                <div className="space-y-3">
+                  {['blanco', 'amarillo', 'criollo'].map(t => (
+                    <button key={t} onClick={() => setTipoMaiz(t as any)}
+                      className="w-full rounded-2xl p-4 border-2 border-gray-200 text-left hover:bg-zinc-50">
+                      <p className="font-semibold text-gray-800 capitalize">Maíz {t}</p>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <button onClick={() => { setTipoMaiz(''); setForm(f => ({...f, variety_id: '', variety_other: ''})); setEsCriollo(false); }} className="text-[#1A5C38] text-sm underline mb-2">← Cambiar tipo de maíz</button>
+                  {variedades.map(v => (
+                    <button key={v.code}
+                      onClick={() => {
+                        setForm(f => ({...f, variety_id: v.code, variety_other: ''}));
+                        setEsCriollo(v.label.toLowerCase().includes('criollo') || v.code === 'MC_CRIOLLO');
+                      }}
+                      className={`w-full rounded-xl p-3.5 border-2 text-left transition-all flex items-center gap-2
+                        ${form.variety_id === v.code
+                          ? 'border-[#1A5C38] bg-green-50'
+                          : 'border-gray-200 bg-white'}`}>
+                      {form.variety_id === v.code && <Check size={14} className="text-[#1A5C38] shrink-0" />}
+                      <span className="text-sm font-medium text-gray-800">{v.label}</span>
+                    </button>
+                  ))}
+                  
+                  {esCriollo && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        ¿Cómo se llama tu variedad criolla? <span className="text-gray-400 font-normal">(opcional)</span>
+                      </label>
+                      <input type="text"
+                        value={form.variety_other}
+                        onChange={e => setForm(f => ({...f, variety_other: e.target.value}))}
+                        placeholder="Ej: Olotillo, Pepitilla, Olotón..."
+                        className={inputCls}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
