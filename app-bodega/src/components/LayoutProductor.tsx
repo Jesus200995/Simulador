@@ -56,34 +56,34 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
     : 'P';
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F2F2F7] overflow-x-clip overflow-y-auto w-full">
+    <div className="fixed inset-0 bg-[#f4f5f7] flex flex-col w-full overflow-hidden">
 
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] px-4 sm:px-6 h-[60px] flex items-center justify-between shadow-sm shadow-black/[0.03]">
+      <header className="flex-none z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 px-4 sm:px-6 h-[60px] flex items-center justify-between shadow-sm">
 
         {/* Left: Logo + Name */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative flex-shrink-0">
-            <img src="/icono.png" alt="SOMEC" className="w-9 h-9 rounded-[10px] ring-[1.5px] ring-[#4ade80]/70 shadow-sm" />
+            <img src="/icono.png" alt="SOMEC" className="w-9 h-9 rounded-[10px] ring-[1.5px] ring-[#1A5C38]/40 shadow-sm" />
           </div>
           <div className="flex flex-col leading-none min-w-0">
-            <span className="text-[16px] font-black tracking-tight leading-none somec-shimmer">SOMEC</span>
-            <span className="text-[9px] text-gray-400 font-medium leading-tight mt-[2px] truncate max-w-[200px] sm:max-w-[320px]">
+            <span className="text-[16px] font-black tracking-tight leading-none text-[#1A5C38]">SOMEC</span>
+            <span className="text-[10px] text-slate-500 font-medium leading-tight mt-[2px] truncate max-w-[200px] sm:max-w-[320px]">
               {SYSTEM_NAME}
             </span>
           </div>
         </div>
 
         {/* Right: Bell + Avatar */}
-        <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+        <div className="flex items-center gap-3 ml-3 flex-shrink-0">
           <button
             onClick={() => navigate('/productor/alertas')}
-            className="relative w-8 h-8 flex items-center justify-center rounded-full active:opacity-70 transition-opacity hover:bg-black/5"
+            className="relative w-8 h-8 flex items-center justify-center rounded-full active:opacity-70 transition-opacity hover:bg-slate-100"
           >
-            <Bell size={20} className="text-gray-500" />
+            <Bell size={20} className="text-slate-600" />
             {notifNoLeidas > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px]
-                               bg-red-500 text-white text-[10px] font-bold rounded-full
+                               bg-rose-500 text-white text-[10px] font-bold rounded-full
                                flex items-center justify-center px-1 border-2 border-white">
                 {notifNoLeidas > 9 ? '9+' : notifNoLeidas}
               </span>
@@ -93,7 +93,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
             onClick={() => setDrawerOpen(true)}
             className="active:opacity-70 transition-opacity"
           >
-            <div className="w-8 h-8 rounded-full bg-[#1A5C38] flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A5C38] to-[#14472b] flex items-center justify-center shadow-sm">
               <span className="text-white text-[12px] font-bold">{initials}</span>
             </div>
           </button>
@@ -101,12 +101,12 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       </header>
 
       {/* ── Main content ───────────────────────────────── */}
-      <main className="flex-1 pb-[72px] overflow-x-clip overflow-y-visible min-w-0 w-full">
+      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#f4f5f7]">
         {children}
       </main>
 
       {/* ── Bottom nav ─────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-xl border-t border-black/[0.06] flex items-stretch shadow-[0_-1px_0_rgba(0,0,0,0.04)]">
+      <nav className="flex-none z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 flex items-stretch shadow-[0_-4px_20px_rgb(0,0,0,0.02)]">
         {NAV.map(({ path, icon: Icon, label }) => {
           const active = pathname === path || (path !== '/productor' && pathname.startsWith(path + '/'))
             || (path === '/productor' && pathname === '/productor');
@@ -115,16 +115,16 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
             <Link
               key={path}
               to={path}
-              className={`flex-1 flex flex-col items-center justify-center pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] gap-[3px] transition-colors
-                ${active ? 'text-[#1A5C38]' : 'text-gray-400'}`}
+              className={`flex-1 flex flex-col items-center justify-center pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] gap-1 transition-colors
+                ${active ? 'text-[#1A5C38]' : 'text-slate-400 hover:text-slate-500'}`}
             >
               <div className="relative">
-                <Icon size={23} strokeWidth={active ? 2.4 : 1.7} />
+                <Icon size={24} strokeWidth={active ? 2.5 : 2} />
                 {isPerfil && cicloPendiente && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 border border-white" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white" />
                 )}
               </div>
-              <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{label}</span>
+              <span className={`text-[10px] ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
             </Link>
           );
         })}
@@ -209,21 +209,21 @@ export function PageHeaderProductor({
 }) {
   const navigate = useNavigate();
   return (
-    <div className="w-full bg-white/90 backdrop-blur-sm border-b border-black/[0.06] px-4 sm:px-6 pt-3.5 pb-4">
-      <div className="max-w-5xl mx-auto">
+    <div className="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-6 pt-3.5 pb-4 shadow-sm">
+      <div className="max-w-[700px] mx-auto">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             {back !== undefined && (
               <button
                 onClick={() => typeof back === 'number' ? navigate(back) : navigate(back)}
-                className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-medium mb-1.5 active:opacity-60 transition-opacity"
+                className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-bold mb-2 hover:opacity-70 transition-opacity"
               >
                 <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" />
                 Volver
               </button>
             )}
-            <h1 className="text-[20px] font-bold text-gray-900 leading-tight truncate">{title}</h1>
-            {subtitle && <p className="text-[13px] text-gray-400 mt-0.5 truncate">{subtitle}</p>}
+            <h1 className="text-[20px] font-bold text-slate-900 leading-tight truncate">{title}</h1>
+            {subtitle && <p className="text-[12px] text-slate-500 font-medium mt-0.5 truncate">{subtitle}</p>}
           </div>
           {action && <div className="flex-shrink-0 pt-1">{action}</div>}
         </div>

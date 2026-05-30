@@ -102,8 +102,8 @@ export default function MapaBodegasPage() {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px - 72px)' }}>
-      <div className="flex-1 relative">
+    <div className="w-full h-full flex flex-col relative min-h-[500px]">
+      <div className="flex-1 relative w-full h-full">
         <MapContainer
           center={up ? [up.lat, up.lng] : [23.6345, -102.5528]}
           zoom={up?.location_confirmed ? 11 : 6}

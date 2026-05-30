@@ -122,33 +122,31 @@ export default function CicloProductivoPage() {
   const inputCls = 'w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-[14px] sm:text-[15px] font-medium text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-4 focus:ring-green-100 transition-all outline-none shadow-sm';
 
   return (
-    <div className="fixed inset-0 bg-[#f4f5f7] flex flex-col font-sans selection:bg-[#1A5C38] selection:text-white overflow-hidden">
+    <div className="flex flex-col font-sans w-full max-w-[700px] mx-auto pb-8 relative">
       
-      {/* Header Fijo con Progreso */}
-      <div className="flex-none bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm z-50">
-        <div className="max-w-[700px] mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-between mb-2.5">
-            <button onClick={() => paso > 1 ? setPaso(paso - 1) : navigate('/productor')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-              <ChevronLeft size={20} strokeWidth={2.5} />
-            </button>
-            <div className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">
-              Paso {paso} de 4
-            </div>
-            <div className="w-9" />
+      {/* Header Sticky con Progreso */}
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm pt-4 pb-3 px-4 sm:px-6">
+        <div className="flex items-center justify-between mb-2.5">
+          <button onClick={() => paso > 1 ? setPaso(paso - 1) : navigate('/productor')}
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+            <ChevronLeft size={20} strokeWidth={2.5} />
+          </button>
+          <div className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">
+            Paso {paso} de 4
           </div>
-          
-          <div className="w-full flex justify-center gap-1.5">
-            {[1, 2, 3, 4].map(n => (
-              <div key={n} className={`h-1.5 flex-1 max-w-[80px] rounded-full transition-all duration-500 shadow-inner
-                ${n < paso ? 'bg-emerald-500' : n === paso ? 'bg-gradient-to-r from-[#1A5C38] to-emerald-500' : 'bg-slate-200'}`} />
-            ))}
-          </div>
+          <div className="w-9" />
+        </div>
+        
+        <div className="w-full flex justify-center gap-1.5">
+          {[1, 2, 3, 4].map(n => (
+            <div key={n} className={`h-1.5 flex-1 max-w-[80px] rounded-full transition-all duration-500 shadow-inner
+              ${n < paso ? 'bg-emerald-500' : n === paso ? 'bg-gradient-to-r from-[#1A5C38] to-emerald-500' : 'bg-slate-200'}`} />
+          ))}
         </div>
       </div>
 
-      {/* Contenido scrolleable central */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-5 pb-[130px] sm:pb-[150px]">
+      {/* Contenido */}
+      <div className="px-4 sm:px-6 pt-6 pb-6">
         <div className="max-w-[500px] mx-auto">
 
           {error && (
@@ -448,8 +446,8 @@ export default function CicloProductivoPage() {
         </div>
       </div>
 
-      {/* Footer Fijo */}
-      <div className="flex-none fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 z-50 p-4 shadow-[0_-10px_40px_rgb(0,0,0,0.05)]">
+      {/* Footer Sticky */}
+      <div className="sticky bottom-0 z-20 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 p-4 shadow-[0_-4px_20px_rgb(0,0,0,0.02)]">
         <div className="max-w-[500px] mx-auto space-y-2">
           {paso === 1 && (
             <button onClick={() => { setError(''); setPaso(2); }}
