@@ -506,12 +506,11 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
     let tipo_cambio_mxn: number | null = null;
     try {
       const refRes = await pool.query(
-        `SELECT clave, valor FROM precio_referencias_externas 
-         WHERE clave IN ('precio_chicago_usd_bushel', 'tipo_cambio_mxn')`
+        `SELECT chicago_usd_bushel, tc_banxico FROM precio_referencias_externas ORDER BY created_at DESC LIMIT 1`
       );
-      for (const row of refRes.rows) {
-        if (row.clave === 'precio_chicago_usd_bushel') precio_chicago_usd_bushel = Number(row.valor);
-        if (row.clave === 'tipo_cambio_mxn') tipo_cambio_mxn = Number(row.valor);
+      if (refRes.rows.length > 0) {
+        precio_chicago_usd_bushel = Number(refRes.rows[0].chicago_usd_bushel);
+        tipo_cambio_mxn = Number(refRes.rows[0].tc_banxico);
       }
     } catch (_) { /* ignore */ }
 
@@ -521,7 +520,7 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
       precio_compra,
       precio_bodega,
       precio_mercado,
-      servicios_promedio: null,
+      servicios_promedio: 0,
       precio_chicago_usd_bushel,
       tipo_cambio_mxn,
       fira,
