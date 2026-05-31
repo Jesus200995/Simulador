@@ -34,6 +34,7 @@ export default function ProductoresAdminPage() {
   const [estadoFilter, setEstadoFilter] = useState('');
   const [tipoFilter, setTipoFilter] = useState('');
   const [estatusFilter, setEstatusFilter] = useState('');
+  const [estadosDisponibles, setEstadosDisponibles] = useState<string[]>([]);
 
   // Modales
   const [selectedProd, setSelectedProd] = useState<Productor | null>(null);
@@ -83,6 +84,14 @@ export default function ProductoresAdminPage() {
 
   useEffect(() => {
     cargarProductores();
+    
+    // Cargar estados dinámicamente
+    fetch(`${BASE}/admin/usuarios/estados-disponibles`, { headers: HDR() })
+      .then(r => r.json())
+      .then(data => setEstadosDisponibles(data.estados || []))
+      .catch(() => {
+        setEstadosDisponibles(['Sinaloa', 'Jalisco', 'Guanajuato', 'Michoacán', 'Colima', 'Querétaro', 'Nayarit', 'Durango']);
+      });
   }, []);
 
   async function handleConfirmAction() {
@@ -252,10 +261,9 @@ export default function ProductoresAdminPage() {
           className="w-full bg-[#0d131a] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-emerald-500/50"
         >
           <option value="">Todos los Estados</option>
-          <option value="Sinaloa">Sinaloa</option>
-          <option value="Jalisco">Jalisco</option>
-          <option value="Guanajuato">Guanajuato</option>
-          <option value="Michoacán">Michoacán</option>
+          {estadosDisponibles.map(estado => (
+            <option key={estado} value={estado}>{estado}</option>
+          ))}
         </select>
 
         {/* Filtrar por Tipo */}

@@ -33,7 +33,10 @@ router.post('/registro-admin', async (req: any, res: Response): Promise<void> =>
     }
 
     // Verificar código de acceso corporativo (almacenado en env o en tabla configuracion)
-    const CODIGO_ADMIN = process.env.ADMIN_REGISTRO_CODIGO || 'SIMAC2026';
+    const CODIGO_ADMIN = process.env.ADMIN_REGISTRO_CODIGO;
+    if (!CODIGO_ADMIN) {
+      throw new Error('FATAL: ADMIN_REGISTRO_CODIGO no definida en variables de entorno.');
+    }
     if (codigo_acceso.trim().toUpperCase() !== CODIGO_ADMIN.toUpperCase()) {
       res.status(403).json({ error: 'Código de acceso corporativo incorrecto' });
       return;
@@ -131,6 +134,26 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
   } catch (error) {
     console.error('Error al listar usuarios:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// GET /api/admin/usuarios/estados-disponibles
+// =============================================
+router.get('/usuarios/estados-disponibles', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT p.estado_up AS estado
+      FROM producer p
+      WHERE p.estado_up IS NOT NULL
+        AND p.estado_up != ''
+      ORDER BY estado ASC
+    `);
+    res.json({ 
+      estados: result.rows.map(r => r.estado) 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener estados' });
   }
 });
 

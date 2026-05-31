@@ -60,7 +60,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       try {
         const [bodegaR, prodR] = await Promise.all([
           pool.query('SELECT nombre FROM bodegas WHERE id = $1', [bodega_id]),
-          pool.query('SELECT u.id FROM usuarios u JOIN producer p ON p.email = u.email WHERE p.producer_id = $1 LIMIT 1', [producer_id]),
+          pool.query('SELECT u.id FROM usuarios u JOIN producer p ON p.usuario_id = u.id WHERE p.producer_id = $1 LIMIT 1', [producer_id]),
         ]);
         if (prodR.rows.length > 0) {
           const msg = `La Bodega ${bodegaR.rows[0]?.nombre} registró una compra tuya: ${volumen_ton} ton a $${precio_ton}/ton. ¿Es correcto?`;

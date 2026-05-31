@@ -15,6 +15,7 @@ export default function B15Tarifario() {
   const [editando, setEditando] = useState<number | null>(null);
   const [precio, setPrecio] = useState('');
   const [saving, setSaving] = useState(false);
+  const [diasSinActualizar, setDiasSinActualizar] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,7 +25,26 @@ export default function B15Tarifario() {
 
   useEffect(() => {
     if (bodegaId) {
-      api.tarifario.get(Number(bodegaId)).then((r: any) => setTarifas(r)).catch(() => {});
+      api.tarifario.get(Number(bodegaId)).then((r: any) => {
+        setTarifas(r);
+        // Calcular días desde la última actualización
+        if (r && r.length > 0) {
+          // Asumimos que r[0] o el array de tarifas puede usarse para ver updated_at
+          const ultima_actualizacion = r[0]?.updated_at || r[0]?.ultima_actualizacion;
+          if (ultima_actualizacion) {
+            const ultima = new Date(ultima_actualizacion);
+            const hoy = new Date();
+            const dias = Math.floor(
+              (hoy.getTime() - ultima.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            setDiasSinActualizar(dias);
+          } else {
+            setDiasSinActualizar(null);
+          }
+        } else {
+          setDiasSinActualizar(null);
+        }
+      }).catch(() => {});
     }
   }, [bodegaId]);
 
@@ -73,6 +93,24 @@ export default function B15Tarifario() {
             {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
         </div>
+
+        {diasSinActualizar !== null && diasSinActualizar >= 30 && (
+          <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="font-semibold text-amber-800">
+                  Tarifario desactualizado — {diasSinActualizar} días sin cambios
+                </p>
+                <p className="text-amber-700 text-sm mt-1">
+                  Las bodegas con tarifario desactualizado no se incluyen en el 
+                  cálculo del Precio Sistema regional. Actualiza tus precios 
+                  de servicios para seguir siendo visible.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Lista de conceptos */}
         {bodegaId && (

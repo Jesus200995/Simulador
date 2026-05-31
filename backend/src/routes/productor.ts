@@ -520,13 +520,30 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
       }
     } catch (_) { /* ignore */ }
 
+    // Calcular promedio real de tarifarios activos en los últimos 60 días
+    let servicios_promedio = 0;
+    try {
+      const serviciosResult = await pool.query(`
+        SELECT COALESCE(AVG(total_por_bodega), 0) AS promedio
+        FROM (
+          SELECT ts.bodega_id, SUM(ts.precio) AS total_por_bodega
+          FROM tarifario_servicios ts
+          JOIN bodeguero_bodegas bb ON bb.bodega_id = ts.bodega_id
+          WHERE ts.updated_at >= NOW() - INTERVAL '60 days'
+            AND ts.activo = true
+          GROUP BY ts.bodega_id
+        ) AS totales_por_bodega
+      `);
+      servicios_promedio = parseFloat(serviciosResult.rows[0]?.promedio || '0');
+    } catch (_) { /* ignore */ }
+
     res.json({
       estado,
       fecha: new Date().toISOString().split('T')[0],
       precio_compra,
       precio_bodega,
       precio_mercado,
-      servicios_promedio: 0,
+      servicios_promedio: Math.round(servicios_promedio),
       precio_chicago_usd_bushel,
       tipo_cambio_mxn,
       fira,

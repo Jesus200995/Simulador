@@ -36,6 +36,7 @@ export default function B10Requerimiento() {
     municipio: municipioPre,
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -77,6 +78,7 @@ export default function B10Requerimiento() {
     if (form.vigencia_fin < form.vigencia_inicio) { toast('La fecha de fin no puede ser anterior al inicio', 'error'); return; }
     setLoading(true);
     try {
+      setError('');
       await api.senales.create({
         ...form,
         vigencia: 'rango',
@@ -85,7 +87,11 @@ export default function B10Requerimiento() {
       setForm(f => ({ ...f, tipo_maiz: '', volumen_ton: '', precio_ofrecido: '', vigencia_fin: '' }));
       cargarRequerimientos();
     } catch (err: any) {
-      toast(err.message, 'error');
+      if (err.message?.includes('5 requerimientos')) {
+        setError('Ya tienes 5 requerimientos activos. Cancela uno antes de crear otro nuevo.');
+      } else {
+        toast(err.message, 'error');
+      }
     } finally { setLoading(false); }
   }
 
@@ -106,6 +112,12 @@ export default function B10Requerimiento() {
       <PageBanner title="Requerimientos de Maíz" subtitle="Notifica a productores en tu área" back="/oferta" />
 
       <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
+        {error && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+            <p className="text-amber-800 font-medium">⚠️ {error}</p>
+          </div>
+        )}
+
         {/* Bodega y maíz */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y tipo de maíz</p>

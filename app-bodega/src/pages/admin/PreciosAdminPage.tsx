@@ -501,8 +501,8 @@ export default function PreciosAdminPage() {
               {preciosData.costos_fira_detalle && preciosData.costos_fira_detalle.length > 0 ? (
                 <div className="space-y-2 text-[12.5px] max-h-56 overflow-y-auto">
                   {preciosData.costos_fira_detalle.slice(0, 4).map((fira, idx) => {
-                    const costoTon = fira.costo_por_ton || (fira as any).precio_fira || (fira as any).costo_por_ha || 0;
-                    const utilidad = preciosHoy.po - costoTon;
+                    const costoHa = fira.costo_por_ha || (fira as any).precio_fira || (fira as any).costo_por_ton || 0;
+                    const utilidad = preciosHoy.po - costoHa;
                     return (
                       <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 flex justify-between items-center">
                         <div>
@@ -510,7 +510,7 @@ export default function PreciosAdminPage() {
                           <p className="text-[10px] text-gray-500 mt-0.5">{fira.ciclo} · {fira.modalidad}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-gray-400 font-semibold">Costo: {fmt(costoTon)}</p>
+                          <p className="text-gray-400 font-semibold">Costo de producción (MXN/ha): {fmt(costoHa)} MXN/ha</p>
                           <span className={`text-[11px] font-bold ${utilidad >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             Utilidad: {utilidad >= 0 ? '+' : ''}{fmt(utilidad)}
                           </span>
@@ -647,7 +647,7 @@ export default function PreciosAdminPage() {
 
             <div className="p-6 space-y-4">
               <p className="text-[12.5px] text-gray-400 leading-relaxed">
-                Selecciona el archivo CSV de costos FIRA. El archivo debe contener las columnas: <strong className="text-white">estado, ciclo, modalidad, costo_por_ton</strong>.
+                Selecciona el archivo CSV de costos FIRA. El archivo debe contener las columnas: <strong className="text-white">estado, ciclo, modalidad, costo_por_ha</strong>.
               </p>
 
               <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-emerald-500/50 transition-all cursor-pointer relative bg-white/[0.01]">
