@@ -95,7 +95,10 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
 
       await client.query('COMMIT');
 
-      const secret = process.env.JWT_SECRET || 'default_secret';
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        throw new Error('FATAL: JWT_SECRET no definida en variables de entorno. El servidor no puede arrancar sin esta variable.');
+      }
       const token = jwt.sign(
         { userId: u.rows[0].id, rol: 'productor', producer_id },
         secret,
@@ -155,7 +158,10 @@ router.post('/auth/login-pin', async (req, res): Promise<void> => {
       return;
     }
 
-    const secret = process.env.JWT_SECRET || 'default_secret';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('FATAL: JWT_SECRET no definida en variables de entorno. El servidor no puede arrancar sin esta variable.');
+    }
     const token = jwt.sign(
       { userId: user.user_id, rol: 'productor', producer_id: user.producer_id },
       secret,

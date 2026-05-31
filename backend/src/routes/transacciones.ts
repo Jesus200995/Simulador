@@ -77,6 +77,58 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
+// GET /api/transacciones/:id — detalle individual de una transacción
+router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const usuarioId = req.user!.userId;
+    const isAdmin = ['admin', 'responsable'].includes(req.user!.rol);
+
+    let query = `
+      SELECT 
+        t.id,
+        t.bodega_id,
+        t.producer_id,
+        t.volumen_ton,
+        t.precio_ton,
+        t.tipo_maiz,
+        t.variedad_code,
+        t.fecha,
+        t.notas,
+        t.confirmacion_productor,
+        t.peso_precio_sistema,
+        t.created_at,
+        b.nombre AS bodega_nombre,
+        b.municipio AS bodega_municipio,
+        b.estado AS bodega_estado
+      FROM transacciones t
+      LEFT JOIN bodegas b ON b.id = t.bodega_id
+      WHERE t.id = $1
+    `;
+    const params: any[] = [id];
+
+    // Si no es admin, verificar que la transacción pertenece al usuario
+    if (!isAdmin) {
+      query += ` AND (t.usuario_bodeguero = $2 OR t.producer_id IN (
+        SELECT p.producer_id FROM producer p JOIN usuarios u ON u.email = p.email WHERE u.id = $2
+      ))`;
+      params.push(usuarioId);
+    }
+
+    const result = await pool.query(query, params);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Transacción no encontrada' });
+      return;
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error al obtener transacción:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // PATCH /api/transacciones/:id/confirmar
 router.patch('/:id/confirmar', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const { confirmacion } = req.body;

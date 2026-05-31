@@ -3,7 +3,7 @@ import { RefreshCw, TrendingUp, Users, Warehouse, BarChart3, ArrowUpDown } from 
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const BASE = import.meta.env.VITE_API_URL || 'http://31.97.8.51:3005/api';
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
 
 function fmtNum(v: number, dec = 0) {

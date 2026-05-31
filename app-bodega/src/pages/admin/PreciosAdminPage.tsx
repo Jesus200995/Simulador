@@ -51,19 +51,9 @@ interface PreciosData {
 export default function PreciosAdminPage() {
   const [refreshLoading, setRefreshLoading] = useState(false);
 
-  // Datos principales
-  const [preciosData, setPreciosData] = useState<PreciosData>({
-    chicago_usd_bushel: 6.28,
-    chicago_usd_ton: 247.53,
-    chicago_mxn: 4312.00,
-    tc_banxico: 17.42,
-    garantia_sader: 6915.00,
-    costo_fira: 5466.00,
-    actualizacion: new Date().toISOString(),
-    fuente: 'cron',
-    error: false,
-    costos_fira_detalle: []
-  });
+  // Datos principales — null hasta que el backend responda (no datos ficticios)
+  const [preciosData, setPreciosData] = useState<PreciosData | null>(null);
+  const [preciosError, setPreciosError] = useState<string | null>(null);
 
   const [preciosHoy, setPreciosHoy] = useState({
     po: 4680,
@@ -93,11 +83,14 @@ export default function PreciosAdminPage() {
 
   async function cargarTodo() {
     try {
+      setPreciosError(null);
       // 1. Cargar referencias externas y costos FIRA
       const resRef = await fetch(`${BASE}/precios/referencias/externas`, { headers: HDR() });
       if (resRef.ok) {
         const ref = await resRef.json();
         setPreciosData(ref);
+      } else {
+        setPreciosError('No se pudieron cargar las referencias de precios');
       }
 
       // 2. Cargar mercado
@@ -281,6 +274,36 @@ export default function PreciosAdminPage() {
   function fmt(v: number | undefined | null) {
     if (v == null || isNaN(Number(v))) return '$0';
     return `$${Number(v).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
+
+  // Mientras carga o si hay error — NO mostrar números ficticios
+  if (!preciosData) {
+    return (
+      <div className="space-y-6">
+        {preciosError ? (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center">
+            <p className="text-red-400 font-bold text-[14px]">Error al cargar precios</p>
+            <p className="text-red-400/70 text-[12px] mt-1">{preciosError}</p>
+            <button 
+              onClick={cargarTodo}
+              className="mt-4 px-5 py-2.5 bg-[#1A5C38] hover:bg-[#1e6b42] text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200"
+            >
+              <RefreshCw size={12} className="inline mr-1" /> Reintentar
+            </button>
+          </div>
+        ) : (
+          <div className="animate-pulse space-y-4">
+            <div className="h-16 bg-white/5 rounded-2xl"></div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="h-32 bg-white/5 rounded-2xl"></div>
+              <div className="h-32 bg-white/5 rounded-2xl"></div>
+              <div className="h-32 bg-white/5 rounded-2xl"></div>
+            </div>
+            <div className="h-64 bg-white/5 rounded-2xl"></div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (

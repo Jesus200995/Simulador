@@ -30,7 +30,7 @@ export default function ConfirmarTransaccionPage() {
     await fetch(`${BASE}/transacciones/${id}/confirmar`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ confirmado: esCorrecta }),
+      body: JSON.stringify({ confirmacion: esCorrecta ? 'confirmada' : 'discrepancia' }),
     });
     navigate('/productor', { state: { mensaje: esCorrecta ? 'Transacción confirmada' : 'Discrepancia reportada' } });
   };

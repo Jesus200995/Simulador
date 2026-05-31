@@ -30,6 +30,7 @@ export default function DisponibilidadVariedadPage() {
 
   const seleccionar = (v: Variedad) => {
     sessionStorage.setItem('disp_variedad_id', String(v.id));
+    sessionStorage.setItem('disp_variedad_code', v.code);
     sessionStorage.setItem('disp_variedad_nombre', v.nombre_variedad);
     navigate('/productor/disponibilidad/volumen');
   };

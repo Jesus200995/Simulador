@@ -30,6 +30,22 @@ router.post('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: 
       return;
     }
 
+    // Verificar si ya existe un ciclo activo del mismo tipo y año en esta UP
+    const duplicado = await pool.query(`
+      SELECT cycle_id FROM cycle 
+      WHERE up_id = $1 
+        AND cycle_year = $2 
+        AND cycle_type = $3 
+        AND COALESCE(estado_ciclo, 'activo') = 'activo'
+    `, [up_id, cycle_year, cycle_type]);
+
+    if (duplicado.rows.length > 0) {
+      res.status(409).json({ 
+        error: `Ya tienes un ciclo ${cycle_type} ${cycle_year} activo en esta UP` 
+      });
+      return;
+    }
+
     const result = await pool.query(
       `INSERT INTO cycle (up_id, cycle_year, cycle_type)
        VALUES ($1, $2, $3)

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Sprout, RefreshCw, AlertTriangle, TrendingUp, MapPin, Layers, CheckCircle, XCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const BASE = import.meta.env.VITE_API_URL || 'http://31.97.8.51:3005/api';
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
 
 function fmtNum(v: number, dec = 0) {
