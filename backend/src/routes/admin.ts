@@ -143,10 +143,11 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
 router.get('/usuarios/estados-disponibles', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(`
-      SELECT DISTINCT p.estado_up AS estado
+      SELECT DISTINCT up.state_name AS estado
       FROM producer p
-      WHERE p.estado_up IS NOT NULL
-        AND p.estado_up != ''
+      JOIN up ON up.producer_id = p.producer_id
+      WHERE up.state_name IS NOT NULL
+        AND up.state_name != ''
       ORDER BY estado ASC
     `);
     res.json({ 
