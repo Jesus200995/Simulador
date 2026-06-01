@@ -296,9 +296,9 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
         let centroidVal = null;
         try {
           const muni = await client.query(
-            `SELECT ST_SetSRID(ST_MakePoint(centroid_lng, centroid_lat), 4326) as centroid 
+            `SELECT centroid::geometry AS centroid
              FROM municipios_referencia
-             WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado_nombre) = LOWER($2) LIMIT 1`,
+             WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
             [municipio_up, estado_up]
           );
           centroidVal = muni.rows[0]?.centroid || null;
