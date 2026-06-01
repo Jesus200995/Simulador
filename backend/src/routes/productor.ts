@@ -263,10 +263,12 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       if (hasCoords) {
         const postgisDisponible = process.env.POSTGIS_ENABLED === 'true';
         const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
-        const geomSql = hasPoligono && postgisDisponible
+        // useGeomParam: $6 solo aparece en el SQL cuando ambas condiciones se cumplen
+        const useGeomParam = hasPoligono && postgisDisponible;
+        const geomSql = useGeomParam
           ? `ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)`
           : 'NULL';
-        const geomParam = hasPoligono && postgisDisponible
+        const geomParam = useGeomParam
           ? JSON.stringify({
               type: 'Polygon',
               coordinates: [[
@@ -277,10 +279,10 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
           : null;
         const qParams = [
           p.rows[0].producer_id, estado_up, municipio_up, lng, lat,
-          ...(hasPoligono ? [geomParam] : []),
+          ...(useGeomParam ? [geomParam] : []),
           area_calc_ha || null, area_real_ha || null, coincide_area ?? null,
         ];
-        const aIdx = hasPoligono ? 7 : 6;
+        const aIdx = useGeomParam ? 7 : 6;
         await client.query(
           `INSERT INTO up
              (producer_id, up_name, up_type, production_system, water_regime,
