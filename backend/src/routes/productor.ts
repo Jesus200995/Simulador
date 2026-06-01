@@ -74,6 +74,21 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
       return;
     }
 
+    // Obtener datos del productor para el INSERT de usuarios
+    const prodInfo = await pool.query(
+      `SELECT curp, nombres, apellido_paterno, apellido_materno,
+              COALESCE(phone, telefono, '') AS telefono
+       FROM producer WHERE producer_id = $1`,
+      [producer_id]
+    );
+    if (!prodInfo.rows.length) {
+      res.status(404).json({ error: 'Productor no encontrado' });
+      return;
+    }
+    const prod = prodInfo.rows[0];
+    const nombreCompleto = [prod.nombres, prod.apellido_paterno, prod.apellido_materno]
+      .filter(Boolean).join(' ');
+
     const hashedPin = await bcrypt.hash(pin, 10);
 
     // Transacción: crear usuario + vincular productor
@@ -82,8 +97,9 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
       await client.query('BEGIN');
 
       const u = await client.query(
-        `INSERT INTO usuarios (password_hash, rol, activo) VALUES ($1, 'productor', true) RETURNING id`,
-        [hashedPin]
+        `INSERT INTO usuarios (curp, nombre_completo, password_hash, telefono, rol, activo)
+         VALUES ($1, $2, $3, $4, 'productor', true) RETURNING id`,
+        [prod.curp, nombreCompleto, hashedPin, prod.telefono]
       );
 
       const producer = await client.query(

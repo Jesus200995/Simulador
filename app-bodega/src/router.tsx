@@ -3,6 +3,7 @@ import { Layout } from './components/Layout';
 import { LayoutProductor } from './components/LayoutProductor';
 import { useAuthStore } from './store/auth';
 
+import WelcomePage from './pages/WelcomePage';
 import B01Login from './pages/B01Login';
 import B02Register from './pages/B02Register';
 
@@ -106,13 +107,14 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 
 function SmartRedirect() {
   const { isAuthenticated, user } = useAuthStore();
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/bienvenida" replace />;
   if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
   if (user?.rol === 'admin' || user?.rol === 'responsable') return <Navigate to="/admin" replace />;
   return <Navigate to="/dashboard" replace />;
 }
 
 export const router = createBrowserRouter([
+  { path: '/bienvenida', element: <GuestOnly><WelcomePage /></GuestOnly> },
   { path: '/login', element: <GuestOnly><B01Login /></GuestOnly> },
   { path: '/registro', element: <GuestOnly><B02Register /></GuestOnly> },
   { path: '/bodegas/seleccionar', element: <RequireAuth><B03SelectBodegas /></RequireAuth> },

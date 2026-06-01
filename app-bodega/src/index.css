@@ -97,6 +97,39 @@ body {
   animation: somec-shimmer 3.5s linear infinite;
 }
 
+/* ═══════ AUTH PAGE ANIMATIONS ═══════ */
+@keyframes auth-slide-up {
+  from { opacity: 0; transform: translateY(28px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.animate-auth-in {
+  animation: auth-slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes auth-slide-right {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-right {
+  animation: auth-slide-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes auth-slide-left {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-left {
+  animation: auth-slide-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes auth-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: auth-fade-in 0.35s ease both;
+}
+
 /* ═══════ HIDE DEFAULT LEAFLET-DRAW TOOLBAR ═══════ */
 .leaflet-draw-toolbar,
 .leaflet-draw-toolbar-top,

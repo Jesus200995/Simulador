@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import PinInput from '../../components/productor/PinInput';
 import { useAuthStore } from '../../store/auth';
 
@@ -21,8 +21,7 @@ export default function CrearPinPage() {
     const data = sessionStorage.getItem('activacion');
     if (!data) { navigate('/activar'); return; }
     const parsed = JSON.parse(data) as ActivacionData;
-    const timer = requestAnimationFrame(() => setActivacion(parsed));
-    return () => cancelAnimationFrame(timer);
+    setActivacion(parsed);
   }, [navigate]);
 
   const handlePinChange = (val: string) => {
@@ -57,7 +56,11 @@ export default function CrearPinPage() {
         body: JSON.stringify({ producer_id: activacion.producer_id, pin: finalPin }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Error al activar'); setPin(''); setConfirmPin(''); setStep('crear'); return; }
+      if (!res.ok) {
+        setError(data.error || 'Error al activar la cuenta.');
+        setPin(''); setConfirmPin(''); setStep('crear');
+        return;
+      }
 
       sessionStorage.removeItem('activacion');
       setAuth(data.token, {
@@ -68,7 +71,7 @@ export default function CrearPinPage() {
       });
       navigate('/productor');
     } catch {
-      setError('Error de conexion.');
+      setError('Error de conexión.');
       setPin(''); setConfirmPin(''); setStep('crear');
     } finally {
       setLoading(false);
@@ -78,41 +81,90 @@ export default function CrearPinPage() {
   if (!activacion) return null;
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center px-5 sm:px-8 py-10">
-      <div className="w-full max-w-md text-center">
-        <div className="mb-8">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={32} className="text-[#1A5C38]" />
+    <div className="relative min-h-screen flex flex-col overflow-hidden">
+      {/* Background */}
+      <div className="fixed inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
+      </div>
+
+      {/* Header */}
+      <div className="relative flex items-center px-4 py-3 sm:py-4">
+        <button
+          onClick={() => { setStep('crear'); setPin(''); setConfirmPin(''); navigate('/activar'); }}
+          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+        >
+          <ChevronLeft size={22} className="text-white/70" />
+        </button>
+        {/* Stepper 2/2 */}
+        <div className="flex-1 flex justify-center items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center">
+              <CheckCircle size={14} className="text-white" />
+            </div>
+            <span className="text-xs text-white/40 font-semibold hidden sm:block">Buscar</span>
           </div>
-          <p className="text-zinc-900 font-bold text-xl sm:text-2xl">
-            Hola, {activacion.nombres}
-          </p>
-          <p className="text-zinc-500 text-sm sm:text-base mt-1.5">
+          <div className="w-6 sm:w-10 h-px bg-white/40" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+              <span className="text-[10px] font-bold text-[#1A5C38]">2</span>
+            </div>
+            <span className="text-xs text-white font-semibold hidden sm:block">Crear PIN</span>
+          </div>
+        </div>
+        <div className="w-9" />
+      </div>
+
+      {/* Content */}
+      <div className="relative flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-10">
+        <div className="w-full max-w-sm animate-auth-in text-center">
+
+          {/* Avatar / greeting */}
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#1A5C38] rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl shadow-green-900/40">
+            <span className="text-2xl sm:text-3xl font-black text-white">
+              {activacion.nombres?.charAt(0) ?? '?'}
+            </span>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-1">
+            ¡Hola, {activacion.nombres?.split(' ')[0]}!
+          </h1>
+          <p className="text-white/50 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
             {step === 'crear'
-              ? 'Crea un PIN de 4 numeros para entrar a tu cuenta'
+              ? 'Crea un PIN de 4 dígitos para acceder a tu cuenta'
               : 'Repite tu PIN para confirmar'}
           </p>
+
+          {/* Step label */}
+          <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 mb-6">
+            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${step === 'crear' ? 'bg-green-400' : 'bg-white/30'}`} />
+            <span className="text-xs text-white/60 font-medium">
+              {step === 'crear' ? 'Paso 1: Elige tu PIN' : 'Paso 2: Confirma tu PIN'}
+            </span>
+          </div>
+
+          {error && (
+            <div className="mb-5 mx-auto p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl
+                            text-red-300 text-sm flex items-start gap-2 text-left">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 text-white/60 py-8">
+              <Loader2 size={22} className="animate-spin" />
+              <span className="text-sm sm:text-base">Activando tu cuenta...</span>
+            </div>
+          ) : (
+            <div className={step === 'confirmar' ? 'animate-slide-left' : ''}>
+              <PinInput
+                value={step === 'crear' ? pin : confirmPin}
+                onChange={handlePinChange}
+              />
+            </div>
+          )}
         </div>
-
-        {error && (
-          <div className="mb-6 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-sm
-                          flex items-start gap-2 text-left max-w-sm mx-auto">
-            <AlertCircle size={16} className="shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex items-center justify-center gap-2 text-zinc-500">
-            <Loader2 size={20} className="animate-spin" />
-            <span>Activando tu cuenta...</span>
-          </div>
-        ) : (
-          <PinInput
-            value={step === 'crear' ? pin : confirmPin}
-            onChange={handlePinChange}
-          />
-        )}
       </div>
     </div>
   );

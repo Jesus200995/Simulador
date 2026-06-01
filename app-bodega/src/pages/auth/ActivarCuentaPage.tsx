@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wheat, Search, UserPlus, LogIn, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Search, AlertCircle, Loader2, UserPlus } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -11,6 +11,7 @@ export default function ActivarCuentaPage() {
   const navigate = useNavigate();
 
   const handleBuscar = async () => {
+    if (curp.length !== 18 || loading) return;
     setLoading(true);
     setError('');
     try {
@@ -22,7 +23,7 @@ export default function ActivarCuentaPage() {
       const data = await res.json();
 
       if (!data.encontrado) {
-        setError('Tu CURP no esta en el padron.');
+        setError('Tu CURP no está en el padrón. Puedes registrarte como nuevo productor.');
         return;
       }
       if (data.ya_tiene_cuenta) {
@@ -36,81 +37,126 @@ export default function ActivarCuentaPage() {
       }));
       navigate('/activar/pin');
     } catch {
-      setError('Error de conexion. Intenta de nuevo.');
+      setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center px-5 sm:px-8 py-10">
-      <div className="w-full max-w-md">
-        <div className="mb-10 text-center">
-          <div className="w-16 h-16 bg-[#1A5C38] rounded-[20px] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-900/20">
-            <Wheat size={28} className="text-white" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">Plan Nacional Maiz</h1>
-          <p className="text-zinc-500 text-sm sm:text-base mt-1.5">Activa tu cuenta de productor</p>
-        </div>
+    <div className="relative min-h-screen flex flex-col overflow-hidden">
+      {/* Background */}
+      <div className="fixed inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
+      </div>
 
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm ring-1 ring-zinc-100">
-          <label className="block text-sm font-semibold text-zinc-700 mb-1.5">
-            Escribe tu CURP
-          </label>
-          <p className="text-xs text-zinc-400 mb-4">
-            Son 18 caracteres. Los encuentras en tu credencial del INE o acta de nacimiento.
-          </p>
-          <input
-            type="text"
-            value={curp}
-            onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-            maxLength={18}
-            placeholder="AAAA000000AAAAAA00"
-            className="w-full bg-zinc-50 ring-1 ring-zinc-200 rounded-xl px-4 py-4 text-lg
-                       font-mono tracking-widest focus:ring-2 focus:ring-[#1A5C38] focus:outline-none
-                       transition-shadow"
-          />
-          <p className="text-xs text-zinc-400 mt-1.5 text-right">{curp.length}/18</p>
-
-          {error && (
-            <div className="mt-3 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2">
-              <AlertCircle size={16} className="shrink-0 mt-0.5" />
-              <span>{error}</span>
+      {/* Header */}
+      <div className="relative flex items-center px-4 py-3 sm:py-4">
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+        >
+          <ChevronLeft size={22} className="text-white/70" />
+        </button>
+        {/* Stepper 1/2 */}
+        <div className="flex-1 flex justify-center items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+              <span className="text-[10px] font-bold text-[#1A5C38]">1</span>
             </div>
-          )}
-
-          <button
-            onClick={handleBuscar}
-            disabled={curp.length !== 18 || loading}
-            className="mt-5 w-full bg-[#1A5C38] hover:bg-[#15482d] text-white rounded-xl py-4 text-base
-                       font-semibold disabled:opacity-40 active:scale-[0.98] transition-all duration-200
-                       flex items-center justify-center gap-2"
-          >
-            <Search size={18} />
-            {loading ? 'Buscando...' : 'Buscar mi registro'}
-          </button>
+            <span className="text-xs text-white font-semibold hidden sm:block">Buscar</span>
+          </div>
+          <div className="w-6 sm:w-10 h-px bg-white/20" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-white/50">2</span>
+            </div>
+            <span className="text-xs text-white/40 font-semibold hidden sm:block">Crear PIN</span>
+          </div>
         </div>
+        <div className="w-9" />
+      </div>
 
-        <div className="mt-8 text-center space-y-4">
-          <div className="border-t border-zinc-200 pt-6">
-            <p className="text-zinc-500 text-sm">No apareces en el padron?</p>
+      {/* Content */}
+      <div className="relative flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-10">
+        <div className="w-full max-w-sm animate-auth-in">
+
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Activar cuenta
+            </h1>
+            <p className="text-white/50 text-sm sm:text-base mt-1.5">
+              Busca tu registro en el padrón de productores
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6">
+            <label className="block text-xs sm:text-sm font-semibold text-white/60 uppercase tracking-wide mb-2">
+              Tu CURP
+            </label>
+            <p className="text-xs text-white/30 mb-3 leading-relaxed">
+              18 caracteres. Lo encuentras en tu credencial INE o acta de nacimiento.
+            </p>
+            <input
+              type="text"
+              value={curp}
+              onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+              maxLength={18}
+              placeholder="AAAA000000AAAAAA00"
+              autoCapitalize="characters"
+              onKeyDown={e => e.key === 'Enter' && handleBuscar()}
+              className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 sm:py-4
+                         text-base sm:text-lg font-mono tracking-widest text-white placeholder-white/25
+                         focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+            />
+            <div className="flex justify-end mt-1.5">
+              <span className="text-xs text-white/30 font-mono">{curp.length}/18</span>
+            </div>
+
+            {error && (
+              <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl
+                              text-red-300 text-sm flex items-start gap-2">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <button
-              onClick={() => navigate('/registro-nuevo')}
-              className="mt-2 text-[#1A5C38] font-semibold text-sm flex items-center gap-1.5 mx-auto hover:underline"
+              onClick={handleBuscar}
+              disabled={curp.length !== 18 || loading}
+              className="mt-4 sm:mt-5 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
+                         rounded-xl py-3.5 sm:py-4 text-sm sm:text-base font-bold
+                         disabled:opacity-30 active:scale-[0.98] transition-all duration-200
+                         flex items-center justify-center gap-2"
             >
-              <UserPlus size={16} /> Registrate aqui
+              {loading
+                ? <><Loader2 size={17} className="animate-spin" /> Buscando...</>
+                : <><Search size={17} /> Buscar mi registro</>
+              }
             </button>
           </div>
 
-          <div className="space-y-2">
-            <button onClick={() => navigate('/login-productor')}
-              className="text-[#1A5C38] text-sm font-semibold flex items-center gap-1.5 mx-auto hover:underline">
-              <LogIn size={16} /> Ya tengo PIN - Entrar con CURP
-            </button>
-            <button onClick={() => navigate('/login')}
-              className="text-zinc-400 text-sm hover:text-zinc-500 transition-colors block mx-auto">
-              Iniciar sesion con correo
-            </button>
+          {/* Links */}
+          <div className="mt-6 sm:mt-8 space-y-3 text-center">
+            <div className="border-t border-white/10 pt-5 space-y-3">
+              <div>
+                <p className="text-white/40 text-xs sm:text-sm mb-1.5">¿No apareces en el padrón?</p>
+                <button
+                  onClick={() => navigate('/registro-nuevo')}
+                  className="flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors mx-auto"
+                >
+                  <UserPlus size={15} />
+                  Registrarme como nuevo productor
+                </button>
+              </div>
+              <button
+                onClick={() => navigate('/login-productor')}
+                className="block text-sm text-white/40 hover:text-white/60 transition-colors mx-auto"
+              >
+                Ya tengo PIN — Entrar
+              </button>
+            </div>
           </div>
         </div>
       </div>
