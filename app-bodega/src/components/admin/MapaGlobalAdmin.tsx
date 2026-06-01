@@ -62,9 +62,14 @@ function FlyToCenter() {
   useEffect(() => {
     const onPopupOpen = (e: any) => {
       const latlng = e.popup.getLatLng();
-      if (latlng) {
-        map.flyTo(latlng, Math.max(map.getZoom(), 7), { animate: true, duration: 0.6 });
-      }
+      if (!latlng) return;
+      const targetZoom = Math.max(map.getZoom(), 7);
+      const mapSize = map.getSize();
+      const offsetY = mapSize.y * 0.30; // push point 30% down from center
+      const targetPoint = map.project(latlng, targetZoom);
+      // unproject can take a Leaflet Point or an array/object with x,y
+      const offsetLatLng = map.unproject([targetPoint.x, targetPoint.y - offsetY], targetZoom);
+      map.flyTo(offsetLatLng, targetZoom, { animate: true, duration: 0.5 });
     };
     map.on('popupopen', onPopupOpen);
     return () => { map.off('popupopen', onPopupOpen); };
