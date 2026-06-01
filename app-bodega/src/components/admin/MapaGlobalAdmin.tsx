@@ -216,31 +216,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
               }}
             >
               <Popup>
-                <div style={{ minWidth: 170 }}>
-                  <p style={{ fontWeight: 700, fontSize: 13, margin: '0 0 3px' }}>{p.nombre}</p>
-                  <p style={{ fontSize: 11, color: '#6b7280', margin: '0 0 4px' }}>
-                    {p.municipio ? `${p.municipio}, ` : ''}{p.estado}
-                  </p>
-                  <span style={{
-                    display: 'inline-block',
-                    fontSize: 10,
-                    fontWeight: 600,
-                    padding: '2px 8px',
-                    borderRadius: 99,
-                    color: 'white',
-                    background: getColor(p.tipo),
-                  }}>
-                    {p.tipo === 'productor' ? 'Productor' : p.tipo === 'bodega' ? 'Bodega' : 'Alerta'}
-                  </span>
-                  {p.detalle && (
-                    <p style={{ fontSize: 11, color: '#374151', marginTop: 6 }}>{p.detalle}</p>
-                  )}
-                  {p.nivel && (
-                    <p style={{ fontSize: 10, color: p.nivel === 'ALTA' ? '#DC2626' : '#F59E0B', fontWeight: 600, marginTop: 4 }}>
-                      Criticidad: {p.nivel}
-                    </p>
-                  )}
-                </div>
+                <PopupContent p={p} color={getColor(p.tipo)} />
               </Popup>
             </CircleMarker>
           ))}
@@ -253,5 +229,54 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
         <span className="ml-auto">Tiles: ESRI World Imagery</span>
       </div>
     </section>
+  );
+}
+
+function PopupContent({ p, color }: { p: Punto; color: string }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="min-w-[180px] max-w-[240px] font-sans">
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <h3 className="font-bold text-[13px] leading-tight text-gray-900 m-0">{p.nombre}</h3>
+      </div>
+      <p className="text-[11px] text-gray-500 m-0 mb-2 leading-tight">
+        {p.municipio ? `${p.municipio}, ` : ''}{p.estado}
+      </p>
+      
+      <div className="mb-3">
+        <span 
+          className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full text-white shadow-sm"
+          style={{ background: color }}
+        >
+          {p.tipo === 'productor' ? 'Productor' : p.tipo === 'bodega' ? 'Bodega' : 'Alerta'}
+        </span>
+        {p.nivel && (
+          <span className={`inline-block ml-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white shadow-sm ${p.nivel === 'ALTA' || p.nivel === 'critico' ? 'bg-red-500' : 'bg-amber-500'}`}>
+            {p.nivel}
+          </span>
+        )}
+      </div>
+
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? 'max-h-[200px] opacity-100 mt-2 mb-3' : 'max-h-0 opacity-0 m-0'}`}>
+        <div className="p-2.5 bg-gray-50 border border-gray-100 rounded-lg">
+          <p className="text-[11px] text-gray-700 m-0 font-medium">{p.detalle || 'No hay detalles adicionales disponibles.'}</p>
+          <div className="mt-2 pt-2 border-t border-gray-200/60 flex items-center justify-between text-[10px] text-gray-400">
+            <span>Lat: {p.latitud.toFixed(4)}</span>
+            <span>Lng: {p.longitud.toFixed(4)}</span>
+          </div>
+        </div>
+      </div>
+
+      <button 
+        onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+        className="w-full py-1.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-[11px] font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5"
+      >
+        <span>{expanded ? 'Ocultar información' : 'Ver más información'}</span>
+        <svg className={`w-3 h-3 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
   );
 }
