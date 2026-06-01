@@ -85,15 +85,6 @@ export default function WelcomePage() {
           </button>
         </div>
 
-        {/* Admin link */}
-        <div className="animate-auth-in mt-8 sm:mt-10 text-center" style={{ animationDelay: '0.2s' }}>
-          <button
-            onClick={() => navigate('/admin/login')}
-            className="text-white/25 hover:text-white/45 text-xs sm:text-sm transition-colors"
-          >
-            Acceso administrativo
-          </button>
-        </div>
 
         {/* Footer */}
         <p className="animate-auth-in mt-6 text-center text-[10px] sm:text-[11px] text-white/20 max-w-xs leading-relaxed px-4" style={{ animationDelay: '0.25s' }}>
