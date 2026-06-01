@@ -535,7 +535,7 @@ router.get('/bodegas/estadisticas', authMiddleware, soloAdmin, async (req: AuthR
       SELECT
         COALESCE(SUM(b.capacidad_ton), 0) AS capacidad_total,
         COALESCE(SUM(CASE WHEN i.vol IS NOT NULL THEN i.vol ELSE 0 END), 0) AS stock_total,
-        ROUND(COALESCE(SUM(CASE WHEN i.vol IS NOT NULL THEN i.vol ELSE 0 END) * 100.0 / NULLIF(SUM(b.capacidad_ton), 0), 0), 1) AS pct_ocupacion,
+        ROUND((COALESCE(SUM(CASE WHEN i.vol IS NOT NULL THEN i.vol ELSE 0 END) * 100.0 / NULLIF(SUM(b.capacidad_ton), 0), 0))::numeric, 1) AS pct_ocupacion,
         COUNT(DISTINCT ts.bodega_id) AS con_tarifario,
         COUNT(DISTINCT v.id) AS ventanillas_activas
       FROM bodegas b
