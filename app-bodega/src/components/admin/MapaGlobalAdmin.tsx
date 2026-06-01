@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface MapaGlobalAdminProps {
@@ -194,6 +194,32 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
             <div className="w-7 h-7 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
           </div>
         )}
+        <style>{`
+          .apple-glass-popup .leaflet-popup-content-wrapper {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+          }
+          .apple-glass-popup .leaflet-popup-content {
+            margin: 0 !important;
+            width: auto !important;
+          }
+          .apple-glass-popup .leaflet-popup-tip-container {
+            display: none !important;
+          }
+          .leaflet-container a.leaflet-popup-close-button {
+            color: #fff !important;
+            opacity: 0.6;
+            right: 14px !important;
+            top: 14px !important;
+            z-index: 10;
+          }
+          .leaflet-container a.leaflet-popup-close-button:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+          }
+        `}</style>
         <MapContainer
           center={[23.6345, -102.5528]}
           zoom={5}
@@ -215,7 +241,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                 weight: 1.5,
               }}
             >
-              <Popup>
+              <Popup className="apple-glass-popup" autoPan={false}>
                 <PopupContent p={p} color={getColor(p.tipo)} />
               </Popup>
             </CircleMarker>
