@@ -92,6 +92,9 @@ const POPUP_CSS = `
   .simac-popup .leaflet-popup-close-button {
     display: none !important;
   }
+  .simac-popup {
+    margin-bottom: 6px !important;
+  }
 `;
 
 export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps) {
@@ -293,140 +296,173 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
   );
 }
 
+/* ── SVG icons for each type (professional, no emojis) ── */
+const TipoIcons: Record<string, JSX.Element> = {
+  productor: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2L12 8" /><path d="M8 6C8 6 9.5 2 12 2C14.5 2 16 6 16 6" />
+      <path d="M6 10C6 10 8 6 12 6C16 6 18 10 18 10" />
+      <path d="M12 8V22" /><path d="M8 22H16" />
+    </svg>
+  ),
+  bodega: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 21V10L12 3L20 10V21H4Z" />
+      <rect x="9" y="13" width="6" height="8" rx="1" />
+    </svg>
+  ),
+  alerta: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  ),
+};
+
 /* ─────────────────────────────────────────────
    PopupCard — Apple 2026 style, light + pastel
+   with pointer arrow at bottom
    ───────────────────────────────────────────── */
 function PopupCard({ p }: { p: Punto }) {
   const [expanded, setExpanded] = useState(false);
   const theme = LIGHT_COLORS[p.tipo] || LIGHT_COLORS.productor;
-
   const tipoLabel = p.tipo === 'productor' ? 'Productor' : p.tipo === 'bodega' ? 'Bodega' : 'Alerta';
-  const tipoIcon = p.tipo === 'productor' ? '🌾' : p.tipo === 'bodega' ? '🏭' : '⚠️';
 
   return (
-    <div
-      style={{
-        width: 260,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
-        background: `linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92))`,
-        border: `1.5px solid ${theme.border}`,
-        borderRadius: 18,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)`,
-        overflow: 'hidden',
-      }}
-    >
-      {/* Accent strip at top */}
-      <div style={{ height: 3, background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}88, transparent)` }} />
-
-      {/* Content */}
-      <div style={{ padding: '14px 16px 12px' }}>
-        {/* Header row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 10,
-            background: theme.badge,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 15, flexShrink: 0,
-          }}>
-            {tipoIcon}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontSize: 13, fontWeight: 700, color: '#1a1a1a',
-              lineHeight: 1.25, margin: 0,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {p.nombre}
-            </div>
-            <div style={{ fontSize: 11, color: '#888', marginTop: 2, lineHeight: 1.2 }}>
-              {p.municipio ? `${p.municipio}, ` : ''}{p.estado}
-            </div>
-          </div>
-        </div>
-
-        {/* Badge row */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-          <span style={{
-            display: 'inline-block', fontSize: 10, fontWeight: 600,
-            padding: '3px 10px', borderRadius: 99,
-            background: theme.badge, color: theme.badgeText,
-            letterSpacing: 0.2,
-          }}>
-            {tipoLabel}
-          </span>
-          {p.nivel && (
-            <span style={{
-              display: 'inline-block', fontSize: 10, fontWeight: 600,
-              padding: '3px 10px', borderRadius: 99,
-              background: p.nivel === 'critico' || p.nivel === 'alto' ? 'rgba(220,38,38,0.1)' : 'rgba(245,158,11,0.1)',
-              color: p.nivel === 'critico' || p.nivel === 'alto' ? '#dc2626' : '#d97706',
-            }}>
-              {p.nivel}
-            </span>
-          )}
-        </div>
-
-        {/* Expandable section */}
-        <div style={{
-          maxHeight: expanded ? 160 : 0,
-          opacity: expanded ? 1 : 0,
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {/* Card body */}
+      <div
+        style={{
+          width: 260,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
+          background: `linear-gradient(145deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93))`,
+          border: `1.5px solid ${theme.border}`,
+          borderRadius: 18,
+          boxShadow: `0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)`,
           overflow: 'hidden',
-          transition: 'max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease',
-        }}>
-          <div style={{
-            background: theme.expandBg,
-            border: `1px solid ${theme.border}`,
-            borderRadius: 12,
-            padding: '10px 12px',
-            marginBottom: 10,
-          }}>
-            <div style={{ fontSize: 11, color: '#555', fontWeight: 500, lineHeight: 1.5, margin: 0 }}>
-              {p.detalle || 'Sin detalles disponibles'}
-            </div>
+        }}
+      >
+        {/* Accent strip at top */}
+        <div style={{ height: 3, background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}88, transparent)` }} />
+
+        {/* Content */}
+        <div style={{ padding: '14px 16px 12px' }}>
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
             <div style={{
-              display: 'flex', justifyContent: 'space-between',
-              marginTop: 8, paddingTop: 8,
-              borderTop: `1px solid ${theme.border}`,
-              fontSize: 10, color: '#aaa', fontFamily: 'monospace',
+              width: 34, height: 34, borderRadius: 10,
+              background: theme.badge,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: theme.badgeText, flexShrink: 0,
             }}>
-              <span>{p.latitud.toFixed(4)}°N</span>
-              <span>{Math.abs(p.longitud).toFixed(4)}°W</span>
+              {TipoIcons[p.tipo] || TipoIcons.productor}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: 13, fontWeight: 700, color: '#1a1a1a',
+                lineHeight: 1.25, margin: 0,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {p.nombre}
+              </div>
+              <div style={{ fontSize: 11, color: '#888', marginTop: 2, lineHeight: 1.2 }}>
+                {p.municipio ? `${p.municipio}, ` : ''}{p.estado}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Toggle button */}
-        <button
-          onClick={e => { e.stopPropagation(); setExpanded(!expanded); }}
-          style={{
-            width: '100%',
-            padding: '7px 0',
-            background: expanded ? theme.expandBg : 'transparent',
-            border: `1px solid ${theme.border}`,
-            borderRadius: 10,
-            color: theme.accent,
-            fontSize: 11,
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
-            transition: 'all 0.2s ease',
-            letterSpacing: 0.1,
-          }}
-          onMouseEnter={e => { (e.target as HTMLElement).style.background = theme.badge; }}
-          onMouseLeave={e => { (e.target as HTMLElement).style.background = expanded ? theme.expandBg : 'transparent'; }}
-        >
-          <span>{expanded ? 'Ocultar' : 'Ver más información'}</span>
-          <svg
-            width="12" height="12" viewBox="0 0 24 24" fill="none"
-            style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}
+          {/* Badge row */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              fontSize: 10, fontWeight: 600,
+              padding: '3px 10px', borderRadius: 99,
+              background: theme.badge, color: theme.badgeText,
+              letterSpacing: 0.2,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.accent }} />
+              {tipoLabel}
+            </span>
+            {p.nivel && (
+              <span style={{
+                display: 'inline-block', fontSize: 10, fontWeight: 600,
+                padding: '3px 10px', borderRadius: 99,
+                background: p.nivel === 'critico' || p.nivel === 'alto' ? 'rgba(220,38,38,0.1)' : 'rgba(245,158,11,0.1)',
+                color: p.nivel === 'critico' || p.nivel === 'alto' ? '#dc2626' : '#d97706',
+              }}>
+                {p.nivel}
+              </span>
+            )}
+          </div>
+
+          {/* Expandable section */}
+          <div style={{
+            maxHeight: expanded ? 160 : 0,
+            opacity: expanded ? 1 : 0,
+            overflow: 'hidden',
+            transition: 'max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease',
+          }}>
+            <div style={{
+              background: theme.expandBg,
+              border: `1px solid ${theme.border}`,
+              borderRadius: 12,
+              padding: '10px 12px',
+              marginBottom: 10,
+            }}>
+              <div style={{ fontSize: 11, color: '#555', fontWeight: 500, lineHeight: 1.5, margin: 0 }}>
+                {p.detalle || 'Sin detalles disponibles'}
+              </div>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                marginTop: 8, paddingTop: 8,
+                borderTop: `1px solid ${theme.border}`,
+                fontSize: 10, color: '#aaa', fontFamily: 'monospace',
+              }}>
+                <span>{p.latitud.toFixed(4)} N</span>
+                <span>{Math.abs(p.longitud).toFixed(4)} W</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Toggle button */}
+          <button
+            onClick={e => { e.stopPropagation(); setExpanded(!expanded); }}
+            style={{
+              width: '100%',
+              padding: '7px 0',
+              background: expanded ? theme.expandBg : 'transparent',
+              border: `1px solid ${theme.border}`,
+              borderRadius: 10,
+              color: theme.accent,
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 5,
+              transition: 'all 0.2s ease',
+              letterSpacing: 0.1,
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = theme.badge; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = expanded ? theme.expandBg : 'transparent'; }}
           >
-            <path d="M6 9l6 6 6-6" stroke={theme.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+            <span>{expanded ? 'Ocultar' : 'Ver mas informacion'}</span>
+            <svg
+              width="12" height="12" viewBox="0 0 24 24" fill="none"
+              style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}
+            >
+              <path d="M6 9l6 6 6-6" stroke={theme.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* Arrow/pointer pointing down to the map pin */}
+      <svg width="20" height="10" viewBox="0 0 20 10" style={{ marginTop: -1, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.08))' }}>
+        <polygon points="0,0 10,10 20,0" fill="rgba(255,255,255,0.96)" stroke={theme.border} strokeWidth="1.5"
+          strokeLinejoin="round" style={{ strokeDasharray: '0 20 14 0' }} />
+      </svg>
     </div>
   );
 }
