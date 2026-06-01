@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Wheat, CircleDot, MapPinned, Check,
-  AlertCircle, User, MapPin, Sprout, Map, Phone, Loader2
+  ChevronLeft, Wheat, CircleDot, Check,
+  AlertCircle, User, MapPin, Sprout, Map, Phone, Loader2,
+  PenLine, Undo2, Pencil, Trash2, CheckCircle2,
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PinInput from '../../components/productor/PinInput';
 import NominatimSearch from '../../components/productor/NominatimSearch';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
+import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -19,11 +21,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
-
-function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  useMapEvents({ click: e => onMapClick(e.latlng.lat, e.latlng.lng) });
-  return null;
-}
 
 const PROGRAMAS = [
   { clave: 'fertilizantes_bienestar', nombre: 'Fertilizantes para el Bienestar' },
@@ -36,11 +33,11 @@ const PROGRAMAS = [
 ];
 
 const PASOS_INFO = [
-  { icon: User,    label: 'Datos' },
-  { icon: MapPin,  label: 'Ubicación' },
-  { icon: Sprout,  label: 'Cultivo' },
-  { icon: Map,     label: 'Parcela' },
-  { icon: Phone,   label: 'Contacto' },
+  { icon: User,   label: 'Datos' },
+  { icon: MapPin, label: 'Ubicación' },
+  { icon: Sprout, label: 'Cultivo' },
+  { icon: Map,    label: 'Parcela' },
+  { icon: Phone,  label: 'Contacto' },
 ];
 
 function normalizeText(str: string): string {
@@ -58,29 +55,39 @@ const selectCls =
 export default function RegistroNuevoPage() {
   const navigate = useNavigate();
   const mapRef = useRef<L.Map>(null);
+  const dibujarRef = useRef<DibujarPoligonoHandle>(null);
+
   const [paso, setPaso] = useState(1);
   const [animDir, setAnimDir] = useState<'right' | 'left'>('right');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Datos personales
   const [nombres, setNombres] = useState('');
   const [apPaterno, setApPaterno] = useState('');
   const [apMaterno, setApMaterno] = useState('');
   const [curp, setCurp] = useState('');
 
+  // Ubicación
   const [estados, setEstados] = useState<{ state_id: string; name: string }[]>([]);
   const [municipios, setMunicipios] = useState<{ municipality_id: string; name: string }[]>([]);
   const [estadoUp, setEstadoUp] = useState('');
   const [estadoUpNombre, setEstadoUpNombre] = useState('');
   const [municipioUp, setMunicipioUp] = useState('');
 
+  // Cultivo
   const [tipoMaiz, setTipoMaiz] = useState('');
+
+  // Mapa / parcela
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [poligono, setPoligono] = useState<[number, number][] | null>(null);
   const [areaCalc, setAreaCalc] = useState<number | null>(null);
   const [areaReal, setAreaReal] = useState('');
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
+  const [drawMode, setDrawMode] = useState<DrawMode>('idle');
+  const [pointCount, setPointCount] = useState(0);
 
+  // Contacto / PIN
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [pin, setPin] = useState('');
@@ -179,25 +186,59 @@ export default function RegistroNuevoPage() {
     }
   };
 
-  // ── PASO 4 — Mapa full-screen con estilo oscuro ───────────────────────────
+  // ── PASO 4 — Mapa full-screen ─────────────────────────────────────────────
   if (paso === 4) {
-    return (
-      <div className="fixed inset-0 flex flex-col bg-[#0c2e1a]" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    const puntosNecesarios = Math.max(0, 3 - pointCount);
+    const puedeTerminar = pointCount >= 3;
+    const parcelaLista = !!poligono && drawMode === 'idle';
+    const areaConfirmada = parcelaLista && coincideArea !== null && (coincideArea === true || (coincideArea === false && !!areaReal));
 
-        {/* Header del mapa */}
-        <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-black/40 backdrop-blur-md">
+    return (
+      <div
+        className="fixed inset-0 flex flex-col bg-[#0c2e1a]"
+        style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-black/50 backdrop-blur-md border-b border-white/05">
           <button
             onClick={handleBack}
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors"
+            className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors flex-shrink-0"
           >
             <ChevronLeft size={20} className="text-white" />
           </button>
-          <div className="flex-1">
-            <p className="text-white font-bold text-sm sm:text-base">Dibuja tu parcela</p>
-            <p className="text-white/50 text-xs">Traza los límites de tu terreno</p>
+
+          <div className="flex-1 min-w-0">
+            {drawMode === 'idle' && !poligono && (
+              <>
+                <p className="text-white font-bold text-sm leading-tight">Dibuja tu parcela</p>
+                <p className="text-white/40 text-xs">Toca el botón verde para comenzar</p>
+              </>
+            )}
+            {drawMode === 'drawing' && (
+              <>
+                <p className="text-green-300 font-bold text-sm leading-tight">Marcando puntos...</p>
+                <p className="text-white/40 text-xs">
+                  {pointCount} punto{pointCount !== 1 ? 's' : ''} marcado{pointCount !== 1 ? 's' : ''}
+                  {puedeTerminar ? ' — ya puedes finalizar' : ` — ${puntosNecesarios} más para terminar`}
+                </p>
+              </>
+            )}
+            {drawMode === 'idle' && poligono && (
+              <>
+                <p className="text-white font-bold text-sm leading-tight">Parcela dibujada</p>
+                <p className="text-white/40 text-xs">{areaCalc} ha calculadas</p>
+              </>
+            )}
+            {drawMode === 'editing' && (
+              <>
+                <p className="text-amber-300 font-bold text-sm leading-tight">Editando parcela</p>
+                <p className="text-white/40 text-xs">Arrastra los puntos para ajustar</p>
+              </>
+            )}
           </div>
+
           {/* Stepper mini */}
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-shrink-0">
             {[1,2,3,4,5].map(n => (
               <div key={n} className={`h-1 w-4 rounded-full transition-colors ${n <= paso ? 'bg-white' : 'bg-white/20'}`} />
             ))}
@@ -206,10 +247,56 @@ export default function RegistroNuevoPage() {
 
         {/* Mapa */}
         <div className="flex-1 relative min-h-0">
+          {/* Overlay instrucción inicial */}
+          {drawMode === 'idle' && !poligono && (
+            <div className="absolute inset-0 z-[500] flex items-center justify-center pointer-events-none">
+              <div className="bg-black/65 backdrop-blur-sm rounded-2xl px-6 py-5 mx-8 text-center shadow-2xl">
+                <div className="w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center mx-auto mb-3">
+                  <PenLine size={24} className="text-green-300" />
+                </div>
+                <p className="text-white font-bold text-sm mb-1.5">Dibuja los límites de tu parcela</p>
+                <p className="text-white/50 text-xs leading-relaxed">
+                  Toca "Comenzar a dibujar" abajo,<br />luego toca el mapa para marcar cada esquina
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Banner de instrucción durante dibujo */}
+          {drawMode === 'drawing' && (
+            <div className="absolute top-3 left-3 right-3 z-[500] pointer-events-none">
+              <div className="bg-black/75 backdrop-blur-md rounded-2xl px-4 py-3 flex items-start gap-3">
+                <div className="w-2 h-2 rounded-full bg-green-400 mt-1 flex-shrink-0 animate-pulse" />
+                <div>
+                  <p className="text-white text-xs font-semibold leading-tight">
+                    {puedeTerminar
+                      ? 'Toca "Finalizar parcela" cuando termines de marcar todos los puntos'
+                      : `Toca el mapa para marcar puntos — necesitas ${puntosNecesarios} más`}
+                  </p>
+                  {puedeTerminar && (
+                    <p className="text-white/40 text-xs mt-0.5">También puedes tocar el primer punto para cerrar</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Banner edición */}
+          {drawMode === 'editing' && (
+            <div className="absolute top-3 left-3 right-3 z-[500] pointer-events-none">
+              <div className="bg-amber-900/80 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-3">
+                <Pencil size={14} className="text-amber-300 flex-shrink-0" />
+                <p className="text-white/90 text-xs font-medium">
+                  Arrastra los puntos azules para ajustar la forma de tu parcela
+                </p>
+              </div>
+            </div>
+          )}
+
           <MapContainer
             ref={mapRef}
             center={coords ? [coords.lat, coords.lng] : [23.6345, -102.5528]}
-            zoom={coords ? 13 : 5}
+            zoom={coords ? 14 : 5}
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
             attributionControl={false}
@@ -223,104 +310,230 @@ export default function RegistroNuevoPage() {
               opacity={0.6}
             />
             <DibujarPoligonoUP
+              ref={dibujarRef}
               onPoligonoCompleto={(c, centroide, ha) => {
-                setPoligono(c); setCoords(centroide); setAreaCalc(ha); setCoincideArea(null);
+                setPoligono(c);
+                setCoords(centroide);
+                setAreaCalc(ha);
+                setCoincideArea(null);
+                setAreaReal('');
               }}
-              onPoligonoEliminado={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); }}
+              onPoligonoEliminado={() => {
+                setPoligono(null);
+                setAreaCalc(null);
+                setCoincideArea(null);
+                setAreaReal('');
+              }}
+              onModeChange={setDrawMode}
+              onPointCountChange={setPointCount}
             />
           </MapContainer>
-          <div className="absolute top-3 left-3 max-w-[calc(100%-80px)] w-64 sm:w-80 z-[1000]">
+
+          {/* Buscador de lugar */}
+          <div className="absolute top-3 left-3 max-w-[calc(100%-2rem)] w-72 sm:w-80 z-[1000]">
             <NominatimSearch
               placeholder="Buscar ejido, localidad..."
               onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 15)}
             />
           </div>
+
+          {/* Botón zoom-in manual visible */}
+          <div className="absolute right-3 bottom-4 z-[1000] flex flex-col gap-2">
+            <button
+              onClick={() => mapRef.current?.zoomIn()}
+              className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >+</button>
+            <button
+              onClick={() => mapRef.current?.zoomOut()}
+              className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >−</button>
+          </div>
         </div>
 
-        {/* Footer del mapa */}
-        <div className="flex-shrink-0 bg-black/60 backdrop-blur-md px-4 py-4 space-y-3">
-          {areaCalc && coincideArea === null && (
-            <div className="bg-amber-500/15 ring-1 ring-amber-400/30 rounded-2xl p-4">
-              <p className="text-sm font-semibold text-white mb-3">
-                Área calculada: <span className="text-amber-300 font-bold">{areaCalc} ha</span> ¿Es correcto?
-              </p>
-              <div className="flex gap-3">
-                <button onClick={() => setCoincideArea(true)}
-                  className="flex-1 bg-white/15 ring-1 ring-white/30 text-white py-2.5 rounded-xl font-semibold text-sm">
-                  ✓ Sí, correcto
+        {/* Footer contextual */}
+        <div className="flex-shrink-0 bg-black/65 backdrop-blur-md border-t border-white/08 px-4 pt-4 pb-3">
+
+          {/* MODO: idle, sin polígono */}
+          {drawMode === 'idle' && !poligono && (
+            <div className="space-y-2.5">
+              <button
+                onClick={() => dibujarRef.current?.startDraw()}
+                className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
+                           flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-lg shadow-green-900/30"
+              >
+                <PenLine size={20} />
+                Comenzar a dibujar
+              </button>
+              <button
+                onClick={() => irAPaso(5)}
+                className="w-full text-white/35 text-sm py-2 text-center hover:text-white/55 transition-colors"
+              >
+                Omitir — completar después
+              </button>
+            </div>
+          )}
+
+          {/* MODO: dibujando */}
+          {drawMode === 'drawing' && (
+            <div className="space-y-2.5">
+              <button
+                onClick={() => dibujarRef.current?.finishDraw()}
+                disabled={!puedeTerminar}
+                className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
+                           disabled:opacity-35 flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all
+                           shadow-lg shadow-green-900/30"
+              >
+                {puedeTerminar
+                  ? <><CheckCircle2 size={20} /> Finalizar parcela ({pointCount} puntos)</>
+                  : `Marca ${puntosNecesarios} punto${puntosNecesarios !== 1 ? 's' : ''} más para continuar`
+                }
+              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => dibujarRef.current?.undoVertex()}
+                  disabled={pointCount === 0}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15
+                             text-white/80 py-3 rounded-xl text-sm font-semibold disabled:opacity-30 active:scale-[0.97] transition-all"
+                >
+                  <Undo2 size={16} /> Deshacer
                 </button>
-                <button onClick={() => setCoincideArea(false)}
-                  className="flex-1 bg-white/08 ring-1 ring-white/15 text-white/70 py-2.5 rounded-xl font-semibold text-sm">
-                  No, tengo más/menos
+                <button
+                  onClick={() => dibujarRef.current?.cancelDraw()}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/05 ring-1 ring-white/10
+                             text-white/40 py-3 rounded-xl text-sm font-semibold active:scale-[0.97] transition-all"
+                >
+                  Cancelar
                 </button>
               </div>
             </div>
           )}
-          {coincideArea === false && (
-            <div className="flex items-center gap-3">
-              <input type="number" min="0.1" max="500" step="0.1"
-                value={areaReal}
-                onChange={e => setAreaReal(e.target.value)}
-                placeholder={String(areaCalc ?? '0.0')}
-                className="flex-1 bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 text-lg font-bold
-                           text-white text-center focus:ring-2 focus:ring-white/40 focus:outline-none"
-              />
-              <span className="text-white/60 font-medium">ha</span>
+
+          {/* MODO: idle, polígono listo, confirmando área */}
+          {drawMode === 'idle' && poligono && coincideArea === null && (
+            <div className="space-y-3">
+              <div className="bg-amber-500/12 ring-1 ring-amber-400/25 rounded-2xl p-4">
+                <p className="text-sm font-semibold text-white mb-1">
+                  Área calculada: <span className="text-amber-300 font-bold text-base">{areaCalc} ha</span>
+                </p>
+                <p className="text-xs text-white/40 mb-3">¿El área calculada es correcta?</p>
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={() => setCoincideArea(true)}
+                    className="flex-1 bg-green-500/20 ring-1 ring-green-400/30 text-green-300 py-3 rounded-xl font-bold text-sm active:scale-[0.97] transition-all"
+                  >
+                    ✓ Sí, es correcta
+                  </button>
+                  <button
+                    onClick={() => setCoincideArea(false)}
+                    className="flex-1 bg-white/08 ring-1 ring-white/12 text-white/60 py-3 rounded-xl font-semibold text-sm active:scale-[0.97] transition-all"
+                  >
+                    No, difiere
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => dibujarRef.current?.startEdit()}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15
+                             text-white/80 py-3 rounded-xl text-sm font-medium active:scale-[0.97] transition-all"
+                >
+                  <Pencil size={14} /> Ajustar forma
+                </button>
+                <button
+                  onClick={() => dibujarRef.current?.deletePolygon()}
+                  className="flex-1 flex items-center justify-center gap-1.5 text-red-400/70 py-3 rounded-xl text-sm font-medium
+                             hover:text-red-400 active:scale-[0.97] transition-all"
+                >
+                  <Trash2 size={14} /> Redibujar
+                </button>
+              </div>
             </div>
           )}
 
-          {areaCalc && (
+          {/* Corrección de área */}
+          {drawMode === 'idle' && poligono && coincideArea === false && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-white/50 font-medium mb-2">¿Cuántas hectáreas tiene tu parcela?</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number" min="0.1" max="5000" step="0.1"
+                    value={areaReal}
+                    onChange={e => setAreaReal(e.target.value)}
+                    placeholder={String(areaCalc ?? '0.0')}
+                    inputMode="decimal"
+                    className="flex-1 bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xl font-bold text-white
+                               text-center focus:ring-2 focus:ring-white/40 focus:outline-none"
+                  />
+                  <span className="text-white/50 font-bold text-lg">ha</span>
+                </div>
+              </div>
+              <button
+                onClick={() => irAPaso(5)}
+                disabled={!areaReal}
+                className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold
+                           disabled:opacity-30 active:scale-[0.98] transition-all"
+              >
+                Confirmar y continuar →
+              </button>
+            </div>
+          )}
+
+          {/* Área confirmada — listo para continuar */}
+          {drawMode === 'idle' && poligono && coincideArea === true && (
             <button
-              onClick={() => { setPoligono(null); setAreaCalc(null); setCoincideArea(null); setAreaReal(''); }}
-              className="w-full text-center text-red-400/80 text-sm py-1"
+              onClick={() => irAPaso(5)}
+              className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold active:scale-[0.98] transition-all"
             >
-              Redibujar parcela
+              Confirmar y continuar →
             </button>
           )}
 
-          <button
-            onClick={() => irAPaso(5)}
-            disabled={!poligono || (coincideArea === null && !!areaCalc)}
-            className="w-full bg-white hover:bg-white/90 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
-                       disabled:opacity-30 active:scale-[0.98] transition-all duration-200"
-          >
-            {poligono ? 'Confirmar y continuar →' : 'Dibuja tu parcela para continuar'}
-          </button>
-          <button onClick={() => irAPaso(5)}
-            className="w-full text-white/40 text-sm py-1 hover:text-white/60 transition-colors">
-            Omitir — completar después
-          </button>
+          {/* MODO: editando */}
+          {drawMode === 'editing' && (
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => dibujarRef.current?.cancelEdit()}
+                className="flex-1 bg-white/10 ring-1 ring-white/15 text-white/70 py-3.5 rounded-2xl text-sm font-semibold active:scale-[0.97] transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { dibujarRef.current?.saveEdit(); setCoincideArea(null); }}
+                className="flex-1 bg-green-500 text-white py-3.5 rounded-2xl text-sm font-bold
+                           flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all"
+              >
+                <CheckCircle2 size={17} /> Guardar cambios
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // ── PASOS 1-3 y 5 ──────────────────────────────────────────────────────────
+  // ── PASOS 1-3 y 5 ─────────────────────────────────────────────────────────
   return (
     <div
-      className="relative flex flex-col overflow-hidden"
-      style={{
-        minHeight: '100dvh',
-        paddingTop: 'env(safe-area-inset-top)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
+      className="fixed inset-0 flex flex-col"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      {/* Background fijo */}
+      {/* Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.08),transparent)]" />
       </div>
 
-      {/* Header */}
-      <div className="flex-shrink-0 flex items-center px-4 py-3 sm:py-4">
+      {/* Header — fijo */}
+      <div className="flex-shrink-0 flex items-center px-4 py-3">
         <button
           onClick={handleBack}
-          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex-shrink-0"
         >
           <ChevronLeft size={22} className="text-white/70" />
         </button>
 
-        {/* Stepper con iconos */}
+        {/* Stepper con íconos */}
         <div className="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2">
           {PASOS_INFO.map((info, i) => {
             const n = i + 1;
@@ -331,7 +544,7 @@ export default function RegistroNuevoPage() {
               <div key={n} className="flex items-center gap-1 sm:gap-1.5">
                 <div className={`flex items-center justify-center rounded-full transition-all duration-300 ${
                   active
-                    ? 'w-7 h-7 sm:w-8 sm:h-8 bg-white'
+                    ? 'w-7 h-7 sm:w-8 sm:h-8 bg-white shadow-md'
                     : done
                     ? 'w-5 h-5 sm:w-6 sm:h-6 bg-white/40'
                     : 'w-5 h-5 sm:w-6 sm:h-6 bg-white/15'
@@ -350,17 +563,16 @@ export default function RegistroNuevoPage() {
           })}
         </div>
 
-        {/* Paso X/5 */}
-        <div className="text-right min-w-[40px]">
-          <span className="text-xs text-white/40 font-mono">{paso}/5</span>
+        <div className="min-w-[36px] text-right flex-shrink-0">
+          <span className="text-xs text-white/35 font-mono">{paso}/5</span>
         </div>
       </div>
 
-      {/* Contenido scrollable */}
-      <div className="flex-1 overflow-y-auto">
-        <div className={`max-w-sm mx-auto px-5 py-4 sm:py-6 ${animDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
+      {/* Contenido scrollable — min-h-0 es clave para que no desborde */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className={`max-w-sm mx-auto px-5 py-4 sm:py-6 pb-6 ${animDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
 
-          {error && (
+          {error && !error.includes('PIN') && (
             <div className="mb-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
               <AlertCircle size={15} className="shrink-0 mt-0.5" />
               <span>{error}</span>
@@ -474,7 +686,7 @@ export default function RegistroNuevoPage() {
                   className={`w-full ring-1 rounded-2xl py-4 px-4 flex items-center gap-4 text-left transition-all duration-200 active:scale-[0.98]
                     ${tipoMaiz === t.valor
                       ? 'ring-2 ring-white bg-white/15'
-                      : 'ring-white/15 bg-white/05 hover:bg-white/10'}`}>
+                      : 'ring-white/15 bg-white/5 hover:bg-white/10'}`}>
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                     tipoMaiz === t.valor ? 'bg-white' : 'bg-white/10'
                   }`}>
@@ -498,7 +710,7 @@ export default function RegistroNuevoPage() {
 
           {/* ── Paso 5: Contacto + PIN + Programas ── */}
           {paso === 5 && (
-            <div className="space-y-5 pb-4">
+            <div className="space-y-5">
               <div className="mb-4">
                 <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Últimos datos</h2>
                 <p className="text-white/50 text-sm sm:text-base mt-1">Ya casi terminas</p>
@@ -536,7 +748,7 @@ export default function RegistroNuevoPage() {
               </div>
 
               {/* PIN */}
-              <div className="bg-white/08 ring-1 ring-white/10 rounded-2xl p-4 text-center">
+              <div className="bg-white/8 ring-1 ring-white/10 rounded-2xl p-4 text-center">
                 <p className="text-sm sm:text-base font-bold text-white mb-1">
                   {pinStep === 'crear' ? 'Crea tu PIN de 4 dígitos' : 'Confirma tu PIN'}
                 </p>
@@ -546,7 +758,7 @@ export default function RegistroNuevoPage() {
                     : 'Escribe los mismos 4 dígitos para confirmar.'}
                 </p>
                 {error && error.includes('PIN') && (
-                  <div className="mb-3 p-2 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs text-center">
+                  <div className="mb-3 p-2 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs">
                     {error}
                   </div>
                 )}
@@ -573,7 +785,7 @@ export default function RegistroNuevoPage() {
                         flex items-center gap-2.5
                         ${programas.includes(p.clave)
                           ? 'ring-2 ring-white/50 bg-white/15 text-white font-medium'
-                          : 'ring-white/10 text-white/50 hover:bg-white/05'}`}>
+                          : 'ring-white/10 text-white/50 hover:bg-white/5'}`}>
                       <CircleDot size={14} className={programas.includes(p.clave) ? 'text-green-400' : 'text-white/20'} />
                       {p.nombre}
                     </button>
@@ -585,7 +797,7 @@ export default function RegistroNuevoPage() {
         </div>
       </div>
 
-      {/* Botón de acción fijo abajo */}
+      {/* Botón de acción — siempre pegado al fondo */}
       <div className="flex-shrink-0 px-5 py-4 bg-black/20 backdrop-blur-md border-t border-white/05">
         <div className="max-w-sm mx-auto space-y-2">
           {paso < 5 ? (
@@ -611,13 +823,6 @@ export default function RegistroNuevoPage() {
                 ? <><Loader2 size={18} className="animate-spin text-[#1A5C38]" /> Enviando...</>
                 : 'Crear mi cuenta →'
               }
-            </button>
-          )}
-
-          {paso === 4 && (
-            <button onClick={() => irAPaso(5)}
-              className="w-full text-white/40 py-2 text-sm text-center hover:text-white/60 transition-colors">
-              Omitir mapa — completar después
             </button>
           )}
         </div>
