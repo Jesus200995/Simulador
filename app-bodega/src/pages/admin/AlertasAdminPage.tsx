@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
-  AlertTriangle, Check, Search, ShieldAlert, RefreshCw, Clock
+  AlertTriangle, Check, Search, ShieldAlert, RefreshCw, Clock, BarChart3, ChevronDown
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
@@ -44,6 +44,9 @@ export default function AlertasAdminPage() {
   const [tipoFilter, setTipoFilter] = useState('');
   const [nivelFilter, setNivelFilter] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('activa'); // default active
+
+  // Stats panel
+  const [mostrarStats, setMostrarStats] = useState(false);
 
   // Sincronización
   const [activeCenter, setActiveCenter] = useState<[number, number] | null>(null);
@@ -174,8 +177,59 @@ export default function AlertasAdminPage() {
     });
   };
 
+  // Stats computados
+  const statsProductoresAfectados = new Set(alertas.filter(a => a.estado === 'activa').map(a => a.estado_afectado)).size;
+  const statsActivasHoy = alertas.filter(a => {
+    const hoy = new Date();
+    const fecha = new Date(a.created_at);
+    return a.estado === 'activa' && fecha.toDateString() === hoy.toDateString();
+  }).length || alertas.filter(a => a.estado === 'activa').length;
+  const statsAtendidasMes = alertas.filter(a => {
+    const ahora = new Date();
+    const fecha = new Date(a.created_at);
+    return a.estado === 'atendida' && fecha.getMonth() === ahora.getMonth() && fecha.getFullYear() === ahora.getFullYear();
+  }).length;
+
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-88px)] gap-6 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-88px)] gap-4 overflow-hidden">
+
+      {/* ── TOGGLE STATS ── */}
+      <div className="flex-shrink-0">
+        <button
+          onClick={() => setMostrarStats(!mostrarStats)}
+          className="flex items-center gap-2 text-[12px] font-bold text-gray-400 hover:text-white transition-all px-1"
+        >
+          <BarChart3 size={14} className="text-emerald-500" />
+          Panel de Estadísticas
+          <ChevronDown size={14} className={`transition-transform duration-200 ${mostrarStats ? 'rotate-180' : ''}`} />
+        </button>
+
+        {mostrarStats && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+            {/* KPI: Productores afectados */}
+            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 space-y-1">
+              <p className="text-[10px] font-bold text-red-400/70 uppercase tracking-widest">Zonas Afectadas</p>
+              <p className="text-[28px] font-black text-red-400 leading-none">{statsProductoresAfectados}</p>
+              <p className="text-[11px] text-red-400/60">Estados con alertas activas</p>
+            </div>
+            {/* KPI: Alertas activas hoy */}
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 space-y-1">
+              <p className="text-[10px] font-bold text-amber-400/70 uppercase tracking-widest">Alertas Activas</p>
+              <p className="text-[28px] font-black text-amber-400 leading-none">{statsActivasHoy}</p>
+              <p className="text-[11px] text-amber-400/60">Incidencias vigentes hoy</p>
+            </div>
+            {/* KPI: Atendidas este mes */}
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 space-y-1">
+              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-widest">Atendidas este Mes</p>
+              <p className="text-[28px] font-black text-emerald-400 leading-none">{statsAtendidasMes}</p>
+              <p className="text-[11px] text-emerald-400/60">Resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── LAYOUT PRINCIPAL ── */}
+      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: ALERTAS & FILTROS (35%) ── */}
       <div className="w-full lg:w-[380px] flex flex-col h-full bg-[#090d12]/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
@@ -429,6 +483,7 @@ export default function AlertasAdminPage() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

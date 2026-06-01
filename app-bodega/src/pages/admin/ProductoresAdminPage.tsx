@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Search, Check, X, Eye, ShieldAlert, ChevronLeft, ChevronRight, RefreshCw, AlertTriangle
+  Search, Check, X, Eye, ShieldAlert, ChevronLeft, ChevronRight, RefreshCw, AlertTriangle, BarChart3, ChevronDown
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -23,11 +23,34 @@ interface Productor {
   up_cultivo?: string;
 }
 
+// Utilidades demográficas basadas en CURP
+function calcularGeneroDesadeCurp(curp: string): 'H' | 'M' | null {
+  if (!curp || curp.length < 11) return null;
+  const g = curp.charAt(10).toUpperCase();
+  return g === 'H' || g === 'M' ? g : null;
+}
+
+function calcularEdadDesdeCurp(curp: string): number | null {
+  if (!curp || curp.length < 10) return null;
+  const yy = parseInt(curp.substring(4, 6), 10);
+  const mm = parseInt(curp.substring(6, 8), 10) - 1;
+  const dd = parseInt(curp.substring(8, 10), 10);
+  if (isNaN(yy) || isNaN(mm) || isNaN(dd)) return null;
+  const siglo = yy <= 30 ? 2000 : 1900;
+  const nacimiento = new Date(siglo + yy, mm, dd);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const mDiff = hoy.getMonth() - nacimiento.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+  return edad >= 0 && edad < 130 ? edad : null;
+}
+
 export default function ProductoresAdminPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<'pendiente' | 'todos' | 'suspendido'>('pendiente');
   const [productores, setProductores] = useState<Productor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mostrarStats, setMostrarStats] = useState(false);
 
   // Filtros
   const [search, setSearch] = useState('');
@@ -298,6 +321,52 @@ export default function ProductoresAdminPage() {
           </div>
         )}
 
+      </div>
+
+      {/* ── PANEL ESTADÍSTICAS DEMOGRÁFICAS ── */}
+      <div className="flex-shrink-0">
+        <button
+          onClick={() => setMostrarStats(!mostrarStats)}
+          className="flex items-center gap-2 text-[12px] font-bold text-gray-400 hover:text-white transition-all px-1 mb-2"
+        >
+          <BarChart3 size={14} className="text-emerald-500" />
+          Estadísticas Demográficas
+          <ChevronDown size={14} className={`transition-transform duration-200 ${mostrarStats ? 'rotate-180' : ''}`} />
+        </button>
+
+        {mostrarStats && (() => {
+          const conCurp = productores.filter(p => p.curp && p.curp !== 'No capturado' && p.curp.length >= 11);
+          const hombres = conCurp.filter(p => calcularGeneroDesadeCurp(p.curp) === 'H').length;
+          const mujeres = conCurp.filter(p => calcularGeneroDesadeCurp(p.curp) === 'M').length;
+          const edades = conCurp.map(p => calcularEdadDesdeCurp(p.curp)).filter((e): e is number => e !== null);
+          const edadPromedio = edades.length > 0 ? Math.round(edades.reduce((s, e) => s + e, 0) / edades.length) : 0;
+          const mayores60 = edades.filter(e => e >= 60).length;
+
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Hombres</p>
+                <p className="text-[26px] font-black text-white leading-none">{hombres}</p>
+                <p className="text-[11px] text-gray-500">productores</p>
+              </div>
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mujeres</p>
+                <p className="text-[26px] font-black text-white leading-none">{mujeres}</p>
+                <p className="text-[11px] text-gray-500">productoras</p>
+              </div>
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Edad Promedio</p>
+                <p className="text-[26px] font-black text-white leading-none">{edadPromedio}<span className="text-[14px] text-gray-500 ml-1">años</span></p>
+                <p className="text-[11px] text-gray-500">de {edades.length} con CURP</p>
+              </div>
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mayores de 60</p>
+                <p className="text-[26px] font-black text-white leading-none">{mayores60}</p>
+                <p className="text-[11px] text-gray-500">adultos mayores</p>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Main Table */}

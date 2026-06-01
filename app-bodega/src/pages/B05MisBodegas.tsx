@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronRight, MapPin, Warehouse, Circle } from 'lucide-react';
+import { Plus, ChevronRight, MapPin, Warehouse, Circle, List, Map as MapIcon } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
 
 interface Bodega {
   id: number; nombre: string; municipio: string; estado: string;
   semaforo_compra: string; ocupacion_pct: number; stock_actual: number; capacidad_ton: number;
+  latitud?: number; longitud?: number;
 }
+
+/* Custom green marker for map view */
+const greenDot = L.divIcon({
+  className: '',
+  html: '<div style="width:14px;height:14px;background:#1A5C38;border-radius:50%;border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.4)"></div>',
+  iconSize: [14, 14] as [number, number],
+  iconAnchor: [7, 7] as [number, number],
+});
 
 const semaforoMap: Record<string, { label: string; color: string; dot: string; badge: string }> = {
   verde:    { label: 'Comprando',       color: 'bg-emerald-500', dot: 'text-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
@@ -18,6 +30,7 @@ const semaforoMap: Record<string, { label: string; color: string; dot: string; b
 export default function B05MisBodegas() {
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vista, setVista] = useState<'lista' | 'mapa'>('lista');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,13 +57,35 @@ export default function B05MisBodegas() {
 
       {/* Contenido */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+
+        {/* Toggle Lista / Mapa */}
+        <div className="flex border border-gray-200 rounded-xl overflow-hidden mb-4">
+          <button
+            onClick={() => setVista('lista')}
+            className={`flex-1 py-2.5 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors ${
+              vista === 'lista' ? 'bg-[#1A5C38] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <List size={15} /> Lista
+          </button>
+          <button
+            onClick={() => setVista('mapa')}
+            className={`flex-1 py-2.5 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors ${
+              vista === 'mapa' ? 'bg-[#1A5C38] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <MapIcon size={15} /> Mapa
+          </button>
+        </div>
+
         {loading && (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
           </div>
         )}
 
-        {/* Grid: 1 col mobile → 2 cols tablet → 3 cols desktop */}
+        {/* ── Vista Lista ── */}
+        {vista === 'lista' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {bodegas.map(b => {
             const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
@@ -102,6 +137,56 @@ export default function B05MisBodegas() {
             );
           })}
         </div>
+        )}
+
+        {/* ── Vista Mapa ── */}
+        {vista === 'mapa' && !loading && (
+          <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style={{ height: 500 }}>
+            <MapContainer
+              center={[23.6345, -102.5528]}
+              zoom={5}
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                attribution="© Esri"
+              />
+              {bodegas
+                .filter(b => b.latitud && b.longitud && Math.abs(b.latitud!) > 0.001)
+                .map(b => {
+                  const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
+                  return (
+                    <Marker key={b.id} position={[b.latitud!, b.longitud!]} icon={greenDot}>
+                      <Popup>
+                        <div style={{ minWidth: 180 }}>
+                          <p style={{ fontWeight: 700, fontSize: 13, margin: '0 0 3px' }}>{b.nombre}</p>
+                          <p style={{ fontSize: 11, color: '#6b7280', margin: '0 0 6px' }}>
+                            {b.municipio}, {b.estado}
+                          </p>
+                          <p style={{ fontSize: 11, color: '#374151', margin: '0 0 4px' }}>
+                            Stock: {formatNum(b.stock_actual || 0)} / {formatNum(b.capacidad_ton || 0)} ton
+                          </p>
+                          <p style={{ fontSize: 11, margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <span style={{
+                              display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                              background: b.semaforo_compra === 'verde' ? '#22c55e' : b.semaforo_compra === 'amarillo' ? '#f59e0b' : '#ef4444'
+                            }} />
+                            {sem.label}
+                          </p>
+                          <button
+                            onClick={() => navigate(`/bodegas/${b.id}`)}
+                            style={{ width: '100%', background: '#1A5C38', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', marginTop: 8 }}
+                          >
+                            Ver detalle
+                          </button>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+            </MapContainer>
+          </div>
+        )}
 
         {!loading && bodegas.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">

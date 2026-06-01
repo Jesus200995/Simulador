@@ -526,4 +526,31 @@ router.get('/ventanillas/resumen', authMiddleware, async (req: AuthRequest, res:
   }
 });
 
+// =============================================
+// GET /api/admin/bodegas/estadisticas
+// =============================================
+router.get('/bodegas/estadisticas', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        COALESCE(SUM(b.capacidad_almacenamiento_ton), 0) AS capacidad_total,
+        COALESCE(SUM(CASE WHEN i.volumen_ton IS NOT NULL THEN i.volumen_ton ELSE 0 END), 0) AS stock_total,
+        ROUND(COALESCE(SUM(CASE WHEN i.volumen_ton IS NOT NULL THEN i.volumen_ton ELSE 0 END) * 100.0 / NULLIF(SUM(b.capacidad_almacenamiento_ton), 0), 0), 1) AS pct_ocupacion,
+        COUNT(DISTINCT ts.bodega_id) AS con_tarifario,
+        COUNT(DISTINCT v.id) AS ventanillas_activas
+      FROM bodegas b
+      LEFT JOIN LATERAL (
+        SELECT volumen_ton FROM inventarios WHERE bodega_id = b.id ORDER BY created_at DESC LIMIT 1
+      ) i ON true
+      LEFT JOIN tarifario_servicios ts ON ts.bodega_id = b.id AND ts.activo = true
+      LEFT JOIN ventanillas v ON v.bodega_id = b.id
+      WHERE b.activa = true
+    `);
+    res.json(result.rows[0] || {});
+  } catch (error) {
+    console.error('Error estadísticas bodegas:', error);
+    res.status(500).json({ error: 'Error al obtener estadísticas de bodegas' });
+  }
+});
+
 export default router;

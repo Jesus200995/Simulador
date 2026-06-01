@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
-  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box
+  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box, BarChart3
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
@@ -40,6 +40,11 @@ export default function BodegasAdminPage() {
   const navigate = useNavigate();
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Tabs
+  const [tabActivo, setTabActivo] = useState<'lista' | 'estadisticas'>('lista');
+  const [stats, setStats] = useState<any>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   // Filtros
   const [search, setSearch] = useState('');
@@ -129,6 +134,36 @@ export default function BodegasAdminPage() {
     cargarBodegas();
   }, []);
 
+  async function cargarStats() {
+    setStatsLoading(true);
+    try {
+      const res = await fetch(`${BASE}/admin/bodegas/estadisticas`, { headers: HDR() });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const data = await res.json();
+      setStats(data);
+    } catch (e) {
+      console.error('Error al cargar estadísticas:', e);
+      // Fallback local desde bodegas cargadas
+      const capTotal = bodegas.reduce((s, b) => s + b.capacidad_total, 0);
+      const stockTotal = bodegas.reduce((s, b) => s + (b.stock_actual || 0), 0);
+      setStats({
+        capacidad_total: capTotal,
+        stock_total: stockTotal,
+        pct_ocupacion: capTotal > 0 ? ((stockTotal / capTotal) * 100).toFixed(1) : 0,
+        con_tarifario: bodegas.filter(b => b.estatus === 'aprobada').length,
+        ventanillas_activas: bodegas.filter(b => b.estatus === 'aprobada').length
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (tabActivo === 'estadisticas' && !stats) {
+      cargarStats();
+    }
+  }, [tabActivo]);
+
   // Filtrado de bodegas
   const filteredList = bodegas.filter(b => {
     if (search && !b.nombre.toLowerCase().includes(search.toLowerCase())) return false;
@@ -164,7 +199,84 @@ export default function BodegasAdminPage() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-88px)] gap-6 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-88px)] gap-4 overflow-hidden">
+
+      {/* ── TAB BAR ── */}
+      <div className="flex border-b border-white/5 gap-2 flex-shrink-0">
+        <button
+          onClick={() => setTabActivo('lista')}
+          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
+            tabActivo === 'lista'
+              ? 'border-emerald-500 text-white'
+              : 'border-transparent text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          <Warehouse size={14} />
+          Lista + Mapa
+        </button>
+        <button
+          onClick={() => setTabActivo('estadisticas')}
+          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
+            tabActivo === 'estadisticas'
+              ? 'border-emerald-500 text-white'
+              : 'border-transparent text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          <BarChart3 size={14} />
+          Estadísticas
+        </button>
+      </div>
+
+      {/* ── TAB: ESTADÍSTICAS ── */}
+      {tabActivo === 'estadisticas' && (
+        <div className="flex-1 overflow-y-auto">
+          {statsLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <RefreshCw size={24} className="text-emerald-500 animate-spin" />
+              <p className="text-[13px] text-gray-500">Cargando estadísticas...</p>
+            </div>
+          ) : stats ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* KPI: Capacidad total */}
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-5 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Capacidad Total</p>
+                <p className="text-[28px] font-black text-white leading-none">{Number(stats.capacidad_total || 0).toLocaleString()}</p>
+                <p className="text-[11px] text-gray-500">toneladas</p>
+              </div>
+              {/* KPI: Stock actual */}
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-5 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Stock Actual</p>
+                <p className="text-[28px] font-black text-white leading-none">{Number(stats.stock_total || 0).toLocaleString()}</p>
+                <p className="text-[11px] text-gray-500">toneladas</p>
+              </div>
+              {/* KPI: % Ocupación */}
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-5 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">% Ocupación</p>
+                <p className="text-[28px] font-black text-emerald-400 leading-none">{stats.pct_ocupacion || 0}<span className="text-[14px] text-gray-500 ml-1">%</span></p>
+                <p className="text-[11px] text-gray-500">capacidad utilizada</p>
+              </div>
+              {/* KPI: Con tarifario */}
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-5 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Con Tarifario</p>
+                <p className="text-[28px] font-black text-white leading-none">{stats.con_tarifario || 0}</p>
+                <p className="text-[11px] text-gray-500">bodegas con tarifa activa</p>
+              </div>
+              {/* KPI: Ventanillas activas */}
+              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-5 space-y-1">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Ventanillas Activas</p>
+                <p className="text-[28px] font-black text-white leading-none">{stats.ventanillas_activas || 0}</p>
+                <p className="text-[11px] text-gray-500">puntos de atención</p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-16 text-gray-500 text-[13px]">No se pudieron cargar las estadísticas.</div>
+          )}
+        </div>
+      )}
+
+      {/* ── TAB: LISTA + MAPA ── */}
+      {tabActivo === 'lista' && (
+      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: LISTA & FILTROS (40%) ── */}
       <div className="w-full lg:w-[400px] flex flex-col h-full bg-[#090d12]/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
@@ -358,6 +470,8 @@ export default function BodegasAdminPage() {
         </MapContainer>
 
       </div>
+      </div>
+      )}
 
     </div>
   );

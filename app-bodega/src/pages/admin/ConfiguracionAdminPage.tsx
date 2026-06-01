@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, RefreshCw, Save, Users, Plus, X, Eye, EyeOff } from 'lucide-react';
+import { Settings, RefreshCw, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -23,6 +23,10 @@ interface NuevoUsuario {
   nombre_completo: string; email: string; password: string; rol: string;
 }
 
+interface Concepto {
+  id: number; nombre: string; estatus: string;
+}
+
 export default function ConfiguracionAdminPage() {
   const [params, setParams] = useState<Parametros | null>(null);
   const [editParams, setEditParams] = useState<Partial<Parametros>>({});
@@ -37,6 +41,14 @@ export default function ConfiguracionAdminPage() {
   const [showPass, setShowPass] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  /* ── Catálogos ── */
+  const [conceptos, setConceptos] = useState<Concepto[]>([]);
+  const [loadingConceptos, setLoadingConceptos] = useState(true);
+  const [showConceptoModal, setShowConceptoModal] = useState(false);
+  const [nuevoConcepto, setNuevoConcepto] = useState('');
+  const [creatingConcepto, setCreatingConcepto] = useState(false);
+  const [conceptoError, setConceptoError] = useState('');
 
   async function cargarParams() {
     try {
@@ -56,9 +68,42 @@ export default function ConfiguracionAdminPage() {
     } catch (e) { console.error(e); } finally { setLoadingAdmins(false); }
   }
 
+  async function cargarConceptos() {
+    setLoadingConceptos(true);
+    try {
+      const r = await fetch(`${BASE}/cat-conceptos-servicio`, { headers: HDR() });
+      const d = await r.json();
+      setConceptos(d.conceptos ?? d ?? []);
+    } catch (e) { console.error(e); } finally { setLoadingConceptos(false); }
+  }
+
+  async function proponerConcepto() {
+    setConceptoError('');
+    if (!nuevoConcepto.trim()) { setConceptoError('El nombre es obligatorio'); return; }
+    setCreatingConcepto(true);
+    try {
+      const r = await fetch(`${BASE}/cat-conceptos-servicio/proponer`, {
+        method: 'POST', headers: HDR(), body: JSON.stringify({ nombre: nuevoConcepto.trim() }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setConceptoError(d.error || 'Error al proponer concepto'); return; }
+      setShowConceptoModal(false);
+      setNuevoConcepto('');
+      cargarConceptos();
+    } catch { setConceptoError('Error de conexión'); } finally { setCreatingConcepto(false); }
+  }
+
+  async function toggleAprobar(id: number) {
+    try {
+      await fetch(`${BASE}/cat-conceptos-servicio/${id}/aprobar`, { method: 'PATCH', headers: HDR() });
+      cargarConceptos();
+    } catch (e) { console.error(e); }
+  }
+
   useEffect(() => {
     cargarParams();
     cargarAdmins();
+    cargarConceptos();
   }, []);
 
   async function guardarParams() {
@@ -196,6 +241,100 @@ export default function ConfiguracionAdminPage() {
           </table>
         </div>
       </div>
+
+      {/* Catálogos del sistema */}
+      <div className="bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.05]">
+          <div className="flex items-center gap-2">
+            <List size={13} className="text-amber-400" />
+            <div>
+              <h2 className="text-[13px] font-bold text-white">Catálogos del sistema</h2>
+              <p className="text-[10px] text-gray-500">Conceptos de servicio de bodega</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowConceptoModal(true)}
+            className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+          >
+            <Plus size={11} /> Nuevo concepto
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-gray-600 text-[9px] uppercase tracking-widest font-bold">
+                <th className="px-4 py-3">Nombre</th>
+                <th className="px-4 py-3 text-center">Estatus</th>
+                <th className="px-4 py-3 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {loadingConceptos ? (
+                [1,2,3].map(i => (
+                  <tr key={i}>
+                    <td colSpan={3} className="px-4 py-3"><div className="h-5 bg-white/[0.03] rounded animate-pulse" /></td>
+                  </tr>
+                ))
+              ) : conceptos.length === 0 ? (
+                <tr><td colSpan={3} className="px-4 py-6 text-center text-[12px] text-gray-600">Sin conceptos registrados</td></tr>
+              ) : conceptos.map((c) => (
+                <tr key={c.id} className="hover:bg-white/[0.015] transition-colors">
+                  <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-200">{c.nombre}</td>
+                  <td className="px-4 py-2.5 text-center">
+                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                      c.estatus === 'aprobado'
+                        ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                        : 'text-amber-400 bg-amber-500/10 border border-amber-500/20'
+                    }`}>
+                      {c.estatus}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-center">
+                    <button
+                      onClick={() => toggleAprobar(c.id)}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all active:scale-95 ${
+                        c.estatus === 'aprobado'
+                          ? 'text-gray-400 bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.07]'
+                          : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15'
+                      }`}
+                    >
+                      <CheckCircle size={10} />
+                      {c.estatus === 'aprobado' ? 'Revocar' : 'Aprobar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal crear concepto */}
+      {showConceptoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0d1117] border border-white/[0.08] rounded-2xl p-5 w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[14px] font-bold text-white">Nuevo concepto de servicio</h3>
+              <button onClick={() => { setShowConceptoModal(false); setConceptoError(''); }} className="text-gray-500 hover:text-white transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className={LABEL}>Nombre del concepto</label>
+                <input className={INPUT} value={nuevoConcepto} onChange={e => setNuevoConcepto(e.target.value)} placeholder="Ej. Secado, Fumigación" />
+              </div>
+              {conceptoError && <p className="text-[11px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{conceptoError}</p>}
+              <div className="flex gap-2 pt-1">
+                <button onClick={() => { setShowConceptoModal(false); setConceptoError(''); }} className="flex-1 text-[12px] font-bold text-gray-400 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08] py-2 rounded-xl transition-all active:scale-95">Cancelar</button>
+                <button onClick={proponerConcepto} disabled={creatingConcepto} className="flex-1 text-[12px] font-bold text-white bg-amber-600 hover:bg-amber-500 py-2 rounded-xl transition-all active:scale-95 disabled:opacity-50">
+                  {creatingConcepto ? 'Creando...' : 'Proponer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal crear usuario */}
       {showModal && (

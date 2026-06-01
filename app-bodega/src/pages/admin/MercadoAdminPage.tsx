@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { RefreshCw, TrendingUp, Users, Warehouse, BarChart3, ArrowUpDown } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -12,6 +12,16 @@ function fmtNum(v: number, dec = 0) {
 function fmtMXN(v: number) {
   return `$${fmtNum(v, 0)}`;
 }
+
+const calcularDistanciaKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+};
 
 interface Disponibilidad {
   id: number; lat: number; lng: number;
@@ -56,6 +66,24 @@ export default function MercadoAdminPage() {
   useEffect(() => { cargar(); }, []);
 
   const kpis = data?.kpis;
+
+  /* ── Coincidencias geográficas ── */
+  const coincidencias = useMemo(() => {
+    if (!data) return [];
+    const pairs: { disp: Disponibilidad; req: Requerimiento; distKm: number }[] = [];
+    for (const r of data.requerimientos) {
+      for (const d of data.disponibilidades) {
+        const dist = calcularDistanciaKm(r.lat, r.lon, d.lat, d.lng);
+        if (dist <= r.radio_km) {
+          pairs.push({ disp: d, req: r, distKm: Math.round(dist * 10) / 10 });
+        }
+      }
+    }
+    return pairs;
+  }, [data]);
+
+  const dispIdsConCoincidencia = useMemo(() => new Set(coincidencias.map(c => c.disp.id)), [coincidencias]);
+  const reqIdsConCoincidencia  = useMemo(() => new Set(coincidencias.map(c => c.req.id)), [coincidencias]);
   const CARD = 'bg-[#080c11] border border-white/[0.06] rounded-2xl p-4 flex flex-col gap-2';
 
   return (
@@ -100,11 +128,25 @@ export default function MercadoAdminPage() {
 
         {/* Mapa Leaflet */}
         <div className="lg:col-span-2 bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden" style={{ minHeight: 380 }}>
+          {coincidencias.length > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block" />
+              <span className="text-[11px] font-bold text-amber-300">
+                {coincidencias.length} coincidencia{coincidencias.length !== 1 ? 's' : ''} geográfica{coincidencias.length !== 1 ? 's' : ''} detectada{coincidencias.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
             <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
             <span className="text-[11px] font-bold text-white">Disponibilidad (productores)</span>
             <span className="w-3 h-3 rounded-full bg-blue-500 inline-block ml-3" />
             <span className="text-[11px] font-bold text-white">Requerimiento (bodegas)</span>
+            {coincidencias.length > 0 && (
+              <>
+                <span className="w-3 h-3 rounded-full bg-amber-400 border-2 border-amber-500 inline-block ml-3" />
+                <span className="text-[11px] font-bold text-amber-300">Con coincidencia</span>
+              </>
+            )}
           </div>
           <MapContainer
             center={[23.6345, -102.5528]} zoom={5}
@@ -112,29 +154,47 @@ export default function MercadoAdminPage() {
             zoomControl
           >
             <TileLayer url={ESRI} attribution="ESRI" maxZoom={18} />
-            {(data?.disponibilidades ?? []).map((d) => (
-              <CircleMarker key={`d-${d.id}`} center={[d.lat, d.lng]} radius={7} color="#1A5C38" fillColor="#22c55e" fillOpacity={0.7} weight={1.5}>
-                <Popup>
-                  <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                    <strong>{d.nombre_productor}</strong><br />
-                    {d.municipio}, {d.estado}<br />
-                    {d.tipo_maiz} · {fmtNum(d.volumen_estimado_ton, 0)} ton
-                  </div>
-                </Popup>
-              </CircleMarker>
-            ))}
-            {(data?.requerimientos ?? []).map((r) => (
-              <CircleMarker key={`r-${r.id}`} center={[r.lat, r.lon]} radius={7} color="#1e40af" fillColor="#3b82f6" fillOpacity={0.7} weight={1.5}>
-                <Popup>
-                  <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                    <strong>{r.nombre_bodega}</strong><br />
-                    {r.municipio}, {r.estado}<br />
-                    {r.tipo_maiz} · {fmtNum(r.volumen_ton, 0)} ton<br />
-                    Precio: {fmtMXN(r.precio_ofrecido)}/ton · Radio: {r.radio_km} km
-                  </div>
-                </Popup>
-              </CircleMarker>
-            ))}
+            {(data?.disponibilidades ?? []).map((d) => {
+              const match = dispIdsConCoincidencia.has(d.id);
+              return (
+                <CircleMarker key={`d-${d.id}`} center={[d.lat, d.lng]}
+                  radius={match ? 10 : 7}
+                  color={match ? '#f59e0b' : '#1A5C38'}
+                  fillColor="#22c55e" fillOpacity={0.7}
+                  weight={match ? 3 : 1.5}
+                >
+                  <Popup>
+                    <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                      <strong>{d.nombre_productor}</strong><br />
+                      {d.municipio}, {d.estado}<br />
+                      {d.tipo_maiz} · {fmtNum(d.volumen_estimado_ton, 0)} ton
+                      {match && <><br /><span style={{ color: '#d97706', fontWeight: 700 }}>★ Coincidencia geográfica</span></>}
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
+            {(data?.requerimientos ?? []).map((r) => {
+              const match = reqIdsConCoincidencia.has(r.id);
+              return (
+                <CircleMarker key={`r-${r.id}`} center={[r.lat, r.lon]}
+                  radius={match ? 10 : 7}
+                  color={match ? '#f59e0b' : '#1e40af'}
+                  fillColor="#3b82f6" fillOpacity={0.7}
+                  weight={match ? 3 : 1.5}
+                >
+                  <Popup>
+                    <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                      <strong>{r.nombre_bodega}</strong><br />
+                      {r.municipio}, {r.estado}<br />
+                      {r.tipo_maiz} · {fmtNum(r.volumen_ton, 0)} ton<br />
+                      Precio: {fmtMXN(r.precio_ofrecido)}/ton · Radio: {r.radio_km} km
+                      {match && <><br /><span style={{ color: '#d97706', fontWeight: 700 }}>★ Coincidencia geográfica</span></>}
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
           </MapContainer>
         </div>
 

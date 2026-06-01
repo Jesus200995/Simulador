@@ -5,6 +5,7 @@ import {
   RefreshCw, ChevronRight, Activity, Clock, CheckCircle2,
   Zap, ShieldAlert
 } from 'lucide-react';
+import MapaGlobalAdmin from '../../components/admin/MapaGlobalAdmin';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -277,6 +278,8 @@ export default function DashboardAdminPage() {
         </div>
       )}
 
+      {/* ── Mapa Nacional ─────────────────────────── */}
+      <MapaGlobalAdmin token={localStorage.getItem('simac_token') || ''} apiUrl={BASE} />
 
 
       {/* ── Actividad reciente ──────────────────────── */}
