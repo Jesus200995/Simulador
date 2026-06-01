@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -27,6 +27,73 @@ const LAYER_CONFIG = {
 
 type LayerKey = keyof typeof LAYER_CONFIG;
 
+/* ── light pastel tints for each type ── */
+const LIGHT_COLORS: Record<string, { bg: string; border: string; accent: string; badge: string; badgeText: string; expandBg: string }> = {
+  productor: {
+    bg: 'rgba(26, 92, 56, 0.06)',
+    border: 'rgba(26, 92, 56, 0.15)',
+    accent: '#1A5C38',
+    badge: 'rgba(26, 92, 56, 0.12)',
+    badgeText: '#15803d',
+    expandBg: 'rgba(26, 92, 56, 0.04)',
+  },
+  bodega: {
+    bg: 'rgba(37, 99, 235, 0.06)',
+    border: 'rgba(37, 99, 235, 0.15)',
+    accent: '#2563EB',
+    badge: 'rgba(37, 99, 235, 0.12)',
+    badgeText: '#1d4ed8',
+    expandBg: 'rgba(37, 99, 235, 0.04)',
+  },
+  alerta: {
+    bg: 'rgba(220, 38, 38, 0.06)',
+    border: 'rgba(220, 38, 38, 0.15)',
+    accent: '#DC2626',
+    badge: 'rgba(220, 38, 38, 0.12)',
+    badgeText: '#b91c1c',
+    expandBg: 'rgba(220, 38, 38, 0.04)',
+  },
+};
+
+/* ── Helper: auto-center map when a popup opens ── */
+function FlyToCenter() {
+  const map = useMap();
+
+  useEffect(() => {
+    const onPopupOpen = (e: any) => {
+      const latlng = e.popup.getLatLng();
+      if (latlng) {
+        map.flyTo(latlng, Math.max(map.getZoom(), 7), { animate: true, duration: 0.6 });
+      }
+    };
+    map.on('popupopen', onPopupOpen);
+    return () => { map.off('popupopen', onPopupOpen); };
+  }, [map]);
+
+  return null;
+}
+
+/* ── POPUP STYLES (injected once) ── */
+const POPUP_CSS = `
+  .simac-popup .leaflet-popup-content-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+  .simac-popup .leaflet-popup-content {
+    margin: 0 !important;
+    width: auto !important;
+    line-height: 1.4 !important;
+  }
+  .simac-popup .leaflet-popup-tip-container {
+    display: none !important;
+  }
+  .simac-popup .leaflet-popup-close-button {
+    display: none !important;
+  }
+`;
+
 export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps) {
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>({
     productores: true,
@@ -47,7 +114,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
       .then(r => r.json())
       .then(data => {
         const pts: Punto[] = [];
-        
+
         if (data.ups && Array.isArray(data.ups)) {
           data.ups.forEach((u: any) => {
             if (u.lat && u.lng) {
@@ -59,12 +126,12 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                 municipio: u.municipality_name || '',
                 latitud: u.lat,
                 longitud: u.lng,
-                detalle: `Área: ${u.area_ha} ha${u.alertas > 0 ? ` | Alertas: ${u.alertas}` : ''}`
+                detalle: `Área: ${u.area_ha} ha${u.alertas > 0 ? ` · Alertas: ${u.alertas}` : ''}`,
               });
             }
           });
         }
-        
+
         if (data.bodegas && Array.isArray(data.bodegas)) {
           data.bodegas.forEach((b: any) => {
             if (b.lat && b.lng) {
@@ -76,12 +143,12 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                 municipio: b.municipio || '',
                 latitud: b.lat,
                 longitud: b.lng,
-                detalle: `Capacidad: ${b.capacidad_toneladas} t | Ocupación: ${b.ocupacion_pct}%`
+                detalle: `Capacidad: ${b.capacidad_toneladas} t · Ocupación: ${b.ocupacion_pct}%`,
               });
             }
           });
         }
-        
+
         if (data.alertas && Array.isArray(data.alertas)) {
           data.alertas.forEach((a: any) => {
             if (a.lat && a.lng) {
@@ -94,14 +161,13 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                 latitud: a.lat,
                 longitud: a.lng,
                 detalle: `UP: ${a.up_name}`,
-                nivel: a.nivel_alerta
+                nivel: a.nivel_alerta,
               });
             }
           });
         }
-        
+
         setPuntos(pts);
-        // Extract unique states for filter
         const uniqueEstados = [...new Set(pts.map(p => p.estado).filter(Boolean))].sort();
         if (estados.length === 0) setEstados(uniqueEstados);
       })
@@ -141,12 +207,8 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Layer toggles */}
           {(Object.keys(LAYER_CONFIG) as LayerKey[]).map(key => (
-            <label
-              key={key}
-              className="flex items-center gap-1.5 cursor-pointer select-none"
-            >
+            <label key={key} className="flex items-center gap-1.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={layers[key]}
@@ -155,9 +217,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
               />
               <span
                 className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center transition-all ${
-                  layers[key]
-                    ? 'border-transparent'
-                    : 'border-gray-600 bg-transparent'
+                  layers[key] ? 'border-transparent' : 'border-gray-600 bg-transparent'
                 }`}
                 style={layers[key] ? { background: LAYER_CONFIG[key].color, borderColor: LAYER_CONFIG[key].color } : {}}
               >
@@ -173,7 +233,6 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
             </label>
           ))}
 
-          {/* State filter */}
           <select
             value={estadoFiltro}
             onChange={e => setEstadoFiltro(e.target.value)}
@@ -194,32 +253,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
             <div className="w-7 h-7 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
           </div>
         )}
-        <style>{`
-          .apple-glass-popup .leaflet-popup-content-wrapper {
-            background: transparent !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-          }
-          .apple-glass-popup .leaflet-popup-content {
-            margin: 0 !important;
-            width: auto !important;
-          }
-          .apple-glass-popup .leaflet-popup-tip-container {
-            display: none !important;
-          }
-          .leaflet-container a.leaflet-popup-close-button {
-            color: #fff !important;
-            opacity: 0.6;
-            right: 14px !important;
-            top: 14px !important;
-            z-index: 10;
-          }
-          .leaflet-container a.leaflet-popup-close-button:hover {
-            opacity: 1;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-          }
-        `}</style>
+        <style>{POPUP_CSS}</style>
         <MapContainer
           center={[23.6345, -102.5528]}
           zoom={5}
@@ -229,6 +263,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             attribution="© Esri"
           />
+          <FlyToCenter />
           {filtered.map(p => (
             <CircleMarker
               key={`${p.tipo}-${p.id}`}
@@ -241,8 +276,8 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                 weight: 1.5,
               }}
             >
-              <Popup className="apple-glass-popup" autoPan={false}>
-                <PopupContent p={p} color={getColor(p.tipo)} />
+              <Popup className="simac-popup" autoPan={false} closeButton={false}>
+                <PopupCard p={p} />
               </Popup>
             </CircleMarker>
           ))}
@@ -258,51 +293,140 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
   );
 }
 
-function PopupContent({ p, color }: { p: Punto; color: string }) {
+/* ─────────────────────────────────────────────
+   PopupCard — Apple 2026 style, light + pastel
+   ───────────────────────────────────────────── */
+function PopupCard({ p }: { p: Punto }) {
   const [expanded, setExpanded] = useState(false);
+  const theme = LIGHT_COLORS[p.tipo] || LIGHT_COLORS.productor;
+
+  const tipoLabel = p.tipo === 'productor' ? 'Productor' : p.tipo === 'bodega' ? 'Bodega' : 'Alerta';
+  const tipoIcon = p.tipo === 'productor' ? '🌾' : p.tipo === 'bodega' ? '🏭' : '⚠️';
 
   return (
-    <div className="min-w-[180px] max-w-[240px] font-sans">
-      <div className="flex items-start justify-between gap-2 mb-1.5">
-        <h3 className="font-bold text-[13px] leading-tight text-gray-900 m-0">{p.nombre}</h3>
-      </div>
-      <p className="text-[11px] text-gray-500 m-0 mb-2 leading-tight">
-        {p.municipio ? `${p.municipio}, ` : ''}{p.estado}
-      </p>
-      
-      <div className="mb-3">
-        <span 
-          className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full text-white shadow-sm"
-          style={{ background: color }}
-        >
-          {p.tipo === 'productor' ? 'Productor' : p.tipo === 'bodega' ? 'Bodega' : 'Alerta'}
-        </span>
-        {p.nivel && (
-          <span className={`inline-block ml-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white shadow-sm ${p.nivel === 'ALTA' || p.nivel === 'critico' ? 'bg-red-500' : 'bg-amber-500'}`}>
-            {p.nivel}
-          </span>
-        )}
-      </div>
+    <div
+      style={{
+        width: 260,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
+        background: `linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92))`,
+        border: `1.5px solid ${theme.border}`,
+        borderRadius: 18,
+        boxShadow: `0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)`,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Accent strip at top */}
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}88, transparent)` }} />
 
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? 'max-h-[200px] opacity-100 mt-2 mb-3' : 'max-h-0 opacity-0 m-0'}`}>
-        <div className="p-2.5 bg-gray-50 border border-gray-100 rounded-lg">
-          <p className="text-[11px] text-gray-700 m-0 font-medium">{p.detalle || 'No hay detalles adicionales disponibles.'}</p>
-          <div className="mt-2 pt-2 border-t border-gray-200/60 flex items-center justify-between text-[10px] text-gray-400">
-            <span>Lat: {p.latitud.toFixed(4)}</span>
-            <span>Lng: {p.longitud.toFixed(4)}</span>
+      {/* Content */}
+      <div style={{ padding: '14px 16px 12px' }}>
+        {/* Header row */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: theme.badge,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 15, flexShrink: 0,
+          }}>
+            {tipoIcon}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 13, fontWeight: 700, color: '#1a1a1a',
+              lineHeight: 1.25, margin: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {p.nombre}
+            </div>
+            <div style={{ fontSize: 11, color: '#888', marginTop: 2, lineHeight: 1.2 }}>
+              {p.municipio ? `${p.municipio}, ` : ''}{p.estado}
+            </div>
           </div>
         </div>
-      </div>
 
-      <button 
-        onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-        className="w-full py-1.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-[11px] font-semibold rounded-md transition-colors flex items-center justify-center gap-1.5"
-      >
-        <span>{expanded ? 'Ocultar información' : 'Ver más información'}</span>
-        <svg className={`w-3 h-3 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+        {/* Badge row */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          <span style={{
+            display: 'inline-block', fontSize: 10, fontWeight: 600,
+            padding: '3px 10px', borderRadius: 99,
+            background: theme.badge, color: theme.badgeText,
+            letterSpacing: 0.2,
+          }}>
+            {tipoLabel}
+          </span>
+          {p.nivel && (
+            <span style={{
+              display: 'inline-block', fontSize: 10, fontWeight: 600,
+              padding: '3px 10px', borderRadius: 99,
+              background: p.nivel === 'critico' || p.nivel === 'alto' ? 'rgba(220,38,38,0.1)' : 'rgba(245,158,11,0.1)',
+              color: p.nivel === 'critico' || p.nivel === 'alto' ? '#dc2626' : '#d97706',
+            }}>
+              {p.nivel}
+            </span>
+          )}
+        </div>
+
+        {/* Expandable section */}
+        <div style={{
+          maxHeight: expanded ? 160 : 0,
+          opacity: expanded ? 1 : 0,
+          overflow: 'hidden',
+          transition: 'max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease',
+        }}>
+          <div style={{
+            background: theme.expandBg,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 12,
+            padding: '10px 12px',
+            marginBottom: 10,
+          }}>
+            <div style={{ fontSize: 11, color: '#555', fontWeight: 500, lineHeight: 1.5, margin: 0 }}>
+              {p.detalle || 'Sin detalles disponibles'}
+            </div>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              marginTop: 8, paddingTop: 8,
+              borderTop: `1px solid ${theme.border}`,
+              fontSize: 10, color: '#aaa', fontFamily: 'monospace',
+            }}>
+              <span>{p.latitud.toFixed(4)}°N</span>
+              <span>{Math.abs(p.longitud).toFixed(4)}°W</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Toggle button */}
+        <button
+          onClick={e => { e.stopPropagation(); setExpanded(!expanded); }}
+          style={{
+            width: '100%',
+            padding: '7px 0',
+            background: expanded ? theme.expandBg : 'transparent',
+            border: `1px solid ${theme.border}`,
+            borderRadius: 10,
+            color: theme.accent,
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+            transition: 'all 0.2s ease',
+            letterSpacing: 0.1,
+          }}
+          onMouseEnter={e => { (e.target as HTMLElement).style.background = theme.badge; }}
+          onMouseLeave={e => { (e.target as HTMLElement).style.background = expanded ? theme.expandBg : 'transparent'; }}
+        >
+          <span>{expanded ? 'Ocultar' : 'Ver más información'}</span>
+          <svg
+            width="12" height="12" viewBox="0 0 24 24" fill="none"
+            style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}
+          >
+            <path d="M6 9l6 6 6-6" stroke={theme.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
