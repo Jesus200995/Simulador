@@ -46,7 +46,60 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
     })
       .then(r => r.json())
       .then(data => {
-        const pts: Punto[] = Array.isArray(data) ? data : data.puntos || [];
+        const pts: Punto[] = [];
+        
+        if (data.ups && Array.isArray(data.ups)) {
+          data.ups.forEach((u: any) => {
+            if (u.lat && u.lng) {
+              pts.push({
+                id: u.up_id,
+                nombre: u.up_name || 'UP Sin Nombre',
+                tipo: 'productor',
+                estado: u.state_name || '',
+                municipio: u.municipality_name || '',
+                latitud: u.lat,
+                longitud: u.lng,
+                detalle: `Área: ${u.area_ha} ha${u.alertas > 0 ? ` | Alertas: ${u.alertas}` : ''}`
+              });
+            }
+          });
+        }
+        
+        if (data.bodegas && Array.isArray(data.bodegas)) {
+          data.bodegas.forEach((b: any) => {
+            if (b.lat && b.lng) {
+              pts.push({
+                id: b.id,
+                nombre: b.nombre || 'Bodega',
+                tipo: 'bodega',
+                estado: b.estado || '',
+                municipio: b.municipio || '',
+                latitud: b.lat,
+                longitud: b.lng,
+                detalle: `Capacidad: ${b.capacidad_toneladas} t | Ocupación: ${b.ocupacion_pct}%`
+              });
+            }
+          });
+        }
+        
+        if (data.alertas && Array.isArray(data.alertas)) {
+          data.alertas.forEach((a: any) => {
+            if (a.lat && a.lng) {
+              pts.push({
+                id: a.id,
+                nombre: `Alerta: ${a.tipo_alerta}`,
+                tipo: 'alerta',
+                estado: a.state_name || '',
+                municipio: a.municipality_name || '',
+                latitud: a.lat,
+                longitud: a.lng,
+                detalle: `UP: ${a.up_name}`,
+                nivel: a.nivel_alerta
+              });
+            }
+          });
+        }
+        
         setPuntos(pts);
         // Extract unique states for filter
         const uniqueEstados = [...new Set(pts.map(p => p.estado).filter(Boolean))].sort();
