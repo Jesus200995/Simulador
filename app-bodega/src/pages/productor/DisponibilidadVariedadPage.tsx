@@ -5,7 +5,7 @@ import DisponibilidadStepper from '../../components/productor/DisponibilidadStep
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-interface Variedad { id: number; nombre_variedad: string; code: string; tipo_maiz: string; }
+interface Variedad { code: string; label: string; }
 
 export default function DisponibilidadVariedadPage() {
   const navigate = useNavigate();
@@ -16,22 +16,20 @@ export default function DisponibilidadVariedadPage() {
   useEffect(() => {
     if (!tipoMaiz) { navigate('/productor/disponibilidad/tipo'); return; }
     const token = localStorage.getItem('simac_token');
-    fetch(`${BASE}/catalogos-productor`, {
+    fetch(`${BASE}/catalogos-productor?tipo_maiz=${tipoMaiz}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
       .then(d => {
-        const all: Variedad[] = d.variedades || [];
-        const filtered = all.filter(v => !v.tipo_maiz || v.tipo_maiz === tipoMaiz);
-        setVariedades(filtered);
+        const all: Variedad[] = d.varieties?.maiz ?? [];
+        setVariedades(all);
       })
       .finally(() => setLoading(false));
   }, [tipoMaiz, navigate]);
 
   const seleccionar = (v: Variedad) => {
-    sessionStorage.setItem('disp_variedad_id', String(v.id));
     sessionStorage.setItem('disp_variedad_code', v.code);
-    sessionStorage.setItem('disp_variedad_nombre', v.nombre_variedad);
+    sessionStorage.setItem('disp_variedad_nombre', v.label);
     navigate('/productor/disponibilidad/volumen');
   };
 
@@ -60,10 +58,10 @@ export default function DisponibilidadVariedadPage() {
         ) : (
           <div className="space-y-2">
             {variedades.map(v => (
-              <button key={v.id} onClick={() => seleccionar(v)}
+              <button key={v.code} onClick={() => seleccionar(v)}
                 className="w-full bg-white ring-1 ring-zinc-200 rounded-2xl
                            py-4 px-5 text-left hover:ring-zinc-300 active:ring-2 active:ring-[#1A5C38] active:bg-emerald-50 transition-all duration-200">
-                <p className="font-semibold text-zinc-800">{v.nombre_variedad}</p>
+                <p className="font-semibold text-zinc-800">{v.label}</p>
               </button>
             ))}
             {variedades.length === 0 && (
