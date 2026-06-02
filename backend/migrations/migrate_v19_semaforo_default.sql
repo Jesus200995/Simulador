@@ -20,17 +20,21 @@
 
 BEGIN;
 
--- 1. Reemplazar el CHECK para incluir 'sin_actividad'
+-- 1. Ampliar la columna: 'sin_actividad' (13 chars) no cabe en VARCHAR(10)
 ALTER TABLE bodegas DROP CONSTRAINT IF EXISTS bodegas_semaforo_compra_check;
+ALTER TABLE bodegas
+  ALTER COLUMN semaforo_compra TYPE VARCHAR(20);
+
+-- 2. Reemplazar el CHECK para incluir 'sin_actividad'
 ALTER TABLE bodegas
   ADD CONSTRAINT bodegas_semaforo_compra_check
   CHECK (semaforo_compra IN ('sin_actividad','verde','amarillo','rojo'));
 
--- 2. Cambiar el DEFAULT a 'sin_actividad'
+-- 3. Cambiar el DEFAULT a 'sin_actividad'
 ALTER TABLE bodegas
   ALTER COLUMN semaforo_compra SET DEFAULT 'sin_actividad';
 
--- 3. Normalizar bodegas que nunca configuraron su semáforo
+-- 4. Normalizar bodegas que nunca configuraron su semáforo
 UPDATE bodegas
    SET semaforo_compra = 'sin_actividad'
  WHERE semaforo_updated_at IS NULL
