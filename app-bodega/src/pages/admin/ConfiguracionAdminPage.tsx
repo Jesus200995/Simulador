@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, RefreshCw, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle } from 'lucide-react';
+import { Settings, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('simac_token')}` });

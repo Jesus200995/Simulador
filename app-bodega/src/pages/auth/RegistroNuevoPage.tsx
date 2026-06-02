@@ -61,6 +61,7 @@ export default function RegistroNuevoPage() {
   const [animDir, setAnimDir] = useState<'right' | 'left'>('right');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [registroExitoso, setRegistroExitoso] = useState(false);
 
   // Datos personales
   const [nombres, setNombres] = useState('');
@@ -178,7 +179,7 @@ export default function RegistroNuevoPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Error al registrar'); return; }
-      navigate('/login-productor', { state: { mensaje: data.mensaje } });
+      setRegistroExitoso(true);
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
@@ -190,8 +191,6 @@ export default function RegistroNuevoPage() {
   if (paso === 4) {
     const puntosNecesarios = Math.max(0, 3 - pointCount);
     const puedeTerminar = pointCount >= 3;
-    const parcelaLista = !!poligono && drawMode === 'idle';
-    const areaConfirmada = parcelaLista && coincideArea !== null && (coincideArea === true || (coincideArea === false && !!areaReal));
 
     return (
       <div
@@ -827,6 +826,41 @@ export default function RegistroNuevoPage() {
           )}
         </div>
       </div>
+
+      {/* Modal de registro exitoso */}
+      {registroExitoso && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-6">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            {/* Ícono de éxito */}
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-[#1A5C38]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            {/* Título */}
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              ¡Registro exitoso!
+            </h2>
+
+            {/* Mensaje */}
+            <p className="text-gray-600 mb-2">
+              Tu cuenta ha sido creada correctamente en SIMAC.
+            </p>
+            <p className="text-gray-500 text-sm mb-8">
+              Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.
+            </p>
+
+            {/* Botón */}
+            <button
+              onClick={() => navigate('/login-productor')}
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg hover:bg-green-800 transition-colors"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

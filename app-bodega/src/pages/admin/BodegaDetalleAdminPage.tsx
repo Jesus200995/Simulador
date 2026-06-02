@@ -17,7 +17,7 @@ interface BodegaDetalle {
   estado: string;
   municipio: string;
   estatus: 'aprobada' | 'pendiente' | 'rechazada';
-  semaforo_compra: 'verde' | 'amarillo' | 'rojo';
+  semaforo_compra: 'sin_actividad' | 'verde' | 'amarillo' | 'rojo';
   stock_actual: number;
   inventario: {
     tipo_maiz: string;

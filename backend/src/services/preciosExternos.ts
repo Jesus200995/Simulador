@@ -52,8 +52,11 @@ export async function obtenerChicagoCME(): Promise<number> {
     return parseFloat(lastDb.chicago_usd_bushel);
   }
 
-  console.log('Sin fallback en BD para Chicago. Usando por defecto 6.28');
-  return 6.28;
+  console.error('[PRECIOS] Sin datos de Chicago CME — ni API ni BD disponibles');
+  throw new Error(
+    'No hay datos de Chicago CME disponibles. ' +
+    'Verifica la conexión a Yahoo Finance o ingresa el valor manualmente desde el panel de Precios.'
+  );
 }
 
 /**
@@ -107,9 +110,12 @@ export async function obtenerTCBanxico(): Promise<number> {
     return parseFloat(lastDb.tc_banxico);
   }
 
-  // 4. Último recurso: hardcoded
-  console.log('Sin fallback en BD para TC. Usando por defecto 17.42');
-  return 17.42;
+  // 4. Sin datos: error explícito (no usar valores ficticios)
+  console.error('[PRECIOS] Sin tipo de cambio disponible — ni Banxico ni Yahoo Finance ni BD');
+  throw new Error(
+    'No hay datos de tipo de cambio disponibles. ' +
+    'Verifica BANXICO_TOKEN en .env o la conexión a Yahoo Finance.'
+  );
 }
 
 /**
@@ -137,16 +143,18 @@ async function obtenerUltimoDeDB() {
  */
 export async function actualizarReferenciasExternas(fuente: string): Promise<any> {
   console.log(`Iniciando actualización de referencias externas. Fuente: ${fuente}`);
-  let chicagoUsdBushel = 6.28;
-  let tc = 17.42;
-  let isError = false;
+  let chicagoUsdBushel: number;
+  let tc: number;
+  const isError = false;
 
   try {
     chicagoUsdBushel = await obtenerChicagoCME();
     tc = await obtenerTCBanxico();
   } catch (e: any) {
-    isError = true;
+    // No guardar valores ficticios en BD: propagar el error para que el
+    // cron/endpoint lo registre y notifique al Admin.
     console.error('Error crítico durante la actualización de referencias:', e);
+    throw e;
   }
 
   // Obtener la garantía SADER de la tabla de parámetros

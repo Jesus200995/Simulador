@@ -64,10 +64,10 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
         {/* Left: Logo + Name */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative flex-shrink-0">
-            <img src="/icono.png" alt="SOMEC" className="w-9 h-9 rounded-[10px] ring-[1.5px] ring-[#1A5C38]/40 shadow-sm" />
+            <img src="/icono.png" alt="SIMAC" className="w-9 h-9 rounded-[10px] ring-[1.5px] ring-[#1A5C38]/40 shadow-sm" />
           </div>
           <div className="flex flex-col leading-none min-w-0">
-            <span className="text-[16px] font-black tracking-tight leading-none text-[#1A5C38]">SOMEC</span>
+            <span className="text-[16px] font-black tracking-tight leading-none text-[#1A5C38]">SIMAC</span>
             <span className="text-[10px] text-slate-500 font-medium leading-tight mt-[2px] truncate max-w-[200px] sm:max-w-[320px]">
               {SYSTEM_NAME}
             </span>

@@ -1,4 +1,5 @@
 import cron from 'node-cron';
+import pool from '../config/database';
 import { actualizarReferenciasExternas } from '../services/preciosExternos';
 
 /**
@@ -10,8 +11,17 @@ export async function runPreciosCron(): Promise<void> {
     console.log('[CRON] Iniciando actualización diaria de precios a las 07:00 AM...');
     const result = await actualizarReferenciasExternas('cron');
     console.log('[CRON] Actualización de precios finalizada con éxito. ID insertado:', result?.id);
-  } catch (err) {
-    console.error('[CRON] Error al actualizar precios en cron diario:', err);
+  } catch (err: any) {
+    const msg = err?.message || String(err);
+    console.error('[CRON] Error al actualizar precios en cron diario:', msg);
+    // Notificar a los administradores (best-effort) — sin guardar valores ficticios en BD
+    try {
+      await pool.query(
+        `INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+         SELECT id, 'sistema', $1 FROM usuarios WHERE rol IN ('admin','responsable')`,
+        [`Error en actualización de precios: ${msg}`]
+      );
+    } catch (_) { /* ignore si notificaciones falla */ }
   }
 }
 

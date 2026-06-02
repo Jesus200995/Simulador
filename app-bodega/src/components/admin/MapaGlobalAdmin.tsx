@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, type ReactElement } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -302,7 +302,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
 }
 
 /* ── SVG icons for each type (professional, no emojis) ── */
-const TipoIcons: Record<string, JSX.Element> = {
+const TipoIcons: Record<string, ReactElement> = {
   productor: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2L12 8" /><path d="M8 6C8 6 9.5 2 12 2C14.5 2 16 6 16 6" />

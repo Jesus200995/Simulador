@@ -28,10 +28,10 @@ export default function WelcomePage() {
         {/* Logo + brand */}
         <div className="animate-auth-in flex flex-col items-center mb-10 sm:mb-12">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] sm:rounded-[24px] bg-white/10 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-2xl mb-4">
-            <img src="/icono.png" alt="SOMEC" className="w-11 h-11 sm:w-14 sm:h-14 rounded-[12px]" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+            <img src="/icono.png" alt="SIMAC" className="w-11 h-11 sm:w-14 sm:h-14 rounded-[12px]" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-[-0.5px] leading-none">
-            SOMEC
+            SIMAC
           </h1>
           <p className="text-sm sm:text-base text-green-300/70 font-medium mt-1.5 tracking-wide text-center">
             Plan Nacional Maíz 2026
@@ -48,7 +48,7 @@ export default function WelcomePage() {
 
           {/* Productor */}
           <button
-            onClick={() => navigate('/login-productor')}
+            onClick={() => navigate('/registro-nuevo')}
             className="animate-auth-in w-full group relative bg-white/10 hover:bg-white/15 active:bg-white/20 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-left transition-all duration-200 active:scale-[0.98]"
             style={{ animationDelay: '0.1s' }}
           >
@@ -59,11 +59,21 @@ export default function WelcomePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-bold text-base sm:text-lg leading-tight">Soy Productor</p>
-                <p className="text-white/50 text-xs sm:text-sm mt-0.5 leading-snug">Ingresa con tu CURP y PIN de 4 dígitos</p>
+                <p className="text-white/50 text-xs sm:text-sm mt-0.5 leading-snug">Regístrate con tu CURP y crea tu PIN de 4 dígitos</p>
               </div>
               <ChevronRight size={18} className="text-white/30 group-hover:text-white/60 transition-colors shrink-0" />
             </div>
           </button>
+
+          {/* Link para productores ya registrados */}
+          <div className="text-center mt-3">
+            <button
+              onClick={() => navigate('/login-productor')}
+              className="text-sm text-green-300 underline hover:text-white transition-colors"
+            >
+              ¿Ya tienes cuenta? Inicia sesión aquí
+            </button>
+          </div>
 
           {/* Bodega / Industria */}
           <button

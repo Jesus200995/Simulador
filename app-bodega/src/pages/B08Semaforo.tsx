@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { CheckCircle2 } from 'lucide-react';
 import { useToast } from '../components/Toast';
 
-type Sem = 'verde' | 'amarillo' | 'rojo';
+type Sem = 'sin_actividad' | 'verde' | 'amarillo' | 'rojo';
 
 const OPTIONS: { key: Sem; dotColor: string; label: string; desc: string; activeBg: string; activeBorder: string; activeText: string }[] = [
   { key: 'verde',    dotColor: 'bg-emerald-500', label: 'Comprando esta semana',          desc: 'Visible para productores en el mapa', activeBg: 'bg-emerald-50', activeBorder: 'border-emerald-400', activeText: 'text-emerald-700' },
@@ -17,12 +17,12 @@ export default function B08Semaforo() {
   const { toast, confirm } = useToast();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<Sem>('verde');
+  const [selected, setSelected] = useState<Sem>('sin_actividad');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     api.bodegas.get(Number(id))
-      .then((r: any) => setSelected(r.bodega?.semaforo_compra || 'verde'))
+      .then((r: any) => setSelected(r.bodega?.semaforo_compra || 'sin_actividad'))
       .catch(() => {});
   }, [id]);
 

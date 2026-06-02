@@ -81,6 +81,12 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 
     const bodegasQuery = `
       SELECT b.*, r.nombre as region_nombre, ${distanciaSelect},
+        CASE b.semaforo_compra
+          WHEN 'verde'    THEN 'comprando'
+          WHEN 'amarillo' THEN 'limitado'
+          WHEN 'rojo'     THEN 'no_compra'
+          ELSE 'sin_actividad'
+        END AS estado_compra,
         (
           SELECT json_build_object(
             'id', sc.id,
@@ -287,6 +293,48 @@ router.patch('/:id/rechazar', authMiddleware, async (req: AuthRequest, res: Resp
   } catch (error) {
     console.error('Error al rechazar bodega:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// GET /api/bodegas/:id/tarifario-publico — tarifario visible para productores
+// =============================================
+router.get('/:id/tarifario-publico', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(
+      `SELECT c.nombre AS concepto, ts.precio, c.unidad_default AS unidad
+       FROM tarifario_servicios ts
+       JOIN cat_conceptos_servicio c ON c.id = ts.concepto_id
+       WHERE ts.bodega_id = $1
+         AND ts.activo = TRUE
+       ORDER BY c.nombre ASC`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener tarifario público:', error);
+    res.status(500).json({ error: 'Error al obtener tarifario' });
+  }
+});
+
+// =============================================
+// GET /api/bodegas/:id/stock-actual — último volumen reportado (productores)
+// =============================================
+router.get('/:id/stock-actual', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(
+      `SELECT volumen_almacenamiento AS volumen_ton
+       FROM inventarios
+       WHERE bodega_id = $1
+       ORDER BY fecha_registro DESC
+       LIMIT 1`,
+      [req.params.id]
+    );
+    const vol = result.rows[0]?.volumen_ton;
+    res.json({ volumen_ton: vol != null ? Number(vol) : null });
+  } catch (error) {
+    console.error('Error al obtener stock actual:', error);
+    res.status(500).json({ error: 'Error al obtener stock' });
   }
 });
 

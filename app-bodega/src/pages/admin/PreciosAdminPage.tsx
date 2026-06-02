@@ -152,26 +152,8 @@ export default function PreciosAdminPage() {
 
     } catch (e) {
       console.error('Error al cargar panel de precios:', e);
-      // Fallback maquetas realistas
-      setSeries([
-        { fecha: '05-24', precio_compra: 5660, margen_negociacion: 4890, precio_venta: 770 },
-        { fecha: '05-25', precio_compra: 5660, margen_negociacion: 4890, precio_venta: 770 },
-        { fecha: '05-26', precio_compra: 5660, margen_negociacion: 4890, precio_venta: 770 },
-        { fecha: '05-27', precio_compra: 5680, margen_negociacion: 4920, precio_venta: 760 },
-        { fecha: '05-28', precio_compra: 5660, margen_negociacion: 4890, precio_venta: 770 },
-      ]);
-      setBodegasHoy([
-        { nombre: 'Silos El Bajío Central', municipio: 'Celaya', estado: 'Guanajuato', precio: 4720, tipo_maiz: 'Maíz Blanco', hora: '09:12', desviacion: 0.9 },
-        { nombre: 'Acopiadora Ocotlán Poniente', municipio: 'Ocotlán', estado: 'Jalisco', precio: 4650, tipo_maiz: 'Maíz Blanco', hora: '09:45', desviacion: -0.6 }
-      ]);
-      setDiscrepancias([
-        { id: 1, tipo: 'Transacción', prioridad: 'ALTA', descripcion: 'Diferencia de $180 MXN/t reportada por productor Juan Leyva vs Bodega Guasave.', creado_at: new Date().toISOString() }
-      ]);
-      setBrechas([
-        { estado: 'Michoacán', brecha: -1853, nivel_criticidad: 'CRITICA', txns: 45 },
-        { estado: 'Guanajuato', brecha: -1481, nivel_criticidad: 'CRITICA', txns: 62 },
-        { estado: 'Jalisco', brecha: -803, nivel_criticidad: 'ALTA', txns: 38 }
-      ]);
+      // Sin datos ficticios: marcar error explícito para mostrar el estado de error.
+      setPreciosError('No se pudo conectar con el servidor de precios. Revisa tu conexión e intenta de nuevo.');
     }
   }
 
@@ -259,6 +241,7 @@ export default function PreciosAdminPage() {
 
   // Exportar CSV del lado del cliente
   function exportarPreciosHoy() {
+    if (!preciosData) return;
     const headers = 'Fecha,Margen Negociacion,Lo Gana Productor,Servicios Bodega,Precio Compra,Precio Venta,Chicago CME USD/bu,TC Banxico\n';
     const row = `${new Date().toISOString().split('T')[0]},${preciosHoy.precio_venta},${preciosHoy.po},${preciosHoy.s},${preciosHoy.total_compra},${preciosHoy.precio_venta},${preciosData.chicago_usd_bushel},${preciosData.tc_banxico}\n`;
     
@@ -501,7 +484,7 @@ export default function PreciosAdminPage() {
               {preciosData.costos_fira_detalle && preciosData.costos_fira_detalle.length > 0 ? (
                 <div className="space-y-2 text-[12.5px] max-h-56 overflow-y-auto">
                   {preciosData.costos_fira_detalle.slice(0, 4).map((fira, idx) => {
-                    const costoHa = fira.costo_por_ha || (fira as any).precio_fira || (fira as any).costo_por_ton || 0;
+                    const costoHa = (fira as any).costo_por_ha || (fira as any).precio_fira || (fira as any).costo_por_ton || 0;
                     const utilidad = preciosHoy.po - costoHa;
                     return (
                       <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 flex justify-between items-center">

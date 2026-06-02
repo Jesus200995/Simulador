@@ -69,6 +69,7 @@ router.get('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: R
 
     const result = await pool.query(
       `SELECT c.cycle_id, c.up_id, c.cycle_year, c.cycle_type, c.created_at,
+              COALESCE(c.estado_ciclo, 'activo') AS estado_ciclo,
               COALESCE(json_agg(
                 json_build_object(
                   'cycle_crop_id', cc.cycle_crop_id,

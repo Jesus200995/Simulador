@@ -15,7 +15,8 @@ L.Icon.Default.mergeOptions({
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const iconBodega = (estado: string) => {
-  let color = '#10B981'; // comprando (Verde)
+  let color = '#6B7280'; // sin_actividad (Gris) — estado neutro por defecto
+  if (estado === 'comprando') color = '#10B981'; // Verde
   if (estado === 'limitado') color = '#f59e0b'; // Naranja
   if (estado === 'no_compra') color = '#ef4444'; // Rojo
 
@@ -60,6 +61,8 @@ export default function MapaBodegasPage() {
   const [mapRef, setMapRef] = useState<L.Map | null>(null);
   const [loadingBodegas, setLoadingBodegas] = useState(true);
   const [radioKm, setRadioKm] = useState(150);
+  const [confirmacionVisible, setConfirmacionVisible] = useState(false);
+  const [bodegaConfirmada, setBodegaConfirmada] = useState<string>('');
 
   // 1. Cargar UP con coordenadas reales
   useEffect(() => {
@@ -93,12 +96,14 @@ export default function MapaBodegasPage() {
       .finally(() => setLoadingBodegas(false));
   }, [up, radioKm]);
 
-  const handleMeInteresa = async (senalId: number) => {
+  const handleMeInteresa = async (senalId: number, nombreBodega?: string) => {
     const token = localStorage.getItem('simac_token');
     await fetch(`${BASE}/senales-compra/${senalId}/interes`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
     });
-    alert('Le avisamos a la bodega que estás interesado');
+    setBodegaConfirmada(nombreBodega || 'la bodega');
+    setConfirmacionVisible(true);
+    setTimeout(() => setConfirmacionVisible(false), 4000);
   };
 
   return (
@@ -140,16 +145,20 @@ export default function MapaBodegasPage() {
           {/* Bodegas */}
           {bodegas.filter(b => b.latitud && b.longitud).map(b => (
             <Marker key={b.id} position={[b.latitud, b.longitud]}
-              icon={iconBodega(b.estado_compra || 'comprando')}>
+              icon={iconBodega(b.estado_compra || 'sin_actividad')}>
               <Popup className="custom-premium-popup" autoPan={false}>
                 <div className="p-3.5 space-y-2.5 text-white">
                   <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
                       b.estado_compra === 'comprando' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' :
                       b.estado_compra === 'limitado' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20' :
-                      'text-red-400 bg-red-500/10 border border-red-500/20'
+                      b.estado_compra === 'no_compra' ? 'text-red-400 bg-red-500/10 border border-red-500/20' :
+                      'text-gray-300 bg-gray-500/10 border border-gray-500/20'
                     }`}>
-                      {b.estado_compra || 'comprando'}
+                      {b.estado_compra === 'comprando' ? 'Comprando' :
+                       b.estado_compra === 'limitado' ? 'Cap. limitada' :
+                       b.estado_compra === 'no_compra' ? 'No compra' :
+                       'Sin actividad'}
                     </span>
                   </div>
                   
@@ -171,7 +180,7 @@ export default function MapaBodegasPage() {
 
                   <div className="flex gap-2 mt-1">
                     {b.senal_activa && (
-                      <button onClick={() => handleMeInteresa(b.senal_activa!.id)}
+                      <button onClick={() => handleMeInteresa(b.senal_activa!.id, b.nombre)}
                         className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center">
                         Me interesa ✓
                       </button>
@@ -212,6 +221,21 @@ export default function MapaBodegasPage() {
           />
         </div>
       </div>
+
+      {/* Toast de confirmación "Me interesa" */}
+      {confirmacionVisible && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000]
+                        bg-[#1A5C38] text-white px-6 py-4 rounded-2xl shadow-2xl
+                        flex items-center gap-3 animate-fade-in max-w-xs w-full mx-4">
+          <span className="text-2xl">✅</span>
+          <div>
+            <p className="font-semibold text-sm">¡Interés registrado!</p>
+            <p className="text-green-200 text-xs mt-0.5">
+              {bodegaConfirmada} recibirá tu solicitud
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,8 @@ interface DashData {
   estado: string;
   location_confirmed: boolean;
   centroid_source: string;
+  lat: number | null;
+  lng: number | null;
   precio_hoy: number | null;
   precio_ayer: number | null;
   alerta_activa: { mensaje: string; tipo: string } | null;
@@ -26,9 +28,10 @@ interface DashData {
 }
 
 const SEMAFORO: Record<string, { cls: string; texto: string }> = {
-  comprando:  { cls: 'bg-emerald-500', texto: 'Comprando' },
-  limitado:   { cls: 'bg-amber-400', texto: 'Capacidad limitada' },
-  no_compra:  { cls: 'bg-red-500', texto: 'No compra' },
+  comprando:     { cls: 'bg-emerald-500', texto: 'Comprando' },
+  limitado:      { cls: 'bg-amber-400', texto: 'Capacidad limitada' },
+  no_compra:     { cls: 'bg-red-500', texto: 'No compra' },
+  sin_actividad: { cls: 'bg-gray-400', texto: 'Sin actividad' },
 };
 
 function SkeletonDashboard() {
@@ -105,6 +108,9 @@ export default function DashboardProductorPage() {
     || user?.nombres || user?.nombre_completo || 'Productor';
   const initials = nombreCompleto.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
 
+  // Detectar si el productor no tiene ubicación confirmada
+  const sinUbicacion = !data?.lat || !data?.location_confirmed;
+
   return (
     <div className="bg-zinc-50">
       {alertaActiva && (
@@ -151,6 +157,28 @@ export default function DashboardProductorPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
+        {sinUbicacion && (
+          <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-6 flex items-start gap-4">
+            <span className="text-2xl mt-0.5">📍</span>
+            <div className="flex-1">
+              <p className="font-semibold text-amber-800">
+                Tu parcela no tiene ubicación confirmada
+              </p>
+              <p className="text-amber-700 text-sm mt-1">
+                Sin ubicación no podemos mostrarte las bodegas más cercanas
+                ni calcular distancias reales. Actualiza tu UP para acceder
+                a toda la información del mercado.
+              </p>
+              <button
+                onClick={() => navigate('/productor/ubicacion')}
+                className="mt-3 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors"
+              >
+                Actualizar mi parcela →
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-[20px] p-5 sm:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
           <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1 font-medium">
             Precio de compra hoy - tu region
@@ -178,7 +206,7 @@ export default function DashboardProductorPage() {
           <p className="text-sm font-bold text-zinc-700 mb-3">Bodegas comprando hoy</p>
           <div className="space-y-2">
             {(data?.bodegas_cercanas ?? []).map(b => {
-              const sem = SEMAFORO[b.estado_compra] || SEMAFORO.comprando;
+              const sem = SEMAFORO[b.estado_compra] || SEMAFORO.sin_actividad;
               return (
                 <button key={b.id}
                   onClick={() => navigate(`/productor/mapa/bodega/${b.id}`)}

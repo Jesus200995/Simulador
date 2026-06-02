@@ -200,7 +200,7 @@ router.patch('/:id/solicitudes/:sid', authMiddleware, async (req: AuthRequest, r
       const sol = result.rows[0];
       if (sol.producer_id) {
         const prod = await pool.query(
-          'SELECT u.id FROM usuarios u JOIN producer p ON p.email = u.email WHERE p.producer_id = $1 LIMIT 1',
+          'SELECT u.id FROM usuarios u JOIN producer p ON p.usuario_id = u.id WHERE p.producer_id = $1 LIMIT 1',
           [sol.producer_id]
         );
         if (prod.rows.length > 0) {

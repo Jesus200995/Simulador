@@ -8,6 +8,11 @@ import fs from 'fs';
 const router = Router();
 const upload = multer({ dest: 'uploads/' });
 
+// ─── CONSTANTES DEL PROGRAMA ─────────────────────────────────────
+// Bono maíz blanco — Plan Nacional Maíz 2026
+// Para modificar: cambiar este valor y reiniciar el servidor
+const BONO_MAIZ_USD = 50;
+
 // Helper para obtener referencias (crea si no existen)
 async function obtenerReferenciasExternasActuales() {
   const res = await pool.query(`
@@ -64,7 +69,6 @@ router.get('/sistema/hoy', authMiddleware, async (req: AuthRequest, res: Respons
     // Referencias externas para Margen de Negociación correcto
     const refs = await obtenerReferenciasExternasActuales();
     const FACTOR_CONVERSION = 39.368;  // 1 ton métrica = 39.368 bushels — constante fija
-    const BONO_MAIZ_USD     = 50;      // Bono maíz blanco — constante del programa
     const chicago_usd_bushel = parseFloat(refs.chicago_usd_bushel || '6.28');
     const tc_banxico         = parseFloat(refs.tc_banxico         || '17.42');
 
@@ -150,7 +154,6 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
 
     // Constantes del Margen de Negociación
     const FACTOR_CONVERSION = 39.368;
-    const BONO_MAIZ_USD     = 50;
 
     // Obtener historial de referencias de BD
     const extHistory = await pool.query(`
@@ -266,7 +269,6 @@ router.get('/componentes/detalle', authMiddleware, async (req: AuthRequest, res:
     // Margen de Negociación correcto — referencia internacional
     const refsC = await obtenerReferenciasExternasActuales();
     const FACTOR_CONVERSION = 39.368;
-    const BONO_MAIZ_USD     = 50;
     const chicago_usd_bushel_c = parseFloat(refsC.chicago_usd_bushel || '6.28');
     const tc_banxico_c         = parseFloat(refsC.tc_banxico         || '17.42');
     const m = Math.round(
@@ -376,7 +378,6 @@ router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response):
 
     const CHICAGO_USD_BUSHEL = parseFloat(extRef.chicago_usd_bushel);
     const TC_MXN = parseFloat(extRef.tc_banxico);
-    const BONO_MAIZ_USD = 50;
     const FACTOR_BUSHEL_TON = 39.368;
 
     // Margen de Negociación = (chicago_usd/bushel × 39.368 + 50 USD) × TC

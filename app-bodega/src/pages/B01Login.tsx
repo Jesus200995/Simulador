@@ -50,10 +50,10 @@ export default function B01Login() {
         {/* ── Logo + brand ── */}
         <div className="flex items-center gap-3.5 mb-8">
           <div className="w-[52px] h-[52px] rounded-[14px] bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-xl">
-            <img src="/icono.png" alt="SOMEC" className="w-9 h-9 rounded-[10px]" />
+            <img src="/icono.png" alt="SIMAC" className="w-9 h-9 rounded-[10px]" />
           </div>
           <div>
-            <p className="text-[28px] font-black text-white tracking-[-0.5px] leading-none">SOMEC</p>
+            <p className="text-[28px] font-black text-white tracking-[-0.5px] leading-none">SIMAC</p>
             <p className="text-[12px] text-green-300/70 font-medium mt-0.5 tracking-wide">Plan Nacional Maíz 2026</p>
           </div>
         </div>

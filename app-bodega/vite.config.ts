@@ -12,8 +12,8 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['icono.png'],
       manifest: {
-        name: 'SOMEC — Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México',
-        short_name: 'SOMEC',
+        name: 'SIMAC — Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México',
+        short_name: 'SIMAC',
         description: 'Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México — Módulo Bodega',
         start_url: '/',
         display: 'standalone',

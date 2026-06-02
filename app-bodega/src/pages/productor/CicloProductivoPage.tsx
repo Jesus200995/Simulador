@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  ChevronLeft, Wheat, Check, AlertCircle, Leaf, Calendar, MapPin, 
+import {
+  ChevronLeft, Wheat, Check, Leaf, Calendar, MapPin,
   Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play
 } from 'lucide-react';
 
@@ -32,6 +32,10 @@ export default function CicloProductivoPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [ciclosExistentes, setCiclosExistentes] = useState<any[]>([]);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [cargandoCiclos, setCargandoCiclos] = useState(true);
+
   const [upId, setUpId] = useState<number | null>(null);
   const [areaHaCalc, setAreaHaCalc] = useState<number | null>(null);
   const [variedades, setVariedades] = useState<Variedad[]>([]);
@@ -59,9 +63,31 @@ export default function CicloProductivoPage() {
         if (up) {
           setUpId(up.up_id);
           setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
+        } else {
+          // Sin UP no hay ciclos que listar — mostrar el formulario directamente
+          setMostrarFormulario(true);
+          setCargandoCiclos(false);
         }
-      }).catch(() => {});
+      }).catch(() => { setMostrarFormulario(true); setCargandoCiclos(false); });
   }, []);
+
+  // Cargar ciclos existentes cuando ya tengamos la UP
+  useEffect(() => {
+    if (!upId) return;
+    const token = localStorage.getItem('simac_token');
+    fetch(`${BASE}/ups/${upId}/cycles`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(data => {
+        const lista = Array.isArray(data) ? data : (data.cycles || []);
+        setCiclosExistentes(lista);
+        // Si no hay ciclos, mostrar formulario directamente
+        if (lista.length === 0) setMostrarFormulario(true);
+      })
+      .catch(() => setMostrarFormulario(true))
+      .finally(() => setCargandoCiclos(false));
+  }, [upId]);
 
   useEffect(() => {
     if (!tipoMaiz) return;
@@ -121,6 +147,91 @@ export default function CicloProductivoPage() {
 
   const inputCls = 'w-full bg-slate-50/50 border border-slate-200 rounded-[14px] px-3.5 py-3 text-[14px] font-semibold text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-2 focus:ring-[#1A5C38]/10 transition-all outline-none';
 
+  const cycleTypeLabel = (t: string) =>
+    t === 'PV' ? 'Primavera-Verano' : t === 'OI' ? 'Otoño-Invierno' : t === 'ANUAL' ? 'Ciclo anual' : t;
+
+  // ── Loader mientras se consultan los ciclos existentes ──
+  if (cargandoCiclos) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[#f4f5f7] gap-3">
+        <div className="w-8 h-8 border-[3px] border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />
+        <p className="text-[13px] font-semibold text-slate-400">Cargando tus ciclos…</p>
+      </div>
+    );
+  }
+
+  // ── Lista de ciclos existentes + botón para agregar uno nuevo ──
+  if (!mostrarFormulario && ciclosExistentes.length > 0) {
+    return (
+      <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[40px]">
+        <div className="w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
+          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
+            <div className="flex items-center justify-between mb-2">
+              <button onClick={() => navigate('/productor')}
+                className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md active:scale-95">
+                <ChevronLeft size={20} strokeWidth={2.5} />
+              </button>
+              <div className="text-[11px] font-bold text-emerald-100/90 uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full backdrop-blur-sm">
+                Mis ciclos
+              </div>
+              <div className="w-9" />
+            </div>
+            <h1 className="text-[20px] font-black text-white tracking-tight">Ciclos productivos</h1>
+            <p className="text-[13px] text-emerald-100/70 font-medium mt-0.5">Tu siembra registrada en SIMAC</p>
+          </div>
+        </div>
+
+        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 -mt-3 relative z-20">
+          <div className="max-w-[500px] mx-auto">
+            <h3 className="text-[14px] font-bold text-slate-700 mb-3 mt-2">
+              Ciclos registrados
+            </h3>
+            <div className="space-y-3 mb-4">
+              {ciclosExistentes.map(ciclo => {
+                const crop = ciclo.crops?.[0] || {};
+                const variedad = crop.variety_other || crop.variety_id || 'Sin variedad';
+                const superficie = crop.area_sown_ha ?? null;
+                const estado = ciclo.estado_ciclo || 'activo';
+                return (
+                  <div
+                    key={ciclo.cycle_id}
+                    className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-800 text-[14px]">
+                        {cycleTypeLabel(ciclo.cycle_type)} {ciclo.cycle_year}
+                      </p>
+                      <p className="text-[12px] text-slate-500 mt-0.5 truncate">
+                        {variedad} · {superficie != null ? `${superficie} ha` : '—'}
+                      </p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold shrink-0 ${
+                      estado === 'activo'
+                        ? 'bg-green-100 text-green-700'
+                        : estado === 'cosechado'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {estado}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => { setPaso(1); setError(''); setMostrarFormulario(true); }}
+              className="w-full py-3 border-2 border-dashed border-[#1A5C38] text-[#1A5C38] rounded-xl font-bold hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <span className="text-xl leading-none">+</span>
+              Agregar otro ciclo productivo
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[100px]">
       
@@ -130,7 +241,12 @@ export default function CicloProductivoPage() {
         
         <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
           <div className="flex items-center justify-between mb-5">
-            <button onClick={() => paso > 1 ? setPaso(paso - 1) : navigate('/productor')}
+            <button onClick={() => {
+                if (paso > 1) { setPaso(paso - 1); return; }
+                // Si ya hay ciclos registrados, volver a la lista; si no, al inicio
+                if (ciclosExistentes.length > 0) setMostrarFormulario(false);
+                else navigate('/productor');
+              }}
               className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>

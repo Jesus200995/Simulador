@@ -10,18 +10,8 @@ import MapaGlobalAdmin from '../../components/admin/MapaGlobalAdmin';
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
 
-function fmt(v: number) {
-  return `$${Math.abs(v).toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
-}
 function fmtTon(v: number) {
   return `${Number(v).toLocaleString('es-MX', { maximumFractionDigits: 0 })} t`;
-}
-function fmtTime(iso: string) {
-  try {
-    return new Intl.DateTimeFormat('es-MX', {
-      hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short'
-    }).format(new Date(iso));
-  } catch { return '—'; }
 }
 
 interface KpiData {

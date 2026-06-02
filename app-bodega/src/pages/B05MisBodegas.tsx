@@ -22,9 +22,10 @@ const greenDot = L.divIcon({
 });
 
 const semaforoMap: Record<string, { label: string; color: string; dot: string; badge: string }> = {
-  verde:    { label: 'Comprando',       color: 'bg-emerald-500', dot: 'text-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  amarillo: { label: 'Cap. limitada',   color: 'bg-amber-400',  dot: 'text-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
-  rojo:     { label: 'No compra',       color: 'bg-red-500',    dot: 'text-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
+  verde:         { label: 'Comprando',     color: 'bg-emerald-500', dot: 'text-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  amarillo:      { label: 'Cap. limitada', color: 'bg-amber-400',  dot: 'text-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+  rojo:          { label: 'No compra',     color: 'bg-red-500',    dot: 'text-red-500',     badge: 'bg-red-50 text-red-700 border-red-200' },
+  sin_actividad: { label: 'Sin actividad', color: 'bg-gray-400',   dot: 'text-gray-400',    badge: 'bg-gray-50 text-gray-600 border-gray-200' },
 };
 
 export default function B05MisBodegas() {
@@ -88,7 +89,7 @@ export default function B05MisBodegas() {
         {vista === 'lista' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {bodegas.map(b => {
-            const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
+            const sem = semaforoMap[b.semaforo_compra] || semaforoMap.sin_actividad;
             const pct = b.ocupacion_pct ?? 0;
             return (
               <div key={b.id} className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] p-5 flex flex-col gap-4">
@@ -154,7 +155,7 @@ export default function B05MisBodegas() {
               {bodegas
                 .filter(b => b.latitud && b.longitud && Math.abs(b.latitud!) > 0.001)
                 .map(b => {
-                  const sem = semaforoMap[b.semaforo_compra] || semaforoMap.verde;
+                  const sem = semaforoMap[b.semaforo_compra] || semaforoMap.sin_actividad;
                   return (
                     <Marker key={b.id} position={[b.latitud!, b.longitud!]} icon={greenDot}>
                       <Popup>
@@ -169,7 +170,7 @@ export default function B05MisBodegas() {
                           <p style={{ fontSize: 11, margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
                             <span style={{
                               display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                              background: b.semaforo_compra === 'verde' ? '#22c55e' : b.semaforo_compra === 'amarillo' ? '#f59e0b' : '#ef4444'
+                              background: b.semaforo_compra === 'verde' ? '#22c55e' : b.semaforo_compra === 'amarillo' ? '#f59e0b' : b.semaforo_compra === 'rojo' ? '#ef4444' : '#9ca3af'
                             }} />
                             {sem.label}
                           </p>

@@ -12,6 +12,7 @@ export default function CrearPinPage() {
   const [step, setStep] = useState<'crear' | 'confirmar'>('crear');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [registroExitoso, setRegistroExitoso] = useState(false);
   interface ActivacionData { producer_id: number; nombres: string; apellido: string; }
   const [activacion, setActivacion] = useState<ActivacionData | null>(null);
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function CrearPinPage() {
         rol: 'productor',
         nombre_completo: `${activacion.nombres} ${activacion.apellido}`,
       });
-      navigate('/productor');
+      setRegistroExitoso(true);
     } catch {
       setError('Error de conexión.');
       setPin(''); setConfirmPin(''); setStep('crear');
@@ -166,6 +167,41 @@ export default function CrearPinPage() {
           )}
         </div>
       </div>
+
+      {/* Modal de activación exitosa */}
+      {registroExitoso && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-6">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            {/* Ícono de éxito */}
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-[#1A5C38]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            {/* Título */}
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              ¡Cuenta activada!
+            </h2>
+
+            {/* Mensaje */}
+            <p className="text-gray-600 mb-2">
+              Tu cuenta ha sido activada correctamente en SIMAC.
+            </p>
+            <p className="text-gray-500 text-sm mb-8">
+              Ya tienes acceso a tu panel de productor.
+            </p>
+
+            {/* Botón */}
+            <button
+              onClick={() => navigate('/productor')}
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg hover:bg-green-800 transition-colors"
+            >
+              Entrar a mi cuenta
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

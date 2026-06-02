@@ -110,7 +110,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
     // Si no es admin, verificar que la transacción pertenece al usuario
     if (!isAdmin) {
       query += ` AND (t.usuario_bodeguero = $2 OR t.producer_id IN (
-        SELECT p.producer_id FROM producer p JOIN usuarios u ON u.email = p.email WHERE u.id = $2
+        SELECT p.producer_id FROM producer p JOIN usuarios u ON u.id = p.usuario_id WHERE u.id = $2
       ))`;
       params.push(usuarioId);
     }

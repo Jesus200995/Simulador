@@ -129,10 +129,10 @@ export default function B02Register() {
         {/* Logo */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-[46px] h-[46px] rounded-[12px] bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-xl">
-            <img src="/icono.png" alt="SOMEC" className="w-8 h-8 rounded-[8px]" />
+            <img src="/icono.png" alt="SIMAC" className="w-8 h-8 rounded-[8px]" />
           </div>
           <div>
-            <p className="text-[24px] font-black text-white tracking-[-0.5px] leading-none">SOMEC</p>
+            <p className="text-[24px] font-black text-white tracking-[-0.5px] leading-none">SIMAC</p>
             <p className="text-[11px] text-green-300/70 font-medium mt-0.5 tracking-wide">Plan Nacional Maíz 2026</p>
           </div>
         </div>

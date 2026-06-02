@@ -16,6 +16,9 @@ export default function DetalleBodegaPage() {
   const navigate = useNavigate();
   const [bodega, setBodega] = useState<BodegaDetalle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tarifario, setTarifario] = useState<any[]>([]);
+  const [stockActual, setStockActual] = useState<number | null>(null);
+  const [cargandoServicios, setCargandoServicios] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -23,6 +26,24 @@ export default function DetalleBodegaPage() {
       .then(r => r.json())
       .then(d => setBodega(d.bodega || d))
       .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    const token = localStorage.getItem('simac_token');
+
+    // Tarifario de servicios (público para productores)
+    fetch(`${BASE}/bodegas/${id}/tarifario-publico`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setTarifario(Array.isArray(d) ? d : d.servicios || []))
+      .catch(() => setTarifario([]))
+      .finally(() => setCargandoServicios(false));
+
+    // Stock actual reportado
+    fetch(`${BASE}/bodegas/${id}/stock-actual`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setStockActual(d.volumen_ton ?? null))
+      .catch(() => setStockActual(null));
   }, [id]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Cargando...</div>;
@@ -60,6 +81,53 @@ export default function DetalleBodegaPage() {
               <span className="text-zinc-500 text-sm">Responsable</span>
               <span className="font-medium text-zinc-800 text-sm">{bodega.responsable}</span>
             </div>
+          )}
+        </div>
+
+        {/* Stock disponible */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+          <h3 className="text-base font-semibold text-gray-800 mb-3">
+            📦 Stock actual
+          </h3>
+          {stockActual !== null ? (
+            <p className="text-3xl font-bold text-[#1A5C38]">
+              {stockActual.toLocaleString('es-MX')}
+              <span className="text-base font-normal text-gray-500 ml-2">toneladas</span>
+            </p>
+          ) : (
+            <p className="text-gray-400 text-sm">
+              Sin información de stock disponible aún
+            </p>
+          )}
+        </div>
+
+        {/* Servicios y tarifario */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+          <h3 className="text-base font-semibold text-gray-800 mb-3">
+            🔧 Servicios de la bodega
+          </h3>
+          {cargandoServicios ? (
+            <div className="space-y-2">
+              {[1,2,3].map(i => (
+                <div key={i} className="h-10 bg-gray-100 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : tarifario.length > 0 ? (
+            <div className="divide-y divide-gray-100">
+              {tarifario.map((servicio, i) => (
+                <div key={i} className="flex items-center justify-between py-3">
+                  <p className="text-gray-700">{servicio.concepto || servicio.nombre}</p>
+                  <p className="font-semibold text-[#1A5C38]">
+                    ${Number(servicio.precio)?.toLocaleString('es-MX')}
+                    <span className="text-xs font-normal text-gray-400 ml-1">{servicio.unidad || 'MXN'}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400 text-sm">
+              Esta bodega aún no ha publicado su tarifario de servicios
+            </p>
           )}
         </div>
 

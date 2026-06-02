@@ -21,7 +21,7 @@ interface Bodega {
   latitud: number;
   longitud: number;
   estatus: 'aprobada' | 'pendiente' | 'rechazada';
-  semaforo_compra: 'verde' | 'amarillo' | 'rojo';
+  semaforo_compra: 'sin_actividad' | 'verde' | 'amarillo' | 'rojo';
   stock_actual?: number;
 }
 
@@ -357,7 +357,8 @@ export default function BodegasAdminPage() {
                 {/* Semaphore color strip */}
                 <div className={`absolute top-0 bottom-0 left-0 w-1 rounded-l-xl ${
                   b.semaforo_compra === 'verde' ? 'bg-emerald-500' :
-                  b.semaforo_compra === 'amarillo' ? 'bg-amber-500' : 'bg-red-500'
+                  b.semaforo_compra === 'amarillo' ? 'bg-amber-500' :
+                  b.semaforo_compra === 'rojo' ? 'bg-red-500' : 'bg-gray-400'
                 }`} />
 
                 <div className="pl-2 space-y-2">
@@ -433,7 +434,8 @@ export default function BodegasAdminPage() {
                     </span>
                     <span className={`w-2.5 h-2.5 rounded-full ${
                       b.semaforo_compra === 'verde' ? 'bg-emerald-500 animate-pulse' :
-                      b.semaforo_compra === 'amarillo' ? 'bg-amber-500' : 'bg-red-500'
+                      b.semaforo_compra === 'amarillo' ? 'bg-amber-500' :
+                      b.semaforo_compra === 'rojo' ? 'bg-red-500' : 'bg-gray-400'
                     }`} />
                   </div>
                   

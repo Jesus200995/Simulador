@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { 
-  ChevronLeft, Wheat, TrendingUp, DollarSign, Tag, Calculator, 
-  CircleDollarSign, Settings, Award, AlertTriangle, BookOpen 
+import {
+  TrendingUp, DollarSign, Tag, Calculator,
+  CircleDollarSign, Settings, Award, AlertTriangle, BookOpen
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -15,7 +14,6 @@ const BONO_MAIZ_BLANCO_USD = 50; // fijo — se configurará desde Admin en el f
 export default function PreciosProductorPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const token = localStorage.getItem('simac_token');
 
   useEffect(() => {
@@ -119,7 +117,7 @@ export default function PreciosProductorPage() {
               { icon: TrendingUp, label: 'Futuro Chicago', value: tieneChicago ? `$${chicago} USD/bu` : 'Sin datos' },
               { icon: DollarSign, label: 'Tipo de cambio', value: tipoCambio != null ? `$${tipoCambio} MXN` : 'Sin datos' },
               { icon: Tag, label: 'Bono maíz', value: `+$${BONO_MAIZ_BLANCO_USD} USD` },
-            ].map((item, i) => (
+            ].map((item) => (
               <div key={item.label} className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 flex items-center sm:flex-col sm:items-start sm:justify-between transition-colors hover:bg-white/[0.08]">
                 <div className="w-[28px] h-[28px] bg-white/[0.08] text-white rounded-md flex items-center justify-center shrink-0 mr-3 sm:mr-0 sm:mb-2">
                   <item.icon size={14} />

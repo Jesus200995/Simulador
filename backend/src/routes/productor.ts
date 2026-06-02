@@ -425,7 +425,12 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
                   WHERE pr.bodega_id = b.id AND pr.tipo_precio = 'bodega'
                   ORDER BY pr.created_at DESC LIMIT 1), 0) AS precio_compra_hoy,
                 FALSE AS is_ventanilla,
-                'comprando' AS estado_compra,
+                CASE b.semaforo_compra
+                  WHEN 'verde'    THEN 'comprando'
+                  WHEN 'amarillo' THEN 'limitado'
+                  WHEN 'rojo'     THEN 'no_compra'
+                  ELSE 'sin_actividad'
+                END AS estado_compra,
                 0 AS distancia_km
          FROM bodegas b
          WHERE b.estado ILIKE $1

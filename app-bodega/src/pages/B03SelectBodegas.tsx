@@ -364,8 +364,8 @@ export default function B03SelectBodegas() {
                         )}
                         {b.semaforo_compra && (
                           <p style={{ fontSize: 11, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: b.semaforo_compra === 'verde' ? '#22c55e' : b.semaforo_compra === 'amarillo' ? '#f59e0b' : '#ef4444' }} />
-                            {b.semaforo_compra === 'verde' ? 'Comprando' : b.semaforo_compra === 'amarillo' ? 'Cap. limitada' : 'No compra'}
+                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: b.semaforo_compra === 'verde' ? '#22c55e' : b.semaforo_compra === 'amarillo' ? '#f59e0b' : b.semaforo_compra === 'rojo' ? '#ef4444' : '#9ca3af' }} />
+                            {b.semaforo_compra === 'verde' ? 'Comprando' : b.semaforo_compra === 'amarillo' ? 'Cap. limitada' : b.semaforo_compra === 'rojo' ? 'No compra' : 'Sin actividad'}
                           </p>
                         )}
                         {selected.some(s => s.id === b.id) ? (
