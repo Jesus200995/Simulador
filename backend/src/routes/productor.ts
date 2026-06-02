@@ -265,8 +265,9 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
         const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
         // useGeomParam: $6 solo aparece en el SQL cuando ambas condiciones se cumplen
         const useGeomParam = hasPoligono && postgisDisponible;
+        // La columna up.geom es MultiPolygon → envolver con ST_Multi
         const geomSql = useGeomParam
-          ? `ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326)`
+          ? `ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))`
           : 'NULL';
         const geomParam = useGeomParam
           ? JSON.stringify({

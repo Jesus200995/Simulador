@@ -256,42 +256,25 @@ export default function RegistroNuevoPage() {
 
         {/* Mapa */}
         <div className="flex-1 relative min-h-0">
-          {/* Mira central (crosshair) */}
+          {/* Mira central — el punto verde marca EXACTAMENTE el centro del mapa */}
           {miraVisible && (
-            <div className="absolute left-1/2 top-1/2 z-[600] pointer-events-none animate-crosshair">
-              <div className="relative -translate-x-1/2 -translate-y-1/2">
-                <div className="w-9 h-9 rounded-full border-[2.5px] border-white shadow-[0_0_0_2px_rgba(0,0,0,0.25)] flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[#34d079] ring-2 ring-white" />
-                </div>
-                {/* líneas guía */}
-                <div className="absolute left-1/2 top-1/2 w-px h-14 -translate-x-1/2 -translate-y-1/2 bg-white/40" />
-                <div className="absolute left-1/2 top-1/2 h-px w-14 -translate-x-1/2 -translate-y-1/2 bg-white/40" />
-              </div>
+            <div className="absolute left-1/2 top-1/2 z-[600] pointer-events-none -translate-x-1/2 -translate-y-1/2">
+              {/* anillo de pulso */}
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#34d079]/40 animate-crosshair-ring" />
+              {/* ticks de precisión */}
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1.5px] h-7 bg-white/70 rounded-full" />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[1.5px] w-7 bg-white/70 rounded-full" />
+              {/* punto central exacto */}
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#34d079] ring-[3px] ring-white shadow-[0_1px_5px_rgba(0,0,0,0.55)]" />
             </div>
           )}
 
-          {/* Instrucción inicial */}
-          {drawMode === 'idle' && !poligono && pointCount === 0 && (
-            <div className="absolute top-3 left-3 right-3 z-[500] pointer-events-none">
-              <div className="bg-black/70 backdrop-blur-md rounded-2xl px-4 py-3 flex items-start gap-3 max-w-md mx-auto">
-                <div className="w-7 h-7 rounded-full bg-green-500/25 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Plus size={16} className="text-green-300" />
-                </div>
-                <p className="text-white/90 text-xs leading-relaxed">
-                  Mueve el mapa con el dedo y haz <strong>zoom</strong> libremente.
-                  Cuando la <strong>mira verde</strong> esté sobre una esquina de tu parcela,
-                  toca <strong>"Agregar punto"</strong>.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Banner edición */}
+          {/* Hint flotante de edición (no se encima con el buscador) */}
           {drawMode === 'editing' && (
-            <div className="absolute top-3 left-3 right-3 z-[500] pointer-events-none">
-              <div className="bg-amber-900/80 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-3 max-w-md mx-auto">
-                <Pencil size={14} className="text-amber-300 flex-shrink-0" />
-                <p className="text-white/90 text-xs font-medium">Arrastra los puntos para ajustar la forma</p>
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[700] pointer-events-none w-[calc(100%-1.5rem)] max-w-sm">
+              <div className="bg-amber-900/85 backdrop-blur-md rounded-full px-4 py-2 flex items-center justify-center gap-2 shadow-lg">
+                <Pencil size={13} className="text-amber-300 flex-shrink-0" />
+                <p className="text-white/95 text-xs font-medium">Arrastra los puntos para ajustar</p>
               </div>
             </div>
           )}
@@ -332,9 +315,9 @@ export default function RegistroNuevoPage() {
             />
           </MapContainer>
 
-          {/* Buscador de lugar */}
+          {/* Buscador de lugar — arriba, centrado */}
           {dibujando && (
-            <div className="absolute top-16 left-3 max-w-[calc(100%-2rem)] w-72 sm:w-80 z-[1000]">
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-md z-[1000]">
               <NominatimSearch
                 placeholder="Buscar ejido, localidad..."
                 onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
@@ -343,7 +326,7 @@ export default function RegistroNuevoPage() {
           )}
 
           {/* Zoom manual */}
-          <div className="absolute right-3 bottom-4 z-[1000] flex flex-col gap-2">
+          <div className="absolute right-3 bottom-3 z-[1000] flex flex-col gap-2">
             <button
               onClick={() => mapRef.current?.zoomIn()}
               className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
@@ -360,7 +343,12 @@ export default function RegistroNuevoPage() {
 
           {/* MODO: dibujando (idle sin polígono o drawing) */}
           {dibujando && (
-            <div className="space-y-2.5">
+            <div className="max-w-md mx-auto space-y-2.5">
+              <p className="text-center text-white/55 text-xs px-2">
+                {pointCount === 0
+                  ? 'Mueve y haz zoom en el mapa. Pon la mira sobre una esquina y toca el botón.'
+                  : 'Mueve la mira a la siguiente esquina y agrega el punto.'}
+              </p>
               <button
                 onClick={() => dibujarRef.current?.addPoint()}
                 className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
@@ -404,7 +392,7 @@ export default function RegistroNuevoPage() {
 
           {/* MODO: polígono listo, confirmando área */}
           {drawMode === 'idle' && poligono && coincideArea === null && (
-            <div className="space-y-3">
+            <div className="max-w-md mx-auto space-y-3">
               <div className="bg-green-500/12 ring-1 ring-green-400/25 rounded-2xl p-4">
                 <p className="text-sm font-semibold text-white mb-1">
                   Área calculada: <span className="text-green-300 font-bold text-base">{areaCalc} ha</span>
@@ -446,7 +434,7 @@ export default function RegistroNuevoPage() {
 
           {/* Corrección de área */}
           {drawMode === 'idle' && poligono && coincideArea === false && (
-            <div className="space-y-3">
+            <div className="max-w-md mx-auto space-y-3">
               <div>
                 <label className="block text-xs text-white/50 font-medium mb-2">¿Cuántas hectáreas tiene tu parcela?</label>
                 <div className="flex items-center gap-3">
@@ -475,17 +463,19 @@ export default function RegistroNuevoPage() {
 
           {/* Área confirmada */}
           {drawMode === 'idle' && poligono && coincideArea === true && (
-            <button
-              onClick={() => irAPaso(5)}
-              className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold active:scale-[0.98] transition-all"
-            >
-              Confirmar y continuar →
-            </button>
+            <div className="max-w-md mx-auto">
+              <button
+                onClick={() => irAPaso(5)}
+                className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold active:scale-[0.98] transition-all"
+              >
+                Confirmar y continuar →
+              </button>
+            </div>
           )}
 
           {/* MODO: editando */}
           {drawMode === 'editing' && (
-            <div className="flex gap-2.5">
+            <div className="max-w-md mx-auto flex gap-2.5">
               <button
                 onClick={() => dibujarRef.current?.cancelEdit()}
                 className="flex-1 bg-white/10 ring-1 ring-white/15 text-white/70 py-3.5 rounded-2xl text-sm font-semibold active:scale-[0.97] transition-all"

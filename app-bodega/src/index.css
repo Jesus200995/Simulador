@@ -142,13 +142,14 @@ body {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-/* Mira (crosshair) del mapa: pulso sutil */
+/* Mira (crosshair) del mapa: anillo de pulso alrededor del punto central exacto */
 @keyframes crosshair-pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 0.85; }
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  70%  { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
-.animate-crosshair {
-  animation: crosshair-pulse 2s ease-in-out infinite;
+.animate-crosshair-ring {
+  animation: crosshair-pulse 1.8s ease-out infinite;
 }
 
 /* ═══════ HIDE DEFAULT LEAFLET-DRAW TOOLBAR ═══════ */
