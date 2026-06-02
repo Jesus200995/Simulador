@@ -129,13 +129,31 @@ export default function MiPerfilPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Cargando...</div>;
   if (!perfil) return <div className="min-h-screen flex items-center justify-center text-gray-400">Error</div>;
 
+  const nombreCompleto = [perfil.nombres, perfil.apellido_paterno, perfil.apellido_materno].filter(Boolean).join(' ');
+  const initials = [perfil.nombres, perfil.apellido_paterno].filter(Boolean).map(w => w[0]).join('').toUpperCase() || 'P';
+
   return (
-    <div className="bg-[#F2F2F7]">
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Perfil</p>
-          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Mi perfil</h1>
-          <p className="text-[13px] font-medium text-white/40 mt-0.5">Informacion personal</p>
+    <div className="bg-[#F2F2F7] min-h-screen">
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[28px] shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-3">Perfil</p>
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm ring-2 ring-white/20 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <span className="text-white text-[18px] font-black">{initials}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-[18px] sm:text-[20px] font-black text-white leading-tight tracking-tight truncate">{nombreCompleto || 'Mi perfil'}</h1>
+              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                <span className="text-[10px] font-bold text-white bg-white/15 rounded-full px-2 py-0.5">Tipo {perfil.tipo_registro}</span>
+                <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                  perfil.estado_validacion === 'activo' ? 'bg-green-400/90 text-green-950'
+                  : perfil.estado_validacion === 'pendiente' ? 'bg-amber-300/90 text-amber-950'
+                  : 'bg-red-400/90 text-red-950'}`}>
+                  {perfil.estado_validacion}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -254,8 +272,8 @@ export default function MiPerfilPage() {
             </div>
           </div>
           <button onClick={() => navigate('/productor/ubicacion')}
-            className="mt-3 flex items-center gap-1 text-[#1A5C38] text-sm font-semibold">
-            <MapPin size={14} /> Actualizar ubicación en el mapa
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)]">
+            <MapPin size={16} /> {poligono ? 'Editar mi parcela en el mapa' : 'Dibujar mi parcela en el mapa'}
           </button>
         </div>
 

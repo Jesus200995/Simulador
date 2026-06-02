@@ -149,6 +149,8 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
         fullRedraw();
         const b = L.latLngBounds(verticesRef.current as L.LatLngTuple[]);
         map.fitBounds(b, { padding: [50, 50] });
+        // Emitir el polígono precargado para que el padre tenga centroide/área lista
+        computeAndEmit();
       }
 
       return () => {

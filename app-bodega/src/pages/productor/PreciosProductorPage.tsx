@@ -78,6 +78,25 @@ export default function PreciosProductorPage() {
       {/* ── CONTENIDO ── */}
       <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-5 space-y-4">
 
+      {/* Aviso cuando aún no hay precio de bodega en la región del productor */}
+      {!tienePO && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle size={17} className="text-amber-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[14px] font-bold text-amber-900">
+              Aún no hay precios de bodega en tu región{data.estado ? ` (${data.estado})` : ''}
+            </p>
+            <p className="text-[12px] text-amber-700 mt-1 leading-relaxed">
+              La <strong>referencia internacional</strong> de abajo ya está disponible.
+              El <strong>precio de compra y de venta</strong> aparecerán en cuanto una bodega de
+              tu estado publique sus precios. Mientras tanto, usa el margen como referencia para negociar.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── PRECIO 1 — Referencia internacional ── */}
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex items-center gap-3 p-4">
