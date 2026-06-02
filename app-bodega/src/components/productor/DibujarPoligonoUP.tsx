@@ -102,26 +102,42 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       if (polyLayerRef.current) g.addLayer(polyLayerRef.current);
     }, []);
 
-    const redrawMarkers = useCallback(() => {
+    // Reconstrucción total: limpia TODO el grupo y vuelve a dibujar polígono +
+    // marcadores desde cero. A prueba de duplicados (incl. StrictMode en dev).
+    const fullRedraw = useCallback(() => {
       const g = groupRef.current;
-      markerLayersRef.current.forEach(m => g.removeLayer(m));
+      g.clearLayers();
+      polyLayerRef.current = null;
       markerLayersRef.current = [];
+
+      const v = verticesRef.current;
+      // Polígono / línea
+      if (v.length >= 3 && modeRef.current !== 'drawing') {
+        polyLayerRef.current = L.polygon(v as L.LatLngTuple[], {
+          color: GREEN, fillColor: GREEN, fillOpacity: 0.22, weight: 3,
+        });
+      } else if (v.length >= 2) {
+        polyLayerRef.current = L.polyline(v as L.LatLngTuple[], {
+          color: GREEN, weight: 3, dashArray: '7 7',
+        });
+      }
+      if (polyLayerRef.current) g.addLayer(polyLayerRef.current);
+
+      // Marcadores de vértice
       const editing = modeRef.current === 'editing';
-      verticesRef.current.forEach(([lat, lng], i) => {
+      v.forEach(([lat, lng], i) => {
         const m = L.marker([lat, lng], { icon: vertexIcon(i, editing), draggable: editing, keyboard: false });
         if (editing) {
           m.on('drag', (e: L.LeafletEvent) => {
             const ll = (e.target as L.Marker).getLatLng();
             verticesRef.current[i] = [ll.lat, ll.lng];
-            redrawPoly();
+            redrawPoly(); // durante el arrastre solo se actualiza el contorno
           });
         }
         markerLayersRef.current.push(m);
         g.addLayer(m);
       });
     }, [redrawPoly]);
-
-    const fullRedraw = useCallback(() => { redrawPoly(); redrawMarkers(); }, [redrawPoly, redrawMarkers]);
 
     useEffect(() => {
       const g = groupRef.current;
