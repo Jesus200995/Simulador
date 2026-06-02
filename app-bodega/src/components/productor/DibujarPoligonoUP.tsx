@@ -136,6 +136,13 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       }
 
       return () => {
+        // Defensa: evita el crash "reading 'baseVal'" de Leaflet si el mapa se
+        // desmonta con un arrastre colgado (Draggable.finishDrag sobre un
+        // _lastTarget inválido). Limpiamos el estado antes de que React desmonte.
+        try {
+          const dr = (map as unknown as { dragging?: { _draggable?: { _lastTarget?: unknown; _moving?: boolean } } }).dragging?._draggable;
+          if (dr) { dr._lastTarget = null; dr._moving = false; }
+        } catch { /* noop */ }
         markerLayersRef.current = [];
         polyLayerRef.current = null;
         g.clearLayers();
