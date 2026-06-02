@@ -115,10 +115,13 @@ export default function B02Register() {
       </div>
 
       {/* Scrollable overlay */}
-      <div className="relative min-h-screen flex flex-col items-center px-4 py-10 overflow-x-hidden">
+      <div
+        className="relative min-h-[100dvh] flex flex-col items-center px-4 py-8 overflow-x-hidden"
+        style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+      >
 
         {/* Back button */}
-        <div className="w-full max-w-[440px] mb-4">
+        <div className="animate-auth-in w-full max-w-[440px] mb-4">
           <button onClick={() => navigate('/login')}
             className="flex items-center gap-1 text-green-200/70 text-[13px] font-medium hover:text-green-200 transition-colors active:opacity-60">
             <ChevronLeft size={16} strokeWidth={2.5} className="-ml-0.5" />
@@ -127,7 +130,7 @@ export default function B02Register() {
         </div>
 
         {/* Logo */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="animate-auth-in flex items-center gap-3 mb-6" style={{ animationDelay: '0.05s' }}>
           <div className="w-[46px] h-[46px] rounded-[12px] bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-xl">
             <img src="/icono.png" alt="SIMAC" className="w-8 h-8 rounded-[8px]" />
           </div>
@@ -138,7 +141,7 @@ export default function B02Register() {
         </div>
 
         {/* Card */}
-        <div className="w-full max-w-[440px] bg-white rounded-[28px] shadow-[0_24px_64px_rgba(0,0,0,0.45)] overflow-hidden mb-8">
+        <div className="animate-auth-in w-full max-w-[440px] bg-white rounded-[28px] shadow-[0_24px_64px_rgba(0,0,0,0.45)] overflow-hidden mb-8" style={{ animationDelay: '0.1s' }}>
           <div className="h-[3px] bg-gradient-to-r from-[#1A5C38] via-[#34d079] to-[#1A5C38]" />
 
           <div className="px-8 pt-7 pb-2">

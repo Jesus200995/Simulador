@@ -2,20 +2,24 @@ import { useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import * as turf from '@turf/turf';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import 'leaflet-draw';
 
 export type DrawMode = 'idle' | 'drawing' | 'editing';
 
 export interface DibujarPoligonoHandle {
-  startDraw: () => void;
-  finishDraw: () => void;
+  /** Agrega un vértice en el centro actual del mapa (la mira). */
+  addPoint: () => void;
+  /** Quita el último vértice agregado. */
   undoVertex: () => void;
-  cancelDraw: () => void;
+  /** Cierra el polígono (requiere ≥3 vértices) y calcula área/centroide. */
+  finishDraw: () => void;
+  /** Borra todo y reinicia. */
+  clear: () => void;
+  /** Activa el modo de edición (arrastrar vértices). */
   startEdit: () => void;
+  /** Guarda la edición y recalcula. */
   saveEdit: () => void;
+  /** Cancela la edición y revierte a la forma previa. */
   cancelEdit: () => void;
-  deletePolygon: () => void;
 }
 
 interface Props {
@@ -30,144 +34,170 @@ interface Props {
   onPointCountChange?: (count: number) => void;
 }
 
+const GREEN = '#34d079';
+const GREEN_DARK = '#16a34a';
+
+/**
+ * Dibujo de parcela tipo "mira + botón": el usuario navega/hace zoom libremente
+ * sin riesgo de agregar puntos por error. Cada vértice se agrega SOLO al tocar
+ * el botón (que llama a addPoint()), tomando el centro visible del mapa.
+ */
 const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
   ({ poligonoInicial, onPoligonoCompleto, onPoligonoEliminado, onModeChange, onPointCountChange }, ref) => {
     const map = useMap();
-    const drawnItemsRef = useRef(new L.FeatureGroup());
-    const drawHandlerRef = useRef<any>(null);
-    const editHandlerRef = useRef<any>(null);
+    const groupRef = useRef(new L.FeatureGroup());
+    const verticesRef = useRef<[number, number][]>([]);
+    const modeRef = useRef<DrawMode>('idle');
+    const polyLayerRef = useRef<L.Layer | null>(null);
+    const markerLayersRef = useRef<L.Marker[]>([]);
+    const backupRef = useRef<[number, number][] | null>(null);
 
-    const updateMode = useCallback((m: DrawMode) => {
+    const setMode = useCallback((m: DrawMode) => {
+      modeRef.current = m;
       onModeChange?.(m);
     }, [onModeChange]);
 
-    const processLayer = useCallback((layer: any) => {
-      const latlngs: [number, number][] = layer.getLatLngs()[0].map(
-        (p: L.LatLng) => [p.lat, p.lng] as [number, number]
+    const emitCount = useCallback(() => {
+      onPointCountChange?.(verticesRef.current.length);
+    }, [onPointCountChange]);
+
+    const computeAndEmit = useCallback(() => {
+      const v = verticesRef.current;
+      if (v.length < 3) return;
+      const ring = [...v.map(([la, ln]) => [ln, la]), [v[0][1], v[0][0]]];
+      const poly = turf.polygon([ring]);
+      const areaHa = parseFloat((turf.area(poly) / 10000).toFixed(4));
+      const c = turf.centroid(poly).geometry.coordinates; // [lng, lat]
+      onPoligonoCompleto(
+        v.map(([la, ln]) => [la, ln] as [number, number]),
+        { lat: c[1], lng: c[0] },
+        areaHa
       );
-      const turfPolygon = turf.polygon([[
-        ...latlngs.map(([lat, lng]) => [lng, lat]),
-        [latlngs[0][1], latlngs[0][0]],
-      ]]);
-      const areaHa = parseFloat((turf.area(turfPolygon) / 10000).toFixed(4));
-      const centroide = layer.getBounds().getCenter();
-      onPoligonoCompleto(latlngs, { lat: centroide.lat, lng: centroide.lng }, areaHa);
     }, [onPoligonoCompleto]);
 
+    const vertexIcon = (index: number, editing: boolean) => {
+      const size = editing ? 20 : 13;
+      const color = index === 0 ? GREEN_DARK : GREEN;
+      return L.divIcon({
+        className: '',
+        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.45)${editing ? ';cursor:grab' : ''}"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+    };
+
+    const redrawPoly = useCallback(() => {
+      const g = groupRef.current;
+      if (polyLayerRef.current) { g.removeLayer(polyLayerRef.current); polyLayerRef.current = null; }
+      const v = verticesRef.current;
+      if (v.length >= 3 && modeRef.current !== 'drawing') {
+        polyLayerRef.current = L.polygon(v as L.LatLngTuple[], {
+          color: GREEN, fillColor: GREEN, fillOpacity: 0.22, weight: 3,
+        });
+      } else if (v.length >= 2) {
+        polyLayerRef.current = L.polyline(v as L.LatLngTuple[], {
+          color: GREEN, weight: 3, dashArray: '7 7',
+        });
+      }
+      if (polyLayerRef.current) g.addLayer(polyLayerRef.current);
+    }, []);
+
+    const redrawMarkers = useCallback(() => {
+      const g = groupRef.current;
+      markerLayersRef.current.forEach(m => g.removeLayer(m));
+      markerLayersRef.current = [];
+      const editing = modeRef.current === 'editing';
+      verticesRef.current.forEach(([lat, lng], i) => {
+        const m = L.marker([lat, lng], { icon: vertexIcon(i, editing), draggable: editing, keyboard: false });
+        if (editing) {
+          m.on('drag', (e: L.LeafletEvent) => {
+            const ll = (e.target as L.Marker).getLatLng();
+            verticesRef.current[i] = [ll.lat, ll.lng];
+            redrawPoly();
+          });
+        }
+        markerLayersRef.current.push(m);
+        g.addLayer(m);
+      });
+    }, [redrawPoly]);
+
+    const fullRedraw = useCallback(() => { redrawPoly(); redrawMarkers(); }, [redrawPoly, redrawMarkers]);
+
     useEffect(() => {
-      const drawnItems = drawnItemsRef.current;
-      map.addLayer(drawnItems);
+      const g = groupRef.current;
+      map.addLayer(g);
 
       if (poligonoInicial && poligonoInicial.length >= 3) {
-        const latlngs = poligonoInicial.map(([lat, lng]) => [lat, lng] as L.LatLngTuple);
-        const poly = L.polygon(latlngs, {
-          color: '#22C55E', fillColor: '#22C55E', fillOpacity: 0.2, weight: 3,
-        });
-        drawnItems.addLayer(poly);
-        map.fitBounds(poly.getBounds(), { padding: [40, 40] });
+        verticesRef.current = poligonoInicial.map(([la, ln]) => [la, ln] as [number, number]);
+        setMode('idle');
+        fullRedraw();
+        const b = L.latLngBounds(verticesRef.current as L.LatLngTuple[]);
+        map.fitBounds(b, { padding: [50, 50] });
       }
-
-      map.on((L as any).Draw.Event.CREATED, (e: any) => {
-        drawnItems.clearLayers();
-        drawnItems.addLayer(e.layer);
-        updateMode('idle');
-        onPointCountChange?.(0);
-        processLayer(e.layer);
-      });
-
-      map.on((L as any).Draw.Event.DELETED, () => {
-        updateMode('idle');
-        onPoligonoEliminado();
-      });
-
-      map.on((L as any).Draw.Event.EDITSTOP, () => {
-        updateMode('idle');
-        drawnItems.eachLayer((layer: any) => {
-          if (layer.getLatLngs) processLayer(layer);
-        });
-      });
-
-      map.on((L as any).Draw.Event.DRAWVERTEX, () => {
-        const count = drawHandlerRef.current?._markers?.length ?? 0;
-        onPointCountChange?.(count);
-      });
 
       return () => {
-        if (drawHandlerRef.current) { drawHandlerRef.current.disable(); drawHandlerRef.current = null; }
-        if (editHandlerRef.current) { editHandlerRef.current.disable(); editHandlerRef.current = null; }
-        map.removeLayer(drawnItems);
-        map.off((L as any).Draw.Event.CREATED);
-        map.off((L as any).Draw.Event.DELETED);
-        map.off((L as any).Draw.Event.EDITSTOP);
-        map.off((L as any).Draw.Event.DRAWVERTEX);
+        markerLayersRef.current = [];
+        polyLayerRef.current = null;
+        g.clearLayers();
+        map.removeLayer(g);
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map]);
 
-    const startDraw = useCallback(() => {
-      if (drawHandlerRef.current) drawHandlerRef.current.disable();
-      drawnItemsRef.current.clearLayers();
-      onPointCountChange?.(0);
-      const handler = new (L as any).Draw.Polygon(map, {
-        allowIntersection: false,
-        showArea: false,
-        shapeOptions: { color: '#22C55E', fillColor: '#22C55E', fillOpacity: 0.2, weight: 3 },
-        drawError: { color: '#ef4444', message: 'Los lados no pueden cruzarse.' },
-      });
-      drawHandlerRef.current = handler;
-      handler.enable();
-      updateMode('drawing');
-    }, [map, updateMode]);
-
-    const finishDraw = useCallback(() => {
-      drawHandlerRef.current?.completeShape?.();
-    }, []);
+    const addPoint = useCallback(() => {
+      if (modeRef.current === 'idle' && verticesRef.current.length === 0) setMode('drawing');
+      else if (modeRef.current === 'idle') setMode('drawing');
+      const c = map.getCenter();
+      verticesRef.current.push([c.lat, c.lng]);
+      fullRedraw();
+      emitCount();
+    }, [map, setMode, fullRedraw, emitCount]);
 
     const undoVertex = useCallback(() => {
-      drawHandlerRef.current?.deleteLastVertex?.();
-      const count = drawHandlerRef.current?._markers?.length ?? 0;
-      onPointCountChange?.(count);
-    }, []);
+      verticesRef.current.pop();
+      if (verticesRef.current.length === 0) setMode('drawing');
+      fullRedraw();
+      emitCount();
+    }, [setMode, fullRedraw, emitCount]);
 
-    const cancelDraw = useCallback(() => {
-      if (drawHandlerRef.current) { drawHandlerRef.current.disable(); drawHandlerRef.current = null; }
-      updateMode('idle');
-      onPointCountChange?.(0);
-    }, [updateMode]);
+    const finishDraw = useCallback(() => {
+      if (verticesRef.current.length < 3) return;
+      setMode('idle');
+      fullRedraw();
+      computeAndEmit();
+    }, [setMode, fullRedraw, computeAndEmit]);
+
+    const clear = useCallback(() => {
+      verticesRef.current = [];
+      backupRef.current = null;
+      setMode('idle');
+      fullRedraw();
+      emitCount();
+      onPoligonoEliminado();
+    }, [setMode, fullRedraw, emitCount, onPoligonoEliminado]);
 
     const startEdit = useCallback(() => {
-      editHandlerRef.current = new (L as any).EditToolbar.Edit(map, { featureGroup: drawnItemsRef.current });
-      editHandlerRef.current.enable();
-      updateMode('editing');
-    }, [map, updateMode]);
+      backupRef.current = verticesRef.current.map(([la, ln]) => [la, ln] as [number, number]);
+      setMode('editing');
+      fullRedraw();
+    }, [setMode, fullRedraw]);
 
     const saveEdit = useCallback(() => {
-      if (editHandlerRef.current) {
-        editHandlerRef.current.save();
-        editHandlerRef.current.disable();
-        editHandlerRef.current = null;
-      }
-      drawnItemsRef.current.eachLayer((layer: any) => { if (layer.getLatLngs) processLayer(layer); });
-      updateMode('idle');
-    }, [updateMode, processLayer]);
+      backupRef.current = null;
+      setMode('idle');
+      fullRedraw();
+      computeAndEmit();
+    }, [setMode, fullRedraw, computeAndEmit]);
 
     const cancelEdit = useCallback(() => {
-      if (editHandlerRef.current) {
-        editHandlerRef.current.revertLayers();
-        editHandlerRef.current.disable();
-        editHandlerRef.current = null;
-      }
-      updateMode('idle');
-    }, [updateMode]);
-
-    const deletePolygon = useCallback(() => {
-      drawnItemsRef.current.clearLayers();
-      updateMode('idle');
-      onPoligonoEliminado();
-    }, [updateMode, onPoligonoEliminado]);
+      if (backupRef.current) verticesRef.current = backupRef.current;
+      backupRef.current = null;
+      setMode('idle');
+      fullRedraw();
+    }, [setMode, fullRedraw]);
 
     useImperativeHandle(ref, () => ({
-      startDraw, finishDraw, undoVertex, cancelDraw,
-      startEdit, saveEdit, cancelEdit, deletePolygon,
+      addPoint, undoVertex, finishDraw, clear, startEdit, saveEdit, cancelEdit,
     }));
 
     return null;

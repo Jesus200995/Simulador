@@ -162,6 +162,8 @@ export default function CrearPinPage() {
               <PinInput
                 value={step === 'crear' ? pin : confirmPin}
                 onChange={handlePinChange}
+                dark
+                error={!!error}
               />
             </div>
           )}

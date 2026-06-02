@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Wheat, CircleDot, Check,
   AlertCircle, User, MapPin, Sprout, Map, Phone, Loader2,
-  PenLine, Undo2, Pencil, Trash2, CheckCircle2,
+  Undo2, Pencil, Trash2, CheckCircle2, Plus, KeyRound, ShieldCheck,
 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -33,12 +33,14 @@ const PROGRAMAS = [
 ];
 
 const PASOS_INFO = [
-  { icon: User,   label: 'Datos' },
-  { icon: MapPin, label: 'Ubicación' },
-  { icon: Sprout, label: 'Cultivo' },
-  { icon: Map,    label: 'Parcela' },
-  { icon: Phone,  label: 'Contacto' },
+  { icon: User,     label: 'Datos' },
+  { icon: MapPin,   label: 'Ubicación' },
+  { icon: Sprout,   label: 'Cultivo' },
+  { icon: Map,      label: 'Parcela' },
+  { icon: Phone,    label: 'Contacto' },
+  { icon: KeyRound, label: 'PIN' },
 ];
+const TOTAL_PASOS = PASOS_INFO.length;
 
 function normalizeText(str: string): string {
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
@@ -88,13 +90,18 @@ export default function RegistroNuevoPage() {
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
 
-  // Contacto / PIN
+  // Contacto
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
+  const [programas, setProgramas] = useState<string[]>([]);
+
+  // PIN
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [pinStep, setPinStep] = useState<'crear' | 'confirmar'>('crear');
-  const [programas, setProgramas] = useState<string[]>([]);
+  const [pinError, setPinError] = useState(false);
+
+  const pinConfirmado = pin.length === 4 && confirmPin.length === 4 && pin === confirmPin;
 
   useEffect(() => {
     fetch(`${BASE}/auth/states`)
@@ -129,21 +136,21 @@ export default function RegistroNuevoPage() {
   };
 
   const handlePinChange = (val: string) => {
-    if (error) setError('');
+    setPinError(false);
     if (pinStep === 'crear') {
       setPin(val);
-      if (val.length === 4) setTimeout(() => setPinStep('confirmar'), 300);
+      if (val.length === 4) setTimeout(() => setPinStep('confirmar'), 250);
     } else {
       setConfirmPin(val);
       if (val.length === 4 && val !== pin) {
-        setError('Los PIN no coinciden. Inténtalo de nuevo.');
-        setConfirmPin('');
+        setPinError(true);
+        setTimeout(() => { setConfirmPin(''); setPinError(false); }, 600);
       }
     }
   };
 
   const reiniciarPin = () => {
-    setPin(''); setConfirmPin(''); setPinStep('crear'); setError('');
+    setPin(''); setConfirmPin(''); setPinStep('crear'); setPinError(false);
   };
 
   const canAdvance = () => {
@@ -152,7 +159,7 @@ export default function RegistroNuevoPage() {
       case 2: return !!(estadoUp && municipioUp);
       case 3: return !!tipoMaiz;
       case 4: return true;
-      case 5: return telefono.length === 10 && confirmPin.length === 4 && confirmPin === pin;
+      case 5: return telefono.length === 10;
       default: return false;
     }
   };
@@ -187,10 +194,12 @@ export default function RegistroNuevoPage() {
     }
   };
 
-  // ── PASO 4 — Mapa full-screen ─────────────────────────────────────────────
+  // ── PASO 4 — Mapa full-screen con mira + botón ────────────────────────────
   if (paso === 4) {
     const puntosNecesarios = Math.max(0, 3 - pointCount);
     const puedeTerminar = pointCount >= 3;
+    const dibujando = drawMode === 'drawing' || (drawMode === 'idle' && !poligono);
+    const miraVisible = dibujando;
 
     return (
       <div
@@ -198,7 +207,7 @@ export default function RegistroNuevoPage() {
         style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-black/50 backdrop-blur-md border-b border-white/05">
+        <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-black/50 backdrop-blur-md border-b border-white/5">
           <button
             onClick={handleBack}
             className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors flex-shrink-0"
@@ -210,72 +219,69 @@ export default function RegistroNuevoPage() {
             {drawMode === 'idle' && !poligono && (
               <>
                 <p className="text-white font-bold text-sm leading-tight">Dibuja tu parcela</p>
-                <p className="text-white/40 text-xs">Toca el botón verde para comenzar</p>
+                <p className="text-white/45 text-xs">Centra la mira y agrega cada esquina</p>
               </>
             )}
             {drawMode === 'drawing' && (
               <>
-                <p className="text-green-300 font-bold text-sm leading-tight">Marcando puntos...</p>
-                <p className="text-white/40 text-xs">
+                <p className="text-green-300 font-bold text-sm leading-tight">
                   {pointCount} punto{pointCount !== 1 ? 's' : ''} marcado{pointCount !== 1 ? 's' : ''}
-                  {puedeTerminar ? ' — ya puedes finalizar' : ` — ${puntosNecesarios} más para terminar`}
+                </p>
+                <p className="text-white/45 text-xs">
+                  {puedeTerminar ? 'Ya puedes finalizar' : `Faltan ${puntosNecesarios} para cerrar`}
                 </p>
               </>
             )}
             {drawMode === 'idle' && poligono && (
               <>
                 <p className="text-white font-bold text-sm leading-tight">Parcela dibujada</p>
-                <p className="text-white/40 text-xs">{areaCalc} ha calculadas</p>
+                <p className="text-white/45 text-xs">{areaCalc} ha calculadas</p>
               </>
             )}
             {drawMode === 'editing' && (
               <>
                 <p className="text-amber-300 font-bold text-sm leading-tight">Editando parcela</p>
-                <p className="text-white/40 text-xs">Arrastra los puntos para ajustar</p>
+                <p className="text-white/45 text-xs">Arrastra los puntos para ajustar</p>
               </>
             )}
           </div>
 
           {/* Stepper mini */}
           <div className="flex gap-1 flex-shrink-0">
-            {[1,2,3,4,5].map(n => (
-              <div key={n} className={`h-1 w-4 rounded-full transition-colors ${n <= paso ? 'bg-white' : 'bg-white/20'}`} />
+            {Array.from({ length: TOTAL_PASOS }, (_, i) => i + 1).map(n => (
+              <div key={n} className={`h-1 w-3 rounded-full transition-colors ${n <= paso ? 'bg-white' : 'bg-white/20'}`} />
             ))}
           </div>
         </div>
 
         {/* Mapa */}
         <div className="flex-1 relative min-h-0">
-          {/* Overlay instrucción inicial */}
-          {drawMode === 'idle' && !poligono && (
-            <div className="absolute inset-0 z-[500] flex items-center justify-center pointer-events-none">
-              <div className="bg-black/65 backdrop-blur-sm rounded-2xl px-6 py-5 mx-8 text-center shadow-2xl">
-                <div className="w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center mx-auto mb-3">
-                  <PenLine size={24} className="text-green-300" />
+          {/* Mira central (crosshair) */}
+          {miraVisible && (
+            <div className="absolute left-1/2 top-1/2 z-[600] pointer-events-none animate-crosshair">
+              <div className="relative -translate-x-1/2 -translate-y-1/2">
+                <div className="w-9 h-9 rounded-full border-[2.5px] border-white shadow-[0_0_0_2px_rgba(0,0,0,0.25)] flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-[#34d079] ring-2 ring-white" />
                 </div>
-                <p className="text-white font-bold text-sm mb-1.5">Dibuja los límites de tu parcela</p>
-                <p className="text-white/50 text-xs leading-relaxed">
-                  Toca "Comenzar a dibujar" abajo,<br />luego toca el mapa para marcar cada esquina
-                </p>
+                {/* líneas guía */}
+                <div className="absolute left-1/2 top-1/2 w-px h-14 -translate-x-1/2 -translate-y-1/2 bg-white/40" />
+                <div className="absolute left-1/2 top-1/2 h-px w-14 -translate-x-1/2 -translate-y-1/2 bg-white/40" />
               </div>
             </div>
           )}
 
-          {/* Banner de instrucción durante dibujo */}
-          {drawMode === 'drawing' && (
+          {/* Instrucción inicial */}
+          {drawMode === 'idle' && !poligono && pointCount === 0 && (
             <div className="absolute top-3 left-3 right-3 z-[500] pointer-events-none">
-              <div className="bg-black/75 backdrop-blur-md rounded-2xl px-4 py-3 flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-green-400 mt-1 flex-shrink-0 animate-pulse" />
-                <div>
-                  <p className="text-white text-xs font-semibold leading-tight">
-                    {puedeTerminar
-                      ? 'Toca "Finalizar parcela" cuando termines de marcar todos los puntos'
-                      : `Toca el mapa para marcar puntos — necesitas ${puntosNecesarios} más`}
-                  </p>
-                  {puedeTerminar && (
-                    <p className="text-white/40 text-xs mt-0.5">También puedes tocar el primer punto para cerrar</p>
-                  )}
+              <div className="bg-black/70 backdrop-blur-md rounded-2xl px-4 py-3 flex items-start gap-3 max-w-md mx-auto">
+                <div className="w-7 h-7 rounded-full bg-green-500/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Plus size={16} className="text-green-300" />
                 </div>
+                <p className="text-white/90 text-xs leading-relaxed">
+                  Mueve el mapa con el dedo y haz <strong>zoom</strong> libremente.
+                  Cuando la <strong>mira verde</strong> esté sobre una esquina de tu parcela,
+                  toca <strong>"Agregar punto"</strong>.
+                </p>
               </div>
             </div>
           )}
@@ -283,11 +289,9 @@ export default function RegistroNuevoPage() {
           {/* Banner edición */}
           {drawMode === 'editing' && (
             <div className="absolute top-3 left-3 right-3 z-[500] pointer-events-none">
-              <div className="bg-amber-900/80 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-3">
+              <div className="bg-amber-900/80 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-3 max-w-md mx-auto">
                 <Pencil size={14} className="text-amber-300 flex-shrink-0" />
-                <p className="text-white/90 text-xs font-medium">
-                  Arrastra los puntos azules para ajustar la forma de tu parcela
-                </p>
+                <p className="text-white/90 text-xs font-medium">Arrastra los puntos para ajustar la forma</p>
               </div>
             </div>
           )}
@@ -295,7 +299,7 @@ export default function RegistroNuevoPage() {
           <MapContainer
             ref={mapRef}
             center={coords ? [coords.lat, coords.lng] : [23.6345, -102.5528]}
-            zoom={coords ? 14 : 5}
+            zoom={coords ? 15 : 5}
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
             attributionControl={false}
@@ -329,14 +333,16 @@ export default function RegistroNuevoPage() {
           </MapContainer>
 
           {/* Buscador de lugar */}
-          <div className="absolute top-3 left-3 max-w-[calc(100%-2rem)] w-72 sm:w-80 z-[1000]">
-            <NominatimSearch
-              placeholder="Buscar ejido, localidad..."
-              onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 15)}
-            />
-          </div>
+          {dibujando && (
+            <div className="absolute top-16 left-3 max-w-[calc(100%-2rem)] w-72 sm:w-80 z-[1000]">
+              <NominatimSearch
+                placeholder="Buscar ejido, localidad..."
+                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+              />
+            </div>
+          )}
 
-          {/* Botón zoom-in manual visible */}
+          {/* Zoom manual */}
           <div className="absolute right-3 bottom-4 z-[1000] flex flex-col gap-2">
             <button
               onClick={() => mapRef.current?.zoomIn()}
@@ -350,71 +356,60 @@ export default function RegistroNuevoPage() {
         </div>
 
         {/* Footer contextual */}
-        <div className="flex-shrink-0 bg-black/65 backdrop-blur-md border-t border-white/08 px-4 pt-4 pb-3">
+        <div className="flex-shrink-0 bg-black/65 backdrop-blur-md border-t border-white/10 px-4 pt-3 pb-3">
 
-          {/* MODO: idle, sin polígono */}
-          {drawMode === 'idle' && !poligono && (
+          {/* MODO: dibujando (idle sin polígono o drawing) */}
+          {dibujando && (
             <div className="space-y-2.5">
               <button
-                onClick={() => dibujarRef.current?.startDraw()}
+                onClick={() => dibujarRef.current?.addPoint()}
                 className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
                            flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-lg shadow-green-900/30"
               >
-                <PenLine size={20} />
-                Comenzar a dibujar
+                <Plus size={20} strokeWidth={2.6} />
+                {pointCount === 0 ? 'Agregar primer punto' : 'Agregar punto'}
               </button>
-              <button
-                onClick={() => irAPaso(5)}
-                className="w-full text-white/35 text-sm py-2 text-center hover:text-white/55 transition-colors"
-              >
-                Omitir — completar después
-              </button>
+
+              {pointCount > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => dibujarRef.current?.undoVertex()}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15
+                               text-white/80 py-3 rounded-xl text-sm font-semibold active:scale-[0.97] transition-all"
+                  >
+                    <Undo2 size={16} /> Deshacer
+                  </button>
+                  <button
+                    onClick={() => dibujarRef.current?.finishDraw()}
+                    disabled={!puedeTerminar}
+                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1A5C38] py-3 rounded-xl text-sm font-bold
+                               disabled:opacity-30 active:scale-[0.97] transition-all"
+                  >
+                    <CheckCircle2 size={17} />
+                    {puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${puntosNecesarios}`}
+                  </button>
+                </div>
+              )}
+
+              {pointCount === 0 && (
+                <button
+                  onClick={() => irAPaso(5)}
+                  className="w-full text-white/40 text-sm py-2 text-center hover:text-white/60 transition-colors"
+                >
+                  Omitir — completar mi ubicación después
+                </button>
+              )}
             </div>
           )}
 
-          {/* MODO: dibujando */}
-          {drawMode === 'drawing' && (
-            <div className="space-y-2.5">
-              <button
-                onClick={() => dibujarRef.current?.finishDraw()}
-                disabled={!puedeTerminar}
-                className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
-                           disabled:opacity-35 flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all
-                           shadow-lg shadow-green-900/30"
-              >
-                {puedeTerminar
-                  ? <><CheckCircle2 size={20} /> Finalizar parcela ({pointCount} puntos)</>
-                  : `Marca ${puntosNecesarios} punto${puntosNecesarios !== 1 ? 's' : ''} más para continuar`
-                }
-              </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => dibujarRef.current?.undoVertex()}
-                  disabled={pointCount === 0}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15
-                             text-white/80 py-3 rounded-xl text-sm font-semibold disabled:opacity-30 active:scale-[0.97] transition-all"
-                >
-                  <Undo2 size={16} /> Deshacer
-                </button>
-                <button
-                  onClick={() => dibujarRef.current?.cancelDraw()}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/05 ring-1 ring-white/10
-                             text-white/40 py-3 rounded-xl text-sm font-semibold active:scale-[0.97] transition-all"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* MODO: idle, polígono listo, confirmando área */}
+          {/* MODO: polígono listo, confirmando área */}
           {drawMode === 'idle' && poligono && coincideArea === null && (
             <div className="space-y-3">
-              <div className="bg-amber-500/12 ring-1 ring-amber-400/25 rounded-2xl p-4">
+              <div className="bg-green-500/12 ring-1 ring-green-400/25 rounded-2xl p-4">
                 <p className="text-sm font-semibold text-white mb-1">
-                  Área calculada: <span className="text-amber-300 font-bold text-base">{areaCalc} ha</span>
+                  Área calculada: <span className="text-green-300 font-bold text-base">{areaCalc} ha</span>
                 </p>
-                <p className="text-xs text-white/40 mb-3">¿El área calculada es correcta?</p>
+                <p className="text-xs text-white/45 mb-3">¿El área calculada coincide con tu parcela?</p>
                 <div className="flex gap-2.5">
                   <button
                     onClick={() => setCoincideArea(true)}
@@ -424,7 +419,7 @@ export default function RegistroNuevoPage() {
                   </button>
                   <button
                     onClick={() => setCoincideArea(false)}
-                    className="flex-1 bg-white/08 ring-1 ring-white/12 text-white/60 py-3 rounded-xl font-semibold text-sm active:scale-[0.97] transition-all"
+                    className="flex-1 bg-white/8 ring-1 ring-white/12 text-white/60 py-3 rounded-xl font-semibold text-sm active:scale-[0.97] transition-all"
                   >
                     No, difiere
                   </button>
@@ -439,7 +434,7 @@ export default function RegistroNuevoPage() {
                   <Pencil size={14} /> Ajustar forma
                 </button>
                 <button
-                  onClick={() => dibujarRef.current?.deletePolygon()}
+                  onClick={() => dibujarRef.current?.clear()}
                   className="flex-1 flex items-center justify-center gap-1.5 text-red-400/70 py-3 rounded-xl text-sm font-medium
                              hover:text-red-400 active:scale-[0.97] transition-all"
                 >
@@ -478,7 +473,7 @@ export default function RegistroNuevoPage() {
             </div>
           )}
 
-          {/* Área confirmada — listo para continuar */}
+          {/* Área confirmada */}
           {drawMode === 'idle' && poligono && coincideArea === true && (
             <button
               onClick={() => irAPaso(5)}
@@ -511,7 +506,7 @@ export default function RegistroNuevoPage() {
     );
   }
 
-  // ── PASOS 1-3 y 5 ─────────────────────────────────────────────────────────
+  // ── PASOS 1-3, 5 y 6 ──────────────────────────────────────────────────────
   return (
     <div
       className="fixed inset-0 flex flex-col"
@@ -520,10 +515,10 @@ export default function RegistroNuevoPage() {
       {/* Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.08),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
       </div>
 
-      {/* Header — fijo */}
+      {/* Header — stepper */}
       <div className="flex-shrink-0 flex items-center px-4 py-3">
         <button
           onClick={handleBack}
@@ -532,46 +527,42 @@ export default function RegistroNuevoPage() {
           <ChevronLeft size={22} className="text-white/70" />
         </button>
 
-        {/* Stepper con íconos */}
-        <div className="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2">
+        <div className="flex-1 flex items-center justify-center gap-1 px-2">
           {PASOS_INFO.map((info, i) => {
             const n = i + 1;
             const Icon = info.icon;
             const active = n === paso;
             const done = n < paso;
             return (
-              <div key={n} className="flex items-center gap-1 sm:gap-1.5">
+              <div key={n} className="flex items-center gap-1">
                 <div className={`flex items-center justify-center rounded-full transition-all duration-300 ${
                   active
                     ? 'w-7 h-7 sm:w-8 sm:h-8 bg-white shadow-md'
-                    : done
-                    ? 'w-5 h-5 sm:w-6 sm:h-6 bg-white/40'
-                    : 'w-5 h-5 sm:w-6 sm:h-6 bg-white/15'
+                    : 'w-5 h-5 sm:w-6 sm:h-6 ' + (done ? 'bg-white/40' : 'bg-white/15')
                 }`}>
                   {done
-                    ? <Check size={10} className="text-white sm:hidden" />
+                    ? <Check size={11} className="text-white" />
                     : <Icon size={active ? 14 : 10} className={active ? 'text-[#1A5C38]' : 'text-white/50'} />
                   }
-                  {done && <Check size={12} className="text-white hidden sm:block" />}
                 </div>
-                {n < 5 && (
-                  <div className={`h-px w-3 sm:w-4 transition-colors duration-300 ${done ? 'bg-white/50' : 'bg-white/15'}`} />
+                {n < TOTAL_PASOS && (
+                  <div className={`h-px w-2 sm:w-3 transition-colors duration-300 ${done ? 'bg-white/50' : 'bg-white/15'}`} />
                 )}
               </div>
             );
           })}
         </div>
 
-        <div className="min-w-[36px] text-right flex-shrink-0">
-          <span className="text-xs text-white/35 font-mono">{paso}/5</span>
+        <div className="min-w-[34px] text-right flex-shrink-0">
+          <span className="text-xs text-white/35 font-mono">{paso}/{TOTAL_PASOS}</span>
         </div>
       </div>
 
-      {/* Contenido scrollable — min-h-0 es clave para que no desborde */}
+      {/* Contenido scrollable */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className={`max-w-sm mx-auto px-5 py-4 sm:py-6 pb-6 ${animDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
 
-          {error && !error.includes('PIN') && (
+          {error && (
             <div className="mb-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
               <AlertCircle size={15} className="shrink-0 mt-0.5" />
               <span>{error}</span>
@@ -707,12 +698,12 @@ export default function RegistroNuevoPage() {
             </div>
           )}
 
-          {/* ── Paso 5: Contacto + PIN + Programas ── */}
+          {/* ── Paso 5: Contacto + Programas ── */}
           {paso === 5 && (
             <div className="space-y-5">
-              <div className="mb-4">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Últimos datos</h2>
-                <p className="text-white/50 text-sm sm:text-base mt-1">Ya casi terminas</p>
+              <div className="mb-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Tu contacto</h2>
+                <p className="text-white/50 text-sm sm:text-base mt-1">Para que las bodegas puedan avisarte</p>
               </div>
 
               {/* Teléfono */}
@@ -746,33 +737,6 @@ export default function RegistroNuevoPage() {
                 />
               </div>
 
-              {/* PIN */}
-              <div className="bg-white/8 ring-1 ring-white/10 rounded-2xl p-4 text-center">
-                <p className="text-sm sm:text-base font-bold text-white mb-1">
-                  {pinStep === 'crear' ? 'Crea tu PIN de 4 dígitos' : 'Confirma tu PIN'}
-                </p>
-                <p className="text-xs text-white/40 mb-4">
-                  {pinStep === 'crear'
-                    ? 'Lo usarás cada vez que entres a la app.'
-                    : 'Escribe los mismos 4 dígitos para confirmar.'}
-                </p>
-                {error && error.includes('PIN') && (
-                  <div className="mb-3 p-2 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs">
-                    {error}
-                  </div>
-                )}
-                <PinInput
-                  value={pinStep === 'crear' ? pin : confirmPin}
-                  onChange={handlePinChange}
-                />
-                {(pin.length > 0 || confirmPin.length > 0) && (
-                  <button onClick={reiniciarPin}
-                    className="mt-3 text-white/40 text-xs hover:text-white/60 transition-colors">
-                    Reiniciar PIN
-                  </button>
-                )}
-              </div>
-
               {/* Programas */}
               <div>
                 <p className="text-sm font-semibold text-white/70 mb-1">¿Recibes algún apoyo gubernamental?</p>
@@ -793,13 +757,96 @@ export default function RegistroNuevoPage() {
               </div>
             </div>
           )}
+
+          {/* ── Paso 6: PIN (paso dedicado) ── */}
+          {paso === 6 && (
+            <div className="text-center">
+              {/* Ícono */}
+              <div className="flex justify-center mb-4">
+                <div className={`w-16 h-16 rounded-[20px] flex items-center justify-center shadow-xl transition-colors duration-300 ${
+                  pinConfirmado ? 'bg-green-500 shadow-green-900/40' : 'bg-white/12 ring-1 ring-white/15'
+                }`}>
+                  {pinConfirmado
+                    ? <ShieldCheck size={30} className="text-white" />
+                    : <KeyRound size={28} className="text-white" />}
+                </div>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                {pinConfirmado ? '¡PIN listo!' : pinStep === 'crear' ? 'Crea tu PIN' : 'Confirma tu PIN'}
+              </h2>
+              <p className="text-white/50 text-sm sm:text-base mt-1.5 mb-5 px-2 leading-relaxed">
+                {pinConfirmado
+                  ? 'Usarás este PIN cada vez que entres a SIMAC.'
+                  : pinStep === 'crear'
+                  ? 'Elige 4 dígitos fáciles de recordar. No los compartas con nadie.'
+                  : 'Vuelve a escribir los mismos 4 dígitos para confirmar.'}
+              </p>
+
+              {/* Indicador de sub-paso */}
+              <div className="flex items-center justify-center gap-2 mb-6">
+                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  pinStep === 'crear' && !pinConfirmado ? 'bg-white/15 text-white' : 'bg-white/5 text-white/40'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${pin.length === 4 ? 'bg-green-400' : 'bg-white/30'}`} />
+                  1· Elige
+                </div>
+                <div className="w-4 h-px bg-white/20" />
+                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  pinStep === 'confirmar' ? 'bg-white/15 text-white' : 'bg-white/5 text-white/40'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${pinConfirmado ? 'bg-green-400' : 'bg-white/30'}`} />
+                  2· Confirma
+                </div>
+              </div>
+
+              {pinError && (
+                <div className="mb-4 mx-auto max-w-xs p-2.5 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs flex items-center justify-center gap-2">
+                  <AlertCircle size={14} /> Los PIN no coinciden. Intenta de nuevo.
+                </div>
+              )}
+              {pinConfirmado && (
+                <div className="mb-4 mx-auto max-w-xs p-2.5 bg-green-500/15 ring-1 ring-green-400/30 rounded-xl text-green-300 text-xs flex items-center justify-center gap-2">
+                  <Check size={14} /> PIN confirmado correctamente
+                </div>
+              )}
+
+              <PinInput
+                value={pinStep === 'crear' ? pin : confirmPin}
+                onChange={handlePinChange}
+                dark
+                error={pinError}
+                success={pinConfirmado}
+              />
+
+              {(pin.length > 0 || confirmPin.length > 0) && (
+                <button onClick={reiniciarPin}
+                  className="mt-5 text-white/40 text-xs hover:text-white/60 transition-colors">
+                  Reiniciar PIN
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Botón de acción — siempre pegado al fondo */}
-      <div className="flex-shrink-0 px-5 py-4 bg-black/20 backdrop-blur-md border-t border-white/05">
-        <div className="max-w-sm mx-auto space-y-2">
-          {paso < 5 ? (
+      {/* Botón de acción */}
+      <div className="flex-shrink-0 px-5 py-4 bg-black/20 backdrop-blur-md border-t border-white/5">
+        <div className="max-w-sm mx-auto">
+          {paso === 6 ? (
+            <button
+              onClick={enviarRegistro}
+              disabled={!pinConfirmado || loading}
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
+                         py-4 rounded-2xl text-base font-bold
+                         disabled:opacity-25 active:scale-[0.98] transition-all duration-200
+                         flex items-center justify-center gap-2"
+            >
+              {loading
+                ? <><Loader2 size={18} className="animate-spin text-[#1A5C38]" /> Creando cuenta...</>
+                : 'Crear mi cuenta →'}
+            </button>
+          ) : (
             <button
               onClick={() => irAPaso(paso + 1)}
               disabled={!canAdvance()}
@@ -809,20 +856,6 @@ export default function RegistroNuevoPage() {
             >
               Continuar
             </button>
-          ) : (
-            <button
-              onClick={enviarRegistro}
-              disabled={!canAdvance() || loading}
-              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
-                         py-4 rounded-2xl text-base font-bold
-                         disabled:opacity-25 active:scale-[0.98] transition-all duration-200
-                         flex items-center justify-center gap-2"
-            >
-              {loading
-                ? <><Loader2 size={18} className="animate-spin text-[#1A5C38]" /> Enviando...</>
-                : 'Crear mi cuenta →'
-              }
-            </button>
           )}
         </div>
       </div>
@@ -830,28 +863,15 @@ export default function RegistroNuevoPage() {
       {/* Modal de registro exitoso */}
       {registroExitoso && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-6">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
-            {/* Ícono de éxito */}
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-fade-in">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-[#1A5C38]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-
-            {/* Título */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              ¡Registro exitoso!
-            </h2>
-
-            {/* Mensaje */}
-            <p className="text-gray-600 mb-2">
-              Tu cuenta ha sido creada correctamente en SIMAC.
-            </p>
-            <p className="text-gray-500 text-sm mb-8">
-              Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.
-            </p>
-
-            {/* Botón */}
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Registro exitoso!</h2>
+            <p className="text-gray-600 mb-2">Tu cuenta ha sido creada correctamente en SIMAC.</p>
+            <p className="text-gray-500 text-sm mb-8">Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.</p>
             <button
               onClick={() => navigate('/login-productor')}
               className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg hover:bg-green-800 transition-colors"

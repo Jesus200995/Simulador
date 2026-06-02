@@ -45,21 +45,24 @@ export default function B01Login() {
       </div>
 
       {/* Scrollable overlay */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16 sm:py-20 overflow-x-hidden">
+      <div
+        className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10 sm:py-16 overflow-x-hidden"
+        style={{ paddingTop: 'max(2.5rem, env(safe-area-inset-top))', paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}
+      >
 
         {/* ── Logo + brand ── */}
-        <div className="flex items-center gap-3.5 mb-8">
+        <div className="animate-auth-in flex items-center gap-3.5 mb-7 sm:mb-8">
           <div className="w-[52px] h-[52px] rounded-[14px] bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-xl">
             <img src="/icono.png" alt="SIMAC" className="w-9 h-9 rounded-[10px]" />
           </div>
           <div>
-            <p className="text-[28px] font-black text-white tracking-[-0.5px] leading-none">SIMAC</p>
+            <p className="text-[26px] sm:text-[28px] font-black text-white tracking-[-0.5px] leading-none">SIMAC</p>
             <p className="text-[12px] text-green-300/70 font-medium mt-0.5 tracking-wide">Plan Nacional Maíz 2026</p>
           </div>
         </div>
 
         {/* ── Card ── */}
-        <div className="w-full max-w-[400px] bg-white rounded-[28px] shadow-[0_24px_64px_rgba(0,0,0,0.45)] overflow-hidden">
+        <div className="animate-auth-in w-full max-w-[400px] bg-white rounded-[28px] shadow-[0_24px_64px_rgba(0,0,0,0.45)] overflow-hidden" style={{ animationDelay: '0.08s' }}>
 
           {/* Green accent bar */}
           <div className="h-[3px] bg-gradient-to-r from-[#1A5C38] via-[#34d079] to-[#1A5C38]" />

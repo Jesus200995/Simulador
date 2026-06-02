@@ -130,6 +130,27 @@ body {
   animation: auth-fade-in 0.35s ease both;
 }
 
+/* Sacudida para errores (PIN incorrecto, etc.) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+.animate-shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Mira (crosshair) del mapa: pulso sutil */
+@keyframes crosshair-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 0.85; }
+}
+.animate-crosshair {
+  animation: crosshair-pulse 2s ease-in-out infinite;
+}
+
 /* ═══════ HIDE DEFAULT LEAFLET-DRAW TOOLBAR ═══════ */
 .leaflet-draw-toolbar,
 .leaflet-draw-toolbar-top,

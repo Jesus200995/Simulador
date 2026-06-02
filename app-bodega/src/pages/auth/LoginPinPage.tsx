@@ -85,7 +85,10 @@ export default function LoginPinPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden">
+    <div
+      className="relative min-h-[100dvh] flex flex-col overflow-hidden"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       {/* Background */}
       <div className="fixed inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
@@ -212,7 +215,7 @@ export default function LoginPinPage() {
                   <span className="text-sm sm:text-base">Verificando...</span>
                 </div>
               ) : (
-                <PinInput value={pin} onChange={handlePinChange} />
+                <PinInput value={pin} onChange={handlePinChange} dark error={!!error} />
               )}
             </div>
           )}
