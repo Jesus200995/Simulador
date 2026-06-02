@@ -266,7 +266,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
         // useGeomParam: $6 solo aparece en el SQL cuando ambas condiciones se cumplen
         const useGeomParam = hasPoligono && postgisDisponible;
         const geomSql = useGeomParam
-          ? `ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)`
+          ? `ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326)`
           : 'NULL';
         const geomParam = useGeomParam
           ? JSON.stringify({
@@ -598,7 +598,7 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
       await pool.query(
         `UPDATE up SET
            centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
-           geom = ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($3), 4326)),
+           geom = ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326)),
            area_ha_calc = $4, area_ha_real = $5, coincide_area = $6,
            location_confirmed = TRUE,
            centroid_source = 'productor'
@@ -636,19 +636,12 @@ router.get('/mi-up', authMiddleware, async (req: AuthRequest, res: Response): Pr
       const r = await pool.query(
         `SELECT up_id, up_name, state_name, municipality_name,
                 location_confirmed, centroid_source,
-                lat, lng,
+                ST_Y(centroid::geometry) AS lat,
+                ST_X(centroid::geometry) AS lng,
                 area_ha_calc, area_ha_real, coincide_area,
-                geom_geojson, geom_coordenadas
-         FROM (
-           SELECT up_id, up_name, state_name, municipality_name,
-                  location_confirmed, centroid_source,
-                  area_ha_calc, area_ha_real, coincide_area,
-                  COALESCE(lat, 0) AS lat,
-                  COALESCE(lng, 0) AS lng,
-                  NULL::json AS geom_geojson,
-                  NULL AS geom_coordenadas
-           FROM up WHERE producer_id = $1
-         ) sub
+                ST_AsGeoJSON(geom)::json AS geom_geojson,
+                NULL AS geom_coordenadas
+         FROM up WHERE producer_id = $1
          LIMIT 1`,
         [producerId]
       );
@@ -689,11 +682,43 @@ router.post('/solicitar-apoyo', authMiddleware, async (req: AuthRequest, res: Re
     const userId = req.user!.userId;
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+    if (!infraestructura_id) { res.status(400).json({ error: 'infraestructura_id requerido' }); return; }
+
+    // El esquema real de solicitudes_apoyo es ventanilla-based:
+    // (ventanilla_id, apoyo_id, producer_id, estado, notas). Resolvemos la
+    // ventanilla activa de la bodega y un apoyo (preferimos el del tipo pedido).
+    const nombreApoyo =
+      tipo_apoyo === 'incentivo' || tipo_apoyo === 'incentivos' ? 'incentivos' :
+      tipo_apoyo === 'cobertura' || tipo_apoyo === 'coberturas' ? 'coberturas' : null;
+
+    const resolve = await pool.query(
+      `SELECT v.id AS ventanilla_id,
+              (SELECT a.id FROM apoyos_ventanilla a
+                 WHERE a.ventanilla_id = v.id
+                   AND ($2::text IS NULL OR a.nombre_apoyo = $2)
+                 ORDER BY a.created_at DESC LIMIT 1) AS apoyo_id_tipo,
+              (SELECT a2.id FROM apoyos_ventanilla a2
+                 WHERE a2.ventanilla_id = v.id
+                 ORDER BY a2.created_at DESC LIMIT 1) AS apoyo_id_any
+         FROM ventanillas v
+        WHERE v.bodega_id = $1 AND v.estatus = 'activa'
+        ORDER BY v.created_at DESC LIMIT 1`,
+      [infraestructura_id, nombreApoyo]
+    );
+    if (resolve.rows.length === 0) {
+      res.status(404).json({ error: 'Esta bodega no tiene una ventanilla de apoyos activa' });
+      return;
+    }
+    const apoyoId = resolve.rows[0].apoyo_id_tipo || resolve.rows[0].apoyo_id_any;
+    if (!apoyoId) {
+      res.status(400).json({ error: 'La ventanilla aún no tiene apoyos publicados' });
+      return;
+    }
 
     const solicitud = await pool.query(
-      `INSERT INTO solicitudes_apoyo (producer_id, infraestructura_id, tipo_apoyo, notas_productor)
-       VALUES ($1, $2, $3, $4) RETURNING id`,
-      [producerId, infraestructura_id, tipo_apoyo, notas]
+      `INSERT INTO solicitudes_apoyo (ventanilla_id, apoyo_id, producer_id, estado, notas)
+       VALUES ($1, $2, $3, 'recibida', $4) RETURNING id`,
+      [resolve.rows[0].ventanilla_id, apoyoId, producerId, notas || null]
     );
 
     res.status(201).json({ solicitud_id: solicitud.rows[0].id });
@@ -710,44 +735,26 @@ router.get('/mis-solicitudes', authMiddleware, async (req: AuthRequest, res: Res
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
-    // Query robusta: intentar primero con JOINs a tablas relacionadas, sino solo la tabla base
-    let rows: any[] = [];
-    try {
-      // Intentar query completa con JOINs
-      const r = await pool.query(
-        `SELECT s.id, s.estado,
-                COALESCE(s.notas_productor, s.notas) AS notas,
-                s.created_at, s.updated_at,
-                COALESCE(s.tipo_apoyo, a.nombre_apoyo, 'Solicitud') AS tipo_apoyo,
-                v.nombre AS ventanilla_nombre
-         FROM solicitudes_apoyo s
-         LEFT JOIN ventanillas v ON v.id = s.ventanilla_id
-         LEFT JOIN apoyos_ventanilla a ON a.id = s.apoyo_id
-         WHERE s.producer_id = $1
-         ORDER BY s.created_at DESC`,
-        [producerId]
-      );
-      rows = r.rows;
-    } catch (queryErr: any) {
-      console.error('Error en mis-solicitudes (query completa), intentando query simple:', queryErr.message);
-      try {
-        // Query mínima — solo la tabla base
-        const r2 = await pool.query(
-          `SELECT id, estado, tipo_apoyo, notas_productor AS notas, created_at, updated_at
-           FROM solicitudes_apoyo
-           WHERE producer_id = $1
-           ORDER BY created_at DESC`,
-          [producerId]
-        );
-        rows = r2.rows;
-      } catch (queryErr2: any) {
-        console.error('Error en mis-solicitudes (query simple):', queryErr2.message);
-        // Tabla no existe — devolver arreglo vacío
-        rows = [];
-      }
-    }
+    // Esquema real (ventanilla-based): solicitudes_apoyo(ventanilla_id, apoyo_id,
+    // producer_id, estado, notas, created_at, updated_at)
+    const r = await pool.query(
+      `SELECT s.id, s.estado,
+              s.notas,
+              s.notas AS notas_ventanilla,
+              s.created_at, s.updated_at,
+              COALESCE(a.nombre_apoyo, 'Solicitud') AS tipo_apoyo,
+              v.nombre_ventanilla AS ventanilla_nombre,
+              b.nombre AS bodega_nombre
+       FROM solicitudes_apoyo s
+       LEFT JOIN ventanillas v ON v.id = s.ventanilla_id
+       LEFT JOIN apoyos_ventanilla a ON a.id = s.apoyo_id
+       LEFT JOIN bodegas b ON b.id = v.bodega_id
+       WHERE s.producer_id = $1
+       ORDER BY s.created_at DESC`,
+      [producerId]
+    );
 
-    res.json(rows);
+    res.json(r.rows);
   } catch (error) {
     console.error('Error en mis-solicitudes:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

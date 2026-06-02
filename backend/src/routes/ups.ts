@@ -55,23 +55,23 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
         $1, $2, $3, $4, $5,
         ST_Multi(
           CASE
-            WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
-            THEN ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)
-            ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
+            WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))
+            THEN ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326)
+            ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))
           END
         ),
         ST_PointOnSurface(
           CASE
-            WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
-            THEN ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)
-            ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
+            WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))
+            THEN ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326)
+            ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))
           END
         ),
         ROUND((ST_Area(
           CASE
-            WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
-            THEN ST_SetSRID(ST_GeomFromGeoJSON($6), 4326)
-            ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
+            WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))
+            THEN ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326)
+            ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))
           END
         ::geography) / 10000.0)::numeric, 4),
         $7, $8, $9, $10,
@@ -210,9 +210,9 @@ router.patch('/:up_id', authMiddleware, async (req: AuthRequest, res: Response):
     // If updating geometry
     if (geom_geojson) {
       const geojsonStr = JSON.stringify(geom_geojson);
-      sets.push(`geom = ST_Multi(CASE WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326)) THEN ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326) ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326)) END)`);
-      sets.push(`centroid = ST_PointOnSurface(CASE WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326)) THEN ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326) ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326)) END)`);
-      sets.push(`area_ha_calc = ROUND((ST_Area(CASE WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326)) THEN ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326) ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}), 4326)) END::geography) / 10000.0)::numeric, 4)`);
+      sets.push(`geom = ST_Multi(CASE WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326)) THEN ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326) ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326)) END)`);
+      sets.push(`centroid = ST_PointOnSurface(CASE WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326)) THEN ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326) ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326)) END)`);
+      sets.push(`area_ha_calc = ROUND((ST_Area(CASE WHEN ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326)) THEN ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326) ELSE ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($${idx}::text), 4326)) END::geography) / 10000.0)::numeric, 4)`);
       params.push(geojsonStr);
       idx++;
     }

@@ -400,7 +400,7 @@ router.get('/mercado', authMiddleware, async (_req: AuthRequest, res: Response):
       const sRes = await pool.query(`
         SELECT AVG(s_bodega) AS avg_s
         FROM (
-          SELECT bodega_id, SUM(precio_ton) AS s_bodega
+          SELECT bodega_id, SUM(precio) AS s_bodega
           FROM tarifario_servicios
           WHERE activo = TRUE AND updated_at >= NOW() - INTERVAL '60 days'
           GROUP BY bodega_id
