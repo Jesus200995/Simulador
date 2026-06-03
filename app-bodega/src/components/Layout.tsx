@@ -139,9 +139,9 @@ export function Layout({ children }: { children: ReactNode }) {
         {/* Drawer menu */}
         <div className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
           {[
-            { icon: User, label: 'Mi perfil', action: () => {} },
+            { icon: User, label: 'Mi perfil', action: () => { setDrawerOpen(false); navigate('/perfil'); } },
             { icon: Bell, label: 'Notificaciones', action: () => { setDrawerOpen(false); navigate('/notificaciones'); } },
-            { icon: Settings, label: 'Configuración', action: () => {} },
+            { icon: Settings, label: 'Configuración', action: () => { setDrawerOpen(false); navigate('/configuracion'); } },
           ].map(({ icon: Icon, label, action }) => (
             <button key={label} onClick={action}
               className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">

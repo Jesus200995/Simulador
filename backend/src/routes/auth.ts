@@ -233,6 +233,98 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
 });
 
 // =============================================
+// PATCH /api/auth/perfil — Actualizar datos del usuario (nombre, teléfono)
+// =============================================
+router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { nombre_completo, telefono } = req.body;
+    const updates: string[] = [];
+    const vals: any[] = [];
+    let idx = 1;
+
+    if (nombre_completo !== undefined) {
+      if (typeof nombre_completo !== 'string' || nombre_completo.trim().length < 3) {
+        res.status(400).json({ error: 'Nombre inválido' });
+        return;
+      }
+      updates.push(`nombre_completo = $${idx++}`);
+      vals.push(nombre_completo.trim().toUpperCase());
+    }
+
+    if (telefono !== undefined) {
+      const tel = String(telefono).replace(/[\s\-\(\)]/g, '');
+      if (!/^\d{10}$/.test(tel)) {
+        res.status(400).json({ error: 'El teléfono debe tener exactamente 10 dígitos' });
+        return;
+      }
+      updates.push(`telefono = $${idx++}`);
+      vals.push(tel);
+    }
+
+    if (updates.length === 0) {
+      res.status(400).json({ error: 'No hay campos para actualizar' });
+      return;
+    }
+
+    vals.push(req.user!.userId);
+    const result = await pool.query(
+      `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${idx} RETURNING id, email, nombre_completo, telefono, rol`,
+      vals
+    );
+
+    res.json({ usuario: result.rows[0], mensaje: 'Perfil actualizado correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar perfil:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// POST /api/auth/cambiar-password — Cambiar contraseña con verificación de actual
+// =============================================
+router.post('/cambiar-password', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { password_actual, password_nuevo } = req.body;
+
+    if (!password_actual || !password_nuevo) {
+      res.status(400).json({ error: 'Se requiere la contraseña actual y la nueva' });
+      return;
+    }
+    if (typeof password_nuevo !== 'string' || password_nuevo.length < 6) {
+      res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+      return;
+    }
+
+    // Obtener hash actual
+    const userRes = await pool.query(
+      'SELECT password_hash FROM usuarios WHERE id = $1',
+      [req.user!.userId]
+    );
+    if (userRes.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    const ok = await bcrypt.compare(password_actual, userRes.rows[0].password_hash);
+    if (!ok) {
+      res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+      return;
+    }
+
+    const newHash = await bcrypt.hash(password_nuevo, 12);
+    await pool.query(
+      'UPDATE usuarios SET password_hash = $1 WHERE id = $2',
+      [newHash, req.user!.userId]
+    );
+
+    res.json({ mensaje: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
 // GET /api/auth/states
 // =============================================
 router.get('/states', async (req: Request, res: Response): Promise<void> => {

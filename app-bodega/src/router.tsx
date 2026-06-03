@@ -49,6 +49,8 @@ import B21DetalleSolicitud from './pages/B21DetalleSolicitud';
 import MasPage from './pages/MasPage';
 import B23Notificaciones from './pages/B23Notificaciones';
 import B22PreciosMercado from './pages/B22PreciosMercado';
+import B24PerfilBodega from './pages/B24PerfilBodega';
+import B25ConfiguracionPage from './pages/B25ConfiguracionPage';
 
 // Panel Administrativo - Importaciones (Apple 2026)
 import AdminShell from './components/admin/AdminShell';
@@ -199,6 +201,14 @@ export const router = createBrowserRouter([
   {
     path: '/notificaciones',
     element: <ProtectedLayout><B23Notificaciones /></ProtectedLayout>,
+  },
+  {
+    path: '/perfil',
+    element: <ProtectedLayout><B24PerfilBodega /></ProtectedLayout>,
+  },
+  {
+    path: '/configuracion',
+    element: <ProtectedLayout><B25ConfiguracionPage /></ProtectedLayout>,
   },
   // Onboarding productor (sin auth)
   { path: '/activar', element: <ActivarCuentaPage /> },
