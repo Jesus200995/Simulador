@@ -26,8 +26,8 @@ interface PerfilBodega {
   telefono: string;
   rol: string;
   curp: string | null;
-  state_id: number | null;
-  municipality_id: number | null;
+  state_id: string | null;
+  municipality_id: string | null;
   created_at: string;
 }
 
@@ -188,14 +188,14 @@ function ModalCURP({ curpActual, onSave, onClose }: {
 
 // ─── Modal edición Estado + Municipio ────────────────────────────────────────
 function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
-  stateIdActual: number | null; muniIdActual: number | null;
-  onSave: (stateId: number, muniId: number, stateNombre: string, muniNombre: string) => Promise<void>;
+  stateIdActual: string | null; muniIdActual: string | null;
+  onSave: (stateId: string, muniId: string, stateNombre: string, muniNombre: string) => Promise<void>;
   onClose: () => void;
 }) {
   const [estados, setEstados] = useState<GeoState[]>([]);
   const [munis, setMunis]     = useState<GeoMuni[]>([]);
-  const [stateId, setStateId] = useState<number | null>(stateIdActual);
-  const [muniId, setMuniId]   = useState<number | null>(muniIdActual);
+  const [stateId, setStateId] = useState<string | null>(stateIdActual);
+  const [muniId, setMuniId]   = useState<string | null>(muniIdActual);
   const [loadingE, setLoadingE] = useState(true);
   const [loadingM, setLoadingM] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -220,8 +220,8 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
       .finally(() => setLoadingM(false));
   }, [stateId]);
 
-  const stateNombre = estados.find(e => Number(e.state_id) === Number(stateId))?.name ?? '';
-  const muniNombre  = munis.find(m => Number(m.municipality_id) === Number(muniId))?.name ?? '';
+  const stateNombre = estados.find(e => e.state_id === stateId)?.name ?? '';
+  const muniNombre  = munis.find(m => m.municipality_id === muniId)?.name ?? '';
 
   async function handleConfirm() {
     if (!stateId || !muniId) return;
@@ -268,7 +268,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           ) : (
             <select
               value={stateId ?? ''}
-              onChange={e => setStateId(Number(e.target.value) || null)}
+              onChange={e => setStateId(e.target.value || null)}
               className="w-full border-2 border-gray-200 focus:border-[#1A5C38] rounded-2xl px-4 py-3 text-sm outline-none transition-colors bg-white appearance-none"
             >
               <option value="">— Selecciona un estado —</option>
@@ -285,7 +285,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           ) : (
             <select
               value={muniId ?? ''}
-              onChange={e => setMuniId(Number(e.target.value) || null)}
+              onChange={e => setMuniId(e.target.value || null)}
               disabled={!stateId || munis.length === 0}
               className="w-full border-2 border-gray-200 focus:border-[#1A5C38] rounded-2xl px-4 py-3 text-sm outline-none transition-colors bg-white appearance-none disabled:opacity-50"
             >
@@ -375,14 +375,14 @@ export default function B24PerfilBodega() {
     fetch(`${BASE}/auth/states`, { headers: HDR() })
       .then(r => r.json())
       .then(d => {
-        const st = (d.states ?? d ?? []).find((e: GeoState) => Number(e.state_id) === Number(perfil.state_id));
+        const st = (d.states ?? d ?? []).find((e: GeoState) => e.state_id === perfil.state_id);
         if (st) setStateNombre(st.name);
       });
     if (!perfil.municipality_id) return;
     fetch(`${BASE}/auth/municipalities?state_id=${perfil.state_id}`, { headers: HDR() })
       .then(r => r.json())
       .then(d => {
-        const mn = (d.municipalities ?? d ?? []).find((m: GeoMuni) => Number(m.municipality_id) === Number(perfil.municipality_id));
+        const mn = (d.municipalities ?? d ?? []).find((m: GeoMuni) => m.municipality_id === perfil.municipality_id);
         if (mn) setMuniNombre(mn.name);
       });
   }, [perfil?.state_id, perfil?.municipality_id]);
@@ -426,7 +426,7 @@ export default function B24PerfilBodega() {
     showToast('CURP actualizada ✓');
   }
 
-  async function guardarUbicacion(sid: number, mid: number, sNombre: string, mNombre: string) {
+  async function guardarUbicacion(sid: string, mid: string, sNombre: string, mNombre: string) {
     const r = await fetch(`${BASE}/auth/perfil`, {
       method: 'PATCH', headers: HDR(), body: JSON.stringify({ state_id: sid, municipality_id: mid }),
     });

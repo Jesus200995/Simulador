@@ -289,8 +289,8 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
     }
 
     if (state_id !== undefined) {
-      const sid = Number(state_id);
-      if (!sid || isNaN(sid)) {
+      const sid = String(state_id).trim();
+      if (!sid) {
         res.status(400).json({ error: 'state_id inválido' });
         return;
       }
@@ -305,13 +305,13 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
     }
 
     if (municipality_id !== undefined) {
-      const mid = Number(municipality_id);
-      if (!mid || isNaN(mid)) {
+      const mid = String(municipality_id).trim();
+      if (!mid) {
         res.status(400).json({ error: 'municipality_id inválido' });
         return;
       }
       // Verificar que el municipio existe y pertenece al estado enviado (o al actual)
-      const targetStateId = state_id ? Number(state_id) : null;
+      const targetStateId = state_id ? String(state_id).trim() : null;
       const muniCheck = targetStateId
         ? await pool.query('SELECT municipality_id FROM geo_municipality WHERE municipality_id = $1 AND state_id = $2', [mid, targetStateId])
         : await pool.query('SELECT municipality_id FROM geo_municipality WHERE municipality_id = $1', [mid]);
