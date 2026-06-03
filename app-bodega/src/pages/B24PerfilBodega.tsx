@@ -220,8 +220,8 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
       .finally(() => setLoadingM(false));
   }, [stateId]);
 
-  const stateNombre = estados.find(e => e.state_id === stateId)?.name ?? '';
-  const muniNombre  = munis.find(m => m.municipality_id === muniId)?.name ?? '';
+  const stateNombre = estados.find(e => Number(e.state_id) === Number(stateId))?.name ?? '';
+  const muniNombre  = munis.find(m => Number(m.municipality_id) === Number(muniId))?.name ?? '';
 
   async function handleConfirm() {
     if (!stateId || !muniId) return;
@@ -375,14 +375,14 @@ export default function B24PerfilBodega() {
     fetch(`${BASE}/auth/states`, { headers: HDR() })
       .then(r => r.json())
       .then(d => {
-        const st = (d.states ?? d ?? []).find((e: GeoState) => e.state_id === perfil.state_id);
+        const st = (d.states ?? d ?? []).find((e: GeoState) => Number(e.state_id) === Number(perfil.state_id));
         if (st) setStateNombre(st.name);
       });
     if (!perfil.municipality_id) return;
     fetch(`${BASE}/auth/municipalities?state_id=${perfil.state_id}`, { headers: HDR() })
       .then(r => r.json())
       .then(d => {
-        const mn = (d.municipalities ?? d ?? []).find((m: GeoMuni) => m.municipality_id === perfil.municipality_id);
+        const mn = (d.municipalities ?? d ?? []).find((m: GeoMuni) => Number(m.municipality_id) === Number(perfil.municipality_id));
         if (mn) setMuniNombre(mn.name);
       });
   }, [perfil?.state_id, perfil?.municipality_id]);
