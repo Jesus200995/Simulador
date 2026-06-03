@@ -258,13 +258,15 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
          apMaternoN, telefono, programas_beneficiario || [], correo || null]
       );
 
-      // UP: si marcó en mapa usar coordenadas, si no usar centroide del municipio
-      const hasCoords = lat && lng && lat !== 0 && lng !== 0;
+      // UP: tres casos según lo que envió el frontend
+      const hasCoords  = lat != null && lng != null && lat !== 0 && lng !== 0;
+      const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
+      const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
+
       if (hasCoords) {
-        const postgisDisponible = process.env.POSTGIS_ENABLED === 'true';
-        const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
+        // Caso 1 — Frontend envió centroide calculado por turf.js ✅
         // useGeomParam: $6 solo aparece en el SQL cuando ambas condiciones se cumplen
-        const useGeomParam = hasPoligono && postgisDisponible;
+        const useGeomParam = hasPoligono && postgisActivo;
         // La columna up.geom es MultiPolygon → envolver con ST_Multi
         const geomSql = useGeomParam
           ? `ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))`
@@ -295,7 +297,40 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
                    $${aIdx}, $${aIdx+1}, $${aIdx+2}, TRUE, 'productor')`,
           qParams
         );
+
+      } else if (hasPoligono && postgisActivo) {
+        // Caso 2 — RED DE SEGURIDAD: frontend envió polígono pero lat/lng llegaron null
+        // El backend calcula el centroide directamente desde el polígono con PostGIS
+        console.log('[UP] lat/lng null pero polígono disponible — calculando centroide con PostGIS');
+
+        const geojson = JSON.stringify({
+          type: 'Polygon',
+          coordinates: [[
+            ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
+            [poligono[0][1], poligono[0][0]],
+          ]],
+        });
+
+        await client.query(
+          `INSERT INTO up
+             (producer_id, up_name, up_type, production_system, water_regime,
+              state_name, municipality_name,
+              centroid, geom,
+              area_ha_calc, area_ha_real, coincide_area,
+              location_confirmed, centroid_source)
+           VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+                   $2, $3,
+                   ST_Centroid(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
+                   ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
+                   $5, $6, $7,
+                   TRUE, 'poligono_calculado')`,
+          [p.rows[0].producer_id, estado_up, municipio_up, geojson,
+           area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
+        );
+
       } else {
+        // Caso 3 — Sin coordenadas ni polígono: usar centroide del municipio
+        console.log('[UP] Sin coordenadas ni polígono — usando centroide del municipio');
         let centroidVal = null;
         try {
           const muni = await client.query(
