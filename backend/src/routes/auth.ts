@@ -233,11 +233,12 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
 });
 
 // =============================================
-// PATCH /api/auth/perfil — Actualizar datos del usuario (nombre, teléfono)
+// PATCH /api/auth/perfil — Actualizar datos del usuario
+// Campos aceptados: nombre_completo, telefono, curp, state_id, municipality_id
 // =============================================
 router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { nombre_completo, telefono } = req.body;
+    const { nombre_completo, telefono, curp, state_id, municipality_id } = req.body;
     const updates: string[] = [];
     const vals: any[] = [];
     let idx = 1;
@@ -247,8 +248,12 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
         res.status(400).json({ error: 'Nombre inválido' });
         return;
       }
+      // Normalizar: mayúsculas, sin tildes
+      const normalizado = nombre_completo.trim()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
       updates.push(`nombre_completo = $${idx++}`);
-      vals.push(nombre_completo.trim().toUpperCase());
+      vals.push(normalizado);
     }
 
     if (telefono !== undefined) {
@@ -261,6 +266,63 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
       vals.push(tel);
     }
 
+    if (curp !== undefined) {
+      const curpLimpio = String(curp).trim()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+      const CURP_RE = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/;
+      if (!CURP_RE.test(curpLimpio)) {
+        res.status(400).json({ error: 'CURP inválida. Verifica el formato (18 caracteres)' });
+        return;
+      }
+      // Verificar que la CURP no esté en uso por otro usuario
+      const curpExistente = await pool.query(
+        'SELECT id FROM usuarios WHERE curp = $1 AND id != $2',
+        [curpLimpio, req.user!.userId]
+      );
+      if (curpExistente.rows.length > 0) {
+        res.status(409).json({ error: 'Esta CURP ya está registrada por otro usuario' });
+        return;
+      }
+      updates.push(`curp = $${idx++}`);
+      vals.push(curpLimpio);
+    }
+
+    if (state_id !== undefined) {
+      const sid = Number(state_id);
+      if (!sid || isNaN(sid)) {
+        res.status(400).json({ error: 'state_id inválido' });
+        return;
+      }
+      // Verificar que el estado existe
+      const stateCheck = await pool.query('SELECT state_id FROM geo_state WHERE state_id = $1', [sid]);
+      if (stateCheck.rows.length === 0) {
+        res.status(400).json({ error: 'El estado seleccionado no existe' });
+        return;
+      }
+      updates.push(`state_id = $${idx++}`);
+      vals.push(sid);
+    }
+
+    if (municipality_id !== undefined) {
+      const mid = Number(municipality_id);
+      if (!mid || isNaN(mid)) {
+        res.status(400).json({ error: 'municipality_id inválido' });
+        return;
+      }
+      // Verificar que el municipio existe y pertenece al estado enviado (o al actual)
+      const targetStateId = state_id ? Number(state_id) : null;
+      const muniCheck = targetStateId
+        ? await pool.query('SELECT municipality_id FROM geo_municipality WHERE municipality_id = $1 AND state_id = $2', [mid, targetStateId])
+        : await pool.query('SELECT municipality_id FROM geo_municipality WHERE municipality_id = $1', [mid]);
+      if (muniCheck.rows.length === 0) {
+        res.status(400).json({ error: 'El municipio no existe o no corresponde al estado seleccionado' });
+        return;
+      }
+      updates.push(`municipality_id = $${idx++}`);
+      vals.push(mid);
+    }
+
     if (updates.length === 0) {
       res.status(400).json({ error: 'No hay campos para actualizar' });
       return;
@@ -268,7 +330,8 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
 
     vals.push(req.user!.userId);
     const result = await pool.query(
-      `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${idx} RETURNING id, email, nombre_completo, telefono, rol`,
+      `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${idx}
+       RETURNING id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id`,
       vals
     );
 
