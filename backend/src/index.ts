@@ -42,7 +42,13 @@ const PORT = parseInt(process.env.PORT || '3000');
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:4173', 'http://localhost:5174', 'https://maiz.geodatos.com.mx', 'https://bodega.geodatos.com.mx'],
+  origin: [
+    'http://localhost:5173', 'http://localhost:4173', 'http://localhost:5174',
+    // Dominio oficial — Secretaría de Agricultura
+    'https://maiz.agricultura.gob.mx', 'https://apimaiz.agricultura.gob.mx',
+    // Dominio anterior (en transición — redirige a agricultura.gob.mx)
+    'https://maiz.geodatos.com.mx', 'https://bodega.geodatos.com.mx',
+  ],
   credentials: true,
 }));
 app.use(express.json({ limit: '5mb' }));

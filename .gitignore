@@ -1,0 +1,4 @@
+# Certificados SSL — NUNCA subir llaves privadas al repo
+certificados/
+*.key
+*.pem
