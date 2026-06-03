@@ -39,8 +39,8 @@ interface BodegaInfo {
   semaforo_compra: string;
 }
 
-interface GeoState  { state_id: number; name: string; }
-interface GeoMuni   { municipality_id: number; name: string; }
+interface GeoState  { state_id: string; name: string; }
+interface GeoMuni   { municipality_id: string; name: string; }
 
 function Spinner({ small = false }: { small?: boolean }) {
   const sz = small ? 'w-4 h-4 border-[1.5px]' : 'w-6 h-6 border-2';
