@@ -77,7 +77,7 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
     // Obtener datos del productor para el INSERT de usuarios
     const prodInfo = await pool.query(
       `SELECT curp, nombres, apellido_paterno, apellido_materno,
-              COALESCE(phone, telefono, '') AS telefono
+              COALESCE(phone, '') AS telefono
        FROM producer WHERE producer_id = $1`,
       [producer_id]
     );
