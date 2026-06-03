@@ -152,7 +152,11 @@ export default function B22PreciosMercado() {
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Tipo Cambio</span>
                 </div>
                 <p className="text-[16px] font-black text-gray-850 mt-0.5 leading-tight">
-                  {loading ? '—' : `$${(data?.tipo_cambio_mxn ?? 0).toFixed(2)}`}
+                  {loading ? '—'
+                    : data?.tipo_cambio_mxn != null
+                      ? `$${data.tipo_cambio_mxn.toFixed(2)}`
+                      : <span className="text-amber-500 text-sm font-semibold">Sin datos</span>
+                  }
                 </p>
                 <p className="text-[9px] text-gray-400">MXN/USD</p>
               </div>
@@ -165,7 +169,13 @@ export default function B22PreciosMercado() {
                 <p className="text-[16px] font-black text-gray-850 mt-0.5 leading-tight">
                   +${BONO_MAIZ_USD} USD
                 </p>
-                <p className="text-[9px] text-gray-400">={loading ? '—' : fmt(BONO_MAIZ_USD * (data?.tipo_cambio_mxn ?? 17.42))}/t</p>
+                <p className="text-[9px] text-gray-400">
+                  ={loading ? '—'
+                    : data?.tipo_cambio_mxn != null
+                      ? fmt(BONO_MAIZ_USD * data.tipo_cambio_mxn)
+                      : <span className="text-amber-500">Sin datos</span>
+                  }/t
+                </p>
               </div>
             </div>
 

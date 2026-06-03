@@ -169,10 +169,20 @@ router.get('/tendencia', authMiddleware, async (req: AuthRequest, res: Response)
     `, qParams);
 
     const extRef = await obtenerReferenciasExternasActuales();
+
+    // Validar que los datos externos son reales antes de calcular (no usar ficticios)
+    if (!extRef?.chicago_usd_bushel || !extRef?.tc_banxico) {
+      res.status(503).json({
+        error: 'Datos de tendencia no disponibles',
+        detalle: 'Sin cotización de Chicago CME o tipo de cambio para calcular tendencia.',
+      });
+      return;
+    }
+
     const es_fallback = extRef.fuente === 'fallback_hardcodeado';
     const garantia = parseFloat(params.precio_garantia_sader || extRef.garantia_sader || '6915');
-    const TC = parseFloat(extRef.tc_banxico || '17.42');
-    const chicagoBushel = parseFloat(extRef.chicago_usd_bushel || '6.28');
+    const TC = parseFloat(extRef.tc_banxico);
+    const chicagoBushel = parseFloat(extRef.chicago_usd_bushel);
 
     // Constantes del Margen de Negociación
     const FACTOR_CONVERSION = 39.368;
@@ -284,42 +294,52 @@ router.get('/componentes/detalle', authMiddleware, async (req: AuthRequest, res:
         AND ${conditions.join(' AND ')}
     `, qParams);
 
-    const po = parseFloat(poRes.rows[0]?.po || '4680');
+    const po = poRes.rows[0]?.po != null ? parseFloat(poRes.rows[0].po) : null;
     const s  = parseFloat(params.servicios_default);
     const f  = parseFloat(params.flete_default);
 
     // Margen de Negociación correcto — referencia internacional
     const refsC = await obtenerReferenciasExternasActuales();
+
+    // Validar que los datos externos son reales antes de calcular (no usar ficticios)
+    if (!refsC?.chicago_usd_bushel || !refsC?.tc_banxico) {
+      res.status(503).json({
+        error: 'Datos de componentes no disponibles',
+        detalle: 'Sin cotización de Chicago CME o tipo de cambio para calcular componentes.',
+      });
+      return;
+    }
+
     const FACTOR_CONVERSION = 39.368;
-    const chicago_usd_bushel_c = parseFloat(refsC.chicago_usd_bushel || '6.28');
-    const tc_banxico_c         = parseFloat(refsC.tc_banxico         || '17.42');
+    const chicago_usd_bushel_c = parseFloat(refsC.chicago_usd_bushel);
+    const tc_banxico_c         = parseFloat(refsC.tc_banxico);
     const m = Math.round(
       (chicago_usd_bushel_c * FACTOR_CONVERSION * tc_banxico_c +
        BONO_MAIZ_USD * tc_banxico_c) * 100
     ) / 100;
 
-    const precio_compra = Math.round((po + s) * 100) / 100;
+    const precio_compra = po != null ? Math.round((po + s) * 100) / 100 : null;
     const ps = precio_compra; // compatibilidad
 
     const componentes = [
       {
         componente: 'PO', descripcion: 'Precio Origen · promedio ponderado 7 días',
-        valor: po, pct: Math.round((po / precio_compra) * 1000) / 10,
+        valor: po, pct: po != null && precio_compra != null ? Math.round((po / precio_compra) * 1000) / 10 : null,
         fuente: 'Bodeguero > Productor', confianza: 3,
       },
       {
         componente: 'S', descripcion: 'Servicios bodega · secado, limpieza, almacenamiento',
-        valor: s, pct: Math.round((s / precio_compra) * 1000) / 10,
+        valor: s, pct: precio_compra != null ? Math.round((s / precio_compra) * 1000) / 10 : null,
         fuente: 'Bodeguero (tarifario)', confianza: 4,
       },
       {
         componente: 'M', descripcion: 'Margen Negociación · Chicago CME + Bono Maíz Blanco × TC Banxico',
-        valor: m, pct: Math.round((m / precio_compra) * 1000) / 10,
+        valor: m, pct: precio_compra != null ? Math.round((m / precio_compra) * 1000) / 10 : null,
         fuente: 'CME + Banxico (referencia internacional)', confianza: 5,
       },
       {
         componente: 'F', descripcion: 'Flete bodega→harinera · GIS · 3 más cercanas',
-        valor: f, pct: Math.round((f / precio_compra) * 1000) / 10,
+        valor: f, pct: precio_compra != null ? Math.round((f / precio_compra) * 1000) / 10 : null,
         fuente: 'Sistema GIS + Admin', confianza: 4,
       },
     ];
