@@ -55,14 +55,14 @@ export default function PreciosAdminPage() {
   const [preciosData, setPreciosData] = useState<PreciosData | null>(null);
   const [preciosError, setPreciosError] = useState<string | null>(null);
 
-  const [preciosHoy, setPreciosHoy] = useState({
-    po: 4680,
-    s: 980,
-    total_compra: 5660,
-    precio_venta: 770,
-    pct_productor: 82.7,
-    pct_servicios: 17.3
-  });
+  const [preciosHoy, setPreciosHoy] = useState<{
+    po: number;
+    s: number;
+    total_compra: number;
+    precio_venta: number;
+    pct_productor: number;
+    pct_servicios: number;
+  } | null>(null);
 
   const [series, setSeries] = useState<any[]>([]);
   const [bodegasHoy, setBodegasHoy] = useState<any[]>([]);
@@ -98,12 +98,12 @@ export default function PreciosAdminPage() {
       if (resM.ok) {
         const m = await resM.json();
         setPreciosHoy({
-          po: m.precio_origen_mxn || 4680,
-          s: m.servicios_bodega_mxn || 980,
-          total_compra: m.precio_compra_mxn || 5660,
-          precio_venta: m.precio_venta_mxn || 770,
-          pct_productor: m.pct_productor || 82.7,
-          pct_servicios: m.pct_servicios || 17.3
+          po: m.precio_origen_mxn ?? 0,
+          s: m.servicios_bodega_mxn ?? 0,
+          total_compra: m.precio_compra_mxn ?? 0,
+          precio_venta: m.precio_venta_mxn ?? 0,
+          pct_productor: m.pct_productor ?? 0,
+          pct_servicios: m.pct_servicios ?? 0
         });
         if (m.series) {
           setSeries(m.series);
@@ -241,7 +241,7 @@ export default function PreciosAdminPage() {
 
   // Exportar CSV del lado del cliente
   function exportarPreciosHoy() {
-    if (!preciosData) return;
+    if (!preciosData || !preciosHoy) return;
     const headers = 'Fecha,Margen Negociacion,Lo Gana Productor,Servicios Bodega,Precio Compra,Precio Venta,Chicago CME USD/bu,TC Banxico\n';
     const row = `${new Date().toISOString().split('T')[0]},${preciosHoy.precio_venta},${preciosHoy.po},${preciosHoy.s},${preciosHoy.total_compra},${preciosHoy.precio_venta},${preciosData.chicago_usd_bushel},${preciosData.tc_banxico}\n`;
     
@@ -349,8 +349,9 @@ export default function PreciosAdminPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* Tres Precios */}
+          {preciosHoy ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
+
             {/* Margen */}
             <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
@@ -386,6 +387,17 @@ export default function PreciosAdminPage() {
             </div>
 
           </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 animate-pulse space-y-3">
+                  <div className="h-2.5 bg-white/10 rounded w-1/2" />
+                  <div className="h-7 bg-white/10 rounded w-3/4" />
+                  <div className="h-2 bg-white/10 rounded w-2/3" />
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Gráfica 30d */}
           <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-5 space-y-4">
@@ -485,7 +497,7 @@ export default function PreciosAdminPage() {
                 <div className="space-y-2 text-[12.5px] max-h-56 overflow-y-auto">
                   {preciosData.costos_fira_detalle.slice(0, 4).map((fira, idx) => {
                     const costoHa = (fira as any).costo_por_ha || (fira as any).precio_fira || (fira as any).costo_por_ton || 0;
-                    const utilidad = preciosHoy.po - costoHa;
+                    const utilidad = (preciosHoy?.po ?? 0) - costoHa;
                     return (
                       <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 flex justify-between items-center">
                         <div>
@@ -597,8 +609,8 @@ export default function PreciosAdminPage() {
               {brechas.map((br, idx) => (
                 <tr key={idx} className="hover:bg-white/[0.01]">
                   <td className="py-3 font-bold text-white">{br.estado}</td>
-                  <td className="py-3 font-bold">${(preciosHoy.po + (idx % 2 === 0 ? 50 : -20)).toLocaleString()}</td>
-                  <td className="py-3 font-bold">{fmt(preciosHoy.precio_venta)}</td>
+                  <td className="py-3 font-bold">${((preciosHoy?.po ?? 0) + (idx % 2 === 0 ? 50 : -20)).toLocaleString()}</td>
+                  <td className="py-3 font-bold">{fmt(preciosHoy?.precio_venta ?? 0)}</td>
                   <td className="py-3 text-red-400 font-black">{fmt(br.brecha)} MXN/t</td>
                   <td className="py-3">
                     <span className={`px-2 py-0.5 text-[9px] font-black uppercase rounded ${

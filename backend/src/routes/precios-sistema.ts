@@ -69,8 +69,30 @@ router.get('/sistema/hoy', authMiddleware, async (req: AuthRequest, res: Respons
     // Referencias externas para Margen de Negociación correcto
     const refs = await obtenerReferenciasExternasActuales();
     const FACTOR_CONVERSION = 39.368;  // 1 ton métrica = 39.368 bushels — constante fija
-    const chicago_usd_bushel = parseFloat(refs.chicago_usd_bushel || '6.28');
-    const tc_banxico         = parseFloat(refs.tc_banxico         || '17.42');
+
+    // Validar que los datos externos son reales antes de calcular (no usar ficticios)
+    if (!refs?.chicago_usd_bushel || !refs?.tc_banxico) {
+      res.status(503).json({
+        error: 'Datos de mercado no disponibles',
+        detalle: 'No hay cotización de Chicago CME ni tipo de cambio Banxico disponibles. ' +
+                 'El administrador puede actualizar los valores manualmente desde el panel de Precios.',
+        ultimo_intento: refs?.created_at ?? null,
+      });
+      return;
+    }
+
+    const chicago_usd_bushel = parseFloat(refs.chicago_usd_bushel);
+    const tc_banxico         = parseFloat(refs.tc_banxico);
+
+    // Validar que los valores parseados son números reales
+    if (isNaN(chicago_usd_bushel) || isNaN(tc_banxico) ||
+        chicago_usd_bushel <= 0   || tc_banxico <= 0) {
+      res.status(503).json({
+        error: 'Datos de mercado inválidos',
+        detalle: 'Los valores almacenados no son números válidos. Actualiza manualmente desde Precios.',
+      });
+      return;
+    }
 
     const chicago_usd_ton    = chicago_usd_bushel * FACTOR_CONVERSION;
     const chicago_mxn        = chicago_usd_ton * tc_banxico;

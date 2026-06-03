@@ -63,6 +63,7 @@ export default function MapaBodegasPage() {
   const [radioKm, setRadioKm] = useState(150);
   const [confirmacionVisible, setConfirmacionVisible] = useState(false);
   const [bodegaConfirmada, setBodegaConfirmada] = useState<string>('');
+  const [coordsAproximadas, setCoordsAproximadas] = useState(false);
 
   // 1. Cargar UP con coordenadas reales
   useEffect(() => {
@@ -70,9 +71,14 @@ export default function MapaBodegasPage() {
     fetch(`${BASE}/productor/dashboard`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
+        const latReal = d.lat ?? null;
+        const lngReal = d.lng ?? null;
+        const usandoFallback = !latReal || !lngReal;
+        setCoordsAproximadas(usandoFallback);
+
         if (d.municipio) setUp({
-          lat: d.lat ?? 23.6345,
-          lng: d.lng ?? -102.5528,
+          lat: latReal ?? 23.6345,
+          lng: lngReal ?? -102.5528,
           location_confirmed: d.location_confirmed,
           centroid_source: d.centroid_source,
           municipio: d.municipio,
@@ -108,6 +114,26 @@ export default function MapaBodegasPage() {
 
   return (
     <div className="w-full h-full flex flex-col relative min-h-[500px]">
+      {coordsAproximadas && (
+        <div className="flex-shrink-0 bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3">
+          <span className="text-lg">📍</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-amber-800 text-sm font-medium">
+              Distancias aproximadas
+            </p>
+            <p className="text-amber-700 text-xs mt-0.5 leading-snug">
+              Tu parcela no tiene ubicación exacta.
+              Las distancias mostradas son estimadas desde tu municipio.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/productor/ubicacion')}
+            className="text-xs text-amber-700 font-semibold underline whitespace-nowrap flex-shrink-0"
+          >
+            Actualizar →
+          </button>
+        </div>
+      )}
       <div className="flex-1 relative w-full h-full">
         <MapContainer
           center={up ? [up.lat, up.lng] : [23.6345, -102.5528]}

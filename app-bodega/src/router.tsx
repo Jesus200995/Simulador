@@ -73,7 +73,9 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function GuestOnly({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (isAuthenticated) {
-    return <Navigate to={user?.rol === 'productor' ? '/productor' : '/dashboard'} replace />;
+    if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
+    if (user?.rol === 'admin' || user?.rol === 'responsable') return <Navigate to="/admin" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
 }

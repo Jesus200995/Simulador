@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import PinInput from '../../components/productor/PinInput';
-import { useAuthStore } from '../../store/auth';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -16,7 +15,6 @@ export default function CrearPinPage() {
   interface ActivacionData { producer_id: number; nombres: string; apellido: string; }
   const [activacion, setActivacion] = useState<ActivacionData | null>(null);
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
 
   useEffect(() => {
     const data = sessionStorage.getItem('activacion');
@@ -64,12 +62,8 @@ export default function CrearPinPage() {
       }
 
       sessionStorage.removeItem('activacion');
-      setAuth(data.token, {
-        userId: data.user.id,
-        email: '',
-        rol: 'productor',
-        nombre_completo: `${activacion.nombres} ${activacion.apellido}`,
-      });
+      // El usuario inicia sesión con su CURP + PIN desde el modal de éxito
+      // (mismo flujo que Tipo B), por eso no se auto-loguea aquí.
       setRegistroExitoso(true);
     } catch {
       setError('Error de conexión.');
@@ -188,18 +182,18 @@ export default function CrearPinPage() {
 
             {/* Mensaje */}
             <p className="text-gray-600 mb-2">
-              Tu cuenta ha sido activada correctamente en SIMAC.
+              Tu cuenta SIMAC ha sido activada correctamente.
             </p>
             <p className="text-gray-500 text-sm mb-8">
-              Ya tienes acceso a tu panel de productor.
+              Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.
             </p>
 
             {/* Botón */}
             <button
-              onClick={() => navigate('/productor')}
+              onClick={() => navigate('/login-productor')}
               className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg hover:bg-green-800 transition-colors"
             >
-              Entrar a mi cuenta
+              Iniciar sesión
             </button>
           </div>
         </div>
