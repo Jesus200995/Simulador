@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, Warehouse, Factory, Eye, EyeOff, Wheat, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, Warehouse, Factory, Eye, EyeOff, AlertCircle, Loader2, Wheat, Check } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
 
@@ -34,23 +34,11 @@ export default function B02Register() {
   }, [form.state_id]);
 
   function normalizarTexto(v: string) {
-    return v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    return v.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
   }
-
-  function setNombre(v: string) {
-    setForm(f => ({ ...f, nombre_completo: normalizarTexto(v) }));
-  }
-
-  function setTelefono(v: string) {
-    const solo = v.replace(/\D/g, '').slice(0, 10);
-    setForm(f => ({ ...f, telefono: solo }));
-  }
-
-  function setCurp(v: string) {
-    const upper = normalizarTexto(v).replace(/[^A-Z0-9]/g, '').slice(0, 18);
-    setForm(f => ({ ...f, curp: upper }));
-  }
-
+  function setNombre(v: string) { setForm(f => ({ ...f, nombre_completo: normalizarTexto(v) })); }
+  function setTelefono(v: string) { setForm(f => ({ ...f, telefono: v.replace(/\D/g, '').slice(0, 10) })); }
+  function setCurp(v: string) { setForm(f => ({ ...f, curp: normalizarTexto(v).replace(/[^A-Z0-9]/g, '').slice(0, 18) })); }
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
   const CURP_REGEX = /^[A-Z]{4}\d{6}[HM][A-Z]{2}[A-Z]{3}[A-Z0-9]\d$/;
@@ -61,7 +49,7 @@ export default function B02Register() {
     if (form.telefono.length !== 10) { setError('El teléfono debe tener exactamente 10 dígitos'); return; }
     if (!form.curp.trim()) { setError('La CURP es obligatoria'); return; }
     if (form.curp.length !== 18 || !CURP_REGEX.test(form.curp)) {
-      setError('CURP inválida. Formato: 4 letras + 6 dígitos + H/M + 2 letras + 3 letras + 1 alfanum. + 1 dígito');
+      setError('CURP inválida. Revisa el formato.');
       return;
     }
     if (!form.state_id) { setError('Selecciona tu estado'); return; }
@@ -81,7 +69,6 @@ export default function B02Register() {
         password: form.password,
         rol,
       };
-
       const res = await api.auth.registro(payload);
       if (res.token) {
         const u = res.usuario || res.user;
@@ -97,62 +84,47 @@ export default function B02Register() {
     }
   }
 
-  const inp = 'w-full bg-[#F5F5F7] rounded-[14px] px-4 py-3.5 text-[15px] text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#1A5C38]/20 focus:bg-white border-0 transition-all';
-  const lbl = 'text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]';
+  const inp =
+    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
+    'placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
+  const sel = `${inp} appearance-none`;
+  const lbl = 'block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5';
 
   return (
-    <div className="relative overflow-x-hidden">
-      {/* Fixed background — same as login */}
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#071f12] via-[#0f3d22] to-[#1A5C38]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_60%_30%,rgba(45,122,80,0.6),transparent)]" />
-        <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-6 opacity-[0.06]">
-          {[0,1,2,3,4,5,6,7,8,9].map(i => (
-            <Wheat key={i} size={i%3===0?52:i%2===0?40:30} className="text-white mb-1" style={{transform:`rotate(${(i-4)*3}deg)`}} />
-          ))}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20" />
+    <div
+      className="relative min-h-[100dvh] flex flex-col overflow-x-hidden"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      {/* Background */}
+      <div className="fixed inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
       </div>
 
-      {/* Scrollable overlay */}
-      <div
-        className="relative min-h-[100dvh] flex flex-col items-center px-4 py-8 overflow-x-hidden"
-        style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
-      >
+      {/* Header */}
+      <div className="relative flex items-center px-4 py-3 flex-shrink-0">
+        <button
+          onClick={() => navigate('/login')}
+          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex items-center gap-1 text-white/70"
+        >
+          <ChevronLeft size={22} /> <span className="text-sm font-medium">Iniciar sesión</span>
+        </button>
+      </div>
 
-        {/* Back button */}
-        <div className="animate-auth-in w-full max-w-[440px] mb-4">
-          <button onClick={() => navigate('/login')}
-            className="flex items-center gap-1 text-green-200/70 text-[13px] font-medium hover:text-green-200 transition-colors active:opacity-60">
-            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-0.5" />
-            Iniciar sesión
-          </button>
-        </div>
+      {/* Content */}
+      <div className="relative flex-1 px-5 pb-8">
+        <div className="w-full max-w-sm mx-auto animate-auth-in">
 
-        {/* Logo */}
-        <div className="animate-auth-in flex items-center gap-3 mb-6" style={{ animationDelay: '0.05s' }}>
-          <div className="w-[46px] h-[46px] rounded-[12px] bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-xl">
-            <img src="/icono.png" alt="SIMAC" className="w-8 h-8 rounded-[8px]" />
-          </div>
-          <div>
-            <p className="text-[24px] font-black text-white tracking-[-0.5px] leading-none">SIMAC</p>
-            <p className="text-[11px] text-green-300/70 font-medium mt-0.5 tracking-wide">Plan Nacional Maíz 2026</p>
-          </div>
-        </div>
-
-        {/* Card */}
-        <div className="animate-auth-in w-full max-w-[440px] bg-white rounded-[28px] shadow-[0_24px_64px_rgba(0,0,0,0.45)] overflow-hidden mb-8" style={{ animationDelay: '0.1s' }}>
-          <div className="h-[3px] bg-gradient-to-r from-[#1A5C38] via-[#34d079] to-[#1A5C38]" />
-
-          <div className="px-8 pt-7 pb-2">
-            <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">Crear cuenta</h1>
-            <p className="text-[13px] text-gray-400 mt-1">Completa tu información para comenzar</p>
+          {/* Title */}
+          <div className="mb-5">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Crear cuenta</h1>
+            <p className="text-white/50 text-sm sm:text-base mt-1">Bodega o Industria · Plan Maíz 2026</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-8 pt-5 pb-7 space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Tipo de cuenta */}
-            <div className="space-y-2">
+            <div>
               <p className={lbl}>Tipo de cuenta</p>
               <div className="grid grid-cols-2 gap-2.5">
                 {([
@@ -160,18 +132,14 @@ export default function B02Register() {
                   { key: 'industria' as Rol, icon: Factory, label: 'Industria', desc: 'Tortillería · Nixtamal' },
                 ]).map(({ key, icon: Icon, label, desc }) => (
                   <button key={key} type="button" onClick={() => setRol(key)}
-                    className={`flex flex-col items-center gap-2 py-4 px-3 rounded-[16px] border-2 transition-all duration-150 active:scale-[0.97]
-                      ${rol === key
-                        ? 'border-[#1A5C38] bg-[#1A5C38]/[0.06] text-[#1A5C38]'
-                        : 'border-gray-100 text-gray-400 bg-[#F5F5F7] hover:border-gray-200'}`}>
-                    <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center ${
-                      rol === key ? 'bg-[#1A5C38]/10' : 'bg-white'
-                    }`}>
-                      <Icon size={20} strokeWidth={rol === key ? 2.2 : 1.5} />
+                    className={`flex flex-col items-center gap-2 py-4 px-3 rounded-2xl ring-1 transition-all duration-150 active:scale-[0.97]
+                      ${rol === key ? 'ring-2 ring-white bg-white/15' : 'ring-white/15 bg-white/5 hover:bg-white/10'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${rol === key ? 'bg-white' : 'bg-white/10'}`}>
+                      <Icon size={20} className={rol === key ? 'text-[#1A5C38]' : 'text-white/60'} strokeWidth={2} />
                     </div>
                     <div className="text-center">
-                      <p className="text-[14px] font-semibold leading-none">{label}</p>
-                      <p className="text-[10px] mt-0.5 opacity-55 leading-tight">{desc}</p>
+                      <p className={`text-sm font-bold leading-none ${rol === key ? 'text-white' : 'text-white/70'}`}>{label}</p>
+                      <p className="text-[10px] mt-1 text-white/40 leading-tight">{desc}</p>
                     </div>
                   </button>
                 ))}
@@ -181,28 +149,22 @@ export default function B02Register() {
             {/* Datos personales */}
             <div className="space-y-2.5">
               <p className={lbl}>Datos personales</p>
-              <input type="text" value={form.nombre_completo}
-                onChange={e => setNombre(e.target.value)}
-                placeholder="NOMBRE COMPLETO" required autoCapitalize="characters"
-                className={`${inp} uppercase tracking-wide`} />
+              <input type="text" value={form.nombre_completo} onChange={e => setNombre(e.target.value)}
+                placeholder="NOMBRE COMPLETO" required autoCapitalize="characters" className={`${inp} tracking-wide`} />
               <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
-                placeholder="Correo electrónico" required className={inp} />
-              <input type="tel" value={form.telefono}
-                onChange={e => setTelefono(e.target.value)}
-                placeholder="10 dígitos" required maxLength={10} inputMode="numeric"
-                className={inp} />
-              <input type="text" value={form.curp}
-                onChange={e => setCurp(e.target.value)}
-                placeholder="18 caracteres" required maxLength={18} autoCapitalize="characters"
-                className={`${inp} font-mono tracking-widest uppercase`} />
+                placeholder="Correo electrónico" required autoCapitalize="off" inputMode="email" className={inp} />
+              <input type="tel" value={form.telefono} onChange={e => setTelefono(e.target.value)}
+                placeholder="Teléfono (10 dígitos)" required maxLength={10} inputMode="numeric" className={`${inp} font-mono tracking-wider`} />
+              <input type="text" value={form.curp} onChange={e => setCurp(e.target.value)}
+                placeholder="CURP (18 caracteres)" required maxLength={18} autoCapitalize="characters" className={`${inp} font-mono tracking-widest`} />
               {form.curp.length > 0 && form.curp.length < 18 && (
-                <p className="text-[11px] text-orange-500 mt-1">{form.curp.length}/18 caracteres</p>
+                <p className="text-[11px] text-amber-300/90 pl-1">{form.curp.length}/18 caracteres</p>
               )}
               {form.curp.length === 18 && !CURP_REGEX.test(form.curp) && (
-                <p className="text-[11px] text-red-500 mt-1">Formato de CURP inválido</p>
+                <p className="text-[11px] text-red-300 pl-1 flex items-center gap-1"><AlertCircle size={12} /> Formato de CURP inválido</p>
               )}
               {form.curp.length === 18 && CURP_REGEX.test(form.curp) && (
-                <p className="text-[11px] text-[#1A5C38] mt-1">CURP válida</p>
+                <p className="text-[11px] text-green-300 pl-1 flex items-center gap-1"><Check size={12} /> CURP válida</p>
               )}
             </div>
 
@@ -211,19 +173,18 @@ export default function B02Register() {
               <p className={lbl}>Ubicación</p>
               <select value={form.state_id}
                 onChange={e => { set('state_id', e.target.value); set('municipality_id', ''); }}
-                required className={inp}>
-                <option value="">Estado donde opera</option>
+                required className={sel} style={{ colorScheme: 'dark' }}>
+                <option value="" style={{ background: '#0c2e1a' }}>Estado donde opera</option>
                 {states.map((s: any) => (
-                  <option key={s.state_id||s.id} value={s.state_id||s.id}>{s.name||s.nombre}</option>
+                  <option key={s.state_id||s.id} value={s.state_id||s.id} style={{ background: '#0c2e1a' }}>{s.name||s.nombre}</option>
                 ))}
               </select>
               <select value={form.municipality_id}
                 onChange={e => set('municipality_id', e.target.value)}
-                required disabled={!form.state_id}
-                className={`${inp} disabled:opacity-40`}>
-                <option value="">Municipio</option>
+                required disabled={!form.state_id} className={`${sel} disabled:opacity-30`} style={{ colorScheme: 'dark' }}>
+                <option value="" style={{ background: '#0c2e1a' }}>{form.state_id ? 'Municipio' : 'Primero elige el estado'}</option>
                 {municipalities.map((m: any) => (
-                  <option key={m.municipality_id||m.id} value={m.municipality_id||m.id}>{m.name||m.nombre}</option>
+                  <option key={m.municipality_id||m.id} value={m.municipality_id||m.id} style={{ background: '#0c2e1a' }}>{m.name||m.nombre}</option>
                 ))}
               </select>
             </div>
@@ -233,46 +194,52 @@ export default function B02Register() {
               <p className={lbl}>Contraseña</p>
               <div className="relative">
                 <input type={showPwd ? 'text' : 'password'} value={form.password}
-                  onChange={e => set('password', e.target.value)}
-                  placeholder="Mínimo 8 caracteres" required className={`${inp} pr-12`} />
+                  onChange={e => set('password', e.target.value)} placeholder="Mínimo 8 caracteres" required className={`${inp} pr-12`} />
                 <button type="button" onClick={() => setShowPwd(p => !p)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  {showPwd ? <EyeOff size={17} /> : <Eye size={17} />}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors">
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               <div className="relative">
                 <input type={showConfirm ? 'text' : 'password'} value={form.confirm}
-                  onChange={e => set('confirm', e.target.value)}
-                  placeholder="Confirmar contraseña" required className={`${inp} pr-12`} />
+                  onChange={e => set('confirm', e.target.value)} placeholder="Confirmar contraseña" required className={`${inp} pr-12`} />
                 <button type="button" onClick={() => setShowConfirm(p => !p)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  {showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors">
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-[14px] px-4 py-3">
-                <ShieldCheck size={14} className="text-red-400 flex-shrink-0" />
-                <p className="text-[13px] text-red-600">{error}</p>
+              <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
+                <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full bg-[#1A5C38] hover:bg-[#1e6b42] active:scale-[0.98] text-white rounded-[14px] py-3.5 text-[15px] font-semibold transition-all disabled:opacity-40 shadow-[0_4px_14px_rgba(26,92,56,0.4)]">
-              {loading
-                ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Creando cuenta…</span>
-                : 'Crear cuenta'}
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
+                         disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Creando cuenta…</> : 'Crear cuenta'}
             </button>
-
-            <p className="text-center text-[13px] text-gray-400">
-              ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="text-[#1A5C38] font-semibold hover:underline">Inicia sesión</Link>
-            </p>
-
           </form>
-        </div>
 
+          {/* Opciones */}
+          <div className="mt-6 space-y-3 text-center">
+            <button onClick={() => navigate('/login')}
+              className="text-sm font-semibold text-white/60 hover:text-white transition-colors">
+              ¿Ya tienes cuenta? Inicia sesión
+            </button>
+            <div className="border-t border-white/10 pt-4">
+              <button
+                onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors"
+              >
+                <Wheat size={15} /> ¿Eres productor? Ver opciones
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Wheat, Building2, ChevronRight, X, LogIn, ShieldCheck, UserPlus } from 'lucide-react';
 
 type Menu = null | 'productor' | 'bodega';
@@ -34,7 +34,10 @@ const OPCIONES: Record<'productor' | 'bodega', { titulo: string; subtitulo: stri
 
 export default function WelcomePage() {
   const navigate = useNavigate();
-  const [menu, setMenu] = useState<Menu>(null);
+  const location = useLocation();
+  // Permite abrir un menú automáticamente al llegar (p. ej. desde "¿Eres productor?")
+  const menuInicial = (location.state as { menu?: Menu } | null)?.menu ?? null;
+  const [menu, setMenu] = useState<Menu>(menuInicial);
   const data = menu ? OPCIONES[menu] : null;
 
   return (

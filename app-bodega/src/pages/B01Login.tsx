@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
-import { Eye, EyeOff, Wheat, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { Eye, EyeOff, Building2, ChevronLeft, AlertCircle, Loader2, UserPlus, Wheat } from 'lucide-react';
 
 export default function B01Login() {
   const [email, setEmail] = useState('');
@@ -29,118 +29,111 @@ export default function B01Login() {
     }
   }
 
+  const inputCls =
+    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
+    'placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
+
   return (
-    <div className="relative overflow-x-hidden">
-      {/* Fixed background — prevents white on any scroll */}
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#071f12] via-[#0f3d22] to-[#1A5C38]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_60%_30%,rgba(45,122,80,0.6),transparent)]" />
-        {/* Decorative bottom wheat row */}
-        <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-6 opacity-[0.06]">
+    <div
+      className="relative min-h-[100dvh] flex flex-col overflow-hidden"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      {/* Background */}
+      <div className="fixed inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
+        <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-6 opacity-[0.05] pointer-events-none">
           {[0,1,2,3,4,5,6,7,8,9].map(i => (
-            <Wheat key={i} size={i%3===0?52:i%2===0?40:30} className="text-white mb-1" style={{transform:`rotate(${(i-4)*3}deg)`}} />
+            <Wheat key={i} size={i%3===0?48:i%2===0?36:26} className="text-white mb-1" style={{ transform: `rotate(${(i-4)*3}deg)` }} />
           ))}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20" />
       </div>
 
-      {/* Scrollable overlay */}
-      <div
-        className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10 sm:py-16 overflow-x-hidden"
-        style={{ paddingTop: 'max(2.5rem, env(safe-area-inset-top))', paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}
-      >
-        {/* Volver */}
+      {/* Header */}
+      <div className="relative flex items-center px-4 py-3 flex-shrink-0">
         <button
           onClick={() => navigate('/bienvenida')}
-          className="absolute left-4 flex items-center gap-1 text-green-200/70 text-[13px] font-medium hover:text-green-200 transition-colors active:opacity-60"
-          style={{ top: 'max(1.25rem, env(safe-area-inset-top))' }}
+          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex items-center gap-1 text-white/70"
         >
-          <ChevronLeft size={18} strokeWidth={2.5} className="-ml-0.5" />
-          Volver
+          <ChevronLeft size={22} /> <span className="text-sm font-medium">Volver</span>
         </button>
+      </div>
 
-        {/* ── Logo + brand ── */}
-        <div className="animate-auth-in flex items-center gap-3.5 mb-7 sm:mb-8">
-          <div className="w-[52px] h-[52px] rounded-[14px] bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-xl">
-            <img src="/icono.png" alt="SIMAC" className="w-9 h-9 rounded-[10px]" />
+      {/* Content */}
+      <div className="relative flex-1 flex flex-col items-center justify-center px-5 pb-8 overflow-y-auto">
+        <div className="w-full max-w-sm animate-auth-in">
+
+          {/* Icon + title */}
+          <div className="flex justify-center mb-5">
+            <div className="w-16 h-16 bg-[#1A5C38] rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
+              <Building2 size={28} className="text-white" />
+            </div>
           </div>
-          <div>
-            <p className="text-[26px] sm:text-[28px] font-black text-white tracking-[-0.5px] leading-none">SIMAC</p>
-            <p className="text-[12px] text-green-300/70 font-medium mt-0.5 tracking-wide">Plan Nacional Maíz 2026</p>
-          </div>
-        </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white text-center tracking-tight">Iniciar sesión</h1>
+          <p className="text-white/50 text-sm sm:text-base text-center mt-1.5 mb-7">
+            Bodega o Industria — correo y contraseña
+          </p>
 
-        {/* ── Card ── */}
-        <div className="animate-auth-in w-full max-w-[400px] bg-white rounded-[28px] shadow-[0_24px_64px_rgba(0,0,0,0.45)] overflow-hidden" style={{ animationDelay: '0.08s' }}>
-
-          {/* Green accent bar */}
-          <div className="h-[3px] bg-gradient-to-r from-[#1A5C38] via-[#34d079] to-[#1A5C38]" />
-
-          <div className="px-8 pt-7 pb-2">
-            <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">Iniciar sesión</h1>
-            <p className="text-[13px] text-gray-400 mt-1">Bienvenido de vuelta</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="px-8 pt-4 pb-7 space-y-4">
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">Correo electrónico</label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5">Correo electrónico</label>
               <input
                 type="email" value={email}
                 onChange={e => setEmail(e.target.value)}
                 required autoComplete="email" placeholder="correo@empresa.com"
-                className="w-full bg-[#F5F5F7] rounded-[14px] px-4 py-3.5 text-[15px] text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#1A5C38]/20 focus:bg-white border-0 transition-all"
+                autoCapitalize="off" inputMode="email"
+                className={inputCls}
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">Contraseña</label>
+            <div>
+              <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5">Contraseña</label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'} value={password}
                   onChange={e => setPassword(e.target.value)}
                   required autoComplete="current-password" placeholder="Mínimo 6 caracteres"
-                  className="w-full bg-[#F5F5F7] rounded-[14px] px-4 py-3.5 text-[15px] text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#1A5C38]/20 focus:bg-white border-0 pr-12 transition-all"
+                  className={`${inputCls} pr-12`}
                 />
                 <button type="button" onClick={() => setShowPwd(p => !p)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  {showPwd ? <EyeOff size={17} /> : <Eye size={17} />}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors">
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-[14px] px-4 py-3">
-                <ShieldCheck size={14} className="text-red-400 flex-shrink-0" />
-                <p className="text-[13px] text-red-600">{error}</p>
+              <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
+                <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full bg-[#1A5C38] hover:bg-[#1e6b42] active:scale-[0.98] text-white rounded-[14px] py-3.5 text-[15px] font-semibold transition-all disabled:opacity-40 shadow-[0_4px_14px_rgba(26,92,56,0.4)] mt-1">
-              {loading
-                ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Ingresando…</span>
-                : 'Entrar'}
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
+                         disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-1">
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Ingresando…</> : 'Entrar'}
+            </button>
+          </form>
+
+          {/* Opciones */}
+          <div className="mt-6 space-y-3">
+            <button onClick={() => navigate('/registro')}
+              className="w-full flex items-center justify-center gap-2 bg-white/10 ring-1 ring-white/15 hover:bg-white/15
+                         text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
+              <UserPlus size={16} /> Crear cuenta nueva
             </button>
 
-            <p className="text-center text-[13px] text-gray-400 pt-1">
-              ¿No tienes cuenta?{' '}
-              <Link to="/registro" className="text-[#1A5C38] font-semibold hover:underline">Regístrate</Link>
-            </p>
-
-            <p className="text-center text-[13px] text-gray-400">
-              ¿Eres productor?{' '}
-              <Link to="/activar" className="text-[#1A5C38] font-semibold hover:underline">Activa tu cuenta aquí</Link>
-            </p>
-
-          </form>
+            <div className="border-t border-white/10 pt-4 text-center">
+              <button
+                onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors"
+              >
+                <Wheat size={15} /> ¿Eres productor? Ver opciones
+              </button>
+            </div>
+          </div>
         </div>
-
-        {/* Footer */}
-        <p className="mt-6 text-center text-[11px] text-white/25 max-w-xs leading-relaxed">
-          Sistema de Ordenamiento de la Producción y Comercialización<br />del Maíz Blanco en México
-        </p>
-
       </div>
     </div>
   );

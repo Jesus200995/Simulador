@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Wheat, AlertCircle, Loader2, UserPlus, KeyRound } from 'lucide-react';
+import { ChevronLeft, Wheat, AlertCircle, Loader2, UserPlus, KeyRound, ShieldCheck, Building2, ChevronRight } from 'lucide-react';
 import PinInput from '../../components/productor/PinInput';
 import { useAuthStore } from '../../store/auth';
 
@@ -169,26 +169,38 @@ export default function LoginPinPage() {
                 </button>
               </div>
 
-              {/* Links */}
-              <div className="mt-6 sm:mt-8 space-y-3 text-center">
-                <div className="border-t border-white/10 pt-5">
-                  <p className="text-white/40 text-xs sm:text-sm mb-2">¿Primera vez?</p>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center">
-                    <button
-                      onClick={() => navigate('/activar')}
-                      className="flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors"
-                    >
-                      <UserPlus size={15} />
-                      Activar cuenta del padrón
-                    </button>
-                    <span className="hidden sm:block text-white/20">·</span>
-                    <button
-                      onClick={() => navigate('/registro-nuevo')}
-                      className="text-sm font-semibold text-white/50 hover:text-white/70 transition-colors"
-                    >
-                      Registrarme como nuevo
-                    </button>
-                  </div>
+              {/* Otras opciones de productor */}
+              <div className="mt-6 sm:mt-7">
+                <p className="text-white/40 text-xs text-center mb-2.5">¿No tienes cuenta o PIN todavía?</p>
+                <div className="space-y-2.5">
+                  <button onClick={() => navigate('/activar')}
+                    className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
+                    <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={17} className="text-green-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm leading-tight">Activar mi cuenta</p>
+                      <p className="text-white/40 text-xs mt-0.5 leading-snug">Ya estás en el padrón del Plan Maíz</p>
+                    </div>
+                    <ChevronRight size={16} className="text-white/30 shrink-0" />
+                  </button>
+                  <button onClick={() => navigate('/registro-nuevo')}
+                    className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
+                    <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <UserPlus size={17} className="text-green-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm leading-tight">Soy nuevo, registrarme</p>
+                      <p className="text-white/40 text-xs mt-0.5 leading-snug">No estás en el padrón</p>
+                    </div>
+                    <ChevronRight size={16} className="text-white/30 shrink-0" />
+                  </button>
+                </div>
+                <div className="border-t border-white/10 mt-4 pt-4 text-center">
+                  <button onClick={() => navigate('/bienvenida', { state: { menu: 'bodega' } })}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors">
+                    <Building2 size={15} /> ¿Eres bodega o industria? Ver opciones
+                  </button>
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Search, AlertCircle, Loader2, UserPlus } from 'lucide-react';
+import { ChevronLeft, Search, AlertCircle, Loader2, UserPlus, LogIn, Building2, ChevronRight } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -137,24 +137,37 @@ export default function ActivarCuentaPage() {
             </button>
           </div>
 
-          {/* Links */}
-          <div className="mt-6 sm:mt-8 space-y-3 text-center">
-            <div className="border-t border-white/10 pt-5 space-y-3">
-              <div>
-                <p className="text-white/40 text-xs sm:text-sm mb-1.5">¿No apareces en el padrón?</p>
-                <button
-                  onClick={() => navigate('/registro-nuevo')}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors mx-auto"
-                >
-                  <UserPlus size={15} />
-                  Registrarme como nuevo productor
-                </button>
-              </div>
-              <button
-                onClick={() => navigate('/login-productor')}
-                className="block text-sm text-white/40 hover:text-white/60 transition-colors mx-auto"
-              >
-                Ya tengo PIN — Entrar
+          {/* Otras opciones de productor */}
+          <div className="mt-6 sm:mt-7">
+            <p className="text-white/40 text-xs text-center mb-2.5">¿Prefieres otra opción?</p>
+            <div className="space-y-2.5">
+              <button onClick={() => navigate('/login-productor')}
+                className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
+                <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                  <LogIn size={17} className="text-green-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm leading-tight">Ya tengo cuenta</p>
+                  <p className="text-white/40 text-xs mt-0.5 leading-snug">Entra con tu CURP y tu PIN</p>
+                </div>
+                <ChevronRight size={16} className="text-white/30 shrink-0" />
+              </button>
+              <button onClick={() => navigate('/registro-nuevo')}
+                className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
+                <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                  <UserPlus size={17} className="text-green-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm leading-tight">Soy nuevo, registrarme</p>
+                  <p className="text-white/40 text-xs mt-0.5 leading-snug">No apareces en el padrón</p>
+                </div>
+                <ChevronRight size={16} className="text-white/30 shrink-0" />
+              </button>
+            </div>
+            <div className="border-t border-white/10 mt-4 pt-4 text-center">
+              <button onClick={() => navigate('/bienvenida', { state: { menu: 'bodega' } })}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors">
+                <Building2 size={15} /> ¿Eres bodega o industria? Ver opciones
               </button>
             </div>
           </div>
