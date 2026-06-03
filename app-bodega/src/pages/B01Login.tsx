@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
-import { Eye, EyeOff, Wheat, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Wheat, ShieldCheck, ChevronLeft } from 'lucide-react';
 
 export default function B01Login() {
   const [email, setEmail] = useState('');
@@ -49,6 +49,15 @@ export default function B01Login() {
         className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10 sm:py-16 overflow-x-hidden"
         style={{ paddingTop: 'max(2.5rem, env(safe-area-inset-top))', paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}
       >
+        {/* Volver */}
+        <button
+          onClick={() => navigate('/bienvenida')}
+          className="absolute left-4 flex items-center gap-1 text-green-200/70 text-[13px] font-medium hover:text-green-200 transition-colors active:opacity-60"
+          style={{ top: 'max(1.25rem, env(safe-area-inset-top))' }}
+        >
+          <ChevronLeft size={18} strokeWidth={2.5} className="-ml-0.5" />
+          Volver
+        </button>
 
         {/* ── Logo + brand ── */}
         <div className="animate-auth-in flex items-center gap-3.5 mb-7 sm:mb-8">

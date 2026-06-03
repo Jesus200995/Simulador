@@ -130,6 +130,15 @@ body {
   animation: auth-fade-in 0.35s ease both;
 }
 
+/* Bottom sheet: deslizar desde abajo */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.animate-sheet-up {
+  animation: sheet-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Sacudida para errores (PIN incorrecto, etc.) */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
