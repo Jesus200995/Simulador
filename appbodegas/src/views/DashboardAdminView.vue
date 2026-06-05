@@ -1591,7 +1591,6 @@ onUnmounted(() => {
   if (activePopup) { activePopup.remove(); activePopup = null }
   if (map) { map.remove(); map = null }
   if (stickyObserver) stickyObserver.disconnect()
-  if (chartPS) { chartPS.destroy(); chartPS = null }
 })
 
 // ═══════════════════════════════════════════════════
