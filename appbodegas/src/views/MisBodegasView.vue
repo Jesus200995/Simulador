@@ -268,6 +268,8 @@
             </div>
           </router-link>
         </div>
+      </div>
+      
       <!-- Tab: Por Aprobar (Admins) -->
       <div v-else-if="activeTab === 'admin_pendientes'">
         <div v-if="adminPendientesLoading" class="mis-bodegas-loading">
