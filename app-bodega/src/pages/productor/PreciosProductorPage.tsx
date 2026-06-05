@@ -34,7 +34,7 @@ export default function PreciosProductorPage() {
   const po          = data.precio_compra;          // PO — lo que paga la bodega
   const servicios   = data.servicios_promedio;     // S — tarifario de servicios
   const tieneChicago   = chicago != null && tipoCambio != null;
-  const tieneServicios = servicios != null;
+  const tieneServicios = servicios != null && servicios > 0;
   const tienePO        = po != null;
 
   // Margen de Negociación = (Chicago × 39.368 × tipo_cambio) + (Bono × tipo_cambio)
@@ -210,7 +210,7 @@ export default function PreciosProductorPage() {
                   Servicios (S)
                 </p>
                 <p className="text-[18px] sm:text-[20px] font-black text-blue-700 tracking-tight leading-none">
-                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
+                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-[13px] text-slate-400 font-medium tracking-normal">Sin tarifario activo</span>}
                 </p>
               </div>
             </div>
@@ -328,8 +328,7 @@ export default function PreciosProductorPage() {
       </div>
 
       {/* ── HISTÓRICO 30 DÍAS ── */}
-      {data.tendencia?.length > 0 && (
-        <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-4 sm:p-5">
+      <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
@@ -342,6 +341,7 @@ export default function PreciosProductorPage() {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">MXN / TON</p>
           </div>
           
+          {data.tendencia?.length > 0 ? (
           <div className="h-48 sm:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.tendencia} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -369,8 +369,16 @@ export default function PreciosProductorPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <span className="text-4xl mb-3">📈</span>
+              <p className="text-gray-600 font-medium">Historial en construcción</p>
+              <p className="text-gray-400 text-sm mt-1 max-w-xs">
+                El historial de precios estará disponible después de los primeros 30 días de operación del sistema.
+              </p>
+            </div>
+          )}
         </div>
-      )}
 
       {/* ── FIRA ── */}
       {data.fira && (

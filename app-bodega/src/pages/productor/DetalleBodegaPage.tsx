@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, MapPin, Phone } from 'lucide-react';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { formatNum } from '../../utils/format';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 interface BodegaDetalle {
   id: number; nombre: string; estado: string; municipio: string;
   latitud: number; longitud: number; capacidad_ton: number;
   responsable: string; telefono: string;
+  estado_compra?: string;
 }
 
 export default function DetalleBodegaPage() {
@@ -69,6 +80,52 @@ export default function DetalleBodegaPage() {
             <MapPin size={14} /> {bodega.municipio}, {bodega.estado}
           </div>
 
+          {/* Semáforo de compra */}
+          {bodega.estado_compra && (
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium mt-2 ${
+              bodega.estado_compra === 'comprando'
+                ? 'bg-green-100 text-green-700'
+                : bodega.estado_compra === 'limitado'
+                ? 'bg-amber-100 text-amber-700'
+                : bodega.estado_compra === 'no_compra'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-gray-100 text-gray-500'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${
+                bodega.estado_compra === 'comprando' ? 'bg-green-500'
+                : bodega.estado_compra === 'limitado' ? 'bg-amber-500'
+                : bodega.estado_compra === 'no_compra' ? 'bg-red-500'
+                : 'bg-gray-400'
+              }`} />
+              {bodega.estado_compra === 'comprando' ? 'Comprando maíz'
+                : bodega.estado_compra === 'limitado' ? 'Capacidad limitada'
+                : bodega.estado_compra === 'no_compra' ? 'No compra por ahora'
+                : 'Sin actividad'}
+            </div>
+          )}
+
+          {/* Mapa de ubicación de la bodega */}
+          {bodega.latitud && bodega.longitud && (
+            <div className="rounded-2xl overflow-hidden border border-gray-100 mt-4" style={{ height: '200px' }}>
+              <MapContainer
+                center={[bodega.latitud, bodega.longitud]}
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+                zoomControl={false}
+                scrollWheelZoom={false}
+                dragging={false}
+                doubleClickZoom={false}
+                attributionControl={false}
+              >
+                <TileLayer
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                  maxZoom={19}
+                />
+                <Marker position={[bodega.latitud, bodega.longitud]} />
+              </MapContainer>
+            </div>
+          )}
+
           {bodega.capacidad_ton > 0 && (
             <div className="mt-4 flex justify-between bg-zinc-50 rounded-xl p-3">
               <span className="text-zinc-500 text-sm">Capacidad</span>
@@ -125,11 +182,24 @@ export default function DetalleBodegaPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">
-              Esta bodega aún no ha publicado su tarifario de servicios
+            <p className="text-gray-400 text-sm text-center py-4">
+              Esta bodega no tiene tarifario activo o sus precios
+              tienen más de 90 días sin actualizar.
             </p>
           )}
         </div>
+
+        {/* Botón Cómo llegar — solo si tiene coordenadas */}
+        {bodega.latitud && bodega.longitud && (
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${bodega.latitud},${bodega.longitud}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 py-4 rounded-2xl font-semibold text-sm w-full active:scale-[0.98] transition-all"
+          >
+            <span>📍</span> Cómo llegar
+          </a>
+        )}
 
         {bodega.telefono && (
           <a href={`tel:${bodega.telefono}`}

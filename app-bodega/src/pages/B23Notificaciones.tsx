@@ -47,10 +47,16 @@ export default function B23Notificaciones() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.notificaciones.mis()
-      .then((r: any) => setNotifs(r.notificaciones || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const cargar = () => {
+      api.notificaciones.mis()
+        .then((r: any) => setNotifs(r.notificaciones || []))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    };
+    cargar();
+    // Auto-refresco cada 30 segundos mientras la página está abierta
+    const interval = setInterval(cargar, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   async function marcarTodas() {

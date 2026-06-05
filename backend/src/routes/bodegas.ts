@@ -32,11 +32,21 @@ router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response
 // =============================================
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { region_id, estado, municipio, q, lat, lng, radio_km } = req.query;
+    const { region_id, estado, municipio, q, lat, lng, radio_km, tipo_maiz } = req.query;
 
     const conditions: string[] = [];
     const params: any[] = [];
     let idx = 1;
+
+    if (tipo_maiz) {
+      // Bodegas con una señal de compra activa para ese tipo de maíz
+      conditions.push(`EXISTS (
+        SELECT 1 FROM senales_compra sc
+        WHERE sc.bodega_id = b.id AND sc.activa = true AND sc.tipo_maiz = $${idx}
+      )`);
+      params.push(tipo_maiz);
+      idx++;
+    }
 
     if (region_id) {
       conditions.push(`b.region_id = $${idx++}`);
@@ -202,7 +212,13 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
   try {
     const { id } = req.params;
     const result = await pool.query(
-      `SELECT b.*, r.nombre as region_nombre
+      `SELECT b.*, r.nombre as region_nombre,
+        CASE b.semaforo_compra
+          WHEN 'verde'    THEN 'comprando'
+          WHEN 'amarillo' THEN 'limitado'
+          WHEN 'rojo'     THEN 'no_compra'
+          ELSE 'sin_actividad'
+        END AS estado_compra
        FROM bodegas b
        LEFT JOIN regiones r ON b.region_id = r.id
        WHERE b.id = $1`,
@@ -302,11 +318,13 @@ router.patch('/:id/rechazar', authMiddleware, async (req: AuthRequest, res: Resp
 router.get('/:id/tarifario-publico', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(
-      `SELECT c.nombre AS concepto, ts.precio, c.unidad_default AS unidad
+      `SELECT c.nombre AS concepto, ts.precio, c.unidad_default AS unidad,
+              ts.updated_at AS ultima_actualizacion
        FROM tarifario_servicios ts
        JOIN cat_conceptos_servicio c ON c.id = ts.concepto_id
        WHERE ts.bodega_id = $1
          AND ts.activo = TRUE
+         AND ts.updated_at >= NOW() - INTERVAL '90 days'
        ORDER BY c.nombre ASC`,
       [req.params.id]
     );

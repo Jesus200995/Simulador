@@ -15,14 +15,38 @@ export default function VentanillasPage() {
   const [items, setItems] = useState<Ventanilla[]>([]);
   const [loading, setLoading] = useState(true);
   const [solicitando, setSolicitando] = useState<number | null>(null);
+  const [coordsProductor, setCoordsProductor] = useState<{ lat: number; lng: number } | null>(null);
+  const [coordsCargadas, setCoordsCargadas] = useState(false);
 
+  // Cargar coordenadas del productor desde el dashboard
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
-    fetch(`${BASE}/infraestructura?is_ventanilla=true`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${BASE}/productor/dashboard`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => setItems(Array.isArray(d) ? d : d.data || []))
-      .finally(() => setLoading(false));
+      .then(d => {
+        if (d.lat && d.lng) setCoordsProductor({ lat: d.lat, lng: d.lng });
+      })
+      .catch(() => {})
+      .finally(() => setCoordsCargadas(true));
   }, []);
+
+  // Cargar ventanillas (filtradas por distancia si hay coordenadas)
+  useEffect(() => {
+    if (!coordsCargadas) return;
+    const token = localStorage.getItem('simac_token');
+    setLoading(true);
+    const params = new URLSearchParams({ es_ventanilla: 'true', is_ventanilla: 'true' });
+    if (coordsProductor) {
+      params.set('lat', String(coordsProductor.lat));
+      params.set('lng', String(coordsProductor.lng));
+      params.set('radio_km', '200');
+    }
+    fetch(`${BASE}/infraestructura?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setItems(d.infraestructura || (Array.isArray(d) ? d : d.data) || []))
+      .catch(() => setItems([]))
+      .finally(() => setLoading(false));
+  }, [coordsCargadas, coordsProductor]);
 
   const solicitar = async (infraId: number) => {
     setSolicitando(infraId);

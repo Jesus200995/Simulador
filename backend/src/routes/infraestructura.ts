@@ -41,16 +41,13 @@ router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response
 // =============================================
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { tipo, estado, municipio, q, es_ventanilla } = req.query;
+    const { tipo, estado, municipio, q, es_ventanilla, is_ventanilla, lat, lng, radio_km } = req.query;
 
     const conditions: string[] = ["b.estatus != 'pendiente'"];
     const params: any[] = [];
     let idx = 1;
 
-    if (tipo === 'ventanilla') {
-      conditions.push(`b.es_ventanilla = TRUE`);
-    }
-    if (es_ventanilla === 'true') {
+    if (tipo === 'ventanilla' || es_ventanilla === 'true' || is_ventanilla === 'true') {
       conditions.push(`b.es_ventanilla = TRUE`);
     }
     if (estado) {
@@ -65,6 +62,14 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
       conditions.push(`(b.nombre ILIKE $${idx} OR b.clave ILIKE $${idx} OR b.municipio ILIKE $${idx})`);
       params.push(`%${q}%`);
       idx++;
+    }
+
+    // Filtro por distancia del productor (Haversine, sin PostGIS)
+    if (lat && lng && radio_km) {
+      const haversine = `(6371 * acos(LEAST(1.0, cos(radians($${idx})) * cos(radians(b.latitud)) * cos(radians(b.longitud) - radians($${idx + 1})) + sin(radians($${idx})) * sin(radians(b.latitud)))))`;
+      conditions.push(`b.latitud IS NOT NULL AND b.longitud IS NOT NULL AND ${haversine} <= $${idx + 2}`);
+      params.push(Number(lat), Number(lng), Number(radio_km));
+      idx += 3;
     }
 
     const where = `WHERE ${conditions.join(' AND ')}`;

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight, BadgeCheck, CalendarCheck } from 'lucide-react';
 import { formatNum } from '../../utils/format';
 import { useAuthStore } from '../../store/auth';
+import HistorialVentasSection from './HistorialVentasSection';
+import MisDisponibilidadesSection from './MisDisponibilidadesSection';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -65,6 +67,13 @@ export default function DashboardProductorPage() {
   const [reloj, setReloj] = useState(getMexicoTime());
   const clockRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [alertaActiva, setAlertaActiva] = useState<{ mensaje: string; tipo: string } | null>(null);
+  const token = localStorage.getItem('simac_token') || '';
+
+  const cargarDashboard = () => {
+    fetch(`${BASE}/productor/dashboard`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.json()).then(setData).finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     clockRef.current = setInterval(() => setReloj(getMexicoTime()), 1000);
@@ -72,10 +81,7 @@ export default function DashboardProductorPage() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('simac_token');
-    fetch(`${BASE}/productor/dashboard`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then(r => r.json()).then(setData).finally(() => setLoading(false));
+    cargarDashboard();
 
     fetch(`${BASE}/productor/mi-ciclo`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -263,6 +269,13 @@ export default function DashboardProductorPage() {
               Tu cuenta esta en validacion. Te avisamos cuando puedas declarar disponibilidad.
             </p>
           )}
+
+          {/* Disponibilidades activas */}
+          <MisDisponibilidadesSection
+            token={token}
+            apiUrl={BASE}
+            onActualizar={() => cargarDashboard()}
+          />
         </div>
 
         {data && !data.location_confirmed && !dismissed && (
@@ -306,6 +319,9 @@ export default function DashboardProductorPage() {
             </div>
           </div>
         )}
+
+        {/* Historial de ventas */}
+        <HistorialVentasSection token={token} apiUrl={BASE} />
       </div>
 
     </div>

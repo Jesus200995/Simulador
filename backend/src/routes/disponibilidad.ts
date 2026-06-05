@@ -119,10 +119,15 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
   const userId = req.user!.userId;
   try {
     const result = await pool.query(
-      `SELECT dp.*, u.municipality_name AS municipio, u.state_name AS estado
+      `SELECT dp.*,
+              u.municipality_name AS municipio,
+              u.state_name AS estado,
+              COALESCE(cv.label, dp.variedad_code) AS variedad_nombre
        FROM disponibilidad_productor dp
        JOIN up u ON u.up_id = dp.up_id
        JOIN producer p ON p.producer_id = dp.producer_id
+       LEFT JOIN cat_crop_variety cv
+         ON cv.code = dp.variedad_code AND cv.is_active = TRUE
        WHERE p.usuario_id = $1 AND dp.activa = TRUE
        ORDER BY dp.created_at DESC`,
       [userId]

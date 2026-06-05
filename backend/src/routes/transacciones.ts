@@ -7,26 +7,52 @@ const router = Router();
 // GET /api/transacciones
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const user = req.user!;
-  const { bodega_id, fecha_inicio, fecha_fin, tipo_maiz } = req.query;
+  const { bodega_id, fecha_inicio, fecha_fin, tipo_maiz, limit } = req.query;
 
   try {
     const isAdmin = ['admin', 'responsable'].includes(user.rol);
-    let where = isAdmin ? 'WHERE 1=1' : 'WHERE t.usuario_bodeguero = $1';
-    const params: any[] = isAdmin ? [] : [user.userId];
+    let where: string;
+    const params: any[] = [];
+
+    if (isAdmin) {
+      where = 'WHERE 1=1';
+    } else if (user.rol === 'productor') {
+      // Productor ve sus transacciones donde él es el vendedor
+      params.push(user.userId);
+      where = `WHERE t.producer_id IN (
+        SELECT p.producer_id FROM producer p
+        JOIN usuarios u ON u.id = p.usuario_id
+        WHERE u.id = $${params.length}
+      )`;
+    } else {
+      // Bodeguero ve sus transacciones (como comprador)
+      params.push(user.userId);
+      where = `WHERE t.usuario_bodeguero = $${params.length}`;
+    }
 
     if (bodega_id) { params.push(bodega_id); where += ` AND t.bodega_id = $${params.length}`; }
     if (tipo_maiz) { params.push(tipo_maiz); where += ` AND t.tipo_maiz = $${params.length}`; }
     if (fecha_inicio) { params.push(fecha_inicio); where += ` AND t.fecha >= $${params.length}`; }
     if (fecha_fin) { params.push(fecha_fin); where += ` AND t.fecha <= $${params.length}`; }
 
+    let limitSql = '';
+    const limitNum = parseInt(String(limit ?? ''), 10);
+    if (Number.isFinite(limitNum) && limitNum > 0 && limitNum <= 100) {
+      params.push(limitNum);
+      limitSql = ` LIMIT $${params.length}`;
+    }
+
     const result = await pool.query(
       `SELECT t.*, b.nombre AS bodega_nombre,
+              t.precio_ton AS precio_por_ton,
+              t.variedad_code AS variedad,
+              t.confirmacion_productor AS estado_confirmacion,
               COALESCE(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), t.nombre_productor_libre) AS nombre_productor
        FROM transacciones t
        JOIN bodegas b ON b.id = t.bodega_id
        LEFT JOIN producer p ON p.producer_id = t.producer_id
        ${where}
-       ORDER BY t.fecha DESC, t.created_at DESC`,
+       ORDER BY t.fecha DESC, t.created_at DESC${limitSql}`,
       params
     );
     res.json(result.rows);

@@ -60,7 +60,8 @@ export default function MapaBodegasPage() {
   const [up, setUp] = useState<UpData | null>(null);
   const [mapRef, setMapRef] = useState<L.Map | null>(null);
   const [loadingBodegas, setLoadingBodegas] = useState(true);
-  const [radioKm, setRadioKm] = useState(150);
+  const [radioKm, setRadioKm] = useState(100);
+  const [filtroTipoMaiz, setFiltroTipoMaiz] = useState<string>('');
   const [confirmacionVisible, setConfirmacionVisible] = useState(false);
   const [bodegaConfirmada, setBodegaConfirmada] = useState<string>('');
   const [coordsAproximadas, setCoordsAproximadas] = useState(false);
@@ -93,14 +94,20 @@ export default function MapaBodegasPage() {
     if (!up) return;
     const token = localStorage.getItem('simac_token');
     setLoadingBodegas(true);
-    fetch(`${BASE}/bodegas?lat=${up.lat}&lng=${up.lng}&radio_km=${radioKm}`, {
+    const params = new URLSearchParams({
+      lat: String(up.lat),
+      lng: String(up.lng),
+      radio_km: String(radioKm),
+      ...(filtroTipoMaiz ? { tipo_maiz: filtroTipoMaiz } : {}),
+    });
+    fetch(`${BASE}/bodegas?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
       .then(d => setBodegas(Array.isArray(d) ? d : d.bodegas || []))
       .catch(() => {})
       .finally(() => setLoadingBodegas(false));
-  }, [up, radioKm]);
+  }, [up, radioKm, filtroTipoMaiz]);
 
   const handleMeInteresa = async (senalId: number, nombreBodega?: string) => {
     const token = localStorage.getItem('simac_token');
@@ -134,6 +141,46 @@ export default function MapaBodegasPage() {
           </button>
         </div>
       )}
+
+      {/* Barra de filtros: tipo de maíz (#9) y radio (#10) */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-100 px-3 py-2.5 space-y-2">
+        {/* Tipo de maíz */}
+        <div className="flex gap-2 overflow-x-auto pb-0.5">
+          {['', 'blanco', 'amarillo', 'criollo'].map(tipo => (
+            <button
+              key={tipo || 'todos'}
+              onClick={() => setFiltroTipoMaiz(tipo)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                filtroTipoMaiz === tipo
+                  ? 'bg-[#1A5C38] text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {tipo === '' ? 'Todos' : `Maíz ${tipo}`}
+            </button>
+          ))}
+        </div>
+        {/* Radio */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500 font-medium shrink-0">Radio:</span>
+          <div className="flex gap-1">
+            {[50, 100, 200, 500].map(km => (
+              <button
+                key={km}
+                onClick={() => setRadioKm(km)}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  radioKm === km
+                    ? 'bg-[#1A5C38] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {km} km
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="flex-1 relative w-full h-full">
         <MapContainer
           center={up ? [up.lat, up.lng] : [23.6345, -102.5528]}

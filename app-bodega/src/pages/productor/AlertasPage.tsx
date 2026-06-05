@@ -30,11 +30,18 @@ export default function AlertasPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('simac_token');
-    fetch(`${BASE}/alertas/notificaciones/mis`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => setNotifs(d.notificaciones || d || []))
-      .finally(() => setLoading(false));
+    const cargar = () => {
+      const token = localStorage.getItem('simac_token');
+      fetch(`${BASE}/alertas/notificaciones/mis`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(d => setNotifs(d.notificaciones || d || []))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    };
+    cargar();
+    // Auto-refresco cada 30 segundos mientras la página está abierta
+    const interval = setInterval(cargar, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const marcarLeida = async (id: number) => {
