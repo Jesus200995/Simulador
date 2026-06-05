@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
-  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box, BarChart3
+  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box, BarChart3, X, CheckCircle
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
@@ -55,6 +55,23 @@ export default function BodegasAdminPage() {
   const [activeCenter, setActiveCenter] = useState<[number, number] | null>(null);
   const [activeZoom, setActiveZoom] = useState(5);
   const [selectedBodegaId, setSelectedBodegaId] = useState<number | null>(null);
+
+  // Modal y Toast
+  const [modalConfirmacion, setModalConfirmacion] = useState<{
+    visible: boolean;
+    tipo: 'aprobar' | 'rechazar';
+    bodegaId: number | null;
+    bodegaNombre: string;
+  }>({ visible: false, tipo: 'aprobar', bodegaId: null, bodegaNombre: '' });
+  
+  const [toast, setToast] = useState<{ visible: boolean; mensaje: string; tipo: 'exito' | 'error' }>({ 
+    visible: false, mensaje: '', tipo: 'exito' 
+  });
+
+  function mostrarToast(mensaje: string, tipo: 'exito' | 'error' = 'exito') {
+    setToast({ visible: true, mensaje, tipo });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
+  }
 
   async function cargarBodegas() {
     setLoading(true);
@@ -164,33 +181,30 @@ export default function BodegasAdminPage() {
     }
   }, [tabActivo]);
 
-  async function aprobarBodega(id: number) {
-    if (!window.confirm('¿Aprobar esta bodega?')) return;
-    try {
-      const res = await fetch(`${BASE}/bodegas/${id}/aprobar`, {
-        method: 'PATCH',
-        headers: HDR()
-      });
-      if (!res.ok) throw new Error('Error al aprobar');
-      setBodegas(prev => prev.filter(b => b.id !== id));
-      alert('Bodega aprobada con éxito');
-    } catch (e: any) {
-      alert(e.message || 'Error');
-    }
+  function confirmarAprobar(id: number, nombre: string) {
+    setModalConfirmacion({ visible: true, tipo: 'aprobar', bodegaId: id, bodegaNombre: nombre });
   }
 
-  async function rechazarBodega(id: number) {
-    if (!window.confirm('¿Rechazar esta bodega?')) return;
+  function confirmarRechazar(id: number, nombre: string) {
+    setModalConfirmacion({ visible: true, tipo: 'rechazar', bodegaId: id, bodegaNombre: nombre });
+  }
+
+  async function procesarAccion() {
+    if (!modalConfirmacion.bodegaId) return;
     try {
-      const res = await fetch(`${BASE}/bodegas/${id}/rechazar`, {
+      const { tipo, bodegaId } = modalConfirmacion;
+      const res = await fetch(`${BASE}/bodegas/${bodegaId}/${tipo}`, {
         method: 'PATCH',
         headers: HDR()
       });
-      if (!res.ok) throw new Error('Error al rechazar');
-      setBodegas(prev => prev.filter(b => b.id !== id));
-      alert('Bodega rechazada con éxito');
+      if (!res.ok) throw new Error(`Error al ${tipo} la bodega`);
+      
+      setBodegas(prev => prev.filter(b => b.id !== bodegaId));
+      mostrarToast(`Bodega ${tipo === 'aprobar' ? 'aprobada' : 'rechazada'} con éxito`, 'exito');
     } catch (e: any) {
-      alert(e.message || 'Error');
+      mostrarToast(e.message || 'Error', 'error');
+    } finally {
+      setModalConfirmacion({ visible: false, tipo: 'aprobar', bodegaId: null, bodegaNombre: '' });
     }
   }
 
@@ -552,13 +566,13 @@ export default function BodegasAdminPage() {
                   </div>
                   <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
                     <button 
-                      onClick={() => aprobarBodega(b.id)}
+                      onClick={() => confirmarAprobar(b.id, b.nombre)}
                       className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl text-[12px] transition-all"
                     >
                       Aprobar
                     </button>
                     <button 
-                      onClick={() => rechazarBodega(b.id)}
+                      onClick={() => confirmarRechazar(b.id, b.nombre)}
                       className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold py-2 rounded-xl text-[12px] transition-all"
                     >
                       Rechazar
@@ -568,6 +582,61 @@ export default function BodegasAdminPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── MODAL DE CONFIRMACIÓN (APPLE 2026 STYLE) ── */}
+      {modalConfirmacion.visible && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#0f151c] border border-white/10 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header del modal */}
+            <div className={`p-6 pb-4 border-b border-white/5 flex flex-col items-center text-center`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                modalConfirmacion.tipo === 'aprobar' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+              }`}>
+                {modalConfirmacion.tipo === 'aprobar' ? <CheckCircle size={24} /> : <X size={24} />}
+              </div>
+              <h3 className="text-white text-[18px] font-black tracking-tight">
+                ¿{modalConfirmacion.tipo === 'aprobar' ? 'Aprobar' : 'Rechazar'} bodega?
+              </h3>
+              <p className="text-gray-400 text-[13px] mt-1.5 leading-relaxed">
+                Estás a punto de <strong className={modalConfirmacion.tipo === 'aprobar' ? 'text-emerald-400' : 'text-red-400'}>{modalConfirmacion.tipo}</strong> la bodega <br/>
+                <span className="text-white font-bold">{modalConfirmacion.bodegaNombre}</span>
+              </p>
+            </div>
+            
+            {/* Botones del modal */}
+            <div className="p-4 flex gap-3">
+              <button
+                onClick={() => setModalConfirmacion({ visible: false, tipo: 'aprobar', bodegaId: null, bodegaNombre: '' })}
+                className="flex-1 py-3 px-4 rounded-xl text-[13px] font-bold text-gray-300 bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={procesarAccion}
+                className={`flex-1 py-3 px-4 rounded-xl text-[13px] font-black text-white transition-colors shadow-lg ${
+                  modalConfirmacion.tipo === 'aprobar' 
+                    ? 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-900/20' 
+                    : 'bg-red-500 hover:bg-red-400 shadow-red-900/20'
+                }`}
+              >
+                Sí, {modalConfirmacion.tipo}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TOAST NOTIFICATION ── */}
+      {toast.visible && (
+        <div className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md animate-in slide-in-from-bottom-5 fade-in duration-300 ${
+          toast.tipo === 'exito' 
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+            : 'bg-red-500/10 border-red-500/20 text-red-400'
+        }`}>
+          {toast.tipo === 'exito' ? <CheckCircle size={18} /> : <X size={18} />}
+          <span className="text-[13px] font-bold">{toast.mensaje}</span>
         </div>
       )}
 
