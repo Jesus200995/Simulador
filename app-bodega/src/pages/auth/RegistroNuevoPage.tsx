@@ -89,6 +89,25 @@ export default function RegistroNuevoPage() {
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
+  const [geoDetectado, setGeoDetectado] = useState<{ estado: string; municipio: string } | null>(null);
+  const [detectandoGeo, setDetectandoGeo] = useState(false);
+
+  // Detecta estado/municipio EXACTOS según dónde quedó marcada la parcela
+  const detectarUbicacion = async (lat: number, lng: number) => {
+    setDetectandoGeo(true);
+    try {
+      const r = await fetch(`${BASE}/productor/geo/reverse?lat=${lat}&lng=${lng}`);
+      const d = await r.json();
+      if (d.estado || d.municipio) {
+        setGeoDetectado({ estado: d.estado || '', municipio: d.municipio || '' });
+        // Autocompletar los campos del paso 2 con la ubicación real de la parcela
+        if (d.estado) setEstadoUpNombre(d.estado);
+        if (d.municipio) setMunicipioUp(d.municipio);
+        if (d.state_id) setEstadoUp(d.state_id);
+      }
+    } catch { /* silencioso: el backend igual lo resuelve al guardar */ }
+    finally { setDetectandoGeo(false); }
+  };
 
   // Contacto
   const [telefono, setTelefono] = useState('');
@@ -303,12 +322,14 @@ export default function RegistroNuevoPage() {
                 setAreaCalc(ha);
                 setCoincideArea(null);
                 setAreaReal('');
+                detectarUbicacion(centroide.lat, centroide.lng);
               }}
               onPoligonoEliminado={() => {
                 setPoligono(null);
                 setAreaCalc(null);
                 setCoincideArea(null);
                 setAreaReal('');
+                setGeoDetectado(null);
               }}
               onModeChange={setDrawMode}
               onPointCountChange={setPointCount}
@@ -340,6 +361,25 @@ export default function RegistroNuevoPage() {
 
         {/* Footer contextual */}
         <div className="flex-shrink-0 bg-black/65 backdrop-blur-md border-t border-white/10 px-4 pt-3 pb-3">
+
+          {/* Ubicación detectada automáticamente según la parcela */}
+          {drawMode === 'idle' && poligono && (detectandoGeo || geoDetectado) && (
+            <div className="max-w-md mx-auto mb-2.5">
+              <div className="bg-white/10 ring-1 ring-white/15 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
+                <MapPin size={15} className="text-green-300 flex-shrink-0" />
+                {detectandoGeo ? (
+                  <p className="text-white/70 text-xs">Detectando estado y municipio…</p>
+                ) : (
+                  <p className="text-white/90 text-xs leading-tight">
+                    <span className="text-white/50">Ubicación detectada: </span>
+                    <span className="font-semibold">{geoDetectado?.municipio}</span>
+                    {geoDetectado?.municipio && geoDetectado?.estado ? ', ' : ''}
+                    <span className="font-semibold">{geoDetectado?.estado}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* MODO: dibujando (idle sin polígono o drawing) */}
           {dibujando && (

@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { reverseGeocode } from '../utils/geocode';
 
 const router = Router();
 
@@ -201,6 +202,31 @@ router.post('/auth/login-pin', async (req, res): Promise<void> => {
   }
 });
 
+// GET /api/productor/geo/reverse?lat=&lng= — reverse-geocoding público
+// Devuelve el estado y municipio exactos según las coordenadas marcadas.
+// Público porque se usa también durante el registro (sin sesión).
+router.get('/geo/reverse', async (req, res): Promise<void> => {
+  const lat = Number(req.query.lat);
+  const lng = Number(req.query.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    res.status(400).json({ error: 'lat y lng son requeridos' });
+    return;
+  }
+  try {
+    const g = await reverseGeocode(lat, lng);
+    res.json({
+      estado: g.state_name,
+      municipio: g.municipality_name,
+      state_id: g.state_id,
+      municipality_id: g.municipality_id,
+      source: g.source,
+    });
+  } catch (error) {
+    console.error('Error en geo/reverse:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // POST /api/productor/auth/registro-nuevo
 // Registro Tipo B — cuenta queda en estado 'pendiente'
 router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
@@ -231,6 +257,20 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
     }
 
     const hashedPin = await bcrypt.hash(pin, 10);
+
+    // Si el productor marcó su parcela, el estado y municipio se derivan de DÓNDE la marcó
+    // (reverse-geocoding), no del formulario. Así el llenado es automático y exacto.
+    let estadoFinal = estado_up;
+    let municipioFinal = municipio_up;
+    let stateIdFinal: string | null = null;
+    let municipalityIdFinal: string | null = null;
+    if (lat != null && lng != null && lat !== 0 && lng !== 0) {
+      const g = await reverseGeocode(Number(lat), Number(lng));
+      if (g.state_name) estadoFinal = g.state_name;
+      if (g.municipality_name) municipioFinal = g.municipality_name;
+      stateIdFinal = g.state_id;
+      municipalityIdFinal = g.municipality_id;
+    }
 
     const client = await pool.connect();
     try {
@@ -281,7 +321,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
             })
           : null;
         const qParams = [
-          p.rows[0].producer_id, estado_up, municipio_up, lng, lat,
+          p.rows[0].producer_id, estadoFinal, municipioFinal, lng, lat,
           ...(useGeomParam ? [geomParam] : []),
           area_calc_ha || null, area_real_ha || null, coincide_area ?? null,
         ];
@@ -324,7 +364,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
                    ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
                    $5, $6, $7,
                    TRUE, 'poligono_calculado')`,
-          [p.rows[0].producer_id, estado_up, municipio_up, geojson,
+          [p.rows[0].producer_id, estadoFinal, municipioFinal, geojson,
            area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
         );
 
@@ -337,7 +377,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
             `SELECT centroid::geometry AS centroid
              FROM municipios_referencia
              WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
-            [municipio_up, estado_up]
+            [municipioFinal, estadoFinal]
           );
           centroidVal = muni.rows[0]?.centroid || null;
         } catch (err) {
@@ -350,7 +390,23 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
               location_confirmed, centroid_source)
            VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
                    $2, $3, $4::geometry, FALSE, 'municipio')`,
-          [p.rows[0].producer_id, estado_up, municipio_up, centroidVal]
+          [p.rows[0].producer_id, estadoFinal, municipioFinal, centroidVal]
+        );
+      }
+
+      // Guardar ids canónicos de estado/municipio (en up y producer) cuando se resolvieron
+      if (stateIdFinal || municipalityIdFinal) {
+        await client.query(
+          `UPDATE up SET state_id = COALESCE($1, state_id),
+                         municipality_id = COALESCE($2, municipality_id)
+           WHERE producer_id = $3`,
+          [stateIdFinal, municipalityIdFinal, p.rows[0].producer_id]
+        );
+        await client.query(
+          `UPDATE producer SET state_id = COALESCE($1, state_id),
+                               municipality_id = COALESCE($2, municipality_id)
+           WHERE producer_id = $3`,
+          [stateIdFinal, municipalityIdFinal, p.rows[0].producer_id]
         );
       }
 
@@ -651,7 +707,36 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
         [lng, lat, producerId]
       );
     }
-    res.json({ ok: true });
+
+    // Reverse-geocoding: el estado y municipio se derivan de DÓNDE quedó la parcela.
+    let geo = null;
+    if (lat != null && lng != null) {
+      const g = await reverseGeocode(Number(lat), Number(lng));
+      if (g.state_name || g.municipality_name) {
+        // Actualizar la UP con el estado/municipio reales de la ubicación marcada
+        await pool.query(
+          `UPDATE up SET
+             state_name = COALESCE($1, state_name),
+             municipality_name = COALESCE($2, municipality_name),
+             state_id = COALESCE($3, state_id),
+             municipality_id = COALESCE($4, municipality_id),
+             updated_at = NOW()
+           WHERE producer_id = $5`,
+          [g.state_name, g.municipality_name, g.state_id, g.municipality_id, producerId]
+        );
+        // Mantener el producer en sintonía (state_id/municipality_id)
+        await pool.query(
+          `UPDATE producer SET
+             state_id = COALESCE($1, state_id),
+             municipality_id = COALESCE($2, municipality_id)
+           WHERE producer_id = $3`,
+          [g.state_id, g.municipality_id, producerId]
+        );
+        geo = { estado: g.state_name, municipio: g.municipality_name };
+      }
+    }
+
+    res.json({ ok: true, geo });
   } catch (error) {
     console.error('Error en ubicacion:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

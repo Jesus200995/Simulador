@@ -32,6 +32,19 @@ export default function CompletarUbicacionPage() {
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [geoDetectado, setGeoDetectado] = useState<{ estado: string; municipio: string } | null>(null);
+  const [detectandoGeo, setDetectandoGeo] = useState(false);
+
+  // Detecta estado/municipio EXACTOS según dónde quedó marcada la parcela
+  const detectarUbicacion = async (lat: number, lng: number) => {
+    setDetectandoGeo(true);
+    try {
+      const r = await fetch(`${BASE}/productor/geo/reverse?lat=${lat}&lng=${lng}`);
+      const d = await r.json();
+      if (d.estado || d.municipio) setGeoDetectado({ estado: d.estado || '', municipio: d.municipio || '' });
+    } catch { /* el backend lo resuelve al guardar */ }
+    finally { setDetectandoGeo(false); }
+  };
 
   const [poligonoInicial, setPoligonoInicial] = useState<[number, number][] | null>(null);
   const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 23.6345, lng: -102.5528 });
@@ -183,12 +196,14 @@ export default function CompletarUbicacionPage() {
                 setAreaCalc(ha);
                 setCoincideArea(null);
                 setAreaReal('');
+                detectarUbicacion(centroide.lat, centroide.lng);
               }}
               onPoligonoEliminado={() => {
                 setPoligono(null);
                 setAreaCalc(null);
                 setCoincideArea(null);
                 setAreaReal('');
+                setGeoDetectado(null);
               }}
               onModeChange={setDrawMode}
               onPointCountChange={setPointCount}
@@ -259,6 +274,21 @@ export default function CompletarUbicacionPage() {
         {/* Polígono listo (dibujado o precargado) */}
         {drawMode === 'idle' && poligono && (
           <div className="max-w-md mx-auto space-y-3">
+            {(detectandoGeo || geoDetectado) && (
+              <div className="bg-white/10 ring-1 ring-white/15 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
+                <MapPin size={15} className="text-green-300 flex-shrink-0" />
+                {detectandoGeo ? (
+                  <p className="text-white/70 text-xs">Detectando estado y municipio…</p>
+                ) : (
+                  <p className="text-white/90 text-xs leading-tight">
+                    <span className="text-white/50">Ubicación detectada: </span>
+                    <span className="font-semibold">{geoDetectado?.municipio}</span>
+                    {geoDetectado?.municipio && geoDetectado?.estado ? ', ' : ''}
+                    <span className="font-semibold">{geoDetectado?.estado}</span>
+                  </p>
+                )}
+              </div>
+            )}
             {coincideArea === false ? (
               <div>
                 <label className="block text-xs text-white/50 font-medium mb-2">¿Cuántas hectáreas tiene tu parcela?</label>
