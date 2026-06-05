@@ -51,7 +51,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
               t.precio_ton AS precio_por_ton,
               t.variedad_code AS variedad,
               t.confirmacion_productor AS estado_confirmacion,
-              COALESCE(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), t.nombre_productor_libre) AS nombre_productor
+              COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), ''), t.nombre_productor_libre) AS nombre_productor
        FROM transacciones t
        JOIN bodegas b ON b.id = t.bodega_id
        LEFT JOIN producer p ON p.producer_id = t.producer_id
@@ -103,7 +103,7 @@ router.get('/exportar', authMiddleware, async (req: AuthRequest, res: Response):
           TO_CHAR(t.fecha, 'DD/MM/YYYY') AS fecha,
           b.nombre AS bodega,
           COALESCE(
-            TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)),
+            NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), ''),
             t.nombre_productor_libre
           ) AS productor,
           t.tipo_maiz,
@@ -221,7 +221,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
         b.nombre AS bodega_nombre,
         b.municipio AS bodega_municipio,
         b.estado AS bodega_estado,
-        COALESCE(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), t.nombre_productor_libre) AS nombre_productor
+        COALESCE(NULLIF(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), ''), t.nombre_productor_libre) AS nombre_productor
       FROM transacciones t
       LEFT JOIN bodegas b ON b.id = t.bodega_id
       LEFT JOIN producer p ON p.producer_id = t.producer_id
