@@ -198,8 +198,15 @@ export default function BodegasAdminPage() {
         headers: HDR()
       });
       if (!res.ok) throw new Error(`Error al ${tipo} la bodega`);
-      
-      setBodegas(prev => prev.filter(b => b.id !== bodegaId));
+      setBodegas(prev => prev.map(b => 
+        b.id === bodegaId 
+          ? { 
+              ...b, 
+              estatus: tipo === 'aprobar' ? 'aprobada' : 'rechazada',
+              semaforo_compra: tipo === 'aprobar' ? 'verde' : 'rojo'
+            }
+          : b
+      ));
       mostrarToast(`Bodega ${tipo === 'aprobar' ? 'aprobada' : 'rechazada'} con éxito`, 'exito');
     } catch (e: any) {
       mostrarToast(e.message || 'Error', 'error');
