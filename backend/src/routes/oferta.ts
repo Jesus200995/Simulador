@@ -84,8 +84,10 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
           params
         );
 
+        const initialResult = result;
+
         // Fallback: si hay menos de 3 resultados, ampliar al estado
-        if (result.rows.length < 3) {
+        if (initialResult.rows.length < 3) {
           const params2: any[] = [bodegaRef.estado];
           let tipoFilter2 = '';
           if (tipo_maiz && tipo_maiz !== 'all') {
@@ -112,15 +114,23 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
              LIMIT 50`,
             params2
           );
-          res.json({ data: result.rows, fallback: true,
-            mensaje: `Mostrando productores en todo el estado (${bodegaRef.estado}) porque no se encontraron suficientes en ${radio} km` });
-          return;
+          if (result.rows.length > 0) {
+            res.json({ data: result.rows, fallback: true,
+              mensaje: `Mostrando productores en todo el estado (${bodegaRef.estado}) porque no se encontraron suficientes en ${radio} km` });
+            return;
+          } else if (initialResult.rows.length > 0) {
+            res.json({ data: initialResult.rows, fallback: false });
+            return;
+          } else {
+            // Throw error to trigger the catch block and fall through to Strategy B
+            throw new Error("No active offers in state, falling through to historical cycle_crop");
+          }
         }
 
-        res.json({ data: result.rows, fallback: false });
+        res.json({ data: initialResult.rows, fallback: false });
         return;
       } catch (_) {
-        // PostGIS query failed — fall through to Strategy B
+        // Fall through to Strategy B
       }
     }
 
