@@ -42,7 +42,7 @@ export default function BodegasAdminPage() {
   const [loading, setLoading] = useState(true);
 
   // Tabs
-  const [tabActivo, setTabActivo] = useState<'lista' | 'estadisticas'>('lista');
+  const [tabActivo, setTabActivo] = useState<'lista' | 'estadisticas' | 'pendientes'>('lista');
   const [stats, setStats] = useState<any>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
@@ -164,6 +164,36 @@ export default function BodegasAdminPage() {
     }
   }, [tabActivo]);
 
+  async function aprobarBodega(id: number) {
+    if (!window.confirm('¿Aprobar esta bodega?')) return;
+    try {
+      const res = await fetch(`${BASE}/bodegas/${id}/aprobar`, {
+        method: 'PATCH',
+        headers: HDR()
+      });
+      if (!res.ok) throw new Error('Error al aprobar');
+      setBodegas(prev => prev.filter(b => b.id !== id));
+      alert('Bodega aprobada con éxito');
+    } catch (e: any) {
+      alert(e.message || 'Error');
+    }
+  }
+
+  async function rechazarBodega(id: number) {
+    if (!window.confirm('¿Rechazar esta bodega?')) return;
+    try {
+      const res = await fetch(`${BASE}/bodegas/${id}/rechazar`, {
+        method: 'PATCH',
+        headers: HDR()
+      });
+      if (!res.ok) throw new Error('Error al rechazar');
+      setBodegas(prev => prev.filter(b => b.id !== id));
+      alert('Bodega rechazada con éxito');
+    } catch (e: any) {
+      alert(e.message || 'Error');
+    }
+  }
+
   // Filtrado de bodegas
   const filteredList = bodegas.filter(b => {
     if (search && !b.nombre.toLowerCase().includes(search.toLowerCase())) return false;
@@ -224,6 +254,20 @@ export default function BodegasAdminPage() {
         >
           <BarChart3 size={14} />
           Estadísticas
+        </button>
+        <button
+          onClick={() => setTabActivo('pendientes')}
+          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
+            tabActivo === 'pendientes'
+              ? 'border-emerald-500 text-white'
+              : 'border-transparent text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          <ShieldAlert size={14} />
+          Por Aprobar
+          <span className="bg-amber-500/20 text-amber-500 text-[10px] px-1.5 py-0.5 rounded-full ml-1">
+            {bodegas.filter(b => b.estatus === 'pendiente').length}
+          </span>
         </button>
       </div>
 
@@ -473,6 +517,58 @@ export default function BodegasAdminPage() {
 
       </div>
       </div>
+      )}
+
+      {/* ── TAB: PENDIENTES ── */}
+      {tabActivo === 'pendientes' && (
+        <div className="flex-1 overflow-y-auto pr-2">
+          {bodegas.filter(b => b.estatus === 'pendiente').length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+              <ShieldAlert size={48} className="mb-4 opacity-50" />
+              <p>No hay bodegas pendientes de aprobación</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {bodegas.filter(b => b.estatus === 'pendiente').map(b => (
+                <div key={b.id} className="bg-[#090d12]/80 border border-amber-500/30 rounded-2xl p-5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-extrabold text-white text-[15px]">{b.nombre}</h3>
+                      <span className="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded-full uppercase font-black">Pendiente</span>
+                    </div>
+                    <p className="text-gray-400 text-[12px] flex items-center gap-1 mb-3">
+                      <MapPin size={12} /> {b.municipio}, {b.estado}
+                    </p>
+                    <div className="text-[12px] text-gray-300 bg-white/5 rounded-lg p-3 space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Capacidad:</span>
+                        <strong className="text-white">{b.capacidad_total.toLocaleString()} t</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Encargado:</span>
+                        <strong className="text-white">{b.encargado_nombre || '—'}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
+                    <button 
+                      onClick={() => aprobarBodega(b.id)}
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl text-[12px] transition-all"
+                    >
+                      Aprobar
+                    </button>
+                    <button 
+                      onClick={() => rechazarBodega(b.id)}
+                      className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold py-2 rounded-xl text-[12px] transition-all"
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
     </div>
