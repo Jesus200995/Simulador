@@ -35,6 +35,7 @@
           >
             <span class="tnf-icon" v-html="t.icon"></span>
             <span class="tnf-lbl">{{ t.label }}</span>
+            <span v-if="t.key === 'bodegas_pendientes' && bodegasPendientes.length > 0" class="tnf-badge-warn">{{ bodegasPendientes.length }}</span>
           </button>
         </nav>
 
@@ -854,10 +855,130 @@
           </template>
         </div>
 
+        <!-- ════════════ PANEL 7: BODEGAS PENDIENTES ════════════ -->
+        <div v-if="tabActiva === 'bodegas_pendientes'" class="panel fade-in">
+          <div class="p-header">
+            <div class="p-header-left">
+              <span class="p-header-badge amber">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+                Solicitudes
+              </span>
+              <h2 class="p-title">Bodegas Pendientes de Aprobacion</h2>
+              <p class="p-desc">Revisa y aprueba o rechaza las solicitudes de nuevas bodegas registradas en el sistema</p>
+            </div>
+            <div class="p-header-right">
+              <button class="btn-bp-refresh" @click="fetchBodegasPendientes" :disabled="bodegasPendientesLoading" title="Actualizar lista">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                Actualizar
+              </button>
+            </div>
+          </div>
+
+          <!-- Toast -->
+          <Transition name="bp-toast">
+            <div v-if="bpToast" class="bp-toast-bar" :class="bpToast.type">
+              <svg v-if="bpToast.type === 'success'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ bpToast.text }}
+            </div>
+          </Transition>
+
+          <!-- Loading -->
+          <div v-if="bodegasPendientesLoading" class="loader-row">
+            <div class="loader"></div><span>Cargando bodegas pendientes...</span>
+          </div>
+
+          <!-- Sin pendientes -->
+          <div v-else-if="bodegasPendientes.length === 0" class="bp-empty glass-card">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".18">
+              <path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/>
+              <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <h3>Sin solicitudes pendientes</h3>
+            <p>Todas las bodegas han sido revisadas. Las nuevas solicitudes apareceran aqui automaticamente.</p>
+          </div>
+
+          <!-- Grid de bodegas -->
+          <div v-else class="bp-grid">
+            <div v-for="b in bodegasPendientes" :key="b.id" class="bp-card glass-card">
+              <!-- Header de la card -->
+              <div class="bp-card-top">
+                <div class="bp-card-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/></svg>
+                </div>
+                <div class="bp-card-info">
+                  <h3 class="bp-card-name">{{ b.nombre }}</h3>
+                  <p class="bp-card-loc">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ b.municipio || '—' }}, {{ b.estado || '—' }}
+                  </p>
+                  <p class="bp-card-clave" v-if="b.clave">Clave: <strong>{{ b.clave }}</strong></p>
+                </div>
+                <span class="bp-badge-pending">Pendiente</span>
+              </div>
+
+              <!-- Datos -->
+              <div class="bp-card-details">
+                <div class="bp-detail-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                  <span>Capacidad: <strong>{{ b.capacidad_ton ? Number(b.capacidad_ton).toLocaleString('es-MX') + ' ton' : '—' }}</strong></span>
+                </div>
+                <div class="bp-detail-item" v-if="b.creado_por_nombre">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span>Registrado por: <strong>{{ b.creado_por_nombre }}</strong></span>
+                </div>
+                <div class="bp-detail-item" v-if="b.fecha_creacion">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span>Solicitud: <strong>{{ new Date(b.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) }}</strong></span>
+                </div>
+                <div class="bp-detail-item" v-if="b.direccion">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                  <span>{{ b.direccion }}</span>
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div class="bp-card-actions">
+                <button
+                  class="bp-btn bp-btn-approve"
+                  @click="bpAprobar(b.id)"
+                  :disabled="bodegasPendientesBusy === b.id"
+                >
+                  <svg v-if="bodegasPendientesBusy !== b.id" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span v-if="bodegasPendientesBusy === b.id" class="bp-spinner"></span>
+                  Aprobar
+                </button>
+                <button
+                  class="bp-btn bp-btn-reject"
+                  @click="bpRechazar(b.id)"
+                  :disabled="bodegasPendientesBusy === b.id"
+                >
+                  <svg v-if="bodegasPendientesBusy !== b.id" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <span v-if="bodegasPendientesBusy === b.id" class="bp-spinner"></span>
+                  Rechazar
+                </button>
+                <router-link :to="`/bodega/${b.id}`" class="bp-btn bp-btn-detail">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Ver detalle
+                </router-link>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contador -->
+          <div v-if="!bodegasPendientesLoading && bodegasPendientes.length > 0" class="bp-footer">
+            <span class="bp-count">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ bodegasPendientes.length }} bodega{{ bodegasPendientes.length !== 1 ? 's' : '' }} pendiente{{ bodegasPendientes.length !== 1 ? 's' : '' }} de revision
+            </span>
+          </div>
+        </div>
+
       </template>
     </div>
   </AppShell>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch, reactive } from 'vue'
@@ -879,7 +1000,7 @@ const authStore = useAuthStore()
 // ── State ──
 const cargando = ref(false)
 const cargandoInicial = ref(true)
-const tabActiva = ref<'vision'|'produccion'|'infraestructura'|'precios'|'alertas'|'operacion'>('vision')
+const tabActiva = ref<'vision'|'produccion'|'infraestructura'|'precios'|'alertas'|'operacion'|'bodegas_pendientes'>('vision')
 const resumen = ref<any>(null)
 const produccion = ref<any>(null)
 const infraestructura = ref<any>(null)
@@ -888,6 +1009,12 @@ const alertasData = ref<any>(null)
 const operacion = ref<any>(null)
 const mapaData = ref<any>(null)
 const filtros = ref({ estado: '', ciclo: '' })
+
+// ── Bodegas pendientes ──
+const bodegasPendientes = ref<any[]>([])
+const bodegasPendientesLoading = ref(false)
+const bodegasPendientesBusy = ref<number | null>(null)
+const bpToast = ref<{ text: string; type: string } | null>(null)
 
 // ── Sticky height tracker ──
 const stickyRef = ref<HTMLElement | null>(null)
@@ -906,12 +1033,13 @@ const ITEM_W = 160
 const ITEM_GAP = 10
 
 const tabs: Array<{ key: typeof tabActiva.value; label: string; icon: string }> = [
-  { key: 'vision',         label: 'Vision general',   icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>' },
-  { key: 'produccion',     label: 'Produccion',        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' },
-  { key: 'infraestructura',label: 'Infraestructura',   icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>' },
-  { key: 'precios',        label: 'Precios',           icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9.35a4 4 0 0 0-3-1.35c-2.2 0-4 1.34-4 3s1.8 3 4 3a4 4 0 0 0 3-1.35"/><line x1="12" y1="5" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="19"/></svg>' },
-  { key: 'alertas',        label: 'Alertas',           icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
-  { key: 'operacion',      label: 'Operacion',         icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>' },
+  { key: 'vision',              label: 'Vision general',    icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>' },
+  { key: 'produccion',          label: 'Produccion',        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' },
+  { key: 'infraestructura',     label: 'Infraestructura',   icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>' },
+  { key: 'precios',             label: 'Precios',           icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9.35a4 4 0 0 0-3-1.35c-2.2 0-4 1.34-4 3s1.8 3 4 3a4 4 0 0 0 3-1.35"/><line x1="12" y1="5" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="19"/></svg>' },
+  { key: 'alertas',             label: 'Alertas',           icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
+  { key: 'operacion',           label: 'Operacion',         icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>' },
+  { key: 'bodegas_pendientes',  label: 'Bodegas Pendientes', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V13h6v8"/><circle cx="18" cy="8" r="4"/><line x1="18" y1="6" x2="18" y2="10"/><line x1="16" y1="8" x2="20" y2="8"/></svg>' },
 ]
 
 // Extended: [clone_last, real_0..real_n, clone_first]
@@ -1393,7 +1521,53 @@ watch(tabActiva, async (tab) => {
   if (tab === 'precios') {
     if (!psHoy.value) cargarPreciosSistema()
   }
+  if (tab === 'bodegas_pendientes') {
+    await fetchBodegasPendientes()
+  }
 })
+
+// ── Bodegas pendientes: funciones ──
+async function fetchBodegasPendientes() {
+  bodegasPendientesLoading.value = true
+  try {
+    const res = await api.admin.bodegasPendientes()
+    bodegasPendientes.value = res.bodegas ?? []
+  } catch(e: any) {
+    bpToast.value = { text: e.message || 'Error al cargar bodegas pendientes', type: 'error' }
+    setTimeout(() => { bpToast.value = null }, 4000)
+  } finally {
+    bodegasPendientesLoading.value = false
+  }
+}
+
+async function bpAprobar(id: number) {
+  bodegasPendientesBusy.value = id
+  try {
+    await api.admin.aprobarBodega(id)
+    bodegasPendientes.value = bodegasPendientes.value.filter(b => b.id !== id)
+    bpToast.value = { text: 'Bodega aprobada correctamente', type: 'success' }
+  } catch(e: any) {
+    bpToast.value = { text: e.message || 'Error al aprobar bodega', type: 'error' }
+  } finally {
+    bodegasPendientesBusy.value = null
+    setTimeout(() => { bpToast.value = null }, 3500)
+  }
+}
+
+async function bpRechazar(id: number) {
+  bodegasPendientesBusy.value = id
+  try {
+    await api.admin.rechazarBodega(id)
+    bodegasPendientes.value = bodegasPendientes.value.filter(b => b.id !== id)
+    bpToast.value = { text: 'Bodega rechazada', type: 'success' }
+  } catch(e: any) {
+    bpToast.value = { text: e.message || 'Error al rechazar bodega', type: 'error' }
+  } finally {
+    bodegasPendientesBusy.value = null
+    setTimeout(() => { bpToast.value = null }, 3500)
+  }
+}
+
 
 watch(mapaData, async () => {
   if (tabActiva.value !== 'vision') return
@@ -1762,6 +1936,12 @@ function psExportarCSV() {
 .tnf-icon { display: flex; align-items: center; opacity: .75; }
 .tnf-btn.active .tnf-icon { opacity: 1; }
 .tnf-lbl { letter-spacing: -.01em; }
+.tnf-badge-warn {
+  font-size: .55rem; font-weight: 700;
+  background: #FF9F0A; color: #fff;
+  border-radius: 99px; padding: 1px 6px; min-width: 18px; text-align: center;
+  line-height: 1.5;
+}
 
 /* ═══ TABS CAROUSEL (mobile only) ═══ */
 .tabs-carousel {
@@ -2442,4 +2622,142 @@ function psExportarCSV() {
 .ps-modal-actions { display:flex;gap:.45rem;margin-top:.85rem; }
 .modal-fade-enter-active,.modal-fade-leave-active { transition:opacity .2s; }
 .modal-fade-enter-from,.modal-fade-leave-to { opacity:0; }
+
+/* ═══ BODEGAS PENDIENTES PANEL ═══ */
+.p-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.p-header-right { flex-shrink: 0; }
+
+.btn-bp-refresh {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem 1rem; border-radius: 10px; border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+  font-size: .78rem; font-weight: 650; color: #374151; cursor: pointer;
+  transition: all .2s; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.btn-bp-refresh:hover:not(:disabled) { background: #fff; border-color: rgba(0,0,0,.15); }
+.btn-bp-refresh:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Toast */
+.bp-toast-bar {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .6rem 1rem; border-radius: 10px; font-size: .82rem; font-weight: 600;
+  margin-bottom: 1rem;
+}
+.bp-toast-bar.success { background: rgba(34,197,94,.1); color: #166534; border: 1px solid rgba(34,197,94,.2); }
+.bp-toast-bar.error { background: rgba(239,68,68,.08); color: #991b1b; border: 1px solid rgba(239,68,68,.15); }
+.bp-toast-enter-active, .bp-toast-leave-active { transition: all .3s ease; }
+.bp-toast-enter-from, .bp-toast-leave-to { opacity: 0; transform: translateY(-6px); }
+
+/* Empty state */
+.bp-empty {
+  text-align: center; padding: 4rem 2rem;
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+}
+.bp-empty h3 { font-size: 1.05rem; font-weight: 700; color: #374151; margin: 0; }
+.bp-empty p { font-size: .84rem; color: #9ca3af; max-width: 380px; line-height: 1.55; margin: 0; }
+
+/* Grid */
+.bp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: .85rem;
+}
+
+/* Card */
+.bp-card {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid rgba(255,159,10,.18);
+  border-radius: 16px; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.bp-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.08); }
+
+.bp-card-top {
+  display: flex; gap: .75rem; align-items: flex-start;
+  padding: 1.1rem 1.1rem .75rem;
+}
+.bp-card-icon {
+  width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px;
+  background: rgba(255,159,10,.1); color: #d97706;
+  display: flex; align-items: center; justify-content: center;
+}
+.bp-card-info { flex: 1; min-width: 0; }
+.bp-card-name { font-size: .92rem; font-weight: 750; color: #111827; margin: 0 0 .2rem; letter-spacing: -.015em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bp-card-loc {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .76rem; color: #6b7280; margin: 0;
+}
+.bp-card-clave { font-size: .72rem; color: #9ca3af; margin: .2rem 0 0; }
+.bp-card-clave strong { color: #6b7280; font-family: ui-monospace, monospace; }
+
+.bp-badge-pending {
+  font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  background: rgba(255,159,10,.12); color: #d97706;
+  border: 1px solid rgba(255,159,10,.25); border-radius: 99px;
+  padding: 3px 8px; flex-shrink: 0; white-space: nowrap; align-self: flex-start;
+}
+
+.bp-card-details {
+  display: flex; flex-direction: column; gap: .35rem;
+  padding: 0 1.1rem .85rem;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+.bp-detail-item {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .76rem; color: #6b7280;
+}
+.bp-detail-item svg { color: #9ca3af; flex-shrink: 0; }
+.bp-detail-item strong { color: #374151; font-weight: 650; }
+
+.bp-card-actions {
+  display: flex; gap: .4rem; padding: .85rem 1.1rem;
+  flex-wrap: wrap;
+}
+.bp-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .45rem .9rem; border-radius: 9px; border: none;
+  font-size: .78rem; font-weight: 650; cursor: pointer;
+  transition: all .2s; text-decoration: none; white-space: nowrap;
+}
+.bp-btn:disabled { opacity: .4; cursor: not-allowed; }
+.bp-btn-approve {
+  background: #22c55e; color: #fff;
+  box-shadow: 0 2px 8px rgba(34,197,94,.25);
+}
+.bp-btn-approve:hover:not(:disabled) { background: #16a34a; transform: translateY(-1px); }
+.bp-btn-reject {
+  background: rgba(239,68,68,.08); color: #dc2626;
+  border: 1px solid rgba(239,68,68,.15);
+}
+.bp-btn-reject:hover:not(:disabled) { background: rgba(239,68,68,.14); }
+.bp-btn-detail {
+  background: rgba(0,0,0,.04); color: #6b7280;
+  border: 1px solid rgba(0,0,0,.07);
+}
+.bp-btn-detail:hover { background: rgba(0,0,0,.07); }
+.bp-spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: currentColor;
+  border-radius: 50%; animation: bpSpin .6s linear infinite;
+}
+@keyframes bpSpin { to { transform: rotate(360deg); } }
+
+/* Footer count */
+.bp-footer {
+  margin-top: .75rem; padding: .6rem .85rem;
+  background: rgba(255,159,10,.06); border-radius: 10px;
+  border: 1px solid rgba(255,159,10,.12);
+}
+.bp-count {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .78rem; font-weight: 600; color: #92400e;
+}
+.bp-count svg { color: #d97706; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bp-grid { grid-template-columns: 1fr; }
+  .p-header { flex-direction: column; }
+  .p-header-right { align-self: flex-start; }
+}
 </style>
