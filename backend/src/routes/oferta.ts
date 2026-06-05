@@ -53,7 +53,7 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
         const params: any[] = [bodegaRef.longitud, bodegaRef.latitud, radioMetros];
         if (tipo_maiz && tipo_maiz !== 'all') {
           params.push(tipo_maiz);
-          tipoFilter = `AND dp.tipo_maiz = $${params.length}`;
+          tipoFilter = `AND dp.tipo_maiz ILIKE $${params.length}`;
         }
 
         let result = await pool.query(
@@ -90,7 +90,7 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
           let tipoFilter2 = '';
           if (tipo_maiz && tipo_maiz !== 'all') {
             params2.push(tipo_maiz);
-            tipoFilter2 = `AND dp.tipo_maiz = $${params2.length}`;
+            tipoFilter2 = `AND dp.tipo_maiz ILIKE $${params2.length}`;
           }
           result = await pool.query(
             `SELECT
@@ -129,8 +129,8 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
     const params: any[] = [];
 
     if (tipo_maiz && tipo_maiz !== 'all') {
-      params.push(tipo_maiz);
-      where += ` AND (cc.variety_id = $${params.length} OR $${params.length}::text = 'all')`;
+      params.push(`%${tipo_maiz}%`);
+      where += ` AND (cc.variety_id::text ILIKE $${params.length} OR cc.variety_other::text ILIKE $${params.length})`;
     }
 
     // If we have bodega coords, filter by state at minimum
