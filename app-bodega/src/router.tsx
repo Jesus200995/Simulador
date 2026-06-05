@@ -53,6 +53,8 @@ import B24PerfilBodega from './pages/B24PerfilBodega';
 import B25ConfiguracionPage from './pages/B25ConfiguracionPage';
 import B26DetalleTransaccion from './pages/B26DetalleTransaccion';
 import B27InteresadosSenal from './pages/B27InteresadosSenal';
+import B28EditarBodega from './pages/B28EditarBodega';
+import B29OnboardingBodeguero from './pages/B29OnboardingBodeguero';
 
 // Panel Administrativo - Importaciones (Apple 2026)
 import AdminShell from './components/admin/AdminShell';
@@ -139,6 +141,14 @@ export const router = createBrowserRouter([
   {
     path: '/bodegas/:id/semaforo',
     element: <ProtectedLayout><B08Semaforo /></ProtectedLayout>,
+  },
+  {
+    path: '/bodegas/:id/editar',
+    element: <ProtectedLayout><B28EditarBodega /></ProtectedLayout>,
+  },
+  {
+    path: '/onboarding',
+    element: <ProtectedLayout><B29OnboardingBodeguero /></ProtectedLayout>,
   },
   {
     path: '/inventario',

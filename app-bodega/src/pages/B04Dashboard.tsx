@@ -149,12 +149,20 @@ export default function B04Dashboard() {
                   Sin bodegas no podrás registrar inventarios, precios
                   ni requerimientos de maíz.
                 </p>
-                <button
-                  onClick={() => navigate('/bodegas/seleccionar')}
-                  className="bg-amber-600 text-white text-[14px] font-semibold px-5 py-2.5 rounded-xl active:opacity-80 transition-opacity"
-                >
-                  Asociar mis bodegas →
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => navigate('/bodegas/seleccionar')}
+                    className="bg-amber-600 text-white text-[14px] font-semibold px-5 py-2.5 rounded-xl active:opacity-80 transition-opacity"
+                  >
+                    Asociar mis bodegas →
+                  </button>
+                  <button
+                    onClick={() => navigate('/onboarding')}
+                    className="bg-white text-amber-700 border border-amber-300 text-[14px] font-semibold px-5 py-2.5 rounded-xl active:opacity-80 transition-opacity"
+                  >
+                    Ver primeros pasos
+                  </button>
+                </div>
               </div>
             )}
 

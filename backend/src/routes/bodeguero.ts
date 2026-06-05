@@ -74,6 +74,49 @@ router.get('/mis-bodegas', authMiddleware, bodegaOnly, async (req: AuthRequest, 
   }
 });
 
+// PATCH /api/bodeguero/bodegas/:id — editar datos de contacto de la bodega (#7)
+// Solo el bodeguero con asociación APROBADA puede editar horario, teléfono y observaciones.
+// Nombre y ubicación NO son editables (los controla el Admin).
+router.patch('/bodegas/:id', authMiddleware, bodegaOnly, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const isAdmin = ['admin', 'responsable'].includes(req.user!.rol);
+  const { id } = req.params;
+  const { horario, telefono_contacto, observaciones } = req.body;
+
+  try {
+    // Verificar asociación aprobada (admin puede editar cualquiera)
+    if (!isAdmin) {
+      const assoc = await pool.query(
+        `SELECT 1 FROM bodeguero_bodegas
+         WHERE usuario_id = $1 AND bodega_id = $2 AND estatus = 'aprobada'`,
+        [userId, id]
+      );
+      if (assoc.rows.length === 0) {
+        res.status(403).json({ error: 'No tienes permiso para editar esta bodega' });
+        return;
+      }
+    }
+
+    const result = await pool.query(
+      `UPDATE bodegas
+       SET horario = COALESCE($1, horario),
+           telefono_contacto = COALESCE($2, telefono_contacto),
+           observaciones = COALESCE($3, observaciones),
+           fecha_actualizacion = NOW()
+       WHERE id = $4
+       RETURNING id, nombre, horario, telefono_contacto, observaciones`,
+      [horario ?? null, telefono_contacto ?? null, observaciones ?? null, id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+    res.json({ ok: true, bodega: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/bodeguero/mis-bodegas-estatus
 // Devuelve TODAS las asociaciones del bodeguero (aprobada/pendiente/rechazada)
 // para mostrar banners de estado en el dashboard. No filtra por estatus.

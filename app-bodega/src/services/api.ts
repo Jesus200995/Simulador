@@ -72,6 +72,8 @@ export const api = {
       request('/bodeguero/bodegas/solicitar', { method: 'POST', body: JSON.stringify({ bodega_id }) }),
     misBodegas: () => request('/bodeguero/mis-bodegas'),
     misBodegasEstatus: () => request('/bodeguero/mis-bodegas-estatus'),
+    editarBodega: (id: number | string, data: { horario?: string; telefono_contacto?: string; observaciones?: string }) =>
+      request(`/bodeguero/bodegas/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   },
   infraestructura: {
     get: (id: number) => request(`/infraestructura/${id}`),

@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
-import { Phone, MapPin, Zap, Package, BarChart2, Signal } from 'lucide-react';
+import { Phone, MapPin, Zap, Package, BarChart2, Signal, PenLine } from 'lucide-react';
 
 type Tab = 'general' | 'inventario' | 'precios' | 'senales';
 
@@ -91,6 +91,28 @@ export default function B06BodegaDetalle() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
         {/* ── General ── */}
         {tab === 'general' && (
+          <div className="space-y-4">
+          <button
+            onClick={() => navigate(`/bodegas/${id}/editar`)}
+            className="flex items-center gap-2 px-5 py-3 bg-[#1A5C38] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
+          >
+            <PenLine size={16} /> Editar datos de contacto
+          </button>
+          {(bodega.horario || bodega.telefono_contacto || bodega.observaciones) && (
+            <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
+              <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Datos de contacto</p>
+              {[
+                ['Horario', bodega.horario || '—'],
+                ['Teléfono', bodega.telefono_contacto || '—'],
+                ['Observaciones', bodega.observaciones || '—'],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between items-start gap-3 px-4 py-3.5">
+                  <span className="text-[14px] text-gray-500 flex-shrink-0">{k}</span>
+                  <span className="text-[14px] font-semibold text-gray-800 text-right">{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
               <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Información</p>
@@ -124,6 +146,7 @@ export default function B06BodegaDetalle() {
                 ))}
               </div>
             )}
+          </div>
           </div>
         )}
 
