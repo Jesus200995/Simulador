@@ -245,8 +245,8 @@ export default function MapaBodegasPage() {
                   <div className="text-[11px] text-gray-300 bg-white/[0.02] border border-white/5 rounded-xl p-2.5 space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500 font-medium">Precio hoy:</span>
-                      <strong className="text-emerald-400 font-bold">
-                        {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton` : '--'}
+                      <strong className={b.precio_compra_hoy > 0 ? 'text-emerald-400 font-bold' : 'text-gray-500 font-medium'}>
+                        {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton` : 'Sin precio publicado'}
                       </strong>
                     </div>
                   </div>

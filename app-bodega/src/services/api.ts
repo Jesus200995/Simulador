@@ -71,6 +71,7 @@ export const api = {
     solicitar: (bodega_id: number) =>
       request('/bodeguero/bodegas/solicitar', { method: 'POST', body: JSON.stringify({ bodega_id }) }),
     misBodegas: () => request('/bodeguero/mis-bodegas'),
+    misBodegasEstatus: () => request('/bodeguero/mis-bodegas-estatus'),
   },
   infraestructura: {
     get: (id: number) => request(`/infraestructura/${id}`),
@@ -96,12 +97,15 @@ export const api = {
       request(`/senales-compra/${id}`, { method: 'DELETE' }),
     interes: (id: number) =>
       request(`/senales-compra/${id}/interes`, { method: 'POST' }),
+    interesados: (id: number | string) =>
+      request(`/senales-compra/${id}/interesados`),
   },
   transacciones: {
     list: (params?: any) => {
       const qs = new URLSearchParams(params).toString();
       return request(`/transacciones${qs ? '?' + qs : ''}`);
     },
+    get: (id: number | string) => request(`/transacciones/${id}`),
     create: (data: any) =>
       request('/transacciones', { method: 'POST', body: JSON.stringify(data) }),
     confirmar: (id: number, confirmacion: string) =>

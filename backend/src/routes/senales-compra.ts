@@ -180,6 +180,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response): P
 
 // POST /api/senales-compra/:id/interes
 router.post('/:id/interes', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
   try {
     const senal = await pool.query(
       `UPDATE senales_compra SET interesados_count = interesados_count + 1
@@ -189,6 +190,36 @@ router.post('/:id/interes', authMiddleware, async (req: AuthRequest, res: Respon
     if (senal.rows.length === 0) { res.status(404).json({ error: 'Señal no encontrada o inactiva' }); return; }
 
     const s = senal.rows[0];
+
+    // Guardar QUIÉN respondió (para que el bodeguero pueda verlo y contactarlo)
+    try {
+      const productorData = await pool.query(
+        `SELECT
+            p.producer_id,
+            TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)) AS nombre_completo,
+            up.municipality_name AS municipio,
+            up.state_name AS estado,
+            COALESCE(p.phone, usr.telefono) AS telefono
+         FROM producer p
+         JOIN usuarios usr ON usr.id = p.usuario_id
+         LEFT JOIN up ON up.producer_id = p.producer_id
+         WHERE usr.id = $1
+         ORDER BY up.created_at DESC NULLS LAST
+         LIMIT 1`,
+        [userId]
+      );
+      const prod = productorData.rows[0];
+      if (prod) {
+        await pool.query(
+          `INSERT INTO senal_interesados
+             (senal_id, producer_id, usuario_id, municipio, estado, telefono, nombre_productor)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           ON CONFLICT (senal_id, producer_id) DO NOTHING`,
+          [req.params.id, prod.producer_id, userId, prod.municipio, prod.estado, prod.telefono, prod.nombre_completo]
+        );
+      }
+    } catch (_) { /* best-effort: tabla puede no existir aún */ }
+
     try {
       await pool.query(
         `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
@@ -199,6 +230,49 @@ router.post('/:id/interes', authMiddleware, async (req: AuthRequest, res: Respon
 
     res.json({ ok: true, interesados_count: s.interesados_count });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/senales-compra/:id/interesados
+// Bodeguero ve quién respondió a su señal (solo el dueño de la señal)
+router.get('/:id/interesados', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const isAdmin = ['admin', 'responsable'].includes(req.user!.rol);
+  try {
+    const { id } = req.params;
+
+    // Verificar que la señal pertenece al bodeguero autenticado (admin puede ver cualquiera)
+    const senal = await pool.query(
+      `SELECT sc.id, sc.usuario_id FROM senales_compra sc WHERE sc.id = $1`,
+      [id]
+    );
+    if (senal.rows.length === 0) {
+      res.status(404).json({ error: 'Señal no encontrada' });
+      return;
+    }
+    if (!isAdmin && senal.rows[0].usuario_id !== userId) {
+      res.status(403).json({ error: 'No tienes acceso a esta señal' });
+      return;
+    }
+
+    const result = await pool.query(
+      `SELECT
+          si.id,
+          si.nombre_productor AS nombre,
+          si.municipio,
+          si.estado,
+          si.telefono,
+          si.created_at AS fecha_interes
+       FROM senal_interesados si
+       WHERE si.senal_id = $1
+       ORDER BY si.created_at DESC`,
+      [id]
+    );
+
+    res.json({ total: result.rows.length, interesados: result.rows });
+  } catch (err: any) {
+    console.error('Error al obtener interesados:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 export default router;

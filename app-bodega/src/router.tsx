@@ -51,6 +51,8 @@ import B23Notificaciones from './pages/B23Notificaciones';
 import B22PreciosMercado from './pages/B22PreciosMercado';
 import B24PerfilBodega from './pages/B24PerfilBodega';
 import B25ConfiguracionPage from './pages/B25ConfiguracionPage';
+import B26DetalleTransaccion from './pages/B26DetalleTransaccion';
+import B27InteresadosSenal from './pages/B27InteresadosSenal';
 
 // Panel Administrativo - Importaciones (Apple 2026)
 import AdminShell from './components/admin/AdminShell';
@@ -165,6 +167,14 @@ export const router = createBrowserRouter([
   {
     path: '/transacciones/nueva',
     element: <ProtectedLayout><B13Transaccion /></ProtectedLayout>,
+  },
+  {
+    path: '/transacciones/:id',
+    element: <ProtectedLayout><B26DetalleTransaccion /></ProtectedLayout>,
+  },
+  {
+    path: '/senales/:id/interesados',
+    element: <ProtectedLayout><B27InteresadosSenal /></ProtectedLayout>,
   },
   {
     path: '/tarifario',

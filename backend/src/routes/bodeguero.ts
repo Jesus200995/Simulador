@@ -74,4 +74,25 @@ router.get('/mis-bodegas', authMiddleware, bodegaOnly, async (req: AuthRequest, 
   }
 });
 
+// GET /api/bodeguero/mis-bodegas-estatus
+// Devuelve TODAS las asociaciones del bodeguero (aprobada/pendiente/rechazada)
+// para mostrar banners de estado en el dashboard. No filtra por estatus.
+router.get('/mis-bodegas-estatus', authMiddleware, bodegaOnly, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  try {
+    const result = await pool.query(
+      `SELECT b.id, b.nombre, b.municipio, b.estado,
+              bb.estatus AS estatus
+       FROM bodeguero_bodegas bb
+       JOIN bodegas b ON b.id = bb.bodega_id
+       WHERE bb.usuario_id = $1
+       ORDER BY b.nombre`,
+      [userId]
+    );
+    res.json({ bodegas: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

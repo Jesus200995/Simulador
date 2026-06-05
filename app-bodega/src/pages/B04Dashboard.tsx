@@ -25,6 +25,8 @@ export default function B04Dashboard() {
   const { user } = useAuthStore();
   const [stats, setStats] = useState<Partial<Stats>>({});
   const [loading, setLoading] = useState(true);
+  const [bodegasAprobadas, setBodegasAprobadas] = useState(0);
+  const [bodegasPendientes, setBodegasPendientes] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +34,17 @@ export default function B04Dashboard() {
       .then((r: any) => setStats(r.stats || {}))
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  // Estado de asociación a bodegas (banner "en revisión" / "sin bodega")
+  useEffect(() => {
+    api.bodeguero.misBodegasEstatus()
+      .then((data: any) => {
+        const bodegas = Array.isArray(data) ? data : data.bodegas || [];
+        setBodegasAprobadas(bodegas.filter((b: any) => b.estatus === 'aprobada').length);
+        setBodegasPendientes(bodegas.filter((b: any) => b.estatus === 'pendiente').length);
+      })
+      .catch(() => {});
   }, []);
 
   // Mexico timezone clock (always Mexico, not device)
@@ -108,8 +121,25 @@ export default function B04Dashboard() {
           </div>
         ) : (
           <>
-            {/* C-11: Onboarding cuando no tiene bodegas */}
-            {(stats.mis_bodegas ?? 0) === 0 && (
+            {/* Banner "Cuenta en revisión" — tiene asociación pendiente, ninguna aprobada */}
+            {bodegasAprobadas === 0 && bodegasPendientes > 0 && (
+              <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⏳</span>
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-800">Tu solicitud está en revisión</p>
+                    <p className="text-amber-700 text-[13px] mt-1 leading-relaxed">
+                      El administrador está verificando tu asociación a la bodega.
+                      Recibirás una notificación cuando sea aprobada.
+                      Mientras tanto puedes explorar la plataforma.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* C-11: Onboarding cuando no tiene bodegas (ni aprobadas ni pendientes) */}
+            {(stats.mis_bodegas ?? 0) === 0 && bodegasPendientes === 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
                 <p className="font-semibold text-amber-800 mb-1">
                   ¡Bienvenido a SIMAC!

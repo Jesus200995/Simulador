@@ -35,13 +35,17 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
     if (fecha_inicio) { params.push(fecha_inicio); where += ` AND t.fecha >= $${params.length}`; }
     if (fecha_fin) { params.push(fecha_fin); where += ` AND t.fecha <= $${params.length}`; }
 
-    let limitSql = '';
-    const limitNum = parseInt(String(limit ?? ''), 10);
-    if (Number.isFinite(limitNum) && limitNum > 0 && limitNum <= 100) {
-      params.push(limitNum);
-      limitSql = ` LIMIT $${params.length}`;
-    }
+    // Paginación (corrección #6). Compatible con el atajo ?limit=N usado por
+    // algunas vistas (p. ej. resumen del productor) sin página explícita.
+    const { page, limit: limitQ } = req.query;
+    const limitNum = parseInt(String(limitQ ?? limit ?? '20'), 10);
+    const safeLimit = Number.isFinite(limitNum) && limitNum > 0 && limitNum <= 100 ? limitNum : 20;
+    const pageNum = parseInt(String(page ?? '1'), 10);
+    const safePage = Number.isFinite(pageNum) && pageNum > 0 ? pageNum : 1;
+    const offset = (safePage - 1) * safeLimit;
 
+    // params para la query de datos (con LIMIT/OFFSET)
+    const dataParams = [...params, safeLimit, offset];
     const result = await pool.query(
       `SELECT t.*, b.nombre AS bodega_nombre,
               t.precio_ton AS precio_por_ton,
@@ -52,11 +56,98 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
        JOIN bodegas b ON b.id = t.bodega_id
        LEFT JOIN producer p ON p.producer_id = t.producer_id
        ${where}
-       ORDER BY t.fecha DESC, t.created_at DESC${limitSql}`,
+       ORDER BY t.fecha DESC, t.created_at DESC
+       LIMIT $${dataParams.length - 1} OFFSET $${dataParams.length}`,
+      dataParams
+    );
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*) AS total FROM transacciones t ${where}`,
       params
     );
-    res.json(result.rows);
+    const total = parseInt(countResult.rows[0]?.total || '0', 10);
+
+    res.json({
+      data: result.rows,
+      pagination: { page: safePage, limit: safeLimit, total, pages: Math.ceil(total / safeLimit) || 1 },
+    });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/transacciones/exportar?formato=csv
+// IMPORTANTE: debe declararse ANTES de GET /:id para no colisionar con la ruta dinámica
+router.get('/exportar', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const user = req.user!;
+    const isAdmin = ['admin', 'responsable'].includes(user.rol);
+
+    let where: string;
+    const params: any[] = [];
+
+    if (isAdmin) {
+      where = 'WHERE 1=1';
+    } else if (user.rol === 'productor') {
+      params.push(user.userId);
+      where = `WHERE t.producer_id IN (
+        SELECT p.producer_id FROM producer p
+        JOIN usuarios u ON u.id = p.usuario_id WHERE u.id = $1
+      )`;
+    } else {
+      params.push(user.userId);
+      where = 'WHERE t.usuario_bodeguero = $1';
+    }
+
+    const result = await pool.query(
+      `SELECT
+          t.id,
+          TO_CHAR(t.fecha, 'DD/MM/YYYY') AS fecha,
+          b.nombre AS bodega,
+          COALESCE(
+            TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)),
+            t.nombre_productor_libre
+          ) AS productor,
+          t.tipo_maiz,
+          t.variedad_code AS variedad,
+          t.volumen_ton,
+          t.precio_ton AS precio_por_ton,
+          (t.volumen_ton * t.precio_ton) AS total_mxn,
+          COALESCE(t.confirmacion_productor, 'pendiente') AS confirmacion
+       FROM transacciones t
+       JOIN bodegas b ON b.id = t.bodega_id
+       LEFT JOIN producer p ON p.producer_id = t.producer_id
+       ${where}
+       ORDER BY t.fecha DESC, t.created_at DESC`,
+      params
+    );
+
+    const headers = [
+      'ID', 'Fecha', 'Bodega', 'Productor', 'Tipo Maíz',
+      'Variedad', 'Volumen (ton)', 'Precio/ton (MXN)', 'Total (MXN)', 'Confirmación',
+    ];
+
+    const rows = result.rows.map(r => [
+      r.id, r.fecha, r.bodega, r.productor,
+      r.tipo_maiz || '', r.variedad || '',
+      r.volumen_ton, r.precio_por_ton, r.total_mxn, r.confirmacion,
+    ]);
+
+    const escape = (cell: any) => {
+      const s = cell == null ? '' : String(cell);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    const csv = [
+      headers.join(','),
+      ...rows.map(row => row.map(escape).join(',')),
+    ].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="transacciones_${Date.now()}.csv"`);
+    res.send('﻿' + csv); // BOM para Excel en espanol
+  } catch (error) {
+    console.error('Error al exportar:', error);
+    res.status(500).json({ error: 'Error al generar el CSV' });
+  }
 });
 
 // POST /api/transacciones
@@ -117,18 +208,23 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
         t.producer_id,
         t.volumen_ton,
         t.precio_ton,
+        t.precio_ton AS precio_por_ton,
         t.tipo_maiz,
         t.variedad_code,
+        t.variedad_code AS variedad,
         t.fecha,
         t.notas,
+        t.notas AS observaciones,
         t.confirmacion_productor,
         t.peso_precio_sistema,
         t.created_at,
         b.nombre AS bodega_nombre,
         b.municipio AS bodega_municipio,
-        b.estado AS bodega_estado
+        b.estado AS bodega_estado,
+        COALESCE(TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno)), t.nombre_productor_libre) AS nombre_productor
       FROM transacciones t
       LEFT JOIN bodegas b ON b.id = t.bodega_id
+      LEFT JOIN producer p ON p.producer_id = t.producer_id
       WHERE t.id = $1
     `;
     const params: any[] = [id];

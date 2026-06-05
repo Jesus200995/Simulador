@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../components/Toast';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Trash2, Wheat } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
@@ -21,6 +21,7 @@ const today = new Date().toISOString().slice(0, 10);
 
 export default function B10Requerimiento() {
   const { toast, confirm } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const municipioPre = searchParams.get('municipio') || '';
 
@@ -226,7 +227,18 @@ export default function B10Requerimiento() {
                       {s.vigencia_inicio ? s.vigencia_inicio.slice(0, 10) : ''}{s.vigencia_fin ? ` → ${s.vigencia_fin.slice(0, 10)}` : ''}
                     </p>
                   )}
-                  <p className="text-[11px] text-gray-400">{s.interesados_count ?? 0} productores interesados</p>
+                  <button
+                    onClick={() => (s.interesados_count ?? 0) > 0 && navigate(`/senales/${s.id}/interesados`)}
+                    disabled={(s.interesados_count ?? 0) === 0}
+                    className={`text-[11px] font-medium ${
+                      (s.interesados_count ?? 0) > 0
+                        ? 'text-[#1A5C38] underline'
+                        : 'text-gray-400 cursor-default'
+                    }`}
+                  >
+                    {s.interesados_count ?? 0} productor{(s.interesados_count ?? 0) !== 1 ? 'es' : ''} interesado{(s.interesados_count ?? 0) !== 1 ? 's' : ''}
+                    {(s.interesados_count ?? 0) > 0 ? ' — Ver →' : ''}
+                  </button>
                   {s.volumen_ton && <p className="text-[11px] text-gray-400">Busca: {s.volumen_ton} ton</p>}
                 </div>
                 <button onClick={() => cancelar(s.id)} className="text-red-400 active:text-red-600 p-2 flex-shrink-0 mt-1">

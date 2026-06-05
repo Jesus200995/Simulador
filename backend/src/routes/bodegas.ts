@@ -108,7 +108,15 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
           WHERE sc.bodega_id = b.id AND sc.activa = true
           ORDER BY sc.created_at DESC
           LIMIT 1
-        ) as senal_activa
+        ) as senal_activa,
+        (
+          SELECT pr.precio
+          FROM precios pr
+          WHERE pr.bodega_id = b.id
+            AND pr.tipo_precio = 'bodega'
+          ORDER BY pr.fecha DESC, pr.created_at DESC
+          LIMIT 1
+        ) AS precio_compra_hoy
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
       ${where}
