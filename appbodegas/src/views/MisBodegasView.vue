@@ -31,6 +31,10 @@
         Bodegas
         <span v-if="bodegas.length" class="tab-count">{{ bodegas.length }}</span>
       </button>
+      <button v-if="auth.isAdmin" :class="{ active: activeTab === 'admin_pendientes' }" @click="activeTab = 'admin_pendientes'">
+        Por Aprobar
+        <span v-if="adminPendientes.length" class="tab-count" style="background:#d97706">{{ adminPendientes.length }}</span>
+      </button>
     </div>
 
     <div class="mis-main">
@@ -264,13 +268,50 @@
             </div>
           </router-link>
         </div>
+      <!-- Tab: Por Aprobar (Admins) -->
+      <div v-else-if="activeTab === 'admin_pendientes'">
+        <div v-if="adminPendientesLoading" class="mis-bodegas-loading">
+          <span class="spinner spinner-dark"></span> Cargando bodegas pendientes...
+        </div>
+        <div v-else-if="adminPendientes.length === 0" class="mis-bodegas-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>No hay bodegas pendientes de aprobacion</p>
+        </div>
+        <div v-else class="mis-bodegas-grid">
+          <div v-for="b in adminPendientes" :key="b.id" class="mis-bodega-card" style="border-color: rgba(217,119,6,.3);">
+            <div class="mis-bodega-top">
+              <span class="mis-bodega-clave">{{ b.clave || 'Sin clave' }}</span>
+              <span class="bodega-badge pendiente" style="background: rgba(217,119,6,.1); color: #b45309;">Pendiente</span>
+            </div>
+            <h3 class="mis-bodega-nombre">{{ b.nombre }}</h3>
+            <p class="mis-bodega-ubicacion">{{ b.municipio }}, {{ b.estado }}</p>
+            <div class="mis-bodega-stats">
+              <div class="mis-bodega-stat">
+                <span class="stat-value">{{ b.capacidad_toneladas?.toLocaleString() || '—' }}</span>
+                <span class="stat-label">Capacidad ton</span>
+              </div>
+            </div>
+            <p v-if="b.creado_por_nombre" style="font-size:.75rem; color:var(--color-text-secondary); margin-top:.5rem;">Registrado por: <strong>{{ b.creado_por_nombre }}</strong></p>
+            <div style="display:flex; gap:.5rem; margin-top:.75rem;">
+              <button @click="bpAprobar(b.id)" class="btn btn-sm" style="flex:1; background:#16a34a; color:#fff; border:none; padding:.4rem; border-radius:6px; font-weight:600; cursor:pointer;" :disabled="adminPendientesBusy === b.id">
+                <span v-if="adminPendientesBusy === b.id" class="spinner"></span>
+                <span v-else>Aprobar</span>
+              </button>
+              <button @click="bpRechazar(b.id)" class="btn btn-sm" style="flex:1; background:rgba(220,38,38,.1); color:#dc2626; border:none; padding:.4rem; border-radius:6px; font-weight:600; cursor:pointer;" :disabled="adminPendientesBusy === b.id">
+                <span v-if="adminPendientesBusy === b.id" class="spinner"></span>
+                <span v-else>Rechazar</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { api } from '@/services/api'
 import type { MiBodega, MiInventario, Bodega } from '@/types'
 import { useAuthStore } from '@/stores/auth'
@@ -281,7 +322,12 @@ const bodegas = ref<MiBodega[]>([])
 const inventarios = ref<MiInventario[]>([])
 const loading = ref(true)
 const error = ref('')
-const activeTab = ref<'catalogo' | 'inventarios' | 'solicitudes' | 'bodegas'>('catalogo')
+const activeTab = ref<'catalogo' | 'inventarios' | 'solicitudes' | 'bodegas' | 'admin_pendientes'>('catalogo')
+
+// Admin: Bodegas Pendientes
+const adminPendientes = ref<any[]>([])
+const adminPendientesLoading = ref(false)
+const adminPendientesBusy = ref<number | null>(null)
 
 const solicitudes = computed(() => bodegas.value.filter(b => b.estatus === 'pendiente'))
 
@@ -384,7 +430,57 @@ async function fetchData() {
   }
 }
 
-onMounted(fetchData)
+async function fetchAdminPendientes() {
+  if (!auth.isAdmin) return
+  adminPendientesLoading.value = true
+  try {
+    const res = await api.admin.bodegasPendientes()
+    adminPendientes.value = res.bodegas || []
+  } catch (err) {
+    console.error('Error fetching admin pendientes:', err)
+  } finally {
+    adminPendientesLoading.value = false
+  }
+}
+
+async function bpAprobar(id: number) {
+  if (!confirm('¿Aprobar esta bodega?')) return
+  adminPendientesBusy.value = id
+  try {
+    await api.admin.aprobarBodega(id)
+    adminPendientes.value = adminPendientes.value.filter(b => b.id !== id)
+  } catch (err: any) {
+    alert(err.message || 'Error al aprobar')
+  } finally {
+    adminPendientesBusy.value = null
+  }
+}
+
+async function bpRechazar(id: number) {
+  if (!confirm('¿Rechazar esta bodega?')) return
+  adminPendientesBusy.value = id
+  try {
+    await api.admin.rechazarBodega(id)
+    adminPendientes.value = adminPendientes.value.filter(b => b.id !== id)
+  } catch (err: any) {
+    alert(err.message || 'Error al rechazar')
+  } finally {
+    adminPendientesBusy.value = null
+  }
+}
+
+watch(activeTab, (newTab) => {
+  if (newTab === 'admin_pendientes' && auth.isAdmin) {
+    fetchAdminPendientes()
+  }
+})
+
+onMounted(() => {
+  fetchData()
+  if (auth.isAdmin) {
+    fetchAdminPendientes()
+  }
+})
 </script>
 
 <style scoped>
