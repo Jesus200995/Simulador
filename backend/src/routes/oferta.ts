@@ -42,94 +42,96 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
     const postgis = await hasPostGIS();
     const radio = Number(radio_km) || 60;
 
-    // ── Strategy A: disponibilidad_productor table + PostGIS ──
+    // ── Strategy A: disponibilidad_productor (oferta real declarada por productores) ──
     const hasDispTable = await pool.query(
       "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'disponibilidad_productor') AS e"
     );
-    if (hasDispTable.rows[0].e && bodegaRef && postgis) {
+    if (hasDispTable.rows[0].e) {
       try {
-        const radioMetros = radio * 1000;
-        let tipoFilter = '';
-        const params: any[] = [bodegaRef.longitud, bodegaRef.latitud, radioMetros];
-        if (tipo_maiz && tipo_maiz !== 'all') {
-          params.push(tipo_maiz);
-          tipoFilter = `AND dp.tipo_maiz ILIKE $${params.length}`;
-        }
+        // SELECT base reutilizable. $1=lng ref, $2=lat ref (para distancia; 0,0 si no hay bodega)
+        const refLng = bodegaRef?.longitud ?? 0;
+        const refLat = bodegaRef?.latitud ?? 0;
 
-        let result = await pool.query(
-          `SELECT
-             COALESCE(u.municipality_name, 'Sin municipio') AS municipio,
-             COALESCE(u.state_name, 'Sin estado') AS estado,
-             COUNT(DISTINCT dp.producer_id) AS productores_disponibles,
-             COALESCE(SUM(dp.volumen_estimado_ton), 0)::numeric(12,2) AS toneladas_estimadas,
-             MODE() WITHIN GROUP (ORDER BY dp.ventana_venta) AS ventana_predominante,
-             ROUND((MIN(ST_Distance(
-               ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
-               ST_SetSRID(ST_Point($1, $2), 4326)::geography
-             )) / 1000)::numeric, 1) AS distancia_km
-           FROM disponibilidad_productor dp
-           JOIN up u ON u.up_id = dp.up_id
-           WHERE dp.activa = TRUE
-             AND dp.fecha_vencimiento >= CURRENT_DATE
-             AND ST_DWithin(
-               ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
-               ST_SetSRID(ST_Point($1, $2), 4326)::geography,
-               $3
-             )
-             ${tipoFilter}
-           GROUP BY u.municipality_name, u.state_name
-           HAVING COUNT(DISTINCT dp.producer_id) > 0
-           ORDER BY distancia_km ASC
-           LIMIT 50`,
-          params
-        );
-
-        const initialResult = result;
-
-        // Fallback: si hay menos de 3 resultados, ampliar al estado
-        if (initialResult.rows.length < 3) {
-          const params2: any[] = [bodegaRef.estado];
-          let tipoFilter2 = '';
+        const buildQuery = (extraWhere: string, extraParams: any[], orderBy: string) => {
+          const params: any[] = [refLng, refLat, ...extraParams];
+          let tipoFilter = '';
           if (tipo_maiz && tipo_maiz !== 'all') {
-            params2.push(tipo_maiz);
-            tipoFilter2 = `AND dp.tipo_maiz ILIKE $${params2.length}`;
+            params.push(tipo_maiz);
+            tipoFilter = `AND dp.tipo_maiz ILIKE $${params.length}`;
           }
-          result = await pool.query(
-            `SELECT
-               COALESCE(u.municipality_name, 'Sin municipio') AS municipio,
-               COALESCE(u.state_name, 'Sin estado') AS estado,
-               COUNT(DISTINCT dp.producer_id) AS productores_disponibles,
-               COALESCE(SUM(dp.volumen_estimado_ton), 0)::numeric(12,2) AS toneladas_estimadas,
-               MODE() WITHIN GROUP (ORDER BY dp.ventana_venta) AS ventana_predominante,
-               0 AS distancia_km
-             FROM disponibilidad_productor dp
-             JOIN up u ON u.up_id = dp.up_id
-             WHERE dp.activa = TRUE
-               AND dp.fecha_vencimiento >= CURRENT_DATE
-               AND u.state_name ILIKE $1
-               ${tipoFilter2}
-             GROUP BY u.municipality_name, u.state_name
-             HAVING COUNT(DISTINCT dp.producer_id) > 0
-             ORDER BY productores_disponibles DESC
-             LIMIT 50`,
-            params2
+          const distExpr = (bodegaRef && postgis)
+            ? `ROUND((MIN(ST_Distance(
+                 ST_SetSRID(ST_Point(ST_X(u.centroid::geometry), ST_Y(u.centroid::geometry)), 4326)::geography,
+                 ST_SetSRID(ST_Point($1, $2), 4326)::geography
+               )) / 1000)::numeric, 1)`
+            : '0';
+          return {
+            text: `SELECT
+                 COALESCE(u.municipality_name, 'Sin municipio') AS municipio,
+                 COALESCE(u.state_name, 'Sin estado') AS estado,
+                 COUNT(DISTINCT dp.producer_id) AS productores_disponibles,
+                 COALESCE(SUM(dp.volumen_estimado_ton), 0)::numeric(12,2) AS toneladas_estimadas,
+                 MODE() WITHIN GROUP (ORDER BY dp.ventana_venta) AS ventana_predominante,
+                 ${distExpr} AS distancia_km
+               FROM disponibilidad_productor dp
+               JOIN up u ON u.up_id = dp.up_id
+               WHERE dp.activa = TRUE
+                 AND dp.fecha_vencimiento >= CURRENT_DATE
+                 ${extraWhere}
+                 ${tipoFilter}
+               GROUP BY u.municipality_name, u.state_name
+               HAVING COUNT(DISTINCT dp.producer_id) > 0
+               ORDER BY ${orderBy}
+               LIMIT 50`,
+            params,
+          };
+        };
+
+        // Nivel 1 — dentro del radio de la bodega (si hay bodega con coords + PostGIS)
+        if (bodegaRef && postgis) {
+          const q = buildQuery(
+            `AND u.centroid IS NOT NULL
+             AND ST_DWithin(
+               ST_SetSRID(ST_Point(ST_X(u.centroid::geometry), ST_Y(u.centroid::geometry)), 4326)::geography,
+               ST_SetSRID(ST_Point($1, $2), 4326)::geography, $3)`,
+            [radio * 1000],
+            'distancia_km ASC'
           );
-          if (result.rows.length > 0) {
-            res.json({ data: result.rows, fallback: true,
-              mensaje: `Mostrando productores en todo el estado (${bodegaRef.estado}) porque no se encontraron suficientes en ${radio} km` });
+          const r1 = await pool.query(q.text, q.params);
+          if (r1.rows.length > 0) {
+            res.json({ data: r1.rows, fallback: false });
             return;
-          } else if (initialResult.rows.length > 0) {
-            res.json({ data: initialResult.rows, fallback: false });
-            return;
-          } else {
-            // Throw error to trigger the catch block and fall through to Strategy B
-            throw new Error("No active offers in state, falling through to historical cycle_crop");
           }
         }
 
-        res.json({ data: initialResult.rows, fallback: false });
-        return;
-      } catch (_) {
+        // Nivel 2 — todo el estado de la bodega
+        if (bodegaRef?.estado) {
+          const q = buildQuery(`AND u.state_name ILIKE $3`, [bodegaRef.estado], 'productores_disponibles DESC');
+          const r2 = await pool.query(q.text, q.params);
+          if (r2.rows.length > 0) {
+            res.json({
+              data: r2.rows, fallback: true,
+              mensaje: `No hay oferta dentro de ${radio} km. Mostrando productores en todo ${bodegaRef.estado}.`,
+            });
+            return;
+          }
+        }
+
+        // Nivel 3 — oferta nacional (para que el bodeguero siempre vea la oferta existente)
+        const q3 = buildQuery('', [], 'productores_disponibles DESC');
+        const r3 = await pool.query(q3.text, q3.params);
+        if (r3.rows.length > 0) {
+          res.json({
+            data: r3.rows, fallback: true,
+            mensaje: bodegaRef
+              ? 'No hay oferta cercana. Mostrando toda la oferta disponible a nivel nacional.'
+              : 'Mostrando toda la oferta disponible. Asocia una bodega para ver la oferta cercana a ti.',
+          });
+          return;
+        }
+        // Si no hay ninguna disponibilidad activa, caer a Strategy B (histórico)
+      } catch (e) {
+        console.error('[oferta] Strategy A falló, usando fallback histórico:', (e as Error).message);
         // Fall through to Strategy B
       }
     }
