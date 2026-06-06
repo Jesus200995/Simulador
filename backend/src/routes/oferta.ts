@@ -213,7 +213,7 @@ router.post('/municipios/:municipio/interes', authMiddleware, async (req: AuthRe
       `SELECT DISTINCT u2.id AS usuario_id
        FROM up u
        JOIN producer p ON p.producer_id = u.producer_id
-       JOIN usuarios u2 ON (u2.curp = p.curp OR u2.email = p.email)
+       JOIN usuarios u2 ON (u2.id = p.usuario_id OR u2.curp = p.curp OR u2.email = p.correo)
        WHERE u.municipality_name ILIKE $1
          AND u2.activo = TRUE AND u2.rol = 'productor'`,
       [municipio]

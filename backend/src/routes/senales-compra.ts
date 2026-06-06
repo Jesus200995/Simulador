@@ -111,7 +111,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
                 ) / 1000)::numeric, 0) AS distancia_km
               FROM up u
               JOIN producer p ON p.producer_id = u.producer_id
-              JOIN usuarios u2 ON (u2.curp = p.curp OR u2.email = p.email)
+              JOIN usuarios u2 ON (u2.id = p.usuario_id OR u2.curp = p.curp OR u2.email = p.correo)
               WHERE u2.rol = 'productor' AND u2.activo = TRUE
                 AND ST_DWithin(
                   ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
@@ -130,7 +130,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             SELECT DISTINCT u2.id AS usuario_id, 0 AS distancia_km
             FROM up u
             JOIN producer p ON p.producer_id = u.producer_id
-            JOIN usuarios u2 ON (u2.curp = p.curp OR u2.email = p.email)
+            JOIN usuarios u2 ON (u2.id = p.usuario_id OR u2.curp = p.curp OR u2.email = p.correo)
             WHERE u2.rol = 'productor' AND u2.activo = TRUE
               AND u.state_name ILIKE $1
             LIMIT 500
