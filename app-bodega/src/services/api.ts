@@ -146,8 +146,10 @@ export const api = {
       const qs = new URLSearchParams(params).toString();
       return request(`/oferta/municipios${qs ? '?' + qs : ''}`);
     },
-    interesMunicipio: (municipio: string, data: { bodega_id: number; tipo_maiz?: string; precio_ofrecido?: number }) =>
+    interesMunicipio: (municipio: string, data: { bodega_id: number; tipo_maiz?: string; precio_ofrecido?: number; estado?: string }) =>
       request(`/oferta/municipios/${encodeURIComponent(municipio)}/interes`, { method: 'POST', body: JSON.stringify(data) }),
+    misIntereses: () => request('/oferta/mis-intereses'),
+    quitarInteres: (id: number | string) => request(`/oferta/intereses/${id}`, { method: 'DELETE' }),
   },
   disponibilidad: {
     list: () => request('/productor/disponibilidad'),

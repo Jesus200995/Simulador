@@ -183,7 +183,7 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
 // ═══════════════════════════════════════════════════════════════
 router.post('/municipios/:municipio/interes', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const { municipio } = req.params;
-  const { bodega_id, tipo_maiz, precio_ofrecido } = req.body;
+  const { bodega_id, tipo_maiz, precio_ofrecido, estado } = req.body;
   const userId = req.user!.userId;
 
   if (!bodega_id) {
@@ -244,7 +244,78 @@ router.post('/municipios/:municipio/interes', authMiddleware, async (req: AuthRe
       } catch (_) { /* best-effort */ }
     }
 
+    // 4. Guardar el interés del bodeguero para que pueda revisarlo en su apartado
+    try {
+      await pool.query(
+        `INSERT INTO oferta_interes (usuario_id, bodega_id, municipio, estado, tipo_maiz)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (usuario_id, LOWER(municipio), COALESCE(tipo_maiz, ''))
+         DO UPDATE SET bodega_id = EXCLUDED.bodega_id,
+                       estado = COALESCE(EXCLUDED.estado, oferta_interes.estado),
+                       created_at = NOW()`,
+        [userId, bodega_id, municipio, estado || bodega.estado || null, tipo_maiz || null]
+      );
+    } catch (_) { /* best-effort: la tabla puede no existir aún */ }
+
     res.json({ ok: true, productores_notificados: notificados });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// GET /api/oferta/mis-intereses — ofertas que el bodeguero marcó
+// Devuelve cada interés con la oferta ACTUAL (re-agregada) de ese municipio
+// ═══════════════════════════════════════════════════════════════
+router.get('/mis-intereses', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  try {
+    const result = await pool.query(
+      `SELECT
+         oi.id,
+         oi.municipio,
+         oi.estado,
+         oi.tipo_maiz,
+         oi.created_at,
+         COALESCE((
+           SELECT COUNT(DISTINCT dp.producer_id)
+           FROM disponibilidad_productor dp
+           JOIN up u ON u.up_id = dp.up_id
+           WHERE dp.activa = TRUE
+             AND dp.fecha_vencimiento >= CURRENT_DATE
+             AND u.municipality_name ILIKE oi.municipio
+             AND (oi.tipo_maiz IS NULL OR dp.tipo_maiz ILIKE oi.tipo_maiz)
+         ), 0) AS productores_disponibles,
+         COALESCE((
+           SELECT SUM(dp.volumen_estimado_ton)
+           FROM disponibilidad_productor dp
+           JOIN up u ON u.up_id = dp.up_id
+           WHERE dp.activa = TRUE
+             AND dp.fecha_vencimiento >= CURRENT_DATE
+             AND u.municipality_name ILIKE oi.municipio
+             AND (oi.tipo_maiz IS NULL OR dp.tipo_maiz ILIKE oi.tipo_maiz)
+         ), 0)::numeric(12,2) AS toneladas_estimadas
+       FROM oferta_interes oi
+       WHERE oi.usuario_id = $1
+       ORDER BY oi.created_at DESC`,
+      [userId]
+    );
+    res.json({ data: result.rows, total: result.rows.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/oferta/intereses/:id — quitar un interés guardado
+router.delete('/intereses/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  try {
+    const r = await pool.query(
+      `DELETE FROM oferta_interes WHERE id = $1 AND usuario_id = $2 RETURNING id`,
+      [req.params.id, userId]
+    );
+    if (r.rows.length === 0) { res.status(404).json({ error: 'Interés no encontrado' }); return; }
+    res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

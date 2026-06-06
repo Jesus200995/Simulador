@@ -5,15 +5,26 @@ import { formatNum } from '../utils/format';
 import { useToast } from '../components/Toast';
 import { Users, Wheat, Signal, Heart, MapPin } from 'lucide-react';
 
+// Clave única de un municipio según el filtro actual (para marcar "ya interesado")
+const claveInteres = (municipio: string, tipo: string) => `${municipio.toLowerCase()}|${tipo || ''}`;
+
 export default function B11OfertaTabla() {
   const [datos, setDatos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tipoMaiz, setTipoMaiz] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [bodegas, setBodegas] = useState<any[]>([]);
+  const [intereses, setIntereses] = useState<Set<string>>(new Set());
+  const [enviando, setEnviando] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const cargarIntereses = () => {
+    api.oferta.misIntereses()
+      .then((r: any) => setIntereses(new Set((r.data || []).map((i: any) => claveInteres(i.municipio, i.tipo_maiz || '')))))
+      .catch(() => {});
+  };
 
   async function cargar(silent = false) {
     if (!silent) setLoading(true);
@@ -32,6 +43,7 @@ export default function B11OfertaTabla() {
 
   useEffect(() => {
     cargar();
+    cargarIntereses();
     api.bodeguero.misBodegas().then((r: any) => setBodegas(Array.isArray(r) ? r : [])).catch(() => {});
   }, [tipoMaiz]);
 
@@ -41,19 +53,25 @@ export default function B11OfertaTabla() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [tipoMaiz]);
 
-  async function marcarInteres(municipio: string) {
+  async function marcarInteres(municipio: string, estado?: string) {
     if (bodegas.length === 0) {
       toast('No tienes bodegas asociadas', 'error');
       return;
     }
+    const clave = claveInteres(municipio, tipoMaiz || '');
+    setEnviando(clave);
     try {
       await api.oferta.interesMunicipio(municipio, {
         bodega_id: bodegas[0].id,
         tipo_maiz: tipoMaiz || undefined,
+        estado,
       });
-      toast(`Productores en ${municipio} notificados de tu interés`, 'success');
+      setIntereses(prev => new Set(prev).add(clave));
+      toast(`Guardado en "Mis intereses". Productores en ${municipio} notificados.`, 'success');
     } catch (err: any) {
       toast(err.message || 'Error al enviar interés', 'error');
+    } finally {
+      setEnviando(null);
     }
   }
 
@@ -62,9 +80,20 @@ export default function B11OfertaTabla() {
       {/* Banner full-bleed */}
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-0.5">Módulo</p>
-          <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight">Oferta de Productores</h1>
-          <p className="text-green-200/70 text-[13px] mt-0.5">Datos agregados por municipio</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-0.5">Módulo</p>
+              <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight">Oferta de Productores</h1>
+              <p className="text-green-200/70 text-[13px] mt-0.5">Datos agregados por municipio</p>
+            </div>
+            <button
+              onClick={() => navigate('/oferta/mis-intereses')}
+              className="flex-shrink-0 flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/20 text-white rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors"
+            >
+              <Heart size={14} className={intereses.size > 0 ? 'fill-white' : ''} />
+              Mis intereses{intereses.size > 0 ? ` (${intereses.size})` : ''}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -156,12 +185,23 @@ export default function B11OfertaTabla() {
                   >
                     <Signal size={14} /> Requerimiento
                   </button>
-                  <button
-                    onClick={() => marcarInteres(d.municipio)}
-                    className="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 rounded-xl px-4 py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity"
-                  >
-                    <Heart size={14} /> Me interesa
-                  </button>
+                  {(() => {
+                    const clave = claveInteres(d.municipio, tipoMaiz || '');
+                    const yaInteresa = intereses.has(clave);
+                    const cargando = enviando === clave;
+                    return (
+                      <button
+                        onClick={() => yaInteresa ? navigate('/oferta/mis-intereses') : marcarInteres(d.municipio, d.estado)}
+                        disabled={cargando}
+                        className={`flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity disabled:opacity-50 ${
+                          yaInteresa ? 'bg-[#1A5C38] text-white' : 'bg-rose-50 text-rose-600'
+                        }`}
+                      >
+                        <Heart size={14} className={yaInteresa ? 'fill-white' : ''} />
+                        {cargando ? '...' : yaInteresa ? 'Interesado' : 'Me interesa'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
