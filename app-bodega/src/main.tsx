@@ -7,7 +7,21 @@ import App from './App.tsx'
 // Si un chunk hasheado deja de existir (build nuevo) el navegador lanza
 // "vite:preloadError" o un error de import dinámico. En vez de quedar en
 // pantalla en blanco, recargamos una sola vez para tomar el build nuevo.
-if (typeof window !== 'undefined') {
+// ── En DESARROLLO local no debe haber Service Worker ──
+// Si quedó uno registrado de una sesión previa (p. ej. tras un preview de
+// producción), intercepta los fetch y rompe el login. Lo desregistramos y
+// limpiamos sus cachés para que el dev local funcione limpio contra la API.
+if (typeof window !== 'undefined' && import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    if (regs.length === 0) return;
+    Promise.all(regs.map((r) => r.unregister()))
+      .then(() => (window.caches ? caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))) : null))
+      .then(() => window.location.reload())
+      .catch(() => {});
+  }).catch(() => {});
+}
+
+if (typeof window !== 'undefined' && !import.meta.env.DEV) {
   const RELOAD_FLAG = 'simac_chunk_reload';
 
   const forzarRecargaUnaVez = () => {

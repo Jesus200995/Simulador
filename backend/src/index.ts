@@ -41,14 +41,22 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3000');
 
 // Middleware
+const ORIGENES_PERMITIDOS = [
+  // Dominio oficial — Secretaría de Agricultura
+  'https://maiz.agricultura.gob.mx', 'https://apimaiz.agricultura.gob.mx',
+  // Dominio anterior (en transición — redirige a agricultura.gob.mx)
+  'https://maiz.geodatos.com.mx', 'https://bodega.geodatos.com.mx',
+];
+// Cualquier puerto de localhost / 127.0.0.1 (desarrollo: vite puede usar 5173, 5174, 5175, …)
+const ES_LOCALHOST = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 'http://localhost:4173', 'http://localhost:5174',
-    // Dominio oficial — Secretaría de Agricultura
-    'https://maiz.agricultura.gob.mx', 'https://apimaiz.agricultura.gob.mx',
-    // Dominio anterior (en transición — redirige a agricultura.gob.mx)
-    'https://maiz.geodatos.com.mx', 'https://bodega.geodatos.com.mx',
-  ],
+  origin: (origin, cb) => {
+    // Sin origin (curl, health checks, apps móviles) → permitir
+    if (!origin) return cb(null, true);
+    if (ORIGENES_PERMITIDOS.includes(origin) || ES_LOCALHOST.test(origin)) return cb(null, true);
+    return cb(null, false);
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '5mb' }));

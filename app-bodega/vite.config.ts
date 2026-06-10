@@ -10,6 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
+      // En desarrollo NO registrar Service Worker (evita que intercepte la API en local)
+      devOptions: { enabled: false },
       includeAssets: ['icono.png'],
       manifest: {
         name: 'SIMAC — Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México',
