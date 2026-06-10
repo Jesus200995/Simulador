@@ -202,14 +202,14 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
   };
 
   return (
-    <section className="bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden">
+    <section className="bg-white border border-gray-200/70 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-5 py-4 border-b border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-5 py-4 border-b border-gray-200/70">
         <div>
-          <p className="text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">
+          <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
             Geolocalización
           </p>
-          <h2 className="text-[13px] sm:text-[14px] font-bold text-white">
+          <h2 className="text-[13px] sm:text-[14px] font-bold text-gray-900">
             Mapa Nacional
           </h2>
         </div>
@@ -235,7 +235,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                   </svg>
                 )}
               </span>
-              <span className="text-[11px] font-medium text-gray-400">
+              <span className="text-[11px] font-medium text-gray-500">
                 {LAYER_CONFIG[key].label}
               </span>
             </label>
@@ -244,7 +244,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
           <select
             value={estadoFiltro}
             onChange={e => setEstadoFiltro(e.target.value)}
-            className="bg-[#090d12] border border-white/10 text-gray-300 text-[11px] font-medium rounded-lg px-2.5 py-1.5 outline-none focus:border-emerald-500/40 transition-colors"
+            className="bg-white border border-gray-200 text-gray-700 text-[11px] font-medium rounded-lg px-2.5 py-1.5 outline-none focus:border-emerald-500/40 transition-colors"
           >
             <option value="">Todo el país</option>
             {estados.map(est => (
@@ -257,7 +257,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
       {/* Map */}
       <div className="relative" style={{ height: 420 }}>
         {loading && (
-          <div className="absolute inset-0 z-[500] flex items-center justify-center bg-[#090d12]/60 backdrop-blur-sm">
+          <div className="absolute inset-0 z-[500] flex items-center justify-center bg-white/60 backdrop-blur-sm">
             <div className="w-7 h-7 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
           </div>
         )}
@@ -293,7 +293,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
       </div>
 
       {/* Legend footer */}
-      <div className="flex items-center gap-4 px-4 sm:px-5 py-2.5 border-t border-white/[0.06] text-[10px] text-gray-600">
+      <div className="flex items-center gap-4 px-4 sm:px-5 py-2.5 border-t border-gray-200/70 text-[10px] text-gray-500">
         <span>{filtered.length} punto{filtered.length !== 1 ? 's' : ''} visibles</span>
         <span className="ml-auto">Tiles: ESRI World Imagery</span>
       </div>

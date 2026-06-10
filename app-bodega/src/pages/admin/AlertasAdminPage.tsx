@@ -197,7 +197,7 @@ export default function AlertasAdminPage() {
       <div className="flex-shrink-0">
         <button
           onClick={() => setMostrarStats(!mostrarStats)}
-          className="flex items-center gap-2 text-[12px] font-bold text-gray-400 hover:text-white transition-all px-1"
+          className="flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all px-1"
         >
           <BarChart3 size={14} className="text-emerald-500" />
           Panel de Estadísticas
@@ -208,21 +208,21 @@ export default function AlertasAdminPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
             {/* KPI: Productores afectados */}
             <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 space-y-1">
-              <p className="text-[10px] font-bold text-red-400/70 uppercase tracking-widest">Zonas Afectadas</p>
-              <p className="text-[28px] font-black text-red-400 leading-none">{statsProductoresAfectados}</p>
-              <p className="text-[11px] text-red-400/60">Estados con alertas activas</p>
+              <p className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">Zonas Afectadas</p>
+              <p className="text-[28px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
+              <p className="text-[11px] text-red-600/60">Estados con alertas activas</p>
             </div>
             {/* KPI: Alertas activas hoy */}
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 space-y-1">
-              <p className="text-[10px] font-bold text-amber-400/70 uppercase tracking-widest">Alertas Activas</p>
-              <p className="text-[28px] font-black text-amber-400 leading-none">{statsActivasHoy}</p>
-              <p className="text-[11px] text-amber-400/60">Incidencias vigentes hoy</p>
+              <p className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">Alertas Activas</p>
+              <p className="text-[28px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
+              <p className="text-[11px] text-amber-600/60">Incidencias vigentes hoy</p>
             </div>
             {/* KPI: Atendidas este mes */}
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 space-y-1">
-              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-widest">Atendidas este Mes</p>
-              <p className="text-[28px] font-black text-emerald-400 leading-none">{statsAtendidasMes}</p>
-              <p className="text-[11px] text-emerald-400/60">Resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
+              <p className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">Atendidas este Mes</p>
+              <p className="text-[28px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
+              <p className="text-[11px] text-emerald-600/60">Resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
             </div>
           </div>
         )}
@@ -232,16 +232,16 @@ export default function AlertasAdminPage() {
       <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: ALERTAS & FILTROS (35%) ── */}
-      <div className="w-full lg:w-[380px] flex flex-col h-full bg-[#090d12]/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
+      <div className="w-full lg:w-[380px] flex flex-col h-full bg-white/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
         
         {/* Controles */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-white tracking-tight flex items-center gap-1.5">
+            <h2 className="text-[14px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
               <AlertTriangle size={15} className="text-emerald-500" />
               Incidencias y Riesgos
             </h2>
-            <span className="text-[10px] font-bold text-gray-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-gray-500 bg-white/5 border border-gray-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
               {filteredList.length} Activas
             </span>
           </div>
@@ -254,7 +254,7 @@ export default function AlertasAdminPage() {
               placeholder="Buscar alertas..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-white placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
+              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
 
@@ -263,7 +263,7 @@ export default function AlertasAdminPage() {
             <select
               value={tipoFilter}
               onChange={e => setTipoFilter(e.target.value)}
-              className="bg-[#0d131a] border border-white/5 rounded-lg px-1.5 py-2 text-white outline-none focus:border-emerald-500/50"
+              className="bg-gray-50 border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="">Tipos</option>
               <option value="fitosanitaria">Fitosanitaria</option>
@@ -275,7 +275,7 @@ export default function AlertasAdminPage() {
             <select
               value={nivelFilter}
               onChange={e => setNivelFilter(e.target.value)}
-              className="bg-[#0d131a] border border-white/5 rounded-lg px-1.5 py-2 text-white outline-none focus:border-emerald-500/50"
+              className="bg-gray-50 border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="">Severidad</option>
               <option value="ALTA">Alta</option>
@@ -286,7 +286,7 @@ export default function AlertasAdminPage() {
             <select
               value={estadoFilter}
               onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-[#0d131a] border border-white/5 rounded-lg px-1.5 py-2 text-white outline-none focus:border-emerald-500/50"
+              className="bg-gray-50 border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="activa">Activas</option>
               <option value="atendida">Atendidas</option>
@@ -303,15 +303,15 @@ export default function AlertasAdminPage() {
             </div>
           ) : filteredList.length === 0 ? (
             <div className="text-center py-16 text-gray-500 text-[12px] space-y-1">
-              <ShieldAlert size={24} className="mx-auto mb-2 text-gray-600" />
-              <p className="font-bold text-gray-400">Sin incidencias reportadas</p>
+              <ShieldAlert size={24} className="mx-auto mb-2 text-gray-500" />
+              <p className="font-bold text-gray-500">Sin incidencias reportadas</p>
             </div>
           ) : (
             filteredList.map(a => (
               <div 
                 key={a.id}
                 onClick={() => focusAlerta(a)}
-                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-white/[0.03] transition-all relative ${
+                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-gray-100 transition-all relative ${
                   selectedAlertaId === a.id 
                     ? 'border-emerald-500 bg-emerald-500/[0.01]' 
                     : 'border-white/5'
@@ -325,16 +325,16 @@ export default function AlertasAdminPage() {
 
                 <div className="pl-2 space-y-2">
                   <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-extrabold text-white text-[13px] leading-tight line-clamp-1">{a.titulo}</h3>
+                    <h3 className="font-extrabold text-gray-900 text-[13px] leading-tight line-clamp-1">{a.titulo}</h3>
                     <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded ${
-                      a.nivel_criticidad === 'ALTA' ? 'text-red-400 bg-red-500/10' :
-                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-400 bg-amber-500/10' : 'text-blue-400 bg-blue-500/10'
+                      a.nivel_criticidad === 'ALTA' ? 'text-red-600 bg-red-500/10' :
+                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-600 bg-amber-500/10' : 'text-blue-600 bg-blue-500/10'
                     }`}>
                       {a.nivel_criticidad}
                     </span>
                   </div>
 
-                  <p className="text-[11.5px] text-gray-450 leading-relaxed line-clamp-2">{a.descripcion}</p>
+                  <p className="text-[11.5px] text-gray-500 leading-relaxed line-clamp-2">{a.descripcion}</p>
 
                   <div className="flex justify-between items-center text-[10.5px] pt-1">
                     <p className="text-gray-500 flex items-center gap-1">
@@ -345,7 +345,7 @@ export default function AlertasAdminPage() {
                     {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); setResolvingAlerta(a); }}
-                        className="text-emerald-500 hover:text-emerald-400 font-extrabold flex items-center gap-0.5 hover:underline"
+                        className="text-emerald-500 hover:text-emerald-600 font-extrabold flex items-center gap-0.5 hover:underline"
                       >
                         Atender <Check size={11} />
                       </button>
@@ -366,7 +366,7 @@ export default function AlertasAdminPage() {
       </div>
 
       {/* ── COLUMNA DERECHA: LEAFLET MAPA (65%) ── */}
-      <div className="flex-1 bg-[#090d12]/80 border border-white/5 rounded-2xl overflow-hidden relative z-10">
+      <div className="flex-1 bg-white/80 border border-white/5 rounded-2xl overflow-hidden relative z-10">
         
         <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -390,12 +390,12 @@ export default function AlertasAdminPage() {
               }}
             >
               <Popup className="custom-premium-popup" autoPan={false}>
-                <div className="p-3.5 space-y-2.5 text-white">
+                <div className="p-3.5 space-y-2.5 text-gray-900">
                   <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
-                      a.nivel_criticidad === 'ALTA' ? 'text-red-400 bg-red-500/10 border border-red-500/20' :
-                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20' :
-                      'text-blue-400 bg-blue-500/10 border border-blue-500/20'
+                      a.nivel_criticidad === 'ALTA' ? 'text-red-600 bg-red-500/10 border border-red-500/20' :
+                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-600 bg-amber-500/10 border border-amber-500/20' :
+                      'text-blue-600 bg-blue-500/10 border border-blue-500/20'
                     }`}>
                       {a.nivel_criticidad}
                     </span>
@@ -405,13 +405,13 @@ export default function AlertasAdminPage() {
                   </div>
                   
                   <div>
-                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{a.titulo}</h4>
-                    <p className="text-[11px] text-gray-300 leading-relaxed font-medium line-clamp-3">{a.descripcion}</p>
+                    <h4 className="font-extrabold text-[13px] text-gray-900 tracking-tight leading-tight mb-1 truncate">{a.titulo}</h4>
+                    <p className="text-[11px] text-gray-700 leading-relaxed font-medium line-clamp-3">{a.descripcion}</p>
                   </div>
 
-                  <div className="text-[10.5px] text-gray-400 border-t border-white/5 pt-2 flex justify-between items-center">
-                    <span>Zona: <strong className="text-white">{a.estado_afectado}</strong></span>
-                    <span className="capitalize">Estatus: <strong className="text-white">{a.estado}</strong></span>
+                  <div className="text-[10.5px] text-gray-500 border-t border-white/5 pt-2 flex justify-between items-center">
+                    <span>Zona: <strong className="text-gray-900">{a.estado_afectado}</strong></span>
+                    <span className="capitalize">Estatus: <strong className="text-gray-900">{a.estado}</strong></span>
                   </div>
 
                   {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
@@ -433,19 +433,19 @@ export default function AlertasAdminPage() {
       {/* ── MODAL: ATENDER ALERTA ── */}
       {resolvingAlerta && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d131a] border border-white/10 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                 <Check size={16} />
               </div>
-              <h3 className="text-[16px] font-extrabold text-white uppercase tracking-tight">Atender Incidencia</h3>
+              <h3 className="text-[16px] font-extrabold text-gray-900 uppercase tracking-tight">Atender Incidencia</h3>
             </div>
 
             <div className="p-6 space-y-4">
               <div className="space-y-1">
-                <h4 className="text-[13.5px] font-bold text-white leading-tight">{resolvingAlerta.titulo}</h4>
-                <p className="text-[11.5px] text-gray-400 leading-normal">{resolvingAlerta.descripcion}</p>
+                <h4 className="text-[13.5px] font-bold text-gray-900 leading-tight">{resolvingAlerta.titulo}</h4>
+                <p className="text-[11.5px] text-gray-500 leading-normal">{resolvingAlerta.descripcion}</p>
               </div>
 
               <div className="space-y-1.5">
@@ -457,7 +457,7 @@ export default function AlertasAdminPage() {
                   placeholder="Detalla las medidas preventivas, correctivas o la auditoría del mercado ejecutada sobre esta alerta..."
                   value={notasResolucion}
                   onChange={e => setNotasResolucion(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/5 rounded-xl p-3 text-[13px] text-white placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>
@@ -465,7 +465,7 @@ export default function AlertasAdminPage() {
             <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingAlerta(null); setNotasResolucion(''); }}
-                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
                 disabled={actionLoading}
               >
                 Cancelar

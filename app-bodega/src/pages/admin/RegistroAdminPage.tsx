@@ -81,22 +81,22 @@ export default function RegistroAdminPage() {
 
   if (success) {
     return (
-      <div className="relative min-h-screen bg-[#0b1117] flex items-center justify-center px-4">
+      <div className="relative min-h-screen bg-[#F5F6F8] flex items-center justify-center px-4">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px]" />
           <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-teal-500/10 blur-[100px]" />
         </div>
         <div className="relative z-10 text-center max-w-sm w-full px-4">
           <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5">
-            <CheckCircle2 className="text-emerald-400" size={28} />
+            <CheckCircle2 className="text-emerald-600" size={28} />
           </div>
-          <h2 className="text-[22px] font-black text-white mb-2">Cuenta creada</h2>
-          <p className="text-[13px] text-gray-400 leading-relaxed mb-6">
+          <h2 className="text-[22px] font-black text-gray-900 mb-2">Cuenta creada</h2>
+          <p className="text-[13px] text-gray-500 leading-relaxed mb-6">
             Tu cuenta administrativa ha sido registrada. Ya puedes iniciar sesión en el panel.
           </p>
           <button
             onClick={() => navigate('/admin/login')}
-            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl py-3 text-[14px] font-bold active:scale-[0.98] transition-all duration-200 shadow-lg shadow-emerald-950/50"
+            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl py-3 text-[14px] font-bold active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[0_8px_20px_rgba(16,92,56,0.25)]"
           >
             Ir al Login
           </button>
@@ -108,12 +108,12 @@ export default function RegistroAdminPage() {
   const s = pwdStrength();
 
   return (
-    <div className="relative min-h-screen bg-[#0b1117] overflow-hidden flex flex-col items-center justify-center py-8 px-4">
+    <div className="relative min-h-screen bg-[#F5F6F8] overflow-hidden flex flex-col items-center justify-center py-8 px-4">
 
       {/* Ambient gradients */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-15%] w-[55%] h-[55%] rounded-full bg-[#1A5C38]/15 blur-[130px]" />
-        <div className="absolute bottom-[-20%] right-[-15%] w-[50%] h-[50%] rounded-full bg-[#1B4F8A]/15 blur-[110px]" />
+        <div className="absolute top-[-20%] left-[-15%] w-[55%] h-[55%] rounded-full bg-emerald-200/40 blur-[130px]" />
+        <div className="absolute bottom-[-20%] right-[-15%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-[110px]" />
         <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-teal-500/8 blur-[90px]" />
       </div>
 
@@ -121,23 +121,23 @@ export default function RegistroAdminPage() {
 
         {/* Logo block */}
         <div className="flex flex-col items-center text-center mb-7">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 flex items-center justify-center shadow-2xl mb-4">
-            <ShieldAlert className="text-emerald-400" size={22} />
+          <div className="w-14 h-14 rounded-2xl bg-gray-100 backdrop-blur-xl border border-gray-200 flex items-center justify-center shadow-2xl mb-4">
+            <ShieldAlert className="text-emerald-600" size={22} />
           </div>
-          <h2 className="text-[24px] sm:text-[28px] font-black text-white tracking-tight leading-none">SIMAC Admin</h2>
+          <h2 className="text-[24px] sm:text-[28px] font-black text-gray-900 tracking-tight leading-none">SIMAC Admin</h2>
           <p className="text-[11px] sm:text-[12px] text-gray-500 font-medium mt-1.5 tracking-wide">
             Registro de Acceso Administrativo
           </p>
         </div>
 
         {/* Card */}
-        <div className="w-full bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-[24px] sm:rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div className="w-full bg-gray-50 backdrop-blur-xl border border-gray-200 rounded-[24px] sm:rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.5)] overflow-hidden">
 
           {/* Accent bar */}
           <div className="h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-blue-500" />
 
           <div className="px-5 sm:px-7 pt-6 pb-2">
-            <h1 className="text-[17px] sm:text-[19px] font-extrabold text-white tracking-tight">Nueva cuenta de administrador</h1>
+            <h1 className="text-[17px] sm:text-[19px] font-extrabold text-gray-900 tracking-tight">Nueva cuenta de administrador</h1>
             <p className="text-[11px] sm:text-[12px] text-gray-500 mt-1">Requiere código de acceso corporativo autorizado</p>
           </div>
 
@@ -156,7 +156,7 @@ export default function RegistroAdminPage() {
                   onChange={e => set('nombre_completo', e.target.value)}
                   required
                   placeholder="Lic. Juan Pérez García"
-                  className="w-full pl-9 pr-4 py-3 sm:py-3.5 bg-white/[0.04] focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-white placeholder-gray-600 outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15 transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-3 sm:py-3.5 bg-gray-100 focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15 transition-all duration-200"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function RegistroAdminPage() {
                   required
                   autoComplete="email"
                   placeholder="nombre@simac.gob.mx"
-                  className="w-full pl-9 pr-4 py-3 sm:py-3.5 bg-white/[0.04] focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-white placeholder-gray-600 outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15 transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-3 sm:py-3.5 bg-gray-100 focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15 transition-all duration-200"
                 />
               </div>
             </div>
@@ -193,9 +193,9 @@ export default function RegistroAdminPage() {
                   onChange={e => set('password', e.target.value)}
                   required
                   placeholder="Mínimo 8 caracteres"
-                  className="w-full pl-9 pr-10 py-3 sm:py-3.5 bg-white/[0.04] focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-white placeholder-gray-600 outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15 transition-all duration-200"
+                  className="w-full pl-9 pr-10 py-3 sm:py-3.5 bg-gray-100 focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15 transition-all duration-200"
                 />
-                <button type="button" onClick={() => setShowPwd(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                <button type="button" onClick={() => setShowPwd(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
                   {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
@@ -212,7 +212,7 @@ export default function RegistroAdminPage() {
                       />
                     ))}
                   </div>
-                  <span className={`text-[9px] font-bold ${s >= 3 ? 'text-emerald-400' : s === 2 ? 'text-amber-400' : 'text-red-400'}`}>
+                  <span className={`text-[9px] font-bold ${s >= 3 ? 'text-emerald-600' : s === 2 ? 'text-amber-600' : 'text-red-600'}`}>
                     {strengthLabel[s]}
                   </span>
                 </div>
@@ -232,18 +232,18 @@ export default function RegistroAdminPage() {
                   onChange={e => set('confirmar', e.target.value)}
                   required
                   placeholder="Repite la contraseña"
-                  className={`w-full pl-9 pr-10 py-3 sm:py-3.5 bg-white/[0.04] focus:bg-white/[0.07] border rounded-xl text-[13px] sm:text-[14px] text-white placeholder-gray-600 outline-none transition-all duration-200 ${
+                  className={`w-full pl-9 pr-10 py-3 sm:py-3.5 bg-gray-100 focus:bg-white/[0.07] border rounded-xl text-[13px] sm:text-[14px] text-gray-900 placeholder-gray-600 outline-none transition-all duration-200 ${
                     form.confirmar && form.confirmar !== form.password
                       ? 'border-red-500/40 focus:ring-1 focus:ring-red-500/20'
                       : 'border-white/[0.07] focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/15'
                   }`}
                 />
-                <button type="button" onClick={() => setShowConfirm(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                <button type="button" onClick={() => setShowConfirm(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
                   {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
               {form.confirmar && form.confirmar !== form.password && (
-                <p className="text-[10px] text-red-400 font-semibold mt-1">Las contraseñas no coinciden</p>
+                <p className="text-[10px] text-red-600 font-semibold mt-1">Las contraseñas no coinciden</p>
               )}
             </div>
 
@@ -260,10 +260,10 @@ export default function RegistroAdminPage() {
                   onChange={e => set('codigo', e.target.value)}
                   required
                   placeholder="Código proporcionado por el responsable"
-                  className="w-full pl-9 pr-4 py-3 sm:py-3.5 bg-white/[0.04] focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-white placeholder-gray-600 outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/15 transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-3 sm:py-3.5 bg-gray-100 focus:bg-white/[0.07] border border-white/[0.07] rounded-xl text-[13px] sm:text-[14px] text-gray-900 placeholder-gray-600 outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/15 transition-all duration-200"
                 />
               </div>
-              <p className="text-[10px] text-gray-600 flex items-center gap-1">
+              <p className="text-[10px] text-gray-400 flex items-center gap-1">
                 <AlertCircle size={10} />
                 Solo personal autorizado por el responsable puede registrarse
               </p>
@@ -271,7 +271,7 @@ export default function RegistroAdminPage() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-3 text-red-400 text-[12px] leading-relaxed">
+              <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-3 text-red-600 text-[12px] leading-relaxed">
                 <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
                 <p>{error}</p>
               </div>
@@ -281,7 +281,7 @@ export default function RegistroAdminPage() {
             <button
               type="submit"
               disabled={loading || (!!form.confirmar && form.password !== form.confirmar)}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-40 text-white rounded-xl py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-bold active:scale-[0.98] transition-all duration-200 shadow-lg shadow-emerald-950/50 mt-1"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-40 text-white rounded-xl py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-bold active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[0_8px_20px_rgba(16,92,56,0.25)] mt-1"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -297,13 +297,13 @@ export default function RegistroAdminPage() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1 text-[11px] sm:text-[12px]">
               <Link
                 to="/admin/login"
-                className="text-gray-500 hover:text-white transition-colors duration-200 border-b border-gray-700 hover:border-white leading-tight"
+                className="text-gray-500 hover:text-gray-900 transition-colors duration-200 border-b border-gray-700 hover:border-white leading-tight"
               >
                 Ya tengo cuenta — Iniciar sesión
               </Link>
               <Link
                 to="/login"
-                className="text-gray-600 hover:text-gray-400 transition-colors duration-200 leading-tight"
+                className="text-gray-400 hover:text-gray-500 transition-colors duration-200 leading-tight"
               >
                 Portal público
               </Link>
@@ -311,7 +311,7 @@ export default function RegistroAdminPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-[9px] sm:text-[10px] text-gray-600 max-w-xs leading-relaxed mx-auto px-4">
+        <p className="mt-6 text-center text-[9px] sm:text-[10px] text-gray-400 max-w-xs leading-relaxed mx-auto px-4">
           SIMAC — Sistema de Información de Mercados Agropecuarios Consolidados. Uso exclusivo del personal autorizado del Plan Nacional Maíz 2026.
         </p>
       </div>

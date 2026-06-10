@@ -84,7 +84,7 @@ export default function MercadoAdminPage() {
 
   const dispIdsConCoincidencia = useMemo(() => new Set(coincidencias.map(c => c.disp.id)), [coincidencias]);
   const reqIdsConCoincidencia  = useMemo(() => new Set(coincidencias.map(c => c.req.id)), [coincidencias]);
-  const CARD = 'bg-[#080c11] border border-white/[0.06] rounded-2xl p-4 flex flex-col gap-2';
+  const CARD = 'bg-white border border-gray-200/70 rounded-2xl p-4 flex flex-col gap-2';
 
   return (
     <div className="space-y-5">
@@ -92,10 +92,10 @@ export default function MercadoAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-0.5">Módulo</p>
-          <h1 className="text-[17px] sm:text-[19px] font-black text-white tracking-tight leading-none">Mercado</h1>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Módulo</p>
+          <h1 className="text-[17px] sm:text-[19px] font-black text-gray-900 tracking-tight leading-none">Mercado</h1>
         </div>
-        <button onClick={cargar} disabled={loading} className="flex items-center gap-2 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 px-3.5 py-2 rounded-xl active:scale-95 transition-all disabled:opacity-50">
+        <button onClick={cargar} disabled={loading} className="flex items-center gap-2 text-[11px] font-bold text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 px-3.5 py-2 rounded-xl active:scale-95 transition-all disabled:opacity-50">
           <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Recargar
         </button>
       </div>
@@ -103,22 +103,22 @@ export default function MercadoAdminPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Ofertado', value: `${fmtNum(kpis?.ofertadas_ton ?? 0)} t`, sub: 'ton disponibles', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: <TrendingUp size={14} /> },
-          { label: 'Demandado', value: `${fmtNum(kpis?.demandadas_ton ?? 0)} t`, sub: 'ton requeridas', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', icon: <BarChart3 size={14} /> },
-          { label: 'Balance', value: `${(kpis?.balance_ton ?? 0) >= 0 ? '+' : ''}${fmtNum(kpis?.balance_ton ?? 0)} t`, sub: 'oferta - demanda', color: (kpis?.balance_ton ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400', bg: (kpis?.balance_ton ?? 0) >= 0 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-red-500/10 border-red-500/20', icon: <ArrowUpDown size={14} /> },
-          { label: 'Precio promedio', value: fmtMXN(kpis?.precio_promedio_ofrecido ?? 0), sub: 'MXN/ton ofrecido', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: <TrendingUp size={14} /> },
-          { label: 'Productores', value: fmtNum(kpis?.productores_con_disponibilidad ?? 0), sub: 'con disponibilidad', color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', icon: <Users size={14} /> },
-          { label: 'Bodegas', value: fmtNum(kpis?.bodegas_buscando_maiz ?? 0), sub: 'buscando maíz', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', icon: <Warehouse size={14} /> },
+          { label: 'Ofertado', value: `${fmtNum(kpis?.ofertadas_ton ?? 0)} t`, sub: 'ton disponibles', color: 'text-emerald-600', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: <TrendingUp size={14} /> },
+          { label: 'Demandado', value: `${fmtNum(kpis?.demandadas_ton ?? 0)} t`, sub: 'ton requeridas', color: 'text-blue-600', bg: 'bg-blue-500/10 border-blue-500/20', icon: <BarChart3 size={14} /> },
+          { label: 'Balance', value: `${(kpis?.balance_ton ?? 0) >= 0 ? '+' : ''}${fmtNum(kpis?.balance_ton ?? 0)} t`, sub: 'oferta - demanda', color: (kpis?.balance_ton ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600', bg: (kpis?.balance_ton ?? 0) >= 0 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-red-500/10 border-red-500/20', icon: <ArrowUpDown size={14} /> },
+          { label: 'Precio promedio', value: fmtMXN(kpis?.precio_promedio_ofrecido ?? 0), sub: 'MXN/ton ofrecido', color: 'text-amber-600', bg: 'bg-amber-500/10 border-amber-500/20', icon: <TrendingUp size={14} /> },
+          { label: 'Productores', value: fmtNum(kpis?.productores_con_disponibilidad ?? 0), sub: 'con disponibilidad', color: 'text-indigo-600', bg: 'bg-indigo-500/10 border-indigo-500/20', icon: <Users size={14} /> },
+          { label: 'Bodegas', value: fmtNum(kpis?.bodegas_buscando_maiz ?? 0), sub: 'buscando maíz', color: 'text-purple-600', bg: 'bg-purple-500/10 border-purple-500/20', icon: <Warehouse size={14} /> },
         ].map((kpi, i) => (
           <div key={i} className={CARD}>
             <div className="flex items-start justify-between">
-              <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{kpi.label}</p>
+              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{kpi.label}</p>
               <div className={`w-7 h-7 rounded-lg ${kpi.bg} border flex items-center justify-center ${kpi.color} flex-shrink-0`}>{kpi.icon}</div>
             </div>
-            <p className={`text-[18px] sm:text-[22px] font-black leading-none tracking-tight ${loading ? 'text-gray-600 animate-pulse' : kpi.color}`}>
+            <p className={`text-[18px] sm:text-[22px] font-black leading-none tracking-tight ${loading ? 'text-gray-500 animate-pulse' : kpi.color}`}>
               {loading ? '—' : kpi.value}
             </p>
-            <p className="text-[10px] text-gray-600">{kpi.sub}</p>
+            <p className="text-[10px] text-gray-500">{kpi.sub}</p>
           </div>
         ))}
       </div>
@@ -127,7 +127,7 @@ export default function MercadoAdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Mapa Leaflet */}
-        <div className="lg:col-span-2 bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden" style={{ minHeight: 380 }}>
+        <div className="lg:col-span-2 bg-white border border-gray-200/70 rounded-2xl overflow-hidden" style={{ minHeight: 380 }}>
           {coincidencias.length > 0 && (
             <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block" />
@@ -136,11 +136,11 @@ export default function MercadoAdminPage() {
               </span>
             </div>
           )}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200/60">
             <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
-            <span className="text-[11px] font-bold text-white">Disponibilidad (productores)</span>
+            <span className="text-[11px] font-bold text-gray-900">Disponibilidad (productores)</span>
             <span className="w-3 h-3 rounded-full bg-blue-500 inline-block ml-3" />
-            <span className="text-[11px] font-bold text-white">Requerimiento (bodegas)</span>
+            <span className="text-[11px] font-bold text-gray-900">Requerimiento (bodegas)</span>
             {coincidencias.length > 0 && (
               <>
                 <span className="w-3 h-3 rounded-full bg-amber-400 border-2 border-amber-500 inline-block ml-3" />
@@ -201,41 +201,41 @@ export default function MercadoAdminPage() {
         {/* Listas */}
         <div className="space-y-3">
           {/* Top disponibilidades */}
-          <div className="bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-white/[0.05]">
-              <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Disponibilidades recientes</p>
+          <div className="bg-white border border-gray-200/70 rounded-2xl overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-gray-200/60">
+              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Disponibilidades recientes</p>
             </div>
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-gray-100">
               {loading ? (
-                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-white/[0.02]" />)
+                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-gray-50" />)
               ) : (data?.disponibilidades ?? []).slice(0, 5).map((d, i) => (
-                <div key={i} className="px-3 py-2 hover:bg-white/[0.02] transition-colors">
-                  <p className="text-[11px] font-semibold text-gray-200 line-clamp-1">{d.nombre_productor}</p>
-                  <p className="text-[10px] text-gray-600">{d.municipio}, {d.estado} · <span className="text-emerald-400">{fmtNum(d.volumen_estimado_ton, 0)} t</span></p>
+                <div key={i} className="px-3 py-2 hover:bg-gray-50 transition-colors">
+                  <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{d.nombre_productor}</p>
+                  <p className="text-[10px] text-gray-500">{d.municipio}, {d.estado} · <span className="text-emerald-600">{fmtNum(d.volumen_estimado_ton, 0)} t</span></p>
                 </div>
               ))}
               {!loading && (data?.disponibilidades ?? []).length === 0 && (
-                <p className="px-3 py-4 text-[11px] text-gray-600 text-center">Sin disponibilidades activas</p>
+                <p className="px-3 py-4 text-[11px] text-gray-500 text-center">Sin disponibilidades activas</p>
               )}
             </div>
           </div>
 
           {/* Top requerimientos */}
-          <div className="bg-[#080c11] border border-white/[0.06] rounded-2xl overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-white/[0.05]">
-              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Requerimientos recientes</p>
+          <div className="bg-white border border-gray-200/70 rounded-2xl overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-gray-200/60">
+              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Requerimientos recientes</p>
             </div>
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-gray-100">
               {loading ? (
-                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-white/[0.02]" />)
+                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-gray-50" />)
               ) : (data?.requerimientos ?? []).slice(0, 5).map((r, i) => (
-                <div key={i} className="px-3 py-2 hover:bg-white/[0.02] transition-colors">
-                  <p className="text-[11px] font-semibold text-gray-200 line-clamp-1">{r.nombre_bodega}</p>
-                  <p className="text-[10px] text-gray-600">{r.municipio}, {r.estado} · <span className="text-blue-400">{fmtNum(r.volumen_ton, 0)} t</span></p>
+                <div key={i} className="px-3 py-2 hover:bg-gray-50 transition-colors">
+                  <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{r.nombre_bodega}</p>
+                  <p className="text-[10px] text-gray-500">{r.municipio}, {r.estado} · <span className="text-blue-600">{fmtNum(r.volumen_ton, 0)} t</span></p>
                 </div>
               ))}
               {!loading && (data?.requerimientos ?? []).length === 0 && (
-                <p className="px-3 py-4 text-[11px] text-gray-600 text-center">Sin requerimientos activos</p>
+                <p className="px-3 py-4 text-[11px] text-gray-500 text-center">Sin requerimientos activos</p>
               )}
             </div>
           </div>

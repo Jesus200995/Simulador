@@ -204,20 +204,20 @@ export default function ProductoresAdminPage() {
   const getEstatusBadge = (status: Productor['estado_validacion']) => {
     switch (status) {
       case 'activo':
-        return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full">Activo</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-full">Activo</span>;
       case 'pendiente':
         return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full">Pendiente</span>;
       case 'rechazado':
-        return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 rounded-full">Rechazado</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-500/10 border border-red-500/20 rounded-full">Rechazado</span>;
       case 'suspendido':
-        return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-white/5 border border-white/10 rounded-full">Suspendido</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-white/5 border border-gray-200 rounded-full">Suspendido</span>;
     }
   };
 
   const getTipoBadge = (tipo: Productor['tipo_productor']) => {
     return tipo === 'B' 
-      ? <span className="text-[10px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.2 rounded">Tipo B</span>
-      : <span className="text-[10px] font-black text-gray-400 bg-white/5 border border-white/10 px-1.5 py-0.2 rounded">Tipo A</span>;
+      ? <span className="text-[10px] font-black text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.2 rounded">Tipo B</span>
+      : <span className="text-[10px] font-black text-gray-500 bg-white/5 border border-gray-200 px-1.5 py-0.2 rounded">Tipo A</span>;
   };
 
   return (
@@ -229,8 +229,8 @@ export default function ProductoresAdminPage() {
           onClick={() => { setTab('pendiente'); setPage(1); }}
           className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
             tab === 'pendiente' 
-              ? 'border-emerald-500 text-white' 
-              : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? 'border-emerald-500 text-gray-900' 
+              : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
           Pendientes
@@ -244,8 +244,8 @@ export default function ProductoresAdminPage() {
           onClick={() => { setTab('todos'); setPage(1); }}
           className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all ${
             tab === 'todos' 
-              ? 'border-emerald-500 text-white' 
-              : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? 'border-emerald-500 text-gray-900' 
+              : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
           Padrón General
@@ -254,8 +254,8 @@ export default function ProductoresAdminPage() {
           onClick={() => { setTab('suspendido'); setPage(1); }}
           className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all ${
             tab === 'suspendido' 
-              ? 'border-emerald-500 text-white' 
-              : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? 'border-emerald-500 text-gray-900' 
+              : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
           Suspendidos
@@ -263,7 +263,7 @@ export default function ProductoresAdminPage() {
       </div>
 
       {/* Control filters bar */}
-      <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="bg-white/80 border border-white/5 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         
         {/* Búsqueda */}
         <div className="relative">
@@ -273,7 +273,7 @@ export default function ProductoresAdminPage() {
             placeholder="Buscar por nombre o CURP..."
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
-            className="w-full bg-white/[0.03] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[13px] text-white placeholder-gray-500 outline-none focus:border-emerald-500/50"
+            className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[13px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50"
           />
         </div>
 
@@ -281,7 +281,7 @@ export default function ProductoresAdminPage() {
         <select
           value={estadoFilter}
           onChange={e => { setEstadoFilter(e.target.value); setPage(1); }}
-          className="w-full bg-[#0d131a] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-emerald-500/50"
+          className="w-full bg-gray-50 border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
         >
           <option value="">Todos los Estados</option>
           {estadosDisponibles.map(estado => (
@@ -293,7 +293,7 @@ export default function ProductoresAdminPage() {
         <select
           value={tipoFilter}
           onChange={e => { setTipoFilter(e.target.value); setPage(1); }}
-          className="w-full bg-[#0d131a] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-emerald-500/50"
+          className="w-full bg-gray-50 border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
         >
           <option value="">Todos los Tipos</option>
           <option value="A">Tipo A (Auto-declarado)</option>
@@ -305,7 +305,7 @@ export default function ProductoresAdminPage() {
           <select
             value={estatusFilter}
             onChange={e => { setEstatusFilter(e.target.value); setPage(1); }}
-            className="w-full bg-[#0d131a] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-emerald-500/50"
+            className="w-full bg-gray-50 border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
           >
             <option value="">Todos los Estatus</option>
             <option value="pendiente">Pendiente</option>
@@ -327,7 +327,7 @@ export default function ProductoresAdminPage() {
       <div className="flex-shrink-0">
         <button
           onClick={() => setMostrarStats(!mostrarStats)}
-          className="flex items-center gap-2 text-[12px] font-bold text-gray-400 hover:text-white transition-all px-1 mb-2"
+          className="flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all px-1 mb-2"
         >
           <BarChart3 size={14} className="text-emerald-500" />
           Estadísticas Demográficas
@@ -344,24 +344,24 @@ export default function ProductoresAdminPage() {
 
           return (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
-              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Hombres</p>
-                <p className="text-[26px] font-black text-white leading-none">{hombres}</p>
+                <p className="text-[26px] font-black text-gray-900 leading-none">{hombres}</p>
                 <p className="text-[11px] text-gray-500">productores</p>
               </div>
-              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mujeres</p>
-                <p className="text-[26px] font-black text-white leading-none">{mujeres}</p>
+                <p className="text-[26px] font-black text-gray-900 leading-none">{mujeres}</p>
                 <p className="text-[11px] text-gray-500">productoras</p>
               </div>
-              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Edad Promedio</p>
-                <p className="text-[26px] font-black text-white leading-none">{edadPromedio}<span className="text-[14px] text-gray-500 ml-1">años</span></p>
+                <p className="text-[26px] font-black text-gray-900 leading-none">{edadPromedio}<span className="text-[14px] text-gray-500 ml-1">años</span></p>
                 <p className="text-[11px] text-gray-500">de {edades.length} con CURP</p>
               </div>
-              <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mayores de 60</p>
-                <p className="text-[26px] font-black text-white leading-none">{mayores60}</p>
+                <p className="text-[26px] font-black text-gray-900 leading-none">{mayores60}</p>
                 <p className="text-[11px] text-gray-500">adultos mayores</p>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function ProductoresAdminPage() {
       </div>
 
       {/* Main Table */}
-      <div className="bg-[#090d12]/80 border border-white/5 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white/80 border border-white/5 rounded-2xl overflow-hidden shadow-sm">
         
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -379,8 +379,8 @@ export default function ProductoresAdminPage() {
           </div>
         ) : paginatedList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-center px-4">
-            <ShieldAlert size={36} className="text-gray-600" />
-            <p className="text-[14px] text-gray-400 font-bold">Sin productores encontrados</p>
+            <ShieldAlert size={36} className="text-gray-500" />
+            <p className="text-[14px] text-gray-500 font-bold">Sin productores encontrados</p>
             <p className="text-[12px] text-gray-500">No hay registros que coincidan con los criterios de búsqueda.</p>
           </div>
         ) : (
@@ -397,27 +397,27 @@ export default function ProductoresAdminPage() {
                   <th className="py-3.5 px-5 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-gray-300">
+              <tbody className="divide-y divide-white/5 text-gray-700">
                 {paginatedList.map(prod => (
                   <tr key={prod.id} className="hover:bg-white/[0.01] transition-all">
                     <td className="py-4 px-5">
                       <div>
-                        <p className="font-extrabold text-white text-[14px]">{prod.nombre} {prod.apellidos}</p>
+                        <p className="font-extrabold text-gray-900 text-[14px]">{prod.nombre} {prod.apellidos}</p>
                         <p className="text-[11px] text-gray-500 mt-0.5">{prod.email || 'Sin correo'}</p>
                       </div>
                     </td>
-                    <td className="py-4 px-5 font-mono text-[12px] text-gray-400">{prod.curp}</td>
+                    <td className="py-4 px-5 font-mono text-[12px] text-gray-500">{prod.curp}</td>
                     <td className="py-4 px-5">
-                      <p className="font-bold text-gray-200">{prod.up_municipio}</p>
+                      <p className="font-bold text-gray-800">{prod.up_municipio}</p>
                       <p className="text-[11px] text-gray-500">{prod.up_estado}</p>
                     </td>
-                    <td className="py-4 px-5 text-gray-400 font-medium">{prod.up_cultivo}</td>
+                    <td className="py-4 px-5 text-gray-500 font-medium">{prod.up_cultivo}</td>
                     <td className="py-4 px-5">{getTipoBadge(prod.tipo_productor)}</td>
                     <td className="py-4 px-5">{getEstatusBadge(prod.estado_validacion)}</td>
                     <td className="py-4 px-5 text-right space-x-1.5">
                       <button 
                         onClick={() => navigate(`/admin/productores/${prod.id}`)}
-                        className="p-2 bg-white/5 hover:bg-white/10 hover:text-white rounded-lg text-gray-400 transition-all inline-flex items-center justify-center"
+                        className="p-2 bg-white/5 hover:bg-white/10 hover:text-gray-900 rounded-lg text-gray-500 transition-all inline-flex items-center justify-center"
                         title="Ver detalle"
                       >
                         <Eye size={13} />
@@ -427,14 +427,14 @@ export default function ProductoresAdminPage() {
                         <>
                           <button 
                             onClick={() => { setSelectedProd(prod); setModalType('aprobar'); }}
-                            className="p-2 bg-emerald-500/10 hover:bg-[#1A5C38] border border-emerald-500/20 hover:border-transparent text-emerald-400 hover:text-white rounded-lg transition-all inline-flex items-center justify-center"
+                            className="p-2 bg-emerald-500/10 hover:bg-[#1A5C38] border border-emerald-500/20 hover:border-transparent text-emerald-600 hover:text-white rounded-lg transition-all inline-flex items-center justify-center"
                             title="Aprobar"
                           >
                             <Check size={13} />
                           </button>
                           <button 
                             onClick={() => { setSelectedProd(prod); setModalType('rechazar'); }}
-                            className="p-2 bg-red-500/10 hover:bg-red-600 border border-red-500/20 hover:border-transparent text-red-400 hover:text-white rounded-lg transition-all inline-flex items-center justify-center"
+                            className="p-2 bg-red-500/10 hover:bg-red-600 border border-red-500/20 hover:border-transparent text-red-600 hover:text-gray-900 rounded-lg transition-all inline-flex items-center justify-center"
                             title="Rechazar"
                           >
                             <X size={13} />
@@ -445,7 +445,7 @@ export default function ProductoresAdminPage() {
                       {prod.estado_validacion === 'activo' && (
                         <button 
                           onClick={() => { setSelectedProd(prod); setModalType('suspender'); }}
-                          className="p-1.5 px-2 bg-white/5 hover:bg-red-500/10 text-gray-400 hover:text-red-400 rounded-lg text-[11px] font-bold transition-all border border-white/5"
+                          className="p-1.5 px-2 bg-white/5 hover:bg-red-500/10 text-gray-500 hover:text-red-600 rounded-lg text-[11px] font-bold transition-all border border-white/5"
                         >
                           Suspender
                         </button>
@@ -454,7 +454,7 @@ export default function ProductoresAdminPage() {
                       {prod.estado_validacion === 'suspendido' && (
                         <button 
                           onClick={() => { setSelectedProd(prod); setModalType('reactivar'); }}
-                          className="p-1.5 px-2 bg-white/5 hover:bg-emerald-500/10 text-gray-400 hover:text-emerald-400 rounded-lg text-[11px] font-bold transition-all border border-white/5"
+                          className="p-1.5 px-2 bg-white/5 hover:bg-emerald-500/10 text-gray-500 hover:text-emerald-600 rounded-lg text-[11px] font-bold transition-all border border-white/5"
                         >
                           Reactivar
                         </button>
@@ -471,20 +471,20 @@ export default function ProductoresAdminPage() {
         {!loading && totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-4 border-t border-white/5 bg-white/[0.01]">
             <p className="text-[12px] text-gray-500">
-              Mostrando página <strong className="text-white font-bold">{page}</strong> de <strong className="text-white font-bold">{totalPages}</strong>
+              Mostrando página <strong className="text-gray-900 font-bold">{page}</strong> de <strong className="text-gray-900 font-bold">{totalPages}</strong>
             </p>
             <div className="flex items-center gap-1.5">
               <button 
                 onClick={() => setPage(p => Math.max(p - 1, 1))} 
                 disabled={page === 1}
-                className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
+                className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-500 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
               >
                 <ChevronLeft size={14} />
               </button>
               <button 
                 onClick={() => setPage(p => Math.min(p + 1, totalPages))} 
                 disabled={page === totalPages}
-                className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
+                className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-500 disabled:opacity-30 disabled:hover:bg-white/5 transition-all"
               >
                 <ChevronRight size={14} />
               </button>
@@ -497,7 +497,7 @@ export default function ProductoresAdminPage() {
       {/* ── MODALES ACCIONES ── */}
       {selectedProd && modalType && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d131a] border border-white/10 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -507,7 +507,7 @@ export default function ProductoresAdminPage() {
               }`}>
                 {modalType === 'aprobar' || modalType === 'reactivar' ? <Check size={16} /> : <AlertTriangle size={16} />}
               </div>
-              <h3 className="text-[16px] font-extrabold text-white uppercase tracking-tight">
+              <h3 className="text-[16px] font-extrabold text-gray-900 uppercase tracking-tight">
                 {modalType === 'aprobar' && 'Confirmar Aprobación'}
                 {modalType === 'rechazar' && 'Rechazar Productor'}
                 {modalType === 'suspender' && 'Suspender Productor'}
@@ -516,12 +516,12 @@ export default function ProductoresAdminPage() {
             </div>
 
             <div className="p-6 space-y-4">
-              <p className="text-[13px] text-gray-300 leading-relaxed">
+              <p className="text-[13px] text-gray-700 leading-relaxed">
                 ¿Estás seguro que deseas {modalType === 'aprobar' && 'aprobar y activar'}
                 {modalType === 'rechazar' && 'rechazar el registro de'}
                 {modalType === 'suspender' && 'suspender temporalmente a'}
                 {modalType === 'reactivar' && 'reactivar y rehabilitar a'}{' '}
-                <strong className="text-white font-extrabold">{selectedProd.nombre} {selectedProd.apellidos}</strong>?
+                <strong className="text-gray-900 font-extrabold">{selectedProd.nombre} {selectedProd.apellidos}</strong>?
               </p>
 
               {/* Nota / Motivo */}
@@ -538,12 +538,12 @@ export default function ProductoresAdminPage() {
                   }
                   value={notaInterna}
                   onChange={e => setNotaInterna(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/5 rounded-xl p-3 text-[13px] text-white placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 
               {actionError && (
-                <div className="flex items-start gap-2 text-[12px] text-red-400 bg-red-500/5 border border-red-500/10 rounded-xl p-3 leading-relaxed">
+                <div className="flex items-start gap-2 text-[12px] text-red-600 bg-red-500/5 border border-red-500/10 rounded-xl p-3 leading-relaxed">
                   <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
                   <p>{actionError}</p>
                 </div>
@@ -553,14 +553,14 @@ export default function ProductoresAdminPage() {
             <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
               <button 
                 onClick={() => { setSelectedProd(null); setModalType(null); setNotaInterna(''); setActionError(''); }}
-                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
                 disabled={actionLoading}
               >
                 Cancelar
               </button>
               <button 
                 onClick={handleConfirmAction}
-                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold text-white transition-all ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-900 transition-all ${
                   modalType === 'aprobar' || modalType === 'reactivar'
                     ? 'bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-950/20'
                     : 'bg-red-600 hover:bg-red-500 shadow-md shadow-red-950/20'
