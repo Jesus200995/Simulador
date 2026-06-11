@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap');
 
 *, *::before, *::after {
   -webkit-tap-highlight-color: transparent;
