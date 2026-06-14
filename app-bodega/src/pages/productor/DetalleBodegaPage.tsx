@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, Phone } from 'lucide-react';
+import { ChevronLeft, MapPin, Phone, Warehouse, Package, Wrench } from 'lucide-react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -136,8 +136,8 @@ export default function DetalleBodegaPage() {
         {/* Capacidad y disponibilidad — vista unificada */}
         {bodega.capacidad_ton > 0 ? (
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
-            <h3 className="text-base font-semibold text-gray-800 mb-4">
-              🏭 Capacidad y disponibilidad
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Warehouse size={18} className="text-gray-500" /> Capacidad y disponibilidad
             </h3>
             {stockActual !== null && (
               <>
@@ -176,7 +176,7 @@ export default function DetalleBodegaPage() {
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
-            <h3 className="text-base font-semibold text-gray-800 mb-3">📦 Stock actual</h3>
+            <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2"><Package size={18} className="text-gray-500" /> Stock actual</h3>
             {stockActual !== null ? (
               <p className="text-3xl font-bold text-[#1A5C38]">
                 {stockActual.toLocaleString('es-MX')}
@@ -190,8 +190,8 @@ export default function DetalleBodegaPage() {
 
         {/* Servicios y tarifario */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">
-            🔧 Servicios de la bodega
+          <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <Wrench size={18} className="text-gray-500" /> Servicios de la bodega
           </h3>
           {cargandoServicios ? (
             <div className="space-y-2">
@@ -227,7 +227,7 @@ export default function DetalleBodegaPage() {
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 py-4 rounded-2xl font-semibold text-sm w-full active:scale-[0.98] transition-all"
           >
-            <span>📍</span> Cómo llegar
+            <MapPin size={16} /> Cómo llegar
           </a>
         )}
 

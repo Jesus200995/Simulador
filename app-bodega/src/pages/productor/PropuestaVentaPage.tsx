@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sprout, Wheat, Check } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -158,7 +158,7 @@ export default function PropuestaVentaPage() {
 
         {paso === 'sin_ciclo' && (
           <div className="text-center py-16">
-            <p className="text-5xl mb-4">🌱</p>
+            <Sprout size={48} className="text-[#1A5C38] mx-auto mb-4" />
             <p className="font-semibold text-gray-800 text-lg mb-2">Primero registra tu ciclo</p>
             <p className="text-gray-500 text-sm max-w-xs mx-auto mb-6">
               Para publicar una propuesta de venta necesitas tener un ciclo productivo activo registrado en tu parcela.
@@ -198,7 +198,7 @@ export default function PropuestaVentaPage() {
                 className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#1A5C38] hover:bg-green-50 transition-colors flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-gray-800">{ciclo.cycle_type} {ciclo.cycle_year}</p>
-                  <p className="text-sm text-[#1A5C38] mt-0.5">🌽 {variedadLegible(ciclo)}</p>
+                  <p className="text-sm text-[#1A5C38] mt-0.5 flex items-center gap-1"><Wheat size={14} /> {variedadLegible(ciclo)}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{ciclo.area_sown_ha} ha sembradas</p>
                 </div>
                 <ChevronRight size={20} className="text-gray-400" />
@@ -214,7 +214,7 @@ export default function PropuestaVentaPage() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Parcela:</span><span className="font-medium text-gray-800">{upSeleccionada.up_name}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Ciclo:</span><span className="font-medium text-gray-800">{cicloSeleccionado.cycle_type} {cicloSeleccionado.cycle_year}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Variedad:</span><span className="font-medium text-[#1A5C38]">🌽 {variedadLegible(cicloSeleccionado)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-600">Variedad:</span><span className="font-medium text-[#1A5C38] inline-flex items-center gap-1"><Wheat size={14} /> {variedadLegible(cicloSeleccionado)}</span></div>
               </div>
             </div>
 
@@ -247,8 +247,8 @@ export default function PropuestaVentaPage() {
             )}
 
             <button onClick={enviar} disabled={enviando || !volumen || !fechaDesde || !fechaHasta}
-              className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40">
-              {enviando ? 'Publicando...' : '✅ Publicar propuesta'}
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40 flex items-center justify-center gap-2">
+              {enviando ? 'Publicando...' : (<><Check size={20} /> Publicar propuesta</>)}
             </button>
           </div>
         )}

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { useToast } from '../components/Toast';
+import { AlertTriangle } from 'lucide-react';
 
 export default function B07Inventario() {
   const [params] = useSearchParams();
@@ -169,7 +170,7 @@ export default function B07Inventario() {
               className={inputClass}
             />
             {errorVolumen && (
-              <p className="text-red-500 text-xs mt-1">⚠️ {errorVolumen}</p>
+              <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle size={12} /> {errorVolumen}</p>
             )}
             <p className="text-xs text-gray-400 mt-1">
               Este número reemplaza el registro anterior y representa

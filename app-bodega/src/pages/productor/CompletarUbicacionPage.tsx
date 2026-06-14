@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, MapPin, Undo2, Pencil, Trash2, CheckCircle2, Loader2,
+  ChevronLeft, MapPin, Undo2, Pencil, Trash2, CheckCircle2, Loader2, Footprints,
 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -239,14 +239,16 @@ export default function CompletarUbicacionPage() {
                   setCapturandoGPS(false);
                   if (!info.ok) setGpsMsg(info.error);
                   else if (info.accuracy > 30) setGpsMsg(`Punto registrado, señal GPS débil (±${Math.round(info.accuracy)} m).`);
-                  else setGpsMsg(`📍 Punto registrado (±${Math.round(info.accuracy)} m).`);
+                  else setGpsMsg(`Punto registrado (±${Math.round(info.accuracy)} m).`);
                 });
               }}
               disabled={capturandoGPS}
               className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold
                          flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
             >
-              {capturandoGPS ? '⏳ Obteniendo ubicación…' : '🚶 Estoy en la esquina — usar mi GPS'}
+              {capturandoGPS
+                ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
             </button>
             {gpsMsg && (
               <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>

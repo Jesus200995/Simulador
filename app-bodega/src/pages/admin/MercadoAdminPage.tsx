@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, TrendingUp, Users, Warehouse, BarChart3, ArrowUpDown } from 'lucide-react';
+import { RefreshCw, TrendingUp, Users, Warehouse, BarChart3, ArrowUpDown, Star } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -168,7 +168,7 @@ export default function MercadoAdminPage() {
                       <strong>{d.nombre_productor}</strong><br />
                       {d.municipio}, {d.estado}<br />
                       {d.tipo_maiz} · {fmtNum(d.volumen_estimado_ton, 0)} ton
-                      {match && <><br /><span style={{ color: '#d97706', fontWeight: 700 }}>★ Coincidencia geográfica</span></>}
+                      {match && <><br /><span style={{ color: '#d97706', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Star size={11} /> Coincidencia geográfica</span></>}
                     </div>
                   </Popup>
                 </CircleMarker>
@@ -189,7 +189,7 @@ export default function MercadoAdminPage() {
                       {r.municipio}, {r.estado}<br />
                       {r.tipo_maiz} · {fmtNum(r.volumen_ton, 0)} ton<br />
                       Precio: {fmtMXN(r.precio_ofrecido)}/ton · Radio: {r.radio_km} km
-                      {match && <><br /><span style={{ color: '#d97706', fontWeight: 700 }}>★ Coincidencia geográfica</span></>}
+                      {match && <><br /><span style={{ color: '#d97706', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Star size={11} /> Coincidencia geográfica</span></>}
                     </div>
                   </Popup>
                 </CircleMarker>

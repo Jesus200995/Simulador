@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../components/Toast';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Trash2, Wheat } from 'lucide-react';
+import { Trash2, Wheat, AlertTriangle } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
@@ -119,7 +119,7 @@ export default function B10Requerimiento() {
       <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
         {error && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-            <p className="text-amber-800 font-medium">⚠️ {error}</p>
+            <p className="text-amber-800 font-medium flex items-center gap-1.5"><AlertTriangle size={15} /> {error}</p>
           </div>
         )}
 
@@ -246,8 +246,8 @@ export default function B10Requerimiento() {
             ))}
           </div>
           {Number(form.radio_km) >= 500 && (
-            <p className="text-xs text-amber-600">
-              ⚠️ Con este radio se notificarán productores en una zona muy amplia
+            <p className="text-xs text-amber-600 flex items-center gap-1">
+              <AlertTriangle size={12} /> Con este radio se notificarán productores en una zona muy amplia
             </p>
           )}
         </div>

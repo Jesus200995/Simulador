@@ -165,7 +165,7 @@ export default function DashboardProductorPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
         {sinUbicacion && (
           <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-6 flex items-start gap-4">
-            <span className="text-2xl mt-0.5">📍</span>
+            <MapPin size={22} className="text-amber-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <p className="font-semibold text-amber-800">
                 Tu parcela no tiene ubicación confirmada

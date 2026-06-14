@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Wheat, CircleDot, Check,
   AlertCircle, User, MapPin, Sprout, Map, Phone, Loader2,
-  Undo2, Pencil, Trash2, CheckCircle2, KeyRound, ShieldCheck,
+  Undo2, Pencil, Trash2, CheckCircle2, KeyRound, ShieldCheck, Footprints,
 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -395,7 +395,7 @@ export default function RegistroNuevoPage() {
                     } else if (info.accuracy > 30) {
                       setGpsMsg(`Punto registrado, pero la señal GPS es débil (±${Math.round(info.accuracy)} m). Espera unos segundos para mejor precisión.`);
                     } else {
-                      setGpsMsg(`📍 Punto registrado con buena precisión (±${Math.round(info.accuracy)} m).`);
+                      setGpsMsg(`Punto registrado con buena precisión (±${Math.round(info.accuracy)} m).`);
                     }
                   });
                 }}
@@ -403,7 +403,9 @@ export default function RegistroNuevoPage() {
                 className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold
                            flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
               >
-                {capturandoGPS ? '⏳ Obteniendo ubicación…' : '🚶 Estoy en la esquina — usar mi GPS'}
+                {capturandoGPS
+                  ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                  : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
               </button>
               {gpsMsg && (
                 <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>

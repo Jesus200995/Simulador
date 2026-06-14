@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
-import { Plus, Truck, Scale, Wind, Sun, Package, Shield, Tag } from 'lucide-react';
+import { Plus, Truck, Scale, Wind, Sun, Package, Shield, Tag, AlertTriangle } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
@@ -97,7 +97,7 @@ export default function B15Tarifario() {
         {diasSinActualizar !== null && diasSinActualizar >= 30 && (
           <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">⚠️</span>
+              <AlertTriangle size={22} className="text-amber-600 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-amber-800">
                   Tarifario desactualizado — {diasSinActualizar} días sin cambios

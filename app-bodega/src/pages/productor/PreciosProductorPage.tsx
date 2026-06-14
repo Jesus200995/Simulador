@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
   TrendingUp, DollarSign, Tag, Calculator,
-  CircleDollarSign, Settings, Award, AlertTriangle, BookOpen
+  CircleDollarSign, Settings, Award, AlertTriangle, BookOpen, Search, Check
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -139,12 +139,13 @@ export default function PreciosProductorPage() {
 
         {modoPrecio === 'bodega' && (
           <div className="mt-4 relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={busquedaBodega}
               onChange={e => { setBusquedaBodega(e.target.value); setBodegaSeleccionada(null); setPreciosBodega(null); }}
-              placeholder="🔍 Buscar bodega por nombre o municipio..."
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+              placeholder="Buscar bodega por nombre o municipio..."
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
             />
 
             {buscando && <p className="text-xs text-slate-400 mt-2">Buscando…</p>}
@@ -196,7 +197,7 @@ export default function PreciosProductorPage() {
 
             {preciosBodega && !preciosBodega.tiene_precio_hoy && (
               <div className="mt-2 flex items-center gap-2 text-amber-600">
-                <span className="text-sm">⚠️</span>
+                <AlertTriangle size={14} />
                 <span className="text-xs">
                   Precio de hace {preciosBodega.dias_antiguedad_precio} día{preciosBodega.dias_antiguedad_precio !== 1 ? 's' : ''}
                 </span>
@@ -419,11 +420,11 @@ export default function PreciosProductorPage() {
                     }
                   </span>
                   {precioVenta != null && (
-                    <span className={`text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider
+                    <span className={`text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider inline-flex items-center gap-1
                       ${esFavorable
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
-                      {esFavorable ? '✓ Favorable' : '⚠ Deficit'}
+                      {esFavorable ? (<><Check size={11} /> Favorable</>) : (<><AlertTriangle size={11} /> Deficit</>)}
                     </span>
                   )}
                 </div>
@@ -499,7 +500,7 @@ export default function PreciosProductorPage() {
           </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <span className="text-4xl mb-3">📈</span>
+              <TrendingUp size={40} className="text-gray-300 mb-3" />
               <p className="text-gray-600 font-medium">Historial en construcción</p>
               <p className="text-gray-400 text-sm mt-1 max-w-xs">
                 El historial de precios estará disponible después de los primeros 30 días de operación del sistema.

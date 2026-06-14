@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChevronLeft, Undo2, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 
@@ -169,12 +169,14 @@ export default function AgregarUPPage() {
                     setCapturandoGPS(false);
                     if (!info.ok) setGpsMsg(info.error);
                     else if (info.accuracy > 30) setGpsMsg(`Punto registrado, señal GPS débil (±${Math.round(info.accuracy)} m).`);
-                    else setGpsMsg(`📍 Punto registrado (±${Math.round(info.accuracy)} m).`);
+                    else setGpsMsg(`Punto registrado (±${Math.round(info.accuracy)} m).`);
                   });
                 }}
                 disabled={capturandoGPS}
                 className="w-full bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
-                {capturandoGPS ? '⏳ Obteniendo ubicación…' : '🚶 Estoy en la esquina — usar mi GPS'}
+                {capturandoGPS
+                  ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                  : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
               </button>
               {gpsMsg && <p className="text-center text-[11px] text-gray-600 bg-white/90 rounded-lg px-3 py-1.5">{gpsMsg}</p>}
 
