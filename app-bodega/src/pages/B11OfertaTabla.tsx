@@ -178,6 +178,15 @@ export default function B11OfertaTabla() {
                     }`}>{formatNum(d.toneladas_estimadas)}</p>
                   </div>
                 </div>
+                {Array.isArray(d.variedades) && d.variedades.length > 0 && (
+                  <div className="flex flex-wrap gap-1 -mt-1">
+                    {d.variedades.map((v: string) => (
+                      <span key={v} className="bg-green-100 text-green-700 text-[11px] font-medium px-2 py-0.5 rounded-full">
+                        {v}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <button
                     onClick={() => navigate(`/requerimientos?municipio=${encodeURIComponent(d.municipio)}`)}

@@ -106,6 +106,62 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
        volumenFinal, ventanaFinal, fechaVenc]
     );
 
+    // Notificar bodegas cercanas usando el centroide de la UP (radio 200 km, Haversine)
+    try {
+      const upResult = await pool.query(
+        `SELECT ST_Y(centroid::geometry) AS lat,
+                ST_X(centroid::geometry) AS lng,
+                municipality_name AS municipio,
+                state_name AS estado
+         FROM up
+         WHERE up_id = $1 AND centroid IS NOT NULL`,
+        [up_id]
+      );
+
+      if (upResult.rows.length > 0) {
+        const { lat, lng, municipio, estado } = upResult.rows[0];
+
+        const bodegasResult = await pool.query(
+          `SELECT DISTINCT bb.usuario_id, b.nombre AS bodega_nombre, b.municipio AS bodega_municipio
+           FROM bodegas b
+           JOIN bodeguero_bodegas bb ON bb.bodega_id = b.id AND bb.estatus = 'aprobada'
+           WHERE b.latitud IS NOT NULL AND b.longitud IS NOT NULL
+             AND (6371 * acos(
+               LEAST(1.0, cos(radians($1)) * cos(radians(b.latitud)) *
+               cos(radians(b.longitud) - radians($2)) +
+               sin(radians($1)) * sin(radians(b.latitud)))
+             )) <= 200
+           LIMIT 100`,
+          [lat, lng]
+        );
+
+        const prodResult = await pool.query(
+          `SELECT TRIM(CONCAT_WS(' ', p.nombres, p.apellido_paterno)) AS nombre
+           FROM producer p WHERE p.usuario_id = $1`,
+          [userId]
+        );
+        const nombreProductor = prodResult.rows[0]?.nombre || 'Un productor';
+        const variedadLabel = variedadFinal || tipo_maiz || 'maíz';
+
+        const msg = `🌽 ${nombreProductor} tiene maíz disponible en ${municipio}, ${estado}.\n` +
+                    `Variedad: ${variedadLabel}\n` +
+                    `Volumen: ${volumenFinal || 'No especificado'} toneladas.\n` +
+                    `Ingresa a la sección de Oferta para ver más detalles.`;
+
+        for (const bodega of bodegasResult.rows) {
+          await pool.query(
+            `INSERT INTO notificaciones
+               (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+             VALUES ($1, 'nueva_disponibilidad', $2, $3, 'disponibilidad_productor')`,
+            [bodega.usuario_id, msg, result.rows[0].id]
+          );
+        }
+      }
+    } catch (notifError) {
+      // Error silencioso — no bloquear la respuesta al productor
+      console.error('[DISPONIBILIDAD] Error al notificar bodegas:', notifError);
+    }
+
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
     console.error('Error en POST disponibilidad:', err);

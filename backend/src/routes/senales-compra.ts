@@ -7,9 +7,11 @@ const router = Router();
 // GET /api/senales-compra
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const { bodega_id, tipo_maiz } = req.query;
+  const userId = req.user!.userId;
   try {
-    let where = 'WHERE sc.activa = TRUE';
-    const params: any[] = [];
+    // Cada bodeguero solo ve SUS propios requerimientos, nunca los de otros bodegueros
+    let where = 'WHERE sc.activa = TRUE AND sc.usuario_id = $1';
+    const params: any[] = [userId];
     if (bodega_id) { params.push(bodega_id); where += ` AND sc.bodega_id = $${params.length}`; }
     if (tipo_maiz) { params.push(tipo_maiz); where += ` AND sc.tipo_maiz = $${params.length}`; }
 
@@ -106,15 +108,16 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             const pgR = await pool.query(`
               SELECT DISTINCT u2.id AS usuario_id,
                 ROUND((ST_Distance(
-                  ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                  u.centroid::geography,
                   ST_SetSRID(ST_Point($1, $2), 4326)::geography
                 ) / 1000)::numeric, 0) AS distancia_km
               FROM up u
               JOIN producer p ON p.producer_id = u.producer_id
               JOIN usuarios u2 ON (u2.id = p.usuario_id OR u2.curp = p.curp OR u2.email = p.correo)
               WHERE u2.rol = 'productor' AND u2.activo = TRUE
+                AND u.centroid IS NOT NULL
                 AND ST_DWithin(
-                  ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                  u.centroid::geography,
                   ST_SetSRID(ST_Point($1, $2), 4326)::geography,
                   $3
                 )

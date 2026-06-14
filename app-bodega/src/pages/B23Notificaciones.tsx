@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, CheckCheck, Signal, Receipt, Store, Megaphone, ClipboardList, Tag } from 'lucide-react';
+import { Bell, CheckCheck, Signal, Receipt, Store, Megaphone, ClipboardList, Tag, Wheat } from 'lucide-react';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
 
@@ -23,6 +23,7 @@ const TIPO_CONFIG: Record<string, { icon: typeof Bell; color: string; bg: string
   interes_senal:             { icon: Signal,         color: 'text-cyan-600',    bg: 'bg-cyan-50',    route: '/requerimientos' },
   confirmacion_transaccion:  { icon: Receipt,        color: 'text-orange-500',  bg: 'bg-orange-50',  route: '/transacciones' },
   interes_bodega_oferta:     { icon: Megaphone,      color: 'text-blue-600',    bg: 'bg-blue-50',    route: '/oferta' },
+  nueva_disponibilidad:      { icon: Wheat,          color: 'text-green-600',   bg: 'bg-green-50',   route: '/oferta' },
   solicitud_apoyo:           { icon: Store,          color: 'text-purple-600',  bg: 'bg-purple-50',  route: '/ventanillas' },
   cambio_estado_solicitud:   { icon: ClipboardList,  color: 'text-green-600',   bg: 'bg-green-50' },
   alerta_tarifario:          { icon: Tag,            color: 'text-amber-600',   bg: 'bg-amber-50',   route: '/tarifario' },

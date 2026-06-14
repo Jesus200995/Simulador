@@ -72,9 +72,14 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
                  COUNT(DISTINCT dp.producer_id) AS productores_disponibles,
                  COALESCE(SUM(dp.volumen_estimado_ton), 0)::numeric(12,2) AS toneladas_estimadas,
                  MODE() WITHIN GROUP (ORDER BY dp.ventana_venta) AS ventana_predominante,
-                 ${distExpr} AS distancia_km
+                 ${distExpr} AS distancia_km,
+                 ARRAY_AGG(DISTINCT COALESCE(cv.label, dp.variedad_libre, dp.variedad_code))
+                   FILTER (WHERE COALESCE(dp.variedad_code, dp.variedad_libre) IS NOT NULL) AS variedades,
+                 ARRAY_AGG(DISTINCT dp.tipo_maiz)
+                   FILTER (WHERE dp.tipo_maiz IS NOT NULL) AS tipos_maiz
                FROM disponibilidad_productor dp
                JOIN up u ON u.up_id = dp.up_id
+               LEFT JOIN cat_crop_variety cv ON cv.code = dp.variedad_code AND cv.is_active = TRUE
                WHERE dp.activa = TRUE
                  AND dp.fecha_vencimiento >= CURRENT_DATE
                  ${extraWhere}

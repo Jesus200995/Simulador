@@ -508,27 +508,52 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
       alerta_activa = alertaRes.rows[0] || null;
     } catch (_) { /* ignore */ }
 
-    // 3 bodegas cercanas (fallback por estado)
+    // 3 bodegas cercanas — distancia real con Haversine si el productor tiene centroide;
+    // si no, fallback por estado (sin distancia)
     let bodegas_cercanas: any[] = [];
     try {
-      const bodegasRes = await pool.query(
-        `SELECT b.id, b.nombre, b.municipio,
-                COALESCE((SELECT pr.precio FROM precios pr
-                  WHERE pr.bodega_id = b.id AND pr.tipo_precio = 'bodega'
-                  ORDER BY pr.created_at DESC LIMIT 1), 0) AS precio_compra_hoy,
-                FALSE AS is_ventanilla,
-                CASE b.semaforo_compra
-                  WHEN 'verde'    THEN 'comprando'
-                  WHEN 'amarillo' THEN 'limitado'
-                  WHEN 'rojo'     THEN 'no_compra'
-                  ELSE 'sin_actividad'
-                END AS estado_compra,
-                0 AS distancia_km
-         FROM bodegas b
-         WHERE b.estado ILIKE $1
-         LIMIT 3`,
-        [up?.state_name || '']
-      );
+      const tieneCoordsUP = up?.lat != null && up?.lng != null;
+
+      const bodegasQuery = tieneCoordsUP ? `
+        SELECT b.id, b.nombre, b.municipio,
+               COALESCE((SELECT pr.precio FROM precios pr
+                 WHERE pr.bodega_id = b.id AND pr.tipo_precio = 'bodega'
+                 ORDER BY pr.created_at DESC LIMIT 1), 0) AS precio_compra_hoy,
+               FALSE AS is_ventanilla,
+               CASE b.semaforo_compra
+                 WHEN 'verde'    THEN 'comprando'
+                 WHEN 'amarillo' THEN 'limitado'
+                 WHEN 'rojo'     THEN 'no_compra'
+                 ELSE 'sin_actividad'
+               END AS estado_compra,
+               ROUND((6371 * acos(
+                 LEAST(1.0, cos(radians($1)) * cos(radians(b.latitud)) *
+                 cos(radians(b.longitud) - radians($2)) +
+                 sin(radians($1)) * sin(radians(b.latitud)))
+               ))::numeric, 1) AS distancia_km
+        FROM bodegas b
+        WHERE b.latitud IS NOT NULL AND b.longitud IS NOT NULL
+        ORDER BY distancia_km ASC
+        LIMIT 3
+      ` : `
+        SELECT b.id, b.nombre, b.municipio,
+               COALESCE((SELECT pr.precio FROM precios pr
+                 WHERE pr.bodega_id = b.id AND pr.tipo_precio = 'bodega'
+                 ORDER BY pr.created_at DESC LIMIT 1), 0) AS precio_compra_hoy,
+               FALSE AS is_ventanilla,
+               CASE b.semaforo_compra
+                 WHEN 'verde'    THEN 'comprando'
+                 WHEN 'amarillo' THEN 'limitado'
+                 WHEN 'rojo'     THEN 'no_compra'
+                 ELSE 'sin_actividad'
+               END AS estado_compra,
+               NULL AS distancia_km
+        FROM bodegas b
+        WHERE b.estado ILIKE $1
+        LIMIT 3
+      `;
+      const bodegasParams = tieneCoordsUP ? [up.lat, up.lng] : [up?.state_name || ''];
+      const bodegasRes = await pool.query(bodegasQuery, bodegasParams);
       bodegas_cercanas = bodegasRes.rows;
     } catch (_) { /* ignore */ }
 
