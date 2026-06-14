@@ -272,6 +272,16 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       municipalityIdFinal = g.municipality_id;
     }
 
+    // area_ha_calc/area_ha_real son NUMERIC(10,4) → máx 999999.9999 ha.
+    // Cap para evitar "numeric field overflow" (22003) con áreas absurdas.
+    const capArea = (v: any): number | null => {
+      const n = Number(v);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return Math.min(n, 999999.9999);
+    };
+    const areaCalc = capArea(area_calc_ha);
+    const areaReal = capArea(area_real_ha);
+
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
@@ -351,7 +361,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
         const qParams = [
           p.rows[0].producer_id, estadoFinal, municipioFinal, lng, lat,
           ...(useGeomParam ? [geomParam] : []),
-          area_calc_ha || null, area_real_ha || null, coincide_area ?? null,
+          areaCalc, areaReal, coincide_area ?? null,
         ];
         const aIdx = useGeomParam ? 7 : 6;
         await client.query(
@@ -393,7 +403,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
                    $5, $6, $7,
                    TRUE, 'poligono_calculado')`,
           [p.rows[0].producer_id, estadoFinal, municipioFinal, geojson,
-           area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
+           areaCalc, areaReal, coincide_area ?? null]
         );
 
       } else {

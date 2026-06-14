@@ -429,8 +429,8 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
         up.municipality_name AS municipio_up,
         up.up_name AS nombre_up,
         up.area_ha_calc AS superficie_ha,
-        up.lat,
-        up.lng
+        ST_Y(up.centroid::geometry) AS lat,
+        ST_X(up.centroid::geometry) AS lng
       FROM producer p
       LEFT JOIN up ON up.producer_id = p.producer_id
       WHERE p.producer_id = $1
