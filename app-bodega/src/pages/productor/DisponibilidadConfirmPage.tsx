@@ -13,6 +13,7 @@ export default function DisponibilidadConfirmPage() {
   const tipo = sessionStorage.getItem('disp_tipo') || '';
   const variedadCode = sessionStorage.getItem('disp_variedad_code') || '';
   const variedadNombre = sessionStorage.getItem('disp_variedad_nombre') || '';
+  const variedadLibre = sessionStorage.getItem('disp_variedad_libre') || '';
   const volumen = sessionStorage.getItem('disp_volumen') || '';
   const fechaDesde = sessionStorage.getItem('disp_fecha_desde') || '';
   const fechaHasta = sessionStorage.getItem('disp_fecha_hasta') || '';
@@ -31,6 +32,7 @@ export default function DisponibilidadConfirmPage() {
         body: JSON.stringify({
           tipo_maiz: tipo,
           variedad_code: variedadCode,
+          variedad_libre: variedadLibre || null,
           volumen_estimado_ton: Number(volumen),
           fecha_disponible_desde: fechaDesde,
           fecha_disponible_hasta: fechaHasta,
@@ -42,7 +44,7 @@ export default function DisponibilidadConfirmPage() {
         return;
       }
       // Limpiar sessionStorage
-      ['disp_tipo','disp_variedad_code','disp_variedad_nombre','disp_volumen','disp_fecha_desde','disp_fecha_hasta']
+      ['disp_tipo','disp_variedad_code','disp_variedad_nombre','disp_variedad_libre','disp_volumen','disp_fecha_desde','disp_fecha_hasta']
         .forEach(k => sessionStorage.removeItem(k));
       setSent(true);
     } catch {

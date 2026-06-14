@@ -36,6 +36,7 @@ const iconBodega = (estado: string) => {
 interface Bodega {
   id: number; nombre: string; municipio: string; latitud: number; longitud: number;
   estado_compra: string; precio_compra_hoy: number; is_ventanilla: boolean;
+  capacidad_ton?: number; stock_actual?: number;
   senal_activa?: { id: number; precio_oferta: number; volumen_ton: number; tipo_maiz: string } | null;
 }
 
@@ -249,6 +250,26 @@ export default function MapaBodegasPage() {
                         {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton` : 'Sin precio publicado'}
                       </strong>
                     </div>
+                    {(b.capacidad_ton ?? 0) > 0 && (() => {
+                      const cap = Number(b.capacidad_ton);
+                      const stock = Number(b.stock_actual || 0);
+                      const pct = Math.min(100, (stock / cap) * 100);
+                      const disponible = Math.max(0, cap - stock);
+                      return (
+                        <div className="pt-2 mt-1 border-t border-white/5 space-y-1.5">
+                          <div className="w-full bg-white/10 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${pct > 90 ? 'bg-red-400' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-gray-400">📦 Stock: <strong className="text-gray-200">{stock.toLocaleString('es-MX')} ton</strong></span>
+                            <span className="text-gray-400">🏭 Libre: <strong className="text-emerald-400">{disponible.toLocaleString('es-MX')} ton</strong></span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <div className="flex gap-2 mt-1">

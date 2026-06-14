@@ -3,9 +3,9 @@ import { ChevronLeft, Wheat } from 'lucide-react';
 import DisponibilidadStepper from '../../components/productor/DisponibilidadStepper';
 
 const TIPOS = [
-  { valor: 'blanco',   etiqueta: 'Maiz Blanco',   bg: 'bg-zinc-100',    descripcion: 'H-40, H-59, H-564C y otros' },
-  { valor: 'amarillo', etiqueta: 'Maiz Amarillo',  bg: 'bg-amber-100',   descripcion: 'H-384A, H-385, Buho y otros' },
-  { valor: 'criollo',  etiqueta: 'Maiz Criollo',   bg: 'bg-emerald-100', descripcion: 'Criollo local o nativo' },
+  { valor: 'blanco',   etiqueta: 'Maíz Blanco',   bg: 'bg-zinc-100',    descripcion: 'H-40, H-59, H-564C y otros' },
+  { valor: 'amarillo', etiqueta: 'Maíz Amarillo',  bg: 'bg-amber-100',   descripcion: 'H-384A, H-385, Buho y otros' },
+  { valor: 'criollo',  etiqueta: 'Maíz Criollo',   bg: 'bg-emerald-100', descripcion: 'Criollo local o nativo' },
 ];
 
 export default function DisponibilidadTipoPage() {

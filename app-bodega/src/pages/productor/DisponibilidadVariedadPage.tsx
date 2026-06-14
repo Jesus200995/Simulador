@@ -12,6 +12,11 @@ export default function DisponibilidadVariedadPage() {
   const tipoMaiz = sessionStorage.getItem('disp_tipo') || '';
   const [variedades, setVariedades] = useState<Variedad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [variedadSel, setVariedadSel] = useState<Variedad | null>(null);
+  const [variedadLibre, setVariedadLibre] = useState('');
+
+  const esOtra = (v: Variedad) =>
+    v.code.toUpperCase() === 'OTRA' || v.label.toLowerCase().includes('otra');
 
   useEffect(() => {
     if (!tipoMaiz) { navigate('/productor/disponibilidad/tipo'); return; }
@@ -30,7 +35,15 @@ export default function DisponibilidadVariedadPage() {
   const seleccionar = (v: Variedad) => {
     sessionStorage.setItem('disp_variedad_code', v.code);
     sessionStorage.setItem('disp_variedad_nombre', v.label);
-    navigate('/productor/disponibilidad/volumen');
+    if (esOtra(v)) {
+      // No navegar todavía: pedir que especifique la variedad
+      setVariedadSel(v);
+    } else {
+      setVariedadSel(null);
+      setVariedadLibre('');
+      sessionStorage.removeItem('disp_variedad_libre');
+      navigate('/productor/disponibilidad/volumen');
+    }
   };
 
   return (
@@ -59,13 +72,41 @@ export default function DisponibilidadVariedadPage() {
           <div className="space-y-2">
             {variedades.map(v => (
               <button key={v.code} onClick={() => seleccionar(v)}
-                className="w-full bg-white ring-1 ring-zinc-200 rounded-2xl
-                           py-4 px-5 text-left hover:ring-zinc-300 active:ring-2 active:ring-[#1A5C38] active:bg-emerald-50 transition-all duration-200">
+                className={`w-full bg-white ring-1 rounded-2xl py-4 px-5 text-left transition-all duration-200
+                  ${variedadSel?.code === v.code
+                    ? 'ring-2 ring-[#1A5C38] bg-emerald-50'
+                    : 'ring-zinc-200 hover:ring-zinc-300 active:ring-2 active:ring-[#1A5C38] active:bg-emerald-50'}`}>
                 <p className="font-semibold text-zinc-800">{v.label}</p>
               </button>
             ))}
             {variedades.length === 0 && (
               <p className="text-zinc-400 text-center py-6">No hay variedades registradas para este tipo</p>
+            )}
+
+            {variedadSel && esOtra(variedadSel) && (
+              <div className="mt-2 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  ¿Cuál variedad es? Especifica:
+                </label>
+                <input
+                  type="text"
+                  value={variedadLibre}
+                  onChange={e => {
+                    setVariedadLibre(e.target.value);
+                    sessionStorage.setItem('disp_variedad_libre', e.target.value);
+                  }}
+                  placeholder="Ej: Criollo local rojo, H-520, etc."
+                  className="w-full border border-amber-300 rounded-lg px-4 py-3 text-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  autoFocus
+                />
+                <button
+                  onClick={() => { if (variedadLibre.trim()) navigate('/productor/disponibilidad/volumen'); }}
+                  disabled={!variedadLibre.trim()}
+                  className="mt-3 w-full bg-[#1A5C38] text-white py-3 rounded-xl font-semibold disabled:opacity-40"
+                >
+                  Continuar →
+                </button>
+              </div>
             )}
           </div>
         )}

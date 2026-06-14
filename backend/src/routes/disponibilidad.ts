@@ -10,7 +10,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
   const {
     up_id: bodyUpId,
     tipo_maiz,
-    variedad_code, variedad_id,
+    variedad_code, variedad_id, variedad_libre,
+    ciclo_id,
     volumen_estimado_ton, volumen_ton,
     ventana_venta,
     fecha_disponible_desde, fecha_disponible_hasta,
@@ -99,10 +100,10 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 
     const result = await pool.query(
       `INSERT INTO disponibilidad_productor
-         (producer_id, up_id, tipo_maiz, variedad_code, volumen_estimado_ton,
-          ventana_venta, fecha_vencimiento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [producer_id, up_id, tipo_maiz, variedadFinal,
+         (producer_id, up_id, tipo_maiz, variedad_code, variedad_libre, ciclo_id,
+          volumen_estimado_ton, ventana_venta, fecha_vencimiento)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [producer_id, up_id, tipo_maiz, variedadFinal, variedad_libre || null, ciclo_id || null,
        volumenFinal, ventanaFinal, fechaVenc]
     );
 

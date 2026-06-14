@@ -262,7 +262,7 @@ export default function DashboardProductorPage() {
                 : 'bg-[#1A5C38] hover:bg-[#15482d] active:scale-[0.97] shadow-lg shadow-green-900/20'}`}
           >
             <Wheat size={24} />
-            Tengo maiz disponible
+            Propuesta de venta
           </button>
           {isPendiente && (
             <p className="text-center text-xs text-zinc-400 mt-2">

@@ -44,6 +44,79 @@ async function getParametros() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/precios/bodega/:id — precios calculados con datos de una bodega específica
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/bodega/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const FACTOR_CONVERSION = 39.368;
+
+    // 1. Último precio de compra (PO) de esa bodega
+    const poResult = await pool.query(
+      `SELECT precio AS po, fecha, (CURRENT_DATE - fecha::date) AS dias_antiguedad
+       FROM precios
+       WHERE bodega_id = $1 AND tipo_precio = 'bodega'
+       ORDER BY fecha DESC, created_at DESC LIMIT 1`,
+      [id]
+    );
+
+    // 2. Tarifario de servicios (S) vigente de esa bodega (últimos 90 días)
+    const serviciosResult = await pool.query(
+      `SELECT COALESCE(SUM(ts.precio), 0) AS servicios_total
+       FROM tarifario_servicios ts
+       WHERE ts.bodega_id = $1 AND ts.activo = TRUE
+         AND ts.updated_at >= NOW() - INTERVAL '90 days'`,
+      [id]
+    );
+
+    // 3. Datos de la bodega
+    const bodegaResult = await pool.query(
+      `SELECT id, nombre, municipio, estado, capacidad_ton FROM bodegas WHERE id = $1`,
+      [id]
+    );
+    if (bodegaResult.rows.length === 0) {
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+
+    const bodega = bodegaResult.rows[0];
+    const po = poResult.rows[0] ? parseFloat(poResult.rows[0].po) : null;
+    const diasAntiguedad = Number(poResult.rows[0]?.dias_antiguedad ?? 0);
+    const servicios = parseFloat(serviciosResult.rows[0]?.servicios_total || '0');
+
+    // 4. Margen de negociación (Chicago + TC) — mismo cálculo que el endpoint principal
+    const refs = await obtenerReferenciasExternasActuales();
+    let margen: number | null = null;
+    if (refs?.chicago_usd_bushel && refs?.tc_banxico) {
+      const chicago = parseFloat(refs.chicago_usd_bushel);
+      const tc = parseFloat(refs.tc_banxico);
+      margen = Math.round(((chicago * FACTOR_CONVERSION * tc) + (BONO_MAIZ_USD * tc)) * 100) / 100;
+    }
+
+    // 5. Calcular precios
+    const precioCompra = po !== null ? Math.round((po + servicios) * 100) / 100 : null;
+    const precioVenta = (precioCompra !== null && margen !== null)
+      ? Math.round((precioCompra - margen) * 100) / 100
+      : null;
+
+    res.json({
+      bodega: { id: bodega.id, nombre: bodega.nombre, municipio: bodega.municipio, estado: bodega.estado },
+      po,
+      dias_antiguedad_precio: diasAntiguedad,
+      servicios,
+      margen,
+      precio_compra: precioCompra,
+      precio_venta: precioVenta,
+      tiene_precio_hoy: diasAntiguedad === 0,
+      tiene_tarifario: servicios > 0,
+    });
+  } catch (error) {
+    console.error('Error en precios por bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET /api/precios/sistema/hoy
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/sistema/hoy', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {

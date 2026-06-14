@@ -12,10 +12,7 @@ const TIPOS_MAIZ = [
   { code: 'criollo', label: 'Criollo / Local' },
 ];
 
-const REGIONES_RADIO: Record<string, [number, number, number]> = {
-  Sinaloa: [30, 80, 200], Sonora: [30, 80, 200], Nayarit: [30, 80, 200],
-  default: [20, 60, 150],
-};
+const OPCIONES_RADIO = [50, 100, 200, 500, 1000, 2000];
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -33,11 +30,14 @@ export default function B10Requerimiento() {
     tipo_maiz: '', variedad_code: '', volumen_ton: '', precio_ofrecido: '',
     vigencia_inicio: today,
     vigencia_fin: '',
-    radio_km: '60',
+    radio_km: '200',
     municipio: municipioPre,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // Múltiples variedades por requerimiento (Feature C-3)
+  const [variedadesSeleccionadas, setVarSeleccionadas] = useState<string[]>([]);
+  const [variedadesLibres, setVarLibres] = useState<Record<string, string>>({});
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -66,12 +66,8 @@ export default function B10Requerimiento() {
 
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
-  const bodegaSel = bodegas.find(b => b.id === Number(form.bodega_id));
-  const radioRange = bodegaSel?.estado
-    ? (REGIONES_RADIO[bodegaSel.estado] || REGIONES_RADIO.default)
-    : REGIONES_RADIO.default;
-
   const filteredVars = variedades.filter(v => v.tipo_maiz === form.tipo_maiz);
+  const esOtraVar = (label?: string) => (label || '').toLowerCase().includes('otra');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -80,12 +76,20 @@ export default function B10Requerimiento() {
     setLoading(true);
     try {
       setError('');
+      const variedadesPayload = variedadesSeleccionadas.map(code => ({
+        code,
+        libre: variedadesLibres[code] || null,
+      }));
       await api.senales.create({
         ...form,
+        // Compatibilidad: variedad_code única = primera seleccionada
+        variedad_code: variedadesSeleccionadas[0] || '',
+        variedades: variedadesPayload,
         vigencia: 'rango',
       });
       toast('Requerimiento publicado. Los productores en el radio serán notificados.', 'success');
-      setForm(f => ({ ...f, tipo_maiz: '', volumen_ton: '', precio_ofrecido: '', vigencia_fin: '' }));
+      setForm(f => ({ ...f, tipo_maiz: '', variedad_code: '', volumen_ton: '', precio_ofrecido: '', vigencia_fin: '' }));
+      setVarSeleccionadas([]); setVarLibres({});
       cargarRequerimientos();
     } catch (err: any) {
       if (err.message?.includes('5 requerimientos')) {
@@ -131,18 +135,58 @@ export default function B10Requerimiento() {
           </div>
           <div>
             <label className={labelClass}>Tipo de maíz que busca</label>
-            <select value={form.tipo_maiz} onChange={e => { set('tipo_maiz', e.target.value); set('variedad_code', ''); }} required className={inputClass}>
+            <select value={form.tipo_maiz} onChange={e => { set('tipo_maiz', e.target.value); set('variedad_code', ''); setVarSeleccionadas([]); setVarLibres({}); }} required className={inputClass}>
               <option value="">Selecciona tipo</option>
               {TIPOS_MAIZ.map(t => <option key={t.code} value={t.code}>{t.label}</option>)}
             </select>
           </div>
           {form.tipo_maiz && (
             <div>
-              <label className={labelClass}>Variedad <span className="text-gray-400 font-normal">(opcional)</span></label>
-              <select value={form.variedad_code} onChange={e => set('variedad_code', e.target.value)} className={inputClass}>
-                <option value="">Sin especificar / No sabe</option>
-                {filteredVars.map(v => <option key={v.code} value={v.code}>{v.label}</option>)}
-              </select>
+              <label className={labelClass}>Variedades que busca <span className="text-gray-400 font-normal">(opcional, varias)</span></label>
+              <div className="space-y-2">
+                {filteredVars.map(v => (
+                  <label key={v.code}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={variedadesSeleccionadas.includes(v.code)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setVarSeleccionadas(prev => [...prev, v.code]);
+                        } else {
+                          setVarSeleccionadas(prev => prev.filter(c => c !== v.code));
+                          if (esOtraVar(v.label)) {
+                            setVarLibres(prev => { const n = { ...prev }; delete n[v.code]; return n; });
+                          }
+                        }
+                      }}
+                      className="w-5 h-5 accent-[#1A5C38]"
+                    />
+                    <span className="text-sm text-gray-800">{v.label}</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Campo "especificar" para cada "Otra" seleccionada */}
+              {variedadesSeleccionadas
+                .filter(code => esOtraVar(filteredVars.find(v => v.code === code)?.label))
+                .map(code => (
+                  <div key={`libre-${code}`} className="mt-2 ml-8">
+                    <input
+                      type="text"
+                      value={variedadesLibres[code] || ''}
+                      onChange={e => setVarLibres(prev => ({ ...prev, [code]: e.target.value }))}
+                      placeholder="Especifica la variedad..."
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                ))}
+
+              {variedadesSeleccionadas.length > 0 && (
+                <p className="text-xs text-[#1A5C38] mt-2">
+                  {variedadesSeleccionadas.length} variedad{variedadesSeleccionadas.length > 1 ? 'es' : ''} seleccionada{variedadesSeleccionadas.length > 1 ? 's' : ''}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -185,16 +229,27 @@ export default function B10Requerimiento() {
         {/* Radio de búsqueda */}
         <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-3">
           <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Radio de búsqueda</p>
-          <div className="flex items-center justify-between">
-            <p className={labelClass + ' mb-0'}>Radio: <span className="text-[#1A5C38] font-bold">{form.radio_km} km</span></p>
-            <span className="text-[13px] text-gray-400">{radioRange[0]}–{radioRange[2]} km</span>
+          <div className="grid grid-cols-3 gap-2">
+            {OPCIONES_RADIO.map(km => (
+              <button
+                key={km}
+                type="button"
+                onClick={() => set('radio_km', String(km))}
+                className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                  Number(form.radio_km) === km
+                    ? 'bg-[#1A5C38] text-white border-[#1A5C38]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                {km >= 1000 ? `${(km / 1000).toLocaleString('es-MX')},000` : km} km
+              </button>
+            ))}
           </div>
-          <input type="range" min={radioRange[0]} max={radioRange[2]} step={10}
-            value={form.radio_km} onChange={e => set('radio_km', e.target.value)}
-            className="w-full accent-[#1A5C38] h-2" />
-          <div className="flex justify-between text-[12px] text-gray-400">
-            <span>{radioRange[0]} km</span><span>{radioRange[2]} km</span>
-          </div>
+          {Number(form.radio_km) >= 500 && (
+            <p className="text-xs text-amber-600">
+              ⚠️ Con este radio se notificarán productores en una zona muy amplia
+            </p>
+          )}
         </div>
 
         <button type="submit" disabled={loading}

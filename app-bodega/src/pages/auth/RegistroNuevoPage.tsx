@@ -242,8 +242,8 @@ export default function RegistroNuevoPage() {
           <div className="flex-1 min-w-0">
             {drawMode === 'idle' && !poligono && (
               <>
-                <p className="text-white font-bold text-sm leading-tight">Dibuja tu parcela</p>
-                <p className="text-white/45 text-xs">Centra la mira y agrega cada esquina</p>
+                <p className="text-white font-bold text-sm leading-tight">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
+                <p className="text-white/45 text-xs">Dibuja el contorno de tu parcela. Toca cada esquina para agregar un punto.</p>
               </>
             )}
             {drawMode === 'drawing' && (

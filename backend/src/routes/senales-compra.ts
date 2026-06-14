@@ -31,7 +31,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.user!.userId;
   const { bodega_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido, radio_km,
-          vigencia, vigencia_inicio, vigencia_fin } = req.body;
+          vigencia, vigencia_inicio, vigencia_fin, variedades } = req.body;
 
   if (!bodega_id || !tipo_maiz || !precio_ofrecido) {
     res.status(400).json({ error: 'Campos requeridos: bodega_id, tipo_maiz, precio_ofrecido' });
@@ -81,6 +81,21 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     );
 
     const senal = result.rows[0];
+
+    // Guardar variedades múltiples solicitadas (tabla senal_variedades)
+    if (Array.isArray(variedades) && variedades.length > 0) {
+      for (const v of variedades) {
+        if (!v || !v.code) continue;
+        try {
+          await pool.query(
+            `INSERT INTO senal_variedades (senal_id, variedad_code, variedad_libre)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (senal_id, variedad_code) DO NOTHING`,
+            [senal.id, v.code, v.libre || null]
+          );
+        } catch (_) { /* best-effort por variedad */ }
+      }
+    }
 
     // C-14 + B-05 + F-06: Notificar productores filtrados por radio con info completa
     try {
