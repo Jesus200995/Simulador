@@ -1066,5 +1066,171 @@ router.post('/ciclo', authMiddleware, async (req: AuthRequest, res: Response): P
   }
 });
 
+// =============================================
+// POST /api/productor/ups — agregar UP adicional a un productor existente
+// =============================================
+router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const usuarioId = req.user!.userId;
+    const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area,
+            estado_up, municipio_up, nombre_up } = req.body;
+
+    const prodResult = await client.query(
+      'SELECT producer_id FROM producer WHERE usuario_id = $1', [usuarioId]
+    );
+    if (prodResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      res.status(404).json({ error: 'Productor no encontrado' });
+      return;
+    }
+    const producer_id = prodResult.rows[0].producer_id;
+    const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
+    const hasCoords = lat != null && lng != null && lat !== 0 && lng !== 0;
+    const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
+    const upName = nombre_up || `Parcela ${new Date().getFullYear()}`;
+
+    const geojson = hasPoligono ? JSON.stringify({
+      type: 'Polygon',
+      coordinates: [[
+        ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
+        [poligono[0][1], poligono[0][0]],
+      ]],
+    }) : null;
+
+    // Validar overlap con UPs existentes del mismo productor
+    if (hasPoligono && postgisActivo) {
+      const overlap = await client.query(
+        `SELECT up_id, up_name FROM up
+         WHERE producer_id = $1 AND geom IS NOT NULL
+           AND ST_Intersects(geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
+         LIMIT 1`,
+        [producer_id, geojson]
+      );
+      if (overlap.rows.length > 0) {
+        await client.query('ROLLBACK');
+        res.status(409).json({
+          error: `El polígono que dibujaste se intersecta con tu parcela "${overlap.rows[0].up_name}". Por favor dibuja en un área diferente.`,
+          up_conflicto: overlap.rows[0].up_name,
+        });
+        return;
+      }
+    }
+
+    let upResult;
+    if (hasCoords) {
+      const useGeom = hasPoligono && postgisActivo;
+      const geomSql = useGeom ? `ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))` : 'NULL';
+      const aIdx = useGeom ? 7 : 6;
+      const params = [
+        producer_id, estado_up, municipio_up, lng, lat,
+        ...(useGeom ? [geojson] : []),
+        area_calc_ha || null, area_real_ha || null, coincide_area ?? null, upName,
+      ];
+      upResult = await client.query(
+        `INSERT INTO up
+           (producer_id, up_name, up_type, production_system, water_regime,
+            state_name, municipality_name, centroid, geom,
+            area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
+         VALUES ($1, $${aIdx + 3}, 'temporal', 'tradicional', 'temporal',
+                 $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), ${geomSql},
+                 $${aIdx}, $${aIdx + 1}, $${aIdx + 2}, TRUE, 'productor')
+         RETURNING up_id, up_name`,
+        params
+      );
+    } else if (hasPoligono && postgisActivo) {
+      upResult = await client.query(
+        `INSERT INTO up
+           (producer_id, up_name, up_type, production_system, water_regime,
+            state_name, municipality_name, centroid, geom,
+            area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
+         VALUES ($1, $5, 'temporal', 'tradicional', 'temporal',
+                 $2, $3,
+                 ST_Centroid(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
+                 ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
+                 $6, $7, $8, TRUE, 'poligono_calculado')
+         RETURNING up_id, up_name`,
+        [producer_id, estado_up, municipio_up, geojson, upName,
+         area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
+      );
+    } else {
+      let centroidVal = null;
+      try {
+        const muni = await client.query(
+          `SELECT centroid::geometry AS centroid FROM municipios_referencia
+           WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
+          [municipio_up, estado_up]
+        );
+        centroidVal = muni.rows[0]?.centroid || null;
+      } catch { /* tabla opcional */ }
+      upResult = await client.query(
+        `INSERT INTO up
+           (producer_id, up_name, up_type, production_system, water_regime,
+            state_name, municipality_name, centroid, geom,
+            area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
+         VALUES ($1, $5, 'temporal', 'tradicional', 'temporal',
+                 $2, $3, $4::geometry, NULL,
+                 $6, $7, $8, FALSE, 'municipio')
+         RETURNING up_id, up_name`,
+        [producer_id, estado_up, municipio_up, centroidVal, upName,
+         area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.status(201).json({ success: true, up: upResult.rows[0] });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al agregar UP:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
+  }
+});
+
+// =============================================
+// GET /api/productor/mis-ups-con-ciclos — UPs del productor con sus ciclos activos
+// =============================================
+router.get('/mis-ups-con-ciclos', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const usuarioId = req.user!.userId;
+    const result = await pool.query(
+      `SELECT
+         u.up_id, u.up_name, u.municipality_name, u.state_name,
+         u.area_ha_calc, u.area_ha_real, u.location_confirmed,
+         COALESCE(
+           JSON_AGG(
+             JSON_BUILD_OBJECT(
+               'cycle_id', c.cycle_id,
+               'cycle_type', c.cycle_type,
+               'cycle_year', c.cycle_year,
+               'area_sown_ha', COALESCE(cr.area_sown_ha, c.hectareas_sembradas),
+               'variedad_code', cr.variety_id,
+               'variedad_nombre', COALESCE(cv.label, cr.variety_id, c.variedad_nombre),
+               'variedad_other', cr.variety_other,
+               'estado_ciclo', COALESCE(c.estado_ciclo, 'activo')
+             )
+           ) FILTER (WHERE c.cycle_id IS NOT NULL),
+           '[]'
+         ) AS ciclos_activos
+       FROM up u
+       JOIN producer p ON p.producer_id = u.producer_id
+       LEFT JOIN cycle c ON c.up_id = u.up_id AND COALESCE(c.estado_ciclo, 'activo') = 'activo'
+       LEFT JOIN cycle_crop cr ON cr.cycle_id = c.cycle_id
+       LEFT JOIN cat_crop_variety cv ON cv.code = cr.variety_id AND cv.is_active = TRUE
+       WHERE p.usuario_id = $1
+       GROUP BY u.up_id, u.up_name, u.municipality_name, u.state_name,
+                u.area_ha_calc, u.area_ha_real, u.location_confirmed, u.created_at
+       ORDER BY u.created_at ASC`,
+      [usuarioId]
+    );
+    res.json({ ups: result.rows });
+  } catch (error) {
+    console.error('Error al obtener UPs con ciclos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 
 export default router;

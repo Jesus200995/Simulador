@@ -254,7 +254,7 @@ export default function DashboardProductorPage() {
 
         <div className="mt-5">
           <button
-            onClick={() => !isPendiente && navigate('/productor/disponibilidad/tipo')}
+            onClick={() => !isPendiente && navigate('/productor/propuesta-venta')}
             disabled={isPendiente}
             className={`w-full py-5 rounded-2xl text-white text-lg font-semibold
               flex items-center justify-center gap-3 transition-all duration-200
@@ -264,6 +264,16 @@ export default function DashboardProductorPage() {
             <Wheat size={24} />
             Propuesta de venta
           </button>
+          {!isPendiente && (
+            <button
+              onClick={() => navigate('/productor/ups/nueva')}
+              className="w-full border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-2xl text-sm font-medium
+                hover:bg-green-50 flex items-center justify-center gap-2 mt-3"
+            >
+              <span className="text-lg">+</span>
+              Agregar otra parcela
+            </button>
+          )}
           {isPendiente && (
             <p className="text-center text-xs text-zinc-400 mt-2">
               Tu cuenta esta en validacion. Te avisamos cuando puedas declarar disponibilidad.

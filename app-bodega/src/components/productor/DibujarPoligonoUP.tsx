@@ -8,6 +8,10 @@ export type DrawMode = 'idle' | 'drawing' | 'editing';
 export interface DibujarPoligonoHandle {
   /** Agrega un vértice en el centro actual del mapa (la mira). */
   addPoint: () => void;
+  /** Modo caminata: captura la ubicación GPS real del dispositivo y la agrega como vértice. */
+  addPointGPS: (
+    onResult?: (info: { ok: true; accuracy: number } | { ok: false; error: string }) => void
+  ) => void;
   /** Quita el último vértice agregado. */
   undoVertex: () => void;
   /** Cierra el polígono (requiere ≥3 vértices) y calcula área/centroide. */
@@ -178,6 +182,34 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       emitCount();
     }, [map, setMode, fullRedraw, emitCount]);
 
+    const addPointGPS = useCallback((
+      onResult?: (info: { ok: true; accuracy: number } | { ok: false; error: string }) => void
+    ) => {
+      if (!navigator.geolocation) {
+        onResult?.({ ok: false, error: 'Tu dispositivo no tiene GPS disponible.' });
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          if (modeRef.current === 'idle') setMode('drawing');
+          verticesRef.current.push([latitude, longitude]);
+          fullRedraw();
+          emitCount();
+          map.setView([latitude, longitude], Math.max(map.getZoom(), 16));
+          onResult?.({ ok: true, accuracy });
+        },
+        (error) => {
+          let msg = 'Error al obtener ubicación. Intenta de nuevo.';
+          if (error.code === error.PERMISSION_DENIED) msg = 'Permiso de ubicación denegado. Activa el GPS en la configuración de tu celular.';
+          else if (error.code === error.POSITION_UNAVAILABLE) msg = 'No se pudo obtener tu ubicación. Sal a un lugar abierto e intenta de nuevo.';
+          else if (error.code === error.TIMEOUT) msg = 'La ubicación tardó demasiado. Intenta de nuevo.';
+          onResult?.({ ok: false, error: msg });
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }, [map, setMode, fullRedraw, emitCount]);
+
     const undoVertex = useCallback(() => {
       verticesRef.current.pop();
       if (verticesRef.current.length === 0) setMode('drawing');
@@ -222,7 +254,7 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
     }, [setMode, fullRedraw]);
 
     useImperativeHandle(ref, () => ({
-      addPoint, undoVertex, finishDraw, clear, startEdit, saveEdit, cancelEdit,
+      addPoint, addPointGPS, undoVertex, finishDraw, clear, startEdit, saveEdit, cancelEdit,
     }));
 
     return null;

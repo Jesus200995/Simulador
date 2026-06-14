@@ -89,6 +89,8 @@ export default function RegistroNuevoPage() {
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
+  const [capturandoGPS, setCapturandoGPS] = useState(false);
+  const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [geoDetectado, setGeoDetectado] = useState<{ estado: string; municipio: string } | null>(null);
   const [detectandoGeo, setDetectandoGeo] = useState(false);
 
@@ -402,6 +404,32 @@ export default function RegistroNuevoPage() {
                 <Plus size={20} strokeWidth={2.6} />
                 {pointCount === 0 ? 'Agregar primer punto' : 'Agregar punto'}
               </button>
+
+              {/* Modo caminata: capturar la esquina con el GPS del celular */}
+              <button
+                onClick={() => {
+                  setCapturandoGPS(true);
+                  setGpsMsg(null);
+                  dibujarRef.current?.addPointGPS((info) => {
+                    setCapturandoGPS(false);
+                    if (!info.ok) {
+                      setGpsMsg(info.error);
+                    } else if (info.accuracy > 30) {
+                      setGpsMsg(`Punto registrado, pero la señal GPS es débil (±${Math.round(info.accuracy)} m). Espera unos segundos para mejor precisión.`);
+                    } else {
+                      setGpsMsg(`📍 Punto registrado con buena precisión (±${Math.round(info.accuracy)} m).`);
+                    }
+                  });
+                }}
+                disabled={capturandoGPS}
+                className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold
+                           flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {capturandoGPS ? '⏳ Obteniendo ubicación…' : '🚶 Estoy en la esquina — usar mi GPS'}
+              </button>
+              {gpsMsg && (
+                <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>
+              )}
 
               {pointCount > 0 && (
                 <div className="flex gap-2">
