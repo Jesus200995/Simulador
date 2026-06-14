@@ -204,7 +204,12 @@ export default function RegistroNuevoPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Error al registrar'); return; }
+      if (!res.ok) {
+        setError(data.error || 'Error al registrar');
+        // Overlap de polígono: regresar al mapa (paso 4) para que el productor redibuje
+        if (res.status === 409 && data.up_conflicto) setPaso(4);
+        return;
+      }
       setRegistroExitoso(true);
     } catch {
       setError('Error de conexión. Intenta de nuevo.');

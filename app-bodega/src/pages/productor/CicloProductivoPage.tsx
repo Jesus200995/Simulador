@@ -102,6 +102,14 @@ export default function CicloProductivoPage() {
 
   const guardar = async () => {
     if (!upId) { setError('No se encontró tu unidad productiva.'); return; }
+    // La superficie sembrada no puede superar el área de la parcela
+    if (areaHaCalc && Number(form.area_sown_ha) > Number(areaHaCalc)) {
+      setError(
+        `La superficie sembrada (${form.area_sown_ha} ha) no puede ser mayor ` +
+        `al área de tu parcela (${areaHaCalc} ha). Ajusta el valor antes de continuar.`
+      );
+      return;
+    }
     const token = localStorage.getItem('simac_token');
     setLoading(true); setError('');
     try {

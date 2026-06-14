@@ -303,6 +303,34 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
       const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
 
+      // Verificar que el nuevo polígono no se intersecta con UPs existentes del mismo productor
+      if (hasPoligono && postgisActivo) {
+        const geojsonNueva = JSON.stringify({
+          type: 'Polygon',
+          coordinates: [[
+            ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
+            [poligono[0][1], poligono[0][0]],
+          ]],
+        });
+        const overlapCheck = await client.query(
+          `SELECT u.up_id, u.up_name
+           FROM up u
+           WHERE u.producer_id = $1
+             AND u.geom IS NOT NULL
+             AND ST_Intersects(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
+           LIMIT 1`,
+          [p.rows[0].producer_id, geojsonNueva]
+        );
+        if (overlapCheck.rows.length > 0) {
+          await client.query('ROLLBACK');
+          res.status(409).json({
+            error: `El polígono que dibujaste se intersecta con tu parcela "${overlapCheck.rows[0].up_name}" que ya está registrada. Por favor dibuja el polígono de tu nueva parcela en un área diferente.`,
+            up_conflicto: overlapCheck.rows[0].up_name,
+          });
+          return;
+        }
+      }
+
       if (hasCoords) {
         // Caso 1 — Frontend envió centroide calculado por turf.js ✅
         // useGeomParam: $6 solo aparece en el SQL cuando ambas condiciones se cumplen
