@@ -160,6 +160,9 @@ export default function AgregarUPPage() {
 
             {/* Controles */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5">
+              <p className="text-center text-[11px] text-white bg-black/40 rounded-lg px-3 py-1.5">
+                Toca el mapa en cada esquina de tu parcela, o centra la mira y usa el botón.
+              </p>
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-700 text-xs">{error}</p></div>
               )}

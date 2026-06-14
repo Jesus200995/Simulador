@@ -147,6 +147,23 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       const g = groupRef.current;
       map.addLayer(g);
 
+      // Modo fluido: tocar/clic directo en el mapa coloca un vértice donde apunta el dedo/cursor.
+      // Coexiste con la mira + botón. Guardas para no marcar por error:
+      //  - nunca durante la edición de vértices (arrastre)
+      //  - nunca cuando el polígono ya está cerrado (idle con ≥3 vértices)
+      const onMapClick = (e: L.LeafletMouseEvent) => {
+        if (modeRef.current === 'editing') return;
+        if (modeRef.current === 'idle' && verticesRef.current.length >= 3) return;
+        if (modeRef.current === 'idle') setMode('drawing');
+        verticesRef.current.push([e.latlng.lat, e.latlng.lng]);
+        fullRedraw();
+        emitCount();
+      };
+      map.on('click', onMapClick);
+      // El doble-toque/clic hace zoom (dispararía 2 clics y crearía puntos sueltos): lo desactivamos
+      // mientras se dibuja. El zoom sigue disponible con pellizco, rueda y los controles +/−.
+      map.doubleClickZoom.disable();
+
       if (poligonoInicial && poligonoInicial.length >= 3) {
         verticesRef.current = poligonoInicial.map(([la, ln]) => [la, ln] as [number, number]);
         setMode('idle');
@@ -158,6 +175,8 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       }
 
       return () => {
+        map.off('click', onMapClick);
+        try { map.doubleClickZoom.enable(); } catch { /* noop */ }
         // Defensa: evita el crash "reading 'baseVal'" de Leaflet si el mapa se
         // desmonta con un arrastre colgado (Draggable.finishDrag sobre un
         // _lastTarget inválido). Limpiamos el estado antes de que React desmonte.

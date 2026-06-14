@@ -143,7 +143,7 @@ export default function CompletarUbicacionPage() {
           <p className="text-white/45 text-xs truncate">
             {drawMode === 'editing' ? 'Arrastra los puntos para ajustar'
               : poligono ? 'Revisa el área y guarda'
-              : 'Centra la mira y agrega cada esquina'}
+              : 'Toca cada esquina en el mapa (o usa la mira y el botón)'}
           </p>
         </div>
       </div>
@@ -238,8 +238,8 @@ export default function CompletarUbicacionPage() {
           <div className="max-w-md mx-auto space-y-2.5">
             <p className="text-center text-white/55 text-xs px-2">
               {pointCount === 0
-                ? 'Mueve y haz zoom en el mapa. Pon la mira sobre una esquina y toca el botón.'
-                : 'Mueve la mira a la siguiente esquina y agrega el punto.'}
+                ? 'Toca el mapa en cada esquina de tu parcela. También puedes centrar la mira y usar el botón.'
+                : 'Toca la siguiente esquina, o centra la mira y agrega el punto.'}
             </p>
             <button
               onClick={() => dibujarRef.current?.addPoint()}
