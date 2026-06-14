@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Wheat, CircleDot, Check,
   AlertCircle, User, MapPin, Sprout, Map, Phone, Loader2,
-  Undo2, Pencil, Trash2, CheckCircle2, Plus, KeyRound, ShieldCheck,
+  Undo2, Pencil, Trash2, CheckCircle2, KeyRound, ShieldCheck,
 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -225,7 +225,6 @@ export default function RegistroNuevoPage() {
     const puntosNecesarios = Math.max(0, 3 - pointCount);
     const puedeTerminar = pointCount >= 3;
     const dibujando = drawMode === 'drawing' || (drawMode === 'idle' && !poligono);
-    const miraVisible = dibujando;
 
     return (
       <div
@@ -282,19 +281,6 @@ export default function RegistroNuevoPage() {
 
         {/* Mapa */}
         <div className="flex-1 relative min-h-0">
-          {/* Mira central — el punto verde marca EXACTAMENTE el centro del mapa */}
-          {miraVisible && (
-            <div className="absolute left-1/2 top-1/2 z-[600] pointer-events-none -translate-x-1/2 -translate-y-1/2">
-              {/* anillo de pulso */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#34d079]/40 animate-crosshair-ring" />
-              {/* ticks de precisión */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1.5px] h-7 bg-white/70 rounded-full" />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[1.5px] w-7 bg-white/70 rounded-full" />
-              {/* punto central exacto */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#34d079] ring-[3px] ring-white shadow-[0_1px_5px_rgba(0,0,0,0.55)]" />
-            </div>
-          )}
-
           {/* Hint flotante de edición (no se encima con el buscador) */}
           {drawMode === 'editing' && (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[700] pointer-events-none w-[calc(100%-1.5rem)] max-w-sm">
@@ -393,17 +379,9 @@ export default function RegistroNuevoPage() {
             <div className="max-w-md mx-auto space-y-2.5">
               <p className="text-center text-white/55 text-xs px-2">
                 {pointCount === 0
-                  ? 'Toca el mapa en cada esquina de tu parcela. También puedes centrar la mira y usar el botón.'
-                  : 'Toca la siguiente esquina, o centra la mira y agrega el punto.'}
+                  ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
+                  : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
               </p>
-              <button
-                onClick={() => dibujarRef.current?.addPoint()}
-                className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
-                           flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-lg shadow-green-900/30"
-              >
-                <Plus size={20} strokeWidth={2.6} />
-                {pointCount === 0 ? 'Agregar primer punto' : 'Agregar punto'}
-              </button>
 
               {/* Modo caminata: capturar la esquina con el GPS del celular */}
               <button

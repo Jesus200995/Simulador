@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChevronLeft, Plus, Undo2, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Undo2, CheckCircle2 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 
@@ -151,26 +151,16 @@ export default function AgregarUPPage() {
               />
             </MapContainer>
 
-            {/* Mira central */}
-            {drawMode !== 'editing' && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1000]">
-                <div className="w-3 h-3 rounded-full bg-[#34d079] border-2 border-white shadow-lg" />
-              </div>
-            )}
-
             {/* Controles */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5">
               <p className="text-center text-[11px] text-white bg-black/40 rounded-lg px-3 py-1.5">
-                Toca el mapa en cada esquina de tu parcela, o centra la mira y usa el botón.
+                {pointCount === 0
+                  ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
+                  : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
               </p>
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-700 text-xs">{error}</p></div>
               )}
-              <button onClick={() => dibujarRef.current?.addPoint()}
-                className="w-full bg-green-500 hover:bg-green-400 text-white py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-2.5 shadow-lg">
-                <Plus size={20} strokeWidth={2.6} />
-                {pointCount === 0 ? 'Agregar primer punto' : 'Agregar punto'}
-              </button>
 
               <button
                 onClick={() => {
