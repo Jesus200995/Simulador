@@ -50,12 +50,12 @@ export default function UpdateToast() {
         <div className="leading-tight">
           {applying ? (
             <>
-              <p className="text-[12px] font-semibold">Actualizando la app…</p>
+              <p className="text-[10px] font-semibold">Actualizando la app…</p>
               <p className="text-[10px] text-white/60">Se aplicarán los cambios en un momento</p>
             </>
           ) : (
             <>
-              <p className="text-[12px] font-semibold">Nueva versión detectada</p>
+              <p className="text-[10px] font-semibold">Nueva versión detectada</p>
               <p className="text-[10px] text-white/60">Preparando actualización…</p>
             </>
           )}

@@ -60,10 +60,10 @@ export default function MisDisponibilidadesSection({ token, apiUrl, onActualizar
   if (disponibilidades.length === 0) return null;
 
   return (
-    <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mt-4">
+    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mt-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Wheat size={18} className="text-green-700" />
+        <Wheat size={13} className="text-green-700" />
         <h3 className="font-semibold text-green-800">
           Mi disponibilidad activa
         </h3>
@@ -77,7 +77,7 @@ export default function MisDisponibilidadesSection({ token, apiUrl, onActualizar
         {disponibilidades.map(disp => (
           <div key={disp.id} className="bg-white rounded-xl p-4 flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-800 text-sm">
+              <p className="font-semibold text-gray-800 text-xs">
                 {disp.variedad_nombre || disp.variedad_code}
               </p>
               <p className="text-xs text-gray-500 mt-0.5">

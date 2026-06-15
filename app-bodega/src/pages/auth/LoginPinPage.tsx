@@ -101,7 +101,7 @@ export default function LoginPinPage() {
           onClick={() => step === 'pin' ? (setStep('curp'), setPin(''), setError('')) : navigate('/')}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
         >
-          <ChevronLeft size={22} className="text-white/70" />
+          <ChevronLeft size={13} className="text-white/70" />
         </button>
         {/* Step indicator */}
         <div className="flex-1 flex justify-center gap-2">
@@ -119,8 +119,8 @@ export default function LoginPinPage() {
           <div className="flex justify-center mb-6 sm:mb-8">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#1A5C38] rounded-[18px] sm:rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
               {step === 'curp'
-                ? <Wheat size={24} className="text-white sm:hidden" />
-                : <KeyRound size={24} className="text-white sm:hidden" />
+                ? <Wheat size={12} className="text-white sm:hidden" />
+                : <KeyRound size={12} className="text-white sm:hidden" />
               }
               {step === 'curp'
                 ? <Wheat size={28} className="text-white hidden sm:block" />
@@ -131,15 +131,15 @@ export default function LoginPinPage() {
 
           {step === 'curp' ? (
             <div className="animate-slide-right">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white text-center mb-1.5 tracking-tight">
+              <h1 className="text-xs sm:text-3xl font-bold text-white text-center mb-1.5 tracking-tight">
                 Iniciar sesión
               </h1>
-              <p className="text-white/50 text-sm sm:text-base text-center mb-6 sm:mb-8">
+              <p className="text-white/50 text-xs sm:text-xs text-center mb-6 sm:mb-8">
                 Escribe tu CURP de 18 caracteres
               </p>
 
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6">
-                <label className="block text-xs sm:text-sm font-semibold text-white/60 uppercase tracking-wide mb-2">
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-4">
+                <label className="block text-xs sm:text-xs font-semibold text-white/60 uppercase tracking-wide mb-2">
                   CURP
                 </label>
                 <input
@@ -150,7 +150,7 @@ export default function LoginPinPage() {
                   placeholder="AAAA000000AAAAAA00"
                   autoCapitalize="characters"
                   className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 sm:py-4
-                             text-base sm:text-lg font-mono tracking-widest text-white placeholder-white/25
+                             text-xs sm:text-xs font-mono tracking-widest text-white placeholder-white/25
                              focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
                 />
                 <div className="flex justify-between items-center mt-1.5">
@@ -162,7 +162,7 @@ export default function LoginPinPage() {
                   onClick={handleContinuar}
                   disabled={curp.length !== 18}
                   className="mt-4 sm:mt-5 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
-                             rounded-xl py-3.5 sm:py-4 text-sm sm:text-base font-bold
+                             rounded-xl py-3.5 sm:py-4 text-xs sm:text-xs font-bold
                              disabled:opacity-30 active:scale-[0.98] transition-all duration-200"
                 >
                   Continuar
@@ -179,10 +179,10 @@ export default function LoginPinPage() {
                       <ShieldCheck size={17} className="text-green-300" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm leading-tight">Activar mi cuenta</p>
+                      <p className="text-white font-semibold text-xs leading-tight">Activar mi cuenta</p>
                       <p className="text-white/40 text-xs mt-0.5 leading-snug">Ya estás en el padrón del Plan Maíz</p>
                     </div>
-                    <ChevronRight size={16} className="text-white/30 shrink-0" />
+                    <ChevronRight size={12} className="text-white/30 shrink-0" />
                   </button>
                   <button onClick={() => navigate('/registro-nuevo')}
                     className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
@@ -190,41 +190,41 @@ export default function LoginPinPage() {
                       <UserPlus size={17} className="text-green-300" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm leading-tight">Soy nuevo, registrarme</p>
+                      <p className="text-white font-semibold text-xs leading-tight">Soy nuevo, registrarme</p>
                       <p className="text-white/40 text-xs mt-0.5 leading-snug">No estás en el padrón</p>
                     </div>
-                    <ChevronRight size={16} className="text-white/30 shrink-0" />
+                    <ChevronRight size={12} className="text-white/30 shrink-0" />
                   </button>
                 </div>
                 <div className="border-t border-white/10 mt-4 pt-4 text-center">
                   <button onClick={() => navigate('/bienvenida', { state: { menu: 'bodega' } })}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors">
-                    <Building2 size={15} /> ¿Eres bodega o industria? Ver opciones
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-300 hover:text-green-200 transition-colors">
+                    <Building2 size={13} /> ¿Eres bodega o industria? Ver opciones
                   </button>
                 </div>
               </div>
             </div>
           ) : (
             <div className="animate-slide-left text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1.5 tracking-tight">
+              <h1 className="text-xs sm:text-3xl font-bold text-white mb-1.5 tracking-tight">
                 Ingresa tu PIN
               </h1>
-              <p className="text-white/50 text-sm sm:text-base mb-6 sm:mb-8">
+              <p className="text-white/50 text-xs sm:text-xs mb-6 sm:mb-8">
                 PIN de 4 dígitos de tu cuenta
               </p>
 
               {error && (
                 <div className="mb-5 mx-auto max-w-xs p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl
-                                text-red-300 text-sm flex items-start gap-2 text-left">
-                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                                text-red-300 text-xs flex items-start gap-2 text-left">
+                  <AlertCircle size={12} className="shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
               )}
 
               {loading ? (
                 <div className="flex items-center justify-center gap-2 text-white/60 py-8">
-                  <Loader2 size={22} className="animate-spin" />
-                  <span className="text-sm sm:text-base">Verificando...</span>
+                  <Loader2 size={13} className="animate-spin" />
+                  <span className="text-xs sm:text-xs">Verificando...</span>
                 </div>
               ) : (
                 <PinInput value={pin} onChange={handlePinChange} dark error={!!error} />

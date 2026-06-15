@@ -125,9 +125,9 @@ export default function MapaBodegasPage() {
     <div className="w-full h-full flex flex-col relative min-h-[500px]">
       {coordsAproximadas && (
         <div className="flex-shrink-0 bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3">
-          <MapPin size={18} className="text-amber-600 flex-shrink-0" />
+          <MapPin size={13} className="text-amber-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-amber-800 text-sm font-medium">
+            <p className="text-amber-800 text-xs font-medium">
               Distancias aproximadas
             </p>
             <p className="text-amber-700 text-xs mt-0.5 leading-snug">
@@ -152,7 +152,7 @@ export default function MapaBodegasPage() {
             <button
               key={tipo || 'todos'}
               onClick={() => setFiltroTipoMaiz(tipo)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 filtroTipoMaiz === tipo
                   ? 'bg-[#1A5C38] text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -238,13 +238,13 @@ export default function MapaBodegasPage() {
                   </div>
                   
                   <div>
-                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
-                    <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                    <h4 className="font-extrabold text-[9.5px] text-white tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
+                    <p className="text-[9.5px] text-gray-400 flex items-center gap-1">
                       <MapPin size={11} /> {b.municipio}
                     </p>
                   </div>
 
-                  <div className="text-[11px] text-gray-300 bg-white/[0.02] border border-white/5 rounded-xl p-2.5 space-y-1">
+                  <div className="text-[9.5px] text-gray-300 bg-white/[0.02] border border-white/5 rounded-xl p-2.5 space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500 font-medium">Precio hoy:</span>
                       <strong className={b.precio_compra_hoy > 0 ? 'text-emerald-400 font-bold' : 'text-gray-500 font-medium'}>
@@ -294,13 +294,13 @@ export default function MapaBodegasPage() {
         {/* Sin bodegas en el radio */}
         {bodegas.length === 0 && up && !loadingBodegas && (
           <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-white/80 backdrop-blur-sm">
-            <div className="text-center px-6 max-w-xs">
+            <div className="text-center px-5 max-w-xs">
               <MapIcon size={40} className="text-gray-300 mx-auto mb-3" />
               <p className="font-semibold text-gray-800">No hay bodegas en {radioKm} km</p>
-              <p className="text-sm text-gray-500 mt-2">Estamos ampliando la red. Intenta con un radio mayor.</p>
+              <p className="text-xs text-gray-500 mt-2">Estamos ampliando la red. Intenta con un radio mayor.</p>
               {radioKm < 500 && (
                 <button onClick={() => setRadioKm(500)}
-                  className="mt-4 text-[#1A5C38] font-semibold text-sm underline">
+                  className="mt-4 text-[#1A5C38] font-semibold text-xs underline">
                   Buscar en 500 km
                 </button>
               )}
@@ -320,11 +320,11 @@ export default function MapaBodegasPage() {
       {/* Toast de confirmación "Me interesa" */}
       {confirmacionVisible && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000]
-                        bg-[#1A5C38] text-white px-6 py-4 rounded-2xl shadow-2xl
+                        bg-[#1A5C38] text-white px-5 py-4 rounded-2xl shadow-2xl
                         flex items-center gap-3 animate-fade-in max-w-xs w-full mx-4">
-          <CheckCircle2 size={24} className="flex-shrink-0" />
+          <CheckCircle2 size={12} className="flex-shrink-0" />
           <div>
-            <p className="font-semibold text-sm">¡Interés registrado!</p>
+            <p className="font-semibold text-xs">¡Interés registrado!</p>
             <p className="text-green-200 text-xs mt-0.5">
               {bodegaConfirmada} recibirá tu solicitud
             </p>

@@ -197,11 +197,11 @@ export default function AlertasAdminPage() {
       <div className="flex-shrink-0">
         <button
           onClick={() => setMostrarStats(!mostrarStats)}
-          className="flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all px-1"
+          className="flex items-center gap-2 text-[10px] font-bold text-gray-500 hover:text-gray-900 transition-all px-1"
         >
-          <BarChart3 size={14} className="text-emerald-500" />
+          <BarChart3 size={12} className="text-emerald-500" />
           Panel de Estadísticas
-          <ChevronDown size={14} className={`transition-transform duration-200 ${mostrarStats ? 'rotate-180' : ''}`} />
+          <ChevronDown size={12} className={`transition-transform duration-200 ${mostrarStats ? 'rotate-180' : ''}`} />
         </button>
 
         {mostrarStats && (
@@ -210,26 +210,26 @@ export default function AlertasAdminPage() {
             <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 space-y-1">
               <p className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">Zonas Afectadas</p>
               <p className="text-[28px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
-              <p className="text-[11px] text-red-600/60">Estados con alertas activas</p>
+              <p className="text-[9.5px] text-red-600/60">Estados con alertas activas</p>
             </div>
             {/* KPI: Alertas activas hoy */}
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 space-y-1">
               <p className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">Alertas Activas</p>
               <p className="text-[28px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
-              <p className="text-[11px] text-amber-600/60">Incidencias vigentes hoy</p>
+              <p className="text-[9.5px] text-amber-600/60">Incidencias vigentes hoy</p>
             </div>
             {/* KPI: Atendidas este mes */}
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 space-y-1">
               <p className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">Atendidas este Mes</p>
               <p className="text-[28px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
-              <p className="text-[11px] text-emerald-600/60">Resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
+              <p className="text-[9.5px] text-emerald-600/60">Resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
             </div>
           </div>
         )}
       </div>
 
       {/* ── LAYOUT PRINCIPAL ── */}
-      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 gap-4 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: ALERTAS & FILTROS (35%) ── */}
       <div className="w-full lg:w-[380px] flex flex-col h-full bg-white/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
@@ -237,8 +237,8 @@ export default function AlertasAdminPage() {
         {/* Controles */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
-              <AlertTriangle size={15} className="text-emerald-500" />
+            <h2 className="text-[10px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
+              <AlertTriangle size={13} className="text-emerald-500" />
               Incidencias y Riesgos
             </h2>
             <span className="text-[10px] font-bold text-gray-500 bg-white/5 border border-gray-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -254,12 +254,12 @@ export default function AlertasAdminPage() {
               placeholder="Buscar alertas..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
+              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[10px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
 
           {/* Filtros grid */}
-          <div className="grid grid-cols-3 gap-1.5 text-[11px] font-bold">
+          <div className="grid grid-cols-3 gap-1.5 text-[9.5px] font-bold">
             <select
               value={tipoFilter}
               onChange={e => setTipoFilter(e.target.value)}
@@ -298,12 +298,12 @@ export default function AlertasAdminPage() {
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-2">
-              <RefreshCw size={20} className="text-emerald-500 animate-spin" />
-              <p className="text-[12px] text-gray-500">Cargando incidencias...</p>
+              <RefreshCw size={12} className="text-emerald-500 animate-spin" />
+              <p className="text-[10px] text-gray-500">Cargando incidencias...</p>
             </div>
           ) : filteredList.length === 0 ? (
-            <div className="text-center py-16 text-gray-500 text-[12px] space-y-1">
-              <ShieldAlert size={24} className="mx-auto mb-2 text-gray-500" />
+            <div className="text-center py-16 text-gray-500 text-[10px] space-y-1">
+              <ShieldAlert size={12} className="mx-auto mb-2 text-gray-500" />
               <p className="font-bold text-gray-500">Sin incidencias reportadas</p>
             </div>
           ) : (
@@ -325,7 +325,7 @@ export default function AlertasAdminPage() {
 
                 <div className="pl-2 space-y-2">
                   <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-extrabold text-gray-900 text-[13px] leading-tight line-clamp-1">{a.titulo}</h3>
+                    <h3 className="font-extrabold text-gray-900 text-[9.5px] leading-tight line-clamp-1">{a.titulo}</h3>
                     <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded ${
                       a.nivel_criticidad === 'ALTA' ? 'text-red-600 bg-red-500/10' :
                       a.nivel_criticidad === 'MEDIA' ? 'text-amber-600 bg-amber-500/10' : 'text-blue-600 bg-blue-500/10'
@@ -405,8 +405,8 @@ export default function AlertasAdminPage() {
                   </div>
                   
                   <div>
-                    <h4 className="font-extrabold text-[13px] text-gray-900 tracking-tight leading-tight mb-1 truncate">{a.titulo}</h4>
-                    <p className="text-[11px] text-gray-700 leading-relaxed font-medium line-clamp-3">{a.descripcion}</p>
+                    <h4 className="font-extrabold text-[9.5px] text-gray-900 tracking-tight leading-tight mb-1 truncate">{a.titulo}</h4>
+                    <p className="text-[9.5px] text-gray-700 leading-relaxed font-medium line-clamp-3">{a.descripcion}</p>
                   </div>
 
                   <div className="text-[10.5px] text-gray-500 border-t border-white/5 pt-2 flex justify-between items-center">
@@ -417,7 +417,7 @@ export default function AlertasAdminPage() {
                   {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
                     <button 
                       onClick={() => setResolvingAlerta(a)}
-                      className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-black py-2.5 px-3 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1 active:scale-95 mt-1"
+                      className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-[9.5px] font-black py-2.5 px-3 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1 active:scale-95 mt-1"
                     >
                       Atender Incidencia ✓
                     </button>
@@ -435,14 +435,14 @@ export default function AlertasAdminPage() {
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-4 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <Check size={16} />
+                <Check size={12} />
               </div>
-              <h3 className="text-[16px] font-extrabold text-gray-900 uppercase tracking-tight">Atender Incidencia</h3>
+              <h3 className="text-[10px] font-extrabold text-gray-900 uppercase tracking-tight">Atender Incidencia</h3>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 space-y-4">
               <div className="space-y-1">
                 <h4 className="text-[13.5px] font-bold text-gray-900 leading-tight">{resolvingAlerta.titulo}</h4>
                 <p className="text-[11.5px] text-gray-500 leading-normal">{resolvingAlerta.descripcion}</p>
@@ -457,22 +457,22 @@ export default function AlertasAdminPage() {
                   placeholder="Detalla las medidas preventivas, correctivas o la auditoría del mercado ejecutada sobre esta alerta..."
                   value={notasResolucion}
                   onChange={e => setNotasResolucion(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[9.5px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-5 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingAlerta(null); setNotasResolucion(''); }}
-                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl text-[9.5px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
                 disabled={actionLoading}
               >
                 Cancelar
               </button>
               <button 
                 onClick={handleResolveAlerta}
-                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-950/20 transition-all"
+                className="px-5 py-2.5 rounded-xl text-[9.5px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-950/20 transition-all"
                 disabled={actionLoading}
               >
                 {actionLoading ? 'Guardando...' : 'Marcar como Atendida'}

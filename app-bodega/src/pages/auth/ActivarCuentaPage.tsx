@@ -57,7 +57,7 @@ export default function ActivarCuentaPage() {
           onClick={() => navigate('/')}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
         >
-          <ChevronLeft size={22} className="text-white/70" />
+          <ChevronLeft size={13} className="text-white/70" />
         </button>
         {/* Stepper 1/2 */}
         <div className="flex-1 flex justify-center items-center gap-2">
@@ -83,16 +83,16 @@ export default function ActivarCuentaPage() {
         <div className="w-full max-w-sm animate-auth-in">
 
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-xs sm:text-3xl font-bold text-white tracking-tight">
               Activar cuenta
             </h1>
-            <p className="text-white/50 text-sm sm:text-base mt-1.5">
+            <p className="text-white/50 text-xs sm:text-xs mt-1.5">
               Busca tu registro en el padrón de productores
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6">
-            <label className="block text-xs sm:text-sm font-semibold text-white/60 uppercase tracking-wide mb-2">
+          <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-4">
+            <label className="block text-xs sm:text-xs font-semibold text-white/60 uppercase tracking-wide mb-2">
               Tu CURP
             </label>
             <p className="text-xs text-white/30 mb-3 leading-relaxed">
@@ -107,7 +107,7 @@ export default function ActivarCuentaPage() {
               autoCapitalize="characters"
               onKeyDown={e => e.key === 'Enter' && handleBuscar()}
               className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 sm:py-4
-                         text-base sm:text-lg font-mono tracking-widest text-white placeholder-white/25
+                         text-xs sm:text-xs font-mono tracking-widest text-white placeholder-white/25
                          focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
             />
             <div className="flex justify-end mt-1.5">
@@ -116,8 +116,8 @@ export default function ActivarCuentaPage() {
 
             {error && (
               <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl
-                              text-red-300 text-sm flex items-start gap-2">
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                              text-red-300 text-xs flex items-start gap-2">
+                <AlertCircle size={12} className="shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
@@ -126,7 +126,7 @@ export default function ActivarCuentaPage() {
               onClick={handleBuscar}
               disabled={curp.length !== 18 || loading}
               className="mt-4 sm:mt-5 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
-                         rounded-xl py-3.5 sm:py-4 text-sm sm:text-base font-bold
+                         rounded-xl py-3.5 sm:py-4 text-xs sm:text-xs font-bold
                          disabled:opacity-30 active:scale-[0.98] transition-all duration-200
                          flex items-center justify-center gap-2"
             >
@@ -147,10 +147,10 @@ export default function ActivarCuentaPage() {
                   <LogIn size={17} className="text-green-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-sm leading-tight">Ya tengo cuenta</p>
+                  <p className="text-white font-semibold text-xs leading-tight">Ya tengo cuenta</p>
                   <p className="text-white/40 text-xs mt-0.5 leading-snug">Entra con tu CURP y tu PIN</p>
                 </div>
-                <ChevronRight size={16} className="text-white/30 shrink-0" />
+                <ChevronRight size={12} className="text-white/30 shrink-0" />
               </button>
               <button onClick={() => navigate('/registro-nuevo')}
                 className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
@@ -158,16 +158,16 @@ export default function ActivarCuentaPage() {
                   <UserPlus size={17} className="text-green-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-sm leading-tight">Soy nuevo, registrarme</p>
+                  <p className="text-white font-semibold text-xs leading-tight">Soy nuevo, registrarme</p>
                   <p className="text-white/40 text-xs mt-0.5 leading-snug">No apareces en el padrón</p>
                 </div>
-                <ChevronRight size={16} className="text-white/30 shrink-0" />
+                <ChevronRight size={12} className="text-white/30 shrink-0" />
               </button>
             </div>
             <div className="border-t border-white/10 mt-4 pt-4 text-center">
               <button onClick={() => navigate('/bienvenida', { state: { menu: 'bodega' } })}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors">
-                <Building2 size={15} /> ¿Eres bodega o industria? Ver opciones
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-300 hover:text-green-200 transition-colors">
+                <Building2 size={13} /> ¿Eres bodega o industria? Ver opciones
               </button>
             </div>
           </div>

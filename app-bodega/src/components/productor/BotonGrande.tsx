@@ -18,7 +18,7 @@ export default function BotonGrande({ icono, texto, subtexto, onClick, disabled,
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full py-5 sm:py-6 rounded-2xl text-lg font-semibold
+      className={`w-full py-5 sm:py-5 rounded-2xl text-xs font-semibold
         flex items-center justify-center gap-3 transition-all duration-200
         active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed
         ${base}`}

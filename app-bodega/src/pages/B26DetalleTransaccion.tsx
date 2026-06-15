@@ -40,38 +40,38 @@ export default function B26DetalleTransaccion() {
     if (!txn) return null;
     if (txn.confirmacion_productor === 'confirmada') {
       return (
-        <div className="flex items-center gap-4 bg-green-50 border border-green-100 rounded-[1.5rem] p-5 shadow-[0_2px_8px_rgba(22,163,74,0.08)]">
+        <div className="flex items-center gap-4 bg-green-50 border border-green-100 rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(22,163,74,0.08)]">
           <div className="w-12 h-12 rounded-[1.25rem] bg-green-100 flex items-center justify-center flex-shrink-0">
             <CheckCircle className="text-green-600 w-6 h-6" />
           </div>
           <div>
-            <p className="font-bold text-green-900 text-[16px]">Confirmada por el productor</p>
-            <p className="text-green-700 text-[13px] font-medium mt-0.5">El productor verificó los datos de la transacción</p>
+            <p className="font-bold text-green-900 text-[10px]">Confirmada por el productor</p>
+            <p className="text-green-700 text-[9.5px] font-medium mt-0.5">El productor verificó los datos de la transacción</p>
           </div>
         </div>
       );
     }
     if (txn.confirmacion_productor === 'discrepancia') {
       return (
-        <div className="flex items-center gap-4 bg-red-50 border border-red-100 rounded-[1.5rem] p-5 shadow-[0_2px_8px_rgba(220,38,38,0.08)]">
+        <div className="flex items-center gap-4 bg-red-50 border border-red-100 rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(220,38,38,0.08)]">
           <div className="w-12 h-12 rounded-[1.25rem] bg-red-100 flex items-center justify-center flex-shrink-0">
             <AlertCircle className="text-red-600 w-6 h-6" />
           </div>
           <div>
-            <p className="font-bold text-red-900 text-[16px]">El productor reportó una discrepancia</p>
-            <p className="text-red-700 text-[13px] font-medium mt-0.5">Contacta al productor para resolver la diferencia</p>
+            <p className="font-bold text-red-900 text-[10px]">El productor reportó una discrepancia</p>
+            <p className="text-red-700 text-[9.5px] font-medium mt-0.5">Contacta al productor para resolver la diferencia</p>
           </div>
         </div>
       );
     }
     return (
-      <div className="flex items-center gap-4 bg-amber-50 border border-amber-100 rounded-[1.5rem] p-5 shadow-[0_2px_8px_rgba(217,119,6,0.08)]">
+      <div className="flex items-center gap-4 bg-amber-50 border border-amber-100 rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(217,119,6,0.08)]">
         <div className="w-12 h-12 rounded-[1.25rem] bg-amber-100 flex items-center justify-center flex-shrink-0">
           <Clock className="text-amber-600 w-6 h-6" />
         </div>
         <div>
-          <p className="font-bold text-amber-900 text-[16px]">Pendiente de confirmación</p>
-          <p className="text-amber-700 text-[13px] font-medium mt-0.5">El productor aún no ha confirmado esta transacción</p>
+          <p className="font-bold text-amber-900 text-[10px]">Pendiente de confirmación</p>
+          <p className="text-amber-700 text-[9.5px] font-medium mt-0.5">El productor aún no ha confirmado esta transacción</p>
         </div>
       </div>
     );
@@ -79,7 +79,7 @@ export default function B26DetalleTransaccion() {
 
   if (cargando) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="p-4 space-y-4">
         {[1, 2, 3, 4].map(i => (
           <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
         ))}
@@ -89,9 +89,9 @@ export default function B26DetalleTransaccion() {
 
   if (error || !txn) {
     return (
-      <div className="p-6 text-center">
+      <div className="p-4 text-center">
         <p className="text-red-500">{error || 'Transacción no encontrada'}</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-sm text-gray-500 underline">
+        <button onClick={() => navigate(-1)} className="mt-4 text-xs text-gray-500 underline">
           Volver
         </button>
       </div>
@@ -107,13 +107,13 @@ export default function B26DetalleTransaccion() {
     <div className="w-full pb-10">
       <PageHeader title="Detalle de transacción" subtitle={`#${txn.id}`} back="/transacciones" />
 
-      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-5 py-5 space-y-6">
         {/* Estado de confirmación */}
         {estadoConfirmacion()}
 
         {/* Datos principales */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
-          <h3 className="font-black text-gray-900 text-[18px] mb-5 tracking-tight">Datos de la compra</h3>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4">
+          <h3 className="font-black text-gray-900 text-[9.5px] mb-5 tracking-tight">Datos de la compra</h3>
           <div className="space-y-4">
             {[
               { label: 'Productor', valor: txn.nombre_productor || '—' },
@@ -132,8 +132,8 @@ export default function B26DetalleTransaccion() {
               },
             ].map(item => (
               <div key={item.label} className="flex justify-between items-center py-3 border-b border-gray-100/50 last:border-0 last:pb-0">
-                <span className="text-gray-500 font-medium text-[14px]">{item.label}</span>
-                <span className={`text-[15px] ${item.destacado ? 'text-[#1A5C38] font-black text-[18px]' : 'text-gray-900 font-bold'}`}>
+                <span className="text-gray-500 font-medium text-[10px]">{item.label}</span>
+                <span className={`text-[9.5px] ${item.destacado ? 'text-[#1A5C38] font-black text-[9.5px]' : 'text-gray-900 font-bold'}`}>
                   {item.valor}
                 </span>
               </div>
@@ -143,15 +143,15 @@ export default function B26DetalleTransaccion() {
 
         {/* Observaciones */}
         {txn.observaciones && (
-          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
-            <h3 className="font-black text-gray-900 text-[18px] mb-3 tracking-tight">Observaciones</h3>
-            <p className="text-gray-600 text-[15px] font-medium leading-relaxed">{txn.observaciones}</p>
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4">
+            <h3 className="font-black text-gray-900 text-[9.5px] mb-3 tracking-tight">Observaciones</h3>
+            <p className="text-gray-600 text-[9.5px] font-medium leading-relaxed">{txn.observaciones}</p>
           </div>
         )}
 
         {/* Peso en Precio Sistema */}
-        <div className="bg-[#F2F2F7] rounded-[1.25rem] p-5">
-          <p className="text-[14px] text-gray-500 text-center font-medium">
+        <div className="bg-[#F2F2F7] rounded-[1.25rem] p-4">
+          <p className="text-[10px] text-gray-500 text-center font-medium">
             Peso en Precio Sistema:{' '}
             <span className="font-bold text-gray-900 ml-1">
               {peso > 0 ? `${(peso * 100).toFixed(0)}%` : 'Pendiente de confirmación'}

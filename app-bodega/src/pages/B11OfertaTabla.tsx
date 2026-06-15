@@ -80,18 +80,18 @@ export default function B11OfertaTabla() {
       {/* Banner full-bleed */}
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
+        <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-bold text-green-300/80 uppercase tracking-widest mb-0.5">Módulo</p>
-              <h1 className="text-[22px] sm:text-[26px] font-bold text-white leading-tight drop-shadow-sm">Oferta de Productores</h1>
-              <p className="text-green-100/80 text-[13px] mt-0.5 font-medium">Datos agregados por municipio</p>
+              <p className="text-[9.5px] font-bold text-green-300/80 uppercase tracking-widest mb-0.5">Módulo</p>
+              <h1 className="text-[9.5px] sm:text-[9.5px] font-bold text-white leading-tight drop-shadow-sm">Oferta de Productores</h1>
+              <p className="text-green-100/80 text-[9.5px] mt-0.5 font-medium">Datos agregados por municipio</p>
             </div>
             <button
               onClick={() => navigate('/oferta/mis-intereses')}
-              className="flex-shrink-0 flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl px-4 py-2.5 text-[13px] font-bold transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
+              className="flex-shrink-0 flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl px-4 py-2.5 text-[9.5px] font-bold transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
             >
-              <Heart size={14} className={intereses.size > 0 ? 'fill-white' : ''} />
+              <Heart size={12} className={intereses.size > 0 ? 'fill-white' : ''} />
               Mis intereses{intereses.size > 0 ? ` (${intereses.size})` : ''}
             </button>
           </div>
@@ -100,11 +100,11 @@ export default function B11OfertaTabla() {
 
       {/* Filtro sticky */}
       <div className="sticky top-[60px] z-10 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-3">
+        <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 py-3">
           <select
             value={tipoMaiz}
             onChange={e => setTipoMaiz(e.target.value)}
-            className="w-full sm:w-60 bg-[#F2F2F7] rounded-xl px-4 py-2.5 text-[14px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/40 border-2 border-transparent focus:bg-white transition-all duration-300"
+            className="w-full sm:w-60 bg-[#F2F2F7] rounded-xl px-4 py-2.5 text-[10px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/40 border-2 border-transparent focus:bg-white transition-all duration-300"
           >
             <option value="">Todos los tipos de maíz</option>
             {[['blanco','Maíz Blanco'],['amarillo','Maíz Amarillo'],['criollo','Criollo / Local']].map(([c,l]) => (
@@ -114,11 +114,11 @@ export default function B11OfertaTabla() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 py-5">
         {/* Fallback message */}
         {mensaje && (
           <div className="bg-amber-50 border border-amber-200 rounded-[1rem] px-5 py-3 mb-5">
-            <p className="text-[14px] font-medium text-amber-800">{mensaje}</p>
+            <p className="text-[10px] font-medium text-amber-800">{mensaje}</p>
           </div>
         )}
 
@@ -129,19 +129,19 @@ export default function B11OfertaTabla() {
         ) : datos.length === 0 ? (
           <div className="flex flex-col items-center py-16 gap-3 text-gray-400">
             <Wheat size={48} className="text-gray-200" />
-            <p className="text-[15px] font-medium">Sin datos de oferta disponibles</p>
+            <p className="text-[9.5px] font-medium">Sin datos de oferta disponibles</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {datos.map((d, i) => (
-              <div key={i} className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 flex flex-col gap-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
+              <div key={i} className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-4 flex flex-col gap-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-bold text-[17px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors">{d.municipio}</p>
-                    <p className="text-[13px] text-gray-500 font-medium">{d.estado}</p>
+                    <p className="font-bold text-[10px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors">{d.municipio}</p>
+                    <p className="text-[9.5px] text-gray-500 font-medium">{d.estado}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="bg-[#1A5C38]/[0.08] text-[#1A5C38] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
+                    <span className="bg-[#1A5C38]/[0.08] text-[#1A5C38] text-[9.5px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
                       {d.ventana_predominante === 'esta_semana' ? 'Esta semana' : d.ventana_predominante === '15_dias' ? '15 días' : d.ventana_predominante || 'Esta semana'}
                     </span>
                     {Number(d.distancia_km) > 0 && (
@@ -158,9 +158,9 @@ export default function B11OfertaTabla() {
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Users size={12} className="text-gray-400" />
-                      <p className="text-[11px] text-gray-400">Productores</p>
+                      <p className="text-[9.5px] text-gray-400">Productores</p>
                     </div>
-                    <p className={`text-[22px] font-black ${
+                    <p className={`text-[9.5px] font-black ${
                       Number(d.productores_disponibles) >= 10 ? 'text-green-700' :
                       Number(d.productores_disponibles) >= 5 ? 'text-amber-700' : 'text-[#1A5C38]'
                     }`}>{d.productores_disponibles}</p>
@@ -171,9 +171,9 @@ export default function B11OfertaTabla() {
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Wheat size={12} className="text-gray-400" />
-                      <p className="text-[11px] text-gray-400">Toneladas</p>
+                      <p className="text-[9.5px] text-gray-400">Toneladas</p>
                     </div>
-                    <p className={`text-[22px] font-black ${
+                    <p className={`text-[9.5px] font-black ${
                       Number(d.toneladas_estimadas) >= 500 ? 'text-green-700' :
                       Number(d.toneladas_estimadas) >= 100 ? 'text-amber-700' : 'text-gray-800'
                     }`}>{formatNum(d.toneladas_estimadas)}</p>
@@ -182,7 +182,7 @@ export default function B11OfertaTabla() {
                 {Array.isArray(d.variedades) && d.variedades.length > 0 && (
                   <div className="flex flex-wrap gap-1 -mt-1">
                     {d.variedades.map((v: string) => (
-                      <span key={v} className="bg-green-100 text-green-700 text-[11px] font-medium px-2 py-0.5 rounded-full">
+                      <span key={v} className="bg-green-100 text-green-700 text-[9.5px] font-medium px-2 py-0.5 rounded-full">
                         {v}
                       </span>
                     ))}
@@ -191,9 +191,9 @@ export default function B11OfertaTabla() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => navigate(`/requerimientos?municipio=${encodeURIComponent(d.municipio)}`)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.12] text-[#1A5C38] rounded-xl py-3 text-[13px] font-bold active:scale-[0.98] transition-all duration-300"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.12] text-[#1A5C38] rounded-xl py-3 text-[9.5px] font-bold active:scale-[0.98] transition-all duration-300"
                   >
-                    <Signal size={14} /> Requerimiento
+                    <Signal size={12} /> Requerimiento
                   </button>
                   {(() => {
                     const clave = claveInteres(d.municipio, tipoMaiz || '');
@@ -203,11 +203,11 @@ export default function B11OfertaTabla() {
                       <button
                         onClick={() => yaInteresa ? navigate('/oferta/mis-intereses') : marcarInteres(d.municipio, d.estado)}
                         disabled={cargando}
-                        className={`flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-[13px] font-bold active:scale-[0.98] transition-all duration-300 disabled:opacity-50 ${
+                        className={`flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-[9.5px] font-bold active:scale-[0.98] transition-all duration-300 disabled:opacity-50 ${
                           yaInteresa ? 'bg-[#1A5C38] hover:bg-[#154a2d] text-white shadow-md' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
                         }`}
                       >
-                        <Heart size={14} className={yaInteresa ? 'fill-white' : ''} />
+                        <Heart size={12} className={yaInteresa ? 'fill-white' : ''} />
                         {cargando ? '...' : yaInteresa ? 'Interesado' : 'Me interesa'}
                       </button>
                     );

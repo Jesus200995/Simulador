@@ -33,12 +33,12 @@ export default function NominatimSearch({ placeholder, onSelect }: Props) {
   return (
     <div className="relative">
       <div className="flex items-center bg-white rounded-xl shadow-md px-3 py-2.5">
-        <Search size={16} className="text-gray-400 mr-2" />
+        <Search size={12} className="text-gray-400 mr-2" />
         <input
           value={query}
           onChange={e => buscar(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 text-sm outline-none bg-transparent"
+          className="flex-1 text-xs outline-none bg-transparent"
         />
         {loading && <span className="text-xs text-gray-400">Buscando...</span>}
       </div>
@@ -53,7 +53,7 @@ export default function NominatimSearch({ placeholder, onSelect }: Props) {
                 setResultados([]);
                 setQuery(r.display_name.split(',')[0]);
               }}
-              className="w-full px-4 py-3 text-left text-sm text-gray-700
+              className="w-full px-4 py-3 text-left text-xs text-gray-700
                          hover:bg-gray-50 border-b border-gray-100 last:border-0"
             >
               {r.display_name}

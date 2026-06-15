@@ -137,7 +137,7 @@ export default function PropuestaVentaPage() {
             else navigate(-1);
           }}
           className="p-2 rounded-lg hover:bg-gray-100">
-          <ChevronLeft size={20} />
+          <ChevronLeft size={12} />
         </button>
         <div>
           <h1 className="font-semibold text-gray-900">Propuesta de venta</h1>
@@ -159,12 +159,12 @@ export default function PropuestaVentaPage() {
         {paso === 'sin_ciclo' && (
           <div className="text-center py-16">
             <Sprout size={48} className="text-[#1A5C38] mx-auto mb-4" />
-            <p className="font-semibold text-gray-800 text-lg mb-2">Primero registra tu ciclo</p>
-            <p className="text-gray-500 text-sm max-w-xs mx-auto mb-6">
+            <p className="font-semibold text-gray-800 text-xs mb-2">Primero registra tu ciclo</p>
+            <p className="text-gray-500 text-xs max-w-xs mx-auto mb-6">
               Para publicar una propuesta de venta necesitas tener un ciclo productivo activo registrado en tu parcela.
             </p>
             <button onClick={() => navigate('/productor/ciclo')}
-              className="bg-[#1A5C38] text-white px-6 py-3 rounded-2xl font-semibold">
+              className="bg-[#1A5C38] text-white px-5 py-3 rounded-2xl font-semibold">
               Registrar mi ciclo →
             </button>
           </div>
@@ -172,18 +172,18 @@ export default function PropuestaVentaPage() {
 
         {paso === 'sel_up' && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-600 mb-4">¿De qué parcela es tu maíz?</p>
+            <p className="text-xs text-gray-600 mb-4">¿De qué parcela es tu maíz?</p>
             {ups.filter(u => (u.ciclos_activos?.length || 0) > 0).map(up => (
               <button key={up.up_id} onClick={() => seleccionarUP(up)}
                 className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#1A5C38] hover:bg-green-50 transition-colors flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-gray-800">{up.up_name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{up.municipality_name}, {up.state_name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{up.municipality_name}, {up.state_name}</p>
                   <p className="text-xs text-[#1A5C38] mt-1">
                     {up.ciclos_activos!.length} ciclo{up.ciclos_activos!.length > 1 ? 's' : ''} activo{up.ciclos_activos!.length > 1 ? 's' : ''} · {up.area_ha_calc} ha
                   </p>
                 </div>
-                <ChevronRight size={20} className="text-gray-400" />
+                <ChevronRight size={12} className="text-gray-400" />
               </button>
             ))}
           </div>
@@ -191,17 +191,17 @@ export default function PropuestaVentaPage() {
 
         {paso === 'sel_ciclo' && upSeleccionada && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-600 mb-4">¿De qué ciclo es tu maíz?</p>
+            <p className="text-xs text-gray-600 mb-4">¿De qué ciclo es tu maíz?</p>
             {ciclos.map(ciclo => (
               <button key={ciclo.cycle_id}
                 onClick={() => { setCicloSeleccionado(ciclo); setPaso('datos'); }}
                 className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#1A5C38] hover:bg-green-50 transition-colors flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-gray-800">{ciclo.cycle_type} {ciclo.cycle_year}</p>
-                  <p className="text-sm text-[#1A5C38] mt-0.5 flex items-center gap-1"><Wheat size={14} /> {variedadLegible(ciclo)}</p>
+                  <p className="text-xs text-[#1A5C38] mt-0.5 flex items-center gap-1"><Wheat size={12} /> {variedadLegible(ciclo)}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{ciclo.area_sown_ha} ha sembradas</p>
                 </div>
-                <ChevronRight size={20} className="text-gray-400" />
+                <ChevronRight size={12} className="text-gray-400" />
               </button>
             ))}
           </div>
@@ -212,49 +212,49 @@ export default function PropuestaVentaPage() {
             <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
               <p className="text-xs text-green-600 font-medium mb-2">Tu propuesta de venta</p>
               <div className="space-y-1">
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Parcela:</span><span className="font-medium text-gray-800">{upSeleccionada.up_name}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Ciclo:</span><span className="font-medium text-gray-800">{cicloSeleccionado.cycle_type} {cicloSeleccionado.cycle_year}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Variedad:</span><span className="font-medium text-[#1A5C38] inline-flex items-center gap-1"><Wheat size={14} /> {variedadLegible(cicloSeleccionado)}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-gray-600">Parcela:</span><span className="font-medium text-gray-800">{upSeleccionada.up_name}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-gray-600">Ciclo:</span><span className="font-medium text-gray-800">{cicloSeleccionado.cycle_type} {cicloSeleccionado.cycle_year}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-gray-600">Variedad:</span><span className="font-medium text-[#1A5C38] inline-flex items-center gap-1"><Wheat size={12} /> {variedadLegible(cicloSeleccionado)}</span></div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <label className="block text-sm font-medium text-gray-700 mb-2">¿Cuántas toneladas ofreces? *</label>
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              <label className="block text-xs font-medium text-gray-700 mb-2">¿Cuántas toneladas ofreces? *</label>
               <input type="number" value={volumen} onChange={e => setVolumen(e.target.value)}
                 placeholder="Ej: 50" min="0.1" step="0.1"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               <p className="text-xs text-gray-400 mt-1">Tu ciclo tiene {cicloSeleccionado.area_sown_ha} ha sembradas</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
-              <p className="text-sm font-medium text-gray-700">¿Cuándo estás disponible para vender? *</p>
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
+              <p className="text-xs font-medium text-gray-700">¿Cuándo estás disponible para vender? *</p>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Desde</label>
                 <input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Hasta</label>
                 <input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)}
                   min={fechaDesde || new Date().toISOString().split('T')[0]}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm">{error}</p></div>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-xs">{error}</p></div>
             )}
 
             <button onClick={enviar} disabled={enviando || !volumen || !fechaDesde || !fechaHasta}
-              className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40 flex items-center justify-center gap-2">
-              {enviando ? 'Publicando...' : (<><Check size={20} /> Publicar propuesta</>)}
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-xs disabled:opacity-40 flex items-center justify-center gap-2">
+              {enviando ? 'Publicando...' : (<><Check size={12} /> Publicar propuesta</>)}
             </button>
           </div>
         )}
 
         {error && paso !== 'datos' && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4"><p className="text-red-700 text-sm">{error}</p></div>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4"><p className="text-red-700 text-xs">{error}</p></div>
         )}
       </div>
     </div>

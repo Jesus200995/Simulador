@@ -42,42 +42,42 @@ export default function B21DetalleSolicitud() {
   }
 
   if (!solicitud) return (
-    <div className="p-10 text-center text-gray-400 text-[15px]">Cargando…</div>
+    <div className="p-10 text-center text-gray-400 text-[9.5px]">Cargando…</div>
   );
 
   return (
     <div className="w-full pb-10">
       <PageHeader title="Detalle de Solicitud" back={`/ventanillas/${id}/solicitudes`} />
 
-      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-5 py-5 space-y-6">
         {/* Datos del productor */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4">
           <div className="pb-4 border-b border-gray-100">
-            <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Productor</p>
+            <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Productor</p>
           </div>
           <div className="pt-5 space-y-2.5">
-            <p className="font-black text-[20px] text-gray-900 tracking-tight">
+            <p className="font-black text-[10px] text-gray-900 tracking-tight">
               {solicitud.productor_nombre || 'Productor no registrado'}
             </p>
-            <p className="text-[15px] font-medium text-gray-500">{solicitud.municipio}</p>
-            <p className="text-[15px] font-medium text-gray-700">
+            <p className="text-[9.5px] font-medium text-gray-500">{solicitud.municipio}</p>
+            <p className="text-[9.5px] font-medium text-gray-700">
               Apoyo: <span className="font-bold text-[#1A5C38] bg-[#1A5C38]/10 px-2 py-0.5 rounded-lg">{solicitud.nombre_apoyo}</span>
             </p>
-            <p className="text-[12px] text-gray-400">
+            <p className="text-[10px] text-gray-400">
               {new Date(solicitud.created_at).toLocaleString('es-MX')}
             </p>
           </div>
         </div>
 
         {/* Cambiar estado */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-6">
-          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Estado de la solicitud</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-6">
+          <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Estado de la solicitud</p>
           <div className="flex flex-wrap gap-2.5">
             {FLUJO.map(e => (
               <button
                 key={e}
                 onClick={() => setNuevoEstado(e)}
-                className={`px-5 py-2.5 rounded-[1.25rem] text-[14px] font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]
+                className={`px-5 py-2.5 rounded-[1.25rem] text-[10px] font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]
                   ${nuevoEstado === e
                     ? (flujoColor[e] || 'border-[#1A5C38] bg-green-50 text-[#1A5C38]') + ' shadow-[0_4px_12px_rgba(0,0,0,0.05)]'
                     : 'border-transparent bg-[#F2F2F7] text-gray-500 hover:bg-gray-200/60'}`}
@@ -88,13 +88,13 @@ export default function B21DetalleSolicitud() {
           </div>
 
           <div>
-            <label className="block text-[14px] font-bold text-gray-700 mb-2">Notas de gestión</label>
+            <label className="block text-[10px] font-bold text-gray-700 mb-2">Notas de gestión</label>
             <textarea
               value={notas}
               onChange={e => setNotas(e.target.value)}
               rows={4}
               placeholder="Registro de la gestión realizada…"
-              className="w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 resize-none transition-all"
+              className="w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[10px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 resize-none transition-all"
             />
           </div>
 
@@ -102,7 +102,7 @@ export default function B21DetalleSolicitud() {
             <button
               onClick={guardar}
               disabled={saving || nuevoEstado === solicitud.estado}
-              className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
+              className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[10px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
             >
               {saving ? 'Guardando…' : 'Guardar cambio de estado'}
             </button>

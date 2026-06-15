@@ -190,13 +190,13 @@ export default function BodegaDetalleAdminPage() {
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-20 gap-2">
-      <RefreshCw size={22} className="text-emerald-500 animate-spin" />
-      <p className="text-[12px] text-gray-500">Cargando expediente de la bodega...</p>
+      <RefreshCw size={13} className="text-emerald-500 animate-spin" />
+      <p className="text-[10px] text-gray-500">Cargando expediente de la bodega...</p>
     </div>
   );
 
   if (!data) return (
-    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center text-red-600">
+    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center text-red-600">
       Error al obtener el expediente de la bodega.
     </div>
   );
@@ -211,18 +211,18 @@ export default function BodegaDetalleAdminPage() {
             onClick={() => navigate('/admin/bodegas')}
             className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-500 hover:text-gray-900 transition-all"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={12} />
           </button>
           <div>
-            <h1 className="text-[18px] font-black text-gray-900">{data.nombre}</h1>
-            <p className="text-[11px] text-gray-500">Expediente de Infraestructura Silo · ID: {data.id}</p>
+            <h1 className="text-[9.5px] font-black text-gray-900">{data.nombre}</h1>
+            <p className="text-[9.5px] text-gray-500">Expediente de Infraestructura Silo · ID: {data.id}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-gray-50 border border-white/5 px-3 py-1.5 rounded-xl text-[12px]">
+          <div className="flex items-center gap-1.5 bg-gray-50 border border-white/5 px-3 py-1.5 rounded-xl text-[10px]">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Estatus:</span>
-            <span className={`text-[11px] font-bold uppercase tracking-wide ${
+            <span className={`text-[9.5px] font-bold uppercase tracking-wide ${
               data.estatus === 'aprobada' ? 'text-emerald-500' :
               data.estatus === 'pendiente' ? 'text-amber-500' : 'text-red-500'
             }`}>
@@ -236,13 +236,13 @@ export default function BodegaDetalleAdminPage() {
                 onClick={() => setModalType('aprobar')}
                 className="flex items-center gap-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-[12.5px] rounded-xl shadow-md transition-all"
               >
-                <Check size={14} /> Aprobar Silo
+                <Check size={12} /> Aprobar Silo
               </button>
               <button 
                 onClick={() => setModalType('rechazar')}
                 className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold text-[12.5px] rounded-xl shadow-md transition-all"
               >
-                <X size={14} /> Rechazar Silo
+                <X size={12} /> Rechazar Silo
               </button>
             </>
           )}
@@ -250,24 +250,24 @@ export default function BodegaDetalleAdminPage() {
       </div>
 
       {/* Grid: Informacion general / Inventario y Tarifario */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Datos generales */}
-        <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-5">
+        <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-5">
           <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-            <Layers size={14} className="text-emerald-500" />
-            <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider font-bold">Datos de Silo</h3>
+            <Layers size={12} className="text-emerald-500" />
+            <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider font-bold">Datos de Silo</h3>
           </div>
 
-          <div className="space-y-4 text-[13px]">
+          <div className="space-y-4 text-[9.5px]">
             <div className="space-y-0.5">
               <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Encargado Responsable</span>
-              <p className="text-[14px] text-gray-900 font-bold">{data.encargado_nombre || 'Sin registrar'}</p>
+              <p className="text-[10px] text-gray-900 font-bold">{data.encargado_nombre || 'Sin registrar'}</p>
             </div>
 
             <div className="space-y-0.5">
               <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Teléfono de Enlace</span>
-              <p className="text-[14px] text-gray-900 flex items-center gap-1.5">
+              <p className="text-[10px] text-gray-900 flex items-center gap-1.5">
                 <Phone size={12} className="text-gray-500" />
                 {data.telefono || 'Sin registrar'}
               </p>
@@ -275,7 +275,7 @@ export default function BodegaDetalleAdminPage() {
 
             <div className="space-y-0.5">
               <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Localización</span>
-              <p className="text-[14px] text-gray-900 flex items-center gap-1.5">
+              <p className="text-[10px] text-gray-900 flex items-center gap-1.5">
                 <MapPin size={12} className="text-gray-500" />
                 {data.municipio}, {data.estado}
               </p>
@@ -283,12 +283,12 @@ export default function BodegaDetalleAdminPage() {
 
             <div className="space-y-0.5">
               <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Capacidad de Almacenamiento</span>
-              <p className="text-[14px] text-gray-900 font-extrabold">{data.capacidad_total.toLocaleString()} Toneladas</p>
+              <p className="text-[10px] text-gray-900 font-extrabold">{data.capacidad_total.toLocaleString()} Toneladas</p>
             </div>
 
             {tieneTarifaVencida() && (
-              <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-600 text-[11px] leading-relaxed">
-                <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-600 text-[9.5px] leading-relaxed">
+                <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
                 <p>
                   <strong>Tarifas desactualizadas:</strong> Las tarifas de esta bodega llevan más de 60 días congeladas en el sistema. Se sugiere auditar.
                 </p>
@@ -301,28 +301,28 @@ export default function BodegaDetalleAdminPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Inventario Actual */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
-                <Inbox size={15} className="text-emerald-500" />
-                <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Inventario en Silo</h3>
+                <Inbox size={13} className="text-emerald-500" />
+                <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Inventario en Silo</h3>
               </div>
-              <span className="text-[11px] text-emerald-600 font-bold bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">
+              <span className="text-[9.5px] text-emerald-600 font-bold bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">
                 Total: {data.stock_actual.toLocaleString()} t
               </span>
             </div>
 
             {data.inventario.length === 0 ? (
-              <p className="text-[12px] text-gray-500 py-4 text-center">Sin stock registrado en bodega.</p>
+              <p className="text-[10px] text-gray-500 py-4 text-center">Sin stock registrado en bodega.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[13px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[9.5px]">
                 {data.inventario.map((item, idx) => (
                   <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 flex justify-between items-center">
                     <div>
                       <p className="font-extrabold text-gray-900 text-[13.5px]">{item.tipo_maiz}</p>
                       <p className="text-[10px] text-gray-500 mt-0.5">Semilla: {item.variedad}</p>
                     </div>
-                    <span className="font-black text-emerald-600 text-[15px]">{item.stock_toneladas.toLocaleString()} t</span>
+                    <span className="font-black text-emerald-600 text-[9.5px]">{item.stock_toneladas.toLocaleString()} t</span>
                   </div>
                 ))}
               </div>
@@ -330,17 +330,17 @@ export default function BodegaDetalleAdminPage() {
           </div>
 
           {/* Tarifario de Servicios */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <Coins size={15} className="text-emerald-500" />
-              <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Tarifario Autorizado de Servicios (S)</h3>
+              <Coins size={13} className="text-emerald-500" />
+              <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Tarifario Autorizado de Servicios (S)</h3>
             </div>
 
             <div className="divide-y divide-white/5">
               {data.tarifarios.map((tar, idx) => {
                 const isOld = new Date().getTime() - new Date(tar.updated_at).getTime() > 60 * 24 * 60 * 60 * 1000;
                 return (
-                  <div key={idx} className="flex justify-between items-center py-2.5 first:pt-0 last:pb-0 text-[13px]">
+                  <div key={idx} className="flex justify-between items-center py-2.5 first:pt-0 last:pb-0 text-[9.5px]">
                     <div>
                       <p className="font-bold text-gray-900">{tar.concepto}</p>
                       <p className="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1">
@@ -348,7 +348,7 @@ export default function BodegaDetalleAdminPage() {
                         {isOld && <span className="text-[8px] font-extrabold bg-red-500/10 text-red-600 border border-red-500/20 px-1 py-0.1 rounded uppercase leading-none">Desactualizado</span>}
                       </p>
                     </div>
-                    <span className="font-black text-gray-900 text-[14px]">
+                    <span className="font-black text-gray-900 text-[10px]">
                       ${tar.precio_ton} <span className="text-[10px] font-semibold text-gray-500">MXN/t</span>
                     </span>
                   </div>
@@ -358,14 +358,14 @@ export default function BodegaDetalleAdminPage() {
           </div>
 
           {/* Transacciones Recientes (30d) */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <ClipboardList size={15} className="text-emerald-500" />
-              <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Transacciones Recientes (Últimos 30 días)</h3>
+              <ClipboardList size={13} className="text-emerald-500" />
+              <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Transacciones Recientes (Últimos 30 días)</h3>
             </div>
 
             {data.transacciones.length === 0 ? (
-              <p className="text-[12px] text-gray-500 py-4 text-center">No se registran transacciones liquidadas este mes.</p>
+              <p className="text-[10px] text-gray-500 py-4 text-center">No se registran transacciones liquidadas este mes.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[12.5px] divide-y divide-white/5">
@@ -382,7 +382,7 @@ export default function BodegaDetalleAdminPage() {
                     {data.transacciones.map(tx => (
                       <tr key={tx.id} className="hover:bg-white/[0.01]">
                         <td className="py-3 font-bold text-gray-900">{tx.productor_nombre}</td>
-                        <td className="py-3 text-gray-500 font-mono text-[11px]">{tx.tipo_maiz}</td>
+                        <td className="py-3 text-gray-500 font-mono text-[9.5px]">{tx.tipo_maiz}</td>
                         <td className="py-3 text-emerald-600 font-bold">{tx.volumen} t</td>
                         <td className="py-3 font-bold">${tx.precio.toLocaleString()}</td>
                         <td className="py-3 text-right">
@@ -411,21 +411,21 @@ export default function BodegaDetalleAdminPage() {
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-4 border-b border-white/5 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                 modalType === 'aprobar' 
                   ? 'bg-emerald-500/10 text-emerald-500' 
                   : 'bg-red-500/10 text-red-500'
               }`}>
-                {modalType === 'aprobar' ? <Check size={16} /> : <AlertTriangle size={16} />}
+                {modalType === 'aprobar' ? <Check size={12} /> : <AlertTriangle size={12} />}
               </div>
-              <h3 className="text-[16px] font-extrabold text-gray-900 uppercase tracking-tight">
+              <h3 className="text-[10px] font-extrabold text-gray-900 uppercase tracking-tight">
                 {modalType === 'aprobar' ? 'Confirmar Aprobación de Silo' : 'Rechazar Aprobación de Silo'}
               </h3>
             </div>
 
-            <div className="p-6 space-y-4">
-              <p className="text-[13px] text-gray-700 leading-relaxed">
+            <div className="p-4 space-y-4">
+              <p className="text-[9.5px] text-gray-700 leading-relaxed">
                 ¿Estás seguro que deseas {modalType === 'aprobar' ? 'aprobar e incorporar a la red de acopio a' : 'rechazar la solicitud de acopio de'}{' '}
                 <strong className="text-gray-900 font-extrabold">{data.nombre}</strong>?
               </p>
@@ -443,29 +443,29 @@ export default function BodegaDetalleAdminPage() {
                   }
                   value={motivoRechazo}
                   onChange={e => setMotivoRechazo(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[9.5px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 
               {actionError && (
-                <div className="flex items-start gap-2 text-[12px] text-red-600 bg-red-500/5 border border-red-500/10 rounded-xl p-3 leading-relaxed">
+                <div className="flex items-start gap-2 text-[10px] text-red-600 bg-red-500/5 border border-red-500/10 rounded-xl p-3 leading-relaxed">
                   <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
                   <p>{actionError}</p>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-5 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
               <button 
                 onClick={() => { setModalType(null); setMotivoRechazo(''); setActionError(''); }}
-                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl text-[9.5px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
                 disabled={actionLoading}
               >
                 Cancelar
               </button>
               <button 
                 onClick={handleApplyEstatus}
-                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-900 transition-all ${
+                className={`px-5 py-2.5 rounded-xl text-[9.5px] font-bold text-gray-900 transition-all ${
                   modalType === 'aprobar'
                     ? 'bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-950/20'
                     : 'bg-red-600 hover:bg-red-500 shadow-md shadow-red-950/20'

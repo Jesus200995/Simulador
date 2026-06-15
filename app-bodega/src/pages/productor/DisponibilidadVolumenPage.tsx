@@ -52,23 +52,23 @@ export default function DisponibilidadVolumenPage() {
   return (
     <div className="bg-[#F2F2F7] flex flex-col min-h-0">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
-            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
-            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
+            className="flex items-center gap-0.5 text-green-200/80 text-[9.5px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={12} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Disponibilidad</p>
-          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Volumen y fechas</h1>
+          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Disponibilidad</p>
+          <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">Volumen y fechas</h1>
         </div>
       </div>
       <DisponibilidadStepper paso={3} />
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-lg mx-auto px-4 sm:px-6 pb-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 text-center mb-1">Cuantas toneladas?</h2>
+        <div className="max-w-lg mx-auto px-4 sm:px-5 pb-4">
+          <h2 className="text-xs sm:text-xs font-bold text-zinc-900 text-center mb-1">Cuantas toneladas?</h2>
           <div className="text-center mt-4 mb-2">
             <span className="text-5xl font-bold text-[#1A5C38]">{volumen}</span>
-            <span className="text-xl text-zinc-400 ml-1">ton</span>
+            <span className="text-xs text-zinc-400 ml-1">ton</span>
           </div>
           <input type="range" min={1} max={200} step={1} value={volumen}
             onChange={e => setVolumen(Number(e.target.value))}
@@ -77,11 +77,11 @@ export default function DisponibilidadVolumenPage() {
             <span>1 ton</span><span>200 ton</span>
           </div>
 
-          <h3 className="text-base font-bold text-zinc-800 mt-8 mb-3">Cuando estara disponible?</h3>
+          <h3 className="text-xs font-bold text-zinc-800 mt-8 mb-3">Cuando estara disponible?</h3>
           <div className="grid grid-cols-2 gap-2">
             {RANGOS_RAPIDOS.map((r, i) => (
               <button key={i} onClick={() => selectRango(i)}
-                className={`py-3 rounded-xl text-sm font-medium ring-1 transition-all duration-200
+                className={`py-3 rounded-xl text-xs font-medium ring-1 transition-all duration-200
                   ${rangoIdx === i ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-[#1A5C38]' : 'ring-zinc-200 text-zinc-600 hover:bg-zinc-50'}`}>
                 {r.label}
               </button>
@@ -105,10 +105,10 @@ export default function DisponibilidadVolumenPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
+      <div className="px-4 sm:px-5 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto">
           <button onClick={confirmar} disabled={!canContinue}
-            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
+            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-xs font-semibold
                        disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
             Continuar
           </button>

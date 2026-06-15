@@ -109,25 +109,25 @@ export default function B10Requerimiento() {
     } catch (err: any) { toast(err.message, 'error'); }
   }
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
-  const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
+  const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[10px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
+  const labelClass = 'block text-[9.5px] font-medium text-gray-600 mb-1.5';
 
   return (
     <div className="w-full">
       <PageBanner title="Requerimientos de Maíz" subtitle="Notifica a productores en tu área" back="/oferta" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 py-5">
         <div className="max-w-4xl mx-auto space-y-6">
           <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-            <p className="text-amber-800 font-medium flex items-center gap-1.5"><AlertTriangle size={15} /> {error}</p>
+            <p className="text-amber-800 font-medium flex items-center gap-1.5"><AlertTriangle size={13} /> {error}</p>
           </div>
         )}
 
         {/* Bodega y maíz */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
-          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Bodega y tipo de maíz</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-5">
+          <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Bodega y tipo de maíz</p>
           <div>
             <label className={labelClass}>Bodega</label>
             <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
@@ -164,7 +164,7 @@ export default function B10Requerimiento() {
                       }}
                       className="w-5 h-5 accent-[#1A5C38]"
                     />
-                    <span className="text-sm text-gray-800">{v.label}</span>
+                    <span className="text-xs text-gray-800">{v.label}</span>
                   </label>
                 ))}
               </div>
@@ -179,7 +179,7 @@ export default function B10Requerimiento() {
                       value={variedadesLibres[code] || ''}
                       onChange={e => setVarLibres(prev => ({ ...prev, [code]: e.target.value }))}
                       placeholder="Especifica la variedad..."
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs"
                     />
                   </div>
                 ))}
@@ -194,8 +194,8 @@ export default function B10Requerimiento() {
         </div>
 
         {/* Volumen y precio */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
-          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Volumen y precio</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-5">
+          <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Volumen y precio</p>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Volumen que busca (ton)</label>
@@ -209,35 +209,35 @@ export default function B10Requerimiento() {
         </div>
 
         {/* Vigencia — date range picker (C-11) */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-5">
           <div>
             <label className={labelClass}>¿Para cuándo necesitas el maíz?</label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[12px] text-gray-400 mb-1">Fecha de inicio</p>
+                <p className="text-[10px] text-gray-400 mb-1">Fecha de inicio</p>
                 <input type="date" value={form.vigencia_inicio} min={today}
                   onChange={e => set('vigencia_inicio', e.target.value)} required className={inputClass} />
               </div>
               <div>
-                <p className="text-[12px] text-gray-400 mb-1">Fecha de fin</p>
+                <p className="text-[10px] text-gray-400 mb-1">Fecha de fin</p>
                 <input type="date" value={form.vigencia_fin} min={form.vigencia_inicio || today}
                   onChange={e => set('vigencia_fin', e.target.value)} required className={inputClass} />
               </div>
             </div>
-            <p className="text-[12px] text-gray-400 mt-2">Indica el período en que necesitas recibir el maíz en tu bodega</p>
+            <p className="text-[10px] text-gray-400 mt-2">Indica el período en que necesitas recibir el maíz en tu bodega</p>
           </div>
         </div>
 
         {/* Radio de búsqueda */}
-        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-4">
-          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Radio de búsqueda</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-4">
+          <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Radio de búsqueda</p>
           <div className="grid grid-cols-3 gap-2">
             {OPCIONES_RADIO.map(km => (
               <button
                 key={km}
                 type="button"
                 onClick={() => set('radio_km', String(km))}
-                className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                className={`py-2.5 rounded-xl text-xs font-medium border transition-colors ${
                   Number(form.radio_km) === km
                     ? 'bg-[#1A5C38] text-white border-[#1A5C38]'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
@@ -255,39 +255,39 @@ export default function B10Requerimiento() {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
+          className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[10px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
           {loading ? 'Publicando…' : '+ Nuevo requerimiento de maíz'}
         </button>
       </form>
 
       {/* Requerimientos activos (C-10) */}
       <div className="max-w-4xl mx-auto pt-6 pb-10 border-t border-black/[0.06] mt-8">
-        <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-4">Requerimientos activos</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Requerimientos activos</p>
         {requerimientos.length === 0 ? (
           <div className="flex flex-col items-center py-10 gap-3 text-gray-400 bg-white rounded-[1.5rem] border border-black/[0.04]">
             <Wheat size={40} className="text-gray-200" />
-            <p className="text-[14px] text-center px-4 font-medium">No tienes requerimientos de maíz activos. Publica uno para que los productores cercanos lo vean.</p>
+            <p className="text-[10px] text-center px-4 font-medium">No tienes requerimientos de maíz activos. Publica uno para que los productores cercanos lo vean.</p>
           </div>
         ) : (
           <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] divide-y divide-gray-100 overflow-hidden">
             {requerimientos.map(s => (
-              <div key={s.id} className="flex items-start gap-4 p-5 hover:bg-gray-50/50 transition-colors">
+              <div key={s.id} className="flex items-start gap-4 p-4 hover:bg-gray-50/50 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-semibold text-gray-800">
+                  <p className="text-[10px] font-semibold text-gray-800">
                     {TIPOS_MAIZ.find(t => t.code === s.tipo_maiz)?.label || s.tipo_maiz}
                     {s.variedad_code ? ` · ${s.variedad_code}` : ''}
                     {' '}<span className="text-[#1A5C38]">${formatNum(s.precio_ofrecido)}/ton</span>
                   </p>
-                  <p className="text-[12px] text-gray-400">{s.bodega_nombre}</p>
+                  <p className="text-[10px] text-gray-400">{s.bodega_nombre}</p>
                   {(s.vigencia_inicio || s.vigencia_fin) && (
-                    <p className="text-[11px] text-gray-400 mt-0.5">
+                    <p className="text-[9.5px] text-gray-400 mt-0.5">
                       {s.vigencia_inicio ? s.vigencia_inicio.slice(0, 10) : ''}{s.vigencia_fin ? ` → ${s.vigencia_fin.slice(0, 10)}` : ''}
                     </p>
                   )}
                   <button
                     onClick={() => (s.interesados_count ?? 0) > 0 && navigate(`/senales/${s.id}/interesados`)}
                     disabled={(s.interesados_count ?? 0) === 0}
-                    className={`text-[11px] font-medium ${
+                    className={`text-[9.5px] font-medium ${
                       (s.interesados_count ?? 0) > 0
                         ? 'text-[#1A5C38] underline'
                         : 'text-gray-400 cursor-default'
@@ -296,10 +296,10 @@ export default function B10Requerimiento() {
                     {s.interesados_count ?? 0} productor{(s.interesados_count ?? 0) !== 1 ? 'es' : ''} interesado{(s.interesados_count ?? 0) !== 1 ? 's' : ''}
                     {(s.interesados_count ?? 0) > 0 ? ' — Ver →' : ''}
                   </button>
-                  {s.volumen_ton && <p className="text-[11px] text-gray-400">Busca: {s.volumen_ton} ton</p>}
+                  {s.volumen_ton && <p className="text-[9.5px] text-gray-400">Busca: {s.volumen_ton} ton</p>}
                 </div>
                 <button onClick={() => cancelar(s.id)} className="text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl p-2.5 flex-shrink-0 transition-colors">
-                  <Trash2 size={18} />
+                  <Trash2 size={13} />
                 </button>
               </div>
             ))}

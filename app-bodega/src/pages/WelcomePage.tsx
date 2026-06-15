@@ -46,7 +46,7 @@ export default function WelcomePage() {
       <div className="fixed inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(52,208,121,0.12),transparent)]" />
-        <div className="absolute bottom-0 inset-x-0 h-40 flex items-end justify-around px-6 opacity-[0.05] pointer-events-none">
+        <div className="absolute bottom-0 inset-x-0 h-40 flex items-end justify-around px-5 opacity-[0.05] pointer-events-none">
           {[0,1,2,3,4,5,6,7,8,9,10,11].map(i => (
             <Wheat
               key={i}
@@ -69,14 +69,14 @@ export default function WelcomePage() {
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-[-0.5px] leading-none">
             SIMAC
           </h1>
-          <p className="text-sm sm:text-base text-green-300/70 font-medium mt-1.5 tracking-wide text-center">
+          <p className="text-xs sm:text-xs text-green-300/70 font-medium mt-1.5 tracking-wide text-center">
             Plan Nacional Maíz 2026
           </p>
         </div>
 
         {/* Subtitle */}
         <div className="animate-auth-in mb-6 sm:mb-8 text-center" style={{ animationDelay: '0.05s' }}>
-          <p className="text-white/60 text-sm sm:text-base">¿Cómo deseas ingresar?</p>
+          <p className="text-white/60 text-xs sm:text-xs">¿Cómo deseas ingresar?</p>
         </div>
 
         {/* Cards */}
@@ -85,44 +85,44 @@ export default function WelcomePage() {
           {/* Productor */}
           <button
             onClick={() => setMenu('productor')}
-            className="animate-auth-in w-full group relative bg-white/10 hover:bg-white/15 active:bg-white/20 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-left transition-all duration-200 active:scale-[0.98]"
+            className="animate-auth-in w-full group relative bg-white/10 hover:bg-white/15 active:bg-white/20 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-4 text-left transition-all duration-200 active:scale-[0.98]"
             style={{ animationDelay: '0.1s' }}
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#1A5C38] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-green-900/40 shrink-0">
-                <Wheat size={22} className="text-white sm:hidden" />
+                <Wheat size={13} className="text-white sm:hidden" />
                 <Wheat size={26} className="text-white hidden sm:block" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-bold text-base sm:text-lg leading-tight">Soy Productor</p>
-                <p className="text-white/50 text-xs sm:text-sm mt-0.5 leading-snug">Iniciar sesión, activar o registrar tu cuenta</p>
+                <p className="text-white font-bold text-xs sm:text-xs leading-tight">Soy Productor</p>
+                <p className="text-white/50 text-xs sm:text-xs mt-0.5 leading-snug">Iniciar sesión, activar o registrar tu cuenta</p>
               </div>
-              <ChevronRight size={18} className="text-white/30 group-hover:text-white/60 transition-colors shrink-0" />
+              <ChevronRight size={13} className="text-white/30 group-hover:text-white/60 transition-colors shrink-0" />
             </div>
           </button>
 
           {/* Bodega / Industria */}
           <button
             onClick={() => setMenu('bodega')}
-            className="animate-auth-in w-full group relative bg-white/06 hover:bg-white/10 active:bg-white/15 backdrop-blur-md ring-1 ring-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-left transition-all duration-200 active:scale-[0.98]"
+            className="animate-auth-in w-full group relative bg-white/06 hover:bg-white/10 active:bg-white/15 backdrop-blur-md ring-1 ring-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-4 text-left transition-all duration-200 active:scale-[0.98]"
             style={{ animationDelay: '0.15s' }}
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-                <Building2 size={22} className="text-white/70 sm:hidden" />
+                <Building2 size={13} className="text-white/70 sm:hidden" />
                 <Building2 size={26} className="text-white/70 hidden sm:block" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white/80 font-bold text-base sm:text-lg leading-tight">Soy Bodega / Industria</p>
-                <p className="text-white/40 text-xs sm:text-sm mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
+                <p className="text-white/80 font-bold text-xs sm:text-xs leading-tight">Soy Bodega / Industria</p>
+                <p className="text-white/40 text-xs sm:text-xs mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
               </div>
-              <ChevronRight size={18} className="text-white/20 group-hover:text-white/50 transition-colors shrink-0" />
+              <ChevronRight size={13} className="text-white/20 group-hover:text-white/50 transition-colors shrink-0" />
             </div>
           </button>
         </div>
 
         {/* Footer */}
-        <p className="animate-auth-in mt-6 text-center text-[10px] sm:text-[11px] text-white/20 max-w-xs leading-relaxed px-4" style={{ animationDelay: '0.25s' }}>
+        <p className="animate-auth-in mt-6 text-center text-[10px] sm:text-[9.5px] text-white/20 max-w-xs leading-relaxed px-4" style={{ animationDelay: '0.25s' }}>
           Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México
         </p>
       </div>
@@ -141,15 +141,15 @@ export default function WelcomePage() {
             {/* Header */}
             <div className="flex items-start justify-between mb-1">
               <div>
-                <h2 className="text-xl font-black text-gray-900 tracking-tight">{data.titulo}</h2>
-                <p className="text-gray-400 text-sm mt-0.5">{data.subtitulo}</p>
+                <h2 className="text-xs font-black text-gray-900 tracking-tight">{data.titulo}</h2>
+                <p className="text-gray-400 text-xs mt-0.5">{data.subtitulo}</p>
               </div>
               <button
                 onClick={() => setMenu(null)}
                 aria-label="Cerrar"
                 className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:scale-90 transition-transform shrink-0"
               >
-                <X size={18} />
+                <X size={13} />
               </button>
             </div>
 
@@ -167,13 +167,13 @@ export default function WelcomePage() {
                         : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
                   >
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm'}`}>
-                      <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1A5C38]'} />
+                      <Icon size={12} className={item.accent ? 'text-white' : 'text-[#1A5C38]'} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-[15px] leading-tight ${item.accent ? 'text-white' : 'text-gray-900'}`}>{item.title}</p>
+                      <p className={`font-bold text-[9.5px] leading-tight ${item.accent ? 'text-white' : 'text-gray-900'}`}>{item.title}</p>
                       <p className={`text-xs mt-1 leading-snug ${item.accent ? 'text-green-100/80' : 'text-gray-500'}`}>{item.desc}</p>
                     </div>
-                    <ChevronRight size={18} className={`shrink-0 ${item.accent ? 'text-white/60' : 'text-gray-300'}`} />
+                    <ChevronRight size={13} className={`shrink-0 ${item.accent ? 'text-white/60' : 'text-gray-300'}`} />
                   </button>
                 );
               })}
@@ -182,7 +182,7 @@ export default function WelcomePage() {
             {/* Volver */}
             <button
               onClick={() => setMenu(null)}
-              className="w-full mt-4 py-3 text-gray-400 text-sm font-semibold active:text-gray-600 transition-colors"
+              className="w-full mt-4 py-3 text-gray-400 text-xs font-semibold active:text-gray-600 transition-colors"
             >
               ← Volver
             </button>

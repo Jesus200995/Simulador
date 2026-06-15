@@ -33,7 +33,7 @@ export default function B17MisVentanillas() {
     <div className="w-full">
       <PageBanner title="Mis Ventanillas" subtitle="Apoyos para productores" back="/mas" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 py-5">
         {loading && (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
@@ -45,29 +45,29 @@ export default function B17MisVentanillas() {
             <button
               key={v.id}
               onClick={() => navigate(`/ventanillas/${v.id}/solicitudes`)}
-              className="w-full bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 text-left active:scale-[0.98] transition-all duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] group/card"
+              className="w-full bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-4 text-left active:scale-[0.98] transition-all duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] group/card"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
-                  <Building2 size={20} className="text-[#1A5C38]" />
+                  <Building2 size={12} className="text-[#1A5C38]" />
                 </div>
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
-                  <p className="font-bold text-[16px] text-gray-900 truncate group-hover/card:text-[#1A5C38] transition-colors">{v.bodega_nombre}</p>
+                  <p className="font-bold text-[10px] text-gray-900 truncate group-hover/card:text-[#1A5C38] transition-colors">{v.bodega_nombre}</p>
                   {v.nombre_ventanilla && (
-                    <p className="text-[13px] text-gray-500 font-medium truncate">{v.nombre_ventanilla}</p>
+                    <p className="text-[9.5px] text-gray-500 font-medium truncate">{v.nombre_ventanilla}</p>
                   )}
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${tipoBadge[v.tipo] || 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full ${tipoBadge[v.tipo] || 'bg-gray-100 text-gray-500'}`}>
                       {tipoLabel[v.tipo] || v.tipo}
                     </span>
                     {v.solicitudes_pendientes > 0 && (
-                      <span className="text-[11px] bg-red-50 text-red-600 border border-red-200 font-bold px-2 py-0.5 rounded-full">
+                      <span className="text-[9.5px] bg-red-50 text-red-600 border border-red-200 font-bold px-2 py-0.5 rounded-full">
                         {v.solicitudes_pendientes} pendientes
                       </span>
                     )}
                   </div>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
+                <ChevronRight size={13} className="text-gray-300 flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
               </div>
             </button>
           ))}
@@ -78,8 +78,8 @@ export default function B17MisVentanillas() {
             <div className="w-16 h-16 rounded-[1.5rem] bg-gray-50 border border-gray-100 flex items-center justify-center">
               <Building2 size={32} className="text-gray-300" />
             </div>
-            <p className="font-bold text-[16px] text-gray-700">Sin ventanillas configuradas</p>
-            <p className="text-[14px] text-gray-400 font-medium">Configura una para publicar apoyos</p>
+            <p className="font-bold text-[10px] text-gray-700">Sin ventanillas configuradas</p>
+            <p className="text-[10px] text-gray-400 font-medium">Configura una para publicar apoyos</p>
           </div>
         )}
       </div>
@@ -89,7 +89,7 @@ export default function B17MisVentanillas() {
         onClick={() => navigate('/ventanillas/nueva')}
         className="fixed bottom-24 right-5 sm:right-8 lg:right-12 xl:right-20 w-14 h-14 bg-[#1A5C38] text-white rounded-[1.25rem] shadow-[0_4px_12px_rgba(26,92,56,0.3)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 z-10"
       >
-        <Plus size={24} />
+        <Plus size={12} />
       </button>
     </div>
   );

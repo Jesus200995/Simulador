@@ -136,7 +136,7 @@ export default function ConfiguracionAdminPage() {
     } catch (e) { setCreateError('Error de conexión'); } finally { setCreatingUser(false); }
   }
 
-  const INPUT = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-900 placeholder-gray-600 focus:outline-none focus:border-emerald-500/40 transition-colors';
+  const INPUT = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[10px] text-gray-900 placeholder-gray-600 focus:outline-none focus:border-emerald-500/40 transition-colors';
   const LABEL = 'text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block';
 
   return (
@@ -146,7 +146,7 @@ export default function ConfiguracionAdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Sistema</p>
-          <h1 className="text-[17px] sm:text-[19px] font-black text-gray-900 tracking-tight leading-none">Configuración</h1>
+          <h1 className="text-[10px] sm:text-[19px] font-black text-gray-900 tracking-tight leading-none">Configuración</h1>
         </div>
       </div>
 
@@ -155,11 +155,11 @@ export default function ConfiguracionAdminPage() {
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-200/60">
           <div className="flex items-center gap-2">
             <Settings size={13} className="text-emerald-600" />
-            <h2 className="text-[13px] font-bold text-gray-900">Parámetros del Sistema</h2>
+            <h2 className="text-[9.5px] font-bold text-gray-900">Parámetros del Sistema</h2>
           </div>
           <button
             onClick={guardarParams} disabled={savingParams}
-            className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[9.5px] font-bold px-3 py-1.5 rounded-lg border transition-all active:scale-95 disabled:opacity-50"
             style={{ background: savedParams ? 'rgba(34,197,94,0.1)' : 'rgba(26,92,56,0.2)', borderColor: savedParams ? 'rgba(34,197,94,0.3)' : 'rgba(26,92,56,0.4)', color: savedParams ? '#22c55e' : '#4ade80' }}
           >
             <Save size={11} />
@@ -193,11 +193,11 @@ export default function ConfiguracionAdminPage() {
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-200/60">
           <div className="flex items-center gap-2">
             <Users size={13} className="text-blue-600" />
-            <h2 className="text-[13px] font-bold text-gray-900">Gestión de Administradores</h2>
+            <h2 className="text-[9.5px] font-bold text-gray-900">Gestión de Administradores</h2>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+            className="flex items-center gap-1.5 text-[9.5px] font-bold text-blue-600 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 px-3 py-1.5 rounded-lg transition-all active:scale-95"
           >
             <Plus size={11} /> Nuevo usuario
           </button>
@@ -220,11 +220,11 @@ export default function ConfiguracionAdminPage() {
                   </tr>
                 ))
               ) : admins.length === 0 ? (
-                <tr><td colSpan={4} className="px-4 py-6 text-center text-[12px] text-gray-500">Sin administradores registrados</td></tr>
+                <tr><td colSpan={4} className="px-4 py-5 text-center text-[10px] text-gray-500">Sin administradores registrados</td></tr>
               ) : admins.map((u, i) => (
                 <tr key={i} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-800">{u.nombre_completo}</td>
-                  <td className="px-4 py-2.5 text-[12px] text-gray-500">{u.email}</td>
+                  <td className="px-4 py-2.5 text-[10px] font-semibold text-gray-800">{u.nombre_completo}</td>
+                  <td className="px-4 py-2.5 text-[10px] text-gray-500">{u.email}</td>
                   <td className="px-4 py-2.5">
                     <span className="text-[10px] font-bold text-blue-600 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5 uppercase">
                       {u.rol}
@@ -248,13 +248,13 @@ export default function ConfiguracionAdminPage() {
           <div className="flex items-center gap-2">
             <List size={13} className="text-amber-600" />
             <div>
-              <h2 className="text-[13px] font-bold text-gray-900">Catálogos del sistema</h2>
+              <h2 className="text-[9.5px] font-bold text-gray-900">Catálogos del sistema</h2>
               <p className="text-[10px] text-gray-500">Conceptos de servicio de bodega</p>
             </div>
           </div>
           <button
             onClick={() => setShowConceptoModal(true)}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-amber-600 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+            className="flex items-center gap-1.5 text-[9.5px] font-bold text-amber-600 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 px-3 py-1.5 rounded-lg transition-all active:scale-95"
           >
             <Plus size={11} /> Nuevo concepto
           </button>
@@ -276,10 +276,10 @@ export default function ConfiguracionAdminPage() {
                   </tr>
                 ))
               ) : conceptos.length === 0 ? (
-                <tr><td colSpan={3} className="px-4 py-6 text-center text-[12px] text-gray-500">Sin conceptos registrados</td></tr>
+                <tr><td colSpan={3} className="px-4 py-5 text-center text-[10px] text-gray-500">Sin conceptos registrados</td></tr>
               ) : conceptos.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-800">{c.nombre}</td>
+                  <td className="px-4 py-2.5 text-[10px] font-semibold text-gray-800">{c.nombre}</td>
                   <td className="px-4 py-2.5 text-center">
                     <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
                       c.estatus === 'aprobado'
@@ -312,11 +312,11 @@ export default function ConfiguracionAdminPage() {
       {/* Modal crear concepto */}
       {showConceptoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/30 backdrop-blur-sm">
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 w-full max-w-sm shadow-2xl">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[14px] font-bold text-gray-900">Nuevo concepto de servicio</h3>
+              <h3 className="text-[10px] font-bold text-gray-900">Nuevo concepto de servicio</h3>
               <button onClick={() => { setShowConceptoModal(false); setConceptoError(''); }} className="text-gray-500 hover:text-gray-900 transition-colors">
-                <X size={16} />
+                <X size={12} />
               </button>
             </div>
             <div className="space-y-3">
@@ -324,10 +324,10 @@ export default function ConfiguracionAdminPage() {
                 <label className={LABEL}>Nombre del concepto</label>
                 <input className={INPUT} value={nuevoConcepto} onChange={e => setNuevoConcepto(e.target.value)} placeholder="Ej. Secado, Fumigación" />
               </div>
-              {conceptoError && <p className="text-[11px] text-red-600 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{conceptoError}</p>}
+              {conceptoError && <p className="text-[9.5px] text-red-600 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{conceptoError}</p>}
               <div className="flex gap-2 pt-1">
-                <button onClick={() => { setShowConceptoModal(false); setConceptoError(''); }} className="flex-1 text-[12px] font-bold text-gray-500 bg-gray-100 hover:bg-white/[0.07] border border-gray-200 py-2 rounded-xl transition-all active:scale-95">Cancelar</button>
-                <button onClick={proponerConcepto} disabled={creatingConcepto} className="flex-1 text-[12px] font-bold text-white bg-amber-600 hover:bg-amber-500 py-2 rounded-xl transition-all active:scale-95 disabled:opacity-50">
+                <button onClick={() => { setShowConceptoModal(false); setConceptoError(''); }} className="flex-1 text-[10px] font-bold text-gray-500 bg-gray-100 hover:bg-white/[0.07] border border-gray-200 py-2 rounded-xl transition-all active:scale-95">Cancelar</button>
+                <button onClick={proponerConcepto} disabled={creatingConcepto} className="flex-1 text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-500 py-2 rounded-xl transition-all active:scale-95 disabled:opacity-50">
                   {creatingConcepto ? 'Creando...' : 'Proponer'}
                 </button>
               </div>
@@ -339,11 +339,11 @@ export default function ConfiguracionAdminPage() {
       {/* Modal crear usuario */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/30 backdrop-blur-sm">
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 w-full max-w-md shadow-2xl">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[14px] font-bold text-gray-900">Crear nuevo usuario</h3>
+              <h3 className="text-[10px] font-bold text-gray-900">Crear nuevo usuario</h3>
               <button onClick={() => { setShowModal(false); setCreateError(''); }} className="text-gray-500 hover:text-gray-900 transition-colors">
-                <X size={16} />
+                <X size={12} />
               </button>
             </div>
             <div className="space-y-3">
@@ -371,10 +371,10 @@ export default function ConfiguracionAdminPage() {
                   <option value="responsable">Responsable</option>
                 </select>
               </div>
-              {createError && <p className="text-[11px] text-red-600 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{createError}</p>}
+              {createError && <p className="text-[9.5px] text-red-600 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{createError}</p>}
               <div className="flex gap-2 pt-1">
-                <button onClick={() => { setShowModal(false); setCreateError(''); }} className="flex-1 text-[12px] font-bold text-gray-500 bg-gray-100 hover:bg-white/[0.07] border border-gray-200 py-2 rounded-xl transition-all active:scale-95">Cancelar</button>
-                <button onClick={crearUsuario} disabled={creatingUser} className="flex-1 text-[12px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl transition-all active:scale-95 disabled:opacity-50">
+                <button onClick={() => { setShowModal(false); setCreateError(''); }} className="flex-1 text-[10px] font-bold text-gray-500 bg-gray-100 hover:bg-white/[0.07] border border-gray-200 py-2 rounded-xl transition-all active:scale-95">Cancelar</button>
+                <button onClick={crearUsuario} disabled={creatingUser} className="flex-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl transition-all active:scale-95 disabled:opacity-50">
                   {creatingUser ? 'Creando...' : 'Crear usuario'}
                 </button>
               </div>
