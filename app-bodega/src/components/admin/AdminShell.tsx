@@ -58,8 +58,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const navCls = ({ isActive }: { isActive: boolean }) =>
     `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 ${
       isActive
-        ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 shadow-[0_0_12px_rgba(52,211,153,0.1)]'
-        : 'text-white/50 hover:text-white hover:bg-white/5 ring-1 ring-transparent'
+        ? 'bg-white/15 text-white shadow-sm'
+        : 'text-emerald-50/70 hover:text-white hover:bg-white/10'
     }`;
 
   const JustifiedText = ({ text, className }: { text: string; className?: string }) => (
@@ -70,8 +70,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const Brand = ({ small }: { small?: boolean }) => (
     <div className="flex items-center gap-3 group cursor-pointer select-none">
-      <div className={`${small ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 flex items-center justify-center flex-shrink-0 shadow-[0_2px_12px_rgba(0,0,0,0.2)] border border-emerald-500/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110 group-hover:rotate-3 group-hover:border-emerald-400/40 group-active:scale-95`}>
-        <ShieldCheck className="text-emerald-400 transition-transform duration-500 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" size={small ? 16 : 19} strokeWidth={2.4} />
+      <div className={`${small ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 shadow-[0_2px_10px_rgba(0,0,0,0.1)] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110 group-hover:rotate-3 group-hover:bg-white/30 group-active:scale-95`}>
+        <ShieldCheck className="text-white transition-transform duration-500 group-hover:scale-110" size={small ? 16 : 19} strokeWidth={2.4} />
       </div>
       <div className={`${small ? 'w-[90px]' : 'w-[125px]'} flex flex-col justify-center transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-1`}>
         <div style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -83,11 +83,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {!small && (
           <JustifiedText 
             text="PLAN NACIONAL MAÍZ" 
-            className="text-[7.5px] text-emerald-500/80 font-bold uppercase leading-none mb-[5px] transition-colors duration-300 group-hover:text-emerald-400" 
+            className="text-[7.5px] text-emerald-100 font-bold uppercase leading-none mb-[5px] transition-colors duration-300 group-hover:text-white" 
           />
         )}
         <div className="w-full">
-          <div className="w-full bg-emerald-500/10 text-emerald-400 text-[8px] font-bold uppercase py-[3px] rounded border border-emerald-500/20 leading-none">
+          <div className="w-full bg-black/10 text-white/90 text-[8px] font-bold uppercase py-[3px] rounded leading-none">
             <JustifiedText text="ADMINISTRADOR" className="px-1.5" />
           </div>
         </div>
@@ -96,16 +96,16 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   );
 
   const UserCard = () => (
-    <div className="flex items-center gap-2.5 bg-white/[0.02] rounded-2xl px-3 py-2.5 ring-1 ring-white/5 group hover:bg-white/[0.04] hover:ring-white/10 transition-all duration-300 cursor-default">
-      <div className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-[13px] flex-shrink-0 shadow-[inset_0_0_8px_rgba(52,211,153,0.1)] group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(52,211,153,0.2)] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]">
+    <div className="flex items-center gap-2.5 bg-black/10 rounded-2xl px-3 py-2.5 group hover:bg-black/20 transition-all duration-300 cursor-default">
+      <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-black text-[13px] flex-shrink-0 group-hover:scale-105 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]">
         {initials()}
       </div>
       <div className="min-w-0 flex-1 flex flex-col justify-center">
-        <p className="text-[11px] font-extrabold text-white truncate leading-none mb-[4px] group-hover:text-emerald-300 transition-colors uppercase">
+        <p className="text-[11px] font-extrabold text-white truncate leading-none mb-[4px] group-hover:text-emerald-50 transition-colors uppercase">
           {user?.nombres || user?.nombre_completo || 'Administrador'}
         </p>
         <div className="flex items-center">
-          <span className="bg-white/5 text-white/60 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded border border-white/10 leading-none group-hover:text-white/90 group-hover:bg-white/10 transition-colors">
+          <span className="bg-white/10 text-white/80 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded leading-none group-hover:text-white group-hover:bg-white/20 transition-colors">
             {user?.rol === 'admin' ? 'Administrador' : (user?.rol || 'Administrador')}
           </span>
         </div>
@@ -119,8 +119,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <NavLink key={item.path} to={item.path} end={item.exact} className={navCls}>
           {({ isActive }) => (
             <>
-              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />}
-              <item.icon size={16} strokeWidth={2.2} className={`flex-shrink-0 transition-colors ${isActive ? 'text-emerald-400' : 'text-white/40 group-hover:text-white/80'}`} />
+              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]" />}
+              <item.icon size={16} strokeWidth={2.2} className={`flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-emerald-100/60 group-hover:text-white'}`} />
               <span className="truncate">{item.label}</span>
               {!mobile && <ChevronRight size={13} className="ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />}
             </>
@@ -134,21 +134,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div className="h-screen w-screen flex overflow-hidden bg-[#F5F6F8] text-gray-900 select-none">
 
       {/* ── SIDEBAR DESKTOP ── */}
-      <aside className="hidden lg:flex flex-col w-[244px] xl:w-[264px] h-screen bg-[#021008] border-r border-[#031f10] flex-shrink-0 rounded-br-[2.5rem] shadow-[4px_0_24px_rgba(0,0,0,0.15)] z-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#010804] opacity-50 pointer-events-none" />
-        <div className="relative z-10 flex items-center px-5 py-5 border-b border-[#031f10] flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-[244px] xl:w-[264px] h-screen bg-[#0e5c33] flex-shrink-0 rounded-br-[2.5rem] shadow-[4px_0_24px_rgba(0,0,0,0.15)] z-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+        <div className="relative z-10 flex items-center px-5 py-5 flex-shrink-0">
           <Brand />
         </div>
-        <div className="relative z-10 px-4 py-4 border-b border-[#031f10] flex-shrink-0">
+        <div className="relative z-10 px-4 py-2 flex-shrink-0">
           <UserCard />
         </div>
         <nav className="relative z-10 flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-none">
           <NavItems />
         </nav>
-        <div className="relative z-10 px-3 py-4 border-t border-[#031f10] flex-shrink-0">
+        <div className="relative z-10 px-3 py-4 flex-shrink-0">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/10 ring-1 ring-transparent hover:ring-red-500/20 active:scale-[0.98] transition-all duration-200 group"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-white/80 hover:text-white hover:bg-red-500/80 active:scale-[0.98] transition-all duration-200 group"
           >
             <LogOut size={16} strokeWidth={2.2} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
             Cerrar Sesión
@@ -164,30 +164,30 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         onClick={() => setDrawerOpen(false)}
       />
       <aside
-        className={`lg:hidden fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-[#021008] shadow-[8px_0_32px_rgba(0,0,0,0.5)]
+        className={`lg:hidden fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-[#0e5c33] shadow-[8px_0_32px_rgba(0,0,0,0.5)]
           transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] w-[78vw] max-w-[300px]
           ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#010804] opacity-50 pointer-events-none" />
-        <div className="relative z-10 flex items-center justify-between px-5 py-4 border-b border-[#031f10] flex-shrink-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+        <div className="relative z-10 flex items-center justify-between px-5 py-4 flex-shrink-0">
           <Brand small />
           <button
             onClick={() => setDrawerOpen(false)}
-            className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+            className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors"
           >
             <X size={15} />
           </button>
         </div>
-        <div className="relative z-10 px-4 py-3 border-b border-[#031f10] flex-shrink-0">
+        <div className="relative z-10 px-4 py-2 flex-shrink-0">
           <UserCard />
         </div>
         <nav className="relative z-10 flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-none">
           <NavItems mobile />
         </nav>
-        <div className="relative z-10 px-3 py-4 border-t border-[#031f10] flex-shrink-0">
+        <div className="relative z-10 px-3 py-4 flex-shrink-0">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/10 ring-1 ring-transparent hover:ring-red-500/20 transition-all group"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-white/80 hover:text-white hover:bg-red-500/80 transition-all group"
           >
             <LogOut size={15} strokeWidth={2.2} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
             Cerrar Sesión
