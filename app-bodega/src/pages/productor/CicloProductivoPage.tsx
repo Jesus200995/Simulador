@@ -172,7 +172,7 @@ export default function CicloProductivoPage() {
   if (!mostrarFormulario && ciclosExistentes.length > 0) {
     return (
       <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[40px]">
-        <div className="w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
+        <div className="sticky top-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
           <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
             <div className="flex items-center justify-between mb-2">
               <button onClick={() => navigate('/productor')}
@@ -244,7 +244,7 @@ export default function CicloProductivoPage() {
     <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[100px]">
       
       {/* Header Verde Premium */}
-      <div className="w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
         
         <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">

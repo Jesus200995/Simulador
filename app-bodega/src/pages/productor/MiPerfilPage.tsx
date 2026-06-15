@@ -134,7 +134,7 @@ export default function MiPerfilPage() {
 
   return (
     <div className="bg-[#F2F2F7] min-h-screen">
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[28px] shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[28px] shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6">
           <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-3">Perfil</p>
           <div className="flex items-center gap-3.5">

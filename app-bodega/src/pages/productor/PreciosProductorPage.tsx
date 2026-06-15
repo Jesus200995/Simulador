@@ -88,7 +88,7 @@ export default function PreciosProductorPage() {
     <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#f4f5f7]">
       
       {/* ── HEADER VERDE ── */}
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
         <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-5">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between mb-1">
