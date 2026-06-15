@@ -195,39 +195,39 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* ── MAIN ── */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
-        <header className="h-15 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-emerald-900/50 bg-emerald-800 backdrop-blur-xl flex-shrink-0 rounded-br-[2.5rem] shadow-[0_4px_16px_rgba(0,0,0,0.05)] z-10">
+        <header className="h-15 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-lime-600/30 bg-[#7ac142] backdrop-blur-xl flex-shrink-0 rounded-br-[2.5rem] shadow-[0_4px_16px_rgba(122,193,66,0.25)] z-10">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden -ml-1 w-9 h-9 flex items-center justify-center rounded-xl text-emerald-200 hover:text-white hover:bg-emerald-700/50 transition-colors flex-shrink-0"
+              className="lg:hidden -ml-1 w-9 h-9 flex items-center justify-center rounded-xl text-lime-900 hover:text-lime-950 hover:bg-lime-600/20 transition-colors flex-shrink-0"
               aria-label="Abrir menú"
             >
               <Menu size={19} />
             </button>
             <div className="flex items-center gap-1.5 min-w-0 group cursor-pointer">
-              <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-widest hidden sm:inline transition-colors duration-300 group-hover:text-emerald-200 bg-emerald-900/40 px-1.5 py-[3px] rounded border border-emerald-800/50 leading-none">Administrador</span>
-              <ChevronRight size={12} className="text-emerald-500 hidden sm:inline flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
-              <h2 className="text-[14px] sm:text-[15px] font-extrabold text-white tracking-tight truncate transition-colors duration-300">
+              <span className="text-[9px] font-bold text-lime-900 uppercase tracking-widest hidden sm:inline transition-colors duration-300 group-hover:text-lime-950 bg-lime-500/30 px-1.5 py-[3px] rounded border border-lime-500/40 leading-none">Administrador</span>
+              <ChevronRight size={12} className="text-lime-700 hidden sm:inline flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
+              <h2 className="text-[14px] sm:text-[15px] font-extrabold text-[#0d2a14] tracking-tight truncate transition-colors duration-300">
                 {pageTitle()}
               </h2>
             </div>
           </div>
           <div className="flex items-center gap-2.5 flex-shrink-0">
             <div className="hidden md:flex items-center gap-2.5">
-              <span className="text-[9px] font-black text-emerald-300 uppercase tracking-widest">PNMB 2026</span>
-              <div className="h-3.5 w-px bg-emerald-600" />
+              <span className="text-[9px] font-black text-lime-800 uppercase tracking-widest">PNMB 2026</span>
+              <div className="h-3.5 w-px bg-lime-600/40" />
             </div>
             <div className="text-right hidden sm:flex flex-col justify-center group cursor-default">
-              <p className="text-[10.5px] text-white font-extrabold truncate max-w-[140px] leading-none mb-[4px] transition-colors duration-300 group-hover:text-emerald-50 uppercase">
+              <p className="text-[10.5px] text-[#0d2a14] font-extrabold truncate max-w-[140px] leading-none mb-[4px] transition-colors duration-300 group-hover:text-[#06170a] uppercase">
                 {user?.nombres || user?.nombre_completo || 'Administrador'}
               </p>
               <div className="flex justify-end">
-                <span className="bg-emerald-700/60 text-emerald-200 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded border border-emerald-600/30 leading-none transition-colors duration-300 group-hover:text-emerald-100">
+                <span className="bg-lime-600/15 text-lime-900 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded border border-lime-600/25 leading-none transition-colors duration-300 group-hover:text-lime-950">
                   {user?.rol === 'admin' ? 'Administrador' : (user?.rol || 'Administrador')}
                 </span>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-emerald-700 flex items-center justify-center text-white font-black text-[11px] flex-shrink-0 shadow-inner ring-1 ring-emerald-600/50 hover:scale-105 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-pointer">
+            <div className="w-8 h-8 rounded-full bg-lime-600 flex items-center justify-center text-white font-black text-[11px] flex-shrink-0 shadow-inner ring-1 ring-lime-500/50 hover:scale-105 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-pointer">
               {initials()}
             </div>
           </div>
