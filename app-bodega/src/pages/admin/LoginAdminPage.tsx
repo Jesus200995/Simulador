@@ -53,9 +53,9 @@ function Feat({ icon: Icon, text }: { icon: any; text: string }) {
   return (
     <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
       <div className="w-8 h-8 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center flex-shrink-0">
-        <Icon size={12} className="text-emerald-300" />
+        <Icon size={14} className="text-emerald-300" />
       </div>
-      <span className="text-[10px] font-medium text-white/70">{text}</span>
+      <span className="text-[12px] font-medium text-white/70">{text}</span>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export default function LoginAdminPage() {
   }
 
   const inputCls = (f: string) => [
-    'w-full pl-11 pr-4 py-3.5 sm:py-4 rounded-2xl text-[10px] outline-none transition-all duration-200',
+    'w-full pl-11 pr-4 py-3.5 sm:py-4 rounded-2xl text-[14px] outline-none transition-all duration-200',
     'bg-white/[0.05] border text-white placeholder-white/25 font-medium',
     focused === f
       ? 'border-emerald-400/60 ring-2 ring-emerald-400/15 bg-white/[0.08]'
@@ -108,23 +108,23 @@ export default function LoginAdminPage() {
         {/* Logo desktop */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-[0_0_24px_rgba(52,211,153,0.4)]">
-            <ShieldCheck size={12} className="text-white" strokeWidth={2.3} />
+            <ShieldCheck size={20} className="text-white" strokeWidth={2.3} />
           </div>
           <div>
-            <span className="text-[10px] font-black text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>SIMAC</span>
+            <span className="text-[17px] font-black text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>SIMAC</span>
             <span className="ml-1.5 text-[9px] font-bold text-emerald-400 uppercase tracking-[0.2em]">Admin</span>
           </div>
         </div>
 
         {/* Hero text */}
         <div className="relative z-10 flex-1 flex flex-col justify-center py-10">
-          <p className="text-[9.5px] font-bold text-emerald-400 uppercase tracking-[0.25em] mb-4">Plan Nacional Maíz · 2026</p>
+          <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-[0.25em] mb-4">Plan Nacional Maíz · 2026</p>
           <h2 className="text-[38px] xl:text-[44px] font-black text-white leading-[1.1] mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             El centro de<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">mando agrícola</span><br />
             de México
           </h2>
-          <p className="text-[10px] text-white/45 leading-relaxed max-w-[360px]">
+          <p className="text-[14px] text-white/45 leading-relaxed max-w-[360px]">
             Monitorea productores, bodegas, precios y alertas en tiempo real desde un solo lugar.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function LoginAdminPage() {
           <AnimatedCanvas />
 
           {/* Contenido del hero mobile */}
-          <div className="relative z-10 flex flex-col items-center justify-center text-center px-5 py-10">
+          <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-10">
             {/* Icon */}
             <div className="relative mb-4">
               <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-[0_0_32px_rgba(52,211,153,0.45)]">
@@ -162,10 +162,10 @@ export default function LoginAdminPage() {
               {/* Pulse ring */}
               <div className="absolute inset-0 rounded-3xl border-2 border-emerald-400/30 animate-ping" style={{ animationDuration: '2.5s' }} />
             </div>
-            <h1 className="text-[9.5px] font-black text-white leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h1 className="text-[26px] font-black text-white leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               SIMAC <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">Admin</span>
             </h1>
-            <p className="text-[9.5px] text-emerald-300/60 mt-1.5 font-medium tracking-widest uppercase">
+            <p className="text-[11px] text-emerald-300/60 mt-1.5 font-medium tracking-widest uppercase">
               Plan Nacional Maíz · 2026
             </p>
           </div>
@@ -179,7 +179,7 @@ export default function LoginAdminPage() {
         </div>
 
         {/* ── FORMULARIO ── */}
-        <div className="flex-1 flex flex-col items-center justify-start lg:justify-center w-full px-5 py-5 sm:py-8 lg:py-0 lg:px-12 xl:px-16">
+        <div className="flex-1 flex flex-col items-center justify-start lg:justify-center w-full px-5 py-6 sm:py-8 lg:py-0 lg:px-12 xl:px-16">
           {/* Fondo sutil en desktop */}
           <div className="hidden lg:block absolute inset-0 bg-[#050f0a]" />
 
@@ -187,21 +187,21 @@ export default function LoginAdminPage() {
 
             {/* Header de formulario */}
             <div className="mb-6 lg:mb-8">
-              <h2 className="text-[9.5px] sm:text-[9.5px] font-black text-white leading-tight mb-1.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h2 className="text-[22px] sm:text-[26px] font-black text-white leading-tight mb-1.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Bienvenido de vuelta
               </h2>
-              <p className="text-[9.5px] text-white/35">Ingresa tus credenciales para continuar</p>
+              <p className="text-[13px] text-white/35">Ingresa tus credenciales para continuar</p>
             </div>
 
             {/* Tarjeta del form en mobile */}
             <div className="rounded-3xl overflow-hidden border border-white/8 bg-white/[0.03] backdrop-blur-sm lg:bg-transparent lg:border-0 lg:backdrop-blur-none">
-              <form onSubmit={handleSubmit} className="p-4 sm:p-4 lg:p-0 space-y-4">
+              <form onSubmit={handleSubmit} className="p-5 sm:p-6 lg:p-0 space-y-4">
 
                 {/* Email */}
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/35 uppercase tracking-[0.15em] block">Correo corporativo</label>
                   <div className="relative">
-                    <Mail size={12} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type="email" value={email}
                       onChange={e => { setEmail(e.target.value); setError(''); }}
                       onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
@@ -215,7 +215,7 @@ export default function LoginAdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/35 uppercase tracking-[0.15em] block">Contraseña</label>
                   <div className="relative">
-                    <Lock size={12} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type={showPwd ? 'text' : 'password'} value={password}
                       onChange={e => { setPassword(e.target.value); setError(''); }}
                       onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
@@ -224,7 +224,7 @@ export default function LoginAdminPage() {
                     />
                     <button type="button" onClick={() => setShowPwd(p => !p)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/60 transition-colors p-1">
-                      {showPwd ? <EyeOff size={12} /> : <Eye size={12} />}
+                      {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
@@ -232,7 +232,7 @@ export default function LoginAdminPage() {
                 {/* Error */}
                 {error && (
                   <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/20 rounded-2xl px-4 py-3 text-[12.5px] text-red-400 animate-fade-in">
-                    <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+                    <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
                     <p>{error}</p>
                   </div>
                 )}
@@ -247,7 +247,7 @@ export default function LoginAdminPage() {
                     {loading ? (
                       <><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Verificando…</>
                     ) : (
-                      <>Ingresar al panel<ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-1" /></>
+                      <>Ingresar al panel<ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" /></>
                     )}
                   </span>
                 </button>
@@ -255,19 +255,19 @@ export default function LoginAdminPage() {
                 {/* Divider */}
                 <div className="flex items-center gap-3">
                   <div className="flex-1 h-px bg-white/8" />
-                  <span className="text-[9.5px] text-white/20 font-medium">o</span>
+                  <span className="text-[11px] text-white/20 font-medium">o</span>
                   <div className="flex-1 h-px bg-white/8" />
                 </div>
 
                 {/* Register link */}
                 <Link to="/admin/registro"
-                  className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-emerald-500/40 rounded-2xl py-3.5 text-[9.5px] font-semibold text-white/45 hover:text-emerald-300 hover:bg-emerald-500/5 transition-all duration-200">
+                  className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-emerald-500/40 rounded-2xl py-3.5 text-[13px] font-semibold text-white/45 hover:text-emerald-300 hover:bg-emerald-500/5 transition-all duration-200">
                   Crear cuenta administrativa
                 </Link>
 
                 {/* Back */}
                 <p className="text-center">
-                  <Link to="/login" className="text-[10px] text-white/20 hover:text-white/45 transition-colors">
+                  <Link to="/login" className="text-[12px] text-white/20 hover:text-white/45 transition-colors">
                     ← Volver al portal público
                   </Link>
                 </p>

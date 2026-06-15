@@ -156,23 +156,23 @@ export default function B03SelectBodegas() {
         <div className="flex items-center gap-2 mb-4 pt-3">
           <button onClick={() => navigate('/login')}
             className="text-white/80 flex items-center gap-0.5 active:opacity-60 transition-opacity">
-            <ChevronLeft size={12} strokeWidth={2.5} className="-ml-1" />
-            <span className="text-[9.5px] font-medium">Volver</span>
+            <ChevronLeft size={20} strokeWidth={2.5} className="-ml-1" />
+            <span className="text-[15px] font-medium">Volver</span>
           </button>
         </div>
-        <h1 className="text-[9.5px] font-bold text-white">Selecciona tus bodegas</h1>
-        <p className="text-green-200 text-[10px] mt-0.5">Busca en el catálogo nacional</p>
+        <h1 className="text-[22px] font-bold text-white">Selecciona tus bodegas</h1>
+        <p className="text-green-200 text-[14px] mt-0.5">Busca en el catálogo nacional</p>
       </div>
 
       {/* Chips seleccionadas */}
       {selected.length > 0 && (
         <div className="bg-white border-b border-gray-100 px-4 py-3">
-          <p className="text-[9.5px] font-semibold text-[#1A5C38] mb-2">
+          <p className="text-[13px] font-semibold text-[#1A5C38] mb-2">
             Seleccionadas ({selected.length})
           </p>
           <div className="flex flex-wrap gap-2">
             {selected.map(b => (
-              <span key={b.id} className="bg-[#1A5C38]/10 text-[#1A5C38] text-[9.5px] font-medium rounded-full px-3 py-1 flex items-center gap-1.5">
+              <span key={b.id} className="bg-[#1A5C38]/10 text-[#1A5C38] text-[13px] font-medium rounded-full px-3 py-1 flex items-center gap-1.5">
                 {b.nombre}
                 <button onClick={() => toggle(b)} className="text-[#1A5C38]/60 active:text-red-500">
                   <X size={13} />
@@ -183,19 +183,19 @@ export default function B03SelectBodegas() {
         </div>
       )}
 
-      <div className="flex-1 px-4 sm:px-5 pt-4 pb-32 space-y-3 max-w-2xl mx-auto w-full">
+      <div className="flex-1 px-4 sm:px-6 pt-4 pb-32 space-y-3 max-w-2xl mx-auto w-full">
         {/* KPIs globales del catálogo */}
         <div className="grid grid-cols-2 gap-3">
           {stats ? (
             <>
               <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
-                <Warehouse size={12} className="text-green-500 mx-auto mb-1" />
-                <p className="text-xs font-bold text-green-700">{stats.total_bodegas.toLocaleString('es-MX')}</p>
+                <Warehouse size={16} className="text-green-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-green-700">{stats.total_bodegas.toLocaleString('es-MX')}</p>
                 <p className="text-xs text-green-600 mt-0.5">Bodegas en el catálogo</p>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
-                <Layers size={12} className="text-blue-500 mx-auto mb-1" />
-                <p className="text-xs font-bold text-blue-700">{formatNum(stats.total_capacidad_ton)} ton</p>
+                <Layers size={16} className="text-blue-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-blue-700">{formatNum(stats.total_capacidad_ton)} ton</p>
                 <p className="text-xs text-blue-600 mt-0.5">Capacidad total registrada</p>
               </div>
             </>
@@ -216,13 +216,13 @@ export default function B03SelectBodegas() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Buscar bodega…"
-              className="w-full bg-white pl-10 pr-4 py-3.5 rounded-xl text-[9.5px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm"
+              className="w-full bg-white pl-10 pr-4 py-3.5 rounded-xl text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm"
             />
           </div>
           <select
             value={estado}
             onChange={e => { setEstado(e.target.value); setMunicipio(''); }}
-            className="bg-white rounded-xl px-3 py-3.5 text-[10px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm min-w-0 max-w-28"
+            className="bg-white rounded-xl px-3 py-3.5 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm min-w-0 max-w-28"
           >
             <option value="">Estado</option>
             {states.map((s: any) => <option key={s.state_id} value={s.name}>{s.name}</option>)}
@@ -232,7 +232,7 @@ export default function B03SelectBodegas() {
           <select
             value={municipio}
             onChange={e => setMunicipio(e.target.value)}
-            className="w-full bg-white rounded-xl px-3 py-3.5 text-[10px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm"
+            className="w-full bg-white rounded-xl px-3 py-3.5 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border border-black/5 shadow-sm"
           >
             <option value="">Todos los municipios</option>
             {municipios.map((m: any) => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
@@ -243,19 +243,19 @@ export default function B03SelectBodegas() {
         <div className="flex border border-gray-200 rounded-xl overflow-hidden">
           <button
             onClick={() => setVista('lista')}
-            className={`flex-1 py-2.5 text-[9.5px] font-medium flex items-center justify-center gap-2 transition-colors ${
+            className={`flex-1 py-2.5 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors ${
               vista === 'lista' ? 'bg-[#1A5C38] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <List size={13} /> Lista
+            <List size={15} /> Lista
           </button>
           <button
             onClick={() => setVista('mapa')}
-            className={`flex-1 py-2.5 text-[9.5px] font-medium flex items-center justify-center gap-2 transition-colors ${
+            className={`flex-1 py-2.5 text-[13px] font-medium flex items-center justify-center gap-2 transition-colors ${
               vista === 'mapa' ? 'bg-[#1A5C38] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <MapIcon size={13} /> Mapa
+            <MapIcon size={15} /> Mapa
           </button>
         </div>
 
@@ -271,8 +271,8 @@ export default function B03SelectBodegas() {
         {!loading && results.length === 0 && (
           <div className="text-center py-12">
             <MapPin size={36} className="text-gray-200 mx-auto mb-3" />
-            <p className="text-[10px] font-medium text-gray-400">Sin resultados</p>
-            <p className="text-[10px] text-gray-300 mt-1">Prueba con otro nombre, estado o municipio</p>
+            <p className="text-[14px] font-medium text-gray-400">Sin resultados</p>
+            <p className="text-[12px] text-gray-300 mt-1">Prueba con otro nombre, estado o municipio</p>
           </div>
         )}
         <div className="space-y-2">
@@ -282,8 +282,8 @@ export default function B03SelectBodegas() {
               <div key={b.id} className={`bg-white rounded-2xl border p-4 flex items-center gap-3 shadow-sm transition-all
                 ${isSelected ? 'border-[#1A5C38]/40' : 'border-black/5'}`}>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[9.5px] text-gray-900 truncate">{b.nombre}</p>
-                  <p className="text-[9.5px] text-gray-500 flex items-center gap-1 mt-0.5">
+                  <p className="font-semibold text-[15px] text-gray-900 truncate">{b.nombre}</p>
+                  <p className="text-[13px] text-gray-500 flex items-center gap-1 mt-0.5">
                     <MapPin size={11} />{b.municipio}, {b.estado}
                     {b.capacidad_ton > 0 && ` · ${formatNum(b.capacidad_ton)} ton`}
                   </p>
@@ -293,7 +293,7 @@ export default function B03SelectBodegas() {
                   className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0
                     ${isSelected ? 'bg-[#1A5C38] text-white' : 'bg-[#F2F2F7] text-gray-500'}`}
                 >
-                  {isSelected ? <CheckCircle size={13} /> : <Plus size={13} />}
+                  {isSelected ? <CheckCircle size={18} /> : <Plus size={18} />}
                 </button>
               </div>
             );
@@ -303,18 +303,18 @@ export default function B03SelectBodegas() {
           <div className="bg-white rounded-2xl border border-[#1A5C38]/25 shadow-sm p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[9.5px] font-black flex items-center justify-center flex-shrink-0">{selected.length}</span>
-                <p className="text-[9.5px] font-semibold text-gray-800">
+                <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0">{selected.length}</span>
+                <p className="text-[13px] font-semibold text-gray-800">
                   {selected.length === 1 ? '1 bodega seleccionada' : `${selected.length} bodegas seleccionadas`}
                 </p>
               </div>
-              <button onClick={() => setSelected([])} className="text-[9.5px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
+              <button onClick={() => setSelected([])} className="text-[11px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
             </div>
             <div className="space-y-1.5">
               {selected.map(b => (
                 <div key={b.id} className="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
                   <MapPin size={12} className="text-green-600 flex-shrink-0" />
-                  <span className="text-[9.5px] font-medium text-green-800 flex-1 leading-snug">{b.nombre}</span>
+                  <span className="text-[13px] font-medium text-green-800 flex-1 leading-snug">{b.nombre}</span>
                   <button onClick={() => toggle(b)} className="text-green-400 active:text-red-500 flex-shrink-0"><X size={13} /></button>
                 </div>
               ))}
@@ -328,8 +328,8 @@ export default function B03SelectBodegas() {
           <>
           {!loading && results.filter(b => b.latitud && b.longitud && Math.abs(b.latitud) > 0.001).length === 0 && (
             <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-              <AlertCircle size={12} className="text-amber-500 flex-shrink-0" />
-              <p className="text-[10px] text-amber-700">Las bodegas filtradas no tienen coordenadas registradas — el mapa permanece en vista general</p>
+              <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />
+              <p className="text-[12px] text-amber-700">Las bodegas filtradas no tienen coordenadas registradas — el mapa permanece en vista general</p>
             </div>
           )}
           <div className="rounded-2xl overflow-hidden border border-gray-200" style={{ height: '450px' }}>
@@ -389,18 +389,18 @@ export default function B03SelectBodegas() {
             <div className="bg-white rounded-2xl border border-[#1A5C38]/25 shadow-sm p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[9.5px] font-black flex items-center justify-center flex-shrink-0">{selected.length}</span>
-                  <p className="text-[9.5px] font-semibold text-gray-800">
+                  <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0">{selected.length}</span>
+                  <p className="text-[13px] font-semibold text-gray-800">
                     {selected.length === 1 ? '1 bodega seleccionada en el mapa' : `${selected.length} bodegas seleccionadas en el mapa`}
                   </p>
                 </div>
-                <button onClick={() => setSelected([])} className="text-[9.5px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
+                <button onClick={() => setSelected([])} className="text-[11px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
               </div>
               <div className="space-y-1.5">
                 {selected.map(b => (
                   <div key={b.id} className="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
                     <MapPin size={12} className="text-green-600 flex-shrink-0" />
-                    <span className="text-[9.5px] font-medium text-green-800 flex-1 leading-snug">{b.nombre}</span>
+                    <span className="text-[13px] font-medium text-green-800 flex-1 leading-snug">{b.nombre}</span>
                     <button onClick={() => toggle(b)} className="text-green-400 active:text-red-500 flex-shrink-0"><X size={13} /></button>
                   </div>
                 ))}
@@ -412,40 +412,40 @@ export default function B03SelectBodegas() {
 
         {/* C-07: Solicitar alta de bodega nueva */}
         <div className="border-t border-gray-200 pt-4 mt-4">
-          <p className="text-[9.5px] text-gray-500 mb-3">¿No encontraste tu bodega en el catálogo?</p>
+          <p className="text-[13px] text-gray-500 mb-3">¿No encontraste tu bodega en el catálogo?</p>
           <button
             onClick={() => setMostrarAlta(true)}
-            className="w-full border-2 border-dashed border-green-300 rounded-xl py-3 px-4 text-green-700 font-medium text-[10px] active:bg-green-50 transition-colors flex items-center justify-center gap-2"
+            className="w-full border-2 border-dashed border-green-300 rounded-xl py-3 px-4 text-green-700 font-medium text-[14px] active:bg-green-50 transition-colors flex items-center justify-center gap-2"
           >
-            <Warehouse size={12} /> Solicitar alta de bodega nueva
+            <Warehouse size={16} /> Solicitar alta de bodega nueva
           </button>
         </div>
 
         {mostrarAlta && (
-          <div className="bg-white rounded-2xl border border-[#1A5C38]/20 shadow-md p-4 space-y-3">
+          <div className="bg-white rounded-2xl border border-[#1A5C38]/20 shadow-md p-5 space-y-3">
             <div className="flex justify-between items-center">
-              <p className="text-[9.5px] font-bold text-[#1A5C38]">Nueva bodega</p>
-              <button onClick={() => setMostrarAlta(false)} className="text-gray-400 active:text-red-500"><X size={13} /></button>
+              <p className="text-[15px] font-bold text-[#1A5C38]">Nueva bodega</p>
+              <button onClick={() => setMostrarAlta(false)} className="text-gray-400 active:text-red-500"><X size={18} /></button>
             </div>
-            <p className="text-[10px] text-gray-400">Llena los datos y un administrador aprobará tu solicitud.</p>
+            <p className="text-[12px] text-gray-400">Llena los datos y un administrador aprobará tu solicitud.</p>
             {[
               { k: 'nombre', label: 'Nombre de la bodega *', type: 'text' },
             ].map(({ k, label, type }) => (
               <div key={k}>
-                <label className="block text-[9.5px] font-medium text-gray-600 mb-1">{label}</label>
-                <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[9.5px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
+                <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
+                <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
               </div>
             ))}
             <div>
-              <label className="block text-[9.5px] font-medium text-gray-600 mb-1">Estado *</label>
-              <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[9.5px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
+              <label className="block text-[13px] font-medium text-gray-600 mb-1">Estado *</label>
+              <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
                 <option value="">Selecciona estado</option>
                 {altaEstados.map((s: any) => <option key={s.state_id} value={s.name}>{s.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[9.5px] font-medium text-gray-600 mb-1">Municipio *</label>
-              <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[9.5px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
+              <label className="block text-[13px] font-medium text-gray-600 mb-1">Municipio *</label>
+              <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
                 <option value="">Selecciona municipio</option>
                 {altaMunicipios.map((m: any) => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
               </select>
@@ -458,13 +458,13 @@ export default function B03SelectBodegas() {
               { k: 'email', label: 'Correo electrónico', type: 'email' },
             ].map(({ k, label, type }) => (
               <div key={k}>
-                <label className="block text-[9.5px] font-medium text-gray-600 mb-1">{label}</label>
-                <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[9.5px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
+                <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
+                <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
               </div>
             ))}
             <div>
-              <label className="block text-[9.5px] font-medium text-gray-600 mb-1">Ubicación de la bodega</label>
-              <p className="text-[9.5px] text-gray-500 mb-2">Toca el mapa para marcar la ubicación de tu bodega</p>
+              <label className="block text-[13px] font-medium text-gray-600 mb-1">Ubicación de la bodega</label>
+              <p className="text-[11px] text-gray-500 mb-2">Toca el mapa para marcar la ubicación de tu bodega</p>
               <div className="rounded-xl overflow-hidden border border-gray-200" style={{ height: '180px' }}>
                 <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }} attributionControl={false}>
                   {import.meta.env.VITE_MAPBOX_TOKEN ? (
@@ -483,9 +483,9 @@ export default function B03SelectBodegas() {
                 </MapContainer>
               </div>
               {coords ? (
-                <p className="text-[9.5px] text-green-600 mt-1">✓ Ubicación marcada: {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</p>
+                <p className="text-[11px] text-green-600 mt-1">✓ Ubicación marcada: {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</p>
               ) : (
-                <p className="text-[9.5px] text-gray-400 mt-1">Sin ubicación — el administrador la completará al aprobar</p>
+                <p className="text-[11px] text-gray-400 mt-1">Sin ubicación — el administrador la completará al aprobar</p>
               )}
             </div>
             <button
@@ -514,7 +514,7 @@ export default function B03SelectBodegas() {
                   toast(err.message || 'Error al enviar solicitud', 'error');
                 } finally { setEnviandoAlta(false); }
               }}
-              className="w-full bg-[#1A5C38] text-white rounded-2xl py-3.5 text-[9.5px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
+              className="w-full bg-[#1A5C38] text-white rounded-2xl py-3.5 text-[15px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
             >
               {enviandoAlta ? 'Enviando…' : 'Enviar solicitud de alta'}
             </button>
@@ -524,7 +524,7 @@ export default function B03SelectBodegas() {
         {/* Continuar sin seleccionar bodega */}
         <button
           onClick={() => navigate('/dashboard')}
-          className="w-full text-[9.5px] text-gray-400 font-medium py-2 active:opacity-70 transition-opacity"
+          className="w-full text-[15px] text-gray-400 font-medium py-2 active:opacity-70 transition-opacity"
         >
           Continuar sin asociar bodega por ahora
         </button>
@@ -535,13 +535,13 @@ export default function B03SelectBodegas() {
         <div className="max-w-2xl mx-auto space-y-2">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-              <p className="text-[10px] text-red-600 whitespace-pre-line">{error}</p>
+              <p className="text-[12px] text-red-600 whitespace-pre-line">{error}</p>
             </div>
           )}
           <button
             onClick={continuar}
             disabled={selected.length === 0 || saving}
-            className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[10px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
+            className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
           >
             {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
           </button>

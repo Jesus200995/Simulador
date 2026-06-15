@@ -264,12 +264,12 @@ export default function PreciosAdminPage() {
     return (
       <div className="space-y-6">
         {preciosError ? (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
-            <p className="text-red-600 font-bold text-[10px]">Error al cargar precios</p>
-            <p className="text-red-600/70 text-[10px] mt-1">{preciosError}</p>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center">
+            <p className="text-red-600 font-bold text-[14px]">Error al cargar precios</p>
+            <p className="text-red-600/70 text-[12px] mt-1">{preciosError}</p>
             <button 
               onClick={cargarTodo}
-              className="mt-4 px-5 py-2.5 bg-[#1A5C38] hover:bg-[#1e6b42] text-white font-bold text-[10px] rounded-xl shadow-md transition-all duration-200"
+              className="mt-4 px-5 py-2.5 bg-[#1A5C38] hover:bg-[#1e6b42] text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200"
             >
               <RefreshCw size={12} className="inline mr-1" /> Reintentar
             </button>
@@ -297,10 +297,10 @@ export default function PreciosAdminPage() {
         <div className="flex items-center gap-3.5 flex-wrap">
           <div className="space-y-0.5">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Futuros Chicago (CME ZC=F)</span>
-            <p className="text-[10px] font-black text-gray-900 flex items-center gap-1">
+            <p className="text-[14px] font-black text-gray-900 flex items-center gap-1">
               <Globe size={13} className="text-gray-500" />
               ${preciosData.chicago_usd_bushel.toFixed(2)} <span className="text-[10px] text-gray-500">USD/bu</span>
-              <span className="text-[9.5px] text-gray-500 ml-1">(= ${preciosData.chicago_usd_ton.toFixed(1)} USD/t)</span>
+              <span className="text-[11px] text-gray-500 ml-1">(= ${preciosData.chicago_usd_ton.toFixed(1)} USD/t)</span>
             </p>
           </div>
 
@@ -308,7 +308,7 @@ export default function PreciosAdminPage() {
 
           <div className="space-y-0.5">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Tipo Cambio (Banxico SF43718)</span>
-            <p className="text-[10px] font-black text-gray-900 flex items-center gap-1">
+            <p className="text-[14px] font-black text-gray-900 flex items-center gap-1">
               <DollarSign size={13} className="text-gray-500" />
               ${preciosData.tc_banxico.toFixed(4)} <span className="text-[10px] text-gray-500">MXN</span>
             </p>
@@ -328,14 +328,14 @@ export default function PreciosAdminPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <button 
             onClick={exportarPreciosHoy}
-            className="flex items-center gap-1 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-bold text-gray-500 hover:text-gray-900 transition-all duration-200"
+            className="flex items-center gap-1 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all duration-200"
           >
             <Download size={12} /> Descargar CSV
           </button>
           <button 
             onClick={handleRefreshManual}
             disabled={refreshLoading}
-            className="flex items-center gap-1 px-3.5 py-2 bg-[#1A5C38] hover:bg-[#1e6b42] active:scale-95 text-white font-bold text-[10px] rounded-xl shadow-md transition-all duration-200 disabled:opacity-40"
+            className="flex items-center gap-1 px-3.5 py-2 bg-[#1A5C38] hover:bg-[#1e6b42] active:scale-95 text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200 disabled:opacity-40"
           >
             <RefreshCw size={12} className={refreshLoading ? 'animate-spin' : ''} /> Actualizar CME & TC
           </button>
@@ -343,7 +343,7 @@ export default function PreciosAdminPage() {
       </div>
 
       {/* Grid: 60% Precios y Tendencias / 40% FIRA, Discrepancias y Logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* ── COLUMNA IZQUIERDA (60%) ── */}
         <div className="lg:col-span-2 space-y-6">
@@ -356,7 +356,7 @@ export default function PreciosAdminPage() {
             <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Margen Negociación</span>
-                <p className="text-[9.5px] font-black text-gray-900 leading-none">{fmt(preciosHoy.precio_venta)}</p>
+                <p className="text-[26px] font-black text-gray-900 leading-none">{fmt(preciosHoy.precio_venta)}</p>
                 <p className="text-[10px] text-gray-500">Referencia Internacional</p>
               </div>
               <p className="text-[10px] text-gray-500 mt-4 leading-normal">Bolsa Chicago CME convertido + Bono $50 USD</p>
@@ -366,7 +366,7 @@ export default function PreciosAdminPage() {
             <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Precio de Compra</span>
-                <p className="text-[9.5px] font-black text-gray-900 leading-none">{fmt(preciosHoy.total_compra)}</p>
+                <p className="text-[26px] font-black text-gray-900 leading-none">{fmt(preciosHoy.total_compra)}</p>
                 <p className="text-[10px] text-gray-500">Promedio Bodega (PO + S)</p>
               </div>
               <p className="text-[10px] text-gray-500 mt-4 leading-normal">
@@ -378,7 +378,7 @@ export default function PreciosAdminPage() {
             <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Precio de Venta</span>
-                <p className={`text-[9.5px] font-black leading-none ${preciosHoy.precio_venta < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                <p className={`text-[26px] font-black leading-none ${preciosHoy.precio_venta < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                   {fmt(preciosHoy.precio_venta)}
                 </p>
                 <p className="text-[10px] text-gray-500">Diferencial Neto</p>
@@ -400,18 +400,18 @@ export default function PreciosAdminPage() {
           )}
 
           {/* Gráfica 30d */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity size={12} className="text-emerald-500" />
-                <h3 className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">Gráfica Tendencia Histórica (30 días)</h3>
+                <Activity size={14} className="text-emerald-500" />
+                <h3 className="text-[12px] font-bold text-gray-900 uppercase tracking-widest">Gráfica Tendencia Histórica (30 días)</h3>
               </div>
               <span className="text-[10px] text-gray-500">Base: MXN/ton</span>
             </div>
 
             {series.length === 0 ? (
               <div className="flex items-center justify-center h-52">
-                <RefreshCw size={12} className="text-emerald-500 animate-spin" />
+                <RefreshCw size={24} className="text-emerald-500 animate-spin" />
               </div>
             ) : (
               <div className="h-64">
@@ -435,11 +435,11 @@ export default function PreciosAdminPage() {
           </div>
 
           {/* Bodegas que publicaron hoy */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
-                <Store size={13} className="text-emerald-500" />
-                <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Acopios Reportados Hoy</h3>
+                <Store size={15} className="text-emerald-500" />
+                <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Acopios Reportados Hoy</h3>
               </div>
               <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Fecha: Hoy</span>
             </div>
@@ -478,15 +478,15 @@ export default function PreciosAdminPage() {
         <div className="space-y-6">
 
           {/* Utilidad FIRA */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
-                <Wheat size={13} className="text-emerald-500" />
-                <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Costos de Producción FIRA</h3>
+                <Wheat size={15} className="text-emerald-500" />
+                <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Costos de Producción FIRA</h3>
               </div>
               <button 
                 onClick={() => setShowFiraModal(true)}
-                className="flex items-center gap-1 text-[9.5px] text-[#1A5C38] font-bold bg-[#1A5C38]/5 hover:bg-[#1A5C38]/10 px-2.5 py-1 rounded"
+                className="flex items-center gap-1 text-[11px] text-[#1A5C38] font-bold bg-[#1A5C38]/5 hover:bg-[#1A5C38]/10 px-2.5 py-1 rounded"
               >
                 <Upload size={11} /> Cargar CSV
               </button>
@@ -506,7 +506,7 @@ export default function PreciosAdminPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-gray-500 font-semibold">Costo de producción (MXN/ha): {fmt(costoHa)} MXN/ha</p>
-                          <span className={`text-[9.5px] font-bold ${utilidad >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          <span className={`text-[11px] font-bold ${utilidad >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                             Utilidad: {utilidad >= 0 ? '+' : ''}{fmt(utilidad)}
                           </span>
                         </div>
@@ -515,21 +515,21 @@ export default function PreciosAdminPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-[10px] text-gray-500 py-2">No se han registrado costos FIRA oficiales en la BD.</p>
+                <p className="text-[12px] text-gray-500 py-2">No se han registrado costos FIRA oficiales en la BD.</p>
               )}
             </div>
           </div>
 
           {/* Discrepancias */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <ShieldCheck size={13} className="text-emerald-500" />
-              <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Discrepancias de Precios</h3>
+              <ShieldCheck size={15} className="text-emerald-500" />
+              <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Discrepancias de Precios</h3>
             </div>
 
             <div className="space-y-3">
               {discrepancias.length === 0 ? (
-                <p className="text-[10px] text-gray-500 py-3 text-center">Sin discrepancias de precios pendientes.</p>
+                <p className="text-[12px] text-gray-500 py-3 text-center">Sin discrepancias de precios pendientes.</p>
               ) : (
                 discrepancias.map((disc, idx) => (
                   <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 space-y-2 text-[12.5px]">
@@ -553,15 +553,15 @@ export default function PreciosAdminPage() {
           </div>
 
           {/* Logs */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-4">
+          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <Clock size={13} className="text-emerald-500" />
-              <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Logs de Actualización (Chicago/TC)</h3>
+              <Clock size={15} className="text-emerald-500" />
+              <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Logs de Actualización (Chicago/TC)</h3>
             </div>
 
             <div className="space-y-2 max-h-56 overflow-y-auto">
               {logs.length === 0 ? (
-                <p className="text-[10px] text-gray-500 py-2">Sin actualizaciones manuales registradas.</p>
+                <p className="text-[12px] text-gray-500 py-2">Sin actualizaciones manuales registradas.</p>
               ) : (
                 logs.slice(0, 5).map((log, idx) => (
                   <div key={idx} className="text-[11.5px] bg-white/[0.01] border border-white/5 rounded-xl p-2.5 flex justify-between items-center text-gray-500">
@@ -584,17 +584,17 @@ export default function PreciosAdminPage() {
       </div>
 
       {/* ── SECTION TABLA BRECHAS (ANCHO COMPLETO, ABAJO) ── */}
-      <section className="bg-white/80 border border-white/5 rounded-2xl p-4 shadow-sm space-y-4">
+      <section className="bg-white/80 border border-white/5 rounded-2xl p-5 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-white/5 pb-3">
           <div className="flex items-center gap-2">
-            <AlertTriangle size={13} className="text-emerald-500" />
-            <h3 className="text-[9.5px] font-bold text-gray-900 uppercase tracking-wider">Auditoría de Brechas Regionales</h3>
+            <AlertTriangle size={15} className="text-emerald-500" />
+            <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Auditoría de Brechas Regionales</h3>
           </div>
-          <span className="text-[9.5px] text-gray-500">Estados con transacciones</span>
+          <span className="text-[11px] text-gray-500">Estados con transacciones</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[9.5px] divide-y divide-white/5">
+          <table className="w-full text-left text-[13px] divide-y divide-white/5">
             <thead>
               <tr className="text-gray-500 font-bold text-[10px] uppercase tracking-wider">
                 <th className="py-2.5">Estado</th>
@@ -633,19 +633,19 @@ export default function PreciosAdminPage() {
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <form onSubmit={handleUploadFira} className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-4 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <Upload size={12} />
+                <Upload size={16} />
               </div>
-              <h3 className="text-[10px] font-extrabold text-gray-900 uppercase tracking-tight">Subir Datos FIRA</h3>
+              <h3 className="text-[16px] font-extrabold text-gray-900 uppercase tracking-tight">Subir Datos FIRA</h3>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-6 space-y-4">
               <p className="text-[12.5px] text-gray-500 leading-relaxed">
                 Selecciona el archivo CSV de costos FIRA. El archivo debe contener las columnas: <strong className="text-gray-900">estado, ciclo, modalidad, costo_por_ha</strong>.
               </p>
 
-              <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-emerald-500/50 transition-all cursor-pointer relative bg-white/[0.01]">
+              <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-emerald-500/50 transition-all cursor-pointer relative bg-white/[0.01]">
                 <input 
                   type="file" 
                   accept=".csv"
@@ -653,21 +653,21 @@ export default function PreciosAdminPage() {
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   required
                 />
-                <Upload className="mx-auto mb-2 text-gray-500" size={12} />
-                <span className="text-[9.5px] font-bold text-gray-700 block">
+                <Upload className="mx-auto mb-2 text-gray-500" size={24} />
+                <span className="text-[13px] font-bold text-gray-700 block">
                   {selectedFile ? selectedFile.name : 'Selecciona o arrastra el CSV'}
                 </span>
                 <span className="text-[10px] text-gray-500 mt-1 block">Tamaño máximo 2MB</span>
               </div>
 
               {firaError && (
-                <div className="text-[10px] text-red-600 bg-red-500/5 border border-red-500/10 rounded-xl p-3 leading-relaxed">
+                <div className="text-[12px] text-red-600 bg-red-500/5 border border-red-500/10 rounded-xl p-3 leading-relaxed">
                   {firaError}
                 </div>
               )}
 
               {firaResult && (
-                <div className="text-[10px] text-emerald-600 bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 leading-relaxed space-y-1">
+                <div className="text-[12px] text-emerald-600 bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 leading-relaxed space-y-1">
                   <p className="font-bold flex items-center gap-1"><Check size={12} /> Carga Finalizada Exitosamente</p>
                   <p>Insertados: {firaResult.insertados} · Actualizados: {firaResult.actualizados}</p>
                   {firaResult.errores?.length > 0 && (
@@ -682,18 +682,18 @@ export default function PreciosAdminPage() {
               )}
             </div>
 
-            <div className="px-5 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
               <button 
                 type="button"
                 onClick={() => { setShowFiraModal(false); setSelectedFile(null); setFiraError(''); setFiraResult(null); }}
-                className="px-4 py-2.5 rounded-xl text-[9.5px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
                 disabled={firaLoading}
               >
                 Cerrar
               </button>
               <button 
                 type="submit"
-                className="px-5 py-2.5 rounded-xl text-[9.5px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-md shadow-emerald-950/20"
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-md shadow-emerald-950/20"
                 disabled={firaLoading || !selectedFile || (firaResult !== null)}
               >
                 {firaLoading ? 'Cargando...' : 'Subir CSV'}
@@ -709,15 +709,15 @@ export default function PreciosAdminPage() {
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-4 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <Check size={12} />
+                <Check size={16} />
               </div>
-              <h3 className="text-[10px] font-extrabold text-gray-900 uppercase tracking-tight">Resolver Discrepancia</h3>
+              <h3 className="text-[16px] font-extrabold text-gray-900 uppercase tracking-tight">Resolver Discrepancia</h3>
             </div>
 
-            <div className="p-4 space-y-4">
-              <p className="text-[9.5px] text-gray-700 leading-normal">{resolvingDisc.descripcion}</p>
+            <div className="p-6 space-y-4">
+              <p className="text-[13px] text-gray-700 leading-normal">{resolvingDisc.descripcion}</p>
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">
@@ -728,22 +728,22 @@ export default function PreciosAdminPage() {
                   placeholder="Detalla las acciones o el veredicto administrativo tomado sobre esta discrepancia de precios..."
                   value={notaResolucion}
                   onChange={e => setNotaResolucion(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[9.5px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>
 
-            <div className="px-5 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingDisc(null); setNotaResolucion(''); }}
-                className="px-4 py-2.5 rounded-xl text-[9.5px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
                 disabled={resolveLoading}
               >
                 Cancelar
               </button>
               <button 
                 onClick={handleResolveDiscrepancia}
-                className="px-5 py-2.5 rounded-xl text-[9.5px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-950/20 transition-all"
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-950/20 transition-all"
                 disabled={resolveLoading}
               >
                 {resolveLoading ? 'Guardando...' : 'Confirmar Resolución'}

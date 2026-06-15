@@ -66,19 +66,19 @@ export default function B07Inventario() {
 
   const filteredVars = conceptos.variedades.filter((v: {tipo_maiz?: string}) => v.tipo_maiz === form.tipo_maiz);
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-[1rem] px-4 py-3.5 text-[10px] font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1A5C38]/40 focus:bg-white border-2 border-transparent focus:border-[#1A5C38]/10';
-  const labelClass = 'block text-[10px] font-bold text-gray-600 mb-1.5 transition-colors group-hover/card:text-[#1A5C38]';
-  const cardClass = 'bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-4 space-y-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-500 group/card hover:-translate-y-0.5';
+  const inputClass = 'w-full bg-[#F2F2F7] rounded-[1rem] px-4 py-3.5 text-[16px] font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1A5C38]/40 focus:bg-white border-2 border-transparent focus:border-[#1A5C38]/10';
+  const labelClass = 'block text-[14px] font-bold text-gray-600 mb-1.5 transition-colors group-hover/card:text-[#1A5C38]';
+  const cardClass = 'bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-500 group/card hover:-translate-y-0.5';
 
   return (
     <div className="w-full">
       <PageBanner title="Actualizar Inventario" subtitle="Registro de volumen almacenado" back="/mis-bodegas" />
 
-      <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 py-5">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-5">
           {/* Bodega */}
           <div className={cardClass}>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Bodega</p>
+            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Bodega</p>
             <div>
               <label className={labelClass}>Selecciona la bodega</label>
               <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
@@ -100,7 +100,7 @@ export default function B07Inventario() {
 
           {/* Tipo de maíz */}
           <div className={cardClass}>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Tipo de maíz</p>
+            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Tipo de maíz</p>
             <div>
               <label className={labelClass}>Tipo de maíz</label>
               <select value={form.tipo_maiz} onChange={e => set('tipo_maiz', e.target.value)} required className={inputClass}>
@@ -131,16 +131,16 @@ export default function B07Inventario() {
 
           {/* Volumen y calidad */}
           <div className={cardClass}>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Volumen y calidad</p>
-            <div className="bg-emerald-50/50 border border-emerald-100 rounded-[1rem] p-4">
-              <p className="text-xs font-bold text-emerald-800 mb-1.5">
+            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Volumen y calidad</p>
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-[1rem] p-5">
+              <p className="text-sm font-bold text-emerald-800 mb-1.5">
                 ¿Qué número debo escribir?
               </p>
-              <p className="text-xs text-emerald-700/90 leading-relaxed font-medium">
+              <p className="text-sm text-emerald-700/90 leading-relaxed font-medium">
                 Escribe el <strong>total de toneladas que tienes almacenadas
                 en este momento</strong> en la bodega — no solo lo que llegó hoy.
               </p>
-              <p className="text-xs text-emerald-600/80 mt-2 font-medium">
+              <p className="text-sm text-emerald-600/80 mt-2 font-medium">
                 Ejemplo: Si tenías 800 ton y llegaron 200 ton más hoy,
                 escribe <strong>1,000</strong> (el total actual).
               </p>
@@ -191,7 +191,7 @@ export default function B07Inventario() {
 
           {/* Fecha */}
           <div className={cardClass}>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Fecha y notas</p>
+            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Fecha y notas</p>
             <div>
               <label className={labelClass}>Fecha</label>
               <input type="date" value={form.fecha} onChange={e => set('fecha', e.target.value)} required
@@ -205,7 +205,7 @@ export default function B07Inventario() {
           </div>
 
           <button type="submit" disabled={loading}
-            className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[10px] font-bold shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:hover:translate-y-0">
+            className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[16px] font-bold shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:hover:translate-y-0">
             {loading ? 'Guardando…' : 'Guardar inventario'}
           </button>
         </form>

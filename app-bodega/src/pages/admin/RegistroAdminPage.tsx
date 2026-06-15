@@ -93,7 +93,7 @@ export default function RegistroAdminPage() {
   }
 
   const inputCls = (f: string) => [
-    'w-full pl-11 pr-4 py-3.5 rounded-2xl text-[10px] outline-none transition-all duration-200',
+    'w-full pl-11 pr-4 py-3.5 rounded-2xl text-[14px] outline-none transition-all duration-200',
     'bg-white/[0.05] border text-white placeholder-white/25 font-medium',
     focused === f ? 'border-emerald-400/60 ring-2 ring-emerald-400/15 bg-white/[0.08]' : 'border-white/10 hover:border-white/20',
   ].join(' ');
@@ -101,7 +101,7 @@ export default function RegistroAdminPage() {
   /* ── SUCCESS ── */
   if (success) {
     return (
-      <div className="min-h-screen bg-[#050f0a] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-[#050f0a] flex items-center justify-center p-5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#062917] via-[#041f12] to-[#020d07]" />
         <div className="absolute -top-[10%] -left-[5%] w-[55%] h-[55%] bg-emerald-500/20 rounded-full blur-[100px]" />
         <div className="absolute -bottom-[15%] -right-[10%] w-[45%] h-[45%] bg-teal-400/10 rounded-full blur-[90px]" />
@@ -113,7 +113,7 @@ export default function RegistroAdminPage() {
               </div>
               <div className="absolute inset-0 rounded-[28px] border-2 border-emerald-400/25 animate-ping" style={{ animationDuration: '2.5s' }} />
               <span className="absolute -top-2.5 -right-2.5 w-7 h-7 bg-lime-400 rounded-full flex items-center justify-center shadow-[0_0_16px_rgba(163,230,53,0.7)]">
-                <Sparkles size={12} className="text-emerald-900" />
+                <Sparkles size={14} className="text-emerald-900" />
               </span>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function RegistroAdminPage() {
             className="w-full group relative overflow-hidden rounded-2xl py-4 text-[14.5px] font-bold text-white transition-all duration-300 active:scale-[0.98] shadow-[0_8px_30px_rgba(52,211,153,0.3)]"
             style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 60%, #34d399 100%)' }}>
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/12 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-            <span className="relative flex items-center justify-center gap-2">Ir al Login<ArrowRight size={12} className="transition-transform group-hover:translate-x-1" /></span>
+            <span className="relative flex items-center justify-center gap-2">Ir al Login<ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /></span>
           </button>
         </div>
       </div>
@@ -150,13 +150,13 @@ export default function RegistroAdminPage() {
             <ShieldAlert size={19} className="text-white" strokeWidth={2.3} />
           </div>
           <div>
-            <span className="text-[10px] font-black text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>SIMAC</span>
+            <span className="text-[17px] font-black text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>SIMAC</span>
             <span className="ml-1.5 text-[9px] font-bold text-emerald-400 uppercase tracking-[0.2em]">Admin</span>
           </div>
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col justify-center py-10">
-          <p className="text-[9.5px] font-bold text-emerald-400 uppercase tracking-[0.25em] mb-4">Acceso administrativo</p>
+          <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-[0.25em] mb-4">Acceso administrativo</p>
           <h2 className="text-[36px] xl:text-[42px] font-black text-white leading-[1.1] mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Crea tu cuenta<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">de administrador</span>
@@ -194,14 +194,14 @@ export default function RegistroAdminPage() {
           <div className="absolute -top-[30%] -left-[20%] w-[70%] h-[70%] bg-emerald-500/20 rounded-full blur-[80px]" />
           <div className="absolute -bottom-[20%] -right-[10%] w-[55%] h-[55%] bg-teal-400/15 rounded-full blur-[70px]" />
           <AnimatedCanvas />
-          <div className="relative z-10 flex flex-col items-center justify-center text-center px-5 py-8">
+          <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-8">
             <div className="relative mb-4">
               <div className="w-15 h-15 w-[60px] h-[60px] rounded-[20px] bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.45)]">
                 <ShieldAlert size={26} className="text-white" strokeWidth={2.2} />
               </div>
               <div className="absolute inset-0 rounded-[20px] border-2 border-emerald-400/30 animate-ping" style={{ animationDuration: '2.5s' }} />
             </div>
-            <h1 className="text-[10px] font-black text-white leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h1 className="text-[24px] font-black text-white leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               SIMAC <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">Admin</span>
             </h1>
             <p className="text-[10.5px] text-emerald-300/55 mt-1.5 font-medium tracking-widest uppercase">Crear cuenta · Plan Nacional Maíz</p>
@@ -214,25 +214,25 @@ export default function RegistroAdminPage() {
         </div>
 
         {/* FORM */}
-        <div className="flex-1 w-full max-w-[420px] mx-auto px-5 py-5 sm:py-8 lg:px-12 xl:px-0">
+        <div className="flex-1 w-full max-w-[420px] mx-auto px-5 py-6 sm:py-8 lg:px-12 xl:px-0">
           <div className="hidden lg:block absolute inset-0 bg-[#050f0a]" />
           <div className="relative z-10">
 
             <div className="mb-5 lg:mb-6">
-              <h2 className="text-[9.5px] sm:text-[10px] font-black text-white leading-tight mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h2 className="text-[22px] sm:text-[24px] font-black text-white leading-tight mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Crear cuenta
               </h2>
               <p className="text-[12.5px] text-white/30">Completa los datos para registrarte</p>
             </div>
 
             <div className="rounded-3xl border border-white/8 bg-white/[0.03] backdrop-blur-sm lg:bg-transparent lg:border-0 lg:backdrop-blur-none overflow-hidden">
-              <form onSubmit={handleSubmit} className="p-4 sm:p-4 lg:p-0 space-y-3.5">
+              <form onSubmit={handleSubmit} className="p-5 sm:p-6 lg:p-0 space-y-3.5">
 
                 {/* Nombre */}
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] block">Nombre completo</label>
                   <div className="relative">
-                    <User size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type="text" value={form.nombre_completo} onChange={e => set('nombre_completo', e.target.value)}
                       onFocus={() => setFocused('nombre')} onBlur={() => setFocused(null)}
                       required placeholder="Lic. Juan Pérez García" className={inputCls('nombre')} />
@@ -243,7 +243,7 @@ export default function RegistroAdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] block">Correo corporativo</label>
                   <div className="relative">
-                    <Mail size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
                       onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
                       required autoComplete="email" placeholder="nombre@simac.gob.mx" className={inputCls('email')} />
@@ -254,13 +254,13 @@ export default function RegistroAdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] block">Contraseña</label>
                   <div className="relative">
-                    <Lock size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type={showPwd ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)}
                       onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
                       required placeholder="Mínimo 8 caracteres" className={inputCls('password').replace('pr-4', 'pr-11')} />
                     <button type="button" onClick={() => setShowPwd(p => !p)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors p-1">
-                      {showPwd ? <EyeOff size={13} /> : <Eye size={13} />}
+                      {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                   {form.password.length > 0 && (
@@ -277,12 +277,12 @@ export default function RegistroAdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] block">Confirmar contraseña</label>
                   <div className="relative">
-                    <Lock size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type={showConfirm ? 'text' : 'password'} value={form.confirmar} onChange={e => set('confirmar', e.target.value)}
                       onFocus={() => setFocused('confirmar')} onBlur={() => setFocused(null)}
                       required placeholder="Repite la contraseña"
                       className={[
-                        'w-full pl-11 pr-11 py-3.5 rounded-2xl text-[10px] outline-none transition-all duration-200 bg-white/[0.05] border text-white placeholder-white/25 font-medium',
+                        'w-full pl-11 pr-11 py-3.5 rounded-2xl text-[14px] outline-none transition-all duration-200 bg-white/[0.05] border text-white placeholder-white/25 font-medium',
                         form.confirmar && form.confirmar !== form.password ? 'border-red-500/40 ring-1 ring-red-500/15'
                           : focused === 'confirmar' ? 'border-emerald-400/60 ring-2 ring-emerald-400/15 bg-white/[0.08]'
                           : 'border-white/10 hover:border-white/20',
@@ -290,7 +290,7 @@ export default function RegistroAdminPage() {
                     />
                     <button type="button" onClick={() => setShowConfirm(p => !p)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors p-1">
-                      {showConfirm ? <EyeOff size={13} /> : <Eye size={13} />}
+                      {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                   {form.confirmar && form.confirmar !== form.password && (
@@ -302,7 +302,7 @@ export default function RegistroAdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] block">Código corporativo</label>
                   <div className="relative">
-                    <KeyRound size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <KeyRound size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                     <input type="text" value={form.codigo} onChange={e => set('codigo', e.target.value)}
                       onFocus={() => setFocused('codigo')} onBlur={() => setFocused(null)}
                       required placeholder="Código proporcionado por el responsable" className={inputCls('codigo')} />
@@ -316,7 +316,7 @@ export default function RegistroAdminPage() {
                 {/* Error */}
                 {error && (
                   <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/20 rounded-2xl px-4 py-3 text-[12.5px] text-red-400 animate-fade-in">
-                    <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+                    <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
                     <p>{error}</p>
                   </div>
                 )}
@@ -330,13 +330,13 @@ export default function RegistroAdminPage() {
                     {loading ? (
                       <><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Creando cuenta…</>
                     ) : (
-                      <>Crear cuenta administrativa<ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-1" /></>
+                      <>Crear cuenta administrativa<ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" /></>
                     )}
                   </span>
                 </button>
 
                 {/* Links */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1 text-[10px]">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1 text-[12px]">
                   <Link to="/admin/login" className="text-emerald-500/60 hover:text-emerald-300 transition-colors">
                     Ya tengo cuenta — Iniciar sesión
                   </Link>

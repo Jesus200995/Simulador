@@ -49,21 +49,21 @@ export default function DisponibilidadVariedadPage() {
   return (
     <div className="bg-[#F2F2F7]">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-3 pb-5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
-            className="flex items-center gap-0.5 text-green-200/80 text-[9.5px] font-medium mb-1.5 active:opacity-60 transition-opacity">
-            <ChevronLeft size={12} strokeWidth={2.5} className="-ml-1" /> Volver
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Disponibilidad</p>
-          <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">Variedad</h1>
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Disponibilidad</p>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Variedad</h1>
         </div>
       </div>
       <DisponibilidadStepper paso={2} />
-      <div className="max-w-lg mx-auto px-4 sm:px-5">
-        <h2 className="text-xs sm:text-xs font-bold text-zinc-900 text-center mb-1">
+      <div className="max-w-lg mx-auto px-4 sm:px-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 text-center mb-1">
           Que variedad?
         </h2>
-        <p className="text-zinc-500 text-xs text-center mb-6">
+        <p className="text-zinc-500 text-sm text-center mb-6">
           Tipo: {tipoMaiz.charAt(0).toUpperCase() + tipoMaiz.slice(1)}
         </p>
         {loading ? (
@@ -80,12 +80,12 @@ export default function DisponibilidadVariedadPage() {
               </button>
             ))}
             {variedades.length === 0 && (
-              <p className="text-zinc-400 text-center py-5">No hay variedades registradas para este tipo</p>
+              <p className="text-zinc-400 text-center py-6">No hay variedades registradas para este tipo</p>
             )}
 
             {variedadSel && esOtra(variedadSel) && (
               <div className="mt-2 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
-                <label className="block text-xs font-medium text-amber-800 mb-2">
+                <label className="block text-sm font-medium text-amber-800 mb-2">
                   ¿Cuál variedad es? Especifica:
                 </label>
                 <input

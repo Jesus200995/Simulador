@@ -119,26 +119,26 @@ export default function CompletarUbicacionPage() {
           onClick={() => navigate(-1)}
           className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors flex-shrink-0"
         >
-          <ChevronLeft size={12} className="text-white" />
+          <ChevronLeft size={20} className="text-white" />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <MapPin size={13} className="text-green-300/80 flex-shrink-0" />
             {drawMode === 'idle' && !poligono && (
-              <p className="text-white font-bold text-xs leading-tight truncate">
+              <p className="text-white font-bold text-sm leading-tight truncate">
                 {tieneExistente ? 'Actualizar parcela' : 'Marca tu parcela'}
               </p>
             )}
             {drawMode === 'drawing' && (
-              <p className="text-green-300 font-bold text-xs leading-tight">
+              <p className="text-green-300 font-bold text-sm leading-tight">
                 {pointCount} punto{pointCount !== 1 ? 's' : ''} · {puedeTerminar ? 'puedes finalizar' : `faltan ${puntosNecesarios}`}
               </p>
             )}
             {drawMode === 'idle' && poligono && (
-              <p className="text-white font-bold text-xs leading-tight">Parcela lista · {areaCalc} ha</p>
+              <p className="text-white font-bold text-sm leading-tight">Parcela lista · {areaCalc} ha</p>
             )}
             {drawMode === 'editing' && (
-              <p className="text-amber-300 font-bold text-xs leading-tight">Editando parcela</p>
+              <p className="text-amber-300 font-bold text-sm leading-tight">Editando parcela</p>
             )}
           </div>
           <p className="text-white/45 text-xs truncate">
@@ -215,9 +215,9 @@ export default function CompletarUbicacionPage() {
         {/* Zoom manual */}
         <div className="absolute right-3 bottom-3 z-[1000] flex flex-col gap-2">
           <button onClick={() => mapRef.current?.zoomIn()}
-            className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xs font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform">+</button>
+            className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform">+</button>
           <button onClick={() => mapRef.current?.zoomOut()}
-            className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xs font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform">−</button>
+            className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform">−</button>
         </div>
       </div>
 
@@ -243,24 +243,24 @@ export default function CompletarUbicacionPage() {
                 });
               }}
               disabled={capturandoGPS}
-              className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-xs font-semibold
+              className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold
                          flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {capturandoGPS
-                ? (<><Loader2 size={12} className="animate-spin" /> Obteniendo ubicación…</>)
-                : (<><Footprints size={12} /> Estoy en la esquina — usar mi GPS</>)}
+                ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
             </button>
             {gpsMsg && (
-              <p className="text-center text-[9.5px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>
+              <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>
             )}
             {pointCount > 0 && (
               <div className="flex gap-2">
                 <button onClick={() => dibujarRef.current?.undoVertex()}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15 text-white/80 py-3 rounded-xl text-xs font-semibold active:scale-[0.97] transition-all">
-                  <Undo2 size={12} /> Deshacer
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15 text-white/80 py-3 rounded-xl text-sm font-semibold active:scale-[0.97] transition-all">
+                  <Undo2 size={16} /> Deshacer
                 </button>
                 <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar}
-                  className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1A5C38] py-3 rounded-xl text-xs font-bold disabled:opacity-30 active:scale-[0.97] transition-all">
+                  className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1A5C38] py-3 rounded-xl text-sm font-bold disabled:opacity-30 active:scale-[0.97] transition-all">
                   <CheckCircle2 size={17} />
                   {puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${puntosNecesarios}`}
                 </button>
@@ -268,7 +268,7 @@ export default function CompletarUbicacionPage() {
             )}
             {pointCount === 0 && (
               <button onClick={() => navigate(-1)}
-                className="w-full text-white/40 text-xs py-2 text-center hover:text-white/60 transition-colors">
+                className="w-full text-white/40 text-sm py-2 text-center hover:text-white/60 transition-colors">
                 Ahora no
               </button>
             )}
@@ -280,7 +280,7 @@ export default function CompletarUbicacionPage() {
           <div className="max-w-md mx-auto space-y-3">
             {(detectandoGeo || geoDetectado) && (
               <div className="bg-white/10 ring-1 ring-white/15 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
-                <MapPin size={13} className="text-green-300 flex-shrink-0" />
+                <MapPin size={15} className="text-green-300 flex-shrink-0" />
                 {detectandoGeo ? (
                   <p className="text-white/70 text-xs">Detectando estado y municipio…</p>
                 ) : (
@@ -299,34 +299,34 @@ export default function CompletarUbicacionPage() {
                 <div className="flex items-center gap-3">
                   <input type="number" min="0.1" max="5000" step="0.1" value={areaReal}
                     onChange={e => setAreaReal(e.target.value)} placeholder={String(areaCalc ?? '0.0')} inputMode="decimal"
-                    className="flex-1 bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xs font-bold text-white text-center focus:ring-2 focus:ring-white/40 focus:outline-none" />
-                  <span className="text-white/50 font-bold text-xs">ha</span>
+                    className="flex-1 bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xl font-bold text-white text-center focus:ring-2 focus:ring-white/40 focus:outline-none" />
+                  <span className="text-white/50 font-bold text-lg">ha</span>
                 </div>
               </div>
             ) : (
               <div className="bg-green-500/12 ring-1 ring-green-400/25 rounded-2xl px-4 py-3 flex items-center justify-between">
-                <span className="text-xs text-white/70">Área calculada</span>
-                <span className="text-green-300 font-bold text-xs">{areaCalc} ha</span>
+                <span className="text-sm text-white/70">Área calculada</span>
+                <span className="text-green-300 font-bold text-lg">{areaCalc} ha</span>
               </div>
             )}
 
             <button onClick={guardar} disabled={loading}
-              className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-xs font-bold disabled:opacity-40 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-              {loading ? <><Loader2 size={13} className="animate-spin" /> Guardando...</> : 'Guardar ubicación'}
+              className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold disabled:opacity-40 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Guardando...</> : 'Guardar ubicación'}
             </button>
 
             <div className="flex gap-2">
               <button onClick={() => dibujarRef.current?.startEdit()}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15 text-white/80 py-3 rounded-xl text-xs font-medium active:scale-[0.97] transition-all">
-                <Pencil size={12} /> Ajustar forma
+                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15 text-white/80 py-3 rounded-xl text-sm font-medium active:scale-[0.97] transition-all">
+                <Pencil size={14} /> Ajustar forma
               </button>
               <button onClick={() => { setCoincideArea(coincideArea === false ? null : false); }}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15 text-white/80 py-3 rounded-xl text-xs font-medium active:scale-[0.97] transition-all">
+                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15 text-white/80 py-3 rounded-xl text-sm font-medium active:scale-[0.97] transition-all">
                 Corregir área
               </button>
               <button onClick={() => dibujarRef.current?.clear()}
-                className="flex-1 flex items-center justify-center gap-1.5 text-red-400/70 py-3 rounded-xl text-xs font-medium hover:text-red-400 active:scale-[0.97] transition-all">
-                <Trash2 size={12} /> Redibujar
+                className="flex-1 flex items-center justify-center gap-1.5 text-red-400/70 py-3 rounded-xl text-sm font-medium hover:text-red-400 active:scale-[0.97] transition-all">
+                <Trash2 size={14} /> Redibujar
               </button>
             </div>
           </div>
@@ -336,11 +336,11 @@ export default function CompletarUbicacionPage() {
         {drawMode === 'editing' && (
           <div className="max-w-md mx-auto flex gap-2.5">
             <button onClick={() => dibujarRef.current?.cancelEdit()}
-              className="flex-1 bg-white/10 ring-1 ring-white/15 text-white/70 py-3.5 rounded-2xl text-xs font-semibold active:scale-[0.97] transition-all">
+              className="flex-1 bg-white/10 ring-1 ring-white/15 text-white/70 py-3.5 rounded-2xl text-sm font-semibold active:scale-[0.97] transition-all">
               Cancelar
             </button>
             <button onClick={() => { dibujarRef.current?.saveEdit(); setCoincideArea(null); }}
-              className="flex-1 bg-green-500 text-white py-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all">
+              className="flex-1 bg-green-500 text-white py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all">
               <CheckCircle2 size={17} /> Guardar cambios
             </button>
           </div>

@@ -49,8 +49,8 @@ export default function B15Tarifario() {
   }, [bodegaId]);
 
   const iconMap: Record<string, React.ReactNode> = {
-    truck: <Truck size={13} />, scale: <Scale size={13} />, wind: <Wind size={13} />,
-    sun: <Sun size={13} />, box: <Package size={13} />, shield: <Shield size={13} />, package: <Package size={13} />,
+    truck: <Truck size={18} />, scale: <Scale size={18} />, wind: <Wind size={18} />,
+    sun: <Sun size={18} />, box: <Package size={18} />, shield: <Shield size={18} />, package: <Package size={18} />,
   };
 
   function getTarifa(conceptoId: number) {
@@ -80,15 +80,15 @@ export default function B15Tarifario() {
     <div className="w-full">
       <PageBanner title="Tarifario de Servicios" subtitle="Precios que ofreces en tu bodega" back="/mas" />
 
-      <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 py-5">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Selector de bodega */}
-          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4">
-          <label className="block text-[9.5px] font-bold text-gray-400 uppercase tracking-widest mb-3">Bodega</label>
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
+          <label className="block text-[15px] font-bold text-gray-400 uppercase tracking-widest mb-3">Bodega</label>
           <select
             value={bodegaId}
             onChange={e => setBodegaId(e.target.value)}
-            className="w-full bg-[#F2F2F7] rounded-[1.25rem] px-5 py-4 text-[10px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
+            className="w-full bg-[#F2F2F7] rounded-[1.25rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
           >
             <option value="">Selecciona bodega</option>
             {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
@@ -96,14 +96,14 @@ export default function B15Tarifario() {
         </div>
 
         {diasSinActualizar !== null && diasSinActualizar >= 30 && (
-          <div className="bg-amber-50 border-l-[6px] border-amber-400 p-4 mb-6 rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <div className="bg-amber-50 border-l-[6px] border-amber-400 p-6 mb-6 rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
             <div className="flex items-center gap-4">
-              <AlertTriangle size={12} className="text-amber-600 flex-shrink-0" />
+              <AlertTriangle size={24} className="text-amber-600 flex-shrink-0" />
               <div>
-                <p className="font-bold text-[10px] text-amber-800">
+                <p className="font-bold text-[16px] text-amber-800">
                   Tarifario desactualizado — {diasSinActualizar} días sin cambios
                 </p>
-                <p className="text-amber-700 text-[10px] font-medium mt-1">
+                <p className="text-amber-700 text-[14px] font-medium mt-1">
                   Las bodegas con tarifario desactualizado no se incluyen en el 
                   cálculo del Precio Sistema regional. Actualiza tus precios 
                   de servicios para seguir siendo visible.
@@ -120,22 +120,22 @@ export default function B15Tarifario() {
               const tarifa = getTarifa(c.id);
               const isEdit = editando === c.id;
               return (
-                <div key={c.id} className="p-4 hover:bg-gray-50/50 transition-colors">
+                <div key={c.id} className="p-5 hover:bg-gray-50/50 transition-colors">
                   <div className="flex items-center gap-4">
-                    <span className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] text-[#1A5C38] flex items-center justify-center flex-shrink-0">{iconMap[c.icono] || <Tag size={12} />}</span>
+                    <span className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] text-[#1A5C38] flex items-center justify-center flex-shrink-0">{iconMap[c.icono] || <Tag size={20} />}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-[10px] text-gray-900">{c.nombre}</p>
-                      <p className="text-[9.5px] text-gray-500 font-medium">{c.unidad_default}</p>
+                      <p className="font-bold text-[16px] text-gray-900">{c.nombre}</p>
+                      <p className="text-[13px] text-gray-500 font-medium">{c.unidad_default}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       {tarifa ? (
-                        <p className="font-black text-[9.5px] text-[#1A5C38]">${formatNum(tarifa.precio)}</p>
+                        <p className="font-black text-[18px] text-[#1A5C38]">${formatNum(tarifa.precio)}</p>
                       ) : (
-                        <p className="text-[10px] font-medium text-gray-400">Sin precio</p>
+                        <p className="text-[14px] font-medium text-gray-400">Sin precio</p>
                       )}
                       <button
                         onClick={() => { setEditando(isEdit ? null : c.id); setPrecio(tarifa?.precio || ''); }}
-                        className="text-[9.5px] text-[#1A5C38] font-bold mt-1 hover:text-[#154a2d] transition-colors"
+                        className="text-[13px] text-[#1A5C38] font-bold mt-1 hover:text-[#154a2d] transition-colors"
                       >
                         {isEdit ? 'Cancelar' : tarifa ? 'Editar' : 'Agregar'}
                       </button>
@@ -148,12 +148,12 @@ export default function B15Tarifario() {
                         value={precio}
                         onChange={e => setPrecio(e.target.value)}
                         placeholder={`Precio en ${c.unidad_default}`}
-                        className="flex-1 bg-[#F2F2F7] rounded-[1rem] px-5 py-3.5 text-[10px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
+                        className="flex-1 bg-[#F2F2F7] rounded-[1rem] px-5 py-3.5 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
                       />
                       <button
                         onClick={() => guardar(c.id)}
                         disabled={saving}
-                        className="bg-[#1A5C38] hover:bg-[#154a2d] text-white px-5 py-3.5 rounded-[1rem] text-[9.5px] font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-md"
+                        className="bg-[#1A5C38] hover:bg-[#154a2d] text-white px-6 py-3.5 rounded-[1rem] text-[15px] font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-md"
                       >
                         {saving ? '…' : 'Guardar'}
                       </button>
@@ -167,9 +167,9 @@ export default function B15Tarifario() {
 
         <button
           onClick={() => navigate('/tarifario/proponer')}
-          className="w-full text-[9.5px] text-[#1A5C38] font-bold border-2 border-dashed border-[#1A5C38]/40 rounded-[1.5rem] py-5 hover:bg-[#1A5C38]/[0.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full text-[15px] text-[#1A5C38] font-bold border-2 border-dashed border-[#1A5C38]/40 rounded-[1.5rem] py-5 hover:bg-[#1A5C38]/[0.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          <Plus size={13} strokeWidth={2.5} />
+          <Plus size={18} strokeWidth={2.5} />
           Proponer nuevo servicio
         </button>
         </div>

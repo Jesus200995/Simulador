@@ -89,13 +89,13 @@ export default function CrearPinPage() {
           onClick={() => { setStep('crear'); setPin(''); setConfirmPin(''); navigate('/activar'); }}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
         >
-          <ChevronLeft size={13} className="text-white/70" />
+          <ChevronLeft size={22} className="text-white/70" />
         </button>
         {/* Stepper 2/2 */}
         <div className="flex-1 flex justify-center items-center gap-2">
           <div className="flex items-center gap-1.5">
             <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center">
-              <CheckCircle size={12} className="text-white" />
+              <CheckCircle size={14} className="text-white" />
             </div>
             <span className="text-xs text-white/40 font-semibold hidden sm:block">Buscar</span>
           </div>
@@ -116,15 +116,15 @@ export default function CrearPinPage() {
 
           {/* Avatar / greeting */}
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#1A5C38] rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl shadow-green-900/40">
-            <span className="text-xs sm:text-3xl font-black text-white">
+            <span className="text-2xl sm:text-3xl font-black text-white">
               {activacion.nombres?.charAt(0) ?? '?'}
             </span>
           </div>
 
-          <h1 className="text-xs sm:text-3xl font-bold text-white tracking-tight mb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-1">
             ¡Hola, {activacion.nombres?.split(' ')[0]}!
           </h1>
-          <p className="text-white/50 text-xs sm:text-xs mb-6 sm:mb-8 leading-relaxed">
+          <p className="text-white/50 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
             {step === 'crear'
               ? 'Crea un PIN de 4 dígitos para acceder a tu cuenta'
               : 'Repite tu PIN para confirmar'}
@@ -140,16 +140,16 @@ export default function CrearPinPage() {
 
           {error && (
             <div className="mb-5 mx-auto p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl
-                            text-red-300 text-xs flex items-start gap-2 text-left">
-              <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                            text-red-300 text-sm flex items-start gap-2 text-left">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {loading ? (
             <div className="flex items-center justify-center gap-2 text-white/60 py-8">
-              <Loader2 size={13} className="animate-spin" />
-              <span className="text-xs sm:text-xs">Activando tu cuenta...</span>
+              <Loader2 size={22} className="animate-spin" />
+              <span className="text-sm sm:text-base">Activando tu cuenta...</span>
             </div>
           ) : (
             <div className={step === 'confirmar' ? 'animate-slide-left' : ''}>
@@ -166,7 +166,7 @@ export default function CrearPinPage() {
 
       {/* Modal de activación exitosa */}
       {registroExitoso && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-5">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-6">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
             {/* Ícono de éxito */}
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -176,7 +176,7 @@ export default function CrearPinPage() {
             </div>
 
             {/* Título */}
-            <h2 className="text-xs font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
               ¡Cuenta activada!
             </h2>
 
@@ -184,14 +184,14 @@ export default function CrearPinPage() {
             <p className="text-gray-600 mb-2">
               Tu cuenta SIMAC ha sido activada correctamente.
             </p>
-            <p className="text-gray-500 text-xs mb-8">
+            <p className="text-gray-500 text-sm mb-8">
               Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.
             </p>
 
             {/* Botón */}
             <button
               onClick={() => navigate('/login-productor')}
-              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-xs hover:bg-green-800 transition-colors"
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg hover:bg-green-800 transition-colors"
             >
               Iniciar sesión
             </button>

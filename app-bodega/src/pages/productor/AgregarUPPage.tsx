@@ -83,7 +83,7 @@ export default function AgregarUPPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-[1100]">
         <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-gray-100">
-          <ChevronLeft size={12} />
+          <ChevronLeft size={20} />
         </button>
         <div>
           <h1 className="font-semibold text-gray-900">Agregar parcela</h1>
@@ -93,30 +93,30 @@ export default function AgregarUPPage() {
 
       {paso === 'info' && (
         <div className="p-4 space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">Nombre de la parcela (opcional)</label>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la parcela (opcional)</label>
             <input type="text" value={nombreUP} onChange={e => setNombreUP(e.target.value)}
               placeholder="Ej: Parcela Norte, El Potrero, etc."
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">Estado *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
               <input type="text" value={estadoUp} onChange={e => setEstadoUp(e.target.value)}
                 placeholder="Ej: Sinaloa"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">Municipio *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Municipio *</label>
               <input type="text" value={municipioUp} onChange={e => setMunicipioUp(e.target.value)}
                 placeholder="Ej: Culiacán"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-xs">{error}</p></div>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm">{error}</p></div>
           )}
 
           <button onClick={() => setPaso('mapa')} disabled={!estadoUp || !municipioUp}
@@ -124,7 +124,7 @@ export default function AgregarUPPage() {
             Continuar → Dibujar en mapa
           </button>
           <button onClick={() => guardar(null, null, null)} disabled={!estadoUp || !municipioUp || enviando}
-            className="w-full border border-gray-200 text-gray-600 py-3 rounded-2xl text-xs disabled:opacity-40">
+            className="w-full border border-gray-200 text-gray-600 py-3 rounded-2xl text-sm disabled:opacity-40">
             {enviando ? 'Guardando…' : 'Guardar sin dibujar (usar municipio como ubicación)'}
           </button>
         </div>
@@ -153,7 +153,7 @@ export default function AgregarUPPage() {
 
             {/* Controles */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5">
-              <p className="text-center text-[9.5px] text-white bg-black/40 rounded-lg px-3 py-1.5">
+              <p className="text-center text-[11px] text-white bg-black/40 rounded-lg px-3 py-1.5">
                 {pointCount === 0
                   ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
                   : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
@@ -173,21 +173,21 @@ export default function AgregarUPPage() {
                   });
                 }}
                 disabled={capturandoGPS}
-                className="w-full bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+                className="w-full bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
                 {capturandoGPS
-                  ? (<><Loader2 size={12} className="animate-spin" /> Obteniendo ubicación…</>)
-                  : (<><Footprints size={12} /> Estoy en la esquina — usar mi GPS</>)}
+                  ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                  : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
               </button>
-              {gpsMsg && <p className="text-center text-[9.5px] text-gray-600 bg-white/90 rounded-lg px-3 py-1.5">{gpsMsg}</p>}
+              {gpsMsg && <p className="text-center text-[11px] text-gray-600 bg-white/90 rounded-lg px-3 py-1.5">{gpsMsg}</p>}
 
               {pointCount > 0 && (
                 <div className="flex gap-2">
                   <button onClick={() => dibujarRef.current?.undoVertex()}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-xl text-xs font-semibold">
-                    <Undo2 size={12} /> Deshacer
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-xl text-sm font-semibold">
+                    <Undo2 size={16} /> Deshacer
                   </button>
                   <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar || enviando}
-                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-[#1A5C38] text-white py-3 rounded-xl text-xs font-bold disabled:opacity-40">
+                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-[#1A5C38] text-white py-3 rounded-xl text-sm font-bold disabled:opacity-40">
                     <CheckCircle2 size={17} />
                     {enviando ? 'Guardando…' : puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
                   </button>

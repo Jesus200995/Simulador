@@ -31,7 +31,7 @@ export default function PinInput({ value, onChange, error, success, dark }: PinI
 
   return (
     <div className={error ? 'animate-shake' : ''}>
-      <div className="flex justify-center gap-4 sm:gap-4 mb-8 sm:mb-10">
+      <div className="flex justify-center gap-4 sm:gap-5 mb-8 sm:mb-10">
         {[0, 1, 2, 3].map(i => (
           <div key={i}
             className={`${dotBase} ${i < value.length ? `${filledColor} scale-110` : emptyColor}`}
@@ -42,13 +42,13 @@ export default function PinInput({ value, onChange, error, success, dark }: PinI
         {keys.map((k, i) => (
           <button key={i} type="button" onClick={() => handlePress(k)}
             disabled={k === ''}
-            className={`h-[58px] sm:h-16 rounded-2xl text-xs font-semibold
+            className={`h-[58px] sm:h-16 rounded-2xl text-2xl font-semibold
               active:scale-90 transition-all duration-150 select-none flex items-center justify-center
               ${k === '' ? 'invisible'
                 : k === 'del' ? (dark ? delDark : delLight)
                 : (dark ? keyDark : keyLight)}`}
           >
-            {k === 'del' ? <Delete size={13} /> : k}
+            {k === 'del' ? <Delete size={22} /> : k}
           </button>
         ))}
       </div>

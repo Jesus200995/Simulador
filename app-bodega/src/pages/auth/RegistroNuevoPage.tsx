@@ -47,11 +47,11 @@ function normalizeText(str: string): string {
 }
 
 const inputCls =
-  'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xs text-white ' +
+  'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
   'placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
 
 const selectCls =
-  'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xs text-white ' +
+  'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
   'focus:ring-2 focus:ring-white/50 focus:outline-none transition-all appearance-none';
 
 export default function RegistroNuevoPage() {
@@ -237,19 +237,19 @@ export default function RegistroNuevoPage() {
             onClick={handleBack}
             className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors flex-shrink-0"
           >
-            <ChevronLeft size={12} className="text-white" />
+            <ChevronLeft size={20} className="text-white" />
           </button>
 
           <div className="flex-1 min-w-0">
             {drawMode === 'idle' && !poligono && (
               <>
-                <p className="text-white font-bold text-xs leading-tight">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
+                <p className="text-white font-bold text-sm leading-tight">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
                 <p className="text-white/45 text-xs">Dibuja el contorno de tu parcela. Toca cada esquina para agregar un punto.</p>
               </>
             )}
             {drawMode === 'drawing' && (
               <>
-                <p className="text-green-300 font-bold text-xs leading-tight">
+                <p className="text-green-300 font-bold text-sm leading-tight">
                   {pointCount} punto{pointCount !== 1 ? 's' : ''} marcado{pointCount !== 1 ? 's' : ''}
                 </p>
                 <p className="text-white/45 text-xs">
@@ -259,13 +259,13 @@ export default function RegistroNuevoPage() {
             )}
             {drawMode === 'idle' && poligono && (
               <>
-                <p className="text-white font-bold text-xs leading-tight">Parcela dibujada</p>
+                <p className="text-white font-bold text-sm leading-tight">Parcela dibujada</p>
                 <p className="text-white/45 text-xs">{areaCalc} ha calculadas</p>
               </>
             )}
             {drawMode === 'editing' && (
               <>
-                <p className="text-amber-300 font-bold text-xs leading-tight">Editando parcela</p>
+                <p className="text-amber-300 font-bold text-sm leading-tight">Editando parcela</p>
                 <p className="text-white/45 text-xs">Arrastra los puntos para ajustar</p>
               </>
             )}
@@ -343,11 +343,11 @@ export default function RegistroNuevoPage() {
           <div className="absolute right-3 bottom-3 z-[1000] flex flex-col gap-2">
             <button
               onClick={() => mapRef.current?.zoomIn()}
-              className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xs font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+              className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
             >+</button>
             <button
               onClick={() => mapRef.current?.zoomOut()}
-              className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xs font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+              className="w-11 h-11 bg-black/60 backdrop-blur-md rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
             >−</button>
           </div>
         </div>
@@ -359,7 +359,7 @@ export default function RegistroNuevoPage() {
           {drawMode === 'idle' && poligono && (detectandoGeo || geoDetectado) && (
             <div className="max-w-md mx-auto mb-2.5">
               <div className="bg-white/10 ring-1 ring-white/15 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
-                <MapPin size={13} className="text-green-300 flex-shrink-0" />
+                <MapPin size={15} className="text-green-300 flex-shrink-0" />
                 {detectandoGeo ? (
                   <p className="text-white/70 text-xs">Detectando estado y municipio…</p>
                 ) : (
@@ -400,15 +400,15 @@ export default function RegistroNuevoPage() {
                   });
                 }}
                 disabled={capturandoGPS}
-                className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-xs font-semibold
+                className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold
                            flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 {capturandoGPS
-                  ? (<><Loader2 size={12} className="animate-spin" /> Obteniendo ubicación…</>)
-                  : (<><Footprints size={12} /> Estoy en la esquina — usar mi GPS</>)}
+                  ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                  : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
               </button>
               {gpsMsg && (
-                <p className="text-center text-[9.5px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>
+                <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>
               )}
 
               {pointCount > 0 && (
@@ -416,14 +416,14 @@ export default function RegistroNuevoPage() {
                   <button
                     onClick={() => dibujarRef.current?.undoVertex()}
                     className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15
-                               text-white/80 py-3 rounded-xl text-xs font-semibold active:scale-[0.97] transition-all"
+                               text-white/80 py-3 rounded-xl text-sm font-semibold active:scale-[0.97] transition-all"
                   >
-                    <Undo2 size={12} /> Deshacer
+                    <Undo2 size={16} /> Deshacer
                   </button>
                   <button
                     onClick={() => dibujarRef.current?.finishDraw()}
                     disabled={!puedeTerminar}
-                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1A5C38] py-3 rounded-xl text-xs font-bold
+                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1A5C38] py-3 rounded-xl text-sm font-bold
                                disabled:opacity-30 active:scale-[0.97] transition-all"
                   >
                     <CheckCircle2 size={17} />
@@ -435,7 +435,7 @@ export default function RegistroNuevoPage() {
               {pointCount === 0 && (
                 <button
                   onClick={() => irAPaso(5)}
-                  className="w-full text-white/40 text-xs py-2 text-center hover:text-white/60 transition-colors"
+                  className="w-full text-white/40 text-sm py-2 text-center hover:text-white/60 transition-colors"
                 >
                   Omitir — completar mi ubicación después
                 </button>
@@ -447,20 +447,20 @@ export default function RegistroNuevoPage() {
           {drawMode === 'idle' && poligono && coincideArea === null && (
             <div className="max-w-md mx-auto space-y-3">
               <div className="bg-green-500/12 ring-1 ring-green-400/25 rounded-2xl p-4">
-                <p className="text-xs font-semibold text-white mb-1">
-                  Área calculada: <span className="text-green-300 font-bold text-xs">{areaCalc} ha</span>
+                <p className="text-sm font-semibold text-white mb-1">
+                  Área calculada: <span className="text-green-300 font-bold text-base">{areaCalc} ha</span>
                 </p>
                 <p className="text-xs text-white/45 mb-3">¿El área calculada coincide con tu parcela?</p>
                 <div className="flex gap-2.5">
                   <button
                     onClick={() => setCoincideArea(true)}
-                    className="flex-1 bg-green-500/20 ring-1 ring-green-400/30 text-green-300 py-3 rounded-xl font-bold text-xs active:scale-[0.97] transition-all"
+                    className="flex-1 bg-green-500/20 ring-1 ring-green-400/30 text-green-300 py-3 rounded-xl font-bold text-sm active:scale-[0.97] transition-all"
                   >
                     ✓ Sí, es correcta
                   </button>
                   <button
                     onClick={() => setCoincideArea(false)}
-                    className="flex-1 bg-white/8 ring-1 ring-white/12 text-white/60 py-3 rounded-xl font-semibold text-xs active:scale-[0.97] transition-all"
+                    className="flex-1 bg-white/8 ring-1 ring-white/12 text-white/60 py-3 rounded-xl font-semibold text-sm active:scale-[0.97] transition-all"
                   >
                     No, difiere
                   </button>
@@ -470,16 +470,16 @@ export default function RegistroNuevoPage() {
                 <button
                   onClick={() => dibujarRef.current?.startEdit()}
                   className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 ring-1 ring-white/15
-                             text-white/80 py-3 rounded-xl text-xs font-medium active:scale-[0.97] transition-all"
+                             text-white/80 py-3 rounded-xl text-sm font-medium active:scale-[0.97] transition-all"
                 >
-                  <Pencil size={12} /> Ajustar forma
+                  <Pencil size={14} /> Ajustar forma
                 </button>
                 <button
                   onClick={() => dibujarRef.current?.clear()}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-red-400/70 py-3 rounded-xl text-xs font-medium
+                  className="flex-1 flex items-center justify-center gap-1.5 text-red-400/70 py-3 rounded-xl text-sm font-medium
                              hover:text-red-400 active:scale-[0.97] transition-all"
                 >
-                  <Trash2 size={12} /> Redibujar
+                  <Trash2 size={14} /> Redibujar
                 </button>
               </div>
             </div>
@@ -497,16 +497,16 @@ export default function RegistroNuevoPage() {
                     onChange={e => setAreaReal(e.target.value)}
                     placeholder={String(areaCalc ?? '0.0')}
                     inputMode="decimal"
-                    className="flex-1 bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xs font-bold text-white
+                    className="flex-1 bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xl font-bold text-white
                                text-center focus:ring-2 focus:ring-white/40 focus:outline-none"
                   />
-                  <span className="text-white/50 font-bold text-xs">ha</span>
+                  <span className="text-white/50 font-bold text-lg">ha</span>
                 </div>
               </div>
               <button
                 onClick={() => irAPaso(5)}
                 disabled={!areaReal}
-                className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-xs font-bold
+                className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold
                            disabled:opacity-30 active:scale-[0.98] transition-all"
               >
                 Confirmar y continuar →
@@ -519,7 +519,7 @@ export default function RegistroNuevoPage() {
             <div className="max-w-md mx-auto">
               <button
                 onClick={() => irAPaso(5)}
-                className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all"
+                className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold active:scale-[0.98] transition-all"
               >
                 Confirmar y continuar →
               </button>
@@ -531,13 +531,13 @@ export default function RegistroNuevoPage() {
             <div className="max-w-md mx-auto flex gap-2.5">
               <button
                 onClick={() => dibujarRef.current?.cancelEdit()}
-                className="flex-1 bg-white/10 ring-1 ring-white/15 text-white/70 py-3.5 rounded-2xl text-xs font-semibold active:scale-[0.97] transition-all"
+                className="flex-1 bg-white/10 ring-1 ring-white/15 text-white/70 py-3.5 rounded-2xl text-sm font-semibold active:scale-[0.97] transition-all"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => { dibujarRef.current?.saveEdit(); setCoincideArea(null); }}
-                className="flex-1 bg-green-500 text-white py-3.5 rounded-2xl text-xs font-bold
+                className="flex-1 bg-green-500 text-white py-3.5 rounded-2xl text-sm font-bold
                            flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all"
               >
                 <CheckCircle2 size={17} /> Guardar cambios
@@ -567,7 +567,7 @@ export default function RegistroNuevoPage() {
           onClick={handleBack}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex-shrink-0"
         >
-          <ChevronLeft size={13} className="text-white/70" />
+          <ChevronLeft size={22} className="text-white/70" />
         </button>
 
         <div className="flex-1 flex items-center justify-center gap-1 px-2">
@@ -603,11 +603,11 @@ export default function RegistroNuevoPage() {
 
       {/* Contenido scrollable */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className={`max-w-sm mx-auto px-5 py-4 sm:py-5 pb-6 ${animDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
+        <div className={`max-w-sm mx-auto px-5 py-4 sm:py-6 pb-6 ${animDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs flex items-start gap-2">
-              <AlertCircle size={13} className="shrink-0 mt-0.5" />
+            <div className="mb-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
+              <AlertCircle size={15} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
@@ -616,8 +616,8 @@ export default function RegistroNuevoPage() {
           {paso === 1 && (
             <div className="space-y-4">
               <div className="mb-6">
-                <h2 className="text-xs sm:text-3xl font-bold text-white tracking-tight">Tus datos</h2>
-                <p className="text-white/50 text-xs sm:text-xs mt-1">Como aparecen en tu INE o acta de nacimiento</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Tus datos</h2>
+                <p className="text-white/50 text-sm sm:text-base mt-1">Como aparecen en tu INE o acta de nacimiento</p>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5">Nombre(s)</label>
@@ -663,8 +663,8 @@ export default function RegistroNuevoPage() {
           {paso === 2 && (
             <div className="space-y-4">
               <div className="mb-6">
-                <h2 className="text-xs sm:text-3xl font-bold text-white tracking-tight">Tu parcela</h2>
-                <p className="text-white/50 text-xs sm:text-xs mt-1">Estado y municipio donde produces</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Tu parcela</h2>
+                <p className="text-white/50 text-sm sm:text-base mt-1">Estado y municipio donde produces</p>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5">Estado</label>
@@ -707,8 +707,8 @@ export default function RegistroNuevoPage() {
           {paso === 3 && (
             <div className="space-y-4">
               <div className="mb-6">
-                <h2 className="text-xs sm:text-3xl font-bold text-white tracking-tight">Tu cultivo</h2>
-                <p className="text-white/50 text-xs sm:text-xs mt-1">¿Qué tipo de maíz siembras principalmente?</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Tu cultivo</h2>
+                <p className="text-white/50 text-sm sm:text-base mt-1">¿Qué tipo de maíz siembras principalmente?</p>
               </div>
               {[
                 { valor: 'blanco',   etiqueta: 'Maíz Blanco',   desc: 'Tortillas, tamales y nixtamal' },
@@ -723,17 +723,17 @@ export default function RegistroNuevoPage() {
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                     tipoMaiz === t.valor ? 'bg-white' : 'bg-white/10'
                   }`}>
-                    <Wheat size={13} className={tipoMaiz === t.valor ? 'text-[#1A5C38]' : 'text-white/50'} />
+                    <Wheat size={22} className={tipoMaiz === t.valor ? 'text-[#1A5C38]' : 'text-white/50'} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-bold transition-colors ${tipoMaiz === t.valor ? 'text-white' : 'text-white/70'}`}>
+                    <p className={`text-base font-bold transition-colors ${tipoMaiz === t.valor ? 'text-white' : 'text-white/70'}`}>
                       {t.etiqueta}
                     </p>
                     <p className="text-xs text-white/40 mt-0.5">{t.desc}</p>
                   </div>
                   {tipoMaiz === t.valor && (
                     <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-                      <Check size={12} className="text-[#1A5C38]" />
+                      <Check size={14} className="text-[#1A5C38]" />
                     </div>
                   )}
                 </button>
@@ -745,8 +745,8 @@ export default function RegistroNuevoPage() {
           {paso === 5 && (
             <div className="space-y-5">
               <div className="mb-2">
-                <h2 className="text-xs sm:text-3xl font-bold text-white tracking-tight">Tu contacto</h2>
-                <p className="text-white/50 text-xs sm:text-xs mt-1">Para que las bodegas puedan avisarte</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Tu contacto</h2>
+                <p className="text-white/50 text-sm sm:text-base mt-1">Para que las bodegas puedan avisarte</p>
               </div>
 
               {/* Teléfono */}
@@ -758,7 +758,7 @@ export default function RegistroNuevoPage() {
                   onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   type="tel" maxLength={10} placeholder="55 1234 5678"
                   inputMode="tel"
-                  className={`${inputCls} font-mono text-xs tracking-wider`}
+                  className={`${inputCls} font-mono text-lg tracking-wider`}
                 />
                 <div className="flex justify-end mt-1">
                   <span className={`text-xs font-mono ${telefono.length === 10 ? 'text-green-400' : 'text-white/30'}`}>
@@ -782,17 +782,17 @@ export default function RegistroNuevoPage() {
 
               {/* Programas */}
               <div>
-                <p className="text-xs font-semibold text-white/70 mb-1">¿Recibes algún apoyo gubernamental?</p>
+                <p className="text-sm font-semibold text-white/70 mb-1">¿Recibes algún apoyo gubernamental?</p>
                 <p className="text-xs text-white/30 mb-3">Opcional — puedes seleccionar varios</p>
                 <div className="space-y-2">
                   {PROGRAMAS.map(p => (
                     <button key={p.clave} onClick={() => togglePrograma(p.clave)}
-                      className={`w-full text-left px-4 py-3 rounded-xl ring-1 text-xs transition-all duration-150 active:scale-[0.98]
+                      className={`w-full text-left px-4 py-3 rounded-xl ring-1 text-sm transition-all duration-150 active:scale-[0.98]
                         flex items-center gap-2.5
                         ${programas.includes(p.clave)
                           ? 'ring-2 ring-white/50 bg-white/15 text-white font-medium'
                           : 'ring-white/10 text-white/50 hover:bg-white/5'}`}>
-                      <CircleDot size={12} className={programas.includes(p.clave) ? 'text-green-400' : 'text-white/20'} />
+                      <CircleDot size={14} className={programas.includes(p.clave) ? 'text-green-400' : 'text-white/20'} />
                       {p.nombre}
                     </button>
                   ))}
@@ -815,10 +815,10 @@ export default function RegistroNuevoPage() {
                 </div>
               </div>
 
-              <h2 className="text-xs sm:text-3xl font-bold text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {pinConfirmado ? '¡PIN listo!' : pinStep === 'crear' ? 'Crea tu PIN' : 'Confirma tu PIN'}
               </h2>
-              <p className="text-white/50 text-xs sm:text-xs mt-1.5 mb-5 px-2 leading-relaxed">
+              <p className="text-white/50 text-sm sm:text-base mt-1.5 mb-5 px-2 leading-relaxed">
                 {pinConfirmado
                   ? 'Usarás este PIN cada vez que entres a SIMAC.'
                   : pinStep === 'crear'
@@ -845,12 +845,12 @@ export default function RegistroNuevoPage() {
 
               {pinError && (
                 <div className="mb-4 mx-auto max-w-xs p-2.5 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs flex items-center justify-center gap-2">
-                  <AlertCircle size={12} /> Los PIN no coinciden. Intenta de nuevo.
+                  <AlertCircle size={14} /> Los PIN no coinciden. Intenta de nuevo.
                 </div>
               )}
               {pinConfirmado && (
                 <div className="mb-4 mx-auto max-w-xs p-2.5 bg-green-500/15 ring-1 ring-green-400/30 rounded-xl text-green-300 text-xs flex items-center justify-center gap-2">
-                  <Check size={12} /> PIN confirmado correctamente
+                  <Check size={14} /> PIN confirmado correctamente
                 </div>
               )}
 
@@ -881,12 +881,12 @@ export default function RegistroNuevoPage() {
               onClick={enviarRegistro}
               disabled={!pinConfirmado || loading}
               className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
-                         py-4 rounded-2xl text-xs font-bold
+                         py-4 rounded-2xl text-base font-bold
                          disabled:opacity-25 active:scale-[0.98] transition-all duration-200
                          flex items-center justify-center gap-2"
             >
               {loading
-                ? <><Loader2 size={13} className="animate-spin text-[#1A5C38]" /> Creando cuenta...</>
+                ? <><Loader2 size={18} className="animate-spin text-[#1A5C38]" /> Creando cuenta...</>
                 : 'Crear mi cuenta →'}
             </button>
           ) : (
@@ -894,7 +894,7 @@ export default function RegistroNuevoPage() {
               onClick={() => irAPaso(paso + 1)}
               disabled={!canAdvance()}
               className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
-                         py-4 rounded-2xl text-xs font-bold
+                         py-4 rounded-2xl text-base font-bold
                          disabled:opacity-25 active:scale-[0.98] transition-all duration-200"
             >
               Continuar
@@ -905,19 +905,19 @@ export default function RegistroNuevoPage() {
 
       {/* Modal de registro exitoso */}
       {registroExitoso && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-5">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-6">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-fade-in">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-[#1A5C38]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xs font-bold text-gray-900 mb-2">¡Registro exitoso!</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Registro exitoso!</h2>
             <p className="text-gray-600 mb-2">Tu cuenta ha sido creada correctamente en SIMAC.</p>
-            <p className="text-gray-500 text-xs mb-8">Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.</p>
+            <p className="text-gray-500 text-sm mb-8">Ya puedes iniciar sesión con tu CURP y PIN de 4 dígitos.</p>
             <button
               onClick={() => navigate('/login-productor')}
-              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-xs hover:bg-green-800 transition-colors"
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg hover:bg-green-800 transition-colors"
             >
               Iniciar sesión
             </button>

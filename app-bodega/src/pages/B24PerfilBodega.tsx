@@ -61,14 +61,14 @@ function ConfirmModal({
       {/* Sheet */}
       <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-slide-up">
         {/* Icon */}
-        <div className="flex flex-col items-center px-5 pt-7 pb-2">
+        <div className="flex flex-col items-center px-6 pt-7 pb-2">
           <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mb-4 shadow-inner">
             <AlertTriangle size={26} className="text-amber-600" />
           </div>
-          <h2 className="text-[9.5px] font-black text-gray-900 text-center leading-snug">{title}</h2>
-          <p className="text-[9.5px] text-gray-500 text-center mt-2 leading-relaxed">{body}</p>
+          <h2 className="text-[18px] font-black text-gray-900 text-center leading-snug">{title}</h2>
+          <p className="text-[13px] text-gray-500 text-center mt-2 leading-relaxed">{body}</p>
           {warning && (
-            <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-3 text-center leading-snug">
+            <p className="text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-3 text-center leading-snug">
               {warning}
             </p>
           )}
@@ -77,14 +77,14 @@ function ConfirmModal({
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#1A5C38] text-white py-3.5 rounded-2xl text-[9.5px] font-bold active:scale-[0.98] transition-all disabled:opacity-60 shadow-[0_4px_14px_rgba(26,92,56,0.3)]"
+            className="w-full flex items-center justify-center gap-2 bg-[#1A5C38] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all disabled:opacity-60 shadow-[0_4px_14px_rgba(26,92,56,0.3)]"
           >
             {loading ? <><Spinner small /> Guardando...</> : 'Sí, actualizar'}
           </button>
           <button
             onClick={onCancel}
             disabled={loading}
-            className="w-full py-3.5 rounded-2xl text-[9.5px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors"
+            className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors"
           >
             Cancelar
           </button>
@@ -130,16 +130,16 @@ function ModalCURP({ curpActual, onSave, onClose }: {
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center px-4 pb-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-slide-up">
-        <div className="px-5 pt-6 pb-4">
+        <div className="px-6 pt-6 pb-4">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-[#1A5C38]/10 flex items-center justify-center">
-                <CreditCard size={13} className="text-[#1A5C38]" />
+                <CreditCard size={18} className="text-[#1A5C38]" />
               </div>
-              <h2 className="text-[10px] font-black text-gray-900">Actualizar CURP</h2>
+              <h2 className="text-[17px] font-black text-gray-900">Actualizar CURP</h2>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200">
-              <X size={12} />
+              <X size={16} />
             </button>
           </div>
 
@@ -149,7 +149,7 @@ function ModalCURP({ curpActual, onSave, onClose }: {
             onChange={e => { setValor(normalizar(e.target.value)); setError(''); }}
             maxLength={18}
             placeholder="XEXX000000HXXXXXX0"
-            className={`w-full font-mono text-[10px] tracking-widest border-2 rounded-2xl px-4 py-3.5 outline-none transition-colors
+            className={`w-full font-mono text-[16px] tracking-widest border-2 rounded-2xl px-4 py-3.5 outline-none transition-colors
               ${error ? 'border-red-400 bg-red-50'
               : valido ? 'border-[#1A5C38] bg-green-50'
               : 'border-gray-200 focus:border-[#1A5C38]'}`}
@@ -165,7 +165,7 @@ function ModalCURP({ curpActual, onSave, onClose }: {
 
           {error && <p className="text-xs text-red-600 mt-2 bg-red-50 rounded-xl px-3 py-2">{error}</p>}
 
-          <p className="text-[9.5px] text-gray-400 mt-3 leading-relaxed">
+          <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
             Solo letras A-Z (sin tildes) y números. Se convierte automáticamente a mayúsculas.
           </p>
         </div>
@@ -173,11 +173,11 @@ function ModalCURP({ curpActual, onSave, onClose }: {
         <div className="px-5 pb-6 flex flex-col gap-2">
           <button
             onClick={() => { setError(''); if (!valido) { setError('CURP inválida. Verifica el formato.'); return; } setConfirm(true); }}
-            className="w-full bg-[#1A5C38] text-white py-3.5 rounded-2xl text-[9.5px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)] disabled:opacity-50"
+            className="w-full bg-[#1A5C38] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)] disabled:opacity-50"
           >
             Continuar
           </button>
-          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[9.5px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors">
+          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors">
             Cancelar
           </button>
         </div>
@@ -248,16 +248,16 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
       <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
 
         {/* Header */}
-        <div className="px-5 pt-6 pb-4 flex-shrink-0">
+        <div className="px-6 pt-6 pb-4 flex-shrink-0">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-[#1A5C38]/10 flex items-center justify-center">
-                <MapPin size={13} className="text-[#1A5C38]" />
+                <MapPin size={18} className="text-[#1A5C38]" />
               </div>
-              <h2 className="text-[10px] font-black text-gray-900">Actualizar ubicación</h2>
+              <h2 className="text-[17px] font-black text-gray-900">Actualizar ubicación</h2>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200">
-              <X size={12} />
+              <X size={16} />
             </button>
           </div>
 
@@ -269,7 +269,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
             <select
               value={stateId ?? ''}
               onChange={e => setStateId(e.target.value || null)}
-              className="w-full border-2 border-gray-200 focus:border-[#1A5C38] rounded-2xl px-4 py-3 text-xs outline-none transition-colors bg-white appearance-none"
+              className="w-full border-2 border-gray-200 focus:border-[#1A5C38] rounded-2xl px-4 py-3 text-sm outline-none transition-colors bg-white appearance-none"
             >
               <option value="">— Selecciona un estado —</option>
               {estados.map(e => (
@@ -287,7 +287,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
               value={muniId ?? ''}
               onChange={e => setMuniId(e.target.value || null)}
               disabled={!stateId || munis.length === 0}
-              className="w-full border-2 border-gray-200 focus:border-[#1A5C38] rounded-2xl px-4 py-3 text-xs outline-none transition-colors bg-white appearance-none disabled:opacity-50"
+              className="w-full border-2 border-gray-200 focus:border-[#1A5C38] rounded-2xl px-4 py-3 text-sm outline-none transition-colors bg-white appearance-none disabled:opacity-50"
             >
               <option value="">
                 {!stateId ? '— Primero selecciona un estado —' : munis.length === 0 ? 'Sin municipios disponibles' : '— Selecciona un municipio —'}
@@ -304,11 +304,11 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           <button
             onClick={() => { if (stateId && muniId) setConfirm(true); }}
             disabled={!stateId || !muniId}
-            className="w-full bg-[#1A5C38] text-white py-3.5 rounded-2xl text-[9.5px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)] disabled:opacity-40"
+            className="w-full bg-[#1A5C38] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)] disabled:opacity-40"
           >
             Continuar
           </button>
-          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[9.5px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors">
+          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors">
             Cancelar
           </button>
         </div>
@@ -457,7 +457,7 @@ export default function B24PerfilBodega() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-gray-900/90 text-white text-xs font-medium px-4 py-2.5 rounded-2xl shadow-xl backdrop-blur-md">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-gray-900/90 text-white text-sm font-medium px-4 py-2.5 rounded-2xl shadow-xl backdrop-blur-md">
           {toast}
         </div>
       )}
@@ -481,39 +481,39 @@ export default function B24PerfilBodega() {
 
       <PageBanner title="Mi Perfil" subtitle={rolDisplay} back="/dashboard" />
 
-      <div className="w-full mx-auto px-4 sm:px-5 lg:px-10 xl:px-16 pt-6">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-6">
         <div className="max-w-4xl mx-auto space-y-6">
         {loading ? (
           <div className="flex justify-center pt-16"><Spinner /></div>
         ) : (
           <>
             {/* Avatar card */}
-            <div className="bg-white rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] flex items-center gap-4">
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] flex items-center gap-5">
               <div className="w-20 h-20 rounded-[1.25rem] bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center flex-shrink-0 shadow-[0_4px_16px_rgba(26,92,56,0.3)]">
                 <span className="text-white text-[28px] font-black">{initials}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black text-gray-900 leading-tight truncate">{perfil?.nombre_completo || user?.nombre_completo || '—'}</p>
-                <p className="text-[10px] text-gray-500 mt-1 font-medium truncate">{perfil?.email || user?.email || '—'}</p>
-                <span className="inline-block mt-2 bg-[#1A5C38]/10 text-[#1A5C38] text-[10px] font-bold px-3 py-1 rounded-full capitalize">
+                <p className="text-[20px] font-black text-gray-900 leading-tight truncate">{perfil?.nombre_completo || user?.nombre_completo || '—'}</p>
+                <p className="text-[14px] text-gray-500 mt-1 font-medium truncate">{perfil?.email || user?.email || '—'}</p>
+                <span className="inline-block mt-2 bg-[#1A5C38]/10 text-[#1A5C38] text-[12px] font-bold px-3 py-1 rounded-full capitalize">
                   {rolDisplay}
                 </span>
               </div>
             </div>
 
             {/* ── Datos de cuenta ─────────────────────────────────── */}
-            <div className="bg-white rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
-              <p className="text-[9.5px] text-gray-400 uppercase tracking-widest font-bold mb-5">Datos de cuenta</p>
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
+              <p className="text-[13px] text-gray-400 uppercase tracking-widest font-bold mb-5">Datos de cuenta</p>
 
               {/* Nombre */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2 text-gray-500">
-                    <User size={12} />
+                    <User size={14} />
                     <span className="text-xs font-medium">Nombre completo</span>
                   </div>
                   <button onClick={() => { setEditNombre(!editNombre); setNombre(perfil?.nombre_completo || ''); }} className="text-[#1A5C38] active:opacity-60">
-                    {editNombre ? <X size={12} /> : <Edit2 size={12} />}
+                    {editNombre ? <X size={14} /> : <Edit2 size={14} />}
                   </button>
                 </div>
                 {editNombre ? (
@@ -524,19 +524,19 @@ export default function B24PerfilBodega() {
                       placeholder="TU NOMBRE COMPLETO"
                       maxLength={80}
                       style={{ textTransform: 'uppercase' }}
-                      className="w-full border-2 border-[#1A5C38]/30 focus:border-[#1A5C38] rounded-xl px-3 py-2 text-xs outline-none transition-colors tracking-wide"
+                      className="w-full border-2 border-[#1A5C38]/30 focus:border-[#1A5C38] rounded-xl px-3 py-2 text-sm outline-none transition-colors tracking-wide"
                     />
                     <p className="text-[10px] text-gray-400">Solo letras mayúsculas, sin tildes ni caracteres especiales</p>
                     <button
                       onClick={guardarNombre}
                       disabled={savingNombre || nombre.trim().length < 3}
-                      className="flex items-center gap-1.5 bg-[#1A5C38] text-white px-4 py-2 rounded-xl text-xs font-semibold disabled:opacity-50 active:scale-95 transition-all"
+                      className="flex items-center gap-1.5 bg-[#1A5C38] text-white px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 active:scale-95 transition-all"
                     >
-                      {savingNombre ? <Spinner small /> : <Check size={12} />} Guardar nombre
+                      {savingNombre ? <Spinner small /> : <Check size={14} />} Guardar nombre
                     </button>
                   </div>
                 ) : (
-                  <p className="text-[9.5px] font-medium text-gray-800">{perfil?.nombre_completo || '—'}</p>
+                  <p className="text-[15px] font-medium text-gray-800">{perfil?.nombre_completo || '—'}</p>
                 )}
               </div>
 
@@ -545,11 +545,11 @@ export default function B24PerfilBodega() {
               {/* Email (no editable) */}
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-500 mb-1">
-                  <Mail size={12} />
+                  <Mail size={14} />
                   <span className="text-xs font-medium">Correo electrónico</span>
                 </div>
-                <p className="text-[9.5px] font-medium text-gray-800">{perfil?.email || '—'}</p>
-                <p className="text-[9.5px] text-gray-400 mt-0.5">Para cambiar el correo, contacta al administrador</p>
+                <p className="text-[15px] font-medium text-gray-800">{perfil?.email || '—'}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Para cambiar el correo, contacta al administrador</p>
               </div>
 
               <div className="h-px bg-gray-100 my-3" />
@@ -558,11 +558,11 @@ export default function B24PerfilBodega() {
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2 text-gray-500">
-                    <Phone size={12} />
+                    <Phone size={14} />
                     <span className="text-xs font-medium">Teléfono</span>
                   </div>
                   <button onClick={() => { setEditTel(!editTel); setTelefono(perfil?.telefono || ''); }} className="text-[#1A5C38] active:opacity-60">
-                    {editTel ? <X size={12} /> : <Edit2 size={12} />}
+                    {editTel ? <X size={14} /> : <Edit2 size={14} />}
                   </button>
                 </div>
                 {editTel ? (
@@ -571,15 +571,15 @@ export default function B24PerfilBodega() {
                       type="tel" inputMode="numeric" value={telefono} maxLength={10}
                       onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       placeholder="10 dígitos"
-                      className="flex-1 border-2 border-[#1A5C38]/30 focus:border-[#1A5C38] rounded-xl px-3 py-2 text-xs outline-none transition-colors"
+                      className="flex-1 border-2 border-[#1A5C38]/30 focus:border-[#1A5C38] rounded-xl px-3 py-2 text-sm outline-none transition-colors"
                     />
                     <button onClick={guardarTelefono} disabled={savingTel || telefono.length < 10}
-                      className="flex items-center gap-1 bg-[#1A5C38] text-white px-3 py-2 rounded-xl text-xs font-semibold disabled:opacity-50 active:scale-95 transition-all">
-                      {savingTel ? <Spinner small /> : <Check size={12} />}
+                      className="flex items-center gap-1 bg-[#1A5C38] text-white px-3 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 active:scale-95 transition-all">
+                      {savingTel ? <Spinner small /> : <Check size={14} />}
                     </button>
                   </div>
                 ) : (
-                  <p className="text-[9.5px] font-medium text-gray-800">{perfil?.telefono || 'Sin teléfono'}</p>
+                  <p className="text-[15px] font-medium text-gray-800">{perfil?.telefono || 'Sin teléfono'}</p>
                 )}
               </div>
 
@@ -589,15 +589,15 @@ export default function B24PerfilBodega() {
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2 text-gray-500">
-                    <CreditCard size={12} />
+                    <CreditCard size={14} />
                     <span className="text-xs font-medium">CURP</span>
                   </div>
                   <button onClick={() => setShowModalCURP(true)} className="text-[#1A5C38] active:opacity-60">
-                    <Edit2 size={12} />
+                    <Edit2 size={14} />
                   </button>
                 </div>
-                <p className="text-[9.5px] font-mono font-medium text-gray-800 tracking-wider">
-                  {perfil?.curp || <span className="text-gray-400 font-sans text-xs not-italic">Sin CURP registrada</span>}
+                <p className="text-[15px] font-mono font-medium text-gray-800 tracking-wider">
+                  {perfil?.curp || <span className="text-gray-400 font-sans text-sm not-italic">Sin CURP registrada</span>}
                 </p>
               </div>
 
@@ -607,45 +607,45 @@ export default function B24PerfilBodega() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2 text-gray-500">
-                    <MapPin size={12} />
+                    <MapPin size={14} />
                     <span className="text-xs font-medium">Estado / Municipio</span>
                   </div>
                   <button onClick={() => setShowModalUbicacion(true)} className="text-[#1A5C38] active:opacity-60">
-                    <Edit2 size={12} />
+                    <Edit2 size={14} />
                   </button>
                 </div>
-                <p className="text-[9.5px] font-medium text-gray-800">
+                <p className="text-[15px] font-medium text-gray-800">
                   {stateNombre && muniNombre
                     ? `${muniNombre}, ${stateNombre}`
-                    : stateNombre || <span className="text-gray-400 text-xs">Sin ubicación registrada</span>}
+                    : stateNombre || <span className="text-gray-400 text-sm">Sin ubicación registrada</span>}
                 </p>
               </div>
             </div>
 
             {/* ── Información del sistema ──────────────────────────── */}
-            <div className="bg-white rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
-              <p className="text-[9.5px] text-gray-400 uppercase tracking-widest font-bold mb-5">Información del sistema</p>
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
+              <p className="text-[13px] text-gray-400 uppercase tracking-widest font-bold mb-5">Información del sistema</p>
               <div className="space-y-4">
                 {fechaRegistro && (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-gray-500"><Calendar size={13} /><span className="text-[9.5px] font-bold">Miembro desde</span></div>
-                    <span className="text-[9.5px] text-gray-700 font-bold">{fechaRegistro}</span>
+                    <div className="flex items-center gap-3 text-gray-500"><Calendar size={18} /><span className="text-[15px] font-bold">Miembro desde</span></div>
+                    <span className="text-[15px] text-gray-700 font-bold">{fechaRegistro}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-gray-500"><ShieldCheck size={13} /><span className="text-[9.5px] font-bold">Rol</span></div>
-                  <span className="text-[9.5px] text-gray-700 font-bold capitalize">{rolDisplay}</span>
+                  <div className="flex items-center gap-3 text-gray-500"><ShieldCheck size={18} /><span className="text-[15px] font-bold">Rol</span></div>
+                  <span className="text-[15px] text-gray-700 font-bold capitalize">{rolDisplay}</span>
                 </div>
               </div>
             </div>
 
             {/* ── Mis bodegas ──────────────────────────────────────── */}
             {bodegas.length > 0 && (
-              <div className="bg-white rounded-[1.5rem] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
+              <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
                 <div className="flex items-center justify-between mb-5">
-                  <p className="text-[9.5px] text-gray-400 uppercase tracking-widest font-bold">Mis bodegas</p>
-                  <button onClick={() => navigate('/mis-bodegas')} className="text-[#1A5C38] text-[9.5px] font-bold flex items-center gap-1 active:opacity-60 transition-opacity">
-                    Ver todas <ChevronRight size={13} />
+                  <p className="text-[13px] text-gray-400 uppercase tracking-widest font-bold">Mis bodegas</p>
+                  <button onClick={() => navigate('/mis-bodegas')} className="text-[#1A5C38] text-[13px] font-bold flex items-center gap-1 active:opacity-60 transition-opacity">
+                    Ver todas <ChevronRight size={15} />
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -653,10 +653,10 @@ export default function B24PerfilBodega() {
                     <button key={b.bodega_id} onClick={() => navigate(`/bodegas/${b.bodega_id}`)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl bg-[#F2F2F7] hover:bg-gray-100 active:scale-[0.98] transition-all text-left">
                       <div className="w-9 h-9 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center flex-shrink-0">
-                        <Warehouse size={12} className="text-[#1A5C38]" />
+                        <Warehouse size={16} className="text-[#1A5C38]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-800 truncate">{b.nombre}</p>
+                        <p className="text-sm font-semibold text-gray-800 truncate">{b.nombre}</p>
                         <p className="text-xs text-gray-400 truncate">{b.municipio}, {b.estado}</p>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${SEMAFORO_COLOR[b.semaforo_compra] || 'bg-gray-100 text-gray-500'}`}>
@@ -671,22 +671,22 @@ export default function B24PerfilBodega() {
             {/* ── Acciones ─────────────────────────────────────────── */}
             <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] overflow-hidden group/card transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5">
               <button onClick={() => navigate('/configuracion')}
-                className="w-full flex items-center gap-4 px-5 py-5 text-left hover:bg-gray-50/50 active:bg-gray-100 transition-colors">
+                className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-gray-50/50 active:bg-gray-100 transition-colors">
                 <div className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
-                  <Building2 size={13} className="text-[#1A5C38]" />
+                  <Building2 size={22} className="text-[#1A5C38]" />
                 </div>
                 <div className="flex-1 transition-transform duration-500 group-hover/card:translate-x-1">
-                  <p className="text-[10px] font-bold text-gray-900">Configuración</p>
-                  <p className="text-[9.5px] text-gray-500 font-medium mt-0.5">Cambiar contraseña y preferencias</p>
+                  <p className="text-[16px] font-bold text-gray-900">Configuración</p>
+                  <p className="text-[13px] text-gray-500 font-medium mt-0.5">Cambiar contraseña y preferencias</p>
                 </div>
-                <ChevronRight size={13} className="text-gray-300 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
+                <ChevronRight size={18} className="text-gray-300 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
               </button>
             </div>
 
             {/* Cerrar sesión */}
             <button onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 bg-red-50 border border-red-100 text-red-600 rounded-[1.25rem] py-4 text-[10px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(220,38,38,0.15)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.25)]">
-              <LogOut size={12} /> Cerrar sesión
+              className="w-full flex items-center justify-center gap-2 bg-red-50 border border-red-100 text-red-600 rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(220,38,38,0.15)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.25)]">
+              <LogOut size={20} /> Cerrar sesión
             </button>
 
             <div className="pb-4" />

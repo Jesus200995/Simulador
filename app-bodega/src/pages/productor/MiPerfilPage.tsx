@@ -135,14 +135,14 @@ export default function MiPerfilPage() {
   return (
     <div className="bg-[#F2F2F7] min-h-screen">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[28px] shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-4 pb-6">
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-3">Perfil</p>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-3">Perfil</p>
           <div className="flex items-center gap-3.5">
             <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm ring-2 ring-white/20 flex items-center justify-center flex-shrink-0 shadow-lg">
-              <span className="text-white text-[9.5px] font-black">{initials}</span>
+              <span className="text-white text-[18px] font-black">{initials}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-[9.5px] sm:text-[10px] font-black text-white leading-tight tracking-tight truncate">{nombreCompleto || 'Mi perfil'}</h1>
+              <h1 className="text-[18px] sm:text-[20px] font-black text-white leading-tight tracking-tight truncate">{nombreCompleto || 'Mi perfil'}</h1>
               <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                 <span className="text-[10px] font-bold text-white bg-white/15 rounded-full px-2 py-0.5">Tipo {perfil.tipo_registro}</span>
                 <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
@@ -159,9 +159,9 @@ export default function MiPerfilPage() {
 
       <div className="px-4 pt-4 space-y-4">
         {/* Datos personales — no editables */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Datos personales</p>
-          <div className="space-y-2 text-xs">
+          <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Nombre</span>
               <span className="font-medium text-gray-800">{perfil.nombres} {perfil.apellido_paterno} {perfil.apellido_materno}</span>
@@ -193,27 +193,27 @@ export default function MiPerfilPage() {
         </div>
 
         {/* Contacto — editable */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Contacto</p>
             <button onClick={() => setEditTel(!editTel)} className="text-[#1A5C38]">
-              <Edit2 size={12} />
+              <Edit2 size={14} />
             </button>
           </div>
           {editTel ? (
             <div className="space-y-2 mb-3">
               <input value={telefono}
                 onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-xs focus:border-[#1A5C38] focus:outline-none" />
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:border-[#1A5C38] focus:outline-none" />
               <button onClick={guardarTelefono}
-                className="w-full bg-[#1A5C38] text-white py-2 rounded-xl text-xs font-semibold">
+                className="w-full bg-[#1A5C38] text-white py-2 rounded-xl text-sm font-semibold">
                 Guardar teléfono
               </button>
             </div>
           ) : (
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs text-gray-400">Teléfono</span>
-              <span className="text-xs text-gray-800">{perfil.telefono || 'Sin teléfono'}</span>
+              <span className="text-sm text-gray-800">{perfil.telefono || 'Sin teléfono'}</span>
             </div>
           )}
           <div className="flex justify-between items-center">
@@ -223,12 +223,12 @@ export default function MiPerfilPage() {
                 <input type="email" value={correo}
                   onChange={e => setCorreo(e.target.value)}
                   autoCapitalize="off" autoCorrect="off" inputMode="email"
-                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:border-[#1A5C38] focus:outline-none" />
+                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-[#1A5C38] focus:outline-none" />
                 <button onClick={guardarCorreo} className="text-[#1A5C38] text-xs font-bold">OK</button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-800">{perfil.correo || <span className="text-gray-400 italic text-xs">sin correo</span>}</span>
+                <span className="text-sm text-gray-800">{perfil.correo || <span className="text-gray-400 italic text-xs">sin correo</span>}</span>
                 <button onClick={() => setEditCorreo(true)} className="text-[#1A5C38]"><Edit2 size={12} /></button>
               </div>
             )}
@@ -236,7 +236,7 @@ export default function MiPerfilPage() {
         </div>
 
         {/* Mi parcela */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Mi parcela</p>
 
           {/* Mapa mini de la UP */}
@@ -255,7 +255,7 @@ export default function MiPerfilPage() {
             </div>
           )}
 
-          <div className="space-y-2 text-xs">
+          <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Estado</span>
               <span className="font-medium text-gray-800">{perfil.state_name || '—'}</span>
@@ -272,28 +272,28 @@ export default function MiPerfilPage() {
             </div>
           </div>
           <button onClick={() => navigate('/productor/ubicacion')}
-            className="mt-4 w-full flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-3 rounded-xl text-xs font-semibold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)]">
-            <MapPin size={12} /> {poligono ? 'Editar mi parcela en el mapa' : 'Dibujar mi parcela en el mapa'}
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)]">
+            <MapPin size={16} /> {poligono ? 'Editar mi parcela en el mapa' : 'Dibujar mi parcela en el mapa'}
           </button>
           <button onClick={() => navigate('/productor/ups/nueva')}
-            className="mt-2 w-full flex items-center justify-center gap-2 border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-xl text-xs font-medium hover:bg-green-50 active:scale-[0.98] transition-all">
-            <span className="text-xs leading-none">+</span> Agregar otra parcela
+            className="mt-2 w-full flex items-center justify-center gap-2 border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-xl text-sm font-medium hover:bg-green-50 active:scale-[0.98] transition-all">
+            <span className="text-lg leading-none">+</span> Agregar otra parcela
           </button>
         </div>
 
         {/* Ciclo productivo */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Ciclo productivo</p>
             <button onClick={() => navigate('/productor/ciclo')} className="text-[#1A5C38]">
-              {ciclos && ciclos.length > 0 ? <Edit2 size={12} /> : <ChevronRight size={12} />}
+              {ciclos && ciclos.length > 0 ? <Edit2 size={14} /> : <ChevronRight size={14} />}
             </button>
           </div>
           {ciclos === null && <p className="text-xs text-gray-400">Cargando...</p>}
           {ciclos !== null && ciclos.length === 0 && (
             <button onClick={() => navigate('/productor/ciclo')}
-              className="w-full flex items-center gap-2 text-[#1A5C38] text-xs font-semibold">
-              <CalendarCheck size={12} /> Declarar ciclo {new Date().getFullYear()}
+              className="w-full flex items-center gap-2 text-[#1A5C38] text-sm font-semibold">
+              <CalendarCheck size={14} /> Declarar ciclo {new Date().getFullYear()}
             </button>
           )}
           {ciclos !== null && ciclos.length > 0 && (
@@ -306,7 +306,7 @@ export default function MiPerfilPage() {
                   <div key={c.cycle_id} className="bg-gray-50 rounded-2xl p-4">
                     <div className="flex justify-between items-center mb-3">
                       <div>
-                        <p className="text-xs font-bold text-gray-800">{tipoCiclo} {c.cycle_year}</p>
+                        <p className="text-sm font-bold text-gray-800">{tipoCiclo} {c.cycle_year}</p>
                         {crop && <p className="text-xs text-gray-500 mt-0.5">{crop.variety_other || crop.variety_id || 'Maíz'}</p>}
                       </div>
                       <button onClick={() => navigate('/productor/ciclo', { state: { cicloId: c.cycle_id } })}
@@ -319,19 +319,19 @@ export default function MiPerfilPage() {
                         {crop.area_sown_ha && (
                           <div className="bg-white rounded-xl p-2.5 text-center">
                             <p className="text-xs text-gray-400">Sembrado</p>
-                            <p className="text-xs font-bold text-gray-800 mt-0.5">{crop.area_sown_ha} ha</p>
+                            <p className="text-sm font-bold text-gray-800 mt-0.5">{crop.area_sown_ha} ha</p>
                           </div>
                         )}
                         {crop.yield_expected && (
                           <div className="bg-white rounded-xl p-2.5 text-center">
                             <p className="text-xs text-gray-400">Esperado</p>
-                            <p className="text-xs font-bold text-gray-800 mt-0.5">{crop.yield_expected} t/ha</p>
+                            <p className="text-sm font-bold text-gray-800 mt-0.5">{crop.yield_expected} t/ha</p>
                           </div>
                         )}
                         {crop.area_sown_ha && crop.yield_expected && (
                           <div className="bg-green-50 rounded-xl p-2.5 text-center">
                             <p className="text-xs text-gray-400">Total est.</p>
-                            <p className="text-xs font-bold text-[#1A5C38] mt-0.5">
+                            <p className="text-sm font-bold text-[#1A5C38] mt-0.5">
                               {(Number(crop.area_sown_ha) * Number(crop.yield_expected)).toFixed(1)} ton
                             </p>
                           </div>
@@ -354,36 +354,36 @@ export default function MiPerfilPage() {
         </div>
 
         {/* Programas */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Programas de beneficiario</p>
             <button onClick={() => setEditProg(!editProg)} className="text-[#1A5C38]">
-              <Edit2 size={12} />
+              <Edit2 size={14} />
             </button>
           </div>
           {editProg ? (
             <div className="space-y-2">
               {PROGRAMAS_GOBIERNO.map(p => (
                 <button key={p.clave} onClick={() => togglePrograma(p.clave)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl ring-1 text-xs transition-all duration-200 flex items-center gap-2
+                  className={`w-full text-left px-3 py-2.5 rounded-xl ring-1 text-sm transition-all duration-200 flex items-center gap-2
                     ${programas.includes(p.clave) ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-emerald-800 font-medium' : 'ring-zinc-200 text-zinc-700 hover:bg-zinc-50'}`}>
-                  <CircleDot size={12} className={programas.includes(p.clave) ? 'text-[#1A5C38]' : 'text-zinc-300'} />
+                  <CircleDot size={14} className={programas.includes(p.clave) ? 'text-[#1A5C38]' : 'text-zinc-300'} />
                   {p.nombre}
                 </button>
               ))}
               <button onClick={guardarProgramas}
-                className="w-full bg-[#1A5C38] text-white py-2 rounded-xl text-xs font-semibold mt-2">
+                className="w-full bg-[#1A5C38] text-white py-2 rounded-xl text-sm font-semibold mt-2">
                 Guardar
               </button>
             </div>
           ) : (
             <div className="space-y-1">
               {(perfil.programas_beneficiario || []).length === 0 && (
-                <p className="text-xs text-gray-400">Ninguno seleccionado</p>
+                <p className="text-sm text-gray-400">Ninguno seleccionado</p>
               )}
               {(perfil.programas_beneficiario || []).map(clave => {
                 const prog = PROGRAMAS_GOBIERNO.find(p => p.clave === clave);
-                return <p key={clave} className="text-xs text-zinc-800 flex items-center gap-2"><CircleDot size={12} className="text-[#1A5C38]" /> {prog?.nombre || clave}</p>;
+                return <p key={clave} className="text-sm text-zinc-800 flex items-center gap-2"><CircleDot size={12} className="text-[#1A5C38]" /> {prog?.nombre || clave}</p>;
               })}
             </div>
           )}
@@ -392,14 +392,14 @@ export default function MiPerfilPage() {
         {/* Mis solicitudes */}
         <button onClick={() => navigate('/productor/solicitud/0')}
           className="w-full bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left">
-          <p className="font-semibold text-gray-800 text-xs">Mis solicitudes de apoyo</p>
+          <p className="font-semibold text-gray-800 text-sm">Mis solicitudes de apoyo</p>
           <p className="text-xs text-gray-500 mt-1">Ver el estado de tus solicitudes a ventanillas</p>
         </button>
 
         {/* Cerrar sesión */}
         <button onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-4 text-red-500 font-semibold text-xs">
-          <LogOut size={12} /> Cerrar sesión
+          className="w-full flex items-center justify-center gap-2 py-4 text-red-500 font-semibold text-sm">
+          <LogOut size={16} /> Cerrar sesión
         </button>
       </div>
     </div>

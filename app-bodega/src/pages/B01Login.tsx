@@ -30,7 +30,7 @@ export default function B01Login() {
   }
 
   const inputCls =
-    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xs text-white ' +
+    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
     'placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
 
   return (
@@ -42,7 +42,7 @@ export default function B01Login() {
       <div className="fixed inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
-        <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-5 opacity-[0.05] pointer-events-none">
+        <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-6 opacity-[0.05] pointer-events-none">
           {[0,1,2,3,4,5,6,7,8,9].map(i => (
             <Wheat key={i} size={i%3===0?48:i%2===0?36:26} className="text-white mb-1" style={{ transform: `rotate(${(i-4)*3}deg)` }} />
           ))}
@@ -55,7 +55,7 @@ export default function B01Login() {
           onClick={() => navigate('/bienvenida')}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex items-center gap-1 text-white/70"
         >
-          <ChevronLeft size={13} /> <span className="text-xs font-medium">Volver</span>
+          <ChevronLeft size={22} /> <span className="text-sm font-medium">Volver</span>
         </button>
       </div>
 
@@ -69,8 +69,8 @@ export default function B01Login() {
               <Building2 size={28} className="text-white" />
             </div>
           </div>
-          <h1 className="text-xs sm:text-3xl font-bold text-white text-center tracking-tight">Iniciar sesión</h1>
-          <p className="text-white/50 text-xs sm:text-xs text-center mt-1.5 mb-7">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white text-center tracking-tight">Iniciar sesión</h1>
+          <p className="text-white/50 text-sm sm:text-base text-center mt-1.5 mb-7">
             Bodega o Industria — correo y contraseña
           </p>
 
@@ -97,22 +97,22 @@ export default function B01Login() {
                 />
                 <button type="button" onClick={() => setShowPwd(p => !p)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors">
-                  {showPwd ? <EyeOff size={13} /> : <Eye size={13} />}
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs flex items-start gap-2">
-                <AlertCircle size={13} className="shrink-0 mt-0.5" />
+              <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
+                <AlertCircle size={15} className="shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-xs font-bold
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
                          disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-1">
-              {loading ? <><Loader2 size={13} className="animate-spin" /> Ingresando…</> : 'Entrar'}
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Ingresando…</> : 'Entrar'}
             </button>
           </form>
 
@@ -120,16 +120,16 @@ export default function B01Login() {
           <div className="mt-6 space-y-3">
             <button onClick={() => navigate('/registro')}
               className="w-full flex items-center justify-center gap-2 bg-white/10 ring-1 ring-white/15 hover:bg-white/15
-                         text-white py-3.5 rounded-xl text-xs font-semibold active:scale-[0.98] transition-all">
-              <UserPlus size={12} /> Crear cuenta nueva
+                         text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
+              <UserPlus size={16} /> Crear cuenta nueva
             </button>
 
             <div className="border-t border-white/10 pt-4 text-center">
               <button
                 onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-300 hover:text-green-200 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors"
               >
-                <Wheat size={13} /> ¿Eres productor? Ver opciones
+                <Wheat size={15} /> ¿Eres productor? Ver opciones
               </button>
             </div>
           </div>

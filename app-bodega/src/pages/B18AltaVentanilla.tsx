@@ -31,18 +31,18 @@ export default function B18AltaVentanilla() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[10px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all';
-  const labelClass = 'block text-[10px] font-bold text-gray-700 mb-2';
+  const inputClass = 'w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all';
+  const labelClass = 'block text-[14px] font-bold text-gray-700 mb-2';
 
   return (
     <div className="w-full pb-10">
       <PageHeader title="Nueva Ventanilla" back="/ventanillas" />
 
-      <div className="w-full max-w-3xl mx-auto px-4 sm:px-5 py-5">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Bodega y tipo */}
-          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-5">
-            <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Bodega y tipo</p>
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+            <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Bodega y tipo</p>
           <div>
             <label className={labelClass}>Bodega asociada</label>
             <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
@@ -58,7 +58,7 @@ export default function B18AltaVentanilla() {
                   type="button"
                   key={k}
                   onClick={() => set('tipo', k)}
-                  className={`py-4 rounded-[1rem] text-[9.5px] font-bold transition-all border-2
+                  className={`py-4 rounded-[1rem] text-[15px] font-bold transition-all border-2
                     ${form.tipo === k
                       ? 'border-[#1A5C38] bg-[#1A5C38]/5 text-[#1A5C38]'
                       : 'border-transparent bg-[#F2F2F7] text-gray-500 hover:bg-gray-200/50'}`}
@@ -67,13 +67,13 @@ export default function B18AltaVentanilla() {
                 </button>
               ))}
             </div>
-              <p className="text-[9.5px] text-gray-500 font-medium mt-2">Selecciona qué apoyos del gobierno se gestionan en esta ventanilla</p>
+              <p className="text-[13px] text-gray-500 font-medium mt-2">Selecciona qué apoyos del gobierno se gestionan en esta ventanilla</p>
             </div>
           </div>
 
           {/* Responsable */}
-          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 space-y-5">
-            <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-widest">Responsable</p>
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+            <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Responsable</p>
           <div>
             <label className={labelClass}>Nombre del enlace con Agricultura</label>
             <input
@@ -125,7 +125,7 @@ export default function B18AltaVentanilla() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[10px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
+              className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
             >
               {loading ? 'Guardando…' : 'Crear ventanilla'}
             </button>

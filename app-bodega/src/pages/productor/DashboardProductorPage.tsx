@@ -120,10 +120,10 @@ export default function DashboardProductorPage() {
   return (
     <div className="bg-zinc-50">
       {alertaActiva && (
-        <div className={`px-4 sm:px-5 py-3 flex items-center justify-between
+        <div className={`px-4 sm:px-6 py-3 flex items-center justify-between
           ${alertaActiva.tipo === 'alerta_climatica' ? 'bg-orange-500' : 'bg-red-600'}`}>
-          <p className="text-white text-xs font-medium flex-1 leading-tight flex items-center gap-1.5">
-            <AlertTriangle size={12} className="shrink-0" /> {alertaActiva.mensaje}
+          <p className="text-white text-sm font-medium flex-1 leading-tight flex items-center gap-1.5">
+            <AlertTriangle size={14} className="shrink-0" /> {alertaActiva.mensaje}
           </p>
           <button onClick={() => navigate('/productor/alertas')}
             className="ml-3 text-white text-xs border border-white/60 rounded-lg px-3 py-1.5 shrink-0 font-medium hover:bg-white/10 transition-colors">
@@ -133,51 +133,51 @@ export default function DashboardProductorPage() {
       )}
 
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-4 pb-5">
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Inicio</p>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Inicio</p>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 ring-2 ring-white/20">
-              <span className="text-white text-[9.5px] font-black">{initials}</span>
+              <span className="text-white text-[15px] font-black">{initials}</span>
             </div>
             <div className="min-w-0">
-              <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">
+              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
                 {saludo}
               </h1>
-              <p className="text-[9.5px] font-medium text-white/40 mt-0.5">{nombreCompleto}</p>
+              <p className="text-[13px] font-medium text-white/40 mt-0.5">{nombreCompleto}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1">
               <Wheat size={11} className="text-green-200" />
-              <span className="text-[9.5px] font-bold text-white">Productor</span>
+              <span className="text-[11px] font-bold text-white">Productor</span>
               <BadgeCheck size={11} className="text-green-300" />
             </div>
-            <p className="text-green-200/60 text-[9.5px] capitalize">{hoy}</p>
+            <p className="text-green-200/60 text-[11px] capitalize">{hoy}</p>
             <div className="ml-auto bg-[#22c55e]/20 border border-[#22c55e]/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-              <span className="text-[9.5px] font-bold text-white tracking-wide">{reloj}</span>
+              <span className="text-[11px] font-bold text-white tracking-wide">{reloj}</span>
               <span className="text-[9px] text-green-200/70 font-medium">MX</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-5 py-5">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
         {sinUbicacion && (
           <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-6 flex items-start gap-4">
-            <MapPin size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+            <MapPin size={22} className="text-amber-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <p className="font-semibold text-amber-800">
                 Tu parcela no tiene ubicación confirmada
               </p>
-              <p className="text-amber-700 text-xs mt-1">
+              <p className="text-amber-700 text-sm mt-1">
                 Sin ubicación no podemos mostrarte las bodegas más cercanas
                 ni calcular distancias reales. Actualiza tu UP para acceder
                 a toda la información del mercado.
               </p>
               <button
                 onClick={() => navigate('/productor/ubicacion')}
-                className="mt-3 px-4 py-2 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 transition-colors"
+                className="mt-3 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors"
               >
                 Actualizar mi parcela →
               </button>
@@ -185,7 +185,7 @@ export default function DashboardProductorPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-[20px] p-4 sm:p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
+        <div className="bg-white rounded-[20px] p-5 sm:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
           <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1 font-medium">
             Precio de compra hoy - tu region
           </p>
@@ -193,23 +193,23 @@ export default function DashboardProductorPage() {
             <span className="text-4xl sm:text-5xl font-bold text-zinc-900">
               ${data?.precio_hoy ? formatNum(data.precio_hoy, 0) : '--'}
             </span>
-            <span className="text-xs text-zinc-400 pb-1">/ton</span>
+            <span className="text-base text-zinc-400 pb-1">/ton</span>
             {delta !== 0 && (
-              <span className={`text-xs pb-1 font-semibold flex items-center gap-0.5 ${delta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                {delta > 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+              <span className={`text-sm pb-1 font-semibold flex items-center gap-0.5 ${delta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                {delta > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                 ${formatNum(Math.abs(delta), 0)}
               </span>
             )}
           </div>
           <p className="text-xs text-zinc-400 mt-2">Promedio regional</p>
           <button onClick={() => navigate('/productor/precios')}
-            className="mt-3 text-[#1A5C38] text-xs font-semibold flex items-center gap-1 hover:underline">
-            Ver desglose de precios <ChevronRight size={12} />
+            className="mt-3 text-[#1A5C38] text-sm font-semibold flex items-center gap-1 hover:underline">
+            Ver desglose de precios <ChevronRight size={14} />
           </button>
         </div>
 
         <div className="mt-5">
-          <p className="text-xs font-bold text-zinc-700 mb-3">Bodegas comprando hoy</p>
+          <p className="text-sm font-bold text-zinc-700 mb-3">Bodegas comprando hoy</p>
           <div className="space-y-2">
             {(data?.bodegas_cercanas ?? []).map(b => {
               const sem = SEMAFORO[b.estado_compra] || SEMAFORO.sin_actividad;
@@ -221,7 +221,7 @@ export default function DashboardProductorPage() {
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full shrink-0 ${sem.cls}`} />
                     <div>
-                      <p className="font-semibold text-zinc-800 text-xs leading-tight">{b.nombre}</p>
+                      <p className="font-semibold text-zinc-800 text-sm leading-tight">{b.nombre}</p>
                       <p className="text-xs text-zinc-500 mt-0.5">
                         {b.municipio} - {Number(b.distancia_km).toFixed(0)} km
                         {b.is_ventanilla && (
@@ -233,7 +233,7 @@ export default function DashboardProductorPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-2">
-                    <p className="font-bold text-zinc-900 text-xs">
+                    <p className="font-bold text-zinc-900 text-sm">
                       ${b.precio_compra_hoy ? formatNum(b.precio_compra_hoy, 0) : '--'}
                     </p>
                     <p className="text-xs text-zinc-400">/ton</p>
@@ -242,11 +242,11 @@ export default function DashboardProductorPage() {
               );
             })}
             {(data?.bodegas_cercanas?.length ?? 0) === 0 && (
-              <p className="text-xs text-zinc-400 text-center py-4">No hay bodegas registradas en tu region aun</p>
+              <p className="text-sm text-zinc-400 text-center py-4">No hay bodegas registradas en tu region aun</p>
             )}
           </div>
           <button onClick={() => navigate('/productor/mapa')}
-            className="w-full mt-3 py-3 text-[#1A5C38] text-xs font-semibold
+            className="w-full mt-3 py-3 text-[#1A5C38] text-sm font-semibold
                        ring-2 ring-[#1A5C38] rounded-2xl hover:bg-emerald-50 active:scale-[0.98] transition-all duration-200">
             Ver mapa completo
           </button>
@@ -256,21 +256,21 @@ export default function DashboardProductorPage() {
           <button
             onClick={() => !isPendiente && navigate('/productor/propuesta-venta')}
             disabled={isPendiente}
-            className={`w-full py-5 rounded-2xl text-white text-xs font-semibold
+            className={`w-full py-5 rounded-2xl text-white text-lg font-semibold
               flex items-center justify-center gap-3 transition-all duration-200
               ${isPendiente ? 'bg-zinc-300 cursor-not-allowed'
                 : 'bg-[#1A5C38] hover:bg-[#15482d] active:scale-[0.97] shadow-lg shadow-green-900/20'}`}
           >
-            <Wheat size={12} />
+            <Wheat size={24} />
             Propuesta de venta
           </button>
           {!isPendiente && (
             <button
               onClick={() => navigate('/productor/ups/nueva')}
-              className="w-full border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-2xl text-xs font-medium
+              className="w-full border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-2xl text-sm font-medium
                 hover:bg-green-50 flex items-center justify-center gap-2 mt-3"
             >
-              <span className="text-xs">+</span>
+              <span className="text-lg">+</span>
               Agregar otra parcela
             </button>
           )}
@@ -290,19 +290,19 @@ export default function DashboardProductorPage() {
 
         {data && !data.location_confirmed && !dismissed && (
           <div className="mt-4 bg-amber-50 ring-1 ring-amber-200 rounded-2xl p-4">
-            <p className="text-amber-800 text-xs font-semibold flex items-center gap-1.5">
-              <MapPin size={12} /> Mejora tu experiencia
+            <p className="text-amber-800 text-sm font-semibold flex items-center gap-1.5">
+              <MapPin size={14} /> Mejora tu experiencia
             </p>
             <p className="text-amber-700 text-xs mt-1">
               Marca tu parcela en el mapa para ver solo las bodegas mas cercanas a ti.
             </p>
             <div className="flex gap-2 mt-3">
               <button onClick={() => navigate('/productor/ubicacion')}
-                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs py-2.5 rounded-xl font-semibold transition-colors">
+                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-sm py-2.5 rounded-xl font-semibold transition-colors">
                 Marcar mi parcela
               </button>
               <button onClick={() => { localStorage.setItem('dismiss_ubicacion', '1'); setDismissed(true); }}
-                className="px-4 text-amber-600 text-xs hover:underline">
+                className="px-4 text-amber-600 text-sm hover:underline">
                 Ahora no
               </button>
             </div>
@@ -311,19 +311,19 @@ export default function DashboardProductorPage() {
 
         {ciclo === null && !dismissedCiclo && !isPendiente && (
           <div className="mt-4 bg-emerald-50 ring-2 ring-[#1A5C38]/20 rounded-2xl p-4">
-            <p className="text-[#1A5C38] text-xs font-bold flex items-center gap-1.5">
-              <CalendarCheck size={12} /> Declara tu ciclo productivo
+            <p className="text-[#1A5C38] text-sm font-bold flex items-center gap-1.5">
+              <CalendarCheck size={14} /> Declara tu ciclo productivo
             </p>
             <p className="text-emerald-700 text-xs mt-1">
               Registra tu ciclo {new Date().getFullYear()} para acceder a programas de apoyo y trazabilidad.
             </p>
             <div className="flex gap-2 mt-3">
               <button onClick={() => navigate('/productor/ciclo')}
-                className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white text-xs py-2.5 rounded-xl font-semibold transition-colors">
+                className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white text-sm py-2.5 rounded-xl font-semibold transition-colors">
                 Registrar ciclo
               </button>
               <button onClick={() => { localStorage.setItem('dismiss_ciclo', '1'); setDismissedCiclo(true); }}
-                className="px-4 text-[#1A5C38] text-xs hover:underline">
+                className="px-4 text-[#1A5C38] text-sm hover:underline">
                 Despues
               </button>
             </div>

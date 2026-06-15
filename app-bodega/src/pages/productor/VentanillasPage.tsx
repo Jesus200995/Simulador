@@ -69,19 +69,19 @@ export default function VentanillasPage() {
   return (
     <div className="bg-[#F2F2F7]">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-3 pb-5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate('/productor/incentivos')}
-            className="flex items-center gap-0.5 text-green-200/80 text-[9.5px] font-medium mb-1.5 active:opacity-60 transition-opacity">
-            <ChevronLeft size={12} strokeWidth={2.5} className="-ml-1" /> Volver
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Apoyos</p>
-          <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Apoyos</p>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">
             {tipo === 'incentivo' ? 'Ventanillas de incentivos' : 'Ventanillas de coberturas'}
           </h1>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 sm:px-5 pt-4 space-y-3">
+      <div className="max-w-lg mx-auto px-4 sm:px-6 pt-4 space-y-3">
         {loading && <p className="text-zinc-400 text-center py-8">Cargando ventanillas...</p>}
 
         {!loading && items.length === 0 && (
@@ -96,7 +96,7 @@ export default function VentanillasPage() {
             </p>
             <button onClick={() => solicitar(v.id)}
               disabled={solicitando === v.id}
-              className="mt-3 w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-3 rounded-xl text-xs font-semibold
+              className="mt-3 w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-3 rounded-xl text-sm font-semibold
                          active:scale-[0.98] transition-all duration-200 disabled:opacity-50">
               {solicitando === v.id ? 'Enviando...' : 'Solicitar informacion'}
             </button>

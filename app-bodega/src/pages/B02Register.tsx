@@ -85,7 +85,7 @@ export default function B02Register() {
   }
 
   const inp =
-    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xs text-white ' +
+    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
     'placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
   const sel = `${inp} appearance-none`;
   const lbl = 'block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5';
@@ -107,7 +107,7 @@ export default function B02Register() {
           onClick={() => navigate('/login')}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex items-center gap-1 text-white/70"
         >
-          <ChevronLeft size={13} /> <span className="text-xs font-medium">Iniciar sesión</span>
+          <ChevronLeft size={22} /> <span className="text-sm font-medium">Iniciar sesión</span>
         </button>
       </div>
 
@@ -117,8 +117,8 @@ export default function B02Register() {
 
           {/* Title */}
           <div className="mb-5">
-            <h1 className="text-xs sm:text-3xl font-bold text-white tracking-tight">Crear cuenta</h1>
-            <p className="text-white/50 text-xs sm:text-xs mt-1">Bodega o Industria · Plan Maíz 2026</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Crear cuenta</h1>
+            <p className="text-white/50 text-sm sm:text-base mt-1">Bodega o Industria · Plan Maíz 2026</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -135,10 +135,10 @@ export default function B02Register() {
                     className={`flex flex-col items-center gap-2 py-4 px-3 rounded-2xl ring-1 transition-all duration-150 active:scale-[0.97]
                       ${rol === key ? 'ring-2 ring-white bg-white/15' : 'ring-white/15 bg-white/5 hover:bg-white/10'}`}>
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${rol === key ? 'bg-white' : 'bg-white/10'}`}>
-                      <Icon size={12} className={rol === key ? 'text-[#1A5C38]' : 'text-white/60'} strokeWidth={2} />
+                      <Icon size={20} className={rol === key ? 'text-[#1A5C38]' : 'text-white/60'} strokeWidth={2} />
                     </div>
                     <div className="text-center">
-                      <p className={`text-xs font-bold leading-none ${rol === key ? 'text-white' : 'text-white/70'}`}>{label}</p>
+                      <p className={`text-sm font-bold leading-none ${rol === key ? 'text-white' : 'text-white/70'}`}>{label}</p>
                       <p className="text-[10px] mt-1 text-white/40 leading-tight">{desc}</p>
                     </div>
                   </button>
@@ -158,13 +158,13 @@ export default function B02Register() {
               <input type="text" value={form.curp} onChange={e => setCurp(e.target.value)}
                 placeholder="CURP (18 caracteres)" required maxLength={18} autoCapitalize="characters" className={`${inp} font-mono tracking-widest`} />
               {form.curp.length > 0 && form.curp.length < 18 && (
-                <p className="text-[9.5px] text-amber-300/90 pl-1">{form.curp.length}/18 caracteres</p>
+                <p className="text-[11px] text-amber-300/90 pl-1">{form.curp.length}/18 caracteres</p>
               )}
               {form.curp.length === 18 && !CURP_REGEX.test(form.curp) && (
-                <p className="text-[9.5px] text-red-300 pl-1 flex items-center gap-1"><AlertCircle size={12} /> Formato de CURP inválido</p>
+                <p className="text-[11px] text-red-300 pl-1 flex items-center gap-1"><AlertCircle size={12} /> Formato de CURP inválido</p>
               )}
               {form.curp.length === 18 && CURP_REGEX.test(form.curp) && (
-                <p className="text-[9.5px] text-green-300 pl-1 flex items-center gap-1"><Check size={12} /> CURP válida</p>
+                <p className="text-[11px] text-green-300 pl-1 flex items-center gap-1"><Check size={12} /> CURP válida</p>
               )}
             </div>
 
@@ -197,7 +197,7 @@ export default function B02Register() {
                   onChange={e => set('password', e.target.value)} placeholder="Mínimo 8 caracteres" required className={`${inp} pr-12`} />
                 <button type="button" onClick={() => setShowPwd(p => !p)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors">
-                  {showPwd ? <EyeOff size={13} /> : <Eye size={13} />}
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               <div className="relative">
@@ -205,37 +205,37 @@ export default function B02Register() {
                   onChange={e => set('confirm', e.target.value)} placeholder="Confirmar contraseña" required className={`${inp} pr-12`} />
                 <button type="button" onClick={() => setShowConfirm(p => !p)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors">
-                  {showConfirm ? <EyeOff size={13} /> : <Eye size={13} />}
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs flex items-start gap-2">
-                <AlertCircle size={13} className="shrink-0 mt-0.5" />
+              <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex items-start gap-2">
+                <AlertCircle size={15} className="shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-xs font-bold
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
                          disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
-              {loading ? <><Loader2 size={13} className="animate-spin" /> Creando cuenta…</> : 'Crear cuenta'}
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Creando cuenta…</> : 'Crear cuenta'}
             </button>
           </form>
 
           {/* Opciones */}
           <div className="mt-6 space-y-3 text-center">
             <button onClick={() => navigate('/login')}
-              className="text-xs font-semibold text-white/60 hover:text-white transition-colors">
+              className="text-sm font-semibold text-white/60 hover:text-white transition-colors">
               ¿Ya tienes cuenta? Inicia sesión
             </button>
             <div className="border-t border-white/10 pt-4">
               <button
                 onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-300 hover:text-green-200 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-300 hover:text-green-200 transition-colors"
               >
-                <Wheat size={13} /> ¿Eres productor? Ver opciones
+                <Wheat size={15} /> ¿Eres productor? Ver opciones
               </button>
             </div>
           </div>

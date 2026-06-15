@@ -32,20 +32,20 @@ export function KPICard({ title, value, subtitle, icon, trend, trendText, color 
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
-        <p className="text-[9px] sm:text-[10px] font-bold text-gray-400/90 uppercase tracking-widest leading-none transition-colors duration-300 group-hover:text-emerald-600/80">{title}</p>
+        <p className="text-[11px] sm:text-[12px] font-bold text-gray-400/90 uppercase tracking-widest leading-none transition-colors duration-300 group-hover:text-emerald-600/80">{title}</p>
         {icon && (
-          <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110 group-hover:rotate-6 ${iconBg[color]}`}>
+          <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110 group-hover:rotate-6 ${iconBg[color]}`}>
             {icon}
           </span>
         )}
       </div>
-      <p className="text-[20px] sm:text-[24px] font-black text-gray-900 leading-none tracking-tight">{value}</p>
+      <p className="text-[22px] sm:text-[26px] font-black text-gray-900 leading-none tracking-tight">{value}</p>
       {trendText && trend && TIcon && (
-        <p className={`text-[9.5px] sm:text-[10px] font-semibold flex items-center gap-1 ${trendColor[trend]}`}>
-          <TIcon size={12} /> {trendText}
+        <p className={`text-[11px] sm:text-[12px] font-semibold flex items-center gap-1 ${trendColor[trend]}`}>
+          <TIcon size={14} /> {trendText}
         </p>
       )}
-      {subtitle && <div className="text-[9.5px] sm:text-[10px] text-gray-400/90 leading-snug">{subtitle}</div>}
+      {subtitle && <div className="text-[11px] sm:text-[12px] text-gray-400/90 leading-snug">{subtitle}</div>}
     </div>
   );
 }

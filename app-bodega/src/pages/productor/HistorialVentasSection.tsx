@@ -56,11 +56,11 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mt-4">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <ClipboardList size={13} /> Mis ventas
+          <ClipboardList size={18} /> Mis ventas
         </h3>
         {transacciones.length > 0 && (
           <span className="text-xs text-gray-400">
@@ -73,7 +73,7 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
       {transacciones.length === 0 ? (
         <div className="text-center py-8">
           <Wheat size={32} className="text-gray-300 mx-auto mb-2" />
-          <p className="text-gray-500 text-xs font-medium">
+          <p className="text-gray-500 text-sm font-medium">
             Aún no tienes ventas registradas
           </p>
           <p className="text-gray-400 text-xs mt-1">
@@ -85,7 +85,7 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
           {transacciones.map(txn => (
             <div key={txn.id} className="py-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 text-xs truncate">
+                <p className="font-medium text-gray-800 text-sm truncate">
                   {txn.bodega_nombre}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">

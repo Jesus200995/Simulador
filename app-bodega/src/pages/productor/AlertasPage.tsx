@@ -57,14 +57,14 @@ export default function AlertasPage() {
   return (
     <div className="bg-[#F2F2F7]">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-4 pb-5">
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Alertas</p>
-          <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">Notificaciones</h1>
-          <p className="text-[9.5px] font-medium text-white/40 mt-0.5">Alertas y avisos recientes</p>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Alertas</p>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Notificaciones</h1>
+          <p className="text-[13px] font-medium text-white/40 mt-0.5">Alertas y avisos recientes</p>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-5 pt-4 space-y-3">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         {notifs.length === 0 && (
           <div className="text-center py-12">
             <Bell size={40} className="text-zinc-300 mx-auto mb-3" />
@@ -88,12 +88,12 @@ export default function AlertasPage() {
                     </span>
                     <span className="text-xs text-zinc-400">{timeAgo(n.created_at)}</span>
                   </div>
-                  <p className={`text-xs leading-snug ${n.leida ? 'text-zinc-600' : 'text-zinc-800 font-medium'}`}>
+                  <p className={`text-sm leading-snug ${n.leida ? 'text-zinc-600' : 'text-zinc-800 font-medium'}`}>
                     {n.mensaje}
                   </p>
                 </div>
-                {isOpen ? <ChevronUp size={12} className="text-zinc-400 shrink-0 mt-1" />
-                         : <ChevronDown size={12} className="text-zinc-400 shrink-0 mt-1" />}
+                {isOpen ? <ChevronUp size={16} className="text-zinc-400 shrink-0 mt-1" />
+                         : <ChevronDown size={16} className="text-zinc-400 shrink-0 mt-1" />}
               </div>
               {isOpen && n.titulo && (
                 <p className="mt-2 text-xs text-zinc-500 border-t border-zinc-100 pt-2">{n.titulo}</p>

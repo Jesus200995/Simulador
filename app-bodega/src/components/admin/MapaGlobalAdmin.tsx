@@ -209,7 +209,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
           <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
             Geolocalización
           </p>
-          <h2 className="text-[9.5px] sm:text-[10px] font-bold text-gray-900">
+          <h2 className="text-[13px] sm:text-[14px] font-bold text-gray-900">
             Mapa Nacional
           </h2>
         </div>
@@ -235,7 +235,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
                   </svg>
                 )}
               </span>
-              <span className="text-[9.5px] font-medium text-gray-500">
+              <span className="text-[11px] font-medium text-gray-500">
                 {LAYER_CONFIG[key].label}
               </span>
             </label>
@@ -244,7 +244,7 @@ export default function MapaGlobalAdmin({ token, apiUrl }: MapaGlobalAdminProps)
           <select
             value={estadoFiltro}
             onChange={e => setEstadoFiltro(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 text-[9.5px] font-medium rounded-lg px-2.5 py-1.5 outline-none focus:border-emerald-500/40 transition-colors"
+            className="bg-white border border-gray-200 text-gray-700 text-[11px] font-medium rounded-lg px-2.5 py-1.5 outline-none focus:border-emerald-500/40 transition-colors"
           >
             <option value="">Todo el país</option>
             {estados.map(est => (

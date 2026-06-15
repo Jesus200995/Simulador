@@ -41,19 +41,19 @@ export default function ConfirmarTransaccionPage() {
   const total = (txn.volumen_ton || 0) * (txn.precio_ton || 0);
 
   return (
-    <div className="bg-[#F2F2F7] flex flex-col px-4 sm:px-5 pt-10">
+    <div className="bg-[#F2F2F7] flex flex-col px-4 sm:px-6 pt-10">
       <div className="max-w-lg mx-auto w-full">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Wheat size={36} className="text-[#1A5C38]" />
         </div>
-        <h2 className="text-xs font-bold text-gray-800">
+        <h2 className="text-xl font-bold text-gray-800">
           {txn.bodega_nombre} registró una compra
         </h2>
-        <p className="text-gray-500 text-xs mt-2">¿Los datos son correctos?</p>
+        <p className="text-gray-500 text-sm mt-2">¿Los datos son correctos?</p>
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-4 mb-8 space-y-3">
+      <div className="bg-gray-50 rounded-2xl p-5 mb-8 space-y-3">
         {[
           { label: 'Bodega', value: txn.bodega_nombre },
           { label: 'Tipo de maíz', value: txn.tipo_maiz },
@@ -62,8 +62,8 @@ export default function ConfirmarTransaccionPage() {
           { label: 'Total', value: `$${formatNum(total, 0)}`, bold: true },
         ].map(row => (
           <div key={row.label} className="flex justify-between items-center">
-            <span className="text-gray-500 text-xs">{row.label}</span>
-            <span className={`text-xs ${row.bold ? 'font-bold text-gray-900 text-xs' : 'font-medium text-gray-800'}`}>
+            <span className="text-gray-500 text-sm">{row.label}</span>
+            <span className={`text-sm ${row.bold ? 'font-bold text-gray-900 text-base' : 'font-medium text-gray-800'}`}>
               {row.value}
             </span>
           </div>
@@ -71,14 +71,14 @@ export default function ConfirmarTransaccionPage() {
       </div>
 
       <button onClick={() => confirmar(true)} disabled={sending}
-        className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-5 rounded-2xl text-xs
+        className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-5 rounded-2xl text-lg
                    font-semibold active:scale-[0.98] transition-all duration-200 mb-3 shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
-        <Check size={12} /> Si, es correcto
+        <Check size={20} /> Si, es correcto
       </button>
       <button onClick={() => confirmar(false)} disabled={sending}
         className="w-full ring-2 ring-red-400 text-red-600 py-5 rounded-2xl
-                   text-xs font-semibold active:scale-[0.98] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2">
-        <X size={12} /> Los datos no son correctos
+                   text-lg font-semibold active:scale-[0.98] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2">
+        <X size={20} /> Los datos no son correctos
       </button>
       <p className="text-center text-xs text-zinc-400 mt-4">
         Si hay un error, el equipo tecnico lo revisara y te contactara.

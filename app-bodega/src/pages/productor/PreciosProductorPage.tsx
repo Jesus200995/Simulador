@@ -89,10 +89,10 @@ export default function PreciosProductorPage() {
       
       {/* ── HEADER VERDE ── */}
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
-        <div className="max-w-[700px] mx-auto px-4 sm:px-5 pt-4 pb-5">
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-5">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest">Precios del Maíz</p>
+              <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest">Precios del Maíz</p>
               <div className="shrink-0 flex items-center gap-1.5 text-[10px] text-green-900 font-bold bg-green-400 border border-green-300 rounded-full px-2 py-0.5 shadow-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-100 opacity-75"></span>
@@ -101,18 +101,18 @@ export default function PreciosProductorPage() {
                 En vivo
               </div>
             </div>
-            <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">Análisis de Precios</h1>
-            <p className="text-[10px] font-medium text-white/60 mt-0.5">Referencia internacional y rentabilidad</p>
+            <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Análisis de Precios</h1>
+            <p className="text-[12px] font-medium text-white/60 mt-0.5">Referencia internacional y rentabilidad</p>
           </div>
         </div>
       </div>
 
       {/* ── CONTENIDO ── */}
-      <div className="w-full max-w-[700px] mx-auto px-4 sm:px-5 pt-5 space-y-4">
+      <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-5 space-y-4">
 
       {/* ── SELECTOR DE MODO: estatal vs bodega específica ── */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-        <p className="text-xs font-medium text-slate-700 mb-3">Ver precios para:</p>
+      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+        <p className="text-sm font-medium text-slate-700 mb-3">Ver precios para:</p>
         <div className="space-y-2">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -121,7 +121,7 @@ export default function PreciosProductorPage() {
               onChange={() => { setModoPrecio('estatal'); setBodegaSeleccionada(null); setPreciosBodega(null); setBusquedaBodega(''); }}
               className="w-4 h-4 accent-[#1A5C38]"
             />
-            <span className="text-xs text-slate-800">
+            <span className="text-sm text-slate-800">
               Promedio de mi estado
               {data?.estado && <span className="text-slate-400 ml-1">({data.estado})</span>}
             </span>
@@ -133,19 +133,19 @@ export default function PreciosProductorPage() {
               onChange={() => setModoPrecio('bodega')}
               className="w-4 h-4 accent-[#1A5C38]"
             />
-            <span className="text-xs text-slate-800">Una bodega específica</span>
+            <span className="text-sm text-slate-800">Una bodega específica</span>
           </label>
         </div>
 
         {modoPrecio === 'bodega' && (
           <div className="mt-4 relative">
-            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={busquedaBodega}
               onChange={e => { setBusquedaBodega(e.target.value); setBodegaSeleccionada(null); setPreciosBodega(null); }}
               placeholder="Buscar bodega por nombre o municipio..."
-              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
             />
 
             {buscando && <p className="text-xs text-slate-400 mt-2">Buscando…</p>}
@@ -166,7 +166,7 @@ export default function PreciosProductorPage() {
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0"
                   >
-                    <p className="text-xs font-medium text-slate-800">{b.nombre}</p>
+                    <p className="text-sm font-medium text-slate-800">{b.nombre}</p>
                     <p className="text-xs text-slate-500">
                       {b.municipio}, {b.estado}
                       {b.precio_compra_hoy > 0 && (
@@ -183,12 +183,12 @@ export default function PreciosProductorPage() {
             {bodegaSeleccionada && (
               <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold text-green-800">{bodegaSeleccionada.nombre}</p>
+                  <p className="text-sm font-semibold text-green-800">{bodegaSeleccionada.nombre}</p>
                   <p className="text-xs text-green-600">{bodegaSeleccionada.municipio}, {bodegaSeleccionada.estado}</p>
                 </div>
                 <button
                   onClick={() => { setBodegaSeleccionada(null); setPreciosBodega(null); setBusquedaBodega(''); }}
-                  className="text-green-500 hover:text-green-700 text-xs"
+                  className="text-green-500 hover:text-green-700 text-lg"
                 >
                   ×
                 </button>
@@ -197,7 +197,7 @@ export default function PreciosProductorPage() {
 
             {preciosBodega && !preciosBodega.tiene_precio_hoy && (
               <div className="mt-2 flex items-center gap-2 text-amber-600">
-                <AlertTriangle size={12} />
+                <AlertTriangle size={14} />
                 <span className="text-xs">
                   Precio de hace {preciosBodega.dias_antiguedad_precio} día{preciosBodega.dias_antiguedad_precio !== 1 ? 's' : ''}
                 </span>
@@ -214,10 +214,10 @@ export default function PreciosProductorPage() {
             <AlertTriangle size={17} className="text-amber-600" />
           </div>
           <div className="flex-1">
-            <p className="text-[10px] font-bold text-amber-900">
+            <p className="text-[14px] font-bold text-amber-900">
               Aún no hay precios de bodega en tu región{data.estado ? ` (${data.estado})` : ''}
             </p>
-            <p className="text-[10px] text-amber-700 mt-1 leading-relaxed">
+            <p className="text-[12px] text-amber-700 mt-1 leading-relaxed">
               La <strong>referencia internacional</strong> de abajo ya está disponible.
               El <strong>precio de compra y de venta</strong> aparecerán en cuanto una bodega de
               tu estado publique sus precios. Mientras tanto, usa el margen como referencia para negociar.
@@ -229,14 +229,14 @@ export default function PreciosProductorPage() {
       {/* ── PRECIO 1 — Referencia internacional ── */}
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex items-center gap-3 p-4">
-          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[10px] font-bold shadow-md shrink-0">
+          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
             1
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-[10px] tracking-tight">
+            <p className="font-bold text-slate-900 text-[14px] tracking-tight">
               Referencia internacional
             </p>
-            <p className="text-[9.5px] text-slate-500 mt-0.5 font-medium leading-relaxed max-w-lg">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-relaxed max-w-lg">
               Calculado en tiempo real (Chicago + TC + Bono).
             </p>
           </div>
@@ -249,7 +249,7 @@ export default function PreciosProductorPage() {
             <p className="text-[28px] sm:text-[34px] leading-none font-black text-white tracking-tight">
               {margen != null
                 ? `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`
-                : <span className="text-[10px] text-slate-400 font-medium tracking-normal">Sin datos</span>
+                : <span className="text-[20px] text-slate-400 font-medium tracking-normal">Sin datos</span>
               }
             </p>
             <div className="flex items-center gap-2 mt-2">
@@ -268,13 +268,13 @@ export default function PreciosProductorPage() {
             ].map((item) => (
               <div key={item.label} className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 flex items-center sm:flex-col sm:items-start sm:justify-between transition-colors hover:bg-white/[0.08]">
                 <div className="w-[28px] h-[28px] bg-white/[0.08] text-white rounded-md flex items-center justify-center shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                  <item.icon size={12} />
+                  <item.icon size={14} />
                 </div>
                 <div>
                   <p className="text-[9px] text-slate-400 font-medium leading-tight">
                     {item.label}
                   </p>
-                  <p className="text-[10px] font-bold text-white mt-0.5">
+                  <p className="text-[12px] font-bold text-white mt-0.5">
                     {item.value}
                   </p>
                 </div>
@@ -295,14 +295,14 @@ export default function PreciosProductorPage() {
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[10px] font-bold shadow-md shrink-0">
+            <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
               2
             </div>
             <div>
-              <p className="font-bold text-slate-900 text-[10px] tracking-tight">
+              <p className="font-bold text-slate-900 text-[14px] tracking-tight">
                 Precio de compra
               </p>
-              <p className="text-[9.5px] text-slate-500 mt-0.5 font-medium leading-relaxed">
+              <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-relaxed">
                 Pago de la bodega más servicios.
               </p>
             </div>
@@ -315,48 +315,48 @@ export default function PreciosProductorPage() {
             {/* PO */}
             <div className="w-full sm:flex-1 bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3 sm:p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
               <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                <CircleDollarSign size={12} />
+                <CircleDollarSign size={16} />
               </div>
               <div>
                 <p className="text-[9px] text-[#1A5C38] font-bold uppercase tracking-wider mb-0.5">
                   Pago bodega (PO)
                 </p>
-                <p className="text-[9.5px] sm:text-[10px] font-black text-[#1A5C38] tracking-tight leading-none">
-                  {tienePO ? `$${po.toLocaleString('es-MX')}` : <span className="text-[10px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
+                <p className="text-[18px] sm:text-[20px] font-black text-[#1A5C38] tracking-tight leading-none">
+                  {tienePO ? `$${po.toLocaleString('es-MX')}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
                 </p>
               </div>
             </div>
 
-            <div className="text-xs font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-0.5 sm:my-0">+</div>
+            <div className="text-lg font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-0.5 sm:my-0">+</div>
 
             {/* S */}
             <div className="w-full sm:flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-3 sm:p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
               <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                <Settings size={12} />
+                <Settings size={16} />
               </div>
               <div>
                 <p className="text-[9px] text-blue-700 font-bold uppercase tracking-wider mb-0.5">
                   Servicios (S)
                 </p>
-                <p className="text-[9.5px] sm:text-[10px] font-black text-blue-700 tracking-tight leading-none">
-                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-[9.5px] text-slate-400 font-medium tracking-normal">Sin tarifario activo</span>}
+                <p className="text-[18px] sm:text-[20px] font-black text-blue-700 tracking-tight leading-none">
+                  {tieneServicios ? `$${servicios.toLocaleString('es-MX')}` : <span className="text-[13px] text-slate-400 font-medium tracking-normal">Sin tarifario activo</span>}
                 </p>
               </div>
             </div>
 
-            <div className="text-xs font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-0.5 sm:my-0">=</div>
+            <div className="text-lg font-black text-slate-300 shrink-0 rotate-90 sm:rotate-0 my-0.5 sm:my-0">=</div>
 
             {/* Total */}
             <div className="w-full sm:flex-1 bg-slate-800 rounded-2xl p-3 sm:p-4 shadow-md flex items-center sm:flex-col sm:items-start sm:justify-center">
               <div className="w-8 h-8 bg-slate-700 text-white rounded-lg flex items-center justify-center shadow-inner shrink-0 mr-3 sm:mr-0 sm:mb-2">
-                <Tag size={12} />
+                <Tag size={16} />
               </div>
               <div>
                 <p className="text-[9px] text-slate-300 font-bold uppercase tracking-wider mb-0.5">
                   Total Compra
                 </p>
-                <p className="text-[9.5px] sm:text-[10px] font-black text-white tracking-tight leading-none">
-                  {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : <span className="text-[10px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
+                <p className="text-[18px] sm:text-[20px] font-black text-white tracking-tight leading-none">
+                  {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
                 </p>
               </div>
             </div>
@@ -367,14 +367,14 @@ export default function PreciosProductorPage() {
       {/* ── PRECIO 3 — Precio de venta ── */}
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex items-center gap-3 p-4 pb-2">
-          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[10px] font-bold shadow-md shrink-0">
+          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
             3
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-[10px] tracking-tight">
+            <p className="font-bold text-slate-900 text-[14px] tracking-tight">
               Precio de venta
             </p>
-            <p className="text-[9.5px] text-slate-500 mt-0.5 font-medium leading-relaxed">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-relaxed">
               Neto resultante al restar el margen a la compra.
             </p>
           </div>
@@ -386,17 +386,17 @@ export default function PreciosProductorPage() {
               Versión 1 — Productor con servicios
             </p>
             <div className="space-y-2 mb-3">
-              <div className="flex items-center justify-between text-[9.5px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <CircleDollarSign size={12} className="text-slate-400"/> Precio de compra
+                  <CircleDollarSign size={14} className="text-slate-400"/> Precio de compra
                 </span>
                 <span className="font-bold text-slate-900">
                   {precioCompra != null ? `$${precioCompra.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : '—'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[9.5px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <TrendingUp size={12} className="text-slate-400"/> Margen de negociación
+                  <TrendingUp size={14} className="text-slate-400"/> Margen de negociación
                 </span>
                 <span className="font-bold text-slate-900">
                   {margen != null ? `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : '—'}
@@ -406,11 +406,11 @@ export default function PreciosProductorPage() {
               <div className="w-full h-px bg-slate-200 my-3"></div>
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
-                <span className="font-black text-slate-900 flex items-center gap-2 text-[10px]">
-                  <Award size={12} className="text-amber-500"/> Diferencial de venta
+                <span className="font-black text-slate-900 flex items-center gap-2 text-[14px]">
+                  <Award size={16} className="text-amber-500"/> Diferencial de venta
                 </span>
                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 w-fit">
-                  <span className={`text-[9.5px] sm:text-[10px] font-black tracking-tight leading-none
+                  <span className={`text-[18px] sm:text-[20px] font-black tracking-tight leading-none
                     ${precioVenta == null ? 'text-slate-400'
                       : esFavorable ? 'text-[#1A5C38]'
                       : 'text-rose-600'}`}>
@@ -432,8 +432,8 @@ export default function PreciosProductorPage() {
             </div>
             
             {precioVenta != null && !esFavorable && (
-              <div className="flex items-start gap-2 text-[9.5px] text-rose-700 bg-rose-50 border border-rose-200/60 rounded-xl p-3 font-medium mt-3 shadow-sm">
-                <AlertTriangle size={12} className="shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 text-[11px] text-rose-700 bg-rose-50 border border-rose-200/60 rounded-xl p-3 font-medium mt-3 shadow-sm">
+                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <p>Alerta: El precio de compra actual se encuentra por debajo del margen de negociación sugerido.</p>
               </div>
             )}
@@ -441,7 +441,7 @@ export default function PreciosProductorPage() {
 
           <div className="border border-dashed border-slate-200 rounded-2xl p-4 bg-slate-50/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
-              <p className="text-[10px] font-bold text-slate-600">
+              <p className="text-[12px] font-bold text-slate-600">
                 Versión 2 — Precio CEDIS
               </p>
               <span className="bg-amber-100 text-amber-800 text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded-md w-fit">
@@ -457,13 +457,13 @@ export default function PreciosProductorPage() {
       </div>
 
       {/* ── HISTÓRICO 30 DÍAS ── */}
-      <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-4 sm:p-4">
+      <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
-                <TrendingUp size={12} />
+                <TrendingUp size={16} />
               </div>
-              <p className="text-[9.5px] font-bold text-slate-900 tracking-tight">
+              <p className="text-[15px] font-bold text-slate-900 tracking-tight">
                 Histórico a 30 días
               </p>
             </div>
@@ -502,7 +502,7 @@ export default function PreciosProductorPage() {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <TrendingUp size={40} className="text-gray-300 mb-3" />
               <p className="text-gray-600 font-medium">Historial en construcción</p>
-              <p className="text-gray-400 text-xs mt-1 max-w-xs">
+              <p className="text-gray-400 text-sm mt-1 max-w-xs">
                 El historial de precios estará disponible después de los primeros 30 días de operación del sistema.
               </p>
             </div>
@@ -511,17 +511,17 @@ export default function PreciosProductorPage() {
 
       {/* ── FIRA ── */}
       {data.fira && (
-        <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-4 sm:p-4 shadow-sm">
+        <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-4 sm:p-5 shadow-sm">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center text-slate-600 shadow-inner">
-              <BookOpen size={12} />
+              <BookOpen size={16} />
             </div>
-            <p className="text-[9.5px] font-bold text-slate-800 tracking-tight">
+            <p className="text-[15px] font-bold text-slate-800 tracking-tight">
               Referencia FIRA · {data.estado}
             </p>
           </div>
           
-          <div className="grid gap-2 text-[9.5px]">
+          <div className="grid gap-2 text-[13px]">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
               <span className="text-slate-500 font-medium mb-0.5 sm:mb-0">Modalidad de riego</span>
               <span className="font-bold text-slate-800">{data.fira.modalidad}</span>
@@ -534,7 +534,7 @@ export default function PreciosProductorPage() {
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-emerald-50 rounded-xl p-3 border border-emerald-100 shadow-sm">
               <span className="text-emerald-700 font-bold mb-0.5 sm:mb-0">Precio FIRA sugerido</span>
-              <span className="font-black text-[#1A5C38] text-[10px]">
+              <span className="font-black text-[#1A5C38] text-[14px]">
                 ${data.fira.precio_fira.toLocaleString('es-MX')} / ton
               </span>
             </div>

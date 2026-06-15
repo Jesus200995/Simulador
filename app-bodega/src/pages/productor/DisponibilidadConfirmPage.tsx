@@ -56,10 +56,10 @@ export default function DisponibilidadConfirmPage() {
 
   if (sent) {
     return (
-      <div className="bg-[#F2F2F7] flex flex-col items-center justify-center px-5 sm:px-8 text-center py-12">
+      <div className="bg-[#F2F2F7] flex flex-col items-center justify-center px-6 sm:px-8 text-center py-12">
         <CheckCircle size={64} className="text-[#1A5C38] mb-4" />
-        <h2 className="text-xs sm:text-xs font-bold text-zinc-900 mb-2">Listo!</h2>
-        <p className="text-zinc-500 text-xs sm:text-xs mb-6 max-w-sm">
+        <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-2">Listo!</h2>
+        <p className="text-zinc-500 text-sm sm:text-base mb-6 max-w-sm">
           Las bodegas cercanas a tu zona podran ver que tienes maiz disponible.
           Te notificamos si alguna esta interesada.
         </p>
@@ -74,46 +74,46 @@ export default function DisponibilidadConfirmPage() {
   return (
     <div className="bg-[#F2F2F7] flex flex-col">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-3 pb-5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
-            className="flex items-center gap-0.5 text-green-200/80 text-[9.5px] font-medium mb-1.5 active:opacity-60 transition-opacity">
-            <ChevronLeft size={12} strokeWidth={2.5} className="-ml-1" /> Volver
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Disponibilidad</p>
-          <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight">Confirmar</h1>
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Disponibilidad</p>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Confirmar</h1>
         </div>
       </div>
 
       <div className="flex-1">
-        <div className="max-w-lg mx-auto px-5 sm:px-8 py-5">
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-4 space-y-4 shadow-sm ring-1 ring-zinc-100">
+        <div className="max-w-lg mx-auto px-5 sm:px-8 py-6">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm ring-1 ring-zinc-100">
             <div className="flex justify-between">
-              <span className="text-zinc-500 text-xs">Tipo de maiz</span>
-              <span className="font-medium text-zinc-800 text-xs capitalize">{tipo}</span>
+              <span className="text-zinc-500 text-sm">Tipo de maiz</span>
+              <span className="font-medium text-zinc-800 text-sm capitalize">{tipo}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500 text-xs">Variedad</span>
-              <span className="font-medium text-zinc-800 text-xs">{variedadNombre}</span>
+              <span className="text-zinc-500 text-sm">Variedad</span>
+              <span className="font-medium text-zinc-800 text-sm">{variedadNombre}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500 text-xs">Volumen</span>
+              <span className="text-zinc-500 text-sm">Volumen</span>
               <span className="font-bold text-zinc-900">{volumen} toneladas</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500 text-xs">Disponible</span>
-              <span className="font-medium text-zinc-800 text-xs">{fechaDesde} -- {fechaHasta}</span>
+              <span className="text-zinc-500 text-sm">Disponible</span>
+              <span className="font-medium text-zinc-800 text-sm">{fechaDesde} -- {fechaHasta}</span>
             </div>
           </div>
 
           <div className="mt-6 bg-emerald-50 ring-1 ring-emerald-200 rounded-2xl p-4">
-            <p className="text-emerald-800 text-xs">
+            <p className="text-emerald-800 text-sm">
               Las bodegas cercanas a tu zona podran ver que tienes maiz disponible.
               Te notificamos si alguna esta interesada.
             </p>
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-xs">
+            <div className="mt-4 p-3 bg-red-50 ring-1 ring-red-200 rounded-xl text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -123,7 +123,7 @@ export default function DisponibilidadConfirmPage() {
       <div className="px-5 sm:px-8 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto">
           <button onClick={enviar} disabled={loading}
-            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-xs font-semibold
+            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
                        disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
             {loading ? 'Enviando...' : 'Confirmar y publicar'}
           </button>

@@ -256,35 +256,35 @@ export default function BodegasAdminPage() {
       <div className="flex border-b border-white/5 gap-2 flex-shrink-0">
         <button
           onClick={() => setTabActivo('lista')}
-          className={`px-4 py-3 text-[9.5px] font-bold border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
             tabActivo === 'lista'
               ? 'border-emerald-500 text-gray-900'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          <Warehouse size={12} />
+          <Warehouse size={14} />
           Lista + Mapa
         </button>
         <button
           onClick={() => setTabActivo('estadisticas')}
-          className={`px-4 py-3 text-[9.5px] font-bold border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
             tabActivo === 'estadisticas'
               ? 'border-emerald-500 text-gray-900'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          <BarChart3 size={12} />
+          <BarChart3 size={14} />
           Estadísticas
         </button>
         <button
           onClick={() => setTabActivo('pendientes')}
-          className={`px-4 py-3 text-[9.5px] font-bold border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
             tabActivo === 'pendientes'
               ? 'border-emerald-500 text-gray-900'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          <ShieldAlert size={12} />
+          <ShieldAlert size={14} />
           Por Aprobar
           <span className="bg-amber-500/20 text-amber-500 text-[10px] px-1.5 py-0.5 rounded-full ml-1">
             {bodegas.filter(b => b.estatus === 'pendiente').length}
@@ -297,51 +297,51 @@ export default function BodegasAdminPage() {
         <div className="flex-1 overflow-y-auto">
           {statsLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <RefreshCw size={12} className="text-emerald-500 animate-spin" />
-              <p className="text-[9.5px] text-gray-500">Cargando estadísticas...</p>
+              <RefreshCw size={24} className="text-emerald-500 animate-spin" />
+              <p className="text-[13px] text-gray-500">Cargando estadísticas...</p>
             </div>
           ) : stats ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* KPI: Capacidad total */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Capacidad Total</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.capacidad_total || 0).toLocaleString()}</p>
-                <p className="text-[9.5px] text-gray-500">toneladas</p>
+                <p className="text-[11px] text-gray-500">toneladas</p>
               </div>
               {/* KPI: Stock actual */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Stock Actual</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.stock_total || 0).toLocaleString()}</p>
-                <p className="text-[9.5px] text-gray-500">toneladas</p>
+                <p className="text-[11px] text-gray-500">toneladas</p>
               </div>
               {/* KPI: % Ocupación */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">% Ocupación</p>
-                <p className="text-[28px] font-black text-emerald-600 leading-none">{stats.pct_ocupacion || 0}<span className="text-[10px] text-gray-500 ml-1">%</span></p>
-                <p className="text-[9.5px] text-gray-500">capacidad utilizada</p>
+                <p className="text-[28px] font-black text-emerald-600 leading-none">{stats.pct_ocupacion || 0}<span className="text-[14px] text-gray-500 ml-1">%</span></p>
+                <p className="text-[11px] text-gray-500">capacidad utilizada</p>
               </div>
               {/* KPI: Con tarifario */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Con Tarifario</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{stats.con_tarifario || 0}</p>
-                <p className="text-[9.5px] text-gray-500">bodegas con tarifa activa</p>
+                <p className="text-[11px] text-gray-500">bodegas con tarifa activa</p>
               </div>
               {/* KPI: Ventanillas activas */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-4 space-y-1">
+              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Ventanillas Activas</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{stats.ventanillas_activas || 0}</p>
-                <p className="text-[9.5px] text-gray-500">puntos de atención</p>
+                <p className="text-[11px] text-gray-500">puntos de atención</p>
               </div>
             </div>
           ) : (
-            <div className="text-center py-16 text-gray-500 text-[9.5px]">No se pudieron cargar las estadísticas.</div>
+            <div className="text-center py-16 text-gray-500 text-[13px]">No se pudieron cargar las estadísticas.</div>
           )}
         </div>
       )}
 
       {/* ── TAB: LISTA + MAPA ── */}
       {tabActivo === 'lista' && (
-      <div className="flex flex-col lg:flex-row flex-1 gap-4 overflow-hidden min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: LISTA & FILTROS (40%) ── */}
       <div className="w-full lg:w-[400px] flex flex-col h-full bg-white/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
@@ -349,8 +349,8 @@ export default function BodegasAdminPage() {
         {/* Controles y Contadores */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-[10px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
-              <Warehouse size={13} className="text-emerald-500" />
+            <h2 className="text-[14px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
+              <Warehouse size={15} className="text-emerald-500" />
               Infraestructura Silos
             </h2>
             <span className="text-[10px] font-bold text-gray-500 uppercase bg-white/5 border border-gray-200 px-2 py-0.5 rounded-full">
@@ -366,7 +366,7 @@ export default function BodegasAdminPage() {
               placeholder="Buscar silo o bodega..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[10px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
+              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
 
@@ -400,12 +400,12 @@ export default function BodegasAdminPage() {
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-2">
-              <RefreshCw size={12} className="text-emerald-500 animate-spin" />
-              <p className="text-[10px] text-gray-500">Cargando bodegas...</p>
+              <RefreshCw size={20} className="text-emerald-500 animate-spin" />
+              <p className="text-[12px] text-gray-500">Cargando bodegas...</p>
             </div>
           ) : filteredList.length === 0 ? (
-            <div className="text-center py-16 text-gray-500 text-[10px] space-y-1">
-              <ShieldAlert size={12} className="mx-auto mb-2 text-gray-500" />
+            <div className="text-center py-16 text-gray-500 text-[12px] space-y-1">
+              <ShieldAlert size={24} className="mx-auto mb-2 text-gray-500" />
               <p className="font-bold text-gray-500">Sin bodegas filtradas</p>
             </div>
           ) : (
@@ -437,12 +437,12 @@ export default function BodegasAdminPage() {
                     </span>
                   </div>
 
-                  <p className="text-[9.5px] text-gray-500 flex items-center gap-1 leading-none">
+                  <p className="text-[11px] text-gray-500 flex items-center gap-1 leading-none">
                     <MapPin size={11} className="text-gray-500" />
                     {b.municipio}, {b.estado}
                   </p>
 
-                  <div className="flex justify-between items-center text-[9.5px] pt-1">
+                  <div className="flex justify-between items-center text-[11px] pt-1">
                     <div className="flex items-center gap-1 text-gray-500">
                       <Box size={11} className="text-gray-500" />
                       Capacidad: <strong>{b.capacidad_total.toLocaleString()} t</strong>
@@ -505,13 +505,13 @@ export default function BodegasAdminPage() {
                   </div>
                   
                   <div>
-                    <h4 className="font-extrabold text-[9.5px] text-gray-900 tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
-                    <p className="text-[9.5px] text-gray-500 flex items-center gap-1">
+                    <h4 className="font-extrabold text-[13px] text-gray-900 tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
+                    <p className="text-[11px] text-gray-500 flex items-center gap-1">
                       <MapPin size={11} /> {b.municipio}, {b.estado}
                     </p>
                   </div>
 
-                  <div className="text-[9.5px] text-gray-700 bg-gray-50 border border-white/5 rounded-xl p-2.5 space-y-1">
+                  <div className="text-[11px] text-gray-700 bg-gray-50 border border-white/5 rounded-xl p-2.5 space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500 font-medium">Capacidad:</span>
                       <strong className="text-gray-900 font-bold">{b.capacidad_total.toLocaleString()} t</strong>
@@ -526,7 +526,7 @@ export default function BodegasAdminPage() {
 
                   <button 
                     onClick={() => navigate(`/admin/bodegas/${b.id}`)}
-                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-[9.5px] font-black py-2.5 px-3 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1 active:scale-95"
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-black py-2.5 px-3 rounded-xl transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1 active:scale-95"
                   >
                     Ver Ficha Completa →
                   </button>
@@ -551,16 +551,16 @@ export default function BodegasAdminPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {bodegas.filter(b => b.estatus === 'pendiente').map(b => (
-                <div key={b.id} className="bg-white/80 border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-between">
+                <div key={b.id} className="bg-white/80 border border-amber-500/30 rounded-2xl p-5 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-extrabold text-gray-900 text-[9.5px]">{b.nombre}</h3>
+                      <h3 className="font-extrabold text-gray-900 text-[15px]">{b.nombre}</h3>
                       <span className="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded-full uppercase font-black">Pendiente</span>
                     </div>
-                    <p className="text-gray-500 text-[10px] flex items-center gap-1 mb-3">
+                    <p className="text-gray-500 text-[12px] flex items-center gap-1 mb-3">
                       <MapPin size={12} /> {b.municipio}, {b.estado}
                     </p>
-                    <div className="text-[10px] text-gray-700 bg-white/5 rounded-lg p-3 space-y-1">
+                    <div className="text-[12px] text-gray-700 bg-white/5 rounded-lg p-3 space-y-1">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Capacidad:</span>
                         <strong className="text-gray-900">{b.capacidad_total.toLocaleString()} t</strong>
@@ -574,13 +574,13 @@ export default function BodegasAdminPage() {
                   <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
                     <button 
                       onClick={() => confirmarAprobar(b.id, b.nombre)}
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl text-[10px] transition-all"
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl text-[12px] transition-all"
                     >
                       Aprobar
                     </button>
                     <button 
                       onClick={() => confirmarRechazar(b.id, b.nombre)}
-                      className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold py-2 rounded-xl text-[10px] transition-all"
+                      className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold py-2 rounded-xl text-[12px] transition-all"
                     >
                       Rechazar
                     </button>
@@ -597,16 +597,16 @@ export default function BodegasAdminPage() {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/30 backdrop-blur-sm p-4">
           <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Header del modal */}
-            <div className={`p-4 pb-4 border-b border-white/5 flex flex-col items-center text-center`}>
+            <div className={`p-6 pb-4 border-b border-white/5 flex flex-col items-center text-center`}>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                 modalConfirmacion.tipo === 'aprobar' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
               }`}>
-                {modalConfirmacion.tipo === 'aprobar' ? <CheckCircle size={12} /> : <X size={12} />}
+                {modalConfirmacion.tipo === 'aprobar' ? <CheckCircle size={24} /> : <X size={24} />}
               </div>
-              <h3 className="text-gray-900 text-[9.5px] font-black tracking-tight">
+              <h3 className="text-gray-900 text-[18px] font-black tracking-tight">
                 ¿{modalConfirmacion.tipo === 'aprobar' ? 'Aprobar' : 'Rechazar'} bodega?
               </h3>
-              <p className="text-gray-500 text-[9.5px] mt-1.5 leading-relaxed">
+              <p className="text-gray-500 text-[13px] mt-1.5 leading-relaxed">
                 Estás a punto de <strong className={modalConfirmacion.tipo === 'aprobar' ? 'text-emerald-600' : 'text-red-600'}>{modalConfirmacion.tipo}</strong> la bodega <br/>
                 <span className="text-gray-900 font-bold">{modalConfirmacion.bodegaNombre}</span>
               </p>
@@ -616,13 +616,13 @@ export default function BodegasAdminPage() {
             <div className="p-4 flex gap-3">
               <button
                 onClick={() => setModalConfirmacion({ visible: false, tipo: 'aprobar', bodegaId: null, bodegaNombre: '' })}
-                className="flex-1 py-3 px-4 rounded-xl text-[9.5px] font-bold text-gray-700 bg-white/5 hover:bg-white/10 transition-colors"
+                className="flex-1 py-3 px-4 rounded-xl text-[13px] font-bold text-gray-700 bg-white/5 hover:bg-white/10 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={procesarAccion}
-                className={`flex-1 py-3 px-4 rounded-xl text-[9.5px] font-black text-gray-900 transition-colors shadow-lg ${
+                className={`flex-1 py-3 px-4 rounded-xl text-[13px] font-black text-gray-900 transition-colors shadow-lg ${
                   modalConfirmacion.tipo === 'aprobar' 
                     ? 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-900/20' 
                     : 'bg-red-500 hover:bg-red-400 shadow-red-900/20'
@@ -642,8 +642,8 @@ export default function BodegasAdminPage() {
             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' 
             : 'bg-red-500/10 border-red-500/20 text-red-600'
         }`}>
-          {toast.tipo === 'exito' ? <CheckCircle size={13} /> : <X size={13} />}
-          <span className="text-[9.5px] font-bold">{toast.mensaje}</span>
+          {toast.tipo === 'exito' ? <CheckCircle size={18} /> : <X size={18} />}
+          <span className="text-[13px] font-bold">{toast.mensaje}</span>
         </div>
       )}
 

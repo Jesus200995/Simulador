@@ -62,26 +62,26 @@ export default function DetalleBodegaPage() {
   return (
     <div className="bg-[#F2F2F7]">
       <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-5 pt-3 pb-5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
-            className="flex items-center gap-0.5 text-green-200/80 text-[9.5px] font-medium mb-1.5 active:opacity-60 transition-opacity">
-            <ChevronLeft size={12} strokeWidth={2.5} className="-ml-1" /> Volver
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
-          <p className="text-[9.5px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Mapa</p>
-          <h1 className="text-[19px] sm:text-[9.5px] font-black text-white leading-tight tracking-tight truncate">{bodega.nombre}</h1>
+          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Mapa</p>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight truncate">{bodega.nombre}</h1>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 sm:px-5 py-5 space-y-4">
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-4 shadow-sm ring-1 ring-zinc-100">
-          <h2 className="font-bold text-zinc-800 text-xs">{bodega.nombre}</h2>
-          <div className="flex items-center gap-1 text-zinc-500 text-xs mt-1">
-            <MapPin size={12} /> {bodega.municipio}, {bodega.estado}
+      <div className="max-w-lg mx-auto px-4 sm:px-6 py-5 space-y-4">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm ring-1 ring-zinc-100">
+          <h2 className="font-bold text-zinc-800 text-lg">{bodega.nombre}</h2>
+          <div className="flex items-center gap-1 text-zinc-500 text-sm mt-1">
+            <MapPin size={14} /> {bodega.municipio}, {bodega.estado}
           </div>
 
           {/* Semáforo de compra */}
           {bodega.estado_compra && (
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mt-2 ${
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium mt-2 ${
               bodega.estado_compra === 'comprando'
                 ? 'bg-green-100 text-green-700'
                 : bodega.estado_compra === 'limitado'
@@ -127,17 +127,17 @@ export default function DetalleBodegaPage() {
 
           {bodega.responsable && (
             <div className="mt-2 flex justify-between bg-zinc-50 rounded-xl p-3">
-              <span className="text-zinc-500 text-xs">Responsable</span>
-              <span className="font-medium text-zinc-800 text-xs">{bodega.responsable}</span>
+              <span className="text-zinc-500 text-sm">Responsable</span>
+              <span className="font-medium text-zinc-800 text-sm">{bodega.responsable}</span>
             </div>
           )}
         </div>
 
         {/* Capacidad y disponibilidad — vista unificada */}
         {bodega.capacidad_ton > 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm ring-1 ring-zinc-100">
-            <h3 className="text-xs font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Warehouse size={13} className="text-gray-500" /> Capacidad y disponibilidad
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Warehouse size={18} className="text-gray-500" /> Capacidad y disponibilidad
             </h3>
             {stockActual !== null && (
               <>
@@ -159,39 +159,39 @@ export default function DetalleBodegaPage() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xs text-gray-500 mb-1">Capacidad total</p>
-                <p className="font-bold text-gray-800 text-xs">{bodega.capacidad_ton.toLocaleString('es-MX')}</p>
+                <p className="font-bold text-gray-800 text-lg">{bodega.capacidad_ton.toLocaleString('es-MX')}</p>
                 <p className="text-xs text-gray-400">toneladas</p>
               </div>
               <div className="bg-blue-50 rounded-xl p-3">
                 <p className="text-xs text-blue-600 mb-1">Stock actual</p>
-                <p className="font-bold text-blue-700 text-xs">{stockActual !== null ? stockActual.toLocaleString('es-MX') : '—'}</p>
+                <p className="font-bold text-blue-700 text-lg">{stockActual !== null ? stockActual.toLocaleString('es-MX') : '—'}</p>
                 <p className="text-xs text-blue-400">toneladas</p>
               </div>
               <div className="bg-green-50 rounded-xl p-3">
                 <p className="text-xs text-green-600 mb-1">Disponible</p>
-                <p className="font-bold text-green-700 text-xs">{stockActual !== null ? Math.max(0, bodega.capacidad_ton - stockActual).toLocaleString('es-MX') : '—'}</p>
+                <p className="font-bold text-green-700 text-lg">{stockActual !== null ? Math.max(0, bodega.capacidad_ton - stockActual).toLocaleString('es-MX') : '—'}</p>
                 <p className="text-xs text-green-400">toneladas libres</p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm ring-1 ring-zinc-100">
-            <h3 className="text-xs font-semibold text-gray-800 mb-3 flex items-center gap-2"><Package size={13} className="text-gray-500" /> Stock actual</h3>
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+            <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2"><Package size={18} className="text-gray-500" /> Stock actual</h3>
             {stockActual !== null ? (
               <p className="text-3xl font-bold text-[#1A5C38]">
                 {stockActual.toLocaleString('es-MX')}
-                <span className="text-xs font-normal text-gray-500 ml-2">toneladas</span>
+                <span className="text-base font-normal text-gray-500 ml-2">toneladas</span>
               </p>
             ) : (
-              <p className="text-gray-400 text-xs">Sin información de stock disponible aún</p>
+              <p className="text-gray-400 text-sm">Sin información de stock disponible aún</p>
             )}
           </div>
         )}
 
         {/* Servicios y tarifario */}
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm ring-1 ring-zinc-100">
-          <h3 className="text-xs font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <Wrench size={13} className="text-gray-500" /> Servicios de la bodega
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+          <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <Wrench size={18} className="text-gray-500" /> Servicios de la bodega
           </h3>
           {cargandoServicios ? (
             <div className="space-y-2">
@@ -212,7 +212,7 @@ export default function DetalleBodegaPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-xs text-center py-4">
+            <p className="text-gray-400 text-sm text-center py-4">
               Esta bodega no tiene tarifario activo o sus precios
               tienen más de 90 días sin actualizar.
             </p>
@@ -225,21 +225,21 @@ export default function DetalleBodegaPage() {
             href={`https://www.google.com/maps/dir/?api=1&destination=${bodega.latitud},${bodega.longitud}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 py-4 rounded-2xl font-semibold text-xs w-full active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 py-4 rounded-2xl font-semibold text-sm w-full active:scale-[0.98] transition-all"
           >
-            <MapPin size={12} /> Cómo llegar
+            <MapPin size={16} /> Cómo llegar
           </a>
         )}
 
         {bodega.telefono && (
           <a href={`tel:${bodega.telefono}`}
             className="flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
-            <Phone size={13} /> Llamar a la bodega
+            <Phone size={18} /> Llamar a la bodega
           </a>
         )}
 
         <button onClick={() => navigate('/productor/mapa')}
-          className="w-full ring-1 ring-zinc-300 text-zinc-600 py-3 rounded-2xl text-xs font-medium hover:bg-zinc-50 transition-colors">
+          className="w-full ring-1 ring-zinc-300 text-zinc-600 py-3 rounded-2xl text-sm font-medium hover:bg-zinc-50 transition-colors">
           Volver al mapa
         </button>
       </div>

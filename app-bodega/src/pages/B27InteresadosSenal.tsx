@@ -36,7 +36,7 @@ export default function B27InteresadosSenal() {
     <div className="w-full pb-10">
       <PageHeader title="Productores interesados" subtitle={`${total} productor${total !== 1 ? 'es' : ''} respondió`} back={-1} />
 
-      <div className="w-full max-w-3xl mx-auto px-4 sm:px-5 py-5">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6">
         {cargando ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
@@ -48,23 +48,23 @@ export default function B27InteresadosSenal() {
             <div className="w-20 h-20 bg-gray-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-4 shadow-inner">
               <Wheat size={40} className="text-gray-300" />
             </div>
-            <p className="text-[10px] text-gray-600 font-bold tracking-tight">Aún no hay productores interesados</p>
-            <p className="text-[10px] text-gray-400 mt-1 font-medium">Los productores en tu radio recibirán la notificación</p>
+            <p className="text-[17px] text-gray-600 font-bold tracking-tight">Aún no hay productores interesados</p>
+            <p className="text-[14px] text-gray-400 mt-1 font-medium">Los productores en tu radio recibirán la notificación</p>
           </div>
         ) : (
           <div className="space-y-4">
             {interesados.map(prod => (
               <div key={prod.id}
-                className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-4 flex items-center justify-between gap-4 transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 group/card"
+                className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-5 flex items-center justify-between gap-4 transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 group/card"
               >
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
-                  <p className="font-bold text-[10px] text-gray-900 truncate">
+                  <p className="font-bold text-[16px] text-gray-900 truncate">
                     {prod.nombre || 'Productor registrado'}
                   </p>
-                  <p className="text-[9.5px] font-medium text-gray-500 mt-1 flex items-center gap-1.5">
-                    <MapPin size={12} className="text-gray-400" /> {[prod.municipio, prod.estado].filter(Boolean).join(', ') || 'Ubicación no disponible'}
+                  <p className="text-[13px] font-medium text-gray-500 mt-1 flex items-center gap-1.5">
+                    <MapPin size={14} className="text-gray-400" /> {[prod.municipio, prod.estado].filter(Boolean).join(', ') || 'Ubicación no disponible'}
                   </p>
-                  <p className="text-[10px] font-medium text-gray-400 mt-1">
+                  <p className="text-[12px] font-medium text-gray-400 mt-1">
                     {new Date(prod.fecha_interes).toLocaleDateString('es-MX', {
                       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
                     })}
@@ -72,8 +72,8 @@ export default function B27InteresadosSenal() {
                 </div>
                 {prod.telefono && (
                   <a href={`tel:${prod.telefono}`}
-                    className="flex items-center gap-2 bg-[#1A5C38] text-white px-5 py-3 rounded-[1.25rem] text-[10px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] whitespace-nowrap">
-                    <Phone size={12} />
+                    className="flex items-center gap-2 bg-[#1A5C38] text-white px-5 py-3 rounded-[1.25rem] text-[14px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] whitespace-nowrap">
+                    <Phone size={16} />
                     Llamar
                   </a>
                 )}
