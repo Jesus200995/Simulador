@@ -47,14 +47,17 @@ const ORIGENES_PERMITIDOS = [
   // Dominio anterior (en transición — redirige a agricultura.gob.mx)
   'https://maiz.geodatos.com.mx', 'https://bodega.geodatos.com.mx',
 ];
-// Cualquier puerto de localhost / 127.0.0.1 (desarrollo: vite puede usar 5173, 5174, 5175, …)
-const ES_LOCALHOST = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+// Desarrollo: permitir el frontend corrido localmente desde CUALQUIER dispositivo
+// y puerto — localhost/127.0.0.1 y direcciones de red local (LAN): 10.x, 172.16-31.x,
+// 192.168.x. Así un celular u otra laptop pueden abrir el frontend local (http://IP:5174)
+// apuntando a esta API sin levantar el backend localmente.
+const ES_RED_LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1|10(\.\d{1,3}){3}|172\.(1[6-9]|2\d|3[01])(\.\d{1,3}){2}|192\.168(\.\d{1,3}){2})(:\d+)?$/;
 
 app.use(cors({
   origin: (origin, cb) => {
     // Sin origin (curl, health checks, apps móviles) → permitir
     if (!origin) return cb(null, true);
-    if (ORIGENES_PERMITIDOS.includes(origin) || ES_LOCALHOST.test(origin)) return cb(null, true);
+    if (ORIGENES_PERMITIDOS.includes(origin) || ES_RED_LOCAL.test(origin)) return cb(null, true);
     return cb(null, false);
   },
   credentials: true,

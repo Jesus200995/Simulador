@@ -36,5 +36,7 @@ export default defineConfig({
       }
     }),
   ],
-  server: { port: 5174 },
+  // host: true expone el dev server en la red local para abrir el frontend
+  // desde cualquier dispositivo (celular/otra laptop) vía http://IP-DEL-EQUIPO:5174
+  server: { host: true, port: 5174 },
 })
