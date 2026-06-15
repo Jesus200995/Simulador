@@ -80,14 +80,15 @@ export default function B15Tarifario() {
     <div className="w-full">
       <PageBanner title="Tarifario de Servicios" subtitle="Precios que ofreces en tu bodega" back="/mas" />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
-        {/* Selector de bodega */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5">
-          <label className="block text-[15px] font-medium text-gray-600 mb-1.5">Bodega</label>
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Selector de bodega */}
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
+          <label className="block text-[15px] font-bold text-gray-400 uppercase tracking-widest mb-3">Bodega</label>
           <select
             value={bodegaId}
             onChange={e => setBodegaId(e.target.value)}
-            className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
+            className="w-full bg-[#F2F2F7] rounded-[1.25rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
           >
             <option value="">Selecciona bodega</option>
             {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
@@ -95,14 +96,14 @@ export default function B15Tarifario() {
         </div>
 
         {diasSinActualizar !== null && diasSinActualizar >= 30 && (
-          <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-lg">
-            <div className="flex items-center gap-3">
-              <AlertTriangle size={22} className="text-amber-600 flex-shrink-0" />
+          <div className="bg-amber-50 border-l-[6px] border-amber-400 p-6 mb-6 rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-4">
+              <AlertTriangle size={24} className="text-amber-600 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-amber-800">
+                <p className="font-bold text-[16px] text-amber-800">
                   Tarifario desactualizado — {diasSinActualizar} días sin cambios
                 </p>
-                <p className="text-amber-700 text-sm mt-1">
+                <p className="text-amber-700 text-[14px] font-medium mt-1">
                   Las bodegas con tarifario desactualizado no se incluyen en el 
                   cálculo del Precio Sistema regional. Actualiza tus precios 
                   de servicios para seguir siendo visible.
@@ -114,45 +115,45 @@ export default function B15Tarifario() {
 
         {/* Lista de conceptos */}
         {bodegaId && (
-          <div className="bg-white rounded-2xl shadow-sm border border-black/5 divide-y divide-gray-100">
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] divide-y divide-gray-100 overflow-hidden">
             {conceptos.map(c => {
               const tarifa = getTarifa(c.id);
               const isEdit = editando === c.id;
               return (
-                <div key={c.id} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-xl bg-[#1A5C38]/[0.08] text-[#1A5C38] flex items-center justify-center flex-shrink-0">{iconMap[c.icono] || <Tag size={18} />}</span>
+                <div key={c.id} className="p-5 hover:bg-gray-50/50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <span className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] text-[#1A5C38] flex items-center justify-center flex-shrink-0">{iconMap[c.icono] || <Tag size={20} />}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[15px] text-gray-900">{c.nombre}</p>
-                      <p className="text-[12px] text-gray-400">{c.unidad_default}</p>
+                      <p className="font-bold text-[16px] text-gray-900">{c.nombre}</p>
+                      <p className="text-[13px] text-gray-500 font-medium">{c.unidad_default}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       {tarifa ? (
-                        <p className="font-bold text-[16px] text-[#1A5C38]">${formatNum(tarifa.precio)}</p>
+                        <p className="font-black text-[18px] text-[#1A5C38]">${formatNum(tarifa.precio)}</p>
                       ) : (
-                        <p className="text-[13px] text-gray-400">Sin precio</p>
+                        <p className="text-[14px] font-medium text-gray-400">Sin precio</p>
                       )}
                       <button
                         onClick={() => { setEditando(isEdit ? null : c.id); setPrecio(tarifa?.precio || ''); }}
-                        className="text-[13px] text-[#1A5C38] font-semibold mt-0.5"
+                        className="text-[13px] text-[#1A5C38] font-bold mt-1 hover:text-[#154a2d] transition-colors"
                       >
                         {isEdit ? 'Cancelar' : tarifa ? 'Editar' : 'Agregar'}
                       </button>
                     </div>
                   </div>
                   {isEdit && (
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex gap-3 mt-4">
                       <input
                         type="number"
                         value={precio}
                         onChange={e => setPrecio(e.target.value)}
                         placeholder={`Precio en ${c.unidad_default}`}
-                        className="flex-1 bg-[#F2F2F7] rounded-xl px-4 py-3 text-[16px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0"
+                        className="flex-1 bg-[#F2F2F7] rounded-[1rem] px-5 py-3.5 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
                       />
                       <button
                         onClick={() => guardar(c.id)}
                         disabled={saving}
-                        className="bg-[#1A5C38] text-white px-5 py-3 rounded-xl text-[15px] font-semibold disabled:opacity-40 active:opacity-80 transition-opacity"
+                        className="bg-[#1A5C38] hover:bg-[#154a2d] text-white px-6 py-3.5 rounded-[1rem] text-[15px] font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-md"
                       >
                         {saving ? '…' : 'Guardar'}
                       </button>
@@ -166,11 +167,12 @@ export default function B15Tarifario() {
 
         <button
           onClick={() => navigate('/tarifario/proponer')}
-          className="w-full text-[15px] text-[#1A5C38] font-semibold border border-dashed border-[#1A5C38]/40 rounded-2xl py-4 active:opacity-70 transition-opacity flex items-center justify-center gap-2"
+          className="w-full text-[15px] text-[#1A5C38] font-bold border-2 border-dashed border-[#1A5C38]/40 rounded-[1.5rem] py-5 hover:bg-[#1A5C38]/[0.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          <Plus size={16} />
+          <Plus size={18} strokeWidth={2.5} />
           Proponer nuevo servicio
         </button>
+        </div>
       </div>
     </div>
   );

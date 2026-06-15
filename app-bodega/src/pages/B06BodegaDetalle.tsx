@@ -73,22 +73,23 @@ export default function B06BodegaDetalle() {
       />
 
       {/* Tabs sticky */}
-      <div className="sticky top-[60px] z-20 bg-white border-b border-black/[0.06] shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex overflow-x-auto no-scrollbar">
+      <div className="sticky top-[60px] z-20 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 flex overflow-x-auto no-scrollbar">
           {tabs.map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 flex-shrink-0 px-4 py-3.5 text-[13px] font-semibold transition-colors border-b-2
-                ${tab === t.key ? 'border-[#1A5C38] text-[#1A5C38]' : 'border-transparent text-gray-400'}`}
+              className={`flex items-center gap-1.5 flex-shrink-0 px-4 py-3.5 text-[13px] font-semibold transition-all duration-300 border-b-2
+                ${tab === t.key ? 'border-[#1A5C38] text-[#1A5C38] scale-[1.02]' : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50/50'}`}
             >
-              {tabIcons[t.key]}{t.label}
+              <span className={`transition-transform duration-300 ${tab === t.key ? 'scale-110' : ''}`}>{tabIcons[t.key]}</span>
+              {t.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
         {/* ── General ── */}
         {tab === 'general' && (
           <div className="space-y-4">
@@ -113,9 +114,9 @@ export default function B06BodegaDetalle() {
               ))}
             </div>
           )}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
-              <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Información</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <div className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] divide-y divide-gray-100 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-500 group">
+              <p className="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover:text-emerald-600/80">Información</p>
               {[
                 ['Capacidad', (bodega.capacidad_ton != null && bodega.capacidad_ton > 0) ? `${formatNum(bodega.capacidad_ton)} ton` : 'Sin datos registrados'],
 
@@ -123,24 +124,24 @@ export default function B06BodegaDetalle() {
                 ['Estatus operativo', bodega.estatus_operativo || '—'],
                 ['Coordenadas', `${bodega.latitud?.toFixed(4) || '—'}, ${bodega.longitud?.toFixed(4) || '—'}`],
               ].map(([k, v]) => (
-                <div key={k} className="flex justify-between items-center px-4 py-3.5">
-                  <span className="text-[14px] text-gray-500">{k}</span>
+                <div key={k} className="flex justify-between items-center px-4 py-3.5 hover:bg-gray-50/50 transition-colors">
+                  <span className="text-[14px] text-gray-500 font-medium">{k}</span>
                   <span className="text-[14px] font-semibold text-gray-800 text-right max-w-[55%] truncate">{v}</span>
                 </div>
               ))}
             </div>
             {contactos.length > 0 && (
-              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
-                <p className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Contactos</p>
+              <div className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] divide-y divide-gray-100 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-500 group">
+                <p className="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover:text-emerald-600/80">Contactos</p>
                 {contactos.map((c: any) => (
-                  <div key={c.id} className="px-4 py-3.5 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div key={c.id} className="px-4 py-3.5 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
                       <Phone size={14} className="text-[#1A5C38]" />
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-gray-800">{c.nombre}</p>
-                      {c.cargo && <p className="text-[12px] text-gray-400">{c.cargo}</p>}
-                      {c.telefono && <p className="text-[12px] text-[#1A5C38] font-medium">{c.telefono}</p>}
+                      {c.cargo && <p className="text-[12px] text-gray-400 font-medium">{c.cargo}</p>}
+                      {c.telefono && <p className="text-[12px] text-[#1A5C38] font-bold mt-0.5">{c.telefono}</p>}
                     </div>
                   </div>
                 ))}

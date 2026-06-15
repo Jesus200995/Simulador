@@ -106,10 +106,11 @@ export default function B13Transaccion() {
     <div className="w-full">
       <PageBanner title="Registrar Transacción" subtitle="Nueva compra de maíz" back="/transacciones" />
 
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
-        {/* Bodega y productor */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y productor</p>
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6">
+          {/* Bodega y productor */}
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+            <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Bodega y productor</p>
           <div>
             <label className={labelClass}>Bodega donde ocurrió la compra</label>
             <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
@@ -178,8 +179,8 @@ export default function B13Transaccion() {
         </div>
 
         {/* Tipo de maíz */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Tipo de maíz</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Tipo de maíz</p>
           <div>
             <label className={labelClass}>Tipo de maíz</label>
             <select value={form.tipo_maiz} onChange={e => { set('tipo_maiz', e.target.value); set('variedad_code', ''); }} required className={inputClass}>
@@ -199,8 +200,8 @@ export default function B13Transaccion() {
         </div>
 
         {/* Volumen, precio y fecha */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volumen, precio y fecha</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Volumen, precio y fecha</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Volumen (ton)</label>
@@ -224,10 +225,11 @@ export default function B13Transaccion() {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40">
+          className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
           {loading ? 'Registrando…' : 'Registrar transacción'}
         </button>
       </form>
+      </div>
     </div>
   );
 }

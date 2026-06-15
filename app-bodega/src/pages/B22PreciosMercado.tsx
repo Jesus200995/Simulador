@@ -76,10 +76,9 @@ export default function B22PreciosMercado() {
     <div className="w-full min-h-screen bg-gradient-to-b from-gray-50/50 to-gray-100/30">
       <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas en tiempo real" back="/dashboard" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-        
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 space-y-6">
         {/* Top Control Bar */}
-        <div className="flex items-center justify-between bg-white/80 backdrop-blur-md border border-gray-100 rounded-xl px-4 py-2.5 shadow-sm">
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur-md border border-black/[0.04] rounded-[1.25rem] px-5 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 relative">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${esDatosDeAyer ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
@@ -105,10 +104,10 @@ export default function B22PreciosMercado() {
         )}
 
         {/* 3 Precios Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {/* PRECIO 1 — Margen de Negociación */}
-          <section className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-3 hover:shadow-md transition-all duration-300">
+          <section className="bg-white/80 backdrop-blur-md rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-500 group/card">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-full bg-gray-800 text-white text-[11px] font-bold flex items-center justify-center shadow-sm">1</span>
@@ -180,7 +179,7 @@ export default function B22PreciosMercado() {
             </div>
 
             {/* Total Margen Negociación */}
-            <div className="bg-gray-900 rounded-xl p-3.5 text-center shadow-inner relative overflow-hidden">
+            <div className="bg-gray-900 rounded-[1.25rem] p-5 text-center shadow-inner relative overflow-hidden transition-transform duration-500 group-hover/card:scale-[1.01]">
               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Margen de Negociación Total</p>
               {loading ? (
                 <div className="flex justify-center py-1"><Spinner /></div>
@@ -192,7 +191,7 @@ export default function B22PreciosMercado() {
           </section>
 
           {/* PRECIO 2 — Precio de Compra (PO + S) */}
-          <section className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-3 hover:shadow-md transition-all duration-300">
+          <section className="bg-white/80 backdrop-blur-md rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-500 group/card">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-full bg-[#1A5C38] text-white text-[11px] font-bold flex items-center justify-center shadow-sm">2</span>
@@ -205,9 +204,9 @@ export default function B22PreciosMercado() {
               Costo real del maíz en la cadena, sumando el pago al productor y el costo de servicios.
             </p>
 
-            <div className="rounded-xl overflow-hidden border border-gray-100 divide-y divide-gray-100 shadow-inner">
+            <div className="rounded-[1.25rem] overflow-hidden border border-gray-100 divide-y divide-gray-100 shadow-inner">
               {/* Productor (PO) */}
-              <div className="bg-[#1A5C38]/5 p-3 flex justify-between items-center">
+              <div className="bg-[#1A5C38]/5 p-4 flex justify-between items-center transition-colors hover:bg-[#1A5C38]/10">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <Wheat size={12} className="text-[#1A5C38]" />
@@ -228,7 +227,7 @@ export default function B22PreciosMercado() {
               </div>
 
               {/* Servicios (S) */}
-              <div className="bg-[#1B4F8A]/5 p-3 flex justify-between items-center">
+              <div className="bg-[#1B4F8A]/5 p-4 flex justify-between items-center transition-colors hover:bg-[#1B4F8A]/10">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <Store size={12} className="text-[#1B4F8A]" />
@@ -250,7 +249,7 @@ export default function B22PreciosMercado() {
             </div>
 
             {/* Total Compra */}
-            <div className="bg-white rounded-xl p-3 border border-gray-100 text-center shadow-sm">
+            <div className="bg-white rounded-[1.25rem] p-5 border border-black/[0.04] text-center shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-transform duration-500 group-hover/card:scale-[1.01]">
               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Precio de Compra Total</p>
               {loading ? (
                 <div className="flex justify-center py-1"><Spinner /></div>
@@ -264,16 +263,16 @@ export default function B22PreciosMercado() {
         </div>
 
         {/* PRECIO 3 — Precio de Venta (Compra - Margen) & PRECIO 4 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
           {/* Precio de Venta (Resta Visual) */}
-          <section className="md:col-span-2 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-3 hover:shadow-md transition-all duration-300">
+          <section className="md:col-span-2 bg-white/80 backdrop-blur-md rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-500 group/card">
             <div className="flex items-center gap-2.5">
               <span className="w-6 h-6 rounded-full bg-[#1B4F8A] text-white text-[11px] font-bold flex items-center justify-center shadow-sm">3</span>
               <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Precio de Venta (Diferencial de Mercado)</h2>
             </div>
 
-            <div className="rounded-xl border border-gray-100 p-3 bg-gray-50/30 space-y-2">
+            <div className="rounded-[1.25rem] border border-black/[0.04] p-5 bg-gray-50/50 space-y-3 transition-transform duration-500 group-hover/card:scale-[1.01]">
               <div className="flex justify-between items-center text-[12px]">
                 <span className="text-gray-400">Precio de Compra (PO + S)</span>
                 <span className="font-semibold text-gray-700">{loading ? '—' : fmt(data?.precio_compra_mxn)}/t</span>
@@ -315,7 +314,7 @@ export default function B22PreciosMercado() {
           </section>
 
           {/* PRECIO 4 — CEDIS */}
-          <section className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 flex flex-col justify-between hover:shadow-md transition-all duration-300">
+          <section className="bg-white/80 backdrop-blur-md rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 flex flex-col justify-between hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-500 group/card">
             <div>
               <div className="flex items-center gap-2.5 mb-2">
                 <span className="w-6 h-6 rounded-full bg-amber-400 text-white text-[11px] font-bold flex items-center justify-center shadow-sm">4</span>
@@ -339,7 +338,7 @@ export default function B22PreciosMercado() {
         </div>
 
         {/* Gráfica de Tendencia */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm p-4 space-y-4 hover:shadow-md transition-all duration-300">
+        <div className="bg-white/80 backdrop-blur-md rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-500 group/card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity size={14} className="text-emerald-500" />

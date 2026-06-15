@@ -228,22 +228,23 @@ export function PageBanner({
 }) {
   const navigate = useNavigate();
   return (
-    <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+    <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
         {back !== undefined && (
           <button
             onClick={() => typeof back === 'number' ? navigate(back) : navigate(back)}
-            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-2 active:opacity-60 transition-opacity"
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-2 active:opacity-60 transition-opacity hover:text-green-100"
           >
-            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" />
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1 transition-transform group-hover/banner:-translate-x-0.5" />
             Volver
           </button>
         )}
         <div className="flex items-end justify-between gap-3">
           <div className="flex-1 min-w-0">
             {badge && <div className="mb-1.5">{badge}</div>}
-            <h1 className="text-[20px] sm:text-[24px] font-black text-white leading-tight">{title}</h1>
-            {subtitle && <p className="text-green-200/80 text-[13px] mt-0.5 leading-snug">{subtitle}</p>}
+            <h1 className="text-[20px] sm:text-[24px] font-bold text-white leading-tight drop-shadow-sm">{title}</h1>
+            {subtitle && <p className="text-green-100/80 text-[13px] mt-0.5 leading-snug font-medium">{subtitle}</p>}
           </div>
           {action && <div className="flex-shrink-0">{action}</div>}
         </div>

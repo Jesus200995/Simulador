@@ -116,7 +116,9 @@ export default function B10Requerimiento() {
     <div className="w-full">
       <PageBanner title="Requerimientos de Maíz" subtitle="Notifica a productores en tu área" back="/oferta" />
 
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
             <p className="text-amber-800 font-medium flex items-center gap-1.5"><AlertTriangle size={15} /> {error}</p>
@@ -124,8 +126,8 @@ export default function B10Requerimiento() {
         )}
 
         {/* Bodega y maíz */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Bodega y tipo de maíz</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Bodega y tipo de maíz</p>
           <div>
             <label className={labelClass}>Bodega</label>
             <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
@@ -192,8 +194,8 @@ export default function B10Requerimiento() {
         </div>
 
         {/* Volumen y precio */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Volumen y precio</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
+          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Volumen y precio</p>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Volumen que busca (ton)</label>
@@ -207,7 +209,7 @@ export default function B10Requerimiento() {
         </div>
 
         {/* Vigencia — date range picker (C-11) */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-4">
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
           <div>
             <label className={labelClass}>¿Para cuándo necesitas el maíz?</label>
             <div className="grid grid-cols-2 gap-3">
@@ -227,8 +229,8 @@ export default function B10Requerimiento() {
         </div>
 
         {/* Radio de búsqueda */}
-        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-5 space-y-3">
-          <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wide">Radio de búsqueda</p>
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-4">
+          <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Radio de búsqueda</p>
           <div className="grid grid-cols-3 gap-2">
             {OPCIONES_RADIO.map(km => (
               <button
@@ -253,23 +255,23 @@ export default function B10Requerimiento() {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1A5C38] text-white rounded-2xl py-4 text-[17px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40">
+          className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
           {loading ? 'Publicando…' : '+ Nuevo requerimiento de maíz'}
         </button>
       </form>
 
       {/* Requerimientos activos (C-10) */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-8">
-        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3 mt-2">Requerimientos activos</p>
+      <div className="max-w-4xl mx-auto pt-6 pb-10 border-t border-black/[0.06] mt-8">
+        <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-4">Requerimientos activos</p>
         {requerimientos.length === 0 ? (
-          <div className="flex flex-col items-center py-10 gap-2 text-gray-400 bg-white rounded-2xl border border-black/[0.06]">
-            <Wheat size={32} className="text-gray-200" />
-            <p className="text-[13px] text-center px-4">No tienes requerimientos de maíz activos. Publica uno para que los productores cercanos lo vean.</p>
+          <div className="flex flex-col items-center py-10 gap-3 text-gray-400 bg-white rounded-[1.5rem] border border-black/[0.04]">
+            <Wheat size={40} className="text-gray-200" />
+            <p className="text-[14px] text-center px-4 font-medium">No tienes requerimientos de maíz activos. Publica uno para que los productores cercanos lo vean.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] divide-y divide-gray-100">
+          <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] divide-y divide-gray-100 overflow-hidden">
             {requerimientos.map(s => (
-              <div key={s.id} className="flex items-start gap-3 px-4 py-3.5">
+              <div key={s.id} className="flex items-start gap-4 p-5 hover:bg-gray-50/50 transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-semibold text-gray-800">
                     {TIPOS_MAIZ.find(t => t.code === s.tipo_maiz)?.label || s.tipo_maiz}
@@ -296,14 +298,16 @@ export default function B10Requerimiento() {
                   </button>
                   {s.volumen_ton && <p className="text-[11px] text-gray-400">Busca: {s.volumen_ton} ton</p>}
                 </div>
-                <button onClick={() => cancelar(s.id)} className="text-red-400 active:text-red-600 p-2 flex-shrink-0 mt-1">
-                  <Trash2 size={16} />
+                <button onClick={() => cancelar(s.id)} className="text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl p-2.5 flex-shrink-0 transition-colors">
+                  <Trash2 size={18} />
                 </button>
               </div>
             ))}
           </div>
         )}
       </div>
+      </div>
+    </div>
     </div>
   );
 }

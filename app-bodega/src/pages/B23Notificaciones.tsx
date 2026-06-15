@@ -93,16 +93,18 @@ export default function B23Notificaciones() {
         }
       />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 space-y-2">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 space-y-3">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-24">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
           </div>
         ) : notifs.length === 0 ? (
-          <div className="text-center py-16">
-            <Bell size={40} className="text-gray-200 mx-auto mb-3" />
-            <p className="text-[15px] text-gray-400 font-medium">No tienes notificaciones por ahora</p>
-            <p className="text-[13px] text-gray-300 mt-1">Cuando haya actividad en tus bodegas, aparecerá aquí.</p>
+          <div className="text-center py-24 bg-white/50 backdrop-blur-sm rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="w-20 h-20 bg-gray-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Bell size={40} className="text-gray-300" />
+            </div>
+            <p className="text-[17px] text-gray-600 font-bold tracking-tight">No tienes notificaciones por ahora</p>
+            <p className="text-[14px] text-gray-400 mt-1 font-medium">Cuando haya actividad en tus bodegas, aparecerá aquí.</p>
           </div>
         ) : (
           notifs.map(n => {
@@ -115,23 +117,23 @@ export default function B23Notificaciones() {
               <button
                 key={n.id}
                 onClick={() => tocarNotif(n)}
-                className={`w-full flex items-start gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all active:scale-[0.98]
-                  ${n.leida ? 'bg-white border-black/[0.04]' : 'bg-white border-[#1A5C38]/20 shadow-sm'}`}
+                className={`w-full flex items-start gap-4 p-5 rounded-[1.5rem] border text-left transition-all duration-500 active:scale-[0.98] group/notif
+                  ${n.leida ? 'bg-white border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5' : 'bg-emerald-50/30 border-[#1A5C38]/20 shadow-[0_4px_16px_rgba(26,92,56,0.08)] hover:-translate-y-0.5'}`}
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
-                  <Icon size={17} className={cfg.color} />
+                <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/notif:scale-110 ${cfg.bg}`}>
+                  <Icon size={22} className={cfg.color} />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/notif:translate-x-1">
                   <div className="flex items-center gap-2">
-                    <p className={`text-[14px] truncate ${n.leida ? 'font-medium text-gray-700' : 'font-semibold text-gray-900'}`}>
+                    <p className={`text-[16px] truncate ${n.leida ? 'font-bold text-gray-700' : 'font-black text-gray-900 group-hover/notif:text-[#1A5C38] transition-colors'}`}>
                       {titulo}
                     </p>
                     {!n.leida && (
-                      <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#1A5C38]" />
+                      <span className="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-[#1A5C38] shadow-[0_0_8px_rgba(26,92,56,0.5)]" />
                     )}
                   </div>
-                  {mensaje && <p className="text-[12px] text-gray-400 mt-0.5 line-clamp-2">{mensaje}</p>}
-                  <p className="text-[11px] text-gray-300 mt-1">{timeAgo(n.created_at)}</p>
+                  {mensaje && <p className={`text-[13px] mt-1 line-clamp-2 ${n.leida ? 'text-gray-500 font-medium' : 'text-gray-600 font-medium'}`}>{mensaje}</p>}
+                  <p className="text-[12px] text-gray-400 mt-2 font-medium">{timeAgo(n.created_at)}</p>
                 </div>
               </button>
             );

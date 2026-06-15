@@ -80,25 +80,27 @@ export default function B29OnboardingBodeguero() {
   return (
     <div className="w-full">
       {/* Banner */}
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-6">
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-6 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
           <button onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-1 text-green-200/80 text-[13px] font-medium mb-2 active:opacity-60">
+            className="flex items-center gap-1 text-green-200/80 text-[13px] font-bold mb-2 hover:text-white transition-colors">
             <ChevronLeft size={16} className="-ml-1" /> Ir al tablero
           </button>
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Primeros pasos</p>
-          <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight">Configura tu cuenta</h1>
-          <p className="text-green-200/70 text-[14px] mt-1">
+          <p className="text-[11px] font-bold text-green-300/70 uppercase tracking-widest mb-1">Primeros pasos</p>
+          <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight drop-shadow-sm">Configura tu cuenta</h1>
+          <p className="text-green-100/80 text-[14px] mt-1 font-medium">
             {completados} de {total} pasos completados
           </p>
           {/* Barra de progreso */}
-          <div className="mt-3 bg-white/15 rounded-full h-2 w-full overflow-hidden">
-            <div className="h-full bg-[#22c55e] rounded-full transition-all" style={{ width: `${pct}%` }} />
+          <div className="mt-4 bg-white/10 rounded-full h-2.5 w-full max-w-md overflow-hidden shadow-inner">
+            <div className="h-full bg-emerald-400 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(52,211,153,0.5)]" style={{ width: `${pct}%` }} />
           </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-3">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+        <div className="max-w-4xl mx-auto space-y-4">
         {cargando ? (
           [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />)
         ) : (
@@ -107,41 +109,44 @@ export default function B29OnboardingBodeguero() {
               <button
                 key={p.key}
                 onClick={() => navigate(p.ruta)}
-                className={`w-full flex items-center gap-4 px-4 py-4 bg-white rounded-2xl border shadow-[0_1px_4px_rgba(0,0,0,0.06)] text-left active:scale-[0.99] transition-transform ${
-                  p.hecho ? 'border-green-200' : 'border-black/[0.06]'
+                className={`w-full flex items-center gap-5 p-5 bg-white rounded-[1.5rem] border shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-left active:scale-[0.98] transition-all duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 group/card ${
+                  p.hecho ? 'border-green-200/50 bg-green-50/10' : 'border-black/[0.04]'
                 }`}
               >
-                <span className={`flex-shrink-0 ${p.hecho ? 'text-green-600' : 'text-gray-300'}`}>
-                  {p.hecho ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                <span className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 ${p.hecho ? 'text-green-500 bg-green-50' : 'text-gray-400 bg-gray-50'}`}>
+                  {p.hecho ? <CheckCircle2 size={24} className="drop-shadow-sm" /> : <Circle size={24} />}
                 </span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`${p.hecho ? 'text-green-600' : 'text-[#1A5C38]'}`}>{p.icon}</span>
-                    <p className={`text-[15px] font-semibold ${p.hecho ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
+                  <div className="flex items-center gap-2.5">
+                    <span className={`p-1.5 rounded-lg ${p.hecho ? 'bg-green-100 text-green-600' : 'bg-[#1A5C38]/10 text-[#1A5C38]'}`}>{p.icon}</span>
+                    <p className={`text-[16px] font-bold ${p.hecho ? 'text-gray-400 line-through' : 'text-gray-900 group-hover/card:text-[#1A5C38]'} transition-colors`}>
                       {i + 1}. {p.titulo}
                     </p>
                   </div>
-                  <p className="text-[12px] text-gray-400 mt-0.5 ml-7">{p.desc}</p>
+                  <p className="text-[13px] text-gray-500 font-medium mt-1 ml-10 leading-snug">{p.desc}</p>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 flex-shrink-0" />
+                <ChevronRight size={18} className={`flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 ${p.hecho ? 'text-green-300' : 'text-gray-300 group-hover/card:text-[#1A5C38]'}`} />
               </button>
             ))}
 
             {completados === total && (
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-5 text-center mt-2">
-                <PartyPopper size={30} className="text-green-600 mx-auto mb-1" />
-                <p className="font-semibold text-green-800">¡Configuración completa!</p>
-                <p className="text-green-700 text-sm mt-1">Ya estás listo para operar en SIMAC.</p>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/60 rounded-[1.5rem] p-8 text-center mt-6 shadow-[0_4px_24px_rgba(52,211,153,0.1)]">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <PartyPopper size={32} className="text-emerald-500" />
+                </div>
+                <p className="text-[20px] font-black text-green-900 tracking-tight">¡Configuración completa!</p>
+                <p className="text-green-700 font-medium text-[14px] mt-1.5">Ya estás listo para operar en SIMAC con todas las funciones.</p>
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="mt-3 px-5 py-2.5 bg-[#1A5C38] text-white rounded-xl text-sm font-semibold"
+                  className="mt-6 px-8 py-3.5 bg-[#1A5C38] text-white rounded-[1.25rem] text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] inline-flex items-center gap-2"
                 >
-                  Ir al tablero →
+                  Ir al tablero <ChevronRight size={16} />
                 </button>
               </div>
             )}
           </>
         )}
+        </div>
       </div>
     </div>
   );

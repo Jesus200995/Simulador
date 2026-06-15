@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
 
 interface Transaccion {
@@ -39,32 +40,38 @@ export default function B26DetalleTransaccion() {
     if (!txn) return null;
     if (txn.confirmacion_productor === 'confirmada') {
       return (
-        <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-4">
-          <CheckCircle className="text-green-600 w-5 h-5 flex-shrink-0" />
+        <div className="flex items-center gap-4 bg-green-50 border border-green-100 rounded-[1.5rem] p-5 shadow-[0_2px_8px_rgba(22,163,74,0.08)]">
+          <div className="w-12 h-12 rounded-[1.25rem] bg-green-100 flex items-center justify-center flex-shrink-0">
+            <CheckCircle className="text-green-600 w-6 h-6" />
+          </div>
           <div>
-            <p className="font-semibold text-green-800 text-sm">Confirmada por el productor</p>
-            <p className="text-green-600 text-xs mt-0.5">El productor verificó los datos de la transacción</p>
+            <p className="font-bold text-green-900 text-[16px]">Confirmada por el productor</p>
+            <p className="text-green-700 text-[13px] font-medium mt-0.5">El productor verificó los datos de la transacción</p>
           </div>
         </div>
       );
     }
     if (txn.confirmacion_productor === 'discrepancia') {
       return (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl p-4">
-          <AlertCircle className="text-red-600 w-5 h-5 flex-shrink-0" />
+        <div className="flex items-center gap-4 bg-red-50 border border-red-100 rounded-[1.5rem] p-5 shadow-[0_2px_8px_rgba(220,38,38,0.08)]">
+          <div className="w-12 h-12 rounded-[1.25rem] bg-red-100 flex items-center justify-center flex-shrink-0">
+            <AlertCircle className="text-red-600 w-6 h-6" />
+          </div>
           <div>
-            <p className="font-semibold text-red-800 text-sm">El productor reportó una discrepancia</p>
-            <p className="text-red-600 text-xs mt-0.5">Contacta al productor para resolver la diferencia</p>
+            <p className="font-bold text-red-900 text-[16px]">El productor reportó una discrepancia</p>
+            <p className="text-red-700 text-[13px] font-medium mt-0.5">Contacta al productor para resolver la diferencia</p>
           </div>
         </div>
       );
     }
     return (
-      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <Clock className="text-amber-600 w-5 h-5 flex-shrink-0" />
+      <div className="flex items-center gap-4 bg-amber-50 border border-amber-100 rounded-[1.5rem] p-5 shadow-[0_2px_8px_rgba(217,119,6,0.08)]">
+        <div className="w-12 h-12 rounded-[1.25rem] bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <Clock className="text-amber-600 w-6 h-6" />
+        </div>
         <div>
-          <p className="font-semibold text-amber-800 text-sm">Pendiente de confirmación</p>
-          <p className="text-amber-600 text-xs mt-0.5">El productor aún no ha confirmado esta transacción</p>
+          <p className="font-bold text-amber-900 text-[16px]">Pendiente de confirmación</p>
+          <p className="text-amber-700 text-[13px] font-medium mt-0.5">El productor aún no ha confirmado esta transacción</p>
         </div>
       </div>
     );
@@ -97,26 +104,17 @@ export default function B26DetalleTransaccion() {
   const total = volumen * precio;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-gray-100">
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 className="font-semibold text-gray-900">Detalle de transacción</h1>
-          <p className="text-xs text-gray-500">#{txn.id}</p>
-        </div>
-      </div>
+    <div className="w-full pb-10">
+      <PageHeader title="Detalle de transacción" subtitle={`#${txn.id}`} back="/transacciones" />
 
-      <div className="p-4 space-y-4">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Estado de confirmación */}
         {estadoConfirmacion()}
 
         {/* Datos principales */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <h3 className="font-semibold text-gray-800 mb-4">Datos de la compra</h3>
-          <div className="space-y-3">
+        <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
+          <h3 className="font-black text-gray-900 text-[18px] mb-5 tracking-tight">Datos de la compra</h3>
+          <div className="space-y-4">
             {[
               { label: 'Productor', valor: txn.nombre_productor || '—' },
               { label: 'Bodega', valor: txn.bodega_nombre },
@@ -133,9 +131,9 @@ export default function B26DetalleTransaccion() {
                   : '—',
               },
             ].map(item => (
-              <div key={item.label} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                <span className="text-gray-500 text-sm">{item.label}</span>
-                <span className={`text-sm font-medium ${item.destacado ? 'text-[#1A5C38] text-base' : 'text-gray-800'}`}>
+              <div key={item.label} className="flex justify-between items-center py-3 border-b border-gray-100/50 last:border-0 last:pb-0">
+                <span className="text-gray-500 font-medium text-[14px]">{item.label}</span>
+                <span className={`text-[15px] ${item.destacado ? 'text-[#1A5C38] font-black text-[18px]' : 'text-gray-900 font-bold'}`}>
                   {item.valor}
                 </span>
               </div>
@@ -145,17 +143,17 @@ export default function B26DetalleTransaccion() {
 
         {/* Observaciones */}
         {txn.observaciones && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 className="font-semibold text-gray-800 mb-2">Observaciones</h3>
-            <p className="text-gray-600 text-sm">{txn.observaciones}</p>
+          <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6">
+            <h3 className="font-black text-gray-900 text-[18px] mb-3 tracking-tight">Observaciones</h3>
+            <p className="text-gray-600 text-[15px] font-medium leading-relaxed">{txn.observaciones}</p>
           </div>
         )}
 
         {/* Peso en Precio Sistema */}
-        <div className="bg-gray-50 rounded-xl p-4">
-          <p className="text-xs text-gray-500 text-center">
+        <div className="bg-[#F2F2F7] rounded-[1.25rem] p-5">
+          <p className="text-[14px] text-gray-500 text-center font-medium">
             Peso en Precio Sistema:{' '}
-            <span className="font-semibold text-gray-700">
+            <span className="font-bold text-gray-900 ml-1">
               {peso > 0 ? `${(peso * 100).toFixed(0)}%` : 'Pendiente de confirmación'}
             </span>
           </p>

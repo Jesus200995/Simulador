@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Phone, Wheat, MapPin } from 'lucide-react';
+import { Phone, Wheat, MapPin } from 'lucide-react';
+import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
 
 interface Interesado {
@@ -32,48 +33,38 @@ export default function B27InteresadosSenal() {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-gray-100">
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 className="font-semibold text-gray-900">Productores interesados</h1>
-          <p className="text-xs text-gray-500">
-            {total} productor{total !== 1 ? 'es' : ''} respondió
-          </p>
-        </div>
-      </div>
+    <div className="w-full pb-10">
+      <PageHeader title="Productores interesados" subtitle={`${total} productor${total !== 1 ? 'es' : ''} respondió`} back={-1} />
 
-      <div className="p-4">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6">
         {cargando ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-20 bg-gray-100 rounded-xl animate-pulse" />
+              <div key={i} className="h-24 bg-white/50 rounded-[1.5rem] border border-black/[0.04] animate-pulse" />
             ))}
           </div>
         ) : interesados.length === 0 ? (
-          <div className="text-center py-16">
-            <Wheat size={32} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">Aún no hay productores interesados</p>
-            <p className="text-gray-400 text-sm mt-1">
-              Los productores en tu radio recibirán la notificación
-            </p>
+          <div className="text-center py-24 bg-white/50 backdrop-blur-sm rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="w-20 h-20 bg-gray-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Wheat size={40} className="text-gray-300" />
+            </div>
+            <p className="text-[17px] text-gray-600 font-bold tracking-tight">Aún no hay productores interesados</p>
+            <p className="text-[14px] text-gray-400 mt-1 font-medium">Los productores en tu radio recibirán la notificación</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {interesados.map(prod => (
               <div key={prod.id}
-                className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-800 truncate">
+                className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-5 flex items-center justify-between gap-4 transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 group/card"
+              >
+                <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
+                  <p className="font-bold text-[16px] text-gray-900 truncate">
                     {prod.nombre || 'Productor registrado'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
-                    <MapPin size={13} /> {[prod.municipio, prod.estado].filter(Boolean).join(', ') || 'Ubicación no disponible'}
+                  <p className="text-[13px] font-medium text-gray-500 mt-1 flex items-center gap-1.5">
+                    <MapPin size={14} className="text-gray-400" /> {[prod.municipio, prod.estado].filter(Boolean).join(', ') || 'Ubicación no disponible'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-[12px] font-medium text-gray-400 mt-1">
                     {new Date(prod.fecha_interes).toLocaleDateString('es-MX', {
                       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
                     })}
@@ -81,8 +72,8 @@ export default function B27InteresadosSenal() {
                 </div>
                 {prod.telefono && (
                   <a href={`tel:${prod.telefono}`}
-                    className="flex items-center gap-2 bg-[#1A5C38] text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors whitespace-nowrap">
-                    <Phone size={14} />
+                    className="flex items-center gap-2 bg-[#1A5C38] text-white px-5 py-3 rounded-[1.25rem] text-[14px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] whitespace-nowrap">
+                    <Phone size={16} />
                     Llamar
                   </a>
                 )}

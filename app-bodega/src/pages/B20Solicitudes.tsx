@@ -31,47 +31,50 @@ export default function B20Solicitudes() {
   }, [id, filtro]);
 
   return (
-    <div className="max-w-2xl mx-auto overflow-x-hidden">
+    <div className="w-full pb-10">
       <PageHeader title="Solicitudes" subtitle="Productores interesados" back={`/ventanillas/${id}`} />
 
+      <div className="w-full max-w-3xl mx-auto">
+
       {/* Filtros scroll horizontal */}
-      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 py-3 flex gap-2 overflow-x-auto no-scrollbar">
+      <div className="px-4 sm:px-6 py-4 flex gap-2.5 overflow-x-auto no-scrollbar">
         {ESTADOS.map(e => (
           <button
             key={e}
             onClick={() => setFiltro(e)}
-            className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-semibold transition-all
-              ${filtro === e ? 'bg-[#1A5C38] text-white' : 'bg-[#F2F2F7] text-gray-600'}`}
+            className={`flex-shrink-0 px-5 py-2.5 rounded-[1.25rem] text-[14px] font-bold transition-all
+              ${filtro === e ? 'bg-[#1A5C38] text-white shadow-[0_4px_12px_rgba(26,92,56,0.25)]' : 'bg-[#F2F2F7] text-gray-500 hover:bg-gray-200/60'}`}
           >
             {e.charAt(0).toUpperCase() + e.slice(1)}
           </button>
         ))}
       </div>
 
-      <div className="px-4 sm:px-6 py-5 space-y-2">
-        {loading && <p className="text-center text-gray-400 text-[14px] py-10">Cargando…</p>}
+      <div className="px-4 sm:px-6 py-2 space-y-3">
+        {loading && <p className="text-center text-gray-400 text-[14px] font-medium py-10">Cargando…</p>}
 
         {solicitudes.map(s => (
           <button
             key={s.id}
             onClick={() => navigate(`/ventanillas/${id}/solicitudes/${s.id}`)}
-            className="w-full bg-white rounded-2xl shadow-sm border border-black/5 p-4 text-left active:bg-gray-50 transition-colors flex items-center gap-3"
+            className="w-full bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-5 text-left active:scale-[0.98] transition-all duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 flex items-center gap-4 group/card"
           >
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-[15px] text-gray-900 truncate">{s.productor_nombre || 'Productor'}</p>
-              <p className="text-[13px] text-gray-500 mt-0.5">{s.municipio} · {s.nombre_apoyo}</p>
-              <p className="text-[12px] text-gray-400 mt-0.5">{new Date(s.created_at).toLocaleDateString('es-MX')}</p>
+            <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
+              <p className="font-bold text-[16px] text-gray-900 truncate group-hover/card:text-[#1A5C38] transition-colors">{s.productor_nombre || 'Productor'}</p>
+              <p className="text-[13px] font-medium text-gray-500 mt-0.5">{s.municipio} · {s.nombre_apoyo}</p>
+              <p className="text-[12px] text-gray-400 mt-1">{new Date(s.created_at).toLocaleDateString('es-MX')}</p>
             </div>
-            <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${badgeColor[s.estado] || 'bg-gray-100 text-gray-500'}`}>
+            <span className={`text-[12px] font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${badgeColor[s.estado] || 'bg-gray-100 text-gray-500'}`}>
               {s.estado}
             </span>
-            <ChevronRight size={16} className="text-gray-300 flex-shrink-0" />
+            <ChevronRight size={18} className="text-gray-300 flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
           </button>
         ))}
 
         {!loading && solicitudes.length === 0 && (
-          <p className="text-center text-gray-400 text-[14px] py-12">Sin solicitudes con este filtro</p>
+          <p className="text-center text-gray-400 text-[14px] font-medium py-12">Sin solicitudes con este filtro</p>
         )}
+      </div>
       </div>
     </div>
   );

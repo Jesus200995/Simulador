@@ -46,18 +46,19 @@ export default function B05MisBodegas() {
   return (
     <div className="w-full">
       {/* Banner full-bleed */}
-      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-0.5">Módulo</p>
-          <h1 className="text-[22px] sm:text-[26px] font-black text-white leading-tight">Mis Bodegas</h1>
-          <p className="text-green-200/70 text-[14px] mt-1">
+      <div className="w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
+          <p className="text-[11px] font-bold text-green-300/80 uppercase tracking-widest mb-0.5 transition-colors duration-500 group-hover/banner:text-emerald-200">Módulo</p>
+          <h1 className="text-[20px] sm:text-[24px] font-bold text-white leading-tight drop-shadow-sm">Mis Bodegas</h1>
+          <p className="text-green-100/80 text-[13px] mt-0.5 leading-snug font-medium">
             {loading ? 'Cargando…' : `${bodegas.length} bodega${bodegas.length !== 1 ? 's' : ''} asociada${bodegas.length !== 1 ? 's' : ''}`}
           </p>
         </div>
       </div>
 
       {/* Contenido */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
 
         {/* Toggle Lista / Mapa */}
         <div className="flex border border-gray-200 rounded-xl overflow-hidden mb-4">
@@ -92,7 +93,7 @@ export default function B05MisBodegas() {
             const sem = semaforoMap[b.semaforo_compra] || semaforoMap.sin_actividad;
             const pct = b.ocupacion_pct ?? 0;
             return (
-              <div key={b.id} className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_4px_rgba(0,0,0,0.06)] p-5 flex flex-col gap-4">
+              <div key={b.id} className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-black/[0.08] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -142,7 +143,7 @@ export default function B05MisBodegas() {
 
         {/* ── Vista Mapa ── */}
         {vista === 'mapa' && !loading && (
-          <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style={{ height: 500 }}>
+          <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm transition-all duration-500 hover:shadow-lg" style={{ height: 600 }}>
             <MapContainer
               center={[23.6345, -102.5528]}
               zoom={5}

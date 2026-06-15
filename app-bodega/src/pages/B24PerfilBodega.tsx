@@ -481,28 +481,29 @@ export default function B24PerfilBodega() {
 
       <PageBanner title="Mi Perfil" subtitle={rolDisplay} back="/dashboard" />
 
-      <div className="max-w-2xl mx-auto px-4 pt-4 space-y-4">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-6">
+        <div className="max-w-4xl mx-auto space-y-6">
         {loading ? (
           <div className="flex justify-center pt-16"><Spinner /></div>
         ) : (
           <>
             {/* Avatar card */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center flex-shrink-0 shadow-md">
-                <span className="text-white text-[22px] font-black">{initials}</span>
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] flex items-center gap-5">
+              <div className="w-20 h-20 rounded-[1.25rem] bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center flex-shrink-0 shadow-[0_4px_16px_rgba(26,92,56,0.3)]">
+                <span className="text-white text-[28px] font-black">{initials}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-bold text-gray-900 leading-tight truncate">{perfil?.nombre_completo || user?.nombre_completo || '—'}</p>
-                <p className="text-[13px] text-gray-500 mt-0.5 truncate">{perfil?.email || user?.email || '—'}</p>
-                <span className="inline-block mt-1.5 bg-[#1A5C38]/10 text-[#1A5C38] text-[11px] font-bold px-2.5 py-0.5 rounded-full capitalize">
+                <p className="text-[20px] font-black text-gray-900 leading-tight truncate">{perfil?.nombre_completo || user?.nombre_completo || '—'}</p>
+                <p className="text-[14px] text-gray-500 mt-1 font-medium truncate">{perfil?.email || user?.email || '—'}</p>
+                <span className="inline-block mt-2 bg-[#1A5C38]/10 text-[#1A5C38] text-[12px] font-bold px-3 py-1 rounded-full capitalize">
                   {rolDisplay}
                 </span>
               </div>
             </div>
 
             {/* ── Datos de cuenta ─────────────────────────────────── */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-4">Datos de cuenta</p>
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
+              <p className="text-[13px] text-gray-400 uppercase tracking-widest font-bold mb-5">Datos de cuenta</p>
 
               {/* Nombre */}
               <div className="mb-4">
@@ -622,32 +623,32 @@ export default function B24PerfilBodega() {
             </div>
 
             {/* ── Información del sistema ──────────────────────────── */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-4">Información del sistema</p>
-              <div className="space-y-3">
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
+              <p className="text-[13px] text-gray-400 uppercase tracking-widest font-bold mb-5">Información del sistema</p>
+              <div className="space-y-4">
                 {fechaRegistro && (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-gray-500"><Calendar size={14} /><span className="text-xs font-medium">Miembro desde</span></div>
-                    <span className="text-sm text-gray-700 font-medium">{fechaRegistro}</span>
+                    <div className="flex items-center gap-3 text-gray-500"><Calendar size={18} /><span className="text-[15px] font-bold">Miembro desde</span></div>
+                    <span className="text-[15px] text-gray-700 font-bold">{fechaRegistro}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-gray-500"><ShieldCheck size={14} /><span className="text-xs font-medium">Rol</span></div>
-                  <span className="text-sm text-gray-700 font-medium capitalize">{rolDisplay}</span>
+                  <div className="flex items-center gap-3 text-gray-500"><ShieldCheck size={18} /><span className="text-[15px] font-bold">Rol</span></div>
+                  <span className="text-[15px] text-gray-700 font-bold capitalize">{rolDisplay}</span>
                 </div>
               </div>
             </div>
 
             {/* ── Mis bodegas ──────────────────────────────────────── */}
             {bodegas.length > 0 && (
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">Mis bodegas</p>
-                  <button onClick={() => navigate('/mis-bodegas')} className="text-[#1A5C38] text-xs font-semibold flex items-center gap-0.5">
-                    Ver todas <ChevronRight size={13} />
+              <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
+                <div className="flex items-center justify-between mb-5">
+                  <p className="text-[13px] text-gray-400 uppercase tracking-widest font-bold">Mis bodegas</p>
+                  <button onClick={() => navigate('/mis-bodegas')} className="text-[#1A5C38] text-[13px] font-bold flex items-center gap-1 active:opacity-60 transition-opacity">
+                    Ver todas <ChevronRight size={15} />
                   </button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {bodegas.slice(0, 3).map(b => (
                     <button key={b.bodega_id} onClick={() => navigate(`/bodegas/${b.bodega_id}`)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl bg-[#F2F2F7] hover:bg-gray-100 active:scale-[0.98] transition-all text-left">
@@ -668,29 +669,30 @@ export default function B24PerfilBodega() {
             )}
 
             {/* ── Acciones ─────────────────────────────────────────── */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] overflow-hidden group/card transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5">
               <button onClick={() => navigate('/configuracion')}
-                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                <div className="w-9 h-9 rounded-xl bg-[#F2F2F7] flex items-center justify-center flex-shrink-0">
-                  <Building2 size={16} className="text-[#1A5C38]" />
+                className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-gray-50/50 active:bg-gray-100 transition-colors">
+                <div className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
+                  <Building2 size={22} className="text-[#1A5C38]" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-[15px] font-medium text-gray-800">Configuración</p>
-                  <p className="text-xs text-gray-400">Cambiar contraseña y preferencias</p>
+                <div className="flex-1 transition-transform duration-500 group-hover/card:translate-x-1">
+                  <p className="text-[16px] font-bold text-gray-900">Configuración</p>
+                  <p className="text-[13px] text-gray-500 font-medium mt-0.5">Cambiar contraseña y preferencias</p>
                 </div>
-                <ChevronRight size={15} className="text-gray-300" />
+                <ChevronRight size={18} className="text-gray-300 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
               </button>
             </div>
 
             {/* Cerrar sesión */}
             <button onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 bg-red-50 border border-red-100 text-red-600 rounded-2xl py-4 text-[15px] font-semibold active:bg-red-100 transition-colors">
-              <LogOut size={18} /> Cerrar sesión
+              className="w-full flex items-center justify-center gap-2 bg-red-50 border border-red-100 text-red-600 rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(220,38,38,0.15)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.25)]">
+              <LogOut size={20} /> Cerrar sesión
             </button>
 
             <div className="pb-4" />
           </>
         )}
+        </div>
       </div>
     </div>
   );
