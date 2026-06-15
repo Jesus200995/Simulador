@@ -20,7 +20,7 @@ export default function AgregarUPPage() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [drawMode, setDrawMode] = useState<DrawMode>('idle');
+  const [, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
   const [capturandoGPS, setCapturandoGPS] = useState(false);
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
