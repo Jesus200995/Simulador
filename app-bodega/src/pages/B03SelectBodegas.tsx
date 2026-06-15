@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Plus, X, MapPin, CheckCircle, ChevronLeft,
-  Warehouse, List, Map as MapIcon, Layers, AlertCircle
+  Warehouse, List, Map as MapIcon, Layers, AlertCircle, ChevronDown
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -200,49 +200,78 @@ export default function B03SelectBodegas() {
             </button>
           </div>
 
-          {/* Buscador + filtro estado en la misma fila */}
-          <div className="flex items-center gap-2">
-            <div className={'flex-1 flex items-center gap-2.5 bg-white/15 backdrop-blur-md rounded-2xl px-3.5 py-2.5 border transition-all duration-300 ' + (searchFocused ? 'border-white/50 bg-white/20 shadow-[0_0_0_3px_rgba(255,255,255,0.08)]' : 'border-white/10')}>
-              <Search size={14} className={'flex-shrink-0 transition-colors duration-300 ' + (searchFocused ? 'text-white' : 'text-white/50')} />
-              <input
-                ref={searchRef}
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                placeholder="Buscar bodega, municipio..."
-                className="flex-1 bg-transparent text-white placeholder-white/40 text-[13px] font-medium outline-none min-w-0"
-              />
-              {query && (
-                <button onClick={() => setQuery('')} className="flex-shrink-0 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center active:opacity-70 hover:bg-white/30">
-                  <X size={11} className="text-white" />
-                </button>
-              )}
-            </div>
-            <select
-              value={estado}
-              onChange={e => { setEstado(e.target.value); setMunicipio(''); }}
-              className="flex-shrink-0 bg-white/15 backdrop-blur-md border border-white/10 text-white text-[12px] font-semibold rounded-2xl px-3 py-2.5 outline-none cursor-pointer max-w-[90px] truncate"
-              style={{ WebkitAppearance: 'none', appearance: 'none' }}
-            >
-              <option value="" className="text-gray-900 bg-white">Estado</option>
-              {states.map((s: any) => <option key={s.state_id} value={s.name} className="text-gray-900 bg-white">{s.name}</option>)}
-            </select>
+          {/* Buscador — fila propia, ancho completo */}
+          <div className={'flex items-center gap-2.5 bg-white/15 backdrop-blur-md rounded-2xl px-3.5 py-2.5 border transition-all duration-300 ' + (searchFocused ? 'border-white/50 bg-white/20 shadow-[0_0_0_3px_rgba(255,255,255,0.08)]' : 'border-white/10')}>
+            <Search size={15} className={'flex-shrink-0 transition-colors duration-300 ' + (searchFocused ? 'text-white' : 'text-white/55')} />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="Buscar bodega, municipio..."
+              className="flex-1 bg-transparent text-white placeholder-white/40 text-[13px] font-medium outline-none min-w-0"
+            />
+            {query && (
+              <button onClick={() => setQuery('')} className="flex-shrink-0 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center active:opacity-70 hover:bg-white/30">
+                <X size={11} className="text-white" />
+              </button>
+            )}
           </div>
 
-          {/* Filtro municipio opcional */}
-          {estado && municipios.length > 0 && (
-            <div className="mt-2">
+          {/* Filtros Estado + Municipio — dos pills bonitos, ancho real, con chevron */}
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {/* Estado */}
+            <div className={'relative flex items-center bg-white/15 backdrop-blur-md rounded-2xl border transition-all duration-300 ' + (estado ? 'border-white/40 bg-white/20' : 'border-white/10')}>
+              <MapPin size={14} className="absolute left-3 text-white/70 pointer-events-none flex-shrink-0" />
+              <select
+                value={estado}
+                onChange={e => { setEstado(e.target.value); setMunicipio(''); }}
+                className="w-full bg-transparent text-white text-[12.5px] font-semibold rounded-2xl pl-9 pr-8 py-2.5 outline-none cursor-pointer truncate"
+                style={{ WebkitAppearance: 'none', appearance: 'none' }}
+              >
+                <option value="" className="text-gray-900 bg-white">Todos los estados</option>
+                {states.map((s: any) => <option key={s.state_id} value={s.name} className="text-gray-900 bg-white">{s.name}</option>)}
+              </select>
+              <ChevronDown size={15} className="absolute right-2.5 text-white/70 pointer-events-none" />
+            </div>
+
+            {/* Municipio */}
+            <div className={'relative flex items-center backdrop-blur-md rounded-2xl border transition-all duration-300 ' + (!estado ? 'bg-white/[0.06] border-white/5 opacity-50' : municipio ? 'bg-white/20 border-white/40' : 'bg-white/15 border-white/10')}>
               <select
                 value={municipio}
                 onChange={e => setMunicipio(e.target.value)}
-                className="w-full bg-white/15 backdrop-blur-md border border-white/10 text-white text-[12px] font-semibold rounded-2xl px-3.5 py-2.5 outline-none cursor-pointer"
+                disabled={!estado || municipios.length === 0}
+                className="w-full bg-transparent text-white text-[12.5px] font-semibold rounded-2xl pl-3.5 pr-8 py-2.5 outline-none cursor-pointer truncate disabled:cursor-not-allowed"
                 style={{ WebkitAppearance: 'none', appearance: 'none' }}
               >
-                <option value="" className="text-gray-900 bg-white">Todos los municipios</option>
+                <option value="" className="text-gray-900 bg-white">{estado ? 'Todos los municipios' : 'Municipio'}</option>
                 {municipios.map((m: any) => <option key={m.municipality_id} value={m.name} className="text-gray-900 bg-white">{m.name}</option>)}
               </select>
+              <ChevronDown size={15} className="absolute right-2.5 text-white/70 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Chips de filtros activos — claros y con "quitar" */}
+          {(estado || municipio) && (
+            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+              {estado && (
+                <span className="inline-flex items-center gap-1 bg-white text-[#1A5C38] text-[11px] font-bold rounded-full pl-2.5 pr-1.5 py-1 shadow-sm">
+                  {estado}
+                  <button onClick={() => { setEstado(''); setMunicipio(''); }} className="w-4 h-4 rounded-full bg-[#1A5C38]/10 flex items-center justify-center active:bg-[#1A5C38]/20">
+                    <X size={9} className="text-[#1A5C38]" />
+                  </button>
+                </span>
+              )}
+              {municipio && (
+                <span className="inline-flex items-center gap-1 bg-white/90 text-[#1A5C38] text-[11px] font-bold rounded-full pl-2.5 pr-1.5 py-1 shadow-sm">
+                  {municipio}
+                  <button onClick={() => setMunicipio('')} className="w-4 h-4 rounded-full bg-[#1A5C38]/10 flex items-center justify-center active:bg-[#1A5C38]/20">
+                    <X size={9} className="text-[#1A5C38]" />
+                  </button>
+                </span>
+              )}
             </div>
           )}
         </div>
