@@ -9,20 +9,21 @@ import {
 
 interface SidebarItem {
   label: string;
+  subtitle?: string;
   path: string;
   icon: any;
   exact?: boolean;
 }
 
 const MENU: SidebarItem[] = [
-  { label: 'Resumen',      path: '/admin',                icon: LayoutDashboard, exact: true },
-  { label: 'Productores',  path: '/admin/productores',    icon: Users },
-  { label: 'Bodegas',      path: '/admin/bodegas',        icon: Warehouse },
-  { label: 'Alertas',      path: '/admin/alertas',        icon: AlertTriangle },
-  { label: 'Precios',      path: '/admin/precios',        icon: TrendingUp },
-  { label: 'Producción',   path: '/admin/produccion',     icon: Sprout },
-  { label: 'Mercado',      path: '/admin/mercado',        icon: BarChart3 },
-  { label: 'Configuración',path: '/admin/configuracion',  icon: Settings },
+  { label: 'Resumen',      subtitle: 'Métricas, estadísticas y vista general del sistema',   path: '/admin',                icon: LayoutDashboard, exact: true },
+  { label: 'Productores',  subtitle: 'Administración y gestión integral de agricultores registrados',     path: '/admin/productores',    icon: Users },
+  { label: 'Bodegas',      subtitle: 'Supervisión y control detallado de centros de acopio',path: '/admin/bodegas',        icon: Warehouse },
+  { label: 'Alertas',      subtitle: 'Centro de notificaciones y avisos en tiempo real',     path: '/admin/alertas',        icon: AlertTriangle },
+  { label: 'Precios',      subtitle: 'Monitoreo de cotizaciones y variaciones del mercado',     path: '/admin/precios',        icon: TrendingUp },
+  { label: 'Producción',   subtitle: 'Registro, seguimiento y estimación de cosechas activas',        path: '/admin/produccion',     icon: Sprout },
+  { label: 'Mercado',      subtitle: 'Análisis estadístico y proyecciones comerciales a futuro',          path: '/admin/mercado',        icon: BarChart3 },
+  { label: 'Configuración',subtitle: 'Preferencias, roles de usuario y ajustes del sistema',         path: '/admin/configuracion',  icon: Settings },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -43,11 +44,24 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     navigate('/admin/login');
   }
 
-  const pageTitle = () => {
+  const pageInfo = () => {
     const m = MENU.find(i => i.exact ? i.path === location.pathname : location.pathname.startsWith(i.path));
-    if (location.pathname.match(/\/admin\/productores\/.+/)) return 'Detalle Productor';
-    if (location.pathname.match(/\/admin\/bodegas\/.+/)) return 'Detalle Bodega';
-    return m?.label ?? 'Panel';
+    
+    let label = m?.label ?? 'Panel';
+    let subtitle = m?.subtitle ?? 'Administración integral del sistema';
+    let Icon = m?.icon ?? LayoutDashboard;
+
+    if (location.pathname.match(/\/admin\/productores\/.+/)) {
+      label = 'Detalle Productor';
+      subtitle = 'Expediente técnico e información detallada del productor';
+      Icon = Users;
+    }
+    if (location.pathname.match(/\/admin\/bodegas\/.+/)) {
+      label = 'Detalle Bodega';
+      subtitle = 'Inventario, operaciones y ficha técnica del centro de acopio';
+      Icon = Warehouse;
+    }
+    return { label, subtitle, Icon };
   };
 
   const initials = () => {
@@ -56,10 +70,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   };
 
   const navCls = ({ isActive }: { isActive: boolean }) =>
-    `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 ${
+    `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-['Space_Grotesk'] font-bold tracking-wide transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
       isActive
-        ? 'bg-white/15 text-white shadow-sm'
-        : 'text-emerald-50/70 hover:text-white hover:bg-white/10'
+        ? 'bg-white/15 text-white shadow-sm scale-[1.02]'
+        : 'text-emerald-50/70 hover:text-white hover:bg-white/10 hover:scale-[1.02]'
     }`;
 
   const JustifiedText = ({ text, className }: { text: string; className?: string }) => (
@@ -70,24 +84,24 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const Brand = ({ small }: { small?: boolean }) => (
     <div className="flex items-center gap-3 group cursor-pointer select-none">
-      <div className={`${small ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 shadow-[0_2px_10px_rgba(0,0,0,0.1)] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110 group-hover:rotate-3 group-hover:bg-white/30 group-active:scale-95`}>
+      <div className={`${small ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 shadow-[0_2px_10px_rgba(0,0,0,0.1)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110 group-hover:rotate-6 group-hover:bg-white/30 group-active:scale-95`}>
         <ShieldCheck className="text-white transition-transform duration-500 group-hover:scale-110" size={small ? 16 : 19} strokeWidth={2.4} />
       </div>
-      <div className={`${small ? 'w-[90px]' : 'w-[125px]'} flex flex-col justify-center transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-1`}>
+      <div className={`${small ? 'w-[90px]' : 'w-[125px]'} flex flex-col justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-1.5`}>
         <div style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           <JustifiedText 
             text="SIMAC" 
-            className={`${small ? 'text-[15px]' : 'text-[18px]'} font-black text-white leading-none uppercase mb-[4px] drop-shadow-sm`} 
+            className={`${small ? 'text-[15px]' : 'text-[18px]'} font-black text-white leading-none uppercase mb-[4px] drop-shadow-sm transition-transform duration-500`} 
           />
         </div>
         {!small && (
           <JustifiedText 
             text="PLAN NACIONAL MAÍZ" 
-            className="text-[7.5px] text-emerald-100 font-bold uppercase leading-none mb-[5px] transition-colors duration-300 group-hover:text-white" 
+            className="text-[7.5px] font-['Outfit'] text-emerald-100 font-bold uppercase tracking-wider leading-none mb-[5px] transition-colors duration-300 group-hover:text-white" 
           />
         )}
         <div className="w-full">
-          <div className="w-full bg-black/10 text-white/90 text-[8px] font-bold uppercase py-[3px] rounded leading-none">
+          <div className="w-full bg-black/10 text-white/90 font-['Outfit'] text-[8px] font-bold uppercase tracking-widest py-[3px] rounded leading-none transition-all duration-300 group-hover:bg-white/20 group-hover:text-white">
             <JustifiedText text="ADMINISTRADOR" className="px-1.5" />
           </div>
         </div>
@@ -96,16 +110,16 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   );
 
   const UserCard = () => (
-    <div className="flex items-center gap-2.5 bg-black/10 rounded-2xl px-3 py-2.5 group hover:bg-black/20 transition-all duration-300 cursor-default">
-      <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-black text-[13px] flex-shrink-0 group-hover:scale-105 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]">
+    <div className="flex items-center gap-2.5 bg-black/10 rounded-2xl px-3 py-2.5 group hover:bg-black/20 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.02] cursor-default">
+      <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-['Space_Grotesk'] font-black text-[13px] flex-shrink-0 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
         {initials()}
       </div>
-      <div className="min-w-0 flex-1 flex flex-col justify-center">
-        <p className="text-[11px] font-extrabold text-white truncate leading-none mb-[4px] group-hover:text-emerald-50 transition-colors uppercase">
+      <div className="min-w-0 flex-1 flex flex-col justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-1">
+        <p className="text-[11px] font-['Space_Grotesk'] font-extrabold text-white tracking-wide truncate leading-none mb-[4px] group-hover:text-emerald-50 transition-colors uppercase">
           {user?.nombres || user?.nombre_completo || 'Administrador'}
         </p>
         <div className="flex items-center">
-          <span className="bg-white/10 text-white/80 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded leading-none group-hover:text-white group-hover:bg-white/20 transition-colors">
+          <span className="bg-white/10 font-['Outfit'] text-white/80 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded leading-none group-hover:text-white group-hover:bg-white/20 transition-colors">
             {user?.rol === 'admin' ? 'Administrador' : (user?.rol || 'Administrador')}
           </span>
         </div>
@@ -119,10 +133,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <NavLink key={item.path} to={item.path} end={item.exact} className={navCls}>
           {({ isActive }) => (
             <>
-              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]" />}
-              <item.icon size={16} strokeWidth={2.2} className={`flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-emerald-100/60 group-hover:text-white'}`} />
-              <span className="truncate">{item.label}</span>
-              {!mobile && <ChevronRight size={13} className="ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />}
+              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all duration-500" />}
+              <item.icon size={16} strokeWidth={2.2} className={`flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'text-white scale-110' : 'text-emerald-100/60 group-hover:text-white group-hover:scale-110'}`} />
+              <span className="truncate transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-1">{item.label}</span>
+              {!mobile && <ChevronRight size={13} className="ml-auto opacity-0 -translate-x-2 group-hover:opacity-40 group-hover:translate-x-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />}
             </>
           )}
         </NavLink>
@@ -134,24 +148,24 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div className="h-screen w-screen flex overflow-hidden bg-[#F5F6F8] text-gray-900 select-none">
 
       {/* ── SIDEBAR DESKTOP ── */}
-      <aside className="hidden lg:flex flex-col w-[244px] xl:w-[264px] h-screen bg-[#0e5c33] flex-shrink-0 rounded-br-[2.5rem] shadow-[4px_0_24px_rgba(0,0,0,0.15)] z-20 relative overflow-hidden">
+      <aside className="hidden lg:flex flex-col w-[244px] xl:w-[264px] h-screen bg-[#0e5c33] flex-shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] z-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
-        <div className="relative z-10 flex items-center px-5 py-5 flex-shrink-0">
+        <div className="relative z-10 flex items-center px-5 py-5 border-b border-emerald-300/30 flex-shrink-0">
           <Brand />
         </div>
-        <div className="relative z-10 px-4 py-2 flex-shrink-0">
+        <div className="relative z-10 px-4 py-3 border-b border-emerald-300/30 flex-shrink-0">
           <UserCard />
         </div>
         <nav className="relative z-10 flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-none">
           <NavItems />
         </nav>
-        <div className="relative z-10 px-3 py-4 flex-shrink-0">
+        <div className="relative z-10 px-3 py-4 border-t border-emerald-300/30 flex-shrink-0">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-white/80 hover:text-white hover:bg-red-500/80 active:scale-[0.98] transition-all duration-200 group"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-['Space_Grotesk'] font-bold tracking-wide text-white/80 hover:text-white hover:bg-red-500/80 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(239,68,68,0.3)] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group"
           >
-            <LogOut size={16} strokeWidth={2.2} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
-            Cerrar Sesión
+            <LogOut size={16} strokeWidth={2.2} className="flex-shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110 group-hover:-translate-y-0.5" />
+            <span className="transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-1">Cerrar Sesión</span>
           </button>
         </div>
       </aside>
@@ -165,57 +179,71 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       />
       <aside
         className={`lg:hidden fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-[#0e5c33] shadow-[8px_0_32px_rgba(0,0,0,0.5)]
-          transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] w-[78vw] max-w-[300px]
+          transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-[78vw] max-w-[300px]
           ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
-        <div className="relative z-10 flex items-center justify-between px-5 py-4 flex-shrink-0">
+        <div className="relative z-10 flex items-center justify-between px-5 py-4 border-b border-emerald-300/30 flex-shrink-0">
           <Brand small />
           <button
             onClick={() => setDrawerOpen(false)}
-            className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors"
+            className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:rotate-90"
           >
             <X size={15} />
           </button>
         </div>
-        <div className="relative z-10 px-4 py-2 flex-shrink-0">
+        <div className="relative z-10 px-4 py-3 border-b border-emerald-300/30 flex-shrink-0">
           <UserCard />
         </div>
         <nav className="relative z-10 flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-none">
           <NavItems mobile />
         </nav>
-        <div className="relative z-10 px-3 py-4 flex-shrink-0">
+        <div className="relative z-10 px-3 py-4 border-t border-emerald-300/30 flex-shrink-0">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-semibold text-white/80 hover:text-white hover:bg-red-500/80 transition-all group"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12.5px] font-['Space_Grotesk'] font-bold tracking-wide text-white/80 hover:text-white hover:bg-red-500/80 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(239,68,68,0.3)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group"
           >
-            <LogOut size={15} strokeWidth={2.2} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
-            Cerrar Sesión
+            <LogOut size={15} strokeWidth={2.2} className="flex-shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110 group-hover:-translate-y-0.5" />
+            <span className="transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-1">Cerrar Sesión</span>
           </button>
         </div>
       </aside>
 
       {/* ── MAIN ── */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
-        <header className="relative h-16 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#03150a]/85 backdrop-blur-2xl flex-shrink-0 rounded-br-[2.5rem] border-b border-emerald-500/20 shadow-[0_8px_30px_rgba(3,21,10,0.6)] z-10 group/header overflow-hidden">
+        <header className="relative h-16 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#0a3c20]/95 backdrop-blur-2xl flex-shrink-0 border-b border-emerald-500/20 shadow-[0_8px_30px_rgba(3,21,10,0.6)] z-10 group/header overflow-hidden">
           {/* Animated background accent */}
-          <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-emerald-500/10 to-transparent opacity-0 group-hover/header:opacity-100 transition-opacity duration-700 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-emerald-400/10 to-transparent opacity-0 group-hover/header:opacity-100 transition-opacity duration-700 pointer-events-none" />
           <div className="absolute -bottom-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent opacity-50" />
 
           <div className="flex items-center gap-3 min-w-0 relative z-10">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden -ml-1 w-9 h-9 flex items-center justify-center rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-all duration-300 flex-shrink-0"
+              className="lg:hidden -ml-1 w-9 h-9 flex items-center justify-center rounded-full text-emerald-400 hover:text-white hover:bg-white/10 transition-all duration-300 flex-shrink-0"
               aria-label="Abrir menú"
             >
               <Menu size={19} />
             </button>
-            <div className="flex items-center gap-2 min-w-0 group cursor-pointer">
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest hidden sm:inline transition-all duration-300 bg-emerald-500/10 px-2 py-[4px] rounded-md border border-emerald-400/20 leading-none group-hover:bg-emerald-500/20 group-hover:shadow-[0_0_12px_rgba(52,211,153,0.25)]">Admin</span>
-              <ChevronRight size={13} className="text-emerald-500/70 hidden sm:inline flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
-              <h2 className="text-[14px] sm:text-[15.5px] font-black text-white tracking-tight truncate transition-all duration-300 drop-shadow-md">
-                {pageTitle()}
-              </h2>
+            <div className="flex items-center gap-2 min-w-0 group cursor-default">
+              {(() => {
+                const { label, subtitle, Icon } = pageInfo();
+                return (
+                  <>
+                    <div className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] group-hover:bg-white/25 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex-shrink-0">
+                      <Icon size={16} strokeWidth={2.5} />
+                    </div>
+                    <div className="h-6 w-[1.5px] bg-white/20 rounded-full flex-shrink-0 mx-1 group-hover:bg-white/40 group-hover:h-7 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
+                    <div className="flex flex-col min-w-0 justify-center">
+                      <h2 className="text-[15px] sm:text-[17px] font-['Space_Grotesk'] font-bold text-white tracking-tight truncate leading-none drop-shadow-sm group-hover:translate-x-1 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                        {label}
+                      </h2>
+                      <p className="text-[7.5px] sm:text-[8px] font-['Outfit'] text-emerald-100/70 font-semibold uppercase tracking-widest truncate leading-none mt-[4px] group-hover:translate-x-1 group-hover:text-emerald-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-75">
+                        {subtitle}
+                      </p>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 
