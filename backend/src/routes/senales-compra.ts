@@ -7,9 +7,11 @@ const router = Router();
 // GET /api/senales-compra
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const { bodega_id, tipo_maiz } = req.query;
+  const userId = req.user!.userId;
   try {
-    let where = 'WHERE sc.activa = TRUE';
-    const params: any[] = [];
+    // Cada bodeguero solo ve SUS propios requerimientos, nunca los de otros bodegueros
+    let where = 'WHERE sc.activa = TRUE AND sc.usuario_id = $1';
+    const params: any[] = [userId];
     if (bodega_id) { params.push(bodega_id); where += ` AND sc.bodega_id = $${params.length}`; }
     if (tipo_maiz) { params.push(tipo_maiz); where += ` AND sc.tipo_maiz = $${params.length}`; }
 
@@ -29,7 +31,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.user!.userId;
   const { bodega_id, tipo_maiz, variedad_code, volumen_ton, precio_ofrecido, radio_km,
-          vigencia, vigencia_inicio, vigencia_fin } = req.body;
+          vigencia, vigencia_inicio, vigencia_fin, variedades } = req.body;
 
   if (!bodega_id || !tipo_maiz || !precio_ofrecido) {
     res.status(400).json({ error: 'Campos requeridos: bodega_id, tipo_maiz, precio_ofrecido' });
@@ -80,6 +82,21 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 
     const senal = result.rows[0];
 
+    // Guardar variedades múltiples solicitadas (tabla senal_variedades)
+    if (Array.isArray(variedades) && variedades.length > 0) {
+      for (const v of variedades) {
+        if (!v || !v.code) continue;
+        try {
+          await pool.query(
+            `INSERT INTO senal_variedades (senal_id, variedad_code, variedad_libre)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (senal_id, variedad_code) DO NOTHING`,
+            [senal.id, v.code, v.libre || null]
+          );
+        } catch (_) { /* best-effort por variedad */ }
+      }
+    }
+
     // C-14 + B-05 + F-06: Notificar productores filtrados por radio con info completa
     try {
       const bodegaR = await pool.query(
@@ -106,15 +123,16 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             const pgR = await pool.query(`
               SELECT DISTINCT u2.id AS usuario_id,
                 ROUND((ST_Distance(
-                  ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                  u.centroid::geography,
                   ST_SetSRID(ST_Point($1, $2), 4326)::geography
                 ) / 1000)::numeric, 0) AS distancia_km
               FROM up u
               JOIN producer p ON p.producer_id = u.producer_id
               JOIN usuarios u2 ON (u2.id = p.usuario_id OR u2.curp = p.curp OR u2.email = p.correo)
               WHERE u2.rol = 'productor' AND u2.activo = TRUE
+                AND u.centroid IS NOT NULL
                 AND ST_DWithin(
-                  ST_SetSRID(ST_Point(COALESCE(u.longitud,0), COALESCE(u.latitud,0)), 4326)::geography,
+                  u.centroid::geography,
                   ST_SetSRID(ST_Point($1, $2), 4326)::geography,
                   $3
                 )

@@ -8,6 +8,10 @@ export type DrawMode = 'idle' | 'drawing' | 'editing';
 export interface DibujarPoligonoHandle {
   /** Agrega un vértice en el centro actual del mapa (la mira). */
   addPoint: () => void;
+  /** Modo caminata: captura la ubicación GPS real del dispositivo y la agrega como vértice. */
+  addPointGPS: (
+    onResult?: (info: { ok: true; accuracy: number } | { ok: false; error: string }) => void
+  ) => void;
   /** Quita el último vértice agregado. */
   undoVertex: () => void;
   /** Cierra el polígono (requiere ≥3 vértices) y calcula área/centroide. */
@@ -143,6 +147,23 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       const g = groupRef.current;
       map.addLayer(g);
 
+      // Modo fluido: tocar/clic directo en el mapa coloca un vértice donde apunta el dedo/cursor.
+      // Coexiste con la mira + botón. Guardas para no marcar por error:
+      //  - nunca durante la edición de vértices (arrastre)
+      //  - nunca cuando el polígono ya está cerrado (idle con ≥3 vértices)
+      const onMapClick = (e: L.LeafletMouseEvent) => {
+        if (modeRef.current === 'editing') return;
+        if (modeRef.current === 'idle' && verticesRef.current.length >= 3) return;
+        if (modeRef.current === 'idle') setMode('drawing');
+        verticesRef.current.push([e.latlng.lat, e.latlng.lng]);
+        fullRedraw();
+        emitCount();
+      };
+      map.on('click', onMapClick);
+      // El doble-toque/clic hace zoom (dispararía 2 clics y crearía puntos sueltos): lo desactivamos
+      // mientras se dibuja. El zoom sigue disponible con pellizco, rueda y los controles +/−.
+      map.doubleClickZoom.disable();
+
       if (poligonoInicial && poligonoInicial.length >= 3) {
         verticesRef.current = poligonoInicial.map(([la, ln]) => [la, ln] as [number, number]);
         setMode('idle');
@@ -154,6 +175,8 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       }
 
       return () => {
+        map.off('click', onMapClick);
+        try { map.doubleClickZoom.enable(); } catch { /* noop */ }
         // Defensa: evita el crash "reading 'baseVal'" de Leaflet si el mapa se
         // desmonta con un arrastre colgado (Draggable.finishDrag sobre un
         // _lastTarget inválido). Limpiamos el estado antes de que React desmonte.
@@ -176,6 +199,34 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       verticesRef.current.push([c.lat, c.lng]);
       fullRedraw();
       emitCount();
+    }, [map, setMode, fullRedraw, emitCount]);
+
+    const addPointGPS = useCallback((
+      onResult?: (info: { ok: true; accuracy: number } | { ok: false; error: string }) => void
+    ) => {
+      if (!navigator.geolocation) {
+        onResult?.({ ok: false, error: 'Tu dispositivo no tiene GPS disponible.' });
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          if (modeRef.current === 'idle') setMode('drawing');
+          verticesRef.current.push([latitude, longitude]);
+          fullRedraw();
+          emitCount();
+          map.setView([latitude, longitude], Math.max(map.getZoom(), 16));
+          onResult?.({ ok: true, accuracy });
+        },
+        (error) => {
+          let msg = 'Error al obtener ubicación. Intenta de nuevo.';
+          if (error.code === error.PERMISSION_DENIED) msg = 'Permiso de ubicación denegado. Activa el GPS en la configuración de tu celular.';
+          else if (error.code === error.POSITION_UNAVAILABLE) msg = 'No se pudo obtener tu ubicación. Sal a un lugar abierto e intenta de nuevo.';
+          else if (error.code === error.TIMEOUT) msg = 'La ubicación tardó demasiado. Intenta de nuevo.';
+          onResult?.({ ok: false, error: msg });
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
     }, [map, setMode, fullRedraw, emitCount]);
 
     const undoVertex = useCallback(() => {
@@ -222,7 +273,7 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
     }, [setMode, fullRedraw]);
 
     useImperativeHandle(ref, () => ({
-      addPoint, undoVertex, finishDraw, clear, startEdit, saveEdit, cancelEdit,
+      addPoint, addPointGPS, undoVertex, finishDraw, clear, startEdit, saveEdit, cancelEdit,
     }));
 
     return null;

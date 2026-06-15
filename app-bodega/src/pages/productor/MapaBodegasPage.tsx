@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-le
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import { MapPin, Package, Warehouse, Map as MapIcon, CheckCircle2 } from 'lucide-react';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -36,6 +37,7 @@ const iconBodega = (estado: string) => {
 interface Bodega {
   id: number; nombre: string; municipio: string; latitud: number; longitud: number;
   estado_compra: string; precio_compra_hoy: number; is_ventanilla: boolean;
+  capacidad_ton?: number; stock_actual?: number;
   senal_activa?: { id: number; precio_oferta: number; volumen_ton: number; tipo_maiz: string } | null;
 }
 
@@ -123,7 +125,7 @@ export default function MapaBodegasPage() {
     <div className="w-full h-full flex flex-col relative min-h-[500px]">
       {coordsAproximadas && (
         <div className="flex-shrink-0 bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3">
-          <span className="text-lg">📍</span>
+          <MapPin size={18} className="text-amber-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-amber-800 text-sm font-medium">
               Distancias aproximadas
@@ -238,7 +240,7 @@ export default function MapaBodegasPage() {
                   <div>
                     <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
                     <p className="text-[11px] text-gray-400 flex items-center gap-1">
-                      📍 {b.municipio}
+                      <MapPin size={11} /> {b.municipio}
                     </p>
                   </div>
 
@@ -249,6 +251,26 @@ export default function MapaBodegasPage() {
                         {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton` : 'Sin precio publicado'}
                       </strong>
                     </div>
+                    {(b.capacidad_ton ?? 0) > 0 && (() => {
+                      const cap = Number(b.capacidad_ton);
+                      const stock = Number(b.stock_actual || 0);
+                      const pct = Math.min(100, (stock / cap) * 100);
+                      const disponible = Math.max(0, cap - stock);
+                      return (
+                        <div className="pt-2 mt-1 border-t border-white/5 space-y-1.5">
+                          <div className="w-full bg-white/10 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${pct > 90 ? 'bg-red-400' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-gray-400 inline-flex items-center gap-1"><Package size={10} /> Stock: <strong className="text-gray-200">{stock.toLocaleString('es-MX')} ton</strong></span>
+                            <span className="text-gray-400 inline-flex items-center gap-1"><Warehouse size={10} /> Libre: <strong className="text-emerald-400">{disponible.toLocaleString('es-MX')} ton</strong></span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <div className="flex gap-2 mt-1">
@@ -273,7 +295,7 @@ export default function MapaBodegasPage() {
         {bodegas.length === 0 && up && !loadingBodegas && (
           <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-white/80 backdrop-blur-sm">
             <div className="text-center px-6 max-w-xs">
-              <p className="text-4xl mb-3">🗺</p>
+              <MapIcon size={40} className="text-gray-300 mx-auto mb-3" />
               <p className="font-semibold text-gray-800">No hay bodegas en {radioKm} km</p>
               <p className="text-sm text-gray-500 mt-2">Estamos ampliando la red. Intenta con un radio mayor.</p>
               {radioKm < 500 && (
@@ -300,7 +322,7 @@ export default function MapaBodegasPage() {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000]
                         bg-[#1A5C38] text-white px-6 py-4 rounded-2xl shadow-2xl
                         flex items-center gap-3 animate-fade-in max-w-xs w-full mx-4">
-          <span className="text-2xl">✅</span>
+          <CheckCircle2 size={24} className="flex-shrink-0" />
           <div>
             <p className="font-semibold text-sm">¡Interés registrado!</p>
             <p className="text-green-200 text-xs mt-0.5">

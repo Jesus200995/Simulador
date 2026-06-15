@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { useToast } from '../components/Toast';
+import { AlertTriangle } from 'lucide-react';
 
 export default function B07Inventario() {
   const [params] = useSearchParams();
@@ -17,6 +18,16 @@ export default function B07Inventario() {
     calidad: '', fecha: new Date().toISOString().slice(0, 10), observaciones: '',
   });
   const [loading, setLoading] = useState(false);
+  const [capacidadBodega, setCapacidadBodega] = useState<number | null>(null);
+  const [errorVolumen, setErrorVolumen] = useState<string | null>(null);
+
+  // Cargar la capacidad total de la bodega seleccionada
+  useEffect(() => {
+    if (!form.bodega_id) { setCapacidadBodega(null); return; }
+    api.infraestructura.get(Number(form.bodega_id))
+      .then((d: any) => setCapacidadBodega(d?.capacidad_ton ? Number(d.capacidad_ton) : null))
+      .catch(() => setCapacidadBodega(null));
+  }, [form.bodega_id]);
 
   useEffect(() => {
     api.bodeguero.misBodegas().then((r: any) => setBodegas(r)).catch(() => {});
@@ -36,6 +47,11 @@ export default function B07Inventario() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.bodega_id) { toast('Selecciona una bodega', 'error'); return; }
+    if (capacidadBodega != null && capacidadBodega > 0 && Number(form.volumen_almacenado) > capacidadBodega) {
+      setErrorVolumen(`No puedes registrar más de ${capacidadBodega.toLocaleString('es-MX')} ton — esa es la capacidad total de la bodega.`);
+      toast('El volumen supera la capacidad de la bodega', 'error');
+      return;
+    }
     setLoading(true);
     try {
       await api.infraestructura.inventario(Number(form.bodega_id), form);
@@ -129,7 +145,33 @@ export default function B07Inventario() {
           </div>
           <div>
             <label className={labelClass}>Stock actual total (ton)</label>
-            <input type="number" value={form.volumen_almacenado} onChange={e => set('volumen_almacenado', e.target.value)} required min="0" step="0.1" placeholder="Ej: 1,500" className={inputClass} />
+            {capacidadBodega != null && capacidadBodega > 0 && (
+              <p className="text-xs text-gray-500 mb-1.5">
+                Capacidad total de la bodega: <strong>{capacidadBodega.toLocaleString('es-MX')} ton</strong>
+              </p>
+            )}
+            <input
+              type="number"
+              value={form.volumen_almacenado}
+              onChange={e => {
+                const val = Number(e.target.value);
+                if (capacidadBodega != null && capacidadBodega > 0 && val > capacidadBodega) {
+                  setErrorVolumen(`No puedes registrar más de ${capacidadBodega.toLocaleString('es-MX')} ton — esa es la capacidad total de la bodega.`);
+                } else {
+                  setErrorVolumen(null);
+                }
+                set('volumen_almacenado', e.target.value);
+              }}
+              required
+              min="0"
+              max={capacidadBodega ?? undefined}
+              step="0.1"
+              placeholder="Ej: 1,500"
+              className={inputClass}
+            />
+            {errorVolumen && (
+              <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle size={12} /> {errorVolumen}</p>
+            )}
             <p className="text-xs text-gray-400 mt-1">
               Este número reemplaza el registro anterior y representa
               el total que hay en tu bodega ahora mismo.

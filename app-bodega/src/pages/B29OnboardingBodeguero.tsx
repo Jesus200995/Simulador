@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Circle, ChevronRight, ChevronLeft, Tag, Activity, Signal, Warehouse } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronRight, ChevronLeft, Tag, Activity, Signal, Warehouse, PartyPopper } from 'lucide-react';
 import { api } from '../services/api';
 
 interface Paso {
@@ -129,7 +129,7 @@ export default function B29OnboardingBodeguero() {
 
             {completados === total && (
               <div className="bg-green-50 border border-green-200 rounded-2xl p-5 text-center mt-2">
-                <p className="text-3xl mb-1">🎉</p>
+                <PartyPopper size={30} className="text-green-600 mx-auto mb-1" />
                 <p className="font-semibold text-green-800">¡Configuración completa!</p>
                 <p className="text-green-700 text-sm mt-1">Ya estás listo para operar en SIMAC.</p>
                 <button

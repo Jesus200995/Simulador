@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
 import { useToast } from '../components/Toast';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function B16ProponerConcepto() {
   const { toast } = useToast();
@@ -26,7 +27,7 @@ export default function B16ProponerConcepto() {
   if (ok) return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-20 text-center">
       <div className="bg-white rounded-3xl shadow-sm border border-black/5 p-10">
-        <p className="text-6xl mb-5">✅</p>
+        <CheckCircle2 size={56} className="text-[#1A5C38] mx-auto mb-5" />
         <p className="text-[22px] font-bold text-gray-900">Propuesta enviada</p>
         <p className="text-[15px] text-gray-500 mt-2 mb-8">Te notificaremos cuando el admin la apruebe.</p>
         <button

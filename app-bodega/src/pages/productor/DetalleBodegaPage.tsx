@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, Phone } from 'lucide-react';
+import { ChevronLeft, MapPin, Phone, Warehouse, Package, Wrench } from 'lucide-react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { formatNum } from '../../utils/format';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -126,13 +125,6 @@ export default function DetalleBodegaPage() {
             </div>
           )}
 
-          {bodega.capacidad_ton > 0 && (
-            <div className="mt-4 flex justify-between bg-zinc-50 rounded-xl p-3">
-              <span className="text-zinc-500 text-sm">Capacidad</span>
-              <span className="font-semibold text-zinc-800 text-sm">{formatNum(bodega.capacidad_ton, 0)} ton</span>
-            </div>
-          )}
-
           {bodega.responsable && (
             <div className="mt-2 flex justify-between bg-zinc-50 rounded-xl p-3">
               <span className="text-zinc-500 text-sm">Responsable</span>
@@ -141,27 +133,65 @@ export default function DetalleBodegaPage() {
           )}
         </div>
 
-        {/* Stock disponible */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">
-            📦 Stock actual
-          </h3>
-          {stockActual !== null ? (
-            <p className="text-3xl font-bold text-[#1A5C38]">
-              {stockActual.toLocaleString('es-MX')}
-              <span className="text-base font-normal text-gray-500 ml-2">toneladas</span>
-            </p>
-          ) : (
-            <p className="text-gray-400 text-sm">
-              Sin información de stock disponible aún
-            </p>
-          )}
-        </div>
+        {/* Capacidad y disponibilidad — vista unificada */}
+        {bodega.capacidad_ton > 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Warehouse size={18} className="text-gray-500" /> Capacidad y disponibilidad
+            </h3>
+            {stockActual !== null && (
+              <>
+                <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
+                  <div
+                    className={`h-3 rounded-full transition-all ${
+                      (stockActual / bodega.capacidad_ton) > 0.9 ? 'bg-red-400'
+                      : (stockActual / bodega.capacidad_ton) > 0.7 ? 'bg-amber-400'
+                      : 'bg-[#1A5C38]'
+                    }`}
+                    style={{ width: `${Math.min(100, (stockActual / bodega.capacidad_ton) * 100).toFixed(0)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 text-right mb-4">
+                  {((stockActual / bodega.capacidad_ton) * 100).toFixed(0)}% ocupado
+                </p>
+              </>
+            )}
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-gray-50 rounded-xl p-3">
+                <p className="text-xs text-gray-500 mb-1">Capacidad total</p>
+                <p className="font-bold text-gray-800 text-lg">{bodega.capacidad_ton.toLocaleString('es-MX')}</p>
+                <p className="text-xs text-gray-400">toneladas</p>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-3">
+                <p className="text-xs text-blue-600 mb-1">Stock actual</p>
+                <p className="font-bold text-blue-700 text-lg">{stockActual !== null ? stockActual.toLocaleString('es-MX') : '—'}</p>
+                <p className="text-xs text-blue-400">toneladas</p>
+              </div>
+              <div className="bg-green-50 rounded-xl p-3">
+                <p className="text-xs text-green-600 mb-1">Disponible</p>
+                <p className="font-bold text-green-700 text-lg">{stockActual !== null ? Math.max(0, bodega.capacidad_ton - stockActual).toLocaleString('es-MX') : '—'}</p>
+                <p className="text-xs text-green-400">toneladas libres</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
+            <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2"><Package size={18} className="text-gray-500" /> Stock actual</h3>
+            {stockActual !== null ? (
+              <p className="text-3xl font-bold text-[#1A5C38]">
+                {stockActual.toLocaleString('es-MX')}
+                <span className="text-base font-normal text-gray-500 ml-2">toneladas</span>
+              </p>
+            ) : (
+              <p className="text-gray-400 text-sm">Sin información de stock disponible aún</p>
+            )}
+          </div>
+        )}
 
         {/* Servicios y tarifario */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">
-            🔧 Servicios de la bodega
+          <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <Wrench size={18} className="text-gray-500" /> Servicios de la bodega
           </h3>
           {cargandoServicios ? (
             <div className="space-y-2">
@@ -197,7 +227,7 @@ export default function DetalleBodegaPage() {
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 py-4 rounded-2xl font-semibold text-sm w-full active:scale-[0.98] transition-all"
           >
-            <span>📍</span> Cómo llegar
+            <MapPin size={16} /> Cómo llegar
           </a>
         )}
 

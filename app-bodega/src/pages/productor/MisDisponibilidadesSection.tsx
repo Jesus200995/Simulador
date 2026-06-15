@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Wheat } from 'lucide-react';
 
 interface Disponibilidad {
   id: number;
@@ -62,7 +63,7 @@ export default function MisDisponibilidadesSection({ token, apiUrl, onActualizar
     <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mt-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">🌽</span>
+        <Wheat size={18} className="text-green-700" />
         <h3 className="font-semibold text-green-800">
           Mi disponibilidad activa
         </h3>

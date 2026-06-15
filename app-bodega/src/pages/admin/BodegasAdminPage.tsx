@@ -507,7 +507,7 @@ export default function BodegasAdminPage() {
                   <div>
                     <h4 className="font-extrabold text-[13px] text-gray-900 tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
                     <p className="text-[11px] text-gray-500 flex items-center gap-1">
-                      📍 {b.municipio}, {b.estado}
+                      <MapPin size={11} /> {b.municipio}, {b.estado}
                     </p>
                   </div>
 

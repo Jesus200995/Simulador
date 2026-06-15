@@ -116,7 +116,14 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
             AND pr.tipo_precio = 'bodega'
           ORDER BY pr.fecha DESC, pr.created_at DESC
           LIMIT 1
-        ) AS precio_compra_hoy
+        ) AS precio_compra_hoy,
+        (
+          SELECT i.volumen_almacenamiento
+          FROM inventarios i
+          WHERE i.bodega_id = b.id
+          ORDER BY i.fecha DESC NULLS LAST, i.fecha_registro DESC
+          LIMIT 1
+        ) AS stock_actual
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
       ${where}

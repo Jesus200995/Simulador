@@ -275,6 +275,10 @@ export default function MiPerfilPage() {
             className="mt-4 w-full flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.25)]">
             <MapPin size={16} /> {poligono ? 'Editar mi parcela en el mapa' : 'Dibujar mi parcela en el mapa'}
           </button>
+          <button onClick={() => navigate('/productor/ups/nueva')}
+            className="mt-2 w-full flex items-center justify-center gap-2 border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-xl text-sm font-medium hover:bg-green-50 active:scale-[0.98] transition-all">
+            <span className="text-lg leading-none">+</span> Agregar otra parcela
+          </button>
         </div>
 
         {/* Ciclo productivo */}

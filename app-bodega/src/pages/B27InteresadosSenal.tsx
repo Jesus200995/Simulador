@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Phone } from 'lucide-react';
+import { ChevronLeft, Phone, Wheat, MapPin } from 'lucide-react';
 import { api } from '../services/api';
 
 interface Interesado {
@@ -55,7 +55,7 @@ export default function B27InteresadosSenal() {
           </div>
         ) : interesados.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">🌽</p>
+            <Wheat size={32} className="text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 font-medium">Aún no hay productores interesados</p>
             <p className="text-gray-400 text-sm mt-1">
               Los productores en tu radio recibirán la notificación
@@ -70,8 +70,8 @@ export default function B27InteresadosSenal() {
                   <p className="font-semibold text-gray-800 truncate">
                     {prod.nombre || 'Productor registrado'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    📍 {[prod.municipio, prod.estado].filter(Boolean).join(', ') || 'Ubicación no disponible'}
+                  <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
+                    <MapPin size={13} /> {[prod.municipio, prod.estado].filter(Boolean).join(', ') || 'Ubicación no disponible'}
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {new Date(prod.fecha_interes).toLocaleDateString('es-MX', {

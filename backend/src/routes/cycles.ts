@@ -148,10 +148,27 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
       return;
     }
 
-    // Verify cycle exists
-    const cycleCheck = await pool.query('SELECT cycle_id FROM cycle WHERE cycle_id = $1', [cycle_id]);
+    // Verify cycle exists + obtener superficie de la UP a la que pertenece
+    const cycleCheck = await pool.query(
+      `SELECT c.cycle_id, c.up_id, u.up_name, u.area_ha_calc, u.area_ha_real
+       FROM cycle c JOIN up u ON u.up_id = c.up_id
+       WHERE c.cycle_id = $1`,
+      [cycle_id]
+    );
     if (cycleCheck.rows.length === 0) {
       res.status(404).json({ error: 'Ciclo no encontrado' });
+      return;
+    }
+
+    // La superficie sembrada no puede superar el área registrada de la parcela
+    const upRow = cycleCheck.rows[0];
+    const superficieUP = parseFloat(upRow.area_ha_real || upRow.area_ha_calc || '0');
+    if (superficieUP > 0 && Number(area_sown_ha) > superficieUP) {
+      res.status(400).json({
+        error: `La superficie sembrada (${area_sown_ha} ha) no puede ser mayor al área registrada de la parcela "${upRow.up_name}" (${superficieUP} ha).`,
+        superficie_up: superficieUP,
+        superficie_ingresada: Number(area_sown_ha),
+      });
       return;
     }
 

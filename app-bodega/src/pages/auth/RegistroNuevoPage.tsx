@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Wheat, CircleDot, Check,
   AlertCircle, User, MapPin, Sprout, Map, Phone, Loader2,
-  Undo2, Pencil, Trash2, CheckCircle2, Plus, KeyRound, ShieldCheck,
+  Undo2, Pencil, Trash2, CheckCircle2, KeyRound, ShieldCheck, Footprints,
 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -89,6 +89,8 @@ export default function RegistroNuevoPage() {
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
+  const [capturandoGPS, setCapturandoGPS] = useState(false);
+  const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [geoDetectado, setGeoDetectado] = useState<{ estado: string; municipio: string } | null>(null);
   const [detectandoGeo, setDetectandoGeo] = useState(false);
 
@@ -204,7 +206,12 @@ export default function RegistroNuevoPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Error al registrar'); return; }
+      if (!res.ok) {
+        setError(data.error || 'Error al registrar');
+        // Overlap de polígono: regresar al mapa (paso 4) para que el productor redibuje
+        if (res.status === 409 && data.up_conflicto) setPaso(4);
+        return;
+      }
       setRegistroExitoso(true);
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
@@ -218,7 +225,6 @@ export default function RegistroNuevoPage() {
     const puntosNecesarios = Math.max(0, 3 - pointCount);
     const puedeTerminar = pointCount >= 3;
     const dibujando = drawMode === 'drawing' || (drawMode === 'idle' && !poligono);
-    const miraVisible = dibujando;
 
     return (
       <div
@@ -237,8 +243,8 @@ export default function RegistroNuevoPage() {
           <div className="flex-1 min-w-0">
             {drawMode === 'idle' && !poligono && (
               <>
-                <p className="text-white font-bold text-sm leading-tight">Dibuja tu parcela</p>
-                <p className="text-white/45 text-xs">Centra la mira y agrega cada esquina</p>
+                <p className="text-white font-bold text-sm leading-tight">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
+                <p className="text-white/45 text-xs">Dibuja el contorno de tu parcela. Toca cada esquina para agregar un punto.</p>
               </>
             )}
             {drawMode === 'drawing' && (
@@ -275,19 +281,6 @@ export default function RegistroNuevoPage() {
 
         {/* Mapa */}
         <div className="flex-1 relative min-h-0">
-          {/* Mira central — el punto verde marca EXACTAMENTE el centro del mapa */}
-          {miraVisible && (
-            <div className="absolute left-1/2 top-1/2 z-[600] pointer-events-none -translate-x-1/2 -translate-y-1/2">
-              {/* anillo de pulso */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#34d079]/40 animate-crosshair-ring" />
-              {/* ticks de precisión */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1.5px] h-7 bg-white/70 rounded-full" />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[1.5px] w-7 bg-white/70 rounded-full" />
-              {/* punto central exacto */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#34d079] ring-[3px] ring-white shadow-[0_1px_5px_rgba(0,0,0,0.55)]" />
-            </div>
-          )}
-
           {/* Hint flotante de edición (no se encima con el buscador) */}
           {drawMode === 'editing' && (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[700] pointer-events-none w-[calc(100%-1.5rem)] max-w-sm">
@@ -386,17 +379,37 @@ export default function RegistroNuevoPage() {
             <div className="max-w-md mx-auto space-y-2.5">
               <p className="text-center text-white/55 text-xs px-2">
                 {pointCount === 0
-                  ? 'Mueve y haz zoom en el mapa. Pon la mira sobre una esquina y toca el botón.'
-                  : 'Mueve la mira a la siguiente esquina y agrega el punto.'}
+                  ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
+                  : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
               </p>
+
+              {/* Modo caminata: capturar la esquina con el GPS del celular */}
               <button
-                onClick={() => dibujarRef.current?.addPoint()}
-                className="w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white py-4 rounded-2xl text-base font-bold
-                           flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-lg shadow-green-900/30"
+                onClick={() => {
+                  setCapturandoGPS(true);
+                  setGpsMsg(null);
+                  dibujarRef.current?.addPointGPS((info) => {
+                    setCapturandoGPS(false);
+                    if (!info.ok) {
+                      setGpsMsg(info.error);
+                    } else if (info.accuracy > 30) {
+                      setGpsMsg(`Punto registrado, pero la señal GPS es débil (±${Math.round(info.accuracy)} m). Espera unos segundos para mejor precisión.`);
+                    } else {
+                      setGpsMsg(`Punto registrado con buena precisión (±${Math.round(info.accuracy)} m).`);
+                    }
+                  });
+                }}
+                disabled={capturandoGPS}
+                className="w-full bg-white/10 ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold
+                           flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
               >
-                <Plus size={20} strokeWidth={2.6} />
-                {pointCount === 0 ? 'Agregar primer punto' : 'Agregar punto'}
+                {capturandoGPS
+                  ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                  : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
               </button>
+              {gpsMsg && (
+                <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>
+              )}
 
               {pointCount > 0 && (
                 <div className="flex gap-2">

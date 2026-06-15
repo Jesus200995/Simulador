@@ -165,7 +165,7 @@ export default function DashboardProductorPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
         {sinUbicacion && (
           <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-6 flex items-start gap-4">
-            <span className="text-2xl mt-0.5">📍</span>
+            <MapPin size={22} className="text-amber-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <p className="font-semibold text-amber-800">
                 Tu parcela no tiene ubicación confirmada
@@ -254,7 +254,7 @@ export default function DashboardProductorPage() {
 
         <div className="mt-5">
           <button
-            onClick={() => !isPendiente && navigate('/productor/disponibilidad/tipo')}
+            onClick={() => !isPendiente && navigate('/productor/propuesta-venta')}
             disabled={isPendiente}
             className={`w-full py-5 rounded-2xl text-white text-lg font-semibold
               flex items-center justify-center gap-3 transition-all duration-200
@@ -262,8 +262,18 @@ export default function DashboardProductorPage() {
                 : 'bg-[#1A5C38] hover:bg-[#15482d] active:scale-[0.97] shadow-lg shadow-green-900/20'}`}
           >
             <Wheat size={24} />
-            Tengo maiz disponible
+            Propuesta de venta
           </button>
+          {!isPendiente && (
+            <button
+              onClick={() => navigate('/productor/ups/nueva')}
+              className="w-full border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-2xl text-sm font-medium
+                hover:bg-green-50 flex items-center justify-center gap-2 mt-3"
+            >
+              <span className="text-lg">+</span>
+              Agregar otra parcela
+            </button>
+          )}
           {isPendiente && (
             <p className="text-center text-xs text-zinc-400 mt-2">
               Tu cuenta esta en validacion. Te avisamos cuando puedas declarar disponibilidad.

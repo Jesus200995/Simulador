@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
   TrendingUp, DollarSign, Tag, Calculator,
-  CircleDollarSign, Settings, Award, AlertTriangle, BookOpen
+  CircleDollarSign, Settings, Award, AlertTriangle, BookOpen, Search, Check
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -16,6 +16,14 @@ export default function PreciosProductorPage() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('simac_token');
 
+  // Modo de precios: promedio estatal vs. bodega específica
+  const [modoPrecio, setModoPrecio] = useState<'estatal' | 'bodega'>('estatal');
+  const [busquedaBodega, setBusquedaBodega] = useState('');
+  const [bodegaSeleccionada, setBodegaSeleccionada] = useState<any>(null);
+  const [resultadosBusqueda, setResultadosBusqueda] = useState<any[]>([]);
+  const [preciosBodega, setPreciosBodega] = useState<any>(null);
+  const [buscando, setBuscando] = useState(false);
+
   useEffect(() => {
     fetch(`${BASE}/productor/precios`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -25,30 +33,54 @@ export default function PreciosProductorPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Buscador de bodega con debounce (mínimo 3 caracteres)
+  useEffect(() => {
+    if (!busquedaBodega || busquedaBodega.length < 3) { setResultadosBusqueda([]); return; }
+    const timer = setTimeout(async () => {
+      setBuscando(true);
+      try {
+        const r = await fetch(`${BASE}/bodegas?q=${encodeURIComponent(busquedaBodega)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const d = await r.json();
+        setResultadosBusqueda((Array.isArray(d) ? d : (d.bodegas || d.data || [])).slice(0, 8));
+      } catch { setResultadosBusqueda([]); }
+      finally { setBuscando(false); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [busquedaBodega]);
+
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" /></div>;
   if (!data) return null;
 
   // ── Cálculos ────────────────────────────────────────────────────────────
+  // Fuente de datos: promedio estatal (data) o bodega específica (preciosBodega)
+  const usandoBodega = modoPrecio === 'bodega' && !!preciosBodega;
+
   const chicago     = data.precio_chicago_usd_bushel;
   const tipoCambio  = data.tipo_cambio_mxn;
-  const po          = data.precio_compra;          // PO — lo que paga la bodega
-  const servicios   = data.servicios_promedio;     // S — tarifario de servicios
-  const tieneChicago   = chicago != null && tipoCambio != null;
+  const tieneChicago = chicago != null && tipoCambio != null;
+
+  const po          = usandoBodega ? preciosBodega.po : data.precio_compra;          // PO
+  const servicios   = usandoBodega ? preciosBodega.servicios : data.servicios_promedio; // S
   const tieneServicios = servicios != null && servicios > 0;
   const tienePO        = po != null;
 
   // Margen de Negociación = (Chicago × 39.368 × tipo_cambio) + (Bono × tipo_cambio)
-  const margen = tieneChicago
+  const margenEstatal = tieneChicago
     ? (chicago * 39.368 * tipoCambio) + (BONO_MAIZ_BLANCO_USD * tipoCambio)
     : null;
+  const margen = usandoBodega ? preciosBodega.margen : margenEstatal;
 
   // Precio de Compra = PO + S
-  const precioCompra = tienePO && tieneServicios ? po + servicios : null;
+  const precioCompra = usandoBodega
+    ? preciosBodega.precio_compra
+    : (tienePO && tieneServicios ? po + servicios : null);
 
   // Precio de Venta = Precio de Compra − Margen de Negociación
-  const precioVenta = precioCompra != null && margen != null
-    ? precioCompra - margen
-    : null;
+  const precioVenta = usandoBodega
+    ? preciosBodega.precio_venta
+    : (precioCompra != null && margen != null ? precioCompra - margen : null);
 
   const esFavorable = precioVenta != null && precioVenta >= 0;
 
@@ -77,6 +109,103 @@ export default function PreciosProductorPage() {
 
       {/* ── CONTENIDO ── */}
       <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-5 space-y-4">
+
+      {/* ── SELECTOR DE MODO: estatal vs bodega específica ── */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+        <p className="text-sm font-medium text-slate-700 mb-3">Ver precios para:</p>
+        <div className="space-y-2">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="radio"
+              checked={modoPrecio === 'estatal'}
+              onChange={() => { setModoPrecio('estatal'); setBodegaSeleccionada(null); setPreciosBodega(null); setBusquedaBodega(''); }}
+              className="w-4 h-4 accent-[#1A5C38]"
+            />
+            <span className="text-sm text-slate-800">
+              Promedio de mi estado
+              {data?.estado && <span className="text-slate-400 ml-1">({data.estado})</span>}
+            </span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="radio"
+              checked={modoPrecio === 'bodega'}
+              onChange={() => setModoPrecio('bodega')}
+              className="w-4 h-4 accent-[#1A5C38]"
+            />
+            <span className="text-sm text-slate-800">Una bodega específica</span>
+          </label>
+        </div>
+
+        {modoPrecio === 'bodega' && (
+          <div className="mt-4 relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={busquedaBodega}
+              onChange={e => { setBusquedaBodega(e.target.value); setBodegaSeleccionada(null); setPreciosBodega(null); }}
+              placeholder="Buscar bodega por nombre o municipio..."
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+            />
+
+            {buscando && <p className="text-xs text-slate-400 mt-2">Buscando…</p>}
+
+            {resultadosBusqueda.length > 0 && !bodegaSeleccionada && (
+              <div className="absolute top-full left-0 right-0 z-50 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 overflow-hidden">
+                {resultadosBusqueda.map(b => (
+                  <button
+                    key={b.id}
+                    onClick={async () => {
+                      setBodegaSeleccionada(b);
+                      setBusquedaBodega(b.nombre);
+                      setResultadosBusqueda([]);
+                      try {
+                        const r = await fetch(`${BASE}/precios/bodega/${b.id}`, { headers: { Authorization: `Bearer ${token}` } });
+                        setPreciosBodega(await r.json());
+                      } catch { /* ignore */ }
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0"
+                  >
+                    <p className="text-sm font-medium text-slate-800">{b.nombre}</p>
+                    <p className="text-xs text-slate-500">
+                      {b.municipio}, {b.estado}
+                      {b.precio_compra_hoy > 0 && (
+                        <span className="ml-2 text-[#1A5C38] font-medium">
+                          ${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton hoy
+                        </span>
+                      )}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {bodegaSeleccionada && (
+              <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-green-800">{bodegaSeleccionada.nombre}</p>
+                  <p className="text-xs text-green-600">{bodegaSeleccionada.municipio}, {bodegaSeleccionada.estado}</p>
+                </div>
+                <button
+                  onClick={() => { setBodegaSeleccionada(null); setPreciosBodega(null); setBusquedaBodega(''); }}
+                  className="text-green-500 hover:text-green-700 text-lg"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {preciosBodega && !preciosBodega.tiene_precio_hoy && (
+              <div className="mt-2 flex items-center gap-2 text-amber-600">
+                <AlertTriangle size={14} />
+                <span className="text-xs">
+                  Precio de hace {preciosBodega.dias_antiguedad_precio} día{preciosBodega.dias_antiguedad_precio !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Aviso cuando aún no hay precio de bodega en la región del productor */}
       {!tienePO && (
@@ -291,11 +420,11 @@ export default function PreciosProductorPage() {
                     }
                   </span>
                   {precioVenta != null && (
-                    <span className={`text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider
+                    <span className={`text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider inline-flex items-center gap-1
                       ${esFavorable
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
-                      {esFavorable ? '✓ Favorable' : '⚠ Deficit'}
+                      {esFavorable ? (<><Check size={11} /> Favorable</>) : (<><AlertTriangle size={11} /> Deficit</>)}
                     </span>
                   )}
                 </div>
@@ -371,7 +500,7 @@ export default function PreciosProductorPage() {
           </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <span className="text-4xl mb-3">📈</span>
+              <TrendingUp size={40} className="text-gray-300 mb-3" />
               <p className="text-gray-600 font-medium">Historial en construcción</p>
               <p className="text-gray-400 text-sm mt-1 max-w-xs">
                 El historial de precios estará disponible después de los primeros 30 días de operación del sistema.

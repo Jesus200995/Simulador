@@ -23,6 +23,8 @@ import DetalleBodegaPage from './pages/productor/DetalleBodegaPage';
 import CompletarUbicacionPage from './pages/productor/CompletarUbicacionPage';
 import CicloProductivoPage from './pages/productor/CicloProductivoPage';
 import PreciosProductorPage from './pages/productor/PreciosProductorPage';
+import PropuestaVentaPage from './pages/productor/PropuestaVentaPage';
+import AgregarUPPage from './pages/productor/AgregarUPPage';
 import ConfirmarTransaccionPage from './pages/productor/ConfirmarTransaccionPage';
 import AlertasPage from './pages/productor/AlertasPage';
 import IncentivosPage from './pages/productor/IncentivosPage';
@@ -256,6 +258,8 @@ export const router = createBrowserRouter([
       { path: 'ubicacion', element: <CompletarUbicacionPage /> },
       { path: 'ciclo', element: <CicloProductivoPage /> },
       { path: 'precios', element: <PreciosProductorPage /> },
+      { path: 'propuesta-venta', element: <PropuestaVentaPage /> },
+      { path: 'ups/nueva', element: <AgregarUPPage /> },
       { path: 'transaccion/:id/confirmar', element: <ConfirmarTransaccionPage /> },
       { path: 'alertas', element: <AlertasPage /> },
       { path: 'incentivos', element: <IncentivosPage /> },

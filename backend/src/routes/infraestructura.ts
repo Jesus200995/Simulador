@@ -348,6 +348,25 @@ router.post('/:id/inventario', authMiddleware, BODEGA_WRITE, async (req: AuthReq
       return;
     }
 
+    // Verificar que el volumen no supera la capacidad total de la bodega
+    const capacidadResult = await pool.query(
+      `SELECT capacidad_ton FROM bodegas WHERE id = $1`,
+      [id]
+    );
+    if (capacidadResult.rows.length === 0) {
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+    const capacidadTotal = parseFloat(capacidadResult.rows[0].capacidad_ton || '0');
+    if (capacidadTotal > 0 && Number(volumen_almacenado) > capacidadTotal) {
+      res.status(400).json({
+        error: `El volumen registrado (${volumen_almacenado} ton) supera la capacidad total de la bodega (${capacidadTotal} ton).`,
+        capacidad_total: capacidadTotal,
+        volumen_ingresado: Number(volumen_almacenado),
+      });
+      return;
+    }
+
     const result = await pool.query(`
       INSERT INTO inventarios
         (bodega_id, usuario_id, ciclo, tipo_maiz, origen, volumen_almacenamiento,
