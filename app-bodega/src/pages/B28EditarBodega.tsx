@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Clock, Phone, FileText, Lock } from 'lucide-react';
+import { Clock, Phone, FileText, Lock } from 'lucide-react';
 import { api } from '../services/api';
 import { PageBanner } from '../components/Layout';
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight, MapPin, Warehouse, Circle, List, Map as MapIcon, Search, X } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
@@ -52,7 +52,6 @@ export default function B05MisBodegas() {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [mapFocus, setMapFocus] = useState<Bodega | null>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Phone, Wheat, MapPin } from 'lucide-react';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
@@ -15,7 +15,6 @@ interface Interesado {
 
 export default function B27InteresadosSenal() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const [interesados, setInteresados] = useState<Interesado[]>([]);
   const [total, setTotal] = useState(0);
