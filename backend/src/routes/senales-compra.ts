@@ -168,11 +168,20 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             `💰 Precio ofrecido: $${Number(precio_ofrecido).toLocaleString()}/ton\n` +
             `🌽 Busca: ${volumen_ton || '?'} ton de ${tipoLabel[tipo_maiz] || tipo_maiz}\n` +
             `📅 Vigencia: ${vigLabel}`;
+          const datosExtra = JSON.stringify({
+            bodega_nombre: b.nombre,
+            bodega_lat: b.latitud,
+            bodega_lng: b.longitud,
+            bodega_municipio: b.municipio,
+            bodega_estado: b.estado,
+            precio_ofrecido,
+            tipo_maiz,
+          });
           try {
             await pool.query(
-              `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-               VALUES ($1, 'senal_compra', $2, $3, 'senales_compra')`,
-              [prod.usuario_id, msg, senal.id]
+              `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo, datos_extra)
+               VALUES ($1, 'senal_compra', $2, $3, 'senales_compra', $4)`,
+              [prod.usuario_id, msg, senal.id, datosExtra]
             );
           } catch (_) { /* best-effort per user */ }
         }

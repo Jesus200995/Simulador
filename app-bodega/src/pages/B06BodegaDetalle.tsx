@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
-import { Phone, MapPin, Zap, Package, BarChart2, Signal, PenLine } from 'lucide-react';
+import { Phone, MapPin, Zap, Package, BarChart2, Signal, PenLine, ChevronLeft } from 'lucide-react';
 
 type Tab = 'general' | 'inventario' | 'precios' | 'senales';
 
@@ -66,26 +65,42 @@ export default function B06BodegaDetalle() {
 
   return (
     <div className="w-full">
-      <PageBanner
-        title={bodega.nombre}
-        subtitle={`${bodega.municipio}, ${bodega.estado}`}
-        back="/mis-bodegas"
-      />
+      {/* ── BANNER VERDE con tabs integradas ── */}
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden" style={{ transform: 'none', animation: 'none' }}>
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none opacity-60" />
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-3 pb-4 relative z-10">
 
-      {/* Tabs sticky */}
-      <div className="sticky top-[60px] z-20 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 flex overflow-x-auto no-scrollbar">
-          {tabs.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 flex-shrink-0 px-4 py-3.5 text-[13px] font-semibold transition-all duration-300 border-b-2
-                ${tab === t.key ? 'border-[#1A5C38] text-[#1A5C38] scale-[1.02]' : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50/50'}`}
-            >
-              <span className={`transition-transform duration-300 ${tab === t.key ? 'scale-110' : ''}`}>{tabIcons[t.key]}</span>
-              {t.label}
-            </button>
-          ))}
+          {/* Volver */}
+          <button
+            onClick={() => navigate('/mis-bodegas')}
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-2 active:opacity-60 hover:text-green-100 transition-opacity"
+          >
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" />
+            Volver
+          </button>
+
+          {/* Título */}
+          <div className="mb-3">
+            <h1 className="text-[19px] sm:text-[22px] font-bold text-white leading-tight drop-shadow-sm truncate">{bodega.nombre}</h1>
+            <p className="text-green-100/70 text-[12px] mt-0.5 font-medium truncate">{bodega.municipio}, {bodega.estado}</p>
+          </div>
+
+          {/* Tabs como pills — scroll horizontal en móvil, todas visibles en desktop */}
+          <div className="flex items-center gap-1.5 w-full overflow-x-auto scrollbar-none">
+            {tabs.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-colors duration-150 ' +
+                  (tab === t.key
+                    ? 'bg-white text-[#1A5C38] shadow-sm'
+                    : 'bg-white/15 text-white/80 hover:bg-white/25 hover:text-white border border-white/10')}
+              >
+                {tabIcons[t.key]}
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, ChevronLeft } from 'lucide-react';
+import { MapPin, ChevronLeft, AlertCircle } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -15,6 +15,7 @@ export default function VentanillasPage() {
   const [items, setItems] = useState<Ventanilla[]>([]);
   const [loading, setLoading] = useState(true);
   const [solicitando, setSolicitando] = useState<number | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
   const [coordsProductor, setCoordsProductor] = useState<{ lat: number; lng: number } | null>(null);
   const [coordsCargadas, setCoordsCargadas] = useState(false);
 
@@ -50,6 +51,7 @@ export default function VentanillasPage() {
 
   const solicitar = async (infraId: number) => {
     setSolicitando(infraId);
+    setErrorMsg('');
     try {
       const token = localStorage.getItem('simac_token');
       const res = await fetch(`${BASE}/productor/solicitar-apoyo`, {
@@ -57,10 +59,16 @@ export default function VentanillasPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ infraestructura_id: infraId, tipo_apoyo: tipo, notas: '' }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        navigate(`/productor/solicitud/${data.solicitud_id}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || 'No se pudo enviar la solicitud. Intenta de nuevo.');
+        setTimeout(() => setErrorMsg(''), 4000);
+        return;
       }
+      navigate(`/productor/solicitud/${data.solicitud_id || data.id}`);
+    } catch {
+      setErrorMsg('Error de conexión. Verifica tu internet e intenta de nuevo.');
+      setTimeout(() => setErrorMsg(''), 4000);
     } finally {
       setSolicitando(null);
     }
@@ -103,6 +111,16 @@ export default function VentanillasPage() {
           </div>
         ))}
       </div>
+
+      {/* Toast de error */}
+      {errorMsg && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000] w-[calc(100%-2rem)] max-w-xs animate-fade-in">
+          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-2xl bg-red-600 text-white">
+            <AlertCircle size={18} className="flex-shrink-0" />
+            <p className="text-[13px] font-semibold leading-snug">{errorMsg}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

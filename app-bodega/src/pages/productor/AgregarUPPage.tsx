@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2 } from 'lucide-react';
+import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 
@@ -16,6 +16,26 @@ export default function AgregarUPPage() {
   const [nombreUP, setNombreUP] = useState('');
   const [estadoUp, setEstadoUp] = useState('');
   const [municipioUp, setMunicipioUp] = useState('');
+  const [estadoId, setEstadoId] = useState('');
+  const [estados, setEstados] = useState<{ state_id: string; name: string }[]>([]);
+  const [municipios, setMunicipios] = useState<{ municipality_id: string; name: string }[]>([]);
+
+  // Catálogo de estados (mismo endpoint que el registro inicial)
+  useEffect(() => {
+    fetch(`${BASE}/auth/states`)
+      .then(r => r.json())
+      .then(d => setEstados(d.states || (Array.isArray(d) ? d : [])))
+      .catch(() => {});
+  }, []);
+
+  // Municipios filtrados por estado seleccionado
+  useEffect(() => {
+    if (!estadoId) { setMunicipios([]); return; }
+    fetch(`${BASE}/auth/municipalities?state_id=${estadoId}`)
+      .then(r => r.json())
+      .then(d => setMunicipios(d.municipalities || (Array.isArray(d) ? d : [])))
+      .catch(() => {});
+  }, [estadoId]);
   const [paso, setPaso] = useState<'info' | 'mapa'>('info');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,15 +123,38 @@ export default function AgregarUPPage() {
           <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
-              <input type="text" value={estadoUp} onChange={e => setEstadoUp(e.target.value)}
-                placeholder="Ej: Sinaloa"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+              <div className="relative">
+                <select
+                  value={estadoId}
+                  onChange={e => {
+                    const sel = estados.find(s => s.state_id === e.target.value);
+                    setEstadoId(e.target.value);
+                    setEstadoUp(sel?.name || '');
+                    setMunicipios([]);
+                    setMunicipioUp('');
+                  }}
+                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+                >
+                  <option value="">Selecciona tu estado</option>
+                  {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name}</option>)}
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Municipio *</label>
-              <input type="text" value={municipioUp} onChange={e => setMunicipioUp(e.target.value)}
-                placeholder="Ej: Culiacán"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+              <div className="relative">
+                <select
+                  value={municipioUp}
+                  onChange={e => setMunicipioUp(e.target.value)}
+                  disabled={!estadoId}
+                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38] disabled:bg-gray-50 disabled:text-gray-400"
+                >
+                  <option value="">{estadoId ? 'Selecciona tu municipio' : 'Primero elige el estado'}</option>
+                  {municipios.map(m => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 

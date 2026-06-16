@@ -35,6 +35,7 @@ export default function PropuestaVentaPage() {
   const [ciclos, setCiclos] = useState<Ciclo[]>([]);
   const [cicloSeleccionado, setCicloSeleccionado] = useState<Ciclo | null>(null);
   const [volumen, setVolumen] = useState('');
+  const [precioMinimo, setPrecioMinimo] = useState('');
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -112,6 +113,7 @@ export default function PropuestaVentaPage() {
           variedad_code: cicloSeleccionado.variedad_code,
           variedad_libre: cicloSeleccionado.variedad_other || null,
           volumen_estimado_ton: Number(volumen),
+          precio_minimo_ton: precioMinimo ? Number(precioMinimo) : null,
           fecha_disponible_desde: fechaDesde,
           fecha_disponible_hasta: fechaHasta,
           ventana_venta: 'esta_semana',
@@ -224,6 +226,22 @@ export default function PropuestaVentaPage() {
                 placeholder="Ej: 50" min="0.1" step="0.1"
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               <p className="text-xs text-gray-400 mt-1">Tu ciclo tiene {cicloSeleccionado.area_sown_ha} ha sembradas</p>
+            </div>
+
+            {/* Precio mínimo (#4) */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Precio mínimo por tonelada
+                <span className="text-gray-400 font-normal ml-1">(opcional)</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">$</span>
+                <input type="number" value={precioMinimo} onChange={e => setPrecioMinimo(e.target.value)}
+                  placeholder="Ej: 5000" min="0" step="50" inputMode="numeric"
+                  className="w-full border border-gray-200 rounded-xl pl-8 pr-20 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">MXN/ton</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">Las bodegas verán este precio como punto de partida para negociar.</p>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">

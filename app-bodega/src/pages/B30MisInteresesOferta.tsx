@@ -63,7 +63,7 @@ export default function B30MisInteresesOferta() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
@@ -84,9 +84,9 @@ export default function B30MisInteresesOferta() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {items.map(d => (
-              <div key={d.id} className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 flex flex-col gap-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
+              <div key={d.id} className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_10px_rgba(0,0,0,0.04)] p-4 flex flex-col gap-3 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-300 group/card">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
                     <p className="font-bold text-[17px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors truncate">{d.municipio}</p>
@@ -101,20 +101,20 @@ export default function B30MisInteresesOferta() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className={`rounded-xl p-3 ${Number(d.productores_disponibles) >= 10 ? 'bg-green-100' : Number(d.productores_disponibles) >= 5 ? 'bg-yellow-50' : 'bg-[#F2F2F7]'}`}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Users size={12} className="text-gray-400" />
-                      <p className="text-[11px] text-gray-400 font-medium">Productores</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className={`rounded-xl p-3 ${Number(d.productores_disponibles) >= 10 ? 'bg-emerald-50' : Number(d.productores_disponibles) >= 5 ? 'bg-amber-50' : 'bg-[#F2F2F7]'}`}>
+                    <div className="flex items-center gap-1 mb-1">
+                      <Users size={11} className="text-gray-400" />
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Productores</p>
                     </div>
-                    <p className="text-[22px] font-black text-[#1A5C38]">{d.productores_disponibles}</p>
+                    <p className="text-[20px] font-black text-[#1A5C38]">{d.productores_disponibles}</p>
                   </div>
-                  <div className={`rounded-xl p-3 ${Number(d.toneladas_estimadas) >= 500 ? 'bg-green-100' : Number(d.toneladas_estimadas) >= 100 ? 'bg-yellow-50' : 'bg-[#F2F2F7]'}`}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Wheat size={12} className="text-gray-400" />
-                      <p className="text-[11px] text-gray-400 font-medium">Toneladas</p>
+                  <div className={`rounded-xl p-3 ${Number(d.toneladas_estimadas) >= 500 ? 'bg-emerald-50' : Number(d.toneladas_estimadas) >= 100 ? 'bg-amber-50' : 'bg-[#F2F2F7]'}`}>
+                    <div className="flex items-center gap-1 mb-1">
+                      <Wheat size={11} className="text-gray-400" />
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Toneladas</p>
                     </div>
-                    <p className="text-[22px] font-black text-gray-800">{formatNum(d.toneladas_estimadas)}</p>
+                    <p className="text-[20px] font-black text-gray-800">{formatNum(d.toneladas_estimadas)}</p>
                   </div>
                 </div>
 
@@ -126,19 +126,19 @@ export default function B30MisInteresesOferta() {
 
                 <p className="text-[11px] text-gray-400 font-medium">Marcado el {fechaFmt(d.created_at)}</p>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mt-auto">
                   <button
                     onClick={() => navigate(`/requerimientos?municipio=${encodeURIComponent(d.municipio)}`)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.12] text-[#1A5C38] rounded-xl py-3 text-[13px] font-bold active:scale-[0.98] transition-all duration-300"
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.13] text-[#1A5C38] rounded-xl py-2.5 text-[12px] font-bold active:scale-[0.98] transition-all duration-200"
                   >
-                    <Signal size={14} /> Requerimiento
+                    <Signal size={13} /> Requerimiento
                   </button>
                   <button
                     onClick={() => quitar(d.id, d.municipio)}
                     disabled={eliminando === d.id}
-                    className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl px-4 py-3 text-[13px] font-bold active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl px-3.5 py-2.5 text-[12px] font-bold active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
                   >
-                    <Trash2 size={14} /> Quitar
+                    <Trash2 size={13} /> Quitar
                   </button>
                 </div>
               </div>

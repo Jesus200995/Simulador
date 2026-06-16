@@ -36,7 +36,7 @@ router.get('/notificaciones/mis', authMiddleware, async (req: AuthRequest, res: 
     const result = await pool.query(`
       SELECT
         n.id, n.leida, n.created_at,
-        n.titulo, n.mensaje, n.tipo, n.referencia_id, n.referencia_tipo,
+        n.titulo, n.mensaje, n.tipo, n.referencia_id, n.referencia_tipo, n.datos_extra,
         a.id as alerta_id, a.tipo_alerta, a.nivel_alerta, a.estado_alerta, a.fecha_alerta,
         p.nombres, p.apellido_paterno,
         u.up_name

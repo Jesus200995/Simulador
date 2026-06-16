@@ -73,6 +73,7 @@ router.get('/municipios', authMiddleware, async (req: AuthRequest, res: Response
                  COALESCE(SUM(dp.volumen_estimado_ton), 0)::numeric(12,2) AS toneladas_estimadas,
                  MODE() WITHIN GROUP (ORDER BY dp.ventana_venta) AS ventana_predominante,
                  ${distExpr} AS distancia_km,
+                 ROUND(AVG(dp.precio_minimo_ton) FILTER (WHERE dp.precio_minimo_ton IS NOT NULL), 0) AS precio_minimo_promedio,
                  ARRAY_AGG(DISTINCT COALESCE(cv.label, dp.variedad_libre, dp.variedad_code))
                    FILTER (WHERE COALESCE(dp.variedad_code, dp.variedad_libre) IS NOT NULL) AS variedades,
                  ARRAY_AGG(DISTINCT dp.tipo_maiz)

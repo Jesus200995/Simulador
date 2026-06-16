@@ -905,6 +905,24 @@ router.post('/solicitar-apoyo', authMiddleware, async (req: AuthRequest, res: Re
       [resolve.rows[0].ventanilla_id, apoyoId, producerId, notas || null]
     );
 
+    // Notificar al bodeguero dueño de la bodega/ventanilla (best-effort)
+    try {
+      const bodegaUsuario = await pool.query(
+        `SELECT usuario_id FROM bodeguero_bodegas
+         WHERE bodega_id = $1 AND estatus = 'aprobada' LIMIT 1`,
+        [infraestructura_id]
+      );
+      if (bodegaUsuario.rows.length > 0) {
+        await pool.query(
+          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
+           VALUES ($1, 'solicitud_apoyo', $2, $3, 'solicitudes')`,
+          [bodegaUsuario.rows[0].usuario_id,
+           'Un productor solicitó información sobre tu ventanilla de apoyo.',
+           solicitud.rows[0].id]
+        );
+      }
+    } catch (_) { /* best-effort */ }
+
     res.status(201).json({ solicitud_id: solicitud.rows[0].id });
   } catch (error) {
     console.error('Error en solicitar-apoyo:', error);

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Plus, X, MapPin, CheckCircle, ChevronLeft,
@@ -126,6 +126,8 @@ export default function B03SelectBodegas() {
     const token = localStorage.getItem('simac_token');
     fetch(`${BASE_URL}/bodegas/stats`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(setStats).catch(() => {});
+
+      
   }, []);
 
   useEffect(() => {
@@ -156,7 +158,7 @@ export default function B03SelectBodegas() {
       h-full + flex flex-col = ocupa exactamente el alto del <main> (que es el scroll container)
       El scroll de página NUNCA ocurre. Solo el recuadro de resultados hace scroll interno.
     */
-    <div className="h-[100dvh] overflow-hidden flex flex-col bg-[#F2F2F7]">
+    <div className="fixed inset-0 flex flex-col bg-[#F2F2F7] overflow-hidden">
 
       {/* ══ BANNER VERDE — sticky, nunca scrollea, rounded-b-3xl ══ */}
       <div className="flex-shrink-0 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.22)] relative z-10 overflow-hidden">
@@ -433,20 +435,22 @@ export default function B03SelectBodegas() {
         </button>
       </div>
 
-      {/* ══ BARRA INFERIOR FIJA ══ */}
-      <div className="flex-shrink-0 bg-white/95 backdrop-blur-md border-t border-gray-200/60 px-4 py-3 max-w-2xl mx-auto w-full">
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-2">
-            <p className="text-[12px] text-red-600 whitespace-pre-line">{error}</p>
-          </div>
-        )}
-        <button
-          onClick={continuar}
-          disabled={selected.length === 0 || saving}
-          className="w-full bg-[#1A5C38] text-white rounded-2xl py-3.5 text-[16px] font-semibold active:opacity-80 transition-opacity disabled:opacity-35 shadow-lg"
-        >
-          {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
-        </button>
+      {/* ══ BARRA INFERIOR FIJA — siempre visible, respeta el espacio ══ */}
+      <div className="flex-shrink-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200/60 px-4 py-3">
+        <div className="max-w-2xl mx-auto w-full">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-2">
+              <p className="text-[12px] text-red-600 whitespace-pre-line">{error}</p>
+            </div>
+          )}
+          <button
+            onClick={continuar}
+            disabled={selected.length === 0 || saving}
+            className="w-full bg-[#1A5C38] text-white rounded-2xl py-3.5 text-[16px] font-semibold active:opacity-80 transition-opacity disabled:opacity-35 shadow-lg"
+          >
+            {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
+          </button>
+        </div>
       </div>
 
       {/* ══ MODAL SOLICITAR ALTA ══ */}

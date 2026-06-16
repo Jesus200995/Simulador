@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell, ShieldAlert, CloudRain, ShoppingCart, Receipt, Heart,
-  MapPin, ChevronDown, ChevronUp, Check, Loader2, BellRing,
+  MapPin, ChevronDown, ChevronUp, Check, Loader2, BellRing, X, ClipboardCheck,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 interface Notif {
   id: number; tipo: string; mensaje: string; leida: boolean; created_at: string;
-  titulo?: string; referencia_id?: number; referencia_tipo?: string;
+  titulo?: string; referencia_id?: number; referencia_tipo?: string; datos_extra?: any;
 }
+
+const parseExtra = (d: any) => {
+  if (!d) return {};
+  try { return typeof d === 'string' ? JSON.parse(d) : d; } catch { return {}; }
+};
 
 type Cfg = { Icon: any; label: string; tile: string; chip: string };
 const TIPO_CFG: Record<string, Cfg> = {
@@ -75,7 +80,21 @@ export default function AlertasPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const marcarInteres = async (senalId: number) => {
+  // Abre Google Maps hacia la bodega usando datos_extra de la notificación
+  const abrirMapaBodega = (n: Notif) => {
+    const x = parseExtra(n.datos_extra);
+    if (x.bodega_lat && x.bodega_lng) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${x.bodega_lat},${x.bodega_lng}`, '_blank');
+    } else if (x.bodega_municipio) {
+      window.open(`https://www.google.com/maps/search/${encodeURIComponent(`${x.bodega_municipio}, ${x.bodega_estado || ''}`)}`, '_blank');
+    } else {
+      navigate('/productor/mapa');
+    }
+  };
+
+  // "Me interesa": registra interés, marca leída y abre el mapa de la bodega
+  const marcarInteres = async (n: Notif) => {
+    const senalId = n.referencia_id!;
     setEnviando(senalId);
     try {
       const token = localStorage.getItem('simac_token');
@@ -85,12 +104,20 @@ export default function AlertasPage() {
       if (!r.ok) throw new Error();
       const next = new Set(interes); next.add(senalId); setInteres(next);
       localStorage.setItem(INTERES_KEY, JSON.stringify([...next]));
+      if (!n.leida) marcarLeida(n.id);
       mostrarToast(true, '¡Interés enviado! La bodega fue notificada.');
+      abrirMapaBodega(n);
     } catch {
       mostrarToast(false, 'No se pudo enviar. Intenta de nuevo.');
     } finally {
       setEnviando(null);
     }
+  };
+
+  // "No me interesa": solo marca la notificación como leída
+  const descartarSenal = (n: Notif) => {
+    if (!n.leida) marcarLeida(n.id);
+    mostrarToast(true, 'Listo, no te mostraremos esta señal de nuevo.');
   };
 
   const noLeidas = notifs.filter(n => !n.leida).length;
@@ -146,9 +173,17 @@ export default function AlertasPage() {
               className={`bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] ring-1 overflow-hidden animate-fade-in transition-all duration-300
                 ${n.leida ? 'ring-gray-100' : 'ring-[#1A5C38]/15'}`}
             >
-              {/* Header (toca para expandir + marcar leída) */}
+              {/* Header (toca para expandir + marcar leída; transacción → confirmar) */}
               <button
-                onClick={() => { setExpanded(isOpen ? null : n.id); if (!n.leida) marcarLeida(n.id); }}
+                onClick={() => {
+                  if (n.tipo === 'confirmacion_transaccion' && n.referencia_id) {
+                    if (!n.leida) marcarLeida(n.id);
+                    navigate(`/productor/transaccion/${n.referencia_id}/confirmar`);
+                    return;
+                  }
+                  setExpanded(isOpen ? null : n.id);
+                  if (!n.leida) marcarLeida(n.id);
+                }}
                 className="w-full flex items-start gap-3 p-3.5 text-left active:bg-gray-50/60 transition-colors"
               >
                 {/* Icono profesional */}
@@ -172,33 +207,50 @@ export default function AlertasPage() {
                 </span>
               </button>
 
-              {/* Acciones para señal de compra */}
+              {/* Acciones para señal de compra (#9) */}
               {esSenal && (
                 <div className="px-3.5 pb-3.5 -mt-0.5">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => !yaInteresado && !enviandoEste && marcarInteres(n.referencia_id!)}
-                      disabled={yaInteresado || enviandoEste}
-                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold transition-all duration-200 active:scale-[0.97]
-                        ${yaInteresado
-                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 cursor-default'
-                          : 'bg-[#1A5C38] text-white shadow-[0_4px_14px_rgba(26,92,56,0.3)] hover:bg-[#16512f]'}`}
-                    >
-                      {enviandoEste ? (
-                        <><Loader2 size={15} className="animate-spin" /> Enviando…</>
-                      ) : yaInteresado ? (
-                        <><Check size={15} strokeWidth={2.6} /> Interés enviado</>
-                      ) : (
-                        <><Heart size={15} strokeWidth={2.3} /> Me interesa</>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => navigate('/productor/mapa')}
-                      className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-4 text-[13px] font-bold text-[#1A5C38] bg-[#1A5C38]/[0.07] ring-1 ring-[#1A5C38]/15 hover:bg-[#1A5C38]/[0.12] active:scale-[0.97] transition-all duration-200"
-                    >
-                      <MapPin size={15} strokeWidth={2.3} /> Ver mapa
-                    </button>
-                  </div>
+                  {yaInteresado ? (
+                    <div className="flex items-center justify-between gap-2 bg-emerald-50 ring-1 ring-emerald-200 rounded-xl px-3 py-2.5">
+                      <span className="flex items-center gap-1.5 text-[12.5px] font-bold text-emerald-700">
+                        <Check size={15} strokeWidth={2.6} /> Ya respondiste a esta señal
+                      </span>
+                      <button onClick={() => abrirMapaBodega(n)}
+                        className="flex items-center gap-1 text-[12px] font-bold text-[#1A5C38] hover:underline">
+                        <MapPin size={13} /> Ver en mapa
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => !enviandoEste && marcarInteres(n)}
+                        disabled={enviandoEste}
+                        className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-[#1A5C38] text-white shadow-[0_4px_14px_rgba(26,92,56,0.3)] hover:bg-[#16512f] active:scale-[0.97] transition-all duration-200 disabled:opacity-60"
+                      >
+                        {enviandoEste
+                          ? <><Loader2 size={15} className="animate-spin" /> Enviando…</>
+                          : <><Heart size={15} strokeWidth={2.3} /> Me interesa</>}
+                      </button>
+                      <button
+                        onClick={() => descartarSenal(n)}
+                        className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-gray-50 ring-1 ring-gray-200 hover:bg-gray-100 active:scale-[0.97] transition-all duration-200"
+                      >
+                        <X size={15} strokeWidth={2.4} /> No me interesa
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Acción para confirmar transacción (#8) */}
+              {n.tipo === 'confirmacion_transaccion' && n.referencia_id && (
+                <div className="px-3.5 pb-3.5 -mt-0.5">
+                  <button
+                    onClick={() => { if (!n.leida) marcarLeida(n.id); navigate(`/productor/transaccion/${n.referencia_id}/confirmar`); }}
+                    className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:bg-blue-700 active:scale-[0.97] transition-all duration-200"
+                  >
+                    <ClipboardCheck size={15} strokeWidth={2.3} /> Revisar y confirmar
+                  </button>
                 </div>
               )}
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  ChevronLeft, Wheat, Check, Leaf, Calendar, MapPin,
+  ChevronLeft, ChevronRight, Wheat, Check, Leaf, Calendar, MapPin,
   Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play
 } from 'lucide-react';
 
@@ -38,6 +38,8 @@ export default function CicloProductivoPage() {
 
   const [upId, setUpId] = useState<number | null>(null);
   const [areaHaCalc, setAreaHaCalc] = useState<number | null>(null);
+  const [todasLasUPs, setTodasLasUPs] = useState<any[]>([]);
+  const [upSeleccionadaId, setUpSeleccionadaId] = useState<number | null>(null);
   const [variedades, setVariedades] = useState<Variedad[]>([]);
   const [tipoMaiz, setTipoMaiz] = useState<'blanco' | 'amarillo' | 'criollo' | ''>('');
   const [esCriollo, setEsCriollo] = useState(false);
@@ -59,13 +61,19 @@ export default function CicloProductivoPage() {
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
-        const up = d.ups?.[0] ?? d[0];
-        if (up) {
-          setUpId(up.up_id);
-          setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
-        } else {
-          // Sin UP no hay ciclos que listar — mostrar el formulario directamente
+        const ups = Array.isArray(d) ? d : (d.ups || []);
+        setTodasLasUPs(ups);
+        if (ups.length === 1) {
+          // Una sola parcela — seleccionar automáticamente
+          setUpId(ups[0].up_id);
+          setAreaHaCalc(ups[0].area_ha_calc ? Number(ups[0].area_ha_calc) : null);
+          setUpSeleccionadaId(ups[0].up_id);
+        } else if (ups.length === 0) {
+          // Sin UP — mostrar el formulario directamente
           setMostrarFormulario(true);
+          setCargandoCiclos(false);
+        } else {
+          // Varias parcelas — esperar a que el productor elija
           setCargandoCiclos(false);
         }
       }).catch(() => { setMostrarFormulario(true); setCargandoCiclos(false); });
@@ -164,6 +172,54 @@ export default function CicloProductivoPage() {
       <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[#f4f5f7] gap-3">
         <div className="w-8 h-8 border-[3px] border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />
         <p className="text-[13px] font-semibold text-slate-400">Cargando tus ciclos…</p>
+      </div>
+    );
+  }
+
+  // ── Selector de parcela cuando hay más de una UP (#6) ──
+  if (todasLasUPs.length > 1 && !upSeleccionadaId) {
+    return (
+      <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[40px]">
+        <div className="sticky top-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] overflow-hidden">
+          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7">
+            <button onClick={() => navigate('/productor')}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all mb-3 active:scale-95">
+              <ChevronLeft size={20} strokeWidth={2.5} />
+            </button>
+            <h1 className="text-[20px] font-black text-white tracking-tight">Ciclo productivo</h1>
+            <p className="text-[13px] text-emerald-100/70 font-medium mt-0.5">¿En qué parcela es este ciclo?</p>
+          </div>
+        </div>
+
+        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 -mt-3 relative z-20">
+          <div className="max-w-[500px] mx-auto space-y-3 pt-1">
+            {todasLasUPs.map((up, i) => (
+              <button
+                key={up.up_id}
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                onClick={() => {
+                  setUpId(up.up_id);
+                  setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
+                  setUpSeleccionadaId(up.up_id);
+                  setCargandoCiclos(true);
+                }}
+                className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left flex items-center gap-3 shadow-sm hover:border-[#1A5C38] hover:shadow-md active:scale-[0.99] transition-all duration-200 animate-fade-in"
+              >
+                <div className="w-11 h-11 rounded-2xl bg-[#1A5C38]/10 flex items-center justify-center flex-shrink-0">
+                  <Sprout size={20} className="text-[#1A5C38]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-slate-800 text-[15px] truncate">{up.up_name || 'Parcela'}</p>
+                  <p className="text-[12.5px] text-slate-500 mt-0.5 truncate">
+                    {[up.municipality_name, up.state_name].filter(Boolean).join(', ')}
+                    {up.area_ha_calc ? ` · ${Number(up.area_ha_calc)} ha` : ''}
+                  </p>
+                </div>
+                <ChevronRight size={20} className="text-gray-300 flex-shrink-0" />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

@@ -15,6 +15,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
     volumen_estimado_ton, volumen_ton,
     ventana_venta,
     fecha_disponible_desde, fecha_disponible_hasta,
+    precio_minimo_ton,
   } = req.body;
 
   if (!tipo_maiz) {
@@ -91,20 +92,25 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
       fechaVenc = d.toISOString().slice(0, 10);
     }
 
-    // Desactivar disponibilidades anteriores del mismo productor + UP
+    // Desactivar SOLO la propuesta anterior con la MISMA variedad en la MISMA UP.
+    // Así un productor puede tener varias propuestas activas de distinta variedad.
     await pool.query(
       `UPDATE disponibilidad_productor SET activa = FALSE, updated_at = NOW()
-       WHERE producer_id = $1 AND up_id = $2 AND activa = TRUE`,
-      [producer_id, up_id]
+       WHERE producer_id = $1 AND up_id = $2 AND activa = TRUE
+         AND variedad_code IS NOT DISTINCT FROM $3`,
+      [producer_id, up_id, variedadFinal]
     );
+
+    const precioMin = precio_minimo_ton != null && precio_minimo_ton !== ''
+      ? Number(precio_minimo_ton) : null;
 
     const result = await pool.query(
       `INSERT INTO disponibilidad_productor
          (producer_id, up_id, tipo_maiz, variedad_code, variedad_libre, ciclo_id,
-          volumen_estimado_ton, ventana_venta, fecha_vencimiento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+          volumen_estimado_ton, ventana_venta, fecha_vencimiento, precio_minimo_ton)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [producer_id, up_id, tipo_maiz, variedadFinal, variedad_libre || null, ciclo_id || null,
-       volumenFinal, ventanaFinal, fechaVenc]
+       volumenFinal, ventanaFinal, fechaVenc, precioMin]
     );
 
     // Notificar bodegas cercanas usando el centroide de la UP (radio 200 km, Haversine)

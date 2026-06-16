@@ -237,7 +237,7 @@ export default function MiPerfilPage() {
 
         {/* Mi parcela */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Mi parcela</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Mis parcelas</p>
 
           {/* Mapa mini de la UP */}
           {perfil.lat && perfil.lng && (
