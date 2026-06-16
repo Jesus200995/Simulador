@@ -101,8 +101,12 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       </header>
 
       {/* ── Main content ───────────────────────────────── */}
+      {/* En desktop el contenido se centra en una columna (como en "seleccionar
+          bodegas"); las vistas de mapa a pantalla completa van a todo lo ancho. */}
       <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#f4f5f7]">
-        {children}
+        {(pathname === '/productor/mapa' || pathname.startsWith('/productor/ubicacion'))
+          ? children
+          : <div className="w-full max-w-2xl mx-auto">{children}</div>}
       </main>
 
       {/* ── Bottom nav ─────────────────────────────────── */}

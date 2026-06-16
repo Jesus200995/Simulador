@@ -86,8 +86,10 @@ export function Layout({ children }: { children: ReactNode }) {
       </header>
 
       {/* ── Main content ───────────────────────────────── */}
+      {/* En desktop el contenido se centra en una columna para verse profesional
+          (como en "seleccionar bodegas") en vez de estirarse a todo lo ancho. */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full pb-[72px]">
-        {children}
+        <div className="w-full max-w-5xl mx-auto">{children}</div>
       </main>
 
       {/* ── Bottom nav ─────────────────────────────────── */}
