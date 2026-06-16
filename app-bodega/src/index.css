@@ -497,3 +497,22 @@ body {
 
 
 
+
+/* ── Header premium "liquid glass" (SIMAC) ── */
+@keyframes simac-header-sheen {
+  0%   { transform: translateX(-40%); opacity: 0; }
+  35%  { opacity: 0.9; }
+  65%  { opacity: 0.9; }
+  100% { transform: translateX(160%); opacity: 0; }
+}
+.simac-header-sheen { animation: simac-header-sheen 7s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+
+@keyframes simac-header-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.simac-header-in { animation: simac-header-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .simac-header-sheen { animation: none; }
+}

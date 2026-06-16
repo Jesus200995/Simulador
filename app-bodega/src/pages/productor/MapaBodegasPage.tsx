@@ -46,6 +46,19 @@ interface UpData {
   municipio?: string; estado?: string;
 }
 
+// Redibuja el mapa cuando cambia el tamaño del contenedor (móvil ↔ tarjeta desktop)
+function InvalidarTamanoMapa() {
+  const map = useMap();
+  useEffect(() => {
+    const fix = () => map.invalidateSize();
+    const t1 = setTimeout(fix, 80);
+    const t2 = setTimeout(fix, 350);
+    window.addEventListener('resize', fix);
+    return () => { clearTimeout(t1); clearTimeout(t2); window.removeEventListener('resize', fix); };
+  }, [map]);
+  return null;
+}
+
 function FlyToUP({ up }: { up: UpData | null }) {
   const map = useMap();
   useEffect(() => {
@@ -122,7 +135,9 @@ export default function MapaBodegasPage() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col relative min-h-[500px]">
+    <div className="w-full h-full flex flex-col bg-[#f4f5f7] lg:p-5">
+      {/* En desktop el mapa se centra en una tarjeta; en móvil ocupa todo */}
+      <div className="flex-1 min-h-0 w-full lg:max-w-5xl lg:mx-auto flex flex-col relative overflow-hidden bg-white lg:rounded-3xl lg:shadow-[0_12px_40px_rgba(0,0,0,0.10)] lg:ring-1 lg:ring-black/5">
       {coordsAproximadas && (
         <div className="flex-shrink-0 bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3">
           <MapPin size={18} className="text-amber-600 flex-shrink-0" />
@@ -202,6 +217,7 @@ export default function MapaBodegasPage() {
             opacity={0.6}
           />
           <FlyToUP up={up} />
+          <InvalidarTamanoMapa />
 
           {/* UP del productor */}
           {up && (
@@ -331,6 +347,7 @@ export default function MapaBodegasPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

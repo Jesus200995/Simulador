@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Warehouse, Users, Receipt, MoreHorizontal, ChevronLeft, X, LogOut, User, Bell, Settings, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 import { api } from '../services/api';
+import AppHeader from './AppHeader';
 
 const NAV = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Tablero' },
@@ -45,45 +46,15 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col h-dvh bg-[#F2F2F7] overflow-hidden w-full">
 
-      {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex-shrink-0 z-30 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] px-4 sm:px-6 h-[60px] flex items-center justify-between shadow-sm shadow-black/[0.03]">
-
-        {/* Left: Logo + Name */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative flex-shrink-0">
-            <img src="/icono.png" alt="SIMAC" className="w-9 h-9 rounded-[10px] ring-[1.5px] ring-[#4ade80]/70 shadow-sm" />
-          </div>
-          <div className="flex flex-col leading-none min-w-0">
-            <span className="text-[16px] font-black tracking-tight leading-none somec-shimmer">SIMAC</span>
-            <span className="text-[9px] text-gray-400 font-medium leading-tight mt-[2px] truncate max-w-[200px] sm:max-w-[320px]">
-              {SYSTEM_NAME}
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Bell + Avatar */}
-        <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-          <button
-            onClick={() => navigate('/notificaciones')}
-            className="relative w-8 h-8 flex items-center justify-center rounded-full active:opacity-70 transition-opacity"
-          >
-            <Bell size={20} className="text-gray-500" />
-            {noLeidas > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold leading-none">
-                {noLeidas > 9 ? '9+' : noLeidas}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="active:opacity-70 transition-opacity"
-          >
-            <div className="w-8 h-8 rounded-full bg-[#1A5C38] flex items-center justify-center shadow-sm">
-              <span className="text-white text-[12px] font-bold">{initials}</span>
-            </div>
-          </button>
-        </div>
-      </header>
+      {/* ── Header premium "liquid glass" (compartido) ── */}
+      <AppHeader
+        subtitle={SYSTEM_NAME}
+        initials={initials}
+        notifCount={noLeidas}
+        onBrand={() => navigate('/dashboard')}
+        onBell={() => navigate('/notificaciones')}
+        onMenu={() => setDrawerOpen(true)}
+      />
 
       {/* ── Main content ───────────────────────────────── */}
       {/* En desktop el contenido se centra en una columna para verse profesional
