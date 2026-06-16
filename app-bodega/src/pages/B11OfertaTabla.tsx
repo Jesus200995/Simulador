@@ -132,13 +132,13 @@ export default function B11OfertaTabla() {
             <p className="text-[15px] font-medium">Sin datos de oferta disponibles</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {datos.map((d, i) => (
-              <div key={i} className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 flex flex-col gap-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
+              <div key={i} className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 flex flex-col gap-4 h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-bold text-[17px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors">{d.municipio}</p>
-                    <p className="text-[13px] text-gray-500 font-medium">{d.estado}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-[16px] text-gray-900 leading-tight group-hover/card:text-[#1A5C38] transition-colors">{d.municipio}</p>
+                    <p className="text-[12.5px] text-gray-500 font-medium truncate">{d.estado}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="bg-[#1A5C38]/[0.08] text-[#1A5C38] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
@@ -188,13 +188,7 @@ export default function B11OfertaTabla() {
                     ))}
                   </div>
                 )}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => navigate(`/requerimientos?municipio=${encodeURIComponent(d.municipio)}`)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.12] text-[#1A5C38] rounded-xl py-3 text-[13px] font-bold active:scale-[0.98] transition-all duration-300"
-                  >
-                    <Signal size={14} /> Requerimiento
-                  </button>
+                <div className="flex flex-col gap-2 mt-auto pt-1">
                   {(() => {
                     const clave = claveInteres(d.municipio, tipoMaiz || '');
                     const yaInteresa = intereses.has(clave);
@@ -203,7 +197,7 @@ export default function B11OfertaTabla() {
                       <button
                         onClick={() => yaInteresa ? navigate('/oferta/mis-intereses') : marcarInteres(d.municipio, d.estado)}
                         disabled={cargando}
-                        className={`flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-[13px] font-bold active:scale-[0.98] transition-all duration-300 disabled:opacity-50 ${
+                        className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold active:scale-[0.98] transition-all duration-300 disabled:opacity-50 ${
                           yaInteresa ? 'bg-[#1A5C38] hover:bg-[#154a2d] text-white shadow-md' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
                         }`}
                       >
@@ -212,6 +206,12 @@ export default function B11OfertaTabla() {
                       </button>
                     );
                   })()}
+                  <button
+                    onClick={() => navigate(`/requerimientos?municipio=${encodeURIComponent(d.municipio)}`)}
+                    className="w-full flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.12] text-[#1A5C38] rounded-xl py-2.5 text-[13px] font-bold active:scale-[0.98] transition-all duration-300"
+                  >
+                    <Signal size={14} /> Requerimiento
+                  </button>
                 </div>
               </div>
             ))}
