@@ -90,7 +90,6 @@ export default function B05MisBodegas() {
   const selectBodega = useCallback((b: Bodega) => {
     setMapFocus(b);
     setQuery(b.nombre);
-    setShowDropdown(false);
     setFocused(false);
     searchRef.current?.blur();
   }, []);
@@ -98,15 +97,14 @@ export default function B05MisBodegas() {
   const clearSearch = useCallback(() => {
     setQuery("");
     setMapFocus(null);
-    setShowDropdown(false);
     searchRef.current?.focus();
   }, []);
 
   /* Cerrar dropdown al hacer click fuera */
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+          searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setFocused(false);
       }
     }
@@ -160,8 +158,8 @@ export default function B05MisBodegas() {
                 ref={searchRef}
                 type="text"
                 value={query}
-                onChange={e => { setQuery(e.target.value); setShowDropdown(true); if (vista === "mapa") setMapFocus(null); }}
-                onFocus={() => { setFocused(true); setShowDropdown(true); }}
+                onChange={e => { setQuery(e.target.value); if (vista === "mapa") setMapFocus(null); }}
+                onFocus={() => { setFocused(true); }}
                 placeholder={vista === "lista" ? "Buscar bodega, municipio o estado..." : "Busca una bodega para enfocar en el mapa..."}
                 className="flex-1 bg-transparent text-white placeholder-white/40 text-[13px] font-medium outline-none min-w-0"
               />
