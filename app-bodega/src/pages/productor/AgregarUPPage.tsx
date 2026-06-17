@@ -100,7 +100,7 @@ export default function AgregarUPPage() {
   const puedeTerminar = pointCount >= 3;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#eef8f2]">
       <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-[1100]">
         <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-[#eef8f2]">
           <ChevronLeft size={20} />
