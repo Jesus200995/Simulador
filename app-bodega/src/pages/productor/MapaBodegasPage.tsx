@@ -83,7 +83,14 @@ export default function MapaBodegasPage() {
     map.current.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.current.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
-    map.current.on('load', () => setMapReady(true));
+    map.current.on('load', () => {
+      setMapReady(true);
+      map.current?.resize();
+    });
+
+    // Forzar resize para evitar contenedor de 0px en layouts flexibles
+    setTimeout(() => map.current?.resize(), 100);
+    setTimeout(() => map.current?.resize(), 500);
 
     return () => {
       map.current?.remove();
@@ -344,7 +351,7 @@ export default function MapaBodegasPage() {
 
         {/* Mapa */}
         <div className="flex-1 relative rounded-none lg:rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/5">
-          <div ref={mapContainer} className="absolute inset-0" />
+          <div ref={mapContainer} className="absolute inset-0 w-full h-full" style={{ minHeight: '300px' }} />
 
           {/* Loading overlay */}
           {loadingBodegas && (
