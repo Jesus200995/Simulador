@@ -5,8 +5,8 @@
 /* Mapbox GL */
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right { z-index: 5 !important; }
-.mapboxgl-popup-content { padding: 0 !important; border-radius: 16px !important; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important; }
-.mapboxgl-popup-tip { display: none; }
+.mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib { display: none !important; }
+.mapboxgl-popup-content { padding: 0 !important; border-radius: 16px !important; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3) !important; border: 1px solid rgba(0,0,0,0.05); }
 
 *, *::before, *::after {
   -webkit-tap-highlight-color: transparent;

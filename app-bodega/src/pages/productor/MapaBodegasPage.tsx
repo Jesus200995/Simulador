@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   MapPin, Package, Warehouse, Map as MapIcon,
-  CheckCircle2, Wheat, X, Navigation, Layers
+  CheckCircle2, Wheat, Navigation, Layers
 } from 'lucide-react';
 
 mapboxgl.accessToken = [
@@ -34,7 +35,7 @@ interface UpData {
   poligono?: GeoJSON.Polygon | null;   // polígono real de la parcela si existe
 }
 
-interface SelectedBodega extends Bodega { distancia_km?: number }
+
 
 // Color semáforo de bodegas
 const SEMAFORO: Record<string, { fill: string; label: string }> = {
@@ -62,8 +63,6 @@ export default function MapaBodegasPage() {
   const [coordsAproximadas, setCoordsAproximadas] = useState(false);
   const [mapReady, setMapReady] = useState(false);
 
-  const [selectedBodega, setSelectedBodega] = useState<SelectedBodega | null>(null);
-  const [selectedUP, setSelectedUP] = useState(false);
   const [confirmacionVisible, setConfirmacionVisible] = useState(false);
   const [bodegaConfirmada, setBodegaConfirmada] = useState('');
   const [mapStyle, setMapStyle] = useState<'streets' | 'satellite'>('streets');
@@ -202,10 +201,47 @@ export default function MapaBodegasPage() {
         @keyframes ping{0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.5);opacity:0}}
       </style>
     `;
-    el.addEventListener('click', () => setSelectedUP(true));
+
+    const popupNode = document.createElement('div');
+    const popupRoot = createRoot(popupNode);
+    popupRoot.render(
+      <div className="w-52 p-3 space-y-2.5 bg-white">
+        <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+          <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <MapPin size={14} className="text-blue-600" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="font-black text-gray-900 text-[13px] leading-tight truncate">Tu Parcela</p>
+            <p className="text-gray-500 text-[9px] truncate">{up.municipio}</p>
+          </div>
+        </div>
+        <div className="bg-blue-50/80 rounded-lg p-2.5 space-y-1.5">
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-gray-500 font-medium">Ubicación</span>
+            <span className={`font-bold ${up.location_confirmed ? 'text-emerald-600' : 'text-amber-600'}`}>
+              {up.location_confirmed ? '✓ Conf.' : 'Aprox.'}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-gray-500 font-medium">Lat,Lng</span>
+            <span className="font-mono text-gray-700">{up.lat.toFixed(3)}, {up.lng.toFixed(3)}</span>
+          </div>
+        </div>
+        {!up.location_confirmed && (
+          <button onClick={() => navigate('/productor/ubicacion')}
+            className="w-full bg-amber-500 hover:bg-amber-400 text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm mt-0.5">
+            Actualizar ubicación →
+          </button>
+        )}
+      </div>
+    );
+
+    const popup = new mapboxgl.Popup({ offset: 15, closeButton: false, className: 'custom-premium-popup' })
+      .setDOMContent(popupNode);
 
     upMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
       .setLngLat([up.lng, up.lat])
+      .setPopup(popup)
       .addTo(map.current!);
 
     // Fly
@@ -245,14 +281,90 @@ export default function MapaBodegasPage() {
           </div>` : ''}
         </div>
       `;
-      el.addEventListener('click', () => {
-        setSelectedBodega(b);
-        setSelectedUP(false);
-        map.current?.flyTo({ center: [b.longitud, b.latitud], zoom: 13, duration: 700 });
+      const popupNode = document.createElement('div');
+      const popupRoot = createRoot(popupNode);
+      
+      const cap = Number(b.capacidad_ton || 0);
+      const stock = Number(b.stock_actual || 0);
+      const pct = cap > 0 ? Math.min(100, (stock / cap) * 100) : 0;
+      const libre = Math.max(0, cap - stock);
+
+      popupRoot.render(
+        <div className="w-[240px] p-3 space-y-2.5 bg-white relative">
+          <div className="flex justify-between items-start border-b border-gray-100 pb-2">
+            <div className="w-full overflow-hidden">
+              <span className="inline-block text-[8px] font-black uppercase px-2 py-0.5 rounded-full mb-1 border"
+                style={{ color: sem.fill, borderColor: sem.fill + '40', background: sem.fill + '15' }}>
+                {sem.label}
+              </span>
+              <h3 className="font-black text-gray-900 text-[13px] leading-tight truncate">{b.nombre}</h3>
+              <p className="text-gray-500 text-[9px] flex items-center gap-1 mt-0.5 truncate">
+                <MapPin size={9} className="flex-shrink-0" /> {b.municipio}
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="bg-emerald-50 rounded-lg p-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-md bg-[#1A5C38]/10 flex items-center justify-center flex-shrink-0">
+                  <Wheat size={12} className="text-[#1A5C38]" />
+                </div>
+                <p className="text-[10px] text-gray-600 font-medium">Precio hoy</p>
+              </div>
+              <p className="font-black text-[#1A5C38] text-[14px]">
+                {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}` : '—'}
+              </p>
+            </div>
+
+            {cap > 0 && (
+              <div className="bg-gray-50 rounded-lg p-2.5 space-y-1.5">
+                <div className="w-full bg-gray-200 rounded-full h-1">
+                  <div className={`h-1 rounded-full transition-all ${pct > 90 ? 'bg-red-500' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}`} style={{ width: `${pct}%` }} />
+                </div>
+                <div className="flex justify-between text-[9px]">
+                  <span className="text-gray-500 flex items-center gap-1"><Package size={9}/> {stock.toLocaleString()}t</span>
+                  <span className="text-emerald-600 flex items-center gap-1"><Warehouse size={9}/> {libre.toLocaleString()}t</span>
+                </div>
+              </div>
+            )}
+            
+            {b.senal_activa && (
+              <div className="bg-blue-50/80 rounded-lg p-2.5">
+                <p className="text-[9px] font-bold text-blue-600 uppercase mb-0.5">Señal de compra</p>
+                <div className="flex justify-between items-end">
+                  <p className="text-[10px] text-gray-700 font-medium">{b.senal_activa.volumen_ton}t {b.senal_activa.tipo_maiz}</p>
+                  <p className="text-emerald-600 font-black text-[12px]">${Number(b.senal_activa.precio_oferta).toLocaleString('es-MX')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-1.5 pt-1 border-t border-gray-100">
+            {b.senal_activa && (
+              <button onClick={() => handleMeInteresa(b.senal_activa!.id, b.nombre)}
+                className="flex-[1.5] bg-[#1A5C38] hover:bg-[#15482d] text-white text-[10px] font-black py-2 rounded-lg flex items-center justify-center gap-1 shadow-sm transition-all">
+                <CheckCircle2 size={11} /> Me interesa
+              </button>
+            )}
+            <button onClick={() => navigate(`/productor/mapa/bodega/${b.id}`)}
+              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-[10px] font-bold py-2 rounded-lg flex items-center justify-center gap-1 transition-all">
+              <Navigation size={10} /> Detalle
+            </button>
+          </div>
+        </div>
+      );
+
+      const popup = new mapboxgl.Popup({ offset: [0, -10], closeButton: false, className: 'custom-premium-popup', maxWidth: '300px' })
+        .setDOMContent(popupNode);
+
+      popup.on('open', () => {
+        map.current?.flyTo({ center: [b.longitud, b.latitud], zoom: 12.5, duration: 800 });
       });
 
       const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([b.longitud, b.latitud])
+        .setPopup(popup)
         .addTo(map.current!);
       markersRef.current.push(marker);
     });
@@ -267,7 +379,6 @@ export default function MapaBodegasPage() {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
     });
     setBodegaConfirmada(nombreBodega || 'la bodega');
-    setSelectedBodega(null);
     setConfirmacionVisible(true);
     setTimeout(() => setConfirmacionVisible(false), 4000);
   };
@@ -400,198 +511,7 @@ export default function MapaBodegasPage() {
             </div>
           )}
         </div>
-
-        {/* ── PANEL LATERAL: Bodega seleccionada ── */}
-        {selectedBodega && (
-          <div className="hidden lg:flex w-80 flex-col bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden flex-shrink-0 animate-[slideIn_0.25s_ease-out]">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-[#1A5C38] to-[#226b44] p-5 relative">
-              <button onClick={() => setSelectedBodega(null)}
-                className="absolute top-3 right-3 text-white/60 hover:text-white">
-                <X size={16} />
-              </button>
-              {(() => {
-                const sem = SEMAFORO[selectedBodega.estado_compra] || SEMAFORO.sin_actividad;
-                return (
-                  <>
-                    <span className="inline-block text-[10px] font-black uppercase px-2 py-0.5 rounded-full mb-2 border"
-                      style={{ color: sem.fill, borderColor: sem.fill + '40', background: sem.fill + '15' }}>
-                      {sem.label}
-                    </span>
-                    <h3 className="text-white font-black text-[15px] leading-tight">{selectedBodega.nombre}</h3>
-                    <p className="text-emerald-200/80 text-[12px] mt-1 flex items-center gap-1">
-                      <MapPin size={11} />{selectedBodega.municipio}
-                    </p>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {/* Precio */}
-              <div className="bg-emerald-50 rounded-xl p-3.5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center">
-                  <Wheat size={18} className="text-[#1A5C38]" />
-                </div>
-                <div>
-                  <p className="text-[11px] text-gray-500 font-medium">Precio de compra hoy</p>
-                  <p className="text-[18px] font-black text-[#1A5C38] leading-tight">
-                    {selectedBodega.precio_compra_hoy > 0
-                      ? `$${Number(selectedBodega.precio_compra_hoy).toLocaleString('es-MX')}/ton`
-                      : '—'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Capacidad */}
-              {(selectedBodega.capacidad_ton ?? 0) > 0 && (() => {
-                const cap = Number(selectedBodega.capacidad_ton);
-                const stock = Number(selectedBodega.stock_actual || 0);
-                const pct = Math.min(100, (stock / cap) * 100);
-                const libre = Math.max(0, cap - stock);
-                return (
-                  <div className="bg-gray-50 rounded-xl p-3.5 space-y-2.5">
-                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Almacén</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className={`h-2 rounded-full transition-all duration-700 ${pct > 90 ? 'bg-red-500' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}`}
-                        style={{ width: `${pct}%` }} />
-                    </div>
-                    <div className="flex justify-between text-[11px]">
-                      <span className="text-gray-500 flex items-center gap-1">
-                        <Package size={11} /> Stock: <strong className="text-gray-800">{stock.toLocaleString('es-MX')} ton</strong>
-                      </span>
-                      <span className="text-emerald-600 flex items-center gap-1">
-                        <Warehouse size={11} /> Libre: <strong>{libre.toLocaleString('es-MX')} ton</strong>
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Señal activa */}
-              {selectedBodega.senal_activa && (
-                <div className="bg-blue-50 rounded-xl p-3.5">
-                  <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wide mb-1.5">Señal de compra activa</p>
-                  <p className="text-[13px] text-gray-700 font-semibold">
-                    {selectedBodega.senal_activa.volumen_ton} ton de {selectedBodega.senal_activa.tipo_maiz}
-                  </p>
-                  <p className="text-emerald-600 font-black text-[16px]">
-                    ${Number(selectedBodega.senal_activa.precio_oferta).toLocaleString('es-MX')}/ton
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="p-4 border-t border-gray-100 space-y-2">
-              {selectedBodega.senal_activa && (
-                <button onClick={() => handleMeInteresa(selectedBodega.senal_activa!.id, selectedBodega.nombre)}
-                  className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white text-[13px] font-black py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                  <CheckCircle2 size={15} /> Me interesa
-                </button>
-              )}
-              <button onClick={() => navigate(`/productor/mapa/bodega/${selectedBodega.id}`)}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-[13px] font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                <Navigation size={14} /> Ver detalle completo
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* ── BOTTOM SHEET MOBILE: Bodega seleccionada ── */}
-      {selectedBodega && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 z-[2000] bg-white rounded-t-3xl shadow-2xl ring-1 ring-black/5 max-h-[60vh] flex flex-col">
-          {/* Pill */}
-          <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-2 flex-shrink-0" />
-          <div className="flex-shrink-0 px-5 pb-3 flex items-start justify-between gap-3">
-            <div>
-              {(() => {
-                const sem = SEMAFORO[selectedBodega.estado_compra] || SEMAFORO.sin_actividad;
-                return (
-                  <span className="inline-block text-[10px] font-black uppercase px-2 py-0.5 rounded-full mb-1 border"
-                    style={{ color: sem.fill, borderColor: sem.fill + '40', background: sem.fill + '15' }}>
-                    {sem.label}
-                  </span>
-                );
-              })()}
-              <h3 className="font-black text-gray-900 text-[16px] leading-tight">{selectedBodega.nombre}</h3>
-              <p className="text-gray-500 text-[12px] flex items-center gap-1 mt-0.5">
-                <MapPin size={11} /> {selectedBodega.municipio}
-              </p>
-            </div>
-            <button onClick={() => setSelectedBodega(null)} className="text-gray-400 mt-1">
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-5 pb-2 space-y-3">
-            <div className="bg-emerald-50 rounded-xl p-3 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center">
-                <Wheat size={16} className="text-[#1A5C38]" />
-              </div>
-              <div>
-                <p className="text-[11px] text-gray-500 font-medium">Precio hoy</p>
-                <p className="font-black text-[#1A5C38] text-[16px] leading-tight">
-                  {selectedBodega.precio_compra_hoy > 0
-                    ? `$${Number(selectedBodega.precio_compra_hoy).toLocaleString('es-MX')}/ton`
-                    : '—'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-shrink-0 p-4 border-t border-gray-100 flex gap-2">
-            {selectedBodega.senal_activa && (
-              <button onClick={() => handleMeInteresa(selectedBodega.senal_activa!.id, selectedBodega.nombre)}
-                className="flex-1 bg-[#1A5C38] text-white text-[13px] font-black py-3 rounded-xl flex items-center justify-center gap-1.5">
-                <CheckCircle2 size={14} /> Me interesa
-              </button>
-            )}
-            <button onClick={() => navigate(`/productor/mapa/bodega/${selectedBodega.id}`)}
-              className="flex-1 bg-gray-100 text-gray-800 text-[13px] font-bold py-3 rounded-xl flex items-center justify-center gap-1.5">
-              <Navigation size={14} /> Detalle
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── POPUP parcela (click al punto azul) ── */}
-      {selectedUP && up && (
-        <div className="fixed inset-x-4 bottom-24 lg:bottom-8 lg:left-auto lg:right-8 lg:w-72 z-[2000] bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 p-5">
-          <button onClick={() => setSelectedUP(false)} className="absolute top-3 right-3 text-gray-400">
-            <X size={16} />
-          </button>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
-              <MapPin size={18} className="text-blue-600" />
-            </div>
-            <div>
-              <p className="font-black text-gray-900 text-[14px]">Tu Parcela</p>
-              <p className="text-gray-500 text-[11px]">{up.municipio}, {up.estado}</p>
-            </div>
-          </div>
-          <div className="bg-blue-50 rounded-xl p-3 space-y-1.5">
-            <div className="flex justify-between text-[12px]">
-              <span className="text-gray-500 font-medium">Ubicación</span>
-              <span className={`font-bold ${up.location_confirmed ? 'text-emerald-600' : 'text-amber-600'}`}>
-                {up.location_confirmed ? '✓ Confirmada' : 'Aproximada'}
-              </span>
-            </div>
-            <div className="flex justify-between text-[12px]">
-              <span className="text-gray-500 font-medium">Coordenadas</span>
-              <span className="font-mono text-gray-700 text-[11px]">{up.lat.toFixed(4)}, {up.lng.toFixed(4)}</span>
-            </div>
-          </div>
-          {!up.location_confirmed && (
-            <button onClick={() => navigate('/productor/ubicacion')}
-              className="mt-3 w-full bg-amber-500 text-white text-[12px] font-bold py-2.5 rounded-xl">
-              Actualizar ubicación →
-            </button>
-          )}
-        </div>
-      )}
 
       {/* ── Toast ── */}
       {confirmacionVisible && (
