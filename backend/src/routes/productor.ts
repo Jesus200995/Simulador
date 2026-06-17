@@ -295,6 +295,13 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     });
   } catch (error: any) {
     console.error('[SADER] Error:', error.message);
+    if (error.message?.includes('no configuradas')) {
+      res.status(503).json({
+        error: 'El servicio de verificación aún no está configurado. Intenta más tarde.',
+        codigo: 'SADER_NO_DISPONIBLE'
+      });
+      return;
+    }
     if (error.response?.status === 503 || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
       res.status(503).json({
         error: 'El servicio de verificación no está disponible. Intenta más tarde.',
