@@ -243,6 +243,16 @@ export default function MapaBodegasPage() {
       className: 'custom-premium-popup' 
     }).setDOMContent(popupNode);
 
+    popup.on('open', () => {
+      const isMobile = window.innerWidth < 1024;
+      map.current?.flyTo({ 
+        center: [up.lng, up.lat], 
+        zoom: 13, 
+        duration: 800,
+        offset: [0, isMobile ? 120 : 60]
+      });
+    });
+
     upMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
       .setLngLat([up.lng, up.lat])
       .setPopup(popup)
@@ -368,7 +378,13 @@ export default function MapaBodegasPage() {
       }).setDOMContent(popupNode);
 
       popup.on('open', () => {
-        map.current?.flyTo({ center: [b.longitud, b.latitud], zoom: 12.5, duration: 800 });
+        const isMobile = window.innerWidth < 1024;
+        map.current?.flyTo({ 
+          center: [b.longitud, b.latitud], 
+          zoom: 12.5, 
+          duration: 800,
+          offset: [0, isMobile ? 140 : 80]
+        });
       });
 
       const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
