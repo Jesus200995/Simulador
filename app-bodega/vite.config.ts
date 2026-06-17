@@ -33,6 +33,7 @@ export default defineConfig({
         skipWaiting: true,
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024
       }
     }),
   ],

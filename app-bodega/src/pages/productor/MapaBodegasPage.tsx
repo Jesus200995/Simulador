@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   MapPin, Package, Warehouse, Map as MapIcon,
-  CheckCircle2, Wheat, Navigation, Layers
+  CheckCircle2, Wheat, Navigation, Layers, ChevronDown, Compass
 } from 'lucide-react';
 
 mapboxgl.accessToken = [
@@ -60,7 +60,16 @@ export default function MapaBodegasPage() {
   const [loadingBodegas, setLoadingBodegas] = useState(true);
   const [radioKm, setRadioKm] = useState(100);
   const [filtroTipoMaiz, setFiltroTipoMaiz] = useState('');
+  const [isMaizOpen, setIsMaizOpen] = useState(false);
+  const [isKmOpen, setIsKmOpen] = useState(false);
+
   const [coordsAproximadas, setCoordsAproximadas] = useState(false);
+
+  useEffect(() => {
+    const handleClick = () => { setIsMaizOpen(false); setIsKmOpen(false); };
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, []);
   const [mapReady, setMapReady] = useState(false);
 
   const [confirmacionVisible, setConfirmacionVisible] = useState(false);
@@ -457,27 +466,68 @@ export default function MapaBodegasPage() {
       )}
 
       {/* ── Filtros ── */}
-      <div className="flex-shrink-0 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-3 py-2.5 space-y-2">
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
-          {(['', 'blanco', 'amarillo', 'criollo'] as const).map(tipo => (
-            <button key={tipo || 'todos'} onClick={() => setFiltroTipoMaiz(tipo)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all ${
-                filtroTipoMaiz === tipo
-                  ? 'bg-[#1A5C38] text-white shadow-sm'
-                  : 'bg-[#eef8f2] text-gray-600 hover:bg-emerald-100'}`}>
-              {tipo === '' ? 'Todos' : `Maíz ${tipo}`}
+      <div className="flex-shrink-0 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-3 z-20 shadow-sm relative">
+        <div className="max-w-5xl mx-auto flex gap-3 sm:gap-4">
+          
+          {/* Tipo Maíz Custom Dropdown */}
+          <div className="relative flex-1" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => { setIsMaizOpen(!isMaizOpen); setIsKmOpen(false); }}
+              className="w-full bg-[#eef8f2]/60 border border-emerald-100 text-gray-800 text-[12px] sm:text-[13px] font-bold rounded-xl py-2.5 pl-9 pr-8 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/20 transition-all shadow-[0_2px_8px_rgba(26,92,56,0.04)]"
+            >
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Wheat size={14} className="text-[#1A5C38]" />
+              </div>
+              <span className="truncate">
+                {filtroTipoMaiz === 'blanco' ? 'Maíz Blanco' : filtroTipoMaiz === 'amarillo' ? 'Maíz Amarillo' : filtroTipoMaiz === 'criollo' ? 'Maíz Criollo' : 'Cualquier maíz'}
+              </span>
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isMaizOpen ? 'rotate-180' : ''}`} />
+              </div>
             </button>
-          ))}
-          <div className="w-px bg-gray-200 mx-1 self-stretch" />
-          {[50, 100, 200, 500].map(km => (
-            <button key={km} onClick={() => setRadioKm(km)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all ${
-                radioKm === km
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>
-              {km} km
+            
+            {/* Maiz Dropdown Menu */}
+            <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 overflow-hidden origin-top transition-all duration-300 ${isMaizOpen ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+              {[
+                { val: '', label: 'Cualquier maíz' },
+                { val: 'blanco', label: 'Maíz Blanco' },
+                { val: 'amarillo', label: 'Maíz Amarillo' },
+                { val: 'criollo', label: 'Maíz Criollo' }
+              ].map(opt => (
+                <button key={opt.val} onClick={() => { setFiltroTipoMaiz(opt.val); setIsMaizOpen(false); }}
+                  className={`w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors ${filtroTipoMaiz === opt.val ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Radio Custom Dropdown */}
+          <div className="relative flex-1" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => { setIsKmOpen(!isKmOpen); setIsMaizOpen(false); }}
+              className="w-full bg-blue-50/50 border border-blue-100 text-gray-800 text-[12px] sm:text-[13px] font-bold rounded-xl py-2.5 pl-9 pr-8 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-[0_2px_8px_rgba(37,99,235,0.04)]"
+            >
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Compass size={14} className="text-blue-600" />
+              </div>
+              <span className="truncate">Radio: {radioKm} km</span>
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isKmOpen ? 'rotate-180' : ''}`} />
+              </div>
             </button>
-          ))}
+            
+            {/* Km Dropdown Menu */}
+            <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 overflow-hidden origin-top transition-all duration-300 ${isKmOpen ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+              {[50, 100, 200, 500].map(km => (
+                <button key={km} onClick={() => { setRadioKm(km); setIsKmOpen(false); }}
+                  className={`w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors ${radioKm === km ? 'bg-blue-50 text-blue-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  Radio: {km} km
+                </button>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
 

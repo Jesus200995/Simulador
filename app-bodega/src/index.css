@@ -1,6 +1,6 @@
-@import "tailwindcss";
 @import url('https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap');
+@import "tailwindcss";
 
 /* Mapbox GL */
 .mapboxgl-ctrl-bottom-left,
