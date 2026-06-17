@@ -209,8 +209,8 @@ export default function CicloProductivoPage() {
                   <Sprout size={20} className="text-[#1A5C38]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-slate-800 text-[15px] truncate">{up.up_name || 'Parcela'}</p>
-                  <p className="text-[12.5px] text-slate-500 mt-0.5 truncate">
+                  <p className="font-bold text-slate-800 text-[15px]">{up.up_name || 'Parcela'}</p>
+                  <p className="text-[12.5px] text-slate-500 mt-0.5">
                     {[up.municipality_name, up.state_name].filter(Boolean).join(', ')}
                     {up.area_ha_calc ? ` · ${Number(up.area_ha_calc)} ha` : ''}
                   </p>

@@ -68,7 +68,7 @@ export default function DetalleBodegaPage() {
             <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
           </button>
           <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Mapa</p>
-          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight truncate">{bodega.nombre}</h1>
+          <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">{bodega.nombre}</h1>
         </div>
       </div>
 

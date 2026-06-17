@@ -99,7 +99,7 @@ export default function B29OnboardingBodeguero() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-4xl mx-auto space-y-4">
         {cargando ? (
           [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />)

@@ -104,7 +104,7 @@ export default function B06BodegaDetalle() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* ── General ── */}
         {tab === 'general' && (
           <div className="space-y-4">

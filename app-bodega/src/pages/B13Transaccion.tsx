@@ -106,7 +106,7 @@ export default function B13Transaccion() {
     <div className="w-full">
       <PageBanner title="Registrar Transacción" subtitle="Nueva compra de maíz" back="/transacciones" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6">
           {/* Bodega y productor */}
           <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">

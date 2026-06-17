@@ -101,7 +101,11 @@ export default function DisponibilidadConfirmPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-500 text-sm">Disponible</span>
-              <span className="font-medium text-zinc-800 text-sm">{fechaDesde} -- {fechaHasta}</span>
+              <span className="font-medium text-zinc-800 text-sm">
+                {fechaDesde ? new Date(fechaDesde + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                {' — '}
+                {fechaHasta ? new Date(fechaHasta + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+              </span>
             </div>
           </div>
 

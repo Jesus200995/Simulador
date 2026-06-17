@@ -115,7 +115,7 @@ export default function B04Dashboard() {
       </div>
 
       {/* ── Contenido ── */}
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 space-y-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
@@ -262,7 +262,7 @@ export default function B04Dashboard() {
                       <Icon size={20} className={iconColor} />
                     </span>
                     <div className="flex-1 min-w-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-0.5">
-                      <p className="text-[14px] sm:text-[15px] font-bold text-gray-900 tracking-tight truncate">{label}</p>
+                      <p className="text-[14px] sm:text-[15px] font-bold text-gray-900 tracking-tight">{label}</p>
                       <p className="text-[11px] sm:text-[12px] text-gray-400/90 truncate mt-0.5">{desc}</p>
                     </div>
                     <ChevronRight size={18} className="text-gray-300 flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-1 group-hover:text-emerald-500" />

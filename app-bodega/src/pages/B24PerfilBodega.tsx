@@ -481,7 +481,7 @@ export default function B24PerfilBodega() {
 
       <PageBanner title="Mi Perfil" subtitle={rolDisplay} back="/dashboard" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="max-w-4xl mx-auto space-y-6">
         {loading ? (
           <div className="flex justify-center pt-16"><Spinner /></div>

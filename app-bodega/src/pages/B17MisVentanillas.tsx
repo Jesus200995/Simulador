@@ -33,14 +33,14 @@ export default function B17MisVentanillas() {
     <div className="w-full">
       <PageBanner title="Mis Ventanillas" subtitle="Apoyos para productores" back="/mas" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading && (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ventanillas.map(v => (
             <button
               key={v.id}
@@ -52,9 +52,9 @@ export default function B17MisVentanillas() {
                   <Building2 size={20} className="text-[#1A5C38]" />
                 </div>
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
-                  <p className="font-bold text-[16px] text-gray-900 truncate group-hover/card:text-[#1A5C38] transition-colors">{v.bodega_nombre}</p>
+                  <p className="font-bold text-[15px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors leading-snug">{v.bodega_nombre}</p>
                   {v.nombre_ventanilla && (
-                    <p className="text-[13px] text-gray-500 font-medium truncate">{v.nombre_ventanilla}</p>
+                    <p className="text-[13px] text-gray-500 font-medium leading-snug mt-0.5">{v.nombre_ventanilla}</p>
                   )}
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${tipoBadge[v.tipo] || 'bg-gray-100 text-gray-500'}`}>

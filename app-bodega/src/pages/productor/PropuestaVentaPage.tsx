@@ -151,7 +151,7 @@ export default function PropuestaVentaPage() {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 max-w-2xl mx-auto">
         {paso === 'cargando' && (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />

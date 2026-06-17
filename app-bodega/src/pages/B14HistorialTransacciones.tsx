@@ -75,27 +75,29 @@ export default function B14HistorialTransacciones() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading && (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {txs.map(tx => (
             <div key={tx.id}
               onClick={() => navigate(`/transacciones/${tx.id}`)}
               className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 cursor-pointer hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
               <div className="flex justify-between items-start gap-3 mb-2">
-                <p className="font-bold text-[16px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors truncate flex-1">
+                <p className="font-bold text-[15px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors leading-snug flex-1">
                   {tx.nombre_productor || tx.nombre_productor_libre || 'Productor'}
                 </p>
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${estadoBadge[tx.confirmacion_productor] || 'bg-gray-100 text-gray-500'}`}>
                   {tx.confirmacion_productor}
                 </span>
               </div>
-              <p className="text-[13px] text-gray-500 font-medium">{tx.bodega_nombre} · {tx.fecha}</p>
+              <p className="text-[13px] text-gray-500 font-medium leading-snug">
+                {tx.bodega_nombre} · {tx.fecha ? new Date(tx.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+              </p>
               <p className="text-[18px] font-black text-[#1A5C38] mt-2">
                 {tx.volumen_ton} ton · ${formatNum(tx.precio_ton)}/ton
               </p>

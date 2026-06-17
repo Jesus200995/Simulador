@@ -254,7 +254,7 @@ export default function MapaBodegasPage() {
                   </div>
                   
                   <div>
-                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1 truncate">{b.nombre}</h4>
+                    <h4 className="font-extrabold text-[13px] text-white tracking-tight leading-tight mb-1">{b.nombre}</h4>
                     <p className="text-[11px] text-gray-400 flex items-center gap-1">
                       <MapPin size={11} /> {b.municipio}
                     </p>

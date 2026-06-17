@@ -99,7 +99,7 @@ export default function B25ConfiguracionPage() {
         back="/perfil"
       />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="max-w-4xl mx-auto space-y-6">
 
         {/* ── Seguridad ── */}

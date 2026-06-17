@@ -44,11 +44,11 @@ export default function MasPage() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 space-y-6">
-        {/* Herramientas: 1 col mobile → 2 cols desktop */}
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Herramientas: 1 col mobile → 2 cols tablet → 3 cols desktop */}
         <div>
           <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-3 transition-colors hover:text-[#1A5C38]/60">Herramientas</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {ACCIONES.map(({ icon: Icon, label, desc, path, iconBg, iconColor }) => (
               <button
                 key={path}
@@ -59,8 +59,8 @@ export default function MasPage() {
                   <Icon size={22} className={iconColor} />
                 </span>
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
-                  <p className="text-[16px] font-bold text-gray-900 group-hover/card:text-[#1A5C38] transition-colors truncate">{label}</p>
-                  <p className="text-[13px] text-gray-500 font-medium truncate mt-0.5">
+                  <p className="text-[15px] font-bold text-gray-900 group-hover/card:text-[#1A5C38] transition-colors">{label}</p>
+                  <p className="text-[13px] text-gray-500 font-medium mt-0.5">
                     {desc !== null ? desc : (
                       ventCount != null && ventCount > 0
                         ? `${ventCount} ventanilla${ventCount !== 1 ? 's' : ''} activa${ventCount !== 1 ? 's' : ''}`

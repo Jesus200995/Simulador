@@ -42,7 +42,7 @@ export default function B08Semaforo() {
     <div className="w-full">
       <PageBanner title="Estado de Compra" subtitle="Visible para productores" back={`/bodegas/${id}`} />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-2xl mx-auto space-y-4">
           <p className="text-[14px] text-gray-400 text-center mb-6 font-medium">
             Indica si tu bodega está comprando maíz esta semana

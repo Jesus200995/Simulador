@@ -142,7 +142,7 @@ export default function MiPerfilPage() {
               <span className="text-white text-[18px] font-black">{initials}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-[18px] sm:text-[20px] font-black text-white leading-tight tracking-tight truncate">{nombreCompleto || 'Mi perfil'}</h1>
+              <h1 className="text-[18px] sm:text-[20px] font-black text-white leading-tight tracking-tight">{nombreCompleto || 'Mi perfil'}</h1>
               <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                 <span className="text-[10px] font-bold text-white bg-white/15 rounded-full px-2 py-0.5">Tipo {perfil.tipo_registro}</span>
                 <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
@@ -157,7 +157,7 @@ export default function MiPerfilPage() {
         </div>
       </div>
 
-      <div className="px-4 pt-4 space-y-4">
+      <div className="max-w-5xl mx-auto px-4 pt-4 space-y-4">
         {/* Datos personales — no editables */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Datos personales</p>

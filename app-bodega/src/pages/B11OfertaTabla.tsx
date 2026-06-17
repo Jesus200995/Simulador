@@ -115,7 +115,7 @@ export default function B11OfertaTabla() {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Fallback message */}
         {mensaje && (
           <div className="bg-amber-50 border border-amber-200 rounded-[1rem] px-5 py-3 mb-5">

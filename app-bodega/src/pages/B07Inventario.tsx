@@ -74,7 +74,7 @@ export default function B07Inventario() {
     <div className="w-full">
       <PageBanner title="Actualizar Inventario" subtitle="Registro de volumen almacenado" back="/mis-bodegas" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-5">
           {/* Bodega */}
           <div className={cardClass}>

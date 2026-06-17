@@ -85,7 +85,7 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
           {transacciones.map(txn => (
             <div key={txn.id} className="py-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 text-sm truncate">
+                <p className="font-medium text-gray-800 text-sm">
                   {txn.bodega_nombre}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">

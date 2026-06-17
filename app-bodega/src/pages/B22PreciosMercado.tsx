@@ -76,7 +76,7 @@ export default function B22PreciosMercado() {
     <div className="w-full min-h-screen bg-gradient-to-b from-gray-50/50 to-gray-100/30">
       <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas en tiempo real" back="/dashboard" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 space-y-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Top Control Bar */}
         <div className="flex items-center justify-between bg-white/80 backdrop-blur-md border border-black/[0.04] rounded-[1.25rem] px-5 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2">

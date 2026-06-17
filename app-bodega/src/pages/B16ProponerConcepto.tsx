@@ -44,7 +44,7 @@ export default function B16ProponerConcepto() {
     <div className="w-full overflow-x-hidden">
       <PageHeader title="Proponer Nuevo Servicio" back="/tarifario" />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6">
           <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] p-6 space-y-5">
             <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Detalles del servicio</p>
