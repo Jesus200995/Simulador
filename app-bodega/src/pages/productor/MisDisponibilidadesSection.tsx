@@ -77,7 +77,7 @@ export default function MisDisponibilidadesSection({ token, apiUrl, onActualizar
         {disponibilidades.map(disp => (
           <div key={disp.id} className="bg-white rounded-xl p-4 flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-800 text-sm">
+              <p className="font-semibold text-gray-800 text-sm capitalize">
                 {disp.variedad_nombre || disp.variedad_code}
               </p>
               <p className="text-xs text-gray-500 mt-0.5">

@@ -142,7 +142,7 @@ export default function B11OfertaTabla() {
                     <p className="text-[12.5px] text-gray-500 font-medium truncate">{d.estado}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="bg-[#1A5C38]/[0.08] text-[#1A5C38] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
+                    <span className="bg-[#1A5C38]/[0.08] text-[#1A5C38] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 capitalize">
                       {d.ventana_predominante === 'esta_semana' ? 'Esta semana' : d.ventana_predominante === '15_dias' ? '15 días' : d.ventana_predominante || 'Esta semana'}
                     </span>
                     {Number(d.distancia_km) > 0 && (
