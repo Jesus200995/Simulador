@@ -185,27 +185,44 @@ export default function DashboardProductorPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-[20px] p-5 sm:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1 font-medium">
-            Precio de compra hoy - tu region
-          </p>
-          <div className="flex items-end gap-2">
-            <span className="text-4xl sm:text-5xl font-bold text-zinc-900">
-              ${data?.precio_hoy ? formatNum(data.precio_hoy, 0) : '--'}
-            </span>
-            <span className="text-base text-zinc-400 pb-1">/ton</span>
-            {delta !== 0 && (
-              <span className={`text-sm pb-1 font-semibold flex items-center gap-0.5 ${delta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                {delta > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                ${formatNum(Math.abs(delta), 0)}
-              </span>
-            )}
+        <div className="relative overflow-hidden bg-white/95 backdrop-blur-2xl rounded-[1.5rem] p-6 sm:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] border border-black/[0.04] group transition-all duration-500">
+          {/* Subtle corner gradient */}
+          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-emerald-50/50 to-transparent opacity-50 rounded-bl-[4rem] pointer-events-none transition-opacity duration-500 group-hover:opacity-100" />
+          
+          <div className="relative z-10">
+            <p className="text-[13px] font-bold text-gray-500 tracking-wide leading-snug transition-colors duration-300 group-hover:text-gray-800">
+              PRECIO DE COMPRA HOY EN TU REGIÓN
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mt-3">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[40px] sm:text-[48px] font-black text-gray-900 leading-none tracking-tight">
+                  ${data?.precio_hoy ? formatNum(data.precio_hoy, 0) : '--'}
+                </span>
+                <span className="text-[16px] sm:text-[18px] font-bold text-gray-400">/ton</span>
+              </div>
+              
+              {delta !== 0 && (
+                <div className={`flex items-center gap-1 sm:pb-2 font-bold text-[14px] ${delta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  <span className={`flex items-center justify-center w-6 h-6 rounded-full ${delta > 0 ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                    {delta > 0 ? <ArrowUpRight size={14} strokeWidth={3} /> : <ArrowDownRight size={14} strokeWidth={3} />}
+                  </span>
+                  ${formatNum(Math.abs(delta), 0)}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-[13px] text-gray-500 font-medium leading-relaxed mt-3 opacity-90 group-hover:opacity-100 transition-opacity">
+              Promedio regional de bodegas activas
+            </p>
+            
+            <button 
+              onClick={() => navigate('/productor/precios')}
+              className="mt-5 inline-flex items-center gap-1.5 px-4 py-2 bg-[#1A5C38]/10 text-[#1A5C38] text-[13px] font-bold rounded-xl active:scale-95 transition-all duration-300 hover:bg-[#1A5C38] hover:text-white group/btn"
+            >
+              Ver desglose de precios 
+              <ChevronRight size={14} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
+            </button>
           </div>
-          <p className="text-xs text-zinc-400 mt-2">Promedio regional</p>
-          <button onClick={() => navigate('/productor/precios')}
-            className="mt-3 text-[#1A5C38] text-sm font-semibold flex items-center gap-1 hover:underline">
-            Ver desglose de precios <ChevronRight size={14} />
-          </button>
         </div>
 
         <div className="mt-5">
