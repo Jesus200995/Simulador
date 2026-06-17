@@ -150,7 +150,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
         const nombreProductor = prodResult.rows[0]?.nombre || 'Un productor';
         const variedadLabel = variedadFinal || tipo_maiz || 'maíz';
 
-        const msg = `🌽 ${nombreProductor} tiene maíz disponible en ${municipio}, ${estado}.\n` +
+        const msg = `${nombreProductor} tiene maíz disponible en ${municipio}, ${estado}.\n` +
                     `Variedad: ${variedadLabel}\n` +
                     `Volumen: ${volumenFinal || 'No especificado'} toneladas.\n` +
                     `Ingresa a la sección de Oferta para ver más detalles.`;

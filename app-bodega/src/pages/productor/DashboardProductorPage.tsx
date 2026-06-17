@@ -104,7 +104,26 @@ export default function DashboardProductorPage() {
       .catch(() => {});
   }, []);
 
-  if (loading) return <SkeletonDashboard />;
+  if (loading || ciclo === undefined) return <SkeletonDashboard />;
+
+  // Ciclo obligatorio: sin ciclo productivo registrado no se puede usar el tablero.
+  if (ciclo === null && !isPendiente) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 max-w-sm w-full text-center shadow-sm">
+          <Wheat size={40} className="text-[#1A5C38] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Registra tu ciclo productivo</h2>
+          <p className="text-gray-500 text-sm mb-6">
+            Para usar SIMAC necesitas registrar al menos un ciclo productivo. Solo te tomará unos minutos.
+          </p>
+          <button onClick={() => navigate('/productor/ciclo')}
+            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold">
+            Registrar mi ciclo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const delta = (data?.precio_hoy ?? 0) - (data?.precio_ayer ?? 0);
   const hora = getMexicoHour();

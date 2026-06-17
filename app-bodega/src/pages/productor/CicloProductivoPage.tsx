@@ -118,6 +118,14 @@ export default function CicloProductivoPage() {
       );
       return;
     }
+    // El rendimiento debe estar en un rango realista para maíz en México
+    if (form.yield_expected) {
+      const r = Number(form.yield_expected);
+      if (r < 1 || r > 15) {
+        setError('El rendimiento debe estar entre 1 y 15 ton/ha para maíz en México.');
+        return;
+      }
+    }
     const token = localStorage.getItem('simac_token');
     setLoading(true); setError('');
     try {

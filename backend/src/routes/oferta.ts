@@ -229,12 +229,12 @@ router.post('/municipios/:municipio/interes', authMiddleware, async (req: AuthRe
     const precioTxt = precio_ofrecido ? `$${Number(precio_ofrecido).toLocaleString()}/ton` : 'precio a convenir';
     const tipoTxt = tipo_maiz || 'maíz';
     const contactoTxt = bodega.contacto_nombre && bodega.telefono
-      ? `\n📞 Contacto: ${bodega.contacto_nombre} — ${bodega.telefono}`
+      ? `\nContacto: ${bodega.contacto_nombre} — ${bodega.telefono}`
       : '';
     const msg =
-      `🏪 La bodega "${bodega.nombre}" está interesada en comprar ${tipoTxt} en ${municipio}.\n\n` +
-      `📍 Ubicación: ${bodega.municipio}, ${bodega.estado}\n` +
-      `💰 Precio ofrecido: ${precioTxt}` +
+      `La bodega "${bodega.nombre}" está interesada en comprar ${tipoTxt} en ${municipio}.\n\n` +
+      `Ubicación: ${bodega.municipio}, ${bodega.estado}\n` +
+      `Precio ofrecido: ${precioTxt}` +
       contactoTxt +
       `\n\nAcércate a la bodega si quieres vender tu maíz.`;
 

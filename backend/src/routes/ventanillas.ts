@@ -35,8 +35,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 
   try {
     const result = await pool.query(
-      `INSERT INTO ventanillas (bodega_id, usuario_id, nombre_enlace_agricultura, nombre_ventanilla, telefono_responsable, correo_responsable, tipo)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      `INSERT INTO ventanillas (bodega_id, usuario_id, nombre_enlace_agricultura, nombre_ventanilla, telefono_responsable, correo_responsable, tipo, estatus)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,'activa') RETURNING *`,
       [bodega_id, userId, nombre_enlace_agricultura, nombre_ventanilla || null, telefono_responsable, correo_responsable, tipo]
     );
     await pool.query('UPDATE bodegas SET es_ventanilla = TRUE WHERE id = $1', [bodega_id]);
@@ -55,7 +55,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
           incentivos: 'Incentivos',
           ambos: 'Coberturas e Incentivos',
         };
-        const msg = `🏦 Nueva ventanilla de apoyos disponible en ${b.nombre} (${b.municipio}, ${b.estado}): ${tipoLabel[tipo] || tipo}. Contacto: ${nombre_enlace_agricultura} — Tel: ${telefono_responsable}.`;
+        const msg = `Nueva ventanilla de apoyos disponible en ${b.nombre} (${b.municipio}, ${b.estado}): ${tipoLabel[tipo] || tipo}. Contacto: ${nombre_enlace_agricultura} — Tel: ${telefono_responsable}.`;
 
         // Filtrar productores por proximidad geográfica (Haversine, sin PostGIS)
         let productorIds: { id: number }[] = [];

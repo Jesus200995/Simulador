@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { reverseGeocode } from '../utils/geocode';
+import { consultarPersonaPorCURP } from '../services/saderService';
 
 const router = Router();
 
@@ -227,15 +228,228 @@ router.get('/geo/reverse', async (req, res): Promise<void> => {
   }
 });
 
+// POST /api/productor/auth/consultar-curp
+// Verifica la CURP contra el padrón de SADER/RENAPO y precarga los datos
+router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
+  const { curp } = req.body;
+
+  if (!curp || curp.trim().length !== 18) {
+    res.status(400).json({ error: 'CURP inválida. Debe tener exactamente 18 caracteres.' });
+    return;
+  }
+  const curpN = curp.toUpperCase().trim();
+
+  // ¿Ya existe en SIMAC?
+  try {
+    const existe = await pool.query(
+      'SELECT id FROM usuarios WHERE UPPER(curp) = $1 LIMIT 1',
+      [curpN]
+    );
+    if (existe.rows.length > 0) {
+      res.status(409).json({
+        error: 'Esta CURP ya tiene cuenta en SIMAC. Inicia sesión.',
+        codigo: 'CURP_DUPLICADA'
+      });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ error: 'Error interno.' });
+    return;
+  }
+
+  // Consultar API SADER
+  try {
+    const datos = await consultarPersonaPorCURP(curpN);
+
+    if (!datos) {
+      res.status(404).json({
+        error: 'Tu CURP no está en el padrón de SADER. Contacta a tu técnico territorial.',
+        codigo: 'NO_EN_PADRON'
+      });
+      return;
+    }
+
+    if (!datos.activo_renapo || !datos.activo_padron) {
+      res.status(403).json({
+        error: 'Tu registro en el padrón no está activo. Contacta a tu técnico territorial.',
+        codigo: 'INACTIVO_PADRON'
+      });
+      return;
+    }
+
+    res.json({
+      encontrado: true,
+      datos: {
+        curp: datos.curp,
+        nombres: datos.nombres,
+        apellido_paterno: datos.apellido_paterno,
+        apellido_materno: datos.apellido_materno,
+        fecha_nacimiento: datos.fecha_nacimiento,
+        genero: datos.genero,
+        telefono: datos.telefono,
+        correo: datos.correo,
+        estado_padron: datos.estado,
+        municipio_padron: datos.municipio,
+        localidad_padron: datos.localidad
+      }
+    });
+  } catch (error: any) {
+    console.error('[SADER] Error:', error.message);
+    if (error.response?.status === 503 || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({
+        error: 'El servicio de verificación no está disponible. Intenta más tarde.',
+        codigo: 'SADER_NO_DISPONIBLE'
+      });
+      return;
+    }
+    if (error.response?.status === 401) {
+      console.error('[SADER] Error de autenticación — verificar API KEY');
+      res.status(503).json({
+        error: 'El servicio de verificación no está disponible. Intenta más tarde.',
+        codigo: 'SADER_NO_DISPONIBLE'
+      });
+      return;
+    }
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// Cap de área a NUMERIC(10,4) → máx 999999.9999 ha (evita overflow 22003)
+function capAreaHa(v: any): number | null {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(n, 999999.9999);
+}
+
+// Crea una UP para un productor dentro de una transacción.
+// Lanza Error con .code='UP_OVERLAP' y .up_conflicto si el polígono se intersecta con otra UP del productor.
+async function crearUP(client: any, producerId: number, up: any): Promise<number> {
+  const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area } = up;
+  let estadoFinal = up.estado_up;
+  let municipioFinal = up.municipio_up;
+  let stateIdFinal: string | null = null;
+  let municipalityIdFinal: string | null = null;
+
+  const hasCoords = lat != null && lng != null && lat !== 0 && lng !== 0;
+  const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
+  const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
+
+  if (hasCoords) {
+    const g = await reverseGeocode(Number(lat), Number(lng));
+    if (g.state_name) estadoFinal = g.state_name;
+    if (g.municipality_name) municipioFinal = g.municipality_name;
+    stateIdFinal = g.state_id;
+    municipalityIdFinal = g.municipality_id;
+  }
+
+  const areaCalc = capAreaHa(area_calc_ha);
+  const areaReal = capAreaHa(area_real_ha);
+  const geojson = hasPoligono ? JSON.stringify({
+    type: 'Polygon',
+    coordinates: [[
+      ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
+      [poligono[0][1], poligono[0][0]],
+    ]],
+  }) : null;
+
+  // Overlap con UPs existentes del mismo productor
+  if (hasPoligono && postgisActivo) {
+    const ov = await client.query(
+      `SELECT up_id, up_name FROM up
+       WHERE producer_id = $1 AND geom IS NOT NULL
+         AND ST_Intersects(geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
+       LIMIT 1`,
+      [producerId, geojson]
+    );
+    if (ov.rows.length > 0) {
+      const e: any = new Error('overlap');
+      e.code = 'UP_OVERLAP';
+      e.up_conflicto = ov.rows[0].up_name;
+      throw e;
+    }
+  }
+
+  let upId: number;
+  if (hasCoords) {
+    const useGeom = hasPoligono && postgisActivo;
+    const geomSql = useGeom ? `ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))` : 'NULL';
+    const aIdx = useGeom ? 7 : 6;
+    const params = [
+      producerId, estadoFinal, municipioFinal, lng, lat,
+      ...(useGeom ? [geojson] : []),
+      areaCalc, areaReal, coincide_area ?? null,
+    ];
+    const r = await client.query(
+      `INSERT INTO up
+         (producer_id, up_name, up_type, production_system, water_regime,
+          state_name, municipality_name, centroid, geom,
+          area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
+       VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+               $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), ${geomSql},
+               $${aIdx}, $${aIdx + 1}, $${aIdx + 2}, TRUE, 'productor')
+       RETURNING up_id`,
+      params
+    );
+    upId = r.rows[0].up_id;
+  } else if (hasPoligono && postgisActivo) {
+    const r = await client.query(
+      `INSERT INTO up
+         (producer_id, up_name, up_type, production_system, water_regime,
+          state_name, municipality_name, centroid, geom,
+          area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
+       VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+               $2, $3,
+               ST_Centroid(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
+               ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
+               $5, $6, $7, TRUE, 'poligono_calculado')
+       RETURNING up_id`,
+      [producerId, estadoFinal, municipioFinal, geojson, areaCalc, areaReal, coincide_area ?? null]
+    );
+    upId = r.rows[0].up_id;
+  } else {
+    let centroidVal = null;
+    try {
+      const muni = await client.query(
+        `SELECT centroid::geometry AS centroid FROM municipios_referencia
+         WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
+        [municipioFinal, estadoFinal]
+      );
+      centroidVal = muni.rows[0]?.centroid || null;
+    } catch { /* tabla opcional */ }
+    const r = await client.query(
+      `INSERT INTO up
+         (producer_id, up_name, up_type, production_system, water_regime,
+          state_name, municipality_name, centroid,
+          location_confirmed, centroid_source)
+       VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+               $2, $3, $4::geometry, FALSE, 'municipio')
+       RETURNING up_id`,
+      [producerId, estadoFinal, municipioFinal, centroidVal]
+    );
+    upId = r.rows[0].up_id;
+  }
+
+  if (stateIdFinal || municipalityIdFinal) {
+    await client.query(
+      `UPDATE up SET state_id = COALESCE($1, state_id), municipality_id = COALESCE($2, municipality_id)
+       WHERE up_id = $3`,
+      [stateIdFinal, municipalityIdFinal, upId]
+    );
+  }
+  return upId;
+}
+
 // POST /api/productor/auth/registro-nuevo
-// Registro Tipo B — cuenta queda en estado 'pendiente'
+// Registro con datos del padrón SADER — la cuenta queda ACTIVA automáticamente.
+// Acepta un array `ups` (múltiples parcelas) o los campos de una sola UP (compatibilidad).
 router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
   try {
     const {
-      curp, nombres, apellido_paterno, apellido_materno,
-      estado_up, municipio_up, tipo_maiz, variedad_id,
+      curp, nombres, apellido_paterno, apellido_materno, genero,
+      estado_up, municipio_up,
       lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area,
-      telefono, pin, programas_beneficiario, correo
+      telefono, pin, programas_beneficiario, correo,
+      ups,
     } = req.body;
 
     if (!pin || !/^\d{4}$/.test(pin)) {
@@ -258,29 +472,10 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
 
     const hashedPin = await bcrypt.hash(pin, 10);
 
-    // Si el productor marcó su parcela, el estado y municipio se derivan de DÓNDE la marcó
-    // (reverse-geocoding), no del formulario. Así el llenado es automático y exacto.
-    let estadoFinal = estado_up;
-    let municipioFinal = municipio_up;
-    let stateIdFinal: string | null = null;
-    let municipalityIdFinal: string | null = null;
-    if (lat != null && lng != null && lat !== 0 && lng !== 0) {
-      const g = await reverseGeocode(Number(lat), Number(lng));
-      if (g.state_name) estadoFinal = g.state_name;
-      if (g.municipality_name) municipioFinal = g.municipality_name;
-      stateIdFinal = g.state_id;
-      municipalityIdFinal = g.municipality_id;
-    }
-
-    // area_ha_calc/area_ha_real son NUMERIC(10,4) → máx 999999.9999 ha.
-    // Cap para evitar "numeric field overflow" (22003) con áreas absurdas.
-    const capArea = (v: any): number | null => {
-      const n = Number(v);
-      if (!Number.isFinite(n) || n <= 0) return null;
-      return Math.min(n, 999999.9999);
-    };
-    const areaCalc = capArea(area_calc_ha);
-    const areaReal = capArea(area_real_ha);
+    // Lista de UPs a crear: usar `ups` (array, flujo nuevo) o la UP única (compatibilidad).
+    const upsList: any[] = (Array.isArray(ups) && ups.length > 0)
+      ? ups
+      : [{ lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area, estado_up, municipio_up }];
 
     const client = await pool.connect();
     try {
@@ -299,159 +494,27 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
         [curpN, nombreCompleto, hashedPin, telefono]
       );
 
+      // Cuenta ACTIVA automáticamente (validada por el padrón SADER). sexo desde el padrón.
       const p = await client.query(
         `INSERT INTO producer
            (usuario_id, curp, nombres, apellido_paterno, apellido_materno,
-            phone, tipo_registro, estado_validacion, programas_beneficiario, correo)
-         VALUES ($1,$2,$3,$4,$5,$6,'B','pendiente',$7,$8) RETURNING producer_id`,
-        [u.rows[0].id, curpN, nombresN, apPaternoN,
-         apMaternoN, telefono, programas_beneficiario || [], correo || null]
+            phone, sexo, tipo_registro, estado_validacion, programas_beneficiario, correo)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,'B','activo',$8,$9) RETURNING producer_id`,
+        [u.rows[0].id, curpN, nombresN, apPaternoN, apMaternoN,
+         telefono, genero || null, programas_beneficiario || [], correo || null]
       );
+      const producerId = p.rows[0].producer_id;
 
-      // UP: tres casos según lo que envió el frontend
-      const hasCoords  = lat != null && lng != null && lat !== 0 && lng !== 0;
-      const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
-      const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
-
-      // Verificar que el nuevo polígono no se intersecta con UPs existentes del mismo productor
-      if (hasPoligono && postgisActivo) {
-        const geojsonNueva = JSON.stringify({
-          type: 'Polygon',
-          coordinates: [[
-            ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
-            [poligono[0][1], poligono[0][0]],
-          ]],
-        });
-        const overlapCheck = await client.query(
-          `SELECT u.up_id, u.up_name
-           FROM up u
-           WHERE u.producer_id = $1
-             AND u.geom IS NOT NULL
-             AND ST_Intersects(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
-           LIMIT 1`,
-          [p.rows[0].producer_id, geojsonNueva]
-        );
-        if (overlapCheck.rows.length > 0) {
-          await client.query('ROLLBACK');
-          res.status(409).json({
-            error: `El polígono que dibujaste se intersecta con tu parcela "${overlapCheck.rows[0].up_name}" que ya está registrada. Por favor dibuja el polígono de tu nueva parcela en un área diferente.`,
-            up_conflicto: overlapCheck.rows[0].up_name,
-          });
-          return;
-        }
-      }
-
-      if (hasCoords) {
-        // Caso 1 — Frontend envió centroide calculado por turf.js ✅
-        // useGeomParam: $6 solo aparece en el SQL cuando ambas condiciones se cumplen
-        const useGeomParam = hasPoligono && postgisActivo;
-        // La columna up.geom es MultiPolygon → envolver con ST_Multi
-        const geomSql = useGeomParam
-          ? `ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))`
-          : 'NULL';
-        const geomParam = useGeomParam
-          ? JSON.stringify({
-              type: 'Polygon',
-              coordinates: [[
-                ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
-                [poligono[0][1], poligono[0][0]],
-              ]],
-            })
-          : null;
-        const qParams = [
-          p.rows[0].producer_id, estadoFinal, municipioFinal, lng, lat,
-          ...(useGeomParam ? [geomParam] : []),
-          areaCalc, areaReal, coincide_area ?? null,
-        ];
-        const aIdx = useGeomParam ? 7 : 6;
-        await client.query(
-          `INSERT INTO up
-             (producer_id, up_name, up_type, production_system, water_regime,
-              state_name, municipality_name, centroid, geom,
-              area_ha_calc, area_ha_real, coincide_area,
-              location_confirmed, centroid_source)
-           VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
-                   $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), ${geomSql},
-                   $${aIdx}, $${aIdx+1}, $${aIdx+2}, TRUE, 'productor')`,
-          qParams
-        );
-
-      } else if (hasPoligono && postgisActivo) {
-        // Caso 2 — RED DE SEGURIDAD: frontend envió polígono pero lat/lng llegaron null
-        // El backend calcula el centroide directamente desde el polígono con PostGIS
-        console.log('[UP] lat/lng null pero polígono disponible — calculando centroide con PostGIS');
-
-        const geojson = JSON.stringify({
-          type: 'Polygon',
-          coordinates: [[
-            ...poligono.map(([plat, plng]: [number, number]) => [plng, plat]),
-            [poligono[0][1], poligono[0][0]],
-          ]],
-        });
-
-        await client.query(
-          `INSERT INTO up
-             (producer_id, up_name, up_type, production_system, water_regime,
-              state_name, municipality_name,
-              centroid, geom,
-              area_ha_calc, area_ha_real, coincide_area,
-              location_confirmed, centroid_source)
-           VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
-                   $2, $3,
-                   ST_Centroid(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
-                   ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
-                   $5, $6, $7,
-                   TRUE, 'poligono_calculado')`,
-          [p.rows[0].producer_id, estadoFinal, municipioFinal, geojson,
-           areaCalc, areaReal, coincide_area ?? null]
-        );
-
-      } else {
-        // Caso 3 — Sin coordenadas ni polígono: usar centroide del municipio
-        console.log('[UP] Sin coordenadas ni polígono — usando centroide del municipio');
-        let centroidVal = null;
-        try {
-          const muni = await client.query(
-            `SELECT centroid::geometry AS centroid
-             FROM municipios_referencia
-             WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
-            [municipioFinal, estadoFinal]
-          );
-          centroidVal = muni.rows[0]?.centroid || null;
-        } catch (err) {
-          console.warn('municipios_referencia no disponible:', err);
-        }
-        await client.query(
-          `INSERT INTO up
-             (producer_id, up_name, up_type, production_system, water_regime,
-              state_name, municipality_name, centroid,
-              location_confirmed, centroid_source)
-           VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
-                   $2, $3, $4::geometry, FALSE, 'municipio')`,
-          [p.rows[0].producer_id, estadoFinal, municipioFinal, centroidVal]
-        );
-      }
-
-      // Guardar ids canónicos de estado/municipio (en up y producer) cuando se resolvieron
-      if (stateIdFinal || municipalityIdFinal) {
-        await client.query(
-          `UPDATE up SET state_id = COALESCE($1, state_id),
-                         municipality_id = COALESCE($2, municipality_id)
-           WHERE producer_id = $3`,
-          [stateIdFinal, municipalityIdFinal, p.rows[0].producer_id]
-        );
-        await client.query(
-          `UPDATE producer SET state_id = COALESCE($1, state_id),
-                               municipality_id = COALESCE($2, municipality_id)
-           WHERE producer_id = $3`,
-          [stateIdFinal, municipalityIdFinal, p.rows[0].producer_id]
-        );
+      // Crear TODAS las UPs (array o única). crearUP hace reverse-geocode, overlap e ids canónicos.
+      for (const upData of upsList) {
+        await crearUP(client, producerId, upData);
       }
 
       await client.query('COMMIT');
 
       res.status(201).json({
-        mensaje: 'Registro enviado. Tu cuenta será validada pronto. Ya puedes consultar precios y alertas.',
+        mensaje: 'Registro completo. Tu cuenta ya está activa. Inicia sesión con tu CURP y PIN.',
+        activo: true,
       });
     } catch (err) {
       await client.query('ROLLBACK');
@@ -461,6 +524,13 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
     }
   } catch (error: any) {
     console.error('Error en registro-nuevo:', error);
+    if (error.code === 'UP_OVERLAP') {
+      res.status(409).json({
+        error: `Una de tus parcelas se intersecta con otra que dibujaste ("${error.up_conflicto}"). Dibújala en un área diferente.`,
+        up_conflicto: error.up_conflicto,
+      });
+      return;
+    }
     if (error.code === '23505') {
       res.status(409).json({ error: 'Esta CURP ya está registrada en el sistema' });
       return;

@@ -162,12 +162,12 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             ? `a ${prod.distancia_km} km de tu parcela`
             : `en tu estado`;
           const msg =
-            `🔔 La bodega "${b.nombre}" busca maíz ${distTxt}.\n\n` +
-            `📍 ${b.municipio}, ${b.estado}\n` +
-            (b.telefono ? `📞 ${b.contacto_nombre || b.nombre} — ${b.telefono}\n` : '') +
-            `💰 Precio ofrecido: $${Number(precio_ofrecido).toLocaleString()}/ton\n` +
-            `🌽 Busca: ${volumen_ton || '?'} ton de ${tipoLabel[tipo_maiz] || tipo_maiz}\n` +
-            `📅 Vigencia: ${vigLabel}`;
+            `La bodega "${b.nombre}" busca maíz ${distTxt}.\n\n` +
+            `Ubicación: ${b.municipio}, ${b.estado}\n` +
+            (b.telefono ? `Contacto: ${b.contacto_nombre || b.nombre} — ${b.telefono}\n` : '') +
+            `Precio ofrecido: $${Number(precio_ofrecido).toLocaleString()}/ton\n` +
+            `Busca: ${volumen_ton || '?'} ton de ${tipoLabel[tipo_maiz] || tipo_maiz}\n` +
+            `Vigencia: ${vigLabel}`;
           const datosExtra = JSON.stringify({
             bodega_nombre: b.nombre,
             bodega_lat: b.latitud,

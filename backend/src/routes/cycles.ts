@@ -142,6 +142,13 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
       return;
     }
 
+    // Rendimiento esperado válido para maíz en México: 1–15 ton/ha
+    const yieldNum = yield_expected === undefined || yield_expected === null || yield_expected === '' ? null : Number(yield_expected);
+    if (yieldNum !== null && !Number.isNaN(yieldNum) && (yieldNum < 1 || yieldNum > 15)) {
+      res.status(400).json({ error: 'El rendimiento debe estar entre 1 y 15 ton/ha.' });
+      return;
+    }
+
     // Require variety_other when variety_id is CRIOLLO_LOCAL or OTRA
     if ((variety_id === 'CRIOLLO_LOCAL' || variety_id === 'OTRA') && !variety_other) {
       res.status(400).json({ error: 'Debe especificar la variedad cuando selecciona Criollo/local u Otra' });
