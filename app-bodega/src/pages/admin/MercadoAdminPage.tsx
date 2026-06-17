@@ -207,9 +207,9 @@ export default function MercadoAdminPage() {
             </div>
             <div className="divide-y divide-gray-100">
               {loading ? (
-                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-gray-50" />)
+                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-[#f4fbf7]" />)
               ) : (data?.disponibilidades ?? []).slice(0, 5).map((d, i) => (
-                <div key={i} className="px-3 py-2 hover:bg-gray-50 transition-colors">
+                <div key={i} className="px-3 py-2 hover:bg-[#f4fbf7] transition-colors">
                   <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{d.nombre_productor}</p>
                   <p className="text-[10px] text-gray-500">{d.municipio}, {d.estado} · <span className="text-emerald-600">{fmtNum(d.volumen_estimado_ton, 0)} t</span></p>
                 </div>
@@ -227,9 +227,9 @@ export default function MercadoAdminPage() {
             </div>
             <div className="divide-y divide-gray-100">
               {loading ? (
-                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-gray-50" />)
+                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-[#f4fbf7]" />)
               ) : (data?.requerimientos ?? []).slice(0, 5).map((r, i) => (
-                <div key={i} className="px-3 py-2 hover:bg-gray-50 transition-colors">
+                <div key={i} className="px-3 py-2 hover:bg-[#f4fbf7] transition-colors">
                   <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{r.nombre_bodega}</p>
                   <p className="text-[10px] text-gray-500">{r.municipio}, {r.estado} · <span className="text-blue-600">{fmtNum(r.volumen_ton, 0)} t</span></p>
                 </div>

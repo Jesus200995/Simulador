@@ -130,7 +130,7 @@ export default function PropuestaVentaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-white pb-8">
       <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-10">
         <button
           onClick={() => {
@@ -138,7 +138,7 @@ export default function PropuestaVentaPage() {
             else if (paso === 'datos' || paso === 'sel_ciclo') setPaso(ups.filter(u => (u.ciclos_activos?.length || 0) > 0).length > 1 ? 'sel_up' : 'datos');
             else navigate(-1);
           }}
-          className="p-2 rounded-lg hover:bg-gray-100">
+          className="p-2 rounded-lg hover:bg-[#eef8f2]">
           <ChevronLeft size={20} />
         </button>
         <div>

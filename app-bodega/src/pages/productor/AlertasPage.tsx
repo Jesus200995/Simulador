@@ -27,7 +27,7 @@ const TIPO_CFG: Record<string, Cfg> = {
   confirmacion_transaccion:{ Icon: Receipt,     label: 'Transacción',     tile: 'bg-blue-50 text-blue-600 ring-blue-100',      chip: 'bg-blue-50 text-blue-600' },
   transaccion:             { Icon: Receipt,     label: 'Transacción',     tile: 'bg-blue-50 text-blue-600 ring-blue-100',      chip: 'bg-blue-50 text-blue-600' },
 };
-const DEFAULT_CFG: Cfg = { Icon: Bell, label: 'Aviso', tile: 'bg-gray-100 text-gray-500 ring-gray-200', chip: 'bg-gray-100 text-gray-500' };
+const DEFAULT_CFG: Cfg = { Icon: Bell, label: 'Aviso', tile: 'bg-[#eef8f2] text-gray-500 ring-gray-200', chip: 'bg-[#eef8f2] text-gray-500' };
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -123,7 +123,7 @@ export default function AlertasPage() {
   const noLeidas = notifs.filter(n => !n.leida).length;
 
   return (
-    <div className="bg-[#F2F2F7] min-h-full">
+    <div className="bg-white min-h-full">
       {/* ── Banner ── */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-5">
@@ -184,7 +184,7 @@ export default function AlertasPage() {
                   setExpanded(isOpen ? null : n.id);
                   if (!n.leida) marcarLeida(n.id);
                 }}
-                className="w-full flex items-start gap-3 p-3.5 text-left active:bg-gray-50/60 transition-colors"
+                className="w-full flex items-start gap-3 p-3.5 text-left active:bg-[#f4fbf7]/60 transition-colors"
               >
                 {/* Icono profesional */}
                 <div className={`relative w-10 h-10 rounded-2xl ring-1 flex items-center justify-center flex-shrink-0 ${cfg.tile}`}>
@@ -233,7 +233,7 @@ export default function AlertasPage() {
                       </button>
                       <button
                         onClick={() => descartarSenal(n)}
-                        className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-gray-50 ring-1 ring-gray-200 hover:bg-gray-100 active:scale-[0.97] transition-all duration-200"
+                        className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-[#f4fbf7] ring-1 ring-gray-200 hover:bg-[#eef8f2] active:scale-[0.97] transition-all duration-200"
                       >
                         <X size={15} strokeWidth={2.4} /> No me interesa
                       </button>

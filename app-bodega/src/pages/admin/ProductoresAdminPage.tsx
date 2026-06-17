@@ -273,7 +273,7 @@ export default function ProductoresAdminPage() {
             placeholder="Buscar por nombre o CURP..."
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
-            className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[13px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50"
+            className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[13px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50"
           />
         </div>
 
@@ -281,7 +281,7 @@ export default function ProductoresAdminPage() {
         <select
           value={estadoFilter}
           onChange={e => { setEstadoFilter(e.target.value); setPage(1); }}
-          className="w-full bg-gray-50 border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
+          className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
         >
           <option value="">Todos los Estados</option>
           {estadosDisponibles.map(estado => (
@@ -293,7 +293,7 @@ export default function ProductoresAdminPage() {
         <select
           value={tipoFilter}
           onChange={e => { setTipoFilter(e.target.value); setPage(1); }}
-          className="w-full bg-gray-50 border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
+          className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
         >
           <option value="">Todos los Tipos</option>
           <option value="A">Tipo A (Auto-declarado)</option>
@@ -305,7 +305,7 @@ export default function ProductoresAdminPage() {
           <select
             value={estatusFilter}
             onChange={e => { setEstatusFilter(e.target.value); setPage(1); }}
-            className="w-full bg-gray-50 border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
+            className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 outline-none focus:border-emerald-500/50"
           >
             <option value="">Todos los Estatus</option>
             <option value="pendiente">Pendiente</option>
@@ -497,7 +497,7 @@ export default function ProductoresAdminPage() {
       {/* ── MODALES ACCIONES ── */}
       {selectedProd && modalType && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -538,7 +538,7 @@ export default function ProductoresAdminPage() {
                   }
                   value={notaInterna}
                   onChange={e => setNotaInterna(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 

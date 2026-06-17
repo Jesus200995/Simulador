@@ -87,7 +87,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div className="animate-modal-in w-full max-w-[320px] bg-white rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.28)] overflow-hidden">
         {/* close X */}
         <div className="flex justify-end px-4 pt-4">
-          <button onClick={() => closeDialog(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors">
+          <button onClick={() => closeDialog(false)} className="w-8 h-8 rounded-full bg-[#eef8f2] flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -106,7 +106,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {/* Buttons */}
         <div className="flex divide-x divide-gray-100 border-t border-gray-100">
           <button onClick={() => closeDialog(false)}
-            className="flex-1 py-4 text-[16px] font-semibold text-gray-500 active:bg-gray-50 transition-colors">
+            className="flex-1 py-4 text-[16px] font-semibold text-gray-500 active:bg-[#f4fbf7] transition-colors">
             Cancelar
           </button>
           <button onClick={() => closeDialog(true)}

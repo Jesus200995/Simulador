@@ -84,7 +84,7 @@ function ConfirmModal({
           <button
             onClick={onCancel}
             disabled={loading}
-            className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors"
+            className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-[#eef8f2] active:bg-gray-200 transition-colors"
           >
             Cancelar
           </button>
@@ -138,7 +138,7 @@ function ModalCURP({ curpActual, onSave, onClose }: {
               </div>
               <h2 className="text-[17px] font-black text-gray-900">Actualizar CURP</h2>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200">
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#eef8f2] flex items-center justify-center text-gray-500 active:bg-gray-200">
               <X size={16} />
             </button>
           </div>
@@ -177,7 +177,7 @@ function ModalCURP({ curpActual, onSave, onClose }: {
           >
             Continuar
           </button>
-          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors">
+          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-[#eef8f2] active:bg-gray-200 transition-colors">
             Cancelar
           </button>
         </div>
@@ -256,7 +256,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
               </div>
               <h2 className="text-[17px] font-black text-gray-900">Actualizar ubicación</h2>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200">
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#eef8f2] flex items-center justify-center text-gray-500 active:bg-gray-200">
               <X size={16} />
             </button>
           </div>
@@ -308,7 +308,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           >
             Continuar
           </button>
-          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors">
+          <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[15px] font-semibold text-gray-600 bg-[#eef8f2] active:bg-gray-200 transition-colors">
             Cancelar
           </button>
         </div>
@@ -449,11 +449,11 @@ export default function B24PerfilBodega() {
 
   const SEMAFORO_COLOR: Record<string, string> = {
     comprando: 'bg-green-100 text-green-700', pausado: 'bg-amber-100 text-amber-700',
-    sin_actividad: 'bg-gray-100 text-gray-500', rojo: 'bg-red-100 text-red-700', amarillo: 'bg-amber-100 text-amber-700',
+    sin_actividad: 'bg-[#eef8f2] text-gray-500', rojo: 'bg-red-100 text-red-700', amarillo: 'bg-amber-100 text-amber-700',
   };
 
   return (
-    <div className="bg-[#F2F2F7] min-h-screen pb-8">
+    <div className="bg-white min-h-screen pb-8">
 
       {/* Toast */}
       {toast && (
@@ -540,7 +540,7 @@ export default function B24PerfilBodega() {
                 )}
               </div>
 
-              <div className="h-px bg-gray-100 my-3" />
+              <div className="h-px bg-[#eef8f2] my-3" />
 
               {/* Email (no editable) */}
               <div className="mb-4">
@@ -552,7 +552,7 @@ export default function B24PerfilBodega() {
                 <p className="text-[11px] text-gray-400 mt-0.5">Para cambiar el correo, contacta al administrador</p>
               </div>
 
-              <div className="h-px bg-gray-100 my-3" />
+              <div className="h-px bg-[#eef8f2] my-3" />
 
               {/* Teléfono */}
               <div className="mb-4">
@@ -583,7 +583,7 @@ export default function B24PerfilBodega() {
                 )}
               </div>
 
-              <div className="h-px bg-gray-100 my-3" />
+              <div className="h-px bg-[#eef8f2] my-3" />
 
               {/* CURP */}
               <div className="mb-4">
@@ -601,7 +601,7 @@ export default function B24PerfilBodega() {
                 </p>
               </div>
 
-              <div className="h-px bg-gray-100 my-3" />
+              <div className="h-px bg-[#eef8f2] my-3" />
 
               {/* Estado / Municipio */}
               <div>
@@ -651,7 +651,7 @@ export default function B24PerfilBodega() {
                 <div className="space-y-3">
                   {bodegas.slice(0, 3).map(b => (
                     <button key={b.bodega_id} onClick={() => navigate(`/bodegas/${b.bodega_id}`)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-[#F2F2F7] hover:bg-gray-100 active:scale-[0.98] transition-all text-left">
+                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-[#eef8f2] hover:bg-[#eef8f2] active:scale-[0.98] transition-all text-left">
                       <div className="w-9 h-9 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center flex-shrink-0">
                         <Warehouse size={16} className="text-[#1A5C38]" />
                       </div>
@@ -659,7 +659,7 @@ export default function B24PerfilBodega() {
                         <p className="text-sm font-semibold text-gray-800 truncate">{b.nombre}</p>
                         <p className="text-xs text-gray-400 truncate">{b.municipio}, {b.estado}</p>
                       </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${SEMAFORO_COLOR[b.semaforo_compra] || 'bg-gray-100 text-gray-500'}`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${SEMAFORO_COLOR[b.semaforo_compra] || 'bg-[#eef8f2] text-gray-500'}`}>
                         {b.semaforo_compra?.replace('_', ' ') || 'N/A'}
                       </span>
                     </button>
@@ -671,7 +671,7 @@ export default function B24PerfilBodega() {
             {/* ── Acciones ─────────────────────────────────────────── */}
             <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] overflow-hidden group/card transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5">
               <button onClick={() => navigate('/configuracion')}
-                className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-gray-50/50 active:bg-gray-100 transition-colors">
+                className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-[#f4fbf7]/50 active:bg-[#eef8f2] transition-colors">
                 <div className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
                   <Building2 size={22} className="text-[#1A5C38]" />
                 </div>

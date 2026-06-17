@@ -57,7 +57,7 @@ export default function B17MisVentanillas() {
                     <p className="text-[13px] text-gray-500 font-medium leading-snug mt-0.5">{v.nombre_ventanilla}</p>
                   )}
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${tipoBadge[v.tipo] || 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${tipoBadge[v.tipo] || 'bg-[#eef8f2] text-gray-500'}`}>
                       {tipoLabel[v.tipo] || v.tipo}
                     </span>
                     {v.solicitudes_pendientes > 0 && (
@@ -75,7 +75,7 @@ export default function B17MisVentanillas() {
 
         {!loading && ventanillas.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-50 border border-gray-100 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-[1.5rem] bg-[#f4fbf7] border border-gray-100 flex items-center justify-center">
               <Building2 size={32} className="text-gray-300" />
             </div>
             <p className="font-bold text-[16px] text-gray-700">Sin ventanillas configuradas</p>

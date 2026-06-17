@@ -31,7 +31,7 @@ const semaforoMap: Record<string, { label: string; dot: string; badge: string }>
   verde:         { label: "Comprando",     dot: "text-emerald-500", badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   amarillo:      { label: "Cap. limitada", dot: "text-amber-500",   badge: "bg-amber-50 text-amber-700 border-amber-200" },
   rojo:          { label: "No compra",     dot: "text-red-500",     badge: "bg-red-50 text-red-700 border-red-200" },
-  sin_actividad: { label: "Sin actividad", dot: "text-gray-400",    badge: "bg-gray-50 text-gray-600 border-gray-200" },
+  sin_actividad: { label: "Sin actividad", dot: "text-gray-400",    badge: "bg-[#f4fbf7] text-gray-600 border-gray-200" },
 };
 
 /* Mueve el mapa al bodega seleccionada */
@@ -180,9 +180,9 @@ export default function B05MisBodegas() {
                     <button
                       key={b.id}
                       onMouseDown={e => { e.preventDefault(); selectBodega(b); }}
-                      className={"w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100 " + (i < suggestions.length - 1 ? "border-b border-gray-50" : "")}
+                      className={"w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f4fbf7] active:bg-[#eef8f2] " + (i < suggestions.length - 1 ? "border-b border-gray-50" : "")}
                     >
-                      <div className={"w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 " + (hasCoords ? "bg-[#1A5C38]/10" : "bg-gray-100")}>
+                      <div className={"w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 " + (hasCoords ? "bg-[#1A5C38]/10" : "bg-[#eef8f2]")}>
                         <MapPin size={14} className={hasCoords ? "text-[#1A5C38]" : "text-gray-400"} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -221,7 +221,7 @@ export default function B05MisBodegas() {
           <>
             {filtered.length === 0 && q ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
                   <Search size={24} className="text-gray-300" />
                 </div>
                 <p className="font-semibold text-[15px] text-gray-600">Sin resultados</p>
@@ -252,7 +252,7 @@ export default function B05MisBodegas() {
                           <span className="font-medium">Ocupación {pct}%</span>
                           <span>{formatNum(b.stock_actual || 0)} / {formatNum(b.capacidad_ton || 0)} ton</span>
                         </div>
-                        <div className="bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-[#eef8f2] rounded-full h-1.5 overflow-hidden">
                           <div className={"h-full rounded-full " + barColor(pct) + " transition-all"} style={{ width: Math.min(pct, 100) + "%" }} />
                         </div>
                       </div>
@@ -260,7 +260,7 @@ export default function B05MisBodegas() {
                         <button onClick={() => navigate("/bodegas/" + b.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A5C38]/[0.08] text-[#1A5C38] rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
                           Detalle <ChevronRight size={13} />
                         </button>
-                        <button onClick={() => navigate("/bodegas/" + b.id + "/semaforo")} className="flex-1 bg-gray-100 text-gray-700 rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
+                        <button onClick={() => navigate("/bodegas/" + b.id + "/semaforo")} className="flex-1 bg-[#eef8f2] text-gray-700 rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
                           Semáforo
                         </button>
                       </div>
@@ -306,7 +306,7 @@ export default function B05MisBodegas() {
 
         {!loading && bodegas.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
               <Warehouse size={32} className="text-gray-300" />
             </div>
             <p className="font-semibold text-[16px] text-gray-700">Sin bodegas asociadas</p>

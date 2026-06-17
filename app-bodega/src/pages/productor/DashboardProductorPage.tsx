@@ -38,7 +38,7 @@ const SEMAFORO: Record<string, { cls: string; texto: string }> = {
 
 function SkeletonDashboard() {
   return (
-    <div className="min-h-screen bg-zinc-50 animate-pulse">
+    <div className="min-h-screen bg-white animate-pulse">
       <div className="bg-[#1A5C38] h-28" />
       <div className="max-w-2xl mx-auto px-4">
         <div className="-mt-4 bg-white rounded-2xl h-32" />
@@ -118,7 +118,7 @@ export default function DashboardProductorPage() {
   const sinUbicacion = !data?.lat || !data?.location_confirmed;
 
   return (
-    <div className="bg-zinc-50">
+    <div className="bg-[#eef8f2]">
       {alertaActiva && (
         <div className={`px-4 sm:px-6 py-3 flex items-center justify-between
           ${alertaActiva.tipo === 'alerta_climatica' ? 'bg-orange-500' : 'bg-red-600'}`}>

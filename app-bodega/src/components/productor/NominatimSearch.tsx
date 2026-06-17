@@ -54,7 +54,7 @@ export default function NominatimSearch({ placeholder, onSelect }: Props) {
                 setQuery(r.display_name.split(',')[0]);
               }}
               className="w-full px-4 py-3 text-left text-sm text-gray-700
-                         hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                         hover:bg-[#f4fbf7] border-b border-gray-100 last:border-0"
             >
               {r.display_name}
             </button>

@@ -8,7 +8,7 @@ const estadoBadge: Record<string, string> = {
   pendiente:    'bg-amber-50 text-amber-700 border border-amber-200',
   confirmada:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
   discrepancia: 'bg-red-50 text-red-700 border border-red-200',
-  expirada:     'bg-gray-100 text-gray-500 border border-gray-200',
+  expirada:     'bg-[#eef8f2] text-gray-500 border border-gray-200',
 };
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -91,7 +91,7 @@ export default function B14HistorialTransacciones() {
                 <p className="font-bold text-[15px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors leading-snug flex-1">
                   {tx.nombre_productor || tx.nombre_productor_libre || 'Productor'}
                 </p>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 capitalize ${estadoBadge[tx.confirmacion_productor] || 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 capitalize ${estadoBadge[tx.confirmacion_productor] || 'bg-[#eef8f2] text-gray-500'}`}>
                   {tx.confirmacion_productor}
                 </span>
               </div>
@@ -108,7 +108,7 @@ export default function B14HistorialTransacciones() {
 
         {!loading && txs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
               <ClipboardList size={32} className="text-gray-300" />
             </div>
             <p className="font-semibold text-[16px] text-gray-700">Sin transacciones registradas</p>
@@ -122,7 +122,7 @@ export default function B14HistorialTransacciones() {
             <button
               onClick={() => setPagina(p => Math.max(1, p - 1))}
               disabled={pagina === 1}
-              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-[#f4fbf7]"
             >
               ← Anterior
             </button>
@@ -130,7 +130,7 @@ export default function B14HistorialTransacciones() {
             <button
               onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
               disabled={pagina === totalPaginas}
-              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-[#f4fbf7]"
             >
               Siguiente →
             </button>

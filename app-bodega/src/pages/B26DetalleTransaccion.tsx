@@ -81,7 +81,7 @@ export default function B26DetalleTransaccion() {
     return (
       <div className="p-6 space-y-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+          <div key={i} className="h-16 bg-[#eef8f2] rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -150,7 +150,7 @@ export default function B26DetalleTransaccion() {
         )}
 
         {/* Peso en Precio Sistema */}
-        <div className="bg-[#F2F2F7] rounded-[1.25rem] p-5">
+        <div className="bg-[#eef8f2] rounded-[1.25rem] p-5">
           <p className="text-[14px] text-gray-500 text-center font-medium">
             Peso en Precio Sistema:{' '}
             <span className="font-bold text-gray-900 ml-1">

@@ -220,7 +220,7 @@ export default function BodegaDetalleAdminPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-gray-50 border border-white/5 px-3 py-1.5 rounded-xl text-[12px]">
+          <div className="flex items-center gap-1.5 bg-[#f4fbf7] border border-white/5 px-3 py-1.5 rounded-xl text-[12px]">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Estatus:</span>
             <span className={`text-[11px] font-bold uppercase tracking-wide ${
               data.estatus === 'aprobada' ? 'text-emerald-500' :
@@ -409,7 +409,7 @@ export default function BodegaDetalleAdminPage() {
       {/* Modales de Aprobación / Rechazo */}
       {modalType && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -443,7 +443,7 @@ export default function BodegaDetalleAdminPage() {
                   }
                   value={motivoRechazo}
                   onChange={e => setMotivoRechazo(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 

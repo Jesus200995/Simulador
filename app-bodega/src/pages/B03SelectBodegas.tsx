@@ -158,7 +158,7 @@ export default function B03SelectBodegas() {
       h-full + flex flex-col = ocupa exactamente el alto del <main> (que es el scroll container)
       El scroll de página NUNCA ocurre. Solo el recuadro de resultados hace scroll interno.
     */
-    <div className="fixed inset-0 flex flex-col bg-[#F2F2F7] overflow-hidden">
+    <div className="fixed inset-0 flex flex-col bg-[#eef8f2] overflow-hidden">
 
       {/* ══ BANNER VERDE — sticky, nunca scrollea, rounded-b-3xl ══ */}
       <div className="flex-shrink-0 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.22)] relative z-10 overflow-hidden">
@@ -339,7 +339,7 @@ export default function B03SelectBodegas() {
             <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
               {loading && (
                 <div className="p-4 space-y-2">
-                  {[1,2,3,4,5].map(i => <div key={i} className="h-[60px] bg-gray-100 rounded-xl animate-pulse" />)}
+                  {[1,2,3,4,5].map(i => <div key={i} className="h-[60px] bg-[#eef8f2] rounded-xl animate-pulse" />)}
                 </div>
               )}
               {!loading && results.length === 0 && (
@@ -352,7 +352,7 @@ export default function B03SelectBodegas() {
               {results.map(b => {
                 const isSelected = selected.some(x => x.id === b.id);
                 return (
-                  <div key={b.id} className={'flex items-center gap-3 px-4 py-3.5 transition-colors ' + (isSelected ? 'bg-[#1A5C38]/[0.04]' : 'hover:bg-gray-50/80')}>
+                  <div key={b.id} className={'flex items-center gap-3 px-4 py-3.5 transition-colors ' + (isSelected ? 'bg-[#1A5C38]/[0.04]' : 'hover:bg-[#f4fbf7]/80')}>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[14px] text-gray-900 truncate leading-tight">{b.nombre}</p>
                       <p className="text-[12px] text-gray-400 flex items-center gap-1 mt-0.5 truncate">
@@ -363,7 +363,7 @@ export default function B03SelectBodegas() {
                     </div>
                     <button
                       onClick={() => toggle(b)}
-                      className={'w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ' + (isSelected ? 'bg-[#1A5C38] text-white shadow-md' : 'bg-[#F2F2F7] text-gray-500')}
+                      className={'w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ' + (isSelected ? 'bg-[#1A5C38] text-white shadow-md' : 'bg-[#eef8f2] text-gray-500')}
                     >
                       {isSelected ? <CheckCircle size={16} /> : <Plus size={16} />}
                     </button>
@@ -459,7 +459,7 @@ export default function B03SelectBodegas() {
           <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90dvh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between rounded-t-3xl">
               <p className="text-[16px] font-bold text-[#1A5C38]">Solicitar alta de bodega</p>
-              <button onClick={() => setMostrarAlta(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200">
+              <button onClick={() => setMostrarAlta(false)} className="w-8 h-8 rounded-full bg-[#eef8f2] flex items-center justify-center text-gray-500 active:bg-gray-200">
                 <X size={16} />
               </button>
             </div>
@@ -468,19 +468,19 @@ export default function B03SelectBodegas() {
               {[{ k: 'nombre', label: 'Nombre de la bodega *', type: 'text' }].map(({ k, label, type }) => (
                 <div key={k}>
                   <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
-                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
+                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#eef8f2] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
                 </div>
               ))}
               <div>
                 <label className="block text-[13px] font-medium text-gray-600 mb-1">Estado *</label>
-                <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
+                <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#eef8f2] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
                   <option value="">Selecciona estado</option>
                   {altaEstados.map((s: any) => <option key={s.state_id} value={s.name}>{s.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-[13px] font-medium text-gray-600 mb-1">Municipio *</label>
-                <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
+                <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#eef8f2] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0">
                   <option value="">Selecciona municipio</option>
                   {altaMunicipios.map((m: any) => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
                 </select>
@@ -488,7 +488,7 @@ export default function B03SelectBodegas() {
               {[{ k: 'localidad', label: 'Localidad', type: 'text' }, { k: 'capacidad_ton', label: 'Capacidad total (ton) *', type: 'number' }, { k: 'responsable', label: 'Nombre del responsable *', type: 'text' }, { k: 'telefono', label: 'Teléfono *', type: 'tel' }, { k: 'email', label: 'Correo electrónico', type: 'email' }].map(({ k, label, type }) => (
                 <div key={k}>
                   <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
-                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#F2F2F7] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
+                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#eef8f2] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0" />
                 </div>
               ))}
               <div>

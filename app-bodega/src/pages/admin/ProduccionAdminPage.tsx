@@ -70,7 +70,7 @@ export default function ProduccionAdminPage() {
           { label: 'Superficie sembrada', value: fmtNum(data?.superficie_sembrada_ha ?? 0), sub: 'ha con ciclo activo', icon: <Sprout size={15} />, color: 'text-emerald-600', bg: 'bg-emerald-500/10 border-emerald-500/20' },
           { label: 'Cosecha esperada', value: fmtNum(data?.produccion_esperada_ton ?? 0), sub: 'toneladas estimadas', icon: <TrendingUp size={15} />, color: 'text-indigo-600', bg: 'bg-indigo-500/10 border-indigo-500/20' },
           { label: 'Con ciclo capturado', value: fmtNum(data?.productores_con_ciclo ?? 0), sub: 'cultivos registrados', icon: <CheckCircle size={15} />, color: 'text-emerald-600', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-          { label: 'Sin ciclo capturado', value: fmtNum(data?.ups_sin_ciclo ?? 0), sub: 'predios sin info', icon: <XCircle size={15} />, color: (data?.ups_sin_ciclo ?? 0) > 0 ? 'text-amber-600' : 'text-gray-500', bg: (data?.ups_sin_ciclo ?? 0) > 0 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-gray-500/10 border-gray-500/20' },
+          { label: 'Sin ciclo capturado', value: fmtNum(data?.ups_sin_ciclo ?? 0), sub: 'predios sin info', icon: <XCircle size={15} />, color: (data?.ups_sin_ciclo ?? 0) > 0 ? 'text-amber-600' : 'text-gray-500', bg: (data?.ups_sin_ciclo ?? 0) > 0 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-[#f4fbf7]0/10 border-gray-500/20' },
         ].map((kpi, i) => (
           <div key={i} className={CARD}>
             <div className="flex items-start justify-between">
@@ -91,7 +91,7 @@ export default function ProduccionAdminPage() {
           <Layers size={13} className="text-emerald-600" />
           <h2 className="text-[13px] font-bold text-gray-900">Producción y Área por Estado</h2>
         </div>
-        {loading ? <div className="h-[240px] bg-gray-50 rounded-xl animate-pulse" /> : (
+        {loading ? <div className="h-[240px] bg-[#f4fbf7] rounded-xl animate-pulse" /> : (
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={data?.por_estado ?? []} margin={{ top: 0, right: 0, left: 0, bottom: 30 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
@@ -128,7 +128,7 @@ export default function ProduccionAdminPage() {
               {(data?.por_estado ?? []).map((row, i) => {
                 const pct = row.ups > 0 ? Math.round((row.cultivos / row.ups) * 100) : 0;
                 return (
-                  <tr key={i} className="hover:bg-gray-50 transition-colors">
+                  <tr key={i} className="hover:bg-[#f4fbf7] transition-colors">
                     <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-800">{row.estado}</td>
                     <td className="px-4 py-2.5 text-[12px] text-gray-500 text-right">{fmtNum(row.ups)}</td>
                     <td className="px-4 py-2.5 text-[12px] text-gray-500 text-right">{fmtNum(row.cultivos)}</td>

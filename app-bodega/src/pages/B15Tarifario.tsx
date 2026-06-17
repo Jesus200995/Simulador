@@ -88,7 +88,7 @@ export default function B15Tarifario() {
           <select
             value={bodegaId}
             onChange={e => setBodegaId(e.target.value)}
-            className="w-full bg-[#F2F2F7] rounded-[1.25rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
+            className="w-full bg-[#eef8f2] rounded-[1.25rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
           >
             <option value="">Selecciona bodega</option>
             {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
@@ -120,7 +120,7 @@ export default function B15Tarifario() {
               const tarifa = getTarifa(c.id);
               const isEdit = editando === c.id;
               return (
-                <div key={c.id} className="p-5 hover:bg-gray-50/50 transition-colors">
+                <div key={c.id} className="p-5 hover:bg-[#f4fbf7]/50 transition-colors">
                   <div className="flex items-center gap-4">
                     <span className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] text-[#1A5C38] flex items-center justify-center flex-shrink-0">{iconMap[c.icono] || <Tag size={20} />}</span>
                     <div className="flex-1 min-w-0">
@@ -148,7 +148,7 @@ export default function B15Tarifario() {
                         value={precio}
                         onChange={e => setPrecio(e.target.value)}
                         placeholder={`Precio en ${c.unidad_default}`}
-                        className="flex-1 bg-[#F2F2F7] rounded-[1rem] px-5 py-3.5 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
+                        className="flex-1 bg-[#eef8f2] rounded-[1rem] px-5 py-3.5 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
                       />
                       <button
                         onClick={() => guardar(c.id)}

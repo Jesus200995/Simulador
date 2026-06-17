@@ -133,7 +133,7 @@ export default function MiPerfilPage() {
   const initials = [perfil.nombres, perfil.apellido_paterno].filter(Boolean).map(w => w[0]).join('').toUpperCase() || 'P';
 
   return (
-    <div className="bg-[#F2F2F7] min-h-screen">
+    <div className="bg-white min-h-screen">
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[28px] shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6">
           <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-3">Perfil</p>
@@ -303,7 +303,7 @@ export default function MiPerfilPage() {
                 const tipoCiclo = c.cycle_type === 'PV' ? 'Primavera-Verano'
                   : c.cycle_type === 'OI' ? 'Otoño-Invierno' : 'Anual';
                 return (
-                  <div key={c.cycle_id} className="bg-gray-50 rounded-2xl p-4">
+                  <div key={c.cycle_id} className="bg-[#f4fbf7] rounded-2xl p-4">
                     <div className="flex justify-between items-center mb-3">
                       <div>
                         <p className="text-sm font-bold text-gray-800">{tipoCiclo} {c.cycle_year}</p>
@@ -366,7 +366,7 @@ export default function MiPerfilPage() {
               {PROGRAMAS_GOBIERNO.map(p => (
                 <button key={p.clave} onClick={() => togglePrograma(p.clave)}
                   className={`w-full text-left px-3 py-2.5 rounded-xl ring-1 text-sm transition-all duration-200 flex items-center gap-2
-                    ${programas.includes(p.clave) ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-emerald-800 font-medium' : 'ring-zinc-200 text-zinc-700 hover:bg-zinc-50'}`}>
+                    ${programas.includes(p.clave) ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-emerald-800 font-medium' : 'ring-zinc-200 text-zinc-700 hover:bg-[#eef8f2]'}`}>
                   <CircleDot size={14} className={programas.includes(p.clave) ? 'text-[#1A5C38]' : 'text-zinc-300'} />
                   {p.nombre}
                 </button>

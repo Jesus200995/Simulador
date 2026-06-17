@@ -102,7 +102,7 @@ export default function B29OnboardingBodeguero() {
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-4xl mx-auto space-y-4">
         {cargando ? (
-          [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />)
+          [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-[#eef8f2] rounded-2xl animate-pulse" />)
         ) : (
           <>
             {pasos.map((p, i) => (
@@ -113,7 +113,7 @@ export default function B29OnboardingBodeguero() {
                   p.hecho ? 'border-green-200/50 bg-green-50/10' : 'border-black/[0.04]'
                 }`}
               >
-                <span className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 ${p.hecho ? 'text-green-500 bg-green-50' : 'text-gray-400 bg-gray-50'}`}>
+                <span className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 ${p.hecho ? 'text-green-500 bg-green-50' : 'text-gray-400 bg-[#f4fbf7]'}`}>
                   {p.hecho ? <CheckCircle2 size={24} className="drop-shadow-sm" /> : <Circle size={24} />}
                 </span>
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">

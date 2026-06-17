@@ -50,7 +50,7 @@ export default function DisponibilidadVolumenPage() {
   };
 
   return (
-    <div className="bg-[#F2F2F7] flex flex-col min-h-0">
+    <div className="bg-[#eef8f2] flex flex-col min-h-0">
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
@@ -82,7 +82,7 @@ export default function DisponibilidadVolumenPage() {
             {RANGOS_RAPIDOS.map((r, i) => (
               <button key={i} onClick={() => selectRango(i)}
                 className={`py-3 rounded-xl text-sm font-medium ring-1 transition-all duration-200
-                  ${rangoIdx === i ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-[#1A5C38]' : 'ring-zinc-200 text-zinc-600 hover:bg-zinc-50'}`}>
+                  ${rangoIdx === i ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-[#1A5C38]' : 'ring-zinc-200 text-zinc-600 hover:bg-[#eef8f2]'}`}>
                 {r.label}
               </button>
             ))}

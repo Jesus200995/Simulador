@@ -11,7 +11,7 @@ const flujoColor: Record<string, string> = {
   contactado: 'border-yellow-400 bg-yellow-50 text-yellow-800',
   agendada: 'border-purple-400 bg-purple-50 text-purple-800',
   canalizada: 'border-green-500 bg-green-50 text-green-800',
-  cerrada: 'border-gray-300 bg-gray-50 text-gray-600',
+  cerrada: 'border-gray-300 bg-[#f4fbf7] text-gray-600',
 };
 
 export default function B21DetalleSolicitud() {
@@ -80,7 +80,7 @@ export default function B21DetalleSolicitud() {
                 className={`px-5 py-2.5 rounded-[1.25rem] text-[14px] font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]
                   ${nuevoEstado === e
                     ? (flujoColor[e] || 'border-[#1A5C38] bg-green-50 text-[#1A5C38]') + ' shadow-[0_4px_12px_rgba(0,0,0,0.05)]'
-                    : 'border-transparent bg-[#F2F2F7] text-gray-500 hover:bg-gray-200/60'}`}
+                    : 'border-transparent bg-[#eef8f2] text-gray-500 hover:bg-gray-200/60'}`}
               >
                 {e.charAt(0).toUpperCase() + e.slice(1)}
               </button>
@@ -94,7 +94,7 @@ export default function B21DetalleSolicitud() {
               onChange={e => setNotas(e.target.value)}
               rows={4}
               placeholder="Registro de la gestión realizada…"
-              className="w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 resize-none transition-all"
+              className="w-full bg-[#eef8f2] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 resize-none transition-all"
             />
           </div>
 

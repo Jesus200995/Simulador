@@ -236,7 +236,7 @@ export default function B04Dashboard() {
                 value={`${ocupPct}%`}
                 subtitle={
                   <div className="space-y-1.5 mt-1">
-                    <div className="bg-gray-100 rounded-full h-2 w-full overflow-hidden">
+                    <div className="bg-[#eef8f2] rounded-full h-2 w-full overflow-hidden">
                       <div className={`h-full rounded-full ${barColor} transition-all`} style={{ width: `${Math.min(ocupPct, 100)}%` }} />
                     </div>
                     <span className="block text-[11px]">{formatNum(stats.total_stock ?? 0)} ton de {formatNum(stats.total_capacidad ?? 0)} ton · {formatNum(stats.espacio_libre ?? Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0)))} ton libres</span>

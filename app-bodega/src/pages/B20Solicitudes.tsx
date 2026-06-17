@@ -11,7 +11,7 @@ const badgeColor: Record<string, string> = {
   contactado: 'bg-yellow-100 text-yellow-800',
   agendada: 'bg-purple-100 text-purple-700',
   canalizada: 'bg-green-100 text-green-700',
-  cerrada: 'bg-gray-100 text-gray-500',
+  cerrada: 'bg-[#eef8f2] text-gray-500',
 };
 
 export default function B20Solicitudes() {
@@ -43,7 +43,7 @@ export default function B20Solicitudes() {
             key={e}
             onClick={() => setFiltro(e)}
             className={`flex-shrink-0 px-5 py-2.5 rounded-[1.25rem] text-[14px] font-bold transition-all
-              ${filtro === e ? 'bg-[#1A5C38] text-white shadow-[0_4px_12px_rgba(26,92,56,0.25)]' : 'bg-[#F2F2F7] text-gray-500 hover:bg-gray-200/60'}`}
+              ${filtro === e ? 'bg-[#1A5C38] text-white shadow-[0_4px_12px_rgba(26,92,56,0.25)]' : 'bg-[#eef8f2] text-gray-500 hover:bg-gray-200/60'}`}
           >
             {e.charAt(0).toUpperCase() + e.slice(1)}
           </button>
@@ -64,7 +64,7 @@ export default function B20Solicitudes() {
               <p className="text-[13px] font-medium text-gray-500 mt-0.5">{s.municipio} · {s.nombre_apoyo}</p>
               <p className="text-[12px] text-gray-400 mt-1">{new Date(s.created_at).toLocaleDateString('es-MX')}</p>
             </div>
-            <span className={`text-[12px] font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${badgeColor[s.estado] || 'bg-gray-100 text-gray-500'}`}>
+            <span className={`text-[12px] font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${badgeColor[s.estado] || 'bg-[#eef8f2] text-gray-500'}`}>
               {s.estado}
             </span>
             <ChevronRight size={18} className="text-gray-300 flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />

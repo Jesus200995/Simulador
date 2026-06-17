@@ -60,7 +60,7 @@ export default function DetalleBodegaPage() {
   if (!bodega) return <div className="min-h-screen flex items-center justify-center text-gray-400">No encontrada</div>;
 
   return (
-    <div className="bg-[#F2F2F7]">
+    <div className="bg-white">
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
@@ -88,7 +88,7 @@ export default function DetalleBodegaPage() {
                 ? 'bg-amber-100 text-amber-700'
                 : bodega.estado_compra === 'no_compra'
                 ? 'bg-red-100 text-red-700'
-                : 'bg-gray-100 text-gray-500'
+                : 'bg-[#eef8f2] text-gray-500'
             }`}>
               <span className={`w-2 h-2 rounded-full ${
                 bodega.estado_compra === 'comprando' ? 'bg-green-500'
@@ -126,7 +126,7 @@ export default function DetalleBodegaPage() {
           )}
 
           {bodega.responsable && (
-            <div className="mt-2 flex justify-between bg-zinc-50 rounded-xl p-3">
+            <div className="mt-2 flex justify-between bg-[#eef8f2] rounded-xl p-3">
               <span className="text-zinc-500 text-sm">Responsable</span>
               <span className="font-medium text-zinc-800 text-sm">{bodega.responsable}</span>
             </div>
@@ -141,7 +141,7 @@ export default function DetalleBodegaPage() {
             </h3>
             {stockActual !== null && (
               <>
-                <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
+                <div className="w-full bg-[#eef8f2] rounded-full h-3 mb-2">
                   <div
                     className={`h-3 rounded-full transition-all ${
                       (stockActual / bodega.capacidad_ton) > 0.9 ? 'bg-red-400'
@@ -157,7 +157,7 @@ export default function DetalleBodegaPage() {
               </>
             )}
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="bg-gray-50 rounded-xl p-3">
+              <div className="bg-[#f4fbf7] rounded-xl p-3">
                 <p className="text-xs text-gray-500 mb-1">Capacidad total</p>
                 <p className="font-bold text-gray-800 text-lg">{bodega.capacidad_ton.toLocaleString('es-MX')}</p>
                 <p className="text-xs text-gray-400">toneladas</p>
@@ -196,7 +196,7 @@ export default function DetalleBodegaPage() {
           {cargandoServicios ? (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="h-10 bg-gray-100 rounded-lg animate-pulse" />
+                <div key={i} className="h-10 bg-[#eef8f2] rounded-lg animate-pulse" />
               ))}
             </div>
           ) : tarifario.length > 0 ? (
@@ -239,7 +239,7 @@ export default function DetalleBodegaPage() {
         )}
 
         <button onClick={() => navigate('/productor/mapa')}
-          className="w-full ring-1 ring-zinc-300 text-zinc-600 py-3 rounded-2xl text-sm font-medium hover:bg-zinc-50 transition-colors">
+          className="w-full ring-1 ring-zinc-300 text-zinc-600 py-3 rounded-2xl text-sm font-medium hover:bg-[#eef8f2] transition-colors">
           Volver al mapa
         </button>
       </div>

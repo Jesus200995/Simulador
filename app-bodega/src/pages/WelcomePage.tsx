@@ -147,7 +147,7 @@ export default function WelcomePage() {
               <button
                 onClick={() => setMenu(null)}
                 aria-label="Cerrar"
-                className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:scale-90 transition-transform shrink-0"
+                className="w-9 h-9 rounded-full bg-[#eef8f2] flex items-center justify-center text-gray-500 active:scale-90 transition-transform shrink-0"
               >
                 <X size={18} />
               </button>
@@ -164,7 +164,7 @@ export default function WelcomePage() {
                     className={`w-full flex items-center gap-3.5 p-4 rounded-2xl text-left transition-all active:scale-[0.98] border
                       ${item.accent
                         ? 'bg-[#1A5C38] border-[#1A5C38] shadow-lg shadow-green-900/20'
-                        : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                        : 'bg-[#f4fbf7] border-gray-100 hover:bg-[#eef8f2]'}`}
                   >
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm'}`}>
                       <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1A5C38]'} />

@@ -57,7 +57,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
     : 'P';
 
   return (
-    <div className="fixed inset-0 bg-[#f4f5f7] flex flex-col w-full overflow-hidden">
+    <div className="fixed inset-0 bg-[#eef8f2] flex flex-col w-full overflow-hidden">
 
       {/* ── Header premium "liquid glass" (compartido) ── */}
       <AppHeader
@@ -72,7 +72,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       {/* ── Main content ───────────────────────────────── */}
       {/* En desktop el contenido se centra en una columna (como en "seleccionar
           bodegas"); las vistas de mapa a pantalla completa van a todo lo ancho. */}
-      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#F2F2F7]">
+      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#eef8f2]">
         {(pathname === '/productor/mapa' || pathname.startsWith('/productor/ubicacion'))
           ? children
           : <div className="w-full max-w-2xl mx-auto">{children}</div>}
@@ -136,8 +136,8 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
             { icon: Settings, label: 'Configuracion', action: () => {} },
           ].map(({ icon: Icon, label, action }) => (
             <button key={label} onClick={action}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
-              <div className="w-9 h-9 rounded-xl bg-[#F2F2F7] flex items-center justify-center flex-shrink-0">
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-[#f4fbf7] active:bg-[#eef8f2] transition-colors text-left">
+              <div className="w-9 h-9 rounded-xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0">
                 <Icon size={18} className="text-[#1A5C38]" />
               </div>
               <span className="flex-1 text-[15px] font-medium">{label}</span>

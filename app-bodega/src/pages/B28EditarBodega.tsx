@@ -53,7 +53,7 @@ export default function B28EditarBodega() {
   if (cargando) {
     return (
       <div className="p-6 space-y-4">
-        {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />)}
+        {[1, 2, 3].map(i => <div key={i} className="h-16 bg-[#eef8f2] rounded-xl animate-pulse" />)}
       </div>
     );
   }
@@ -83,7 +83,7 @@ export default function B28EditarBodega() {
               value={horario}
               onChange={e => setHorario(e.target.value)}
               placeholder="Ej. Lun a Vie 8:00–17:00, Sáb 8:00–13:00"
-              className="w-full bg-[#F2F2F7] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/30 transition-all"
+              className="w-full bg-[#eef8f2] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/30 transition-all"
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function B28EditarBodega() {
               value={telefono}
               onChange={e => setTelefono(e.target.value)}
               placeholder="Ej. 667 123 4567"
-              className="w-full bg-[#F2F2F7] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/30 transition-all"
+              className="w-full bg-[#eef8f2] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/30 transition-all"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default function B28EditarBodega() {
               onChange={e => setObservaciones(e.target.value)}
               placeholder="Información adicional para los productores (servicios, requisitos, etc.)"
               rows={4}
-              className="w-full bg-[#F2F2F7] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium resize-none focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/30 transition-all"
+              className="w-full bg-[#eef8f2] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium resize-none focus:outline-none focus:ring-2 focus:ring-[#1A5C38]/30 transition-all"
             />
           </div>
 

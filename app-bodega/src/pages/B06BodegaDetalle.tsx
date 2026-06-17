@@ -139,7 +139,7 @@ export default function B06BodegaDetalle() {
                 ['Estatus operativo', bodega.estatus_operativo || '—'],
                 ['Coordenadas', `${bodega.latitud?.toFixed(4) || '—'}, ${bodega.longitud?.toFixed(4) || '—'}`],
               ].map(([k, v]) => (
-                <div key={k} className="flex justify-between items-center px-4 py-3.5 hover:bg-gray-50/50 transition-colors">
+                <div key={k} className="flex justify-between items-center px-4 py-3.5 hover:bg-[#f4fbf7]/50 transition-colors">
                   <span className="text-[14px] text-gray-500 font-medium">{k}</span>
                   <span className="text-[14px] font-semibold text-gray-800 text-right max-w-[55%] truncate">{v}</span>
                 </div>
@@ -149,7 +149,7 @@ export default function B06BodegaDetalle() {
               <div className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] divide-y divide-gray-100 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-500 group">
                 <p className="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover:text-emerald-600/80">Contactos</p>
                 {contactos.map((c: any) => (
-                  <div key={c.id} className="px-4 py-3.5 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
+                  <div key={c.id} className="px-4 py-3.5 flex items-start gap-3 hover:bg-[#f4fbf7]/50 transition-colors">
                     <div className="w-8 h-8 rounded-full bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
                       <Phone size={14} className="text-[#1A5C38]" />
                     </div>

@@ -100,9 +100,9 @@ export default function AgregarUPPage() {
   const puedeTerminar = pointCount >= 3;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-[1100]">
-        <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-gray-100">
+        <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-[#eef8f2]">
           <ChevronLeft size={20} />
         </button>
         <div>
@@ -148,7 +148,7 @@ export default function AgregarUPPage() {
                   value={municipioUp}
                   onChange={e => setMunicipioUp(e.target.value)}
                   disabled={!estadoId}
-                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38] disabled:bg-gray-50 disabled:text-gray-400"
+                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38] disabled:bg-[#f4fbf7] disabled:text-gray-400"
                 >
                   <option value="">{estadoId ? 'Selecciona tu municipio' : 'Primero elige el estado'}</option>
                   {municipios.map(m => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}

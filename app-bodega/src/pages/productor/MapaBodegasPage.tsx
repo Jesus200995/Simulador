@@ -135,7 +135,7 @@ export default function MapaBodegasPage() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#f4f5f7] lg:p-5">
+    <div className="w-full h-full flex flex-col bg-[#eef8f2] lg:p-5">
       {/* En desktop el mapa se centra en una tarjeta; en móvil ocupa todo */}
       <div className="flex-1 min-h-0 w-full lg:max-w-5xl lg:mx-auto flex flex-col relative overflow-hidden bg-white lg:rounded-3xl lg:shadow-[0_12px_40px_rgba(0,0,0,0.10)] lg:ring-1 lg:ring-black/5">
       {coordsAproximadas && (
@@ -170,7 +170,7 @@ export default function MapaBodegasPage() {
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 filtroTipoMaiz === tipo
                   ? 'bg-[#1A5C38] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-[#eef8f2] text-gray-600 hover:bg-gray-200'
               }`}
             >
               {tipo === '' ? 'Todos' : `Maíz ${tipo}`}
@@ -188,7 +188,7 @@ export default function MapaBodegasPage() {
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                   radioKm === km
                     ? 'bg-[#1A5C38] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-[#eef8f2] text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {km} km
@@ -244,7 +244,7 @@ export default function MapaBodegasPage() {
                       b.estado_compra === 'comprando' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' :
                       b.estado_compra === 'limitado' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20' :
                       b.estado_compra === 'no_compra' ? 'text-red-400 bg-red-500/10 border border-red-500/20' :
-                      'text-gray-300 bg-gray-500/10 border border-gray-500/20'
+                      'text-gray-300 bg-[#f4fbf7]0/10 border border-gray-500/20'
                     }`}>
                       {b.estado_compra === 'comprando' ? 'Comprando' :
                        b.estado_compra === 'limitado' ? 'Cap. limitada' :

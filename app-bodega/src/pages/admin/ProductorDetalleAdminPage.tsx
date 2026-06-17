@@ -268,7 +268,7 @@ export default function ProductorDetalleAdminPage() {
 
         {/* Estatus indicator + action buttons */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-gray-50 border border-white/5 px-3 py-1.5 rounded-xl">
+          <div className="flex items-center gap-1.5 bg-[#f4fbf7] border border-white/5 px-3 py-1.5 rounded-xl">
             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Estado:</span>
             <span className={`text-[11px] font-bold uppercase tracking-wide ${
               data.estado_validacion === 'activo' ? 'text-emerald-500' :
@@ -365,7 +365,7 @@ export default function ProductorDetalleAdminPage() {
                     <p className="text-[10.5px] text-indigo-300 leading-normal">Cuenta con verificación biométrica o báscula autorizada en bodega. Capacidad operativa aprobada.</p>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 border border-white/5 text-gray-500 p-3 rounded-xl mt-1 space-y-1">
+                  <div className="bg-[#f4fbf7] border border-white/5 text-gray-500 p-3 rounded-xl mt-1 space-y-1">
                     <p className="text-[12px] font-bold">Productor Tipo A</p>
                     <p className="text-[10.5px] text-gray-500 leading-normal">Registro autodeclarado en la plataforma. Sujeto a auditorías físicas de silo y rendimiento.</p>
                   </div>
@@ -486,7 +486,7 @@ export default function ProductorDetalleAdminPage() {
       {/* Modales de Confirmación */}
       {modalType && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -526,7 +526,7 @@ export default function ProductorDetalleAdminPage() {
                   }
                   value={notaInterna}
                   onChange={e => setNotaInterna(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 

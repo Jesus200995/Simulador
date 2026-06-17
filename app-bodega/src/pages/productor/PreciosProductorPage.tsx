@@ -85,7 +85,7 @@ export default function PreciosProductorPage() {
   const esFavorable = precioVenta != null && precioVenta >= 0;
 
   return (
-    <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#f4f5f7]">
+    <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#eef8f2]">
       
       {/* ── HEADER VERDE ── */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
@@ -164,7 +164,7 @@ export default function PreciosProductorPage() {
                         setPreciosBodega(await r.json());
                       } catch { /* ignore */ }
                     }}
-                    className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0"
+                    className="w-full text-left px-4 py-3 hover:bg-[#eef8f2] border-b border-slate-50 last:border-0"
                   >
                     <p className="text-sm font-medium text-slate-800">{b.nombre}</p>
                     <p className="text-xs text-slate-500">
@@ -381,7 +381,7 @@ export default function PreciosProductorPage() {
         </div>
 
         <div className="px-4 pb-4">
-          <div className="bg-slate-50 rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
+          <div className="bg-[#eef8f2] rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-3">
               Versión 1 — Productor con servicios
             </p>
@@ -439,7 +439,7 @@ export default function PreciosProductorPage() {
             )}
           </div>
 
-          <div className="border border-dashed border-slate-200 rounded-2xl p-4 bg-slate-50/50">
+          <div className="border border-dashed border-slate-200 rounded-2xl p-4 bg-[#eef8f2]/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
               <p className="text-[12px] font-bold text-slate-600">
                 Versión 2 — Precio CEDIS
@@ -467,7 +467,7 @@ export default function PreciosProductorPage() {
                 Histórico a 30 días
               </p>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">MXN / TON</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-[#eef8f2] px-2.5 py-1 rounded-md border border-slate-100">MXN / TON</p>
           </div>
           
           {data.tendencia?.length > 0 ? (
@@ -511,7 +511,7 @@ export default function PreciosProductorPage() {
 
       {/* ── FIRA ── */}
       {data.fira && (
-        <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-4 sm:p-5 shadow-sm">
+        <div className="bg-[#eef8f2] border border-slate-200 rounded-[24px] p-4 sm:p-5 shadow-sm">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center text-slate-600 shadow-inner">
               <BookOpen size={16} />

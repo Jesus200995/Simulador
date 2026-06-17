@@ -155,7 +155,7 @@ export default function B11OfertaTabla() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className={`rounded-xl p-3 ${
                     Number(d.productores_disponibles) >= 10 ? 'bg-green-100' :
-                    Number(d.productores_disponibles) >= 5 ? 'bg-yellow-50' : 'bg-[#F2F2F7]'
+                    Number(d.productores_disponibles) >= 5 ? 'bg-yellow-50' : 'bg-[#eef8f2]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Users size={12} className="text-gray-400" />
@@ -168,7 +168,7 @@ export default function B11OfertaTabla() {
                   </div>
                   <div className={`rounded-xl p-3 ${
                     Number(d.toneladas_estimadas) >= 500 ? 'bg-green-100' :
-                    Number(d.toneladas_estimadas) >= 100 ? 'bg-yellow-50' : 'bg-[#F2F2F7]'
+                    Number(d.toneladas_estimadas) >= 100 ? 'bg-yellow-50' : 'bg-[#eef8f2]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Wheat size={12} className="text-gray-400" />

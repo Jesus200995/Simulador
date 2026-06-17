@@ -44,7 +44,7 @@ export function Layout({ children }: { children: ReactNode }) {
     : 'U';
 
   return (
-    <div className="flex flex-col h-dvh bg-[#F2F2F7] overflow-hidden w-full">
+    <div className="flex flex-col h-dvh bg-[#eef8f2] overflow-hidden w-full">
 
       {/* ── Header premium "liquid glass" (compartido) ── */}
       <AppHeader
@@ -59,7 +59,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* ── Main content ───────────────────────────────── */}
       {/* En desktop el contenido se centra en una columna para verse profesional
           (como en "seleccionar bodegas") en vez de estirarse a todo lo ancho. */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full pb-[72px] bg-[#F2F2F7]">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full pb-[72px] bg-[#eef8f2]">
         <div className="w-full max-w-5xl mx-auto">{children}</div>
       </main>
 
@@ -117,8 +117,8 @@ export function Layout({ children }: { children: ReactNode }) {
             { icon: Settings, label: 'Configuración', action: () => { setDrawerOpen(false); navigate('/configuracion'); } },
           ].map(({ icon: Icon, label, action }) => (
             <button key={label} onClick={action}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
-              <div className="w-9 h-9 rounded-xl bg-[#F2F2F7] flex items-center justify-center flex-shrink-0">
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-[#f4fbf7] active:bg-[#eef8f2] transition-colors text-left">
+              <div className="w-9 h-9 rounded-xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0">
                 <Icon size={18} className="text-[#1A5C38]" />
               </div>
               <span className="flex-1 text-[15px] font-medium">{label}</span>

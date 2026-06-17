@@ -109,7 +109,7 @@ export default function B10Requerimiento() {
     } catch (err: any) { toast(err.message, 'error'); }
   }
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
+  const inputClass = 'w-full bg-[#eef8f2] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
@@ -148,7 +148,7 @@ export default function B10Requerimiento() {
               <div className="space-y-2">
                 {filteredVars.map(v => (
                   <label key={v.code}
-                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-[#f4fbf7] transition-colors">
                     <input
                       type="checkbox"
                       checked={variedadesSeleccionadas.includes(v.code)}
@@ -240,7 +240,7 @@ export default function B10Requerimiento() {
                 className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                   Number(form.radio_km) === km
                     ? 'bg-[#1A5C38] text-white border-[#1A5C38]'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#f4fbf7]'
                 }`}
               >
                 {km >= 1000 ? `${(km / 1000).toLocaleString('es-MX')},000` : km} km
@@ -271,7 +271,7 @@ export default function B10Requerimiento() {
         ) : (
           <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] divide-y divide-gray-100 overflow-hidden">
             {requerimientos.map(s => (
-              <div key={s.id} className="flex items-start gap-4 p-5 hover:bg-gray-50/50 transition-colors">
+              <div key={s.id} className="flex items-start gap-4 p-5 hover:bg-[#f4fbf7]/50 transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-semibold text-gray-800">
                     {TIPOS_MAIZ.find(t => t.code === s.tipo_maiz)?.label || s.tipo_maiz}

@@ -102,14 +102,14 @@ export default function B30MisInteresesOferta() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <div className={`rounded-xl p-3 ${Number(d.productores_disponibles) >= 10 ? 'bg-emerald-50' : Number(d.productores_disponibles) >= 5 ? 'bg-amber-50' : 'bg-[#F2F2F7]'}`}>
+                  <div className={`rounded-xl p-3 ${Number(d.productores_disponibles) >= 10 ? 'bg-emerald-50' : Number(d.productores_disponibles) >= 5 ? 'bg-amber-50' : 'bg-[#eef8f2]'}`}>
                     <div className="flex items-center gap-1 mb-1">
                       <Users size={11} className="text-gray-400" />
                       <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Productores</p>
                     </div>
                     <p className="text-[20px] font-black text-[#1A5C38]">{d.productores_disponibles}</p>
                   </div>
-                  <div className={`rounded-xl p-3 ${Number(d.toneladas_estimadas) >= 500 ? 'bg-emerald-50' : Number(d.toneladas_estimadas) >= 100 ? 'bg-amber-50' : 'bg-[#F2F2F7]'}`}>
+                  <div className={`rounded-xl p-3 ${Number(d.toneladas_estimadas) >= 500 ? 'bg-emerald-50' : Number(d.toneladas_estimadas) >= 100 ? 'bg-amber-50' : 'bg-[#eef8f2]'}`}>
                     <div className="flex items-center gap-1 mb-1">
                       <Wheat size={11} className="text-gray-400" />
                       <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Toneladas</p>

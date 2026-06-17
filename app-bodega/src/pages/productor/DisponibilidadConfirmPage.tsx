@@ -56,7 +56,7 @@ export default function DisponibilidadConfirmPage() {
 
   if (sent) {
     return (
-      <div className="bg-[#F2F2F7] flex flex-col items-center justify-center px-6 sm:px-8 text-center py-12">
+      <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 text-center py-12">
         <CheckCircle size={64} className="text-[#1A5C38] mb-4" />
         <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-2">Listo!</h2>
         <p className="text-zinc-500 text-sm sm:text-base mb-6 max-w-sm">
@@ -72,7 +72,7 @@ export default function DisponibilidadConfirmPage() {
   }
 
   return (
-    <div className="bg-[#F2F2F7] flex flex-col">
+    <div className="bg-white flex flex-col">
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}

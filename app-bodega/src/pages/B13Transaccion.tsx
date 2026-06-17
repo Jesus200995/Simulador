@@ -99,7 +99,7 @@ export default function B13Transaccion() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
+  const inputClass = 'w-full bg-[#eef8f2] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
@@ -140,14 +140,14 @@ export default function B13Transaccion() {
                     {sugerencias.map(p => (
                       <button type="button" key={p.producer_id}
                         onClick={() => seleccionarProducer(p)}
-                        className="w-full text-left px-4 py-3 hover:bg-[#F2F2F7] active:bg-[#F2F2F7] border-b border-gray-50 last:border-0">
+                        className="w-full text-left px-4 py-3 hover:bg-[#eef8f2] active:bg-[#eef8f2] border-b border-gray-50 last:border-0">
                         <p className="text-[14px] font-semibold text-gray-900">{p.nombre_completo}</p>
                         <p className="text-[12px] text-gray-400">{p.municipio} · CURP: …{p.curp_parcial}</p>
                       </button>
                     ))}
                     <button type="button"
                       onClick={activarModoLibre}
-                      className="w-full text-left px-4 py-3 text-[#1A5C38] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#F2F2F7]">
+                      className="w-full text-left px-4 py-3 text-[#1A5C38] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#eef8f2]">
                       <PenLine size={14} /> + Registrar nombre manualmente
                     </button>
                   </div>

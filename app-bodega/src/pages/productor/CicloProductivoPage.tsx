@@ -161,7 +161,7 @@ export default function CicloProductivoPage() {
     navigate('/productor');
   };
 
-  const inputCls = 'w-full bg-slate-50/50 border border-slate-200 rounded-[14px] px-3.5 py-3 text-[14px] font-semibold text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-2 focus:ring-[#1A5C38]/10 transition-all outline-none';
+  const inputCls = 'w-full bg-[#eef8f2]/50 border border-slate-200 rounded-[14px] px-3.5 py-3 text-[14px] font-semibold text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-2 focus:ring-[#1A5C38]/10 transition-all outline-none';
 
   const cycleTypeLabel = (t: string) =>
     t === 'PV' ? 'Primavera-Verano' : t === 'OI' ? 'Otoño-Invierno' : t === 'ANUAL' ? 'Ciclo anual' : t;
@@ -169,7 +169,7 @@ export default function CicloProductivoPage() {
   // ── Loader mientras se consultan los ciclos existentes ──
   if (cargandoCiclos) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[#f4f5f7] gap-3">
+      <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[#eef8f2] gap-3">
         <div className="w-8 h-8 border-[3px] border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />
         <p className="text-[13px] font-semibold text-slate-400">Cargando tus ciclos…</p>
       </div>
@@ -179,7 +179,7 @@ export default function CicloProductivoPage() {
   // ── Selector de parcela cuando hay más de una UP (#6) ──
   if (todasLasUPs.length > 1 && !upSeleccionadaId) {
     return (
-      <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[40px]">
+      <div className="flex flex-col font-sans w-full min-h-screen bg-[#eef8f2] pb-[40px]">
         <div className="sticky top-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] overflow-hidden">
           <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7">
             <button onClick={() => navigate('/productor')}
@@ -227,7 +227,7 @@ export default function CicloProductivoPage() {
   // ── Lista de ciclos existentes + botón para agregar uno nuevo ──
   if (!mostrarFormulario && ciclosExistentes.length > 0) {
     return (
-      <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[40px]">
+      <div className="flex flex-col font-sans w-full min-h-screen bg-[#eef8f2] pb-[40px]">
         <div className="sticky top-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
           <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
             <div className="flex items-center justify-between mb-2">
@@ -274,7 +274,7 @@ export default function CicloProductivoPage() {
                         ? 'bg-green-100 text-green-700'
                         : estado === 'cosechado'
                         ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-500'
+                        : 'bg-[#eef8f2] text-gray-500'
                     }`}>
                       {estado}
                     </span>
@@ -297,7 +297,7 @@ export default function CicloProductivoPage() {
   }
 
   return (
-    <div className="flex flex-col font-sans w-full min-h-screen bg-[#f4f5f7] pb-[100px]">
+    <div className="flex flex-col font-sans w-full min-h-screen bg-white pb-[100px]">
       
       {/* Header Verde Premium */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative z-10 overflow-hidden">
@@ -376,7 +376,7 @@ export default function CicloProductivoPage() {
                       className={`w-full border-2 rounded-[16px] py-3 px-4 flex items-center gap-3.5 text-left transition-all duration-200 active:scale-[0.98]
                         ${form.cycle_type === c.valor 
                           ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' 
-                          : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50/50'}`}>
+                          : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]/50'}`}>
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300
                         ${form.cycle_type === c.valor ? 'bg-[#1A5C38] text-white shadow-md shadow-[#1A5C38]/30 scale-105' : 'bg-slate-100 text-slate-400'}`}>
                         <Wheat size={18} strokeWidth={2} />
@@ -434,7 +434,7 @@ export default function CicloProductivoPage() {
                       <button key={t} onClick={() => setTipoMaiz(t as any)}
                         className="w-full rounded-[16px] p-4 border-2 border-slate-100 bg-white hover:border-[#1A5C38]/30 hover:bg-emerald-50/30 text-left transition-all duration-200 active:scale-[0.98] group flex justify-between items-center shadow-sm hover:shadow-md">
                         <div className="flex items-center gap-3.5">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-slate-500 group-hover:text-[#1A5C38] group-hover:bg-[#1A5C38]/10 bg-slate-50 transition-colors`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-slate-500 group-hover:text-[#1A5C38] group-hover:bg-[#1A5C38]/10 bg-[#eef8f2] transition-colors`}>
                             {idx === 0 ? <Wheat size={20} /> : idx === 1 ? <Sun size={20} /> : <Sprout size={20} />}
                           </div>
                           <p className="text-[15px] font-black text-slate-800 capitalize group-hover:text-[#1A5C38] transition-colors tracking-tight">
@@ -447,13 +447,13 @@ export default function CicloProductivoPage() {
                   </div>
                 ) : (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex items-center justify-between mb-4 bg-slate-50/80 p-2.5 rounded-[14px] border border-slate-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 bg-[#eef8f2]/80 p-2.5 rounded-[14px] border border-slate-100 shadow-sm">
                       <p className="font-black text-slate-800 capitalize text-[14px] flex items-center gap-2 px-2">
                         {tipoMaiz === 'blanco' ? <Wheat size={18} className="text-[#1A5C38]"/> : tipoMaiz === 'amarillo' ? <Sun size={18} className="text-amber-500"/> : <Sprout size={18} className="text-emerald-500"/>} 
                         Maíz {tipoMaiz}
                       </p>
                       <button onClick={() => { setTipoMaiz(''); setForm(f => ({...f, variety_id: '', variety_other: ''})); setEsCriollo(false); }} 
-                        className="text-[#1A5C38] text-[12px] font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-50 transition-colors shadow-sm active:scale-95">
+                        className="text-[#1A5C38] text-[12px] font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:bg-[#eef8f2] transition-colors shadow-sm active:scale-95">
                         Cambiar
                       </button>
                     </div>
@@ -468,7 +468,7 @@ export default function CicloProductivoPage() {
                           className={`w-full rounded-[14px] p-3.5 border-2 text-left transition-all active:scale-[0.98] flex items-center gap-3
                             ${form.variety_id === v.code
                               ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm'
-                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'}`}>
+                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]'}`}>
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center border-2 shrink-0 transition-colors
                             ${form.variety_id === v.code ? 'bg-[#1A5C38] border-[#1A5C38]' : 'border-slate-300'}`}>
                             {form.variety_id === v.code && <Check size={10} className="text-white" strokeWidth={4} />}
@@ -481,7 +481,7 @@ export default function CicloProductivoPage() {
                     </div>
                     
                     {esCriollo && (
-                      <div className="animate-in fade-in slide-in-from-top-2 p-4 bg-slate-50/80 rounded-[16px] border border-slate-100 shadow-sm">
+                      <div className="animate-in fade-in slide-in-from-top-2 p-4 bg-[#eef8f2]/80 rounded-[16px] border border-slate-100 shadow-sm">
                         <label className="block text-[13px] font-bold text-slate-800 mb-2">
                           ¿Cómo se llama tu variedad criolla? <span className="text-slate-400 font-medium ml-1">(opcional)</span>
                         </label>
@@ -522,7 +522,7 @@ export default function CicloProductivoPage() {
                 )}
 
                 <div className="space-y-3.5">
-                  <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-[16px] shadow-sm">
+                  <div className="p-4 bg-[#eef8f2]/80 border border-slate-100 rounded-[16px] shadow-sm">
                     <label className="block text-[14px] font-bold text-slate-800 mb-2.5 text-center sm:text-left">
                       ¿Hectáreas a sembrar este ciclo?
                     </label>
@@ -543,7 +543,7 @@ export default function CicloProductivoPage() {
                     )}
                   </div>
 
-                  <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-[16px] shadow-sm">
+                  <div className="p-4 bg-[#eef8f2]/80 border border-slate-100 rounded-[16px] shadow-sm">
                     <label className="block text-[14px] font-bold text-slate-800 mb-1 text-center sm:text-left">
                       Rendimiento esperado
                     </label>
@@ -586,7 +586,7 @@ export default function CicloProductivoPage() {
                 </div>
 
                 <div className="space-y-3.5">
-                  <div className="bg-slate-50/80 rounded-[16px] p-4 border border-slate-100 shadow-sm">
+                  <div className="bg-[#eef8f2]/80 rounded-[16px] p-4 border border-slate-100 shadow-sm">
                     <label className="text-[14px] font-bold text-slate-800 mb-2.5 flex items-center gap-2">
                       <Calendar size={16} className="text-slate-400"/> ¿Cuándo vas a sembrar?
                     </label>
@@ -596,7 +596,7 @@ export default function CicloProductivoPage() {
                     />
                   </div>
                   
-                  <div className="bg-slate-50/80 rounded-[16px] p-4 border border-slate-100 shadow-sm">
+                  <div className="bg-[#eef8f2]/80 rounded-[16px] p-4 border border-slate-100 shadow-sm">
                     <label className="text-[14px] font-bold text-slate-800 mb-2.5 flex items-center gap-2">
                       <Clock size={16} className="text-slate-400"/> ¿Cuándo esperas cosechar? <span className="text-slate-400 font-medium ml-1 text-[11px]">(opcional)</span>
                     </label>
@@ -617,7 +617,7 @@ export default function CicloProductivoPage() {
                           className={`rounded-[16px] p-3.5 border-2 text-left transition-all active:scale-95 flex flex-col gap-2.5 items-center text-center
                             ${form.destination === d.valor
                               ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm'
-                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'}`}>
+                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]'}`}>
                           <d.icon size={22} className={form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-400'} strokeWidth={2} />
                           <span className={`text-[12px] font-black tracking-tight ${form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-600'}`}>
                             {d.label}

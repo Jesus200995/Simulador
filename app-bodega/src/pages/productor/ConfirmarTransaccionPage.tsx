@@ -41,7 +41,7 @@ export default function ConfirmarTransaccionPage() {
   const total = (txn.volumen_ton || 0) * (txn.precio_ton || 0);
 
   return (
-    <div className="bg-[#F2F2F7] flex flex-col px-4 sm:px-6 pt-10">
+    <div className="bg-white flex flex-col px-4 sm:px-6 pt-10">
       <div className="max-w-lg mx-auto w-full">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -53,7 +53,7 @@ export default function ConfirmarTransaccionPage() {
         <p className="text-gray-500 text-sm mt-2">¿Los datos son correctos?</p>
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-5 mb-8 space-y-3">
+      <div className="bg-[#f4fbf7] rounded-2xl p-5 mb-8 space-y-3">
         {[
           { label: 'Bodega', value: txn.bodega_nombre },
           { label: 'Tipo de maíz', value: txn.tipo_maiz },

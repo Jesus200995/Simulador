@@ -631,7 +631,7 @@ export default function PreciosAdminPage() {
       {/* ── MODAL: SUBIR CSV FIRA ── */}
       {showFiraModal && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleUploadFira} className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <form onSubmit={handleUploadFira} className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -707,7 +707,7 @@ export default function PreciosAdminPage() {
       {/* ── MODAL: RESOLVER DISCREPANCIA ── */}
       {resolvingDisc && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -728,7 +728,7 @@ export default function PreciosAdminPage() {
                   placeholder="Detalla las acciones o el veredicto administrativo tomado sobre esta discrepancia de precios..."
                   value={notaResolucion}
                   onChange={e => setNotaResolucion(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>

@@ -366,7 +366,7 @@ export default function BodegasAdminPage() {
               placeholder="Buscar silo o bodega..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
+              className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
 
@@ -375,7 +375,7 @@ export default function BodegasAdminPage() {
             <select
               value={estadoFilter}
               onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-gray-50 border border-white/5 rounded-lg px-2 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-2 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="">Estados</option>
               <option value="Sinaloa">Sinaloa</option>
@@ -386,7 +386,7 @@ export default function BodegasAdminPage() {
             <select
               value={estatusFilter}
               onChange={e => setEstatusFilter(e.target.value)}
-              className="bg-gray-50 border border-white/5 rounded-lg px-2 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-2 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="">Estatus</option>
               <option value="aprobada">Aprobada</option>
@@ -413,7 +413,7 @@ export default function BodegasAdminPage() {
               <div 
                 key={b.id}
                 onClick={() => focusBodega(b)}
-                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-gray-100 transition-all relative ${
+                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-[#eef8f2] transition-all relative ${
                   selectedBodegaId === b.id 
                     ? 'border-emerald-500 bg-emerald-500/[0.02]' 
                     : 'border-white/5'
@@ -511,7 +511,7 @@ export default function BodegasAdminPage() {
                     </p>
                   </div>
 
-                  <div className="text-[11px] text-gray-700 bg-gray-50 border border-white/5 rounded-xl p-2.5 space-y-1">
+                  <div className="text-[11px] text-gray-700 bg-[#f4fbf7] border border-white/5 rounded-xl p-2.5 space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500 font-medium">Capacidad:</span>
                       <strong className="text-gray-900 font-bold">{b.capacidad_total.toLocaleString()} t</strong>
@@ -595,7 +595,7 @@ export default function BodegasAdminPage() {
       {/* ── MODAL DE CONFIRMACIÓN (APPLE 2026 STYLE) ── */}
       {modalConfirmacion.visible && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/30 backdrop-blur-sm p-4">
-          <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[#f4fbf7] border border-gray-200 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Header del modal */}
             <div className={`p-6 pb-4 border-b border-white/5 flex flex-col items-center text-center`}>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${

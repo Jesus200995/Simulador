@@ -100,7 +100,7 @@ export default function B23Notificaciones() {
           </div>
         ) : notifs.length === 0 ? (
           <div className="text-center py-24 bg-white/50 backdrop-blur-sm rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-            <div className="w-20 h-20 bg-gray-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <div className="w-20 h-20 bg-[#f4fbf7] rounded-[1.25rem] flex items-center justify-center mx-auto mb-4 shadow-inner">
               <Bell size={40} className="text-gray-300" />
             </div>
             <p className="text-[17px] text-gray-600 font-bold tracking-tight">No tienes notificaciones por ahora</p>
@@ -108,7 +108,7 @@ export default function B23Notificaciones() {
           </div>
         ) : (
           notifs.map(n => {
-            const cfg = TIPO_CONFIG[n.tipo || ''] || { icon: Bell, color: 'text-gray-500', bg: 'bg-gray-50' };
+            const cfg = TIPO_CONFIG[n.tipo || ''] || { icon: Bell, color: 'text-gray-500', bg: 'bg-[#f4fbf7]' };
             const Icon = cfg.icon;
             const titulo = n.titulo || n.tipo_alerta || 'Notificación';
             const mensaje = n.mensaje || '';

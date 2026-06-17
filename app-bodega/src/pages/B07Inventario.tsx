@@ -66,7 +66,7 @@ export default function B07Inventario() {
 
   const filteredVars = conceptos.variedades.filter((v: {tipo_maiz?: string}) => v.tipo_maiz === form.tipo_maiz);
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-[1rem] px-4 py-3.5 text-[16px] font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1A5C38]/40 focus:bg-white border-2 border-transparent focus:border-[#1A5C38]/10';
+  const inputClass = 'w-full bg-[#eef8f2] rounded-[1rem] px-4 py-3.5 text-[16px] font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1A5C38]/40 focus:bg-white border-2 border-transparent focus:border-[#1A5C38]/10';
   const labelClass = 'block text-[14px] font-bold text-gray-600 mb-1.5 transition-colors group-hover/card:text-[#1A5C38]';
   const cardClass = 'bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-500 group/card hover:-translate-y-0.5';
 

@@ -56,7 +56,7 @@ export default function B16ProponerConcepto() {
                 onChange={e => setNombre(e.target.value)}
                 required
                 placeholder="Ej: Análisis de calidad"
-                className="w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
+                className="w-full bg-[#eef8f2] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
               />
             </div>
             <div>
@@ -64,7 +64,7 @@ export default function B16ProponerConcepto() {
               <select
                 value={unidad}
                 onChange={e => setUnidad(e.target.value)}
-                className="w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
+                className="w-full bg-[#eef8f2] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all"
               >
               <option value="MXN/ton">MXN/ton</option>
               <option value="MXN/ton/mes">MXN/ton/mes</option>
@@ -73,7 +73,7 @@ export default function B16ProponerConcepto() {
           </div>
         </div>
 
-        <div className="bg-[#F2F2F7] rounded-[1.25rem] p-5">
+        <div className="bg-[#eef8f2] rounded-[1.25rem] p-5">
           <p className="text-[13px] text-gray-500 font-medium leading-snug">
             Tu propuesta será revisada por el equipo de SIMAC. Una vez aprobada, podrás establecer precios para este servicio en tus bodegas.
           </p>

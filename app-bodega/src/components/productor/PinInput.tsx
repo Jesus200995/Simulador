@@ -25,7 +25,7 @@ export default function PinInput({ value, onChange, error, success, dark }: PinI
   const emptyColor = dark ? 'ring-white/30 bg-transparent' : 'ring-zinc-300 bg-white';
 
   const keyDark = 'bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15 active:bg-white/25';
-  const keyLight = 'bg-white text-zinc-800 ring-1 ring-zinc-200 shadow-sm hover:bg-zinc-50';
+  const keyLight = 'bg-white text-zinc-800 ring-1 ring-zinc-200 shadow-sm hover:bg-[#eef8f2]';
   const delDark = 'bg-white/5 text-white/70 hover:bg-white/10';
   const delLight = 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200';
 

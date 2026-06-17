@@ -31,7 +31,7 @@ export default function B18AltaVentanilla() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#F2F2F7] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all';
+  const inputClass = 'w-full bg-[#eef8f2] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all';
   const labelClass = 'block text-[14px] font-bold text-gray-700 mb-2';
 
   return (
@@ -61,7 +61,7 @@ export default function B18AltaVentanilla() {
                   className={`py-4 rounded-[1rem] text-[15px] font-bold transition-all border-2
                     ${form.tipo === k
                       ? 'border-[#1A5C38] bg-[#1A5C38]/5 text-[#1A5C38]'
-                      : 'border-transparent bg-[#F2F2F7] text-gray-500 hover:bg-gray-200/50'}`}
+                      : 'border-transparent bg-[#eef8f2] text-gray-500 hover:bg-gray-200/50'}`}
                 >
                   {l}
                 </button>

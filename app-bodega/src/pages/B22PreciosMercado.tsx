@@ -123,7 +123,7 @@ export default function B22PreciosMercado() {
             </p>
 
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+              <div className="bg-[#f4fbf7]/50 rounded-xl p-2.5 border border-gray-100">
                 <div className="flex items-center gap-1">
                   <Globe size={10} className="text-gray-400" />
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">CME Chicago</span>
@@ -134,7 +134,7 @@ export default function B22PreciosMercado() {
                 <p className="text-[9px] text-gray-400">USD/bushel</p>
               </div>
 
-              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+              <div className="bg-[#f4fbf7]/50 rounded-xl p-2.5 border border-gray-100">
                 <div className="flex items-center gap-1">
                   <ArrowLeftRight size={10} className="text-gray-400" />
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Conversión</span>
@@ -145,7 +145,7 @@ export default function B22PreciosMercado() {
                 <p className="text-[9px] text-gray-400">USD/ton metric</p>
               </div>
 
-              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+              <div className="bg-[#f4fbf7]/50 rounded-xl p-2.5 border border-gray-100">
                 <div className="flex items-center gap-1">
                   <DollarSign size={10} className="text-gray-400" />
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Tipo Cambio</span>
@@ -160,7 +160,7 @@ export default function B22PreciosMercado() {
                 <p className="text-[9px] text-gray-400">MXN/USD</p>
               </div>
 
-              <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100">
+              <div className="bg-[#f4fbf7]/50 rounded-xl p-2.5 border border-gray-100">
                 <div className="flex items-center gap-1">
                   <Gift size={10} className="text-gray-400" />
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Bono Blanco</span>
@@ -272,7 +272,7 @@ export default function B22PreciosMercado() {
               <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Precio de Venta (Diferencial de Mercado)</h2>
             </div>
 
-            <div className="rounded-[1.25rem] border border-black/[0.04] p-5 bg-gray-50/50 space-y-3 transition-transform duration-500 group-hover/card:scale-[1.01]">
+            <div className="rounded-[1.25rem] border border-black/[0.04] p-5 bg-[#f4fbf7]/50 space-y-3 transition-transform duration-500 group-hover/card:scale-[1.01]">
               <div className="flex justify-between items-center text-[12px]">
                 <span className="text-gray-400">Precio de Compra (PO + S)</span>
                 <span className="font-semibold text-gray-700">{loading ? '—' : fmt(data?.precio_compra_mxn)}/t</span>

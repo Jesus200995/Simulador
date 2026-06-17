@@ -254,7 +254,7 @@ export default function AlertasAdminPage() {
               placeholder="Buscar alertas..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
+              className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
 
@@ -263,7 +263,7 @@ export default function AlertasAdminPage() {
             <select
               value={tipoFilter}
               onChange={e => setTipoFilter(e.target.value)}
-              className="bg-gray-50 border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="">Tipos</option>
               <option value="fitosanitaria">Fitosanitaria</option>
@@ -275,7 +275,7 @@ export default function AlertasAdminPage() {
             <select
               value={nivelFilter}
               onChange={e => setNivelFilter(e.target.value)}
-              className="bg-gray-50 border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="">Severidad</option>
               <option value="ALTA">Alta</option>
@@ -286,7 +286,7 @@ export default function AlertasAdminPage() {
             <select
               value={estadoFilter}
               onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-gray-50 border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
             >
               <option value="activa">Activas</option>
               <option value="atendida">Atendidas</option>
@@ -311,7 +311,7 @@ export default function AlertasAdminPage() {
               <div 
                 key={a.id}
                 onClick={() => focusAlerta(a)}
-                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-gray-100 transition-all relative ${
+                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-[#eef8f2] transition-all relative ${
                   selectedAlertaId === a.id 
                     ? 'border-emerald-500 bg-emerald-500/[0.01]' 
                     : 'border-white/5'
@@ -433,7 +433,7 @@ export default function AlertasAdminPage() {
       {/* ── MODAL: ATENDER ALERTA ── */}
       {resolvingAlerta && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-50 border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
             <div className="p-6 border-b border-white/5 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -457,7 +457,7 @@ export default function AlertasAdminPage() {
                   placeholder="Detalla las medidas preventivas, correctivas o la auditoría del mercado ejecutada sobre esta alerta..."
                   value={notasResolucion}
                   onChange={e => setNotasResolucion(e.target.value)}
-                  className="w-full bg-gray-50 border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>
