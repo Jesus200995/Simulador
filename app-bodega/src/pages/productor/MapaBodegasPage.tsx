@@ -80,7 +80,6 @@ export default function MapaBodegasPage() {
     });
 
     map.current.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
-    map.current.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
     map.current.on('load', () => {
       setMapReady(true);
@@ -505,8 +504,7 @@ export default function MapaBodegasPage() {
             {mapStyle === 'streets' ? 'Satélite' : 'Mapa'}
           </button>
 
-          {/* Legend */}
-          <div className="absolute bottom-[52px] lg:bottom-10 left-3 z-10 bg-white/90 backdrop-blur-md rounded-xl p-2.5 shadow-lg space-y-1.5 border border-black/5">
+          <div className="absolute bottom-4 left-4 lg:bottom-6 lg:left-6 z-10 bg-white/90 backdrop-blur-md rounded-xl p-2.5 shadow-lg space-y-1.5 border border-black/5">
             {Object.entries(SEMAFORO).map(([k, v]) => (
               <div key={k} className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: v.fill }} />
