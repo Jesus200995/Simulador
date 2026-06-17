@@ -91,7 +91,7 @@ export default function B14HistorialTransacciones() {
                 <p className="font-bold text-[15px] text-gray-900 group-hover/card:text-[#1A5C38] transition-colors leading-snug flex-1">
                   {tx.nombre_productor || tx.nombre_productor_libre || 'Productor'}
                 </p>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${estadoBadge[tx.confirmacion_productor] || 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 capitalize ${estadoBadge[tx.confirmacion_productor] || 'bg-gray-100 text-gray-500'}`}>
                   {tx.confirmacion_productor}
                 </span>
               </div>
@@ -101,7 +101,7 @@ export default function B14HistorialTransacciones() {
               <p className="text-[18px] font-black text-[#1A5C38] mt-2">
                 {tx.volumen_ton} ton · ${formatNum(tx.precio_ton)}/ton
               </p>
-              <p className="text-[12px] text-gray-400 mt-1 font-medium">{tx.tipo_maiz}</p>
+              <p className="text-[12px] text-gray-400 mt-1 font-medium capitalize">{tx.tipo_maiz}</p>
             </div>
           ))}
         </div>

@@ -133,7 +133,7 @@ export default function B26DetalleTransaccion() {
             ].map(item => (
               <div key={item.label} className="flex justify-between items-center py-3 border-b border-gray-100/50 last:border-0 last:pb-0">
                 <span className="text-gray-500 font-medium text-[14px]">{item.label}</span>
-                <span className={`text-[15px] ${item.destacado ? 'text-[#1A5C38] font-black text-[18px]' : 'text-gray-900 font-bold'}`}>
+                <span className={`text-[15px] capitalize ${item.destacado ? 'text-[#1A5C38] font-black text-[18px]' : 'text-gray-900 font-bold'}`}>
                   {item.valor}
                 </span>
               </div>

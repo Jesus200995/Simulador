@@ -42,7 +42,7 @@ export function KPICard({ title, value, subtitle, icon, trend, trendText, color 
       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${gradientBg[color]} opacity-50 rounded-bl-[4rem] pointer-events-none transition-opacity duration-500 group-hover:opacity-100`} />
       
       <div className="flex items-start justify-between relative z-10 gap-3">
-        <p className="text-[13px] font-bold text-gray-500 tracking-wide leading-snug transition-colors duration-300 group-hover:text-gray-800">{title}</p>
+        <p className="text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-snug transition-colors duration-300 group-hover:text-gray-800">{title}</p>
         {icon && (
           <span className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ring-1 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110 group-hover:-rotate-3 group-hover:shadow-md bg-white ${iconBg[color]}`}>
             {icon}

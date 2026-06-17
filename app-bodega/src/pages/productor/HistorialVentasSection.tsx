@@ -88,7 +88,7 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
                 <p className="font-medium text-gray-800 text-sm">
                   {txn.bodega_nombre}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-500 mt-0.5 capitalize">
                   {txn.volumen_ton} ton ·{' '}
                   ${txn.precio_por_ton?.toLocaleString('es-MX')}/ton ·{' '}
                   {txn.variedad || 'Sin variedad'}
