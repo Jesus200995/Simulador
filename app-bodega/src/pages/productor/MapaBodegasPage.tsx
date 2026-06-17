@@ -236,8 +236,12 @@ export default function MapaBodegasPage() {
       </div>
     );
 
-    const popup = new mapboxgl.Popup({ offset: 15, closeButton: false, className: 'custom-premium-popup' })
-      .setDOMContent(popupNode);
+    const popup = new mapboxgl.Popup({ 
+      anchor: 'bottom', 
+      offset: [0, -14], 
+      closeButton: false, 
+      className: 'custom-premium-popup' 
+    }).setDOMContent(popupNode);
 
     upMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
       .setLngLat([up.lng, up.lat])
@@ -355,8 +359,13 @@ export default function MapaBodegasPage() {
         </div>
       );
 
-      const popup = new mapboxgl.Popup({ offset: [0, -10], closeButton: false, className: 'custom-premium-popup', maxWidth: '300px' })
-        .setDOMContent(popupNode);
+      const popup = new mapboxgl.Popup({ 
+        anchor: 'bottom', 
+        offset: [0, -42], 
+        closeButton: false, 
+        className: 'custom-premium-popup', 
+        maxWidth: '300px' 
+      }).setDOMContent(popupNode);
 
       popup.on('open', () => {
         map.current?.flyTo({ center: [b.longitud, b.latitud], zoom: 12.5, duration: 800 });
@@ -481,7 +490,7 @@ export default function MapaBodegasPage() {
           </button>
 
           {/* Legend */}
-          <div className="absolute bottom-8 left-3 z-10 bg-white/90 backdrop-blur-md rounded-xl p-2.5 shadow-lg space-y-1.5">
+          <div className="absolute bottom-[52px] lg:bottom-10 left-3 z-10 bg-white/90 backdrop-blur-md rounded-xl p-2.5 shadow-lg space-y-1.5 border border-black/5">
             {Object.entries(SEMAFORO).map(([k, v]) => (
               <div key={k} className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: v.fill }} />
