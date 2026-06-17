@@ -5,7 +5,7 @@
 /* Mapbox GL */
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right { z-index: 5 !important; }
-.mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib { display: none !important; }
+.mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib, .mapboxgl-ctrl-scale { display: none !important; }
 
 /* Premium Apple-style Popups */
 .mapboxgl-popup {
