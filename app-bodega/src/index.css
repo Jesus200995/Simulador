@@ -1,5 +1,12 @@
 @import "tailwindcss";
+@import url('https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap');
+
+/* Mapbox GL */
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right { z-index: 5 !important; }
+.mapboxgl-popup-content { padding: 0 !important; border-radius: 16px !important; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important; }
+.mapboxgl-popup-tip { display: none; }
 
 *, *::before, *::after {
   -webkit-tap-highlight-color: transparent;
