@@ -574,7 +574,7 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
 
-    // UP del productor
+    // UP del productor (ubicación principal)
     const upRes = await pool.query(
       `SELECT state_name, municipality_name, location_confirmed, centroid_source,
               ST_Y(centroid::geometry) AS lat, ST_X(centroid::geometry) AS lng
@@ -582,6 +582,17 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
       [producerId]
     );
     const up = upRes.rows[0];
+
+    // Todas las parcelas del productor (geometrías)
+    const parcelasRes = await pool.query(
+      `SELECT up_id as id,
+              ST_Y(centroid::geometry) AS lat, ST_X(centroid::geometry) AS lng,
+              ST_AsGeoJSON(geom)::json AS poligono
+       FROM up WHERE producer_id = $1 AND geom IS NOT NULL`,
+      [producerId]
+    );
+    const parcelas = parcelasRes.rows;
+
 
     // Precio promedio regional (últimos 7 días)
     let precio_hoy: number | null = null;
@@ -687,6 +698,7 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
       centroid_source: up?.centroid_source,
       lat: up?.lat ?? null,
       lng: up?.lng ?? null,
+      parcelas,
       precio_hoy,
       precio_ayer,
       alerta_activa,

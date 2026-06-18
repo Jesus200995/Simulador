@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   MapPin, Package, Warehouse, Map as MapIcon,
-  CheckCircle2, Wheat, Navigation, Layers, ChevronDown, Compass
+  CheckCircle2, Wheat, Navigation, Layers, ChevronDown, Compass, Flag
 } from 'lucide-react';
 
 mapboxgl.accessToken = [
@@ -28,16 +28,22 @@ interface Bodega {
   senal_activa?: { id: number; precio_oferta: number; volumen_ton: number; tipo_maiz: string } | null;
 }
 
+interface ParcelaData {
+  id: number;
+  lat: number; lng: number;
+  poligono: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+}
+
 interface UpData {
   lat: number; lng: number;
   location_confirmed: boolean; centroid_source: string;
   municipio?: string; estado?: string;
-  poligono?: GeoJSON.Polygon | null;   // polÃ­gono real de la parcela si existe
+  parcelas?: ParcelaData[];
 }
 
 
 
-// Color semÃ¡foro de bodegas
+// Color semáforo de bodegas
 const SEMAFORO: Record<string, { fill: string; label: string }> = {
   comprando:     { fill: '#10B981', label: 'Comprando' },
   limitado:      { fill: '#F59E0B', label: 'Cap. Limitada' },
@@ -53,6 +59,7 @@ export default function MapaBodegasPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const parcelMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const upMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
   const [up, setUp] = useState<UpData | null>(null);
@@ -137,7 +144,7 @@ export default function MapaBodegasPage() {
             centroid_source: d.centroid_source,
             municipio: d.municipio,
             estado: d.estado,
-            poligono: d.poligono ?? null,
+            parcelas: d.parcelas || [],
           });
         }
       })
@@ -162,6 +169,7 @@ export default function MapaBodegasPage() {
   }, [up, radioKm, filtroTipoMaiz]);
 
   // â”€â”€ 4. Dibuja polÃ­gono UP en el mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── 4. Dibuja polígonos UP en el mapa ──
   const drawParcela = useCallback(() => {
     if (!map.current || !mapReady || !up) return;
 
@@ -171,19 +179,27 @@ export default function MapaBodegasPage() {
     });
     if (map.current.getSource('up-source')) map.current.removeSource('up-source');
 
+    // Limpia marcadores anteriores
     if (upMarkerRef.current) { upMarkerRef.current.remove(); upMarkerRef.current = null; }
+    parcelMarkersRef.current.forEach(m => m.remove());
+    parcelMarkersRef.current = [];
 
-    const geom: GeoJSON.Geometry = up.poligono
-      ? up.poligono
-      : { type: 'Point', coordinates: [up.lng, up.lat] };
+    const tieneParcelas = up.parcelas && up.parcelas.length > 0;
 
-    map.current.addSource('up-source', {
-      type: 'geojson',
-      data: { type: 'Feature', geometry: geom, properties: {} }
-    });
+    if (tieneParcelas) {
+      // Dibuja múltiples polígonos
+      const features: GeoJSON.Feature[] = up.parcelas!.map(p => ({
+        type: 'Feature',
+        geometry: p.poligono,
+        properties: { id: p.id }
+      }));
 
-    if (up.poligono) {
-      // PolÃ­gono azul relleno
+      map.current.addSource('up-source', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features }
+      });
+
+      // Polígonos azul relleno
       map.current.addLayer({
         id: 'up-fill',
         type: 'fill',
@@ -194,87 +210,110 @@ export default function MapaBodegasPage() {
         id: 'up-outline',
         type: 'line',
         source: 'up-source',
-        paint: { 'line-color': '#2563EB', 'line-width': 2.5, 'line-dasharray': [] }
+        paint: { 'line-color': '#2563EB', 'line-width': 2.5 }
       });
-    }
 
-    // Marcador animado en el centroide
-    const el = document.createElement('div');
-    el.innerHTML = `
-      <div style="position:relative;width:28px;height:28px;cursor:pointer">
-        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(59,130,246,0.3);animation:ping 1.8s cubic-bezier(0,0,0.2,1) infinite"></div>
-        <div style="position:absolute;inset:4px;border-radius:50%;background:#3B82F6;border:3px solid white;box-shadow:0 2px 8px rgba(37,99,235,0.6)"></div>
-      </div>
-      <style>
-        @keyframes ping{0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.5);opacity:0}}
-      </style>
-    `;
+      // Bounding box total para todas las parcelas
+      const bounds = new mapboxgl.LngLatBounds();
+      let hasBounds = false;
 
-    const popupNode = document.createElement('div');
-    const popupRoot = createRoot(popupNode);
-    popupRoot.render(
-      <div className="w-52 p-3 space-y-2.5 bg-white">
-        <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <MapPin size={14} className="text-blue-600" />
+      up.parcelas!.forEach(p => {
+        // Marcador con banderita
+        const el = document.createElement('div');
+        const root = createRoot(el);
+        root.render(
+          <div className="relative group cursor-pointer">
+            <div className="absolute -inset-2 bg-blue-500/20 rounded-full animate-ping"></div>
+            <div className="relative w-7 h-7 bg-blue-600 rounded-full border-2 border-white shadow-[0_2px_10px_rgba(37,99,235,0.8)] flex items-center justify-center transform transition-transform hover:scale-110">
+              <Flag size={14} className="text-white" />
+            </div>
           </div>
-          <div className="overflow-hidden">
-            <p className="font-black text-gray-900 text-[13px] leading-tight truncate">Tu Parcela</p>
-            <p className="text-gray-500 text-[9px] truncate">{up.municipio}</p>
-          </div>
-        </div>
-        <div className="bg-blue-50/80 rounded-lg p-2.5 space-y-1.5">
-          <div className="flex justify-between items-center text-[10px]">
-            <span className="text-gray-500 font-medium">UbicaciÃ³n</span>
-            <span className={`font-bold ${up.location_confirmed ? 'text-emerald-600' : 'text-amber-600'}`}>
-              {up.location_confirmed ? 'âœ“ Conf.' : 'Aprox.'}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-[10px]">
-            <span className="text-gray-500 font-medium">Lat,Lng</span>
-            <span className="font-mono text-gray-700">{up.lat.toFixed(3)}, {up.lng.toFixed(3)}</span>
-          </div>
-        </div>
-        {!up.location_confirmed && (
-          <button onClick={() => navigate('/productor/ubicacion')}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm mt-0.5">
-            Actualizar ubicaciÃ³n â†’
-          </button>
-        )}
-      </div>
-    );
+        );
 
-    const popup = new mapboxgl.Popup({ 
-      anchor: 'bottom', 
-      offset: [0, -14], 
-      closeButton: false, 
-      className: 'custom-premium-popup' 
-    }).setDOMContent(popupNode);
+        const popupNode = document.createElement('div');
+        const popupRoot = createRoot(popupNode);
+        popupRoot.render(
+          <div className="w-52 p-3 space-y-2.5 bg-white">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <Flag size={14} className="text-blue-600" />
+              </div>
+              <div className="overflow-hidden">
+                <p className="font-black text-gray-900 text-[13px] leading-tight truncate">Tu Parcela</p>
+                <p className="text-gray-500 text-[9px] truncate">{up.municipio}</p>
+              </div>
+            </div>
+            <div className="bg-blue-50/80 rounded-lg p-2.5 space-y-1.5">
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-gray-500 font-medium">Ubicación</span>
+                <span className={`font-bold ${up.location_confirmed ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {up.location_confirmed ? '✓ Conf.' : 'Aprox.'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-gray-500 font-medium">Lat,Lng</span>
+                <span className="font-mono text-gray-700">{p.lat.toFixed(3)}, {p.lng.toFixed(3)}</span>
+              </div>
+            </div>
+            {!up.location_confirmed && (
+              <button onClick={() => navigate('/productor/ubicacion')}
+                className="w-full bg-amber-500 hover:bg-amber-400 text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm mt-0.5">
+                Actualizar ubicación →
+              </button>
+            )}
+          </div>
+        );
 
-    popup.on('open', () => {
-      const isMobile = window.innerWidth < 1024;
-      map.current?.flyTo({ 
-        center: [up.lng, up.lat], 
-        zoom: 13, 
-        duration: 800,
-        offset: [0, isMobile ? 120 : 60]
+        const popup = new mapboxgl.Popup({ 
+          anchor: 'bottom', offset: [0, -14], closeButton: false, className: 'custom-premium-popup' 
+        }).setDOMContent(popupNode);
+
+        popup.on('open', () => {
+          const isMobile = window.innerWidth < 1024;
+          map.current?.flyTo({ 
+            center: [p.lng, p.lat], zoom: 14, duration: 800, offset: [0, isMobile ? 120 : 60]
+          });
+        });
+
+        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([p.lng, p.lat])
+          .setPopup(popup)
+          .addTo(map.current!);
+        
+        parcelMarkersRef.current.push(marker);
+
+        // Extraer coordenadas para bounds
+        if (p.poligono.type === 'Polygon') {
+          p.poligono.coordinates[0].forEach(coord => { bounds.extend(coord as mapboxgl.LngLatLike); hasBounds = true; });
+        } else if (p.poligono.type === 'MultiPolygon') {
+          p.poligono.coordinates.forEach(poly => poly[0].forEach(coord => { bounds.extend(coord as mapboxgl.LngLatLike); hasBounds = true; }));
+        }
       });
-    });
 
-    upMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
-      .setLngLat([up.lng, up.lat])
-      .setPopup(popup)
-      .addTo(map.current!);
+      if (hasBounds) {
+        map.current.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 1200 });
+      }
 
-    // Fly
-    if (up.poligono) {
-      const coords = up.poligono.coordinates[0] as [number, number][];
-      const bounds = coords.reduce(
-        (b, c) => b.extend(c as mapboxgl.LngLatLike),
-        new mapboxgl.LngLatBounds(coords[0], coords[0])
-      );
-      map.current.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 1200 });
     } else {
+      // Fallback: punto simple si no hay polígonos
+      map.current.addSource('up-source', {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: { type: 'Point', coordinates: [up.lng, up.lat] }, properties: {} }
+      });
+
+      const el = document.createElement('div');
+      el.innerHTML = `
+        <div style="position:relative;width:28px;height:28px;cursor:pointer">
+          <div style="position:absolute;inset:0;border-radius:50%;background:rgba(59,130,246,0.3);animation:ping 1.8s cubic-bezier(0,0,0.2,1) infinite"></div>
+          <div style="position:absolute;inset:4px;border-radius:50%;background:#3B82F6;border:3px solid white;box-shadow:0 2px 8px rgba(37,99,235,0.6)"></div>
+        </div>
+        <style>@keyframes ping{0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.5);opacity:0}}</style>
+      `;
+
+      upMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([up.lng, up.lat])
+        .addTo(map.current!);
+
       map.current.flyTo({ center: [up.lng, up.lat], zoom: up.location_confirmed ? 11 : 8, duration: 1200 });
     }
   }, [up, mapReady]);
