@@ -160,9 +160,26 @@ export default function RegistroNuevoPage() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Error al registrar.'); return; }
       setPaso(99);
-    } catch {
-      setError('Error de conexión. Intenta de nuevo.');
     } finally { setCargando(false); }
+  };
+
+  const handleBack = () => {
+    if (paso === 6) setPaso(5);
+    else if (paso === 5) {
+      const lastUP = ups[ups.length - 1];
+      if (lastUP) setUpActual({ estado: lastUP.estado, municipio: lastUP.municipio });
+      setUps(prev => prev.slice(0, -1));
+      setPaso(3);
+    }
+    else if (paso === 4 && enDibujo) {
+      setEnDibujo(false); setPaso(3);
+    }
+    else if (paso === 3) {
+      if (ups.length > 0) setPaso(5);
+      else setPaso(2);
+    }
+    else if (paso === 2) setPaso(1);
+    else navigate(-1);
   };
 
   // --- STYLES ---
@@ -175,8 +192,8 @@ export default function RegistroNuevoPage() {
     const puedeTerminar = pointCount >= 3;
     return (
       <div className="h-screen flex flex-col">
-        <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
-          <button onClick={() => { setEnDibujo(false); setPaso(3); }} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
+        <div className="bg-[#0c2e1a] px-4 pb-3 flex items-center gap-3 z-10 shadow-md" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+          <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
             <ChevronLeft size={20} />
           </button>
           <div>
@@ -265,9 +282,9 @@ export default function RegistroNuevoPage() {
 
       {/* Header con Stepper */}
       {paso < 99 && (
-        <div className="relative z-10 flex items-center px-4 py-3 sm:py-4">
+        <div className="relative z-10 flex items-center px-4 pb-3 sm:pb-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <button
-            onClick={() => paso > 1 ? setPaso(paso - 1) : navigate(-1)}
+            onClick={handleBack}
             className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
           >
             <ChevronLeft size={22} className="text-white/70" />
