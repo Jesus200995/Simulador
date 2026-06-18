@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus, Search, UserCheck, Map, KeyRound, AlertTriangle, Pencil
@@ -68,6 +68,13 @@ export default function RegistroNuevoPage() {
   const mapRef = useRef<any>(null);
   const [errorOverlap, setErrorOverlap] = useState<string | null>(null);
   const [parcelaEnPadron, setParcelaEnPadron] = useState<boolean | null>(null);
+
+  // Paso 45 — Confirmación previa de parcela
+  const [pendingUP, setPendingUP] = useState<{
+    poligono: [number, number][];
+    coords: { lat: number; lng: number };
+    area: number;
+  } | null>(null);
 
   // Nombre automático de cada parcela según su orden
   const nombreAutomaticoUP = (indice: number): string =>
@@ -146,16 +153,39 @@ export default function RegistroNuevoPage() {
   }, [paso, enDibujo]);
 
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
-    // Overlap: validar al cerrar el polígono (no al final del flujo)
+    // Overlap: validar al cerrar el polígono
     const errOv = validarOverlapLocal(poly);
     if (errOv) { setErrorOverlap(errOv); return; }
     setErrorOverlap(null);
+    // En lugar de guardar de inmediato, mostramos la pantalla de confirmación
+    setPendingUP({ poligono: poly, coords: centro, area });
+    setPaso(45);
+  };
+
+  const confirmarUP = () => {
+    if (!pendingUP) return;
     setUps(prev => [...prev, {
-      poligono: poly, coords: centro, areaCalc: area,
-      estado: upActual.estado, municipio: upActual.municipio,
-      nombre: nombreAutomaticoUP(prev.length),
+      poligono: pendingUP.poligono,
+      coords: pendingUP.coords,
+      areaCalc: pendingUP.area,
+      estado: upActual.estado,
+      municipio: upActual.municipio,
+      nombre: nombreAutomaticoUP(ups.length),
     }]);
+    setPendingUP(null);
     setEnDibujo(false); setPointCount(0); setGpsMsg(null); setPaso(5);
+  };
+
+  const redibujarUP = () => {
+    setPendingUP(null);
+    setPaso(4);
+    // Reiniciar el dibujo
+    setEnDibujo(true);
+    setPointCount(0);
+    setGpsMsg(null);
+    setErrorOverlap(null);
+    // Pequeño delay para que el componente de mapa se remonte
+    setTimeout(() => dibujarRef.current?.startEdit?.(), 100);
   };
 
   const registrar = async () => {
@@ -198,6 +228,7 @@ export default function RegistroNuevoPage() {
 
   const handleBack = () => {
     if (paso === 6) setPaso(5);
+    else if (paso === 45) { redibujarUP(); }
     else if (paso === 5) {
       const lastUP = ups[ups.length - 1];
       if (lastUP) setUpActual({ estado: lastUP.estado, municipio: lastUP.municipio });
@@ -320,6 +351,7 @@ export default function RegistroNuevoPage() {
     if (paso === 1) return 1;
     if (paso === 2) return 2;
     if (paso >= 3 && paso <= 5) return 3;
+    if (paso === 45) return 3;
     if (paso === 6) return 4;
     return 4;
   };
@@ -584,6 +616,76 @@ export default function RegistroNuevoPage() {
                     No, continuar a crear PIN
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Paso 45 — Vista Previa / Confirmación de Parcela */}
+          {paso === 45 && pendingUP && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-4">
+                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
+                  <MapPin size={28} className="text-green-300" />
+                </div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Confirmar Parcela</h1>
+                <p className="text-white/50 text-sm mt-1.5">Revisa que el área sea correcta antes de guardar</p>
+              </div>
+
+              {/* Mini mapa con polígono */}
+              <div className="rounded-2xl overflow-hidden ring-1 ring-white/15 shadow-xl shadow-black/30 mb-4" style={{ height: 220 }}>
+                <MapContainer
+                  center={pendingUP.coords}
+                  zoom={14}
+                  style={{ height: '100%', width: '100%' }}
+                  zoomControl={false}
+                  dragging={false}
+                  scrollWheelZoom={false}
+                  doubleClickZoom={false}
+                  touchZoom={false}
+                  attributionControl={false}
+                >
+                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="© Esri" />
+                  <Polygon
+                    positions={pendingUP.poligono}
+                    pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.35, weight: 2.5 }}
+                  />
+                </MapContainer>
+              </div>
+
+              {/* Datos de la parcela */}
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 shadow-xl shadow-black/20 mb-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/5 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-wider mb-1">Área Calculada</p>
+                    <p className="text-xl font-black text-white">{pendingUP.area.toLocaleString('es-MX', { maximumFractionDigits: 2 })} ha</p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-wider mb-1">Puntos</p>
+                    <p className="text-xl font-black text-white">{pendingUP.poligono.length}</p>
+                    <p className="text-[10px] text-white/40">vértices del polígono</p>
+                  </div>
+                  <div className="col-span-2 bg-white/5 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-wider mb-1">Ubicación</p>
+                    <p className="text-sm font-semibold text-white">{upActual.municipio}</p>
+                    <p className="text-xs text-white/50">{upActual.estado}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones de acción */}
+              <div className="space-y-3">
+                <button
+                  onClick={confirmarUP}
+                  className={btnCls}
+                >
+                  <CheckCircle2 size={18} /> Confirmar y Guardar Parcela
+                </button>
+                <button
+                  onClick={redibujarUP}
+                  className="w-full bg-white/10 hover:bg-white/20 active:bg-white/15 ring-1 ring-white/20 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Undo2 size={17} /> Volver a Dibujar
+                </button>
               </div>
             </div>
           )}
