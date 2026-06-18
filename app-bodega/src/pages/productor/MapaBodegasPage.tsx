@@ -85,6 +85,7 @@ export default function MapaBodegasPage() {
   const [mapStyle, setMapStyle] = useState<'streets' | 'satellite'>('streets');
 
   // â”€â”€ 1. Init mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ——— 1. Init mapa ——————————————————————————————————————————————————————————————
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -113,43 +114,59 @@ export default function MapaBodegasPage() {
     };
   }, []);
 
-  // â”€â”€ Toggle style â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Toggle style
   useEffect(() => {
     if (!map.current || !mapReady) return;
     const style = mapStyle === 'streets'
       ? 'mapbox://styles/mapbox/streets-v12'
       : 'mapbox://styles/mapbox/satellite-streets-v12';
     map.current.setStyle(style);
-    // re-draw after style loads
     map.current.once('styledata', () => {
       drawParcela();
       drawBodegas();
     });
   }, [mapStyle]); // eslint-disable-line
 
-  // â”€â”€ 2. Cargar UP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── 2. Cargar UP + geometrías reales de parcelas ──
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
+
+    // (A) Datos generales del productor
     fetch(`${BASE}/productor/dashboard`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
         const latReal = d.lat ?? null;
         const lngReal = d.lng ?? null;
-        const usandoFallback = !latReal || !lngReal;
-        setCoordsAproximadas(usandoFallback);
+        setCoordsAproximadas(!latReal || !lngReal);
         if (d.municipio) {
-          setUp({
+          setUp(prev => ({
             lat: latReal ?? 23.6345,
             lng: lngReal ?? -102.5528,
             location_confirmed: d.location_confirmed,
             centroid_source: d.centroid_source,
             municipio: d.municipio,
             estado: d.estado,
-            parcelas: d.parcelas || [],
-          });
+            parcelas: prev?.parcelas ?? [],
+          }));
         }
-      })
-      .catch(() => {});
+      }).catch(() => {});
+
+    // (B) Geometrías reales (mismo endpoint que Mi Perfil)
+    fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => {
+        const rows: any[] = d.ups ?? (Array.isArray(d) ? d : []);
+        const parcelas: ParcelaData[] = rows
+          .filter((u: any) => u.geom_geojson)
+          .map((u: any) => ({
+            id: u.up_id,
+            lat: Number(u.centroid_lat ?? 0),
+            lng: Number(u.centroid_lng ?? 0),
+            poligono: u.geom_geojson as GeoJSON.Polygon | GeoJSON.MultiPolygon,
+          }))
+          .filter((p: ParcelaData) => p.lat !== 0 && p.lng !== 0);
+        setUp(prev => prev ? { ...prev, parcelas } : null);
+      }).catch(() => {});
   }, []);
 
   // â”€â”€ 3. Cargar bodegas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -170,11 +187,11 @@ export default function MapaBodegasPage() {
   }, [up, radioKm, filtroTipoMaiz]);
 
   // â”€â”€ 4. Dibuja polÃ­gono UP en el mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // ── 4. Dibuja polígonos UP en el mapa ──
+  // ── 4. Dibuja parcelas del productor en el mapa ──
   const drawParcela = useCallback(() => {
     if (!map.current || !mapReady || !up) return;
 
-    // Limpia capa anterior
+    // Limpia capas anteriores
     ['up-fill', 'up-outline', 'up-pulse'].forEach(id => {
       if (map.current!.getLayer(id)) map.current!.removeLayer(id);
     });
@@ -185,143 +202,112 @@ export default function MapaBodegasPage() {
     parcelMarkersRef.current.forEach(m => m.remove());
     parcelMarkersRef.current = [];
 
-    const tieneParcelas = up.parcelas && up.parcelas.length > 0;
+    // Usar parcelas del backend O sintetizar una desde el centroide del UP
+    const parcelas: ParcelaData[] = (up.parcelas && up.parcelas.length > 0)
+      ? up.parcelas
+      : [{ id: 0, lat: up.lat, lng: up.lng, poligono: null }];
 
-    if (tieneParcelas) {
-      // Dibuja solo los polígonos que sí tienen geometría
-      const conPoligono = up.parcelas!.filter(p => p.poligono);
-      if (conPoligono.length > 0) {
-        const features: GeoJSON.Feature[] = conPoligono.map(p => ({
-          type: 'Feature',
-          geometry: p.poligono!,
-          properties: { id: p.id }
-        }));
-
-        map.current.addSource('up-source', {
-          type: 'geojson',
-          data: { type: 'FeatureCollection', features }
-        });
-
-        // Polígonos azul relleno
-        map.current.addLayer({
-          id: 'up-fill',
-          type: 'fill',
-          source: 'up-source',
-          paint: { 'fill-color': '#3B82F6', 'fill-opacity': 0.25 }
-        });
-        map.current.addLayer({
-          id: 'up-outline',
-          type: 'line',
-          source: 'up-source',
-          paint: { 'line-color': '#2563EB', 'line-width': 2.5 }
-        });
-      }
-
-      // Bounding box total para todas las parcelas
-      const bounds = new mapboxgl.LngLatBounds();
-      let hasBounds = false;
-
-      up.parcelas!.forEach(p => {
-        // Marcador con banderita
-        const el = document.createElement('div');
-        const root = createRoot(el);
-        root.render(
-          <div className="relative group cursor-pointer">
-            <div className="absolute -inset-2 bg-blue-500/20 rounded-full animate-ping"></div>
-            <div className="relative w-7 h-7 bg-blue-600 rounded-full border-2 border-white shadow-[0_2px_10px_rgba(37,99,235,0.8)] flex items-center justify-center transform transition-transform hover:scale-110">
-              <Flag size={14} className="text-white" />
-            </div>
-          </div>
-        );
-
-        const popupNode = document.createElement('div');
-        const popupRoot = createRoot(popupNode);
-        popupRoot.render(
-          <div className="w-52 p-3 space-y-2.5 bg-white">
-            <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-              <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <Flag size={14} className="text-blue-600" />
-              </div>
-              <div className="overflow-hidden">
-                <p className="font-black text-gray-900 text-[13px] leading-tight truncate">Tu Parcela</p>
-                <p className="text-gray-500 text-[9px] truncate">{up.municipio}</p>
-              </div>
-            </div>
-            <div className="bg-blue-50/80 rounded-lg p-2.5 space-y-1.5">
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-gray-500 font-medium">Ubicación</span>
-                <span className={`font-bold ${up.location_confirmed ? 'text-emerald-600' : 'text-amber-600'}`}>
-                  {up.location_confirmed ? '✓ Conf.' : 'Aprox.'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-gray-500 font-medium">Lat,Lng</span>
-                <span className="font-mono text-gray-700">{p.lat.toFixed(3)}, {p.lng.toFixed(3)}</span>
-              </div>
-            </div>
-            {!up.location_confirmed && (
-              <button onClick={() => navigate('/productor/ubicacion')}
-                className="w-full bg-amber-500 hover:bg-amber-400 text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm mt-0.5">
-                Actualizar ubicación →
-              </button>
-            )}
-          </div>
-        );
-
-        const popup = new mapboxgl.Popup({ 
-          anchor: 'bottom', offset: [0, -14], closeButton: false, className: 'custom-premium-popup' 
-        }).setDOMContent(popupNode);
-
-        popup.on('open', () => {
-          const isMobile = window.innerWidth < 1024;
-          map.current?.flyTo({ 
-            center: [p.lng, p.lat], zoom: 14, duration: 800, offset: [0, isMobile ? 120 : 60]
-          });
-        });
-
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-          .setLngLat([p.lng, p.lat])
-          .setPopup(popup)
-          .addTo(map.current!);
-        
-        parcelMarkersRef.current.push(marker);
-
-        // Extraer coordenadas para bounds
-        if (p.poligono && p.poligono.type === 'Polygon') {
-          p.poligono.coordinates[0].forEach(coord => { bounds.extend(coord as mapboxgl.LngLatLike); hasBounds = true; });
-        } else if (p.poligono && p.poligono.type === 'MultiPolygon') {
-          p.poligono.coordinates.forEach(poly => poly[0].forEach(coord => { bounds.extend(coord as mapboxgl.LngLatLike); hasBounds = true; }));
-        } else {
-          // Sin polígono, usa el centroide para bounds
-          if (p.lat && p.lng) { bounds.extend([p.lng, p.lat] as mapboxgl.LngLatLike); hasBounds = true; }
-        }
-      });
-
-      if (hasBounds) {
-        map.current.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 1200 });
-      }
-
-    } else {
-      // Fallback: punto simple si no hay polígonos
+    // --- POLÍGONOS ---
+    const conPoligono = parcelas.filter(p => p.poligono);
+    if (conPoligono.length > 0) {
+      const features: GeoJSON.Feature[] = conPoligono.map(p => ({
+        type: 'Feature' as const,
+        geometry: p.poligono!,
+        properties: { id: p.id }
+      }));
       map.current.addSource('up-source', {
         type: 'geojson',
-        data: { type: 'Feature', geometry: { type: 'Point', coordinates: [up.lng, up.lat] }, properties: {} }
+        data: { type: 'FeatureCollection', features }
       });
+      map.current.addLayer({
+        id: 'up-fill', type: 'fill', source: 'up-source',
+        paint: { 'fill-color': '#3B82F6', 'fill-opacity': 0.25 }
+      });
+      map.current.addLayer({
+        id: 'up-outline', type: 'line', source: 'up-source',
+        paint: { 'line-color': '#2563EB', 'line-width': 2.5 }
+      });
+    }
 
+    // --- BANDERAS + BOUNDS ---
+    const bounds = new mapboxgl.LngLatBounds();
+    let hasBounds = false;
+
+    parcelas.forEach(p => {
+      if (!p.lat || !p.lng) return;
+
+      // Marcador punto azul pequeño
       const el = document.createElement('div');
+      el.style.cssText = 'position:relative;width:20px;height:20px;cursor:pointer';
       el.innerHTML = `
-        <div style="position:relative;width:28px;height:28px;cursor:pointer">
-          <div style="position:absolute;inset:0;border-radius:50%;background:rgba(59,130,246,0.3);animation:ping 1.8s cubic-bezier(0,0,0.2,1) infinite"></div>
-          <div style="position:absolute;inset:4px;border-radius:50%;background:#3B82F6;border:3px solid white;box-shadow:0 2px 8px rgba(37,99,235,0.6)"></div>
-        </div>
-        <style>@keyframes ping{0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.5);opacity:0}}</style>
+        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(37,99,235,0.2);animation:flagping 2s ease-out infinite"></div>
+        <div style="position:absolute;inset:4px;border-radius:50%;background:#2563EB;border:2px solid white;box-shadow:0 1px 8px rgba(37,99,235,0.8)"></div>
+        <style>@keyframes flagping{0%{transform:scale(1);opacity:.5}70%{transform:scale(2);opacity:.08}100%{transform:scale(2.5);opacity:0}}</style>
       `;
 
-      upMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([up.lng, up.lat])
-        .addTo(map.current!);
+      const popupNode = document.createElement('div');
+      const popupRoot = createRoot(popupNode);
+      popupRoot.render(
+        <div className="w-52 p-3 space-y-2.5 bg-white">
+          <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+            <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <Flag size={14} className="text-blue-600" />
+            </div>
+            <div className="overflow-hidden">
+              <p className="font-black text-gray-900 text-[13px] leading-tight truncate">Tu Parcela</p>
+              <p className="text-gray-500 text-[9px] truncate">{up.municipio || up.estado}</p>
+            </div>
+          </div>
+          <div className="bg-blue-50/80 rounded-lg p-2.5 space-y-1.5">
+            <div className="flex justify-between items-center text-[10px]">
+              <span className="text-gray-500 font-medium">Ubicación</span>
+              <span className={`font-bold ${up.location_confirmed ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {up.location_confirmed ? '✓ Confirmada' : 'Aprox.'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-[10px]">
+              <span className="text-gray-500 font-medium">Lat, Lng</span>
+              <span className="font-mono text-gray-700">{p.lat.toFixed(4)}, {p.lng.toFixed(4)}</span>
+            </div>
+          </div>
+          {!up.location_confirmed && (
+            <button onClick={() => navigate('/productor/ubicacion')}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm">
+              Actualizar ubicación →
+            </button>
+          )}
+        </div>
+      );
 
-      map.current.flyTo({ center: [up.lng, up.lat], zoom: up.location_confirmed ? 11 : 8, duration: 1200 });
+      const popup = new mapboxgl.Popup({
+        anchor: 'bottom', offset: [0, -18], closeButton: false, className: 'custom-premium-popup'
+      }).setDOMContent(popupNode);
+
+      popup.on('open', () => {
+        const isMobile = window.innerWidth < 1024;
+        map.current?.flyTo({ center: [p.lng, p.lat], zoom: 14, duration: 800, offset: [0, isMobile ? 120 : 60] });
+      });
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([p.lng, p.lat])
+        .setPopup(popup)
+        .addTo(map.current!);
+      parcelMarkersRef.current.push(marker);
+
+      // Bounds
+      if (p.poligono && p.poligono.type === 'Polygon') {
+        p.poligono.coordinates[0].forEach(c => { bounds.extend(c as mapboxgl.LngLatLike); hasBounds = true; });
+      } else if (p.poligono && p.poligono.type === 'MultiPolygon') {
+        p.poligono.coordinates.forEach(poly => poly[0].forEach(c => { bounds.extend(c as mapboxgl.LngLatLike); hasBounds = true; }));
+      } else {
+        bounds.extend([p.lng, p.lat] as mapboxgl.LngLatLike); hasBounds = true;
+      }
+    });
+
+    if (hasBounds) {
+      const padding = conPoligono.length > 0 ? 80 : 0;
+      const maxZoom = conPoligono.length > 0 ? 14 : (up.location_confirmed ? 13 : 9);
+      map.current.fitBounds(bounds, { padding, maxZoom, duration: 1200 });
     }
   }, [up, mapReady]);
 
