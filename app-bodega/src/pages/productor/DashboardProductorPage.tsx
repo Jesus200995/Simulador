@@ -109,17 +109,37 @@ export default function DashboardProductorPage() {
   // Ciclo obligatorio: sin ciclo productivo registrado no se puede usar el tablero.
   if (ciclo === null && !isPendiente) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 max-w-sm w-full text-center shadow-sm">
-          <Wheat size={40} className="text-[#1A5C38] mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Registra tu ciclo productivo</h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Para usar SIMAC necesitas registrar al menos un ciclo productivo. Solo te tomará unos minutos.
-          </p>
-          <button onClick={() => navigate('/productor/ciclo')}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold">
-            Registrar mi ciclo
-          </button>
+      <div className="flex flex-col h-[100dvh] bg-[#eef8f2] overflow-hidden">
+        {/* Fondo decorativo */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 h-[40dvh] bg-gradient-to-b from-[#1A5C38]/10 to-transparent"></div>
+          <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full"></div>
+        </div>
+
+        {/* Contenido centrado */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 pb-[10dvh]">
+          <div className="w-full max-w-[340px] animate-in fade-in zoom-in-95 slide-in-from-bottom-8 duration-700 ease-out">
+            <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 shadow-[0_20px_60px_-15px_rgba(26,92,56,0.15)] border border-white relative overflow-hidden text-center group">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1A5C38]/[0.02] to-transparent pointer-events-none"></div>
+              
+              <div className="w-16 h-16 bg-gradient-to-br from-[#1A5C38] to-[#124227] rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-[0_8px_25px_-5px_rgba(26,92,56,0.4)] transform group-hover:scale-105 transition-transform duration-500">
+                <Wheat size={32} className="text-white" strokeWidth={2} />
+              </div>
+              
+              <h2 className="text-[22px] font-black text-slate-900 tracking-tight leading-tight mb-2.5">
+                Registra tu siembra
+              </h2>
+              
+              <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">
+                Para usar SIMAC necesitas registrar la información de tu ciclo productivo. Es muy rápido.
+              </p>
+              
+              <button onClick={() => navigate('/productor/ciclo')}
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3.5 rounded-full font-bold text-[15px] shadow-[0_6px_15px_rgba(26,92,56,0.2)] active:scale-[0.98] transition-all duration-200">
+                Registrar ciclo
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
