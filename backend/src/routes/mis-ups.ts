@@ -187,4 +187,51 @@ router.patch('/:up_id', authMiddleware, async (req: AuthRequest, res: Response):
   }
 });
 
+// DELETE /api/mis-ups/:up_id — eliminar una parcela del productor
+router.delete('/:up_id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const userId = req.user!.userId;
+    const { up_id } = req.params;
+
+    const producerResult = await pool.query(
+      'SELECT producer_id FROM producer WHERE usuario_id = $1',
+      [userId]
+    );
+    if (producerResult.rows.length === 0) {
+      res.status(404).json({ error: 'Productor no encontrado' });
+      return;
+    }
+    const producerIds = producerResult.rows.map((r: any) => r.producer_id);
+
+    // Verificar propiedad
+    const own = await pool.query(
+      'SELECT up_id FROM up WHERE up_id = $1 AND producer_id = ANY($2)',
+      [up_id, producerIds]
+    );
+    if (own.rows.length === 0) {
+      res.status(404).json({ error: 'Parcela no encontrada o no autorizada' });
+      return;
+    }
+
+    await client.query('BEGIN');
+    // Quitar propuestas de venta asociadas (datos no críticos)
+    await client.query('DELETE FROM disponibilidad_productor WHERE up_id = $1', [up_id]);
+    await client.query('DELETE FROM up WHERE up_id = $1', [up_id]);
+    await client.query('COMMIT');
+    res.json({ ok: true });
+  } catch (error: any) {
+    await client.query('ROLLBACK').catch(() => {});
+    // FK: la parcela tiene ciclos/registros de producción asociados
+    if (error?.code === '23503') {
+      res.status(409).json({ error: 'No se puede eliminar: la parcela tiene ciclos productivos o registros asociados.' });
+      return;
+    }
+    console.error('Error al eliminar UP:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;

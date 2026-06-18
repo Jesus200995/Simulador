@@ -828,10 +828,21 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
 // PATCH /api/productor/ubicacion
 router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area } = req.body;
+    const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area, up_id } = req.body;
     const userId = req.user!.userId;
     const producerId = await getProducerId(userId);
     if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    // Resolver la parcela a actualizar: la indicada (up_id) o, si no, la principal
+    // (la más antigua). Así editar una parcela NO sobreescribe las demás.
+    const upRes = await pool.query(
+      up_id
+        ? `SELECT up_id FROM up WHERE up_id = $1 AND producer_id = $2`
+        : `SELECT up_id FROM up WHERE producer_id = $2 ORDER BY created_at ASC LIMIT 1`,
+      up_id ? [up_id, producerId] : [null, producerId]
+    );
+    const targetUpId = upRes.rows[0]?.up_id;
+    if (!targetUpId) { res.status(404).json({ error: 'Parcela no encontrada' }); return; }
 
     const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
     if (hasPoligono) {
@@ -849,8 +860,8 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
            area_ha_calc = $4, area_ha_real = $5, coincide_area = $6,
            location_confirmed = TRUE,
            centroid_source = 'productor'
-         WHERE producer_id = $7`,
-        [lng, lat, geomGeoJSON, area_calc_ha || null, area_real_ha || null, coincide_area ?? null, producerId]
+         WHERE up_id = $7`,
+        [lng, lat, geomGeoJSON, area_calc_ha || null, area_real_ha || null, coincide_area ?? null, targetUpId]
       );
     } else {
       await pool.query(
@@ -858,8 +869,8 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
            centroid = ST_SetSRID(ST_MakePoint($1, $2), 4326),
            location_confirmed = TRUE,
            centroid_source = 'productor'
-         WHERE producer_id = $3`,
-        [lng, lat, producerId]
+         WHERE up_id = $3`,
+        [lng, lat, targetUpId]
       );
     }
 
@@ -876,8 +887,8 @@ router.patch('/ubicacion', authMiddleware, async (req: AuthRequest, res: Respons
              state_id = COALESCE($3, state_id),
              municipality_id = COALESCE($4, municipality_id),
              updated_at = NOW()
-           WHERE producer_id = $5`,
-          [g.state_name, g.municipality_name, g.state_id, g.municipality_id, producerId]
+           WHERE up_id = $5`,
+          [g.state_name, g.municipality_name, g.state_id, g.municipality_id, targetUpId]
         );
         // Mantener el producer en sintonía (state_id/municipality_id)
         await pool.query(

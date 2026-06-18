@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, MapPin, Undo2, Pencil, Trash2, CheckCircle2, Loader2, Footprints,
 } from 'lucide-react';
@@ -21,6 +21,8 @@ const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export default function CompletarUbicacionPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const upId = searchParams.get('up_id');
   const mapRef = useRef<L.Map>(null);
   const dibujarRef = useRef<DibujarPoligonoHandle>(null);
 
@@ -58,7 +60,8 @@ export default function CompletarUbicacionPage() {
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
-        const up = d.ups?.[0] ?? d[0];
+        const ups = d.ups ?? (Array.isArray(d) ? d : []);
+        const up = upId ? ups.find((u: any) => String(u.up_id) === String(upId)) : ups[0];
         if (up) {
           const geom = up.geom_geojson;
           if (geom?.coordinates) {
@@ -90,6 +93,7 @@ export default function CompletarUbicacionPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
+          up_id: upId || undefined,
           lat: centroide.lat, lng: centroide.lng,
           poligono: poligono || null,
           area_calc_ha: areaCalc || null,
