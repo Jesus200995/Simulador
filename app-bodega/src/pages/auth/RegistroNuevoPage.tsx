@@ -401,7 +401,7 @@ export default function RegistroNuevoPage() {
 
                 {error && (
                   <div className="mt-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm flex items-start gap-2">
-                    <span className="mt-0.5">⚠️</span> <span>{error}</span>
+                    <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" /> <span>{error}</span>
                   </div>
                 )}
 
