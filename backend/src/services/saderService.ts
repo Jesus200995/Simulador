@@ -33,8 +33,8 @@ export async function consultarPersonaPorCURP(
   curp: string
 ): Promise<DatosSADER | null> {
 
-  if (!SADER_API_URL || !SADER_API_KEY) {
-    throw new Error('SADER_API_URL o SADER_API_KEY no configuradas en .env');
+  if (!SADER_API_URL) {
+    throw new Error('SADER_API_URL no configurada en .env');
   }
 
   try {
@@ -48,10 +48,9 @@ export async function consultarPersonaPorCURP(
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SADER_API_KEY}`
+          'Content-Type': 'application/json'
         },
-        timeout: 15000
+        timeout: 20000
       }
     );
 
