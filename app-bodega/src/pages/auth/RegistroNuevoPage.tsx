@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
-  ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus,
+  ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus, Search, UserCheck, Map, KeyRound
 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
@@ -71,10 +71,9 @@ export default function RegistroNuevoPage() {
   const validarCURP = (c: string) =>
     /^[A-Z]{4}[0-9]{6}[A-Z0-9]{6}[0-9]{2}$/.test(c.toUpperCase().trim());
 
-  // ── Paso 1: Consultar CURP en el padrón SADER ──────────────────
   const consultarCURP = async () => {
     if (!validarCURP(curp)) {
-      setError('El formato de la CURP no es válido. Verifica los 18 caracteres.');
+      setError('El formato de la CURP no es válido.');
       return;
     }
     setCargando(true); setError(null);
@@ -94,7 +93,6 @@ export default function RegistroNuevoPage() {
     } finally { setCargando(false); }
   };
 
-  // ── Cargar estados (mismo endpoint del sistema) ────────────────
   const cargarEstados = async () => {
     try {
       const r = await fetch(`${BASE}/auth/states`);
@@ -111,7 +109,6 @@ export default function RegistroNuevoPage() {
     } catch { setMunicipios([]); }
   };
 
-  // Centrar el mapa con GPS al entrar al dibujo
   useEffect(() => {
     if (paso === 4 && enDibujo && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -121,23 +118,14 @@ export default function RegistroNuevoPage() {
     }
   }, [paso, enDibujo]);
 
-  // ── UP dibujada ────────────────────────────────────────────────
-  const onUPDibujada = (
-    poly: [number, number][],
-    centro: { lat: number; lng: number },
-    area: number
-  ) => {
+  const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
     setUps(prev => [...prev, {
       poligono: poly, coords: centro, areaCalc: area,
       estado: upActual.estado, municipio: upActual.municipio,
     }]);
-    setEnDibujo(false);
-    setPointCount(0);
-    setGpsMsg(null);
-    setPreguntandoOtraUP(true);
+    setEnDibujo(false); setPointCount(0); setGpsMsg(null); setPreguntandoOtraUP(true);
   };
 
-  // ── Paso 6: Registro final ─────────────────────────────────────
   const registrar = async () => {
     if (pin !== confirmPin) { setError('Los PINs no coinciden.'); return; }
     if (pin.length !== 4) { setError('El PIN debe ser de 4 dígitos.'); return; }
@@ -177,20 +165,23 @@ export default function RegistroNuevoPage() {
     } finally { setCargando(false); }
   };
 
-  const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]';
+  // --- STYLES ---
+  const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-sm sm:text-base tracking-wide text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all';
+  const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5';
+  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
 
-  // ── Paso 4 — Mapa full-screen ──────────────────────────────────
+  // --- MAPA (Paso 4) ---
   if (paso === 4 && enDibujo) {
     const puedeTerminar = pointCount >= 3;
     return (
       <div className="h-screen flex flex-col">
-        <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-          <button onClick={() => { setEnDibujo(false); setPaso(3); }} className="p-2 rounded-lg hover:bg-gray-100">
+        <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
+          <button onClick={() => { setEnDibujo(false); setPaso(3); }} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
             <ChevronLeft size={20} />
           </button>
           <div>
-            <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
-            <p className="text-xs text-gray-500 mt-0.5">Parcela {ups.length + 1} — {upActual.municipio}, {upActual.estado}</p>
+            <p className="text-[10px] font-bold text-green-300 uppercase tracking-wider">Geolocalización</p>
+            <p className="text-xs text-white/80 mt-0.5">Parcela {ups.length + 1} — {upActual.municipio}, {upActual.estado}</p>
           </div>
         </div>
         <div className="flex-1 relative">
@@ -205,8 +196,8 @@ export default function RegistroNuevoPage() {
             />
           </MapContainer>
 
-          <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5">
-            <p className="text-center text-[11px] text-white bg-black/40 rounded-lg px-3 py-1.5">
+          <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+            <p className="text-center text-xs text-white bg-black/60 backdrop-blur-md rounded-xl px-4 py-2 font-medium ring-1 ring-white/10">
               {pointCount === 0
                 ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
                 : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
@@ -222,28 +213,28 @@ export default function RegistroNuevoPage() {
                 });
               }}
               disabled={capturandoGPS}
-              className="w-full bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-[#1A5C38]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
             >
               {capturandoGPS
                 ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
                 : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
             </button>
-            {gpsMsg && <p className="text-center text-[11px] text-white bg-black/40 rounded-lg px-3 py-1.5">{gpsMsg}</p>}
+            {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
             {pointCount > 0 && (
               <div className="flex gap-2">
                 <button onClick={() => dibujarRef.current?.undoVertex()}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-xl text-sm font-semibold">
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
                   <Undo2 size={16} /> Deshacer
                 </button>
                 <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar}
-                  className="flex-[1.4] flex items-center justify-center gap-1.5 bg-[#1A5C38] text-white py-3 rounded-xl text-sm font-bold disabled:opacity-40">
+                  className="flex-[1.4] flex items-center justify-center gap-1.5 bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-lg shadow-green-900/50">
                   <CheckCircle2 size={17} /> {puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
                 </button>
               </div>
             )}
             {drawMode === 'editing' && (
               <button onClick={() => dibujarRef.current?.saveEdit()}
-                className="w-full bg-[#1A5C38] text-white py-3 rounded-xl text-sm font-bold">
+                className="w-full bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-green-900/50 active:scale-[0.98] transition-all">
                 Guardar ajustes
               </button>
             )}
@@ -253,253 +244,317 @@ export default function RegistroNuevoPage() {
     );
   }
 
+  // Helper para saber el "paso visual" en el header (1 al 4)
+  const getVisualStep = () => {
+    if (paso === 1) return 1;
+    if (paso === 2) return 2;
+    if (paso >= 3 && paso <= 5) return 3;
+    if (paso === 6) return 4;
+    return 4;
+  };
+
+  const visualStep = getVisualStep();
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header con progreso */}
+    <div className="relative min-h-screen flex flex-col overflow-hidden">
+      {/* Background idéntico a Login */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
+      </div>
+
+      {/* Header con Stepper */}
       {paso < 99 && (
-        <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-10">
-          <button onClick={() => paso > 1 ? setPaso(paso - 1) : navigate(-1)} className="p-2 rounded-lg hover:bg-gray-100">
-            <ChevronLeft size={20} />
-          </button>
-          <div className="flex-1">
-            <h1 className="font-semibold text-gray-900 text-sm">Registro de productor</h1>
-            <div className="flex gap-1 mt-1.5">
-              {[1, 2, 3, 6].map(p => (
-                <div key={p} className={`h-1 flex-1 rounded-full ${paso >= p ? 'bg-[#1A5C38]' : 'bg-gray-200'}`} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Paso 1 — CURP */}
-      {paso === 1 && (
-        <div className="p-4 space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-1">Ingresa tu CURP</h2>
-            <p className="text-sm text-gray-500 mb-4">Verificaremos tu información en el padrón de SADER</p>
-            <input
-              type="text" value={curp}
-              onChange={e => setCurp(e.target.value.toUpperCase())}
-              placeholder="Ej: VAMJ761015HSRLRS03"
-              maxLength={18}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg tracking-widest font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
-            />
-            <p className="text-xs text-gray-400 mt-1">{curp.length}/18 caracteres</p>
-          </div>
-          {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm">{error}</p></div>}
-          <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40 flex items-center justify-center gap-2">
-            {cargando ? (<><Loader2 size={18} className="animate-spin" /> Verificando…</>) : 'Verificar CURP'}
-          </button>
-          <button onClick={() => navigate('/login-productor')} className="w-full text-center text-sm text-gray-500 py-2">
-            ¿Ya tienes cuenta? Inicia sesión
-          </button>
-        </div>
-      )}
-
-      {/* Paso 2 — Confirmar datos del padrón */}
-      {paso === 2 && datosPadron && (
-        <div className="p-4 space-y-4">
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-start gap-3">
-            <CheckCircle2 size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-green-800">Encontrado en el padrón SADER</p>
-              <p className="text-xs text-green-600 mt-0.5">Confirma que estos son tus datos</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-3">
-            {[
-              { label: 'Nombre', valor: `${datosPadron.nombres} ${datosPadron.apellido_paterno} ${datosPadron.apellido_materno}` },
-              { label: 'CURP', valor: datosPadron.curp },
-              { label: 'Estado (padrón)', valor: datosPadron.estado_padron || '—' },
-              { label: 'Municipio (padrón)', valor: datosPadron.municipio_padron || '—' },
-            ].map(item => (
-              <div key={item.label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
-                <span className="text-sm text-gray-500">{item.label}</span>
-                <span className="text-sm font-medium text-gray-800 text-right max-w-[60%]">{item.valor}</span>
-              </div>
-            ))}
-            <div className="py-2">
-              <label className="block text-sm text-gray-500 mb-1">Teléfono (puedes actualizarlo)</label>
-              <input type="tel" value={telefonoEditable} onChange={e => setTelefonoEditable(e.target.value)}
-                placeholder="10 dígitos" maxLength={10} className={inputCls} />
-            </div>
-          </div>
-          <button onClick={() => { cargarEstados(); setPaso(3); }}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold">
-            Sí, son mis datos
-          </button>
-        </div>
-      )}
-
-      {/* Paso 3 — Ubicación de la UP */}
-      {paso === 3 && (
-        <div className="p-4 space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-bold text-gray-900 mb-1">¿Dónde está tu parcela{ups.length > 0 ? ` ${ups.length + 1}` : ''}?</h2>
-            <p className="text-sm text-gray-500 mb-4">Indica el estado y municipio de la parcela</p>
-
-            {datosPadron?.estado_padron && ups.length === 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
-                <p className="text-xs text-blue-800">
-                  Tu domicilio en el padrón es <strong>{datosPadron.municipio_padron}, {datosPadron.estado_padron}</strong>.
-                  ¿Tu parcela está ahí?
-                </p>
-                <button
-                  onClick={() => {
-                    setUpActual({ estado: datosPadron.estado_padron || '', municipio: datosPadron.municipio_padron || '' });
-                    setEnDibujo(true); setPaso(4);
-                  }}
-                  className="mt-2 text-sm font-medium text-blue-700 underline"
-                >
-                  Sí, usar este estado y municipio
-                </button>
-              </div>
-            )}
-
-            <select value={estadoId}
-              onChange={e => {
-                const sel = estados.find(s => String(s.state_id) === e.target.value);
-                setEstadoId(e.target.value);
-                setUpActual({ estado: sel?.name || sel?.state_name || '', municipio: '' });
-                setMunicipios([]);
-                if (e.target.value) cargarMunicipios(e.target.value);
-              }}
-              className={`${inputCls} mb-3`}
-            >
-              <option value="">Selecciona el estado</option>
-              {estados.map(s => (
-                <option key={s.state_id} value={s.state_id}>{s.name || s.state_name}</option>
-              ))}
-            </select>
-
-            {estadoId && (
-              <select value={upActual.municipio || ''}
-                onChange={e => setUpActual(prev => ({ ...prev, municipio: e.target.value }))}
-                className={inputCls}
-              >
-                <option value="">Selecciona el municipio</option>
-                {municipios.map(m => (
-                  <option key={m.municipality_id} value={m.name || m.municipality_name}>{m.name || m.municipality_name}</option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm">{error}</p></div>}
-
+        <div className="relative z-10 flex items-center px-4 py-3 sm:py-4">
           <button
-            onClick={() => {
-              if (!upActual.estado || !upActual.municipio) { setError('Selecciona estado y municipio.'); return; }
-              setError(null); setEnDibujo(true); setPaso(4);
-            }}
-            disabled={!upActual.estado || !upActual.municipio}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold disabled:opacity-40"
+            onClick={() => paso > 1 ? setPaso(paso - 1) : navigate(-1)}
+            className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
           >
-            Continuar — Dibujar parcela
+            <ChevronLeft size={22} className="text-white/70" />
           </button>
-        </div>
-      )}
-
-      {/* Paso 5 — ¿Otra UP? */}
-      {preguntandoOtraUP && paso !== 99 && (
-        <div className="p-4 space-y-4">
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-            <CheckCircle2 size={28} className="text-green-600 mx-auto mb-2" />
-            <p className="font-semibold text-green-800">Parcela {ups.length} registrada</p>
-            <p className="text-xs text-green-600 mt-1">{ups[ups.length - 1]?.municipio}, {ups[ups.length - 1]?.estado}</p>
-          </div>
-
-          {ups.length > 1 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs font-medium text-gray-500 mb-3">Parcelas registradas ({ups.length}):</p>
-              {ups.map((up, i) => (
-                <div key={i} className="flex items-center gap-2 py-2 border-b border-gray-50 last:border-0">
-                  <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full text-xs flex items-center justify-center font-bold flex-shrink-0">{i + 1}</span>
-                  <span className="text-sm text-gray-700">
-                    {up.municipio}, {up.estado}
-                    {up.areaCalc && <span className="text-gray-400 ml-1">· {up.areaCalc} ha</span>}
-                  </span>
+          
+          <div className="flex-1 flex justify-center items-center px-2">
+            <div className="flex w-full max-w-[200px] sm:max-w-[280px] justify-between relative">
+              <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/10 -translate-y-1/2 rounded-full" />
+              <div 
+                className="absolute top-1/2 left-0 h-0.5 bg-green-400 -translate-y-1/2 rounded-full transition-all duration-500" 
+                style={{ width: `${((visualStep - 1) / 3) * 100}%` }} 
+              />
+              
+              {[1, 2, 3, 4].map(num => (
+                <div key={num} className={`relative z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 ${visualStep >= num ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'bg-[#0c2e1a] ring-2 ring-white/20'}`}>
+                  {visualStep > num ? (
+                    <Check size={14} className="text-[#1A5C38] font-bold" strokeWidth={3} />
+                  ) : (
+                    <span className={`text-[10px] sm:text-xs font-bold ${visualStep === num ? 'text-[#1A5C38]' : 'text-white/40'}`}>{num}</span>
+                  )}
                 </div>
               ))}
             </div>
+          </div>
+          <div className="w-9" />
+        </div>
+      )}
+
+      {/* Contenedor Principal */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-10 pt-4">
+        <div className="w-full max-w-sm">
+
+          {/* Paso 1 — CURP */}
+          {paso === 1 && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-white/20 shadow-lg shadow-black/20">
+                  <UserCheck size={32} className="text-green-300" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Nuevo Registro</h1>
+                <p className="text-white/50 text-sm sm:text-base mt-2">Verificaremos tu identidad en SADER</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20">
+                <label className={labelCls}>Ingresa tu CURP</label>
+                <input
+                  type="text" value={curp}
+                  onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                  placeholder="AAAA000000AAAAAA00"
+                  maxLength={18}
+                  className={`${inputCls} font-mono uppercase text-center text-lg sm:text-xl`}
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-[11px] text-white/40">18 caracteres obligatorios</p>
+                  <p className="text-[11px] font-mono text-white/40">{curp.length}/18</p>
+                </div>
+
+                {error && (
+                  <div className="mt-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm flex items-start gap-2">
+                    <span className="mt-0.5">⚠️</span> <span>{error}</span>
+                  </div>
+                )}
+
+                <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-5 ${btnCls}`}>
+                  {cargando ? (<><Loader2 size={18} className="animate-spin" /> Conectando con SADER…</>) : (<><Search size={18} /> Verificar Identidad</>)}
+                </button>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <button onClick={() => navigate('/login-productor')} className="text-sm font-semibold text-green-300 hover:text-white transition-colors">
+                  ¿Ya estás registrado? Inicia sesión
+                </button>
+              </div>
+            </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-bold text-gray-900 mb-1 text-center">¿Tienes otra parcela que registrar?</h2>
-            <p className="text-sm text-gray-500 text-center mb-4">Si tienes más parcelas agrégalas ahora</p>
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  setPreguntandoOtraUP(false);
-                  setUpActual({ estado: '', municipio: '' });
-                  setEstadoId(''); setMunicipios([]);
-                  setPaso(3);
-                }}
-                className="w-full border-2 border-[#1A5C38] text-[#1A5C38] py-4 rounded-2xl font-semibold flex items-center justify-center gap-2"
-              >
-                <Plus size={20} /> Sí, tengo otra parcela
-              </button>
-              <button
-                onClick={() => { setPreguntandoOtraUP(false); setPaso(6); }}
-                className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold"
-              >
-                No, continuar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Paso 6 — PIN */}
-      {paso === 6 && !preguntandoOtraUP && (
-        <div className="p-4 space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-bold text-gray-900 mb-1">Crea tu PIN de acceso</h2>
-            <p className="text-sm text-gray-500 mb-4">4 dígitos que usarás para iniciar sesión con tu CURP</p>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">PIN (4 dígitos)</label>
-                <input type="password" inputMode="numeric" value={pin}
-                  onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  placeholder="••••" maxLength={4}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+          {/* Paso 2 — Datos Padron */}
+          {paso === 2 && datosPadron && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-white tracking-tight">Datos Encontrados</h1>
+                <p className="text-green-300 text-sm mt-1.5 flex items-center justify-center gap-1.5">
+                  <CheckCircle2 size={16} /> Identidad verificada
+                </p>
               </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Confirma tu PIN</label>
-                <input type="password" inputMode="numeric" value={confirmPin}
-                  onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  placeholder="••••" maxLength={4}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 space-y-4">
+                <div className="space-y-3">
+                  {[
+                    { label: 'Nombre', valor: `${datosPadron.nombres} ${datosPadron.apellido_paterno} ${datosPadron.apellido_materno}` },
+                    { label: 'CURP', valor: datosPadron.curp },
+                    { label: 'Ubicación', valor: `${datosPadron.municipio_padron || '—'}, ${datosPadron.estado_padron || '—'}` },
+                  ].map(item => (
+                    <div key={item.label} className="border-b border-white/10 pb-2 last:border-0 last:pb-0">
+                      <p className="text-[11px] font-semibold text-white/50 uppercase tracking-wide">{item.label}</p>
+                      <p className="text-sm font-medium text-white mt-0.5">{item.valor}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2">
+                  <label className={labelCls}>Teléfono de contacto</label>
+                  <input type="tel" value={telefonoEditable} onChange={e => setTelefonoEditable(e.target.value.replace(/\D/g, ''))}
+                    placeholder="10 dígitos" maxLength={10} className={inputCls} />
+                </div>
+
+                <button onClick={() => { cargarEstados(); setPaso(3); }} className={`mt-2 ${btnCls}`}>
+                  <Check size={18} /> Confirmar y Continuar
+                </button>
               </div>
             </div>
-          </div>
-          {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm">{error}</p></div>}
-          <button onClick={registrar} disabled={pin.length !== 4 || confirmPin.length !== 4 || cargando}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40 flex items-center justify-center gap-2">
-            {cargando ? (<><Loader2 size={18} className="animate-spin" /> Registrando…</>) : (<><Check size={20} /> Completar registro</>)}
-          </button>
-        </div>
-      )}
+          )}
 
-      {/* Paso 99 — Éxito */}
-      {paso === 99 && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-6">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check size={40} className="text-[#1A5C38]" strokeWidth={2.5} />
+          {/* Paso 3 — Ubicación UP */}
+          {paso === 3 && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
+                  <MapPin size={26} className="text-green-300" />
+                </div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Ubicación de Parcela</h1>
+                <p className="text-white/50 text-sm mt-1.5">¿En qué estado y municipio se encuentra?</p>
+              </div>
+
+              {datosPadron?.estado_padron && ups.length === 0 && (
+                <div className="bg-green-500/20 ring-1 ring-green-400/30 rounded-2xl p-4 mb-4 backdrop-blur-md">
+                  <p className="text-sm text-green-100 text-center leading-relaxed">
+                    Tu domicilio registrado es <strong className="text-white">{datosPadron.municipio_padron}, {datosPadron.estado_padron}</strong>.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setUpActual({ estado: datosPadron.estado_padron || '', municipio: datosPadron.municipio_padron || '' });
+                      setEnDibujo(true); setPaso(4);
+                    }}
+                    className="mt-3 w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-2.5 rounded-xl text-sm transition-all"
+                  >
+                    Mi parcela está ahí
+                  </button>
+                </div>
+              )}
+
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20">
+                <div className="space-y-4">
+                  <div>
+                    <label className={labelCls}>Estado</label>
+                    <select value={estadoId}
+                      onChange={e => {
+                        const sel = estados.find(s => String(s.state_id) === e.target.value);
+                        setEstadoId(e.target.value);
+                        setUpActual({ estado: sel?.name || sel?.state_name || '', municipio: '' });
+                        setMunicipios([]);
+                        if (e.target.value) cargarMunicipios(e.target.value);
+                      }}
+                      className={`${inputCls} appearance-none [&>option]:text-gray-900`}
+                    >
+                      <option value="">Selecciona estado...</option>
+                      {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name || s.state_name}</option>)}
+                    </select>
+                  </div>
+
+                  {estadoId && (
+                    <div className="animate-auth-in">
+                      <label className={labelCls}>Municipio</label>
+                      <select value={upActual.municipio || ''}
+                        onChange={e => setUpActual(prev => ({ ...prev, municipio: e.target.value }))}
+                        className={`${inputCls} appearance-none [&>option]:text-gray-900`}
+                      >
+                        <option value="">Selecciona municipio...</option>
+                        {municipios.map(m => <option key={m.municipality_id} value={m.name || m.municipality_name}>{m.name || m.municipality_name}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {error && <div className="mt-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm"><p>{error}</p></div>}
+
+                <button
+                  onClick={() => {
+                    if (!upActual.estado || !upActual.municipio) { setError('Selecciona estado y municipio.'); return; }
+                    setError(null); setEnDibujo(true); setPaso(4);
+                  }}
+                  disabled={!upActual.estado || !upActual.municipio}
+                  className={`mt-6 ${btnCls}`}
+                >
+                  <Map size={18} /> Continuar al Mapa
+                </button>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Registro exitoso!</h2>
-            <p className="text-gray-600 mb-1">Tu cuenta SIMAC está lista.</p>
-            <p className="text-gray-500 text-sm mb-8">Inicia sesión con tu CURP y PIN de 4 dígitos.</p>
-            <button onClick={() => navigate('/login-productor')}
-              className="w-full bg-[#1A5C38] text-white py-4 rounded-xl font-semibold text-lg">
-              Iniciar sesión
-            </button>
-          </div>
+          )}
+
+          {/* Paso 5 — ¿Otra UP? */}
+          {preguntandoOtraUP && paso !== 99 && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 ring-2 ring-green-400/50">
+                  <Check size={32} className="text-green-300" strokeWidth={3} />
+                </div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Parcela Registrada</h1>
+                <p className="text-white/70 text-sm mt-1.5">Has registrado {ups.length} {ups.length === 1 ? 'parcela' : 'parcelas'}</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 mb-4">
+                <div className="space-y-3 mb-6">
+                  {ups.map((up, i) => (
+                    <div key={i} className="flex items-center gap-3 bg-white/5 rounded-xl p-3 ring-1 ring-white/10">
+                      <div className="w-8 h-8 rounded-lg bg-[#1A5C38] flex items-center justify-center text-white font-bold text-sm">
+                        {i + 1}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{up.municipio}</p>
+                        <p className="text-xs text-white/50">{up.estado} {up.areaCalc && `· ${up.areaCalc} ha`}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <h2 className="font-semibold text-white text-center mb-4 text-lg">¿Tienes otra parcela?</h2>
+                <div className="space-y-3">
+                  <button onClick={() => {
+                    setPreguntandoOtraUP(false); setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setPaso(3);
+                  }} className="w-full bg-white/10 hover:bg-white/20 active:bg-white/15 ring-1 ring-white/20 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
+                    <Plus size={18} /> Sí, agregar otra
+                  </button>
+                  <button onClick={() => { setPreguntandoOtraUP(false); setPaso(6); }} className={btnCls}>
+                    No, continuar a crear PIN
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Paso 6 — PIN */}
+          {paso === 6 && !preguntandoOtraUP && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
+                  <KeyRound size={26} className="text-green-300" />
+                </div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Crea tu NIP</h1>
+                <p className="text-white/50 text-sm mt-1.5">Lo usarás como contraseña junto con tu CURP</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20">
+                <div className="space-y-5">
+                  <div>
+                    <label className={`${labelCls} text-center`}>NIP (4 dígitos)</label>
+                    <input type="password" inputMode="numeric" value={pin}
+                      onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      placeholder="••••" maxLength={4}
+                      className={`${inputCls} text-center text-3xl tracking-[1em] indent-[1em]`} />
+                  </div>
+                  <div>
+                    <label className={`${labelCls} text-center`}>Confirma tu NIP</label>
+                    <input type="password" inputMode="numeric" value={confirmPin}
+                      onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      placeholder="••••" maxLength={4}
+                      className={`${inputCls} text-center text-3xl tracking-[1em] indent-[1em]`} />
+                  </div>
+                </div>
+
+                {error && <div className="mt-5 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm text-center"><p>{error}</p></div>}
+
+                <button onClick={registrar} disabled={pin.length !== 4 || confirmPin.length !== 4 || cargando} className={`mt-6 ${btnCls}`}>
+                  {cargando ? (<><Loader2 size={18} className="animate-spin" /> Registrando…</>) : (<><CheckCircle2 size={20} /> Finalizar Registro</>)}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Paso 99 — Éxito (ahora integrado al flujo en lugar de modal para ser más estético) */}
+          {paso === 99 && (
+            <div className="animate-auth-in text-center pt-8">
+              <div className="w-24 h-24 bg-green-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(74,222,128,0.4)] animate-bounce">
+                <Check size={48} className="text-[#061510]" strokeWidth={3} />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-3">¡Registro Exitoso!</h2>
+              <p className="text-green-100/80 mb-10 text-lg">Tu cuenta ha sido creada correctamente.</p>
+              
+              <button onClick={() => navigate('/login-productor')}
+                className="w-full bg-white hover:bg-gray-50 active:scale-[0.98] text-[#1A5C38] py-4 rounded-2xl font-bold text-lg transition-all shadow-xl">
+                Iniciar Sesión
+              </button>
+            </div>
+          )}
+
         </div>
-      )}
+      </div>
     </div>
   );
 }
