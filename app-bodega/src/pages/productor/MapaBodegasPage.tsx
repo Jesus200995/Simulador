@@ -7,6 +7,7 @@ import {
   MapPin, Package, Warehouse, Map as MapIcon,
   CheckCircle2, Wheat, Navigation, Layers, ChevronDown, Compass, Flag
 } from 'lucide-react';
+import * as turf from '@turf/turf';
 
 mapboxgl.accessToken = [
   'pk.eyJ1IjoibWFyaWVsMDgi',
@@ -33,6 +34,8 @@ interface ParcelaData {
   lat: number; lng: number;
   poligono: GeoJSON.Polygon | GeoJSON.MultiPolygon | null;
   tiene_poligono?: boolean;
+  nombre_up?: string;
+  municipio?: string;
 }
 
 interface UpData {
@@ -163,6 +166,8 @@ export default function MapaBodegasPage() {
             lat: Number(u.centroid_lat ?? 0),
             lng: Number(u.centroid_lng ?? 0),
             poligono: u.geom_geojson as GeoJSON.Polygon | GeoJSON.MultiPolygon,
+            nombre_up: u.up_name || 'Tu Parcela',
+            municipio: u.municipio || ''
           }))
           .filter((p: ParcelaData) => p.lat !== 0 && p.lng !== 0);
         setUp(prev => prev ? { ...prev, parcelas } : null);
@@ -236,14 +241,24 @@ export default function MapaBodegasPage() {
     parcelas.forEach(p => {
       if (!p.lat || !p.lng) return;
 
+      let pLat = p.lat;
+      let pLng = p.lng;
+      if (p.poligono) {
+        try {
+          const center = turf.pointOnFeature(p.poligono as any);
+          if (center && center.geometry && center.geometry.coordinates) {
+            pLng = center.geometry.coordinates[0];
+            pLat = center.geometry.coordinates[1];
+          }
+        } catch (e) {
+          // fallback to DB centroid
+        }
+      }
+
       // Marcador punto azul pequeño
       const el = document.createElement('div');
-      el.style.cssText = 'position:relative;width:20px;height:20px;cursor:pointer';
-      el.innerHTML = `
-        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(37,99,235,0.2);animation:flagping 2s ease-out infinite"></div>
-        <div style="position:absolute;inset:4px;border-radius:50%;background:#2563EB;border:2px solid white;box-shadow:0 1px 8px rgba(37,99,235,0.8)"></div>
-        <style>@keyframes flagping{0%{transform:scale(1);opacity:.5}70%{transform:scale(2);opacity:.08}100%{transform:scale(2.5);opacity:0}}</style>
-      `;
+      el.style.cssText = 'width:14px;height:14px;background-color:#2563EB;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.5);cursor:pointer;';
+
 
       const popupNode = document.createElement('div');
       const popupRoot = createRoot(popupNode);
@@ -254,8 +269,8 @@ export default function MapaBodegasPage() {
               <Flag size={14} className="text-blue-600" />
             </div>
             <div className="overflow-hidden">
-              <p className="font-black text-gray-900 text-[13px] leading-tight truncate">Tu Parcela</p>
-              <p className="text-gray-500 text-[9px] truncate">{up.municipio || up.estado}</p>
+              <p className="font-black text-gray-900 text-[13px] leading-tight truncate">{p.nombre_up || 'Tu Parcela'}</p>
+              <p className="text-gray-500 text-[9px] truncate">{p.municipio || up.municipio || up.estado}</p>
             </div>
           </div>
           <div className="bg-blue-50/80 rounded-lg p-2.5 space-y-1.5">
@@ -289,7 +304,7 @@ export default function MapaBodegasPage() {
       });
 
       const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([p.lng, p.lat])
+        .setLngLat([pLng, pLat])
         .setPopup(popup)
         .addTo(map.current!);
       parcelMarkersRef.current.push(marker);

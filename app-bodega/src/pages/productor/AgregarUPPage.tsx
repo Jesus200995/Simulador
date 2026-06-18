@@ -6,6 +6,7 @@ import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown } fr
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import * as turf from '@turf/turf';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -41,6 +42,7 @@ export default function AgregarUPPage() {
   const [paso, setPaso] = useState<'info' | 'mapa'>('info');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorOverlap, setErrorOverlap] = useState<string | null>(null);
 
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
@@ -90,7 +92,26 @@ export default function AgregarUPPage() {
     }
   }, [paso]);
 
+  const validarOverlapLocal = (poly: [number, number][]): string | null => {
+    if (poly.length < 3) return null;
+    try {
+      const nueva = turf.polygon([[...poly.map(([la, ln]) => [ln, la]), [poly[0][1], poly[0][0]]]]);
+      for (let i = 0; i < existentes.length; i++) {
+        const ex = existentes[i];
+        if (!ex || ex.length < 3) continue;
+        const exPoly = turf.polygon([[...ex.map(([la, ln]) => [ln, la]), [ex[0][1], ex[0][0]]]]);
+        if (turf.booleanIntersects(nueva, exPoly)) {
+          return `Tu nueva parcela se empalma con una parcela existente. Dibújala en un área diferente.`;
+        }
+      }
+    } catch { /* si turf falla, no bloquear */ }
+    return null;
+  };
+
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
+    const errOv = validarOverlapLocal(poly);
+    if (errOv) { setErrorOverlap(errOv); return; }
+    setErrorOverlap(null);
     setPendingUP({ poligono: poly, coords: centro, area });
     setCoincideArea(null);
     setAreaReal('');
@@ -106,6 +127,7 @@ export default function AgregarUPPage() {
     setPendingUP(null);
     setPointCount(0);
     setGpsMsg(null);
+    setErrorOverlap(null);
     setTimeout(() => dibujarRef.current?.startEdit?.(), 50);
   };
 
@@ -278,7 +300,7 @@ export default function AgregarUPPage() {
                       <CheckCircle2 size={16} className="text-green-400" />
                     </div>
                     <div>
-                      <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar esta parcela?</p>
+                      <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar {nombreUP ? `"${nombreUP}"` : 'esta parcela'}?</p>
                       <p className="text-white/50 text-[11px]">Revisa el polígono en el mapa antes de guardar</p>
                     </div>
                   </div>
@@ -353,6 +375,15 @@ export default function AgregarUPPage() {
               </div>
             ) : (
               <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+                {errorOverlap && (
+                  <div className="bg-red-50 border border-red-300 rounded-xl p-3 shadow-lg">
+                    <p className="text-red-700 text-sm font-bold flex items-center gap-1.5">{errorOverlap}</p>
+                    <button onClick={() => { setErrorOverlap(null); dibujarRef.current?.startEdit?.(); }}
+                      className="mt-2 text-xs text-red-600 font-bold underline bg-white/50 px-2 py-1 rounded-md hover:bg-white transition-colors">
+                      Editar puntos para corregir
+                    </button>
+                  </div>
+                )}
                 <p className="text-center text-xs text-white bg-black/60 backdrop-blur-md rounded-xl px-4 py-2 font-medium ring-1 ring-white/10">
                   {pointCount === 0
                     ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
