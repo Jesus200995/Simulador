@@ -53,7 +53,6 @@ export default function RegistroNuevoPage() {
   const [municipios, setMunicipios] = useState<any[]>([]);
   const [estadoId, setEstadoId] = useState('');
   const [enDibujo, setEnDibujo] = useState(false);
-  const [preguntandoOtraUP, setPreguntandoOtraUP] = useState(false);
 
   // Mapa
   const dibujarRef = useRef<DibujarPoligonoHandle>(null);
@@ -123,7 +122,7 @@ export default function RegistroNuevoPage() {
       poligono: poly, coords: centro, areaCalc: area,
       estado: upActual.estado, municipio: upActual.municipio,
     }]);
-    setEnDibujo(false); setPointCount(0); setGpsMsg(null); setPreguntandoOtraUP(true);
+    setEnDibujo(false); setPointCount(0); setGpsMsg(null); setPaso(5);
   };
 
   const registrar = async () => {
@@ -482,7 +481,7 @@ export default function RegistroNuevoPage() {
           )}
 
           {/* Paso 5 — ¿Otra UP? */}
-          {preguntandoOtraUP && paso !== 99 && (
+          {paso === 5 && (
             <div className="animate-auth-in">
               <div className="text-center mb-4 sm:mb-6">
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 ring-2 ring-green-400/50">
@@ -510,11 +509,11 @@ export default function RegistroNuevoPage() {
                 <h2 className="font-semibold text-white text-center mb-4 text-lg">¿Tienes otra parcela?</h2>
                 <div className="space-y-3">
                   <button onClick={() => {
-                    setPreguntandoOtraUP(false); setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setPaso(3);
+                    setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setPaso(3);
                   }} className="w-full bg-white/10 hover:bg-white/20 active:bg-white/15 ring-1 ring-white/20 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
                     <Plus size={18} /> Sí, agregar otra
                   </button>
-                  <button onClick={() => { setPreguntandoOtraUP(false); setPaso(6); }} className={btnCls}>
+                  <button onClick={() => { setPaso(6); }} className={btnCls}>
                     No, continuar a crear PIN
                   </button>
                 </div>
@@ -523,7 +522,7 @@ export default function RegistroNuevoPage() {
           )}
 
           {/* Paso 6 — PIN */}
-          {paso === 6 && !preguntandoOtraUP && (
+          {paso === 6 && (
             <div className="animate-auth-in">
               <div className="text-center mb-4 sm:mb-6">
                 <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
