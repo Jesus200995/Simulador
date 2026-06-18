@@ -1,7 +1,9 @@
 import { useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import * as turf from '@turf/turf';
+import area from '@turf/area';
+import centroid from '@turf/centroid';
+import { polygon } from '@turf/helpers';
 
 export type DrawMode = 'idle' | 'drawing' | 'editing';
 
@@ -69,9 +71,9 @@ const DibujarPoligonoUP = forwardRef<DibujarPoligonoHandle, Props>(
       const v = verticesRef.current;
       if (v.length < 3) return;
       const ring = [...v.map(([la, ln]) => [ln, la]), [v[0][1], v[0][0]]];
-      const poly = turf.polygon([ring]);
-      const areaHa = parseFloat((turf.area(poly) / 10000).toFixed(4));
-      const c = turf.centroid(poly).geometry.coordinates; // [lng, lat]
+      const poly = polygon([ring]);
+      const areaHa = parseFloat((area(poly) / 10000).toFixed(4));
+      const c = centroid(poly).geometry.coordinates; // [lng, lat]
       onPoligonoCompleto(
         v.map(([la, ln]) => [la, ln] as [number, number]),
         { lat: c[1], lng: c[0] },

@@ -117,24 +117,6 @@ export default function RegistroNuevoPage() {
     }
   }, [paso, enDibujo]);
 
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) return;
-    const originalColor = meta.getAttribute('content') || '#1A5C38';
-    
-    // Si estamos en dibujo de mapa, usar el verde del header del mapa, si no, el verde muy oscuro de fondo
-    if (paso === 4 && enDibujo) {
-      meta.setAttribute('content', '#0c2e1a');
-    } else {
-      meta.setAttribute('content', '#061510');
-    }
-    
-    return () => {
-      meta.setAttribute('content', originalColor);
-    };
-  }, [paso, enDibujo]);
-
-
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
     setUps(prev => [...prev, {
       poligono: poly, coords: centro, areaCalc: area,
@@ -294,11 +276,11 @@ export default function RegistroNuevoPage() {
 
   return (
     <div 
-      className="relative h-[100dvh] flex flex-col overflow-hidden bg-[#061510]"
+      className="relative min-h-[100dvh] flex flex-col overflow-hidden"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      {/* Background idéntico a Login */}
-      <div className="fixed inset-0 pointer-events-none">
+      {/* Background */}
+      <div className="fixed inset-0 z-[-1]">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
       </div>
