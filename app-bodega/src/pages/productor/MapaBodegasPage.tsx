@@ -31,7 +31,8 @@ interface Bodega {
 interface ParcelaData {
   id: number;
   lat: number; lng: number;
-  poligono: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  poligono: GeoJSON.Polygon | GeoJSON.MultiPolygon | null;
+  tiene_poligono?: boolean;
 }
 
 interface UpData {
@@ -187,31 +188,34 @@ export default function MapaBodegasPage() {
     const tieneParcelas = up.parcelas && up.parcelas.length > 0;
 
     if (tieneParcelas) {
-      // Dibuja múltiples polígonos
-      const features: GeoJSON.Feature[] = up.parcelas!.map(p => ({
-        type: 'Feature',
-        geometry: p.poligono,
-        properties: { id: p.id }
-      }));
+      // Dibuja solo los polígonos que sí tienen geometría
+      const conPoligono = up.parcelas!.filter(p => p.poligono);
+      if (conPoligono.length > 0) {
+        const features: GeoJSON.Feature[] = conPoligono.map(p => ({
+          type: 'Feature',
+          geometry: p.poligono!,
+          properties: { id: p.id }
+        }));
 
-      map.current.addSource('up-source', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features }
-      });
+        map.current.addSource('up-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features }
+        });
 
-      // Polígonos azul relleno
-      map.current.addLayer({
-        id: 'up-fill',
-        type: 'fill',
-        source: 'up-source',
-        paint: { 'fill-color': '#3B82F6', 'fill-opacity': 0.25 }
-      });
-      map.current.addLayer({
-        id: 'up-outline',
-        type: 'line',
-        source: 'up-source',
-        paint: { 'line-color': '#2563EB', 'line-width': 2.5 }
-      });
+        // Polígonos azul relleno
+        map.current.addLayer({
+          id: 'up-fill',
+          type: 'fill',
+          source: 'up-source',
+          paint: { 'fill-color': '#3B82F6', 'fill-opacity': 0.25 }
+        });
+        map.current.addLayer({
+          id: 'up-outline',
+          type: 'line',
+          source: 'up-source',
+          paint: { 'line-color': '#2563EB', 'line-width': 2.5 }
+        });
+      }
 
       // Bounding box total para todas las parcelas
       const bounds = new mapboxgl.LngLatBounds();
@@ -283,10 +287,13 @@ export default function MapaBodegasPage() {
         parcelMarkersRef.current.push(marker);
 
         // Extraer coordenadas para bounds
-        if (p.poligono.type === 'Polygon') {
+        if (p.poligono && p.poligono.type === 'Polygon') {
           p.poligono.coordinates[0].forEach(coord => { bounds.extend(coord as mapboxgl.LngLatLike); hasBounds = true; });
-        } else if (p.poligono.type === 'MultiPolygon') {
+        } else if (p.poligono && p.poligono.type === 'MultiPolygon') {
           p.poligono.coordinates.forEach(poly => poly[0].forEach(coord => { bounds.extend(coord as mapboxgl.LngLatLike); hasBounds = true; }));
+        } else {
+          // Sin polígono, usa el centroide para bounds
+          if (p.lat && p.lng) { bounds.extend([p.lng, p.lat] as mapboxgl.LngLatLike); hasBounds = true; }
         }
       });
 

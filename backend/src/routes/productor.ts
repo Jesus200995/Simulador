@@ -583,12 +583,13 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
     );
     const up = upRes.rows[0];
 
-    // Todas las parcelas del productor (geometrías)
+    // Todas las parcelas del productor — siempre, con o sin polígono
     const parcelasRes = await pool.query(
       `SELECT up_id as id,
               ST_Y(centroid::geometry) AS lat, ST_X(centroid::geometry) AS lng,
-              ST_AsGeoJSON(geom)::json AS poligono
-       FROM up WHERE producer_id = $1 AND geom IS NOT NULL`,
+              CASE WHEN geom IS NOT NULL THEN ST_AsGeoJSON(geom)::json ELSE NULL END AS poligono,
+              geom IS NOT NULL AS tiene_poligono
+       FROM up WHERE producer_id = $1 AND centroid IS NOT NULL`,
       [producerId]
     );
     const parcelas = parcelasRes.rows;
