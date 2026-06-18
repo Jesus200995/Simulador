@@ -188,47 +188,50 @@ export default function CicloProductivoPage() {
   if (todasLasUPs.length > 1 && !upSeleccionadaId) {
     return (
       <div className="flex flex-col font-sans w-full h-[100dvh] bg-[#eef8f2] overflow-hidden">
-        {/* Header estático */}
-        <div className="shrink-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
+        {/* Deep Header */}
+        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-24 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
             <button onClick={() => navigate('/productor')}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all mb-3 active:scale-95">
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all mb-4 active:scale-95 backdrop-blur-sm">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
-            <h1 className="text-[20px] font-black text-white tracking-tight">Ciclo productivo</h1>
-            <p className="text-[13px] text-emerald-100/70 font-medium mt-0.5">¿En qué parcela es este ciclo?</p>
+            <h1 className="text-[24px] font-black text-white tracking-tight leading-tight">Ciclo productivo</h1>
+            <p className="text-[14px] text-emerald-100/80 font-medium mt-1">¿En qué parcela es este ciclo?</p>
           </div>
         </div>
 
-        {/* Contenido scrolleable debajo del header */}
-        <div className="flex-1 overflow-y-auto w-full pb-safe">
-          <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 -mt-3 relative z-10">
-            <div className="max-w-[500px] mx-auto space-y-3 pt-1 mb-8">
-              {todasLasUPs.map((up, i) => (
-                <button
-                  key={up.up_id}
-                  style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
-                  onClick={() => {
-                    setUpId(up.up_id);
-                    setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
-                    setUpSeleccionadaId(up.up_id);
-                    setCargandoCiclos(true);
-                  }}
-                  className="w-full bg-white rounded-[20px] border border-gray-100 p-4 text-left flex items-center gap-3 shadow-sm hover:border-[#1A5C38]/30 hover:shadow-md active:scale-[0.98] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
-                >
-                  <div className="w-12 h-12 rounded-[16px] bg-[#1A5C38]/10 flex items-center justify-center shrink-0">
-                    <Sprout size={22} className="text-[#1A5C38]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-slate-800 text-[15px]">{up.up_name || 'Parcela'}</p>
-                    <p className="text-[12.5px] text-slate-500 mt-0.5 truncate">
-                      {[up.municipality_name, up.state_name].filter(Boolean).join(', ')}
-                      {up.area_ha_calc ? ` · ${Number(up.area_ha_calc)} ha` : ''}
-                    </p>
-                  </div>
-                  <ChevronRight size={20} className="text-gray-300 shrink-0" />
-                </button>
-              ))}
+        {/* Floating Card Content */}
+        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-16">
+          <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
+            <div className="max-w-[500px] mx-auto bg-white/95 backdrop-blur-xl rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white p-2">
+              <div className="space-y-2 p-2">
+                {todasLasUPs.map((up, i) => (
+                  <button
+                    key={up.up_id}
+                    style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                    onClick={() => {
+                      setUpId(up.up_id);
+                      setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
+                      setUpSeleccionadaId(up.up_id);
+                      setCargandoCiclos(true);
+                    }}
+                    className="w-full bg-transparent rounded-[24px] p-4 text-left flex items-center gap-4 hover:bg-[#eef8f2] active:scale-[0.98] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 group"
+                  >
+                    <div className="w-14 h-14 rounded-[20px] bg-[#1A5C38]/5 flex items-center justify-center shrink-0 group-hover:bg-[#1A5C38]/10 transition-colors">
+                      <Sprout size={24} className="text-[#1A5C38]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-800 text-[16px]">{up.up_name || 'Parcela'}</p>
+                      <p className="text-[13px] text-slate-500 mt-1 truncate">
+                        {[up.municipality_name, up.state_name].filter(Boolean).join(', ')}
+                        {up.area_ha_calc ? ` · ${Number(up.area_ha_calc)} ha` : ''}
+                      </p>
+                    </div>
+                    <ChevronRight size={20} className="text-gray-300 shrink-0 group-hover:text-[#1A5C38] group-hover:translate-x-1 transition-all" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -240,10 +243,11 @@ export default function CicloProductivoPage() {
   if (!mostrarFormulario && ciclosExistentes.length > 0) {
     return (
       <div className="flex flex-col font-sans w-full h-[100dvh] bg-[#eef8f2] overflow-hidden">
-        {/* Header estático */}
-        <div className="shrink-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
-            <div className="flex items-center justify-between mb-2">
+        {/* Deep Header */}
+        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-24 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
+            <div className="flex items-center justify-between mb-4">
               <button onClick={() => navigate('/productor')}
                 className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md active:scale-95">
                 <ChevronLeft size={20} strokeWidth={2.5} />
@@ -253,19 +257,19 @@ export default function CicloProductivoPage() {
               </div>
               <div className="w-9" />
             </div>
-            <h1 className="text-[20px] font-black text-white tracking-tight">Ciclos productivos</h1>
-            <p className="text-[13px] text-emerald-100/70 font-medium mt-0.5">Tu siembra registrada en SIMAC</p>
+            <h1 className="text-[24px] font-black text-white tracking-tight leading-tight">Ciclos productivos</h1>
+            <p className="text-[14px] text-emerald-100/80 font-medium mt-1">Tu siembra registrada en SIMAC</p>
           </div>
         </div>
 
-        {/* Contenido scrolleable debajo del header */}
-        <div className="flex-1 overflow-y-auto w-full pb-safe">
-          <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 -mt-3 relative z-10">
-            <div className="max-w-[500px] mx-auto pb-8">
-              <h3 className="text-[14px] font-bold text-slate-700 mb-3 mt-4 px-1">
+        {/* Floating Card Content */}
+        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-16">
+          <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
+            <div className="max-w-[500px] mx-auto bg-white/95 backdrop-blur-xl rounded-[32px] p-5 sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white">
+              <h3 className="text-[15px] font-black text-slate-800 mb-4 px-1">
                 Ciclos registrados
               </h3>
-              <div className="space-y-3 mb-5">
+              <div className="space-y-3 mb-6">
                 {ciclosExistentes.map((ciclo, i) => {
                   const crop = ciclo.crops?.[0] || {};
                   const variedad = crop.variety_other || crop.variety_id || 'Sin variedad';
@@ -275,19 +279,19 @@ export default function CicloProductivoPage() {
                     <div
                       key={ciclo.cycle_id}
                       style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
-                      className="bg-white border border-gray-100 rounded-[20px] p-4.5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow animate-in fade-in slide-in-from-bottom-2"
+                      className="bg-white border border-gray-100 rounded-[24px] p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow animate-in fade-in slide-in-from-bottom-2"
                     >
                       <div className="min-w-0 pr-3">
-                        <p className="font-bold text-slate-800 text-[15px] tracking-tight">
+                        <p className="font-bold text-slate-800 text-[16px] tracking-tight">
                           {cycleTypeLabel(ciclo.cycle_type)} {ciclo.cycle_year}
                         </p>
-                        <p className="text-[13px] text-slate-500 mt-0.5 truncate font-medium">
+                        <p className="text-[13px] text-slate-500 mt-1 truncate font-medium">
                           {variedad} · {superficie != null ? `${superficie} ha` : '—'}
                         </p>
                       </div>
-                      <span className={`px-3.5 py-1.5 rounded-full text-[11px] font-bold shrink-0 tracking-wide ${
+                      <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold shrink-0 tracking-wide ${
                         estado === 'activo'
-                          ? 'bg-green-50 text-green-700 border border-green-100'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                           : estado === 'cosechado'
                           ? 'bg-blue-50 text-blue-700 border border-blue-100'
                           : 'bg-gray-50 text-gray-500 border border-gray-200'
@@ -301,12 +305,12 @@ export default function CicloProductivoPage() {
 
               <button
                 onClick={() => { setPaso(1); setError(''); setMostrarFormulario(true); }}
-                className="w-full py-4 border-2 border-dashed border-[#1A5C38]/40 bg-[#1A5C38]/5 text-[#1A5C38] rounded-[20px] font-bold hover:bg-[#1A5C38]/10 hover:border-[#1A5C38]/60 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+                className="w-full py-4 border-2 border-dashed border-[#1A5C38]/40 bg-[#1A5C38]/5 text-[#1A5C38] rounded-[24px] font-bold hover:bg-[#1A5C38]/10 hover:border-[#1A5C38]/60 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <div className="w-6 h-6 rounded-full bg-[#1A5C38] text-white flex items-center justify-center">
                   <span className="text-sm font-black leading-none mt-[1px]">+</span>
                 </div>
-                <span className="text-[14px]">Agregar otro ciclo</span>
+                <span className="text-[15px]">Agregar otro ciclo</span>
               </button>
             </div>
           </div>
@@ -318,11 +322,11 @@ export default function CicloProductivoPage() {
   return (
     <div className="flex flex-col font-sans w-full h-[100dvh] bg-[#eef8f2] overflow-hidden">
       
-      {/* Header Verde Premium Estático */}
-      <div className="shrink-0 z-20 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] rounded-b-[28px] shadow-[0_8px_30px_rgba(26,92,56,0.15)] relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+      {/* Deep Header */}
+      <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-24 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
         
-        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 pb-7 relative z-20">
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
           <div className="flex items-center justify-between mb-5">
             <button onClick={() => {
                 if (paso > 1) { setPaso(paso - 1); return; }
@@ -347,9 +351,9 @@ export default function CicloProductivoPage() {
         </div>
       </div>
 
-      {/* Contenido scrolleable */}
-      <div className="flex-1 overflow-y-auto w-full pb-[120px] scroll-smooth">
-        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 pt-4 relative z-20">
+      {/* Floating Card Content */}
+      <div className="flex-1 overflow-y-auto w-full pb-[120px] z-20 -mt-12 scroll-smooth">
+        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
           <div className="max-w-[500px] mx-auto">
 
             {error && (
@@ -360,7 +364,7 @@ export default function CicloProductivoPage() {
             )}
 
             {/* Tarjeta Contenedor */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-[28px] p-5 sm:p-7 shadow-sm border border-gray-100/60 transition-all duration-300">
+            <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white transition-all duration-300">
             
             {/* PASO 1 — Tipo de ciclo + año */}
             {paso === 1 && (
