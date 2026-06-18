@@ -117,6 +117,24 @@ export default function RegistroNuevoPage() {
     }
   }, [paso, enDibujo]);
 
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+    const originalColor = meta.getAttribute('content') || '#1A5C38';
+    
+    // Si estamos en dibujo de mapa, usar el verde del header del mapa, si no, el verde muy oscuro de fondo
+    if (paso === 4 && enDibujo) {
+      meta.setAttribute('content', '#0c2e1a');
+    } else {
+      meta.setAttribute('content', '#061510');
+    }
+    
+    return () => {
+      meta.setAttribute('content', originalColor);
+    };
+  }, [paso, enDibujo]);
+
+
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
     setUps(prev => [...prev, {
       poligono: poly, coords: centro, areaCalc: area,
