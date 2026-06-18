@@ -109,15 +109,15 @@ export default function DashboardProductorPage() {
   // Ciclo obligatorio: sin ciclo productivo registrado no se puede usar el tablero.
   if (ciclo === null && !isPendiente) {
     return (
-      <div className="flex flex-col h-[100dvh] bg-[#eef8f2] overflow-hidden">
+      <div className="absolute inset-0 flex flex-col bg-[#eef8f2] overflow-hidden">
         {/* Fondo decorativo */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-[40dvh] bg-gradient-to-b from-[#1A5C38]/10 to-transparent"></div>
+          <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-[#1A5C38]/10 to-transparent"></div>
           <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full"></div>
         </div>
 
         {/* Contenido centrado */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 pb-[10dvh]">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">
           <div className="w-full max-w-[340px] animate-in fade-in zoom-in-95 slide-in-from-bottom-8 duration-700 ease-out">
             <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 shadow-[0_20px_60px_-15px_rgba(26,92,56,0.15)] border border-white relative overflow-hidden text-center group">
               <div className="absolute inset-0 bg-gradient-to-br from-[#1A5C38]/[0.02] to-transparent pointer-events-none"></div>
