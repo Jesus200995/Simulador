@@ -364,71 +364,71 @@ export default function CicloProductivoPage() {
             )}
 
             {/* Tarjeta Contenedor */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white transition-all duration-300">
+            <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-5 sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white transition-all duration-300">
             
             {/* PASO 1 — Tipo de ciclo + año */}
             {paso === 1 && (
-              <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-4 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
                 {esPrimerLogin && (
-                  <div className="bg-indigo-50/50 border border-indigo-100 rounded-[14px] p-3.5 mb-2 flex gap-3 items-start">
-                    <div className="bg-indigo-100 text-indigo-600 p-1.5 rounded-full shrink-0">
-                      <Play size={12} fill="currentColor" />
+                  <div className="bg-indigo-50/50 border border-indigo-100 rounded-[12px] p-3 mb-1 flex gap-2.5 items-start">
+                    <div className="bg-indigo-100 text-indigo-600 p-1 rounded-full shrink-0">
+                      <Play size={10} fill="currentColor" />
                     </div>
                     <div>
-                      <p className="text-indigo-900 text-[13px] font-bold tracking-tight">Un último paso</p>
-                      <p className="text-indigo-700/80 text-[12px] font-medium mt-0.5 leading-relaxed">
+                      <p className="text-indigo-900 text-[12px] font-bold tracking-tight">Un último paso</p>
+                      <p className="text-indigo-700/80 text-[11.5px] font-medium mt-0.5 leading-relaxed">
                         Registra la información de tu siembra actual para las bodegas.
                       </p>
                     </div>
                   </div>
                 )}
                 
-                <div className="text-center sm:text-left mb-2">
-                  <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-[#1A5C38] mb-4 mx-auto sm:mx-0 shadow-sm border border-emerald-100/50">
-                    <Calendar size={22} strokeWidth={2} />
+                <div className="text-center sm:text-left mb-1">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-[14px] flex items-center justify-center text-[#1A5C38] mb-3 mx-auto sm:mx-0 shadow-sm border border-emerald-100/50">
+                    <Calendar size={18} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-tight mb-1.5">
+                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight leading-tight mb-1">
                     Tu ciclo productivo
                   </h2>
                   <p className="text-[13px] text-slate-500 font-medium">¿Qué ciclo estás sembrando actualmente?</p>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {CICLOS.map(c => (
                     <button key={c.valor} onClick={() => setForm(f => ({...f, cycle_type: c.valor}))}
-                      className={`w-full border-2 rounded-[16px] py-3 px-4 flex items-center gap-3.5 text-left transition-all duration-200 active:scale-[0.98]
+                      className={`w-full border-2 rounded-[14px] py-2.5 px-3 flex items-center gap-3 text-left transition-all duration-200 active:scale-[0.98]
                         ${form.cycle_type === c.valor 
                           ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' 
                           : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]/50'}`}>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300
+                      <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-all duration-300
                         ${form.cycle_type === c.valor ? 'bg-[#1A5C38] text-white shadow-md shadow-[#1A5C38]/30 scale-105' : 'bg-slate-100 text-slate-400'}`}>
-                        <Wheat size={18} strokeWidth={2} />
+                        <Wheat size={16} strokeWidth={2} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-[14px] font-black tracking-tight ${form.cycle_type === c.valor ? 'text-[#1A5C38]' : 'text-slate-800'}`}>
+                        <p className={`text-[13px] font-black tracking-tight ${form.cycle_type === c.valor ? 'text-[#1A5C38]' : 'text-slate-800'}`}>
                           {c.label}
                         </p>
-                        <p className={`text-[12px] font-medium mt-0.5 ${form.cycle_type === c.valor ? 'text-emerald-700/80' : 'text-slate-500'}`}>
+                        <p className={`text-[11.5px] font-medium mt-0.5 ${form.cycle_type === c.valor ? 'text-emerald-700/80' : 'text-slate-500'}`}>
                           {c.desc}
                         </p>
                       </div>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center border-2 transition-all duration-300
                         ${form.cycle_type === c.valor ? 'bg-[#1A5C38] border-[#1A5C38] scale-110' : 'border-slate-200'}`}>
-                        {form.cycle_type === c.valor && <Check size={12} className="text-white" strokeWidth={3} />}
+                        {form.cycle_type === c.valor && <Check size={10} className="text-white" strokeWidth={3} />}
                       </div>
                     </button>
                   ))}
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[14px] font-bold text-slate-800 mb-2.5">¿En qué año?</p>
-                  <div className="flex gap-2.5">
+                <div className="pt-3 border-t border-slate-100">
+                  <p className="text-[13px] font-bold text-slate-800 mb-2">¿En qué año?</p>
+                  <div className="flex gap-2">
                     {[AÑO_ACTUAL - 1, AÑO_ACTUAL, AÑO_ACTUAL + 1].map(y => (
                       <button key={y}
                         onClick={() => setForm(f => ({...f, cycle_year: y}))}
-                        className={`flex-1 py-2.5 rounded-[12px] border-2 font-black text-[14px] transition-all active:scale-95
+                        className={`flex-1 py-2 rounded-[10px] border-2 font-black text-[13px] transition-all active:scale-95
                           ${form.cycle_year === y 
-                            ? 'border-[#1A5C38] bg-[#1A5C38] text-white shadow-md shadow-[#1A5C38]/20' 
+                            ? 'border-[#1A5C38] bg-[#1A5C38] text-white shadow-sm shadow-[#1A5C38]/20' 
                             : 'border-slate-100 text-slate-500 hover:border-slate-200 bg-white'}`}>
                         {y}
                       </button>
@@ -440,63 +440,63 @@ export default function CicloProductivoPage() {
 
             {/* PASO 2 — Variedad */}
             {paso === 2 && (
-              <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="text-center sm:text-left mb-2">
-                  <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 mb-4 mx-auto sm:mx-0 shadow-sm border border-amber-100/50">
-                    <Leaf size={22} strokeWidth={2} />
+              <div className="space-y-4 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="text-center sm:text-left mb-1">
+                  <div className="w-10 h-10 bg-amber-50 rounded-[14px] flex items-center justify-center text-amber-500 mb-3 mx-auto sm:mx-0 shadow-sm border border-amber-100/50">
+                    <Leaf size={18} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-tight mb-1.5">
+                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight leading-tight mb-1">
                     Variedad sembrada
                   </h2>
                   <p className="text-[13px] text-slate-500 font-medium">Selecciona el tipo de maíz que produces.</p>
                 </div>
                 
                 {!tipoMaiz ? (
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {['blanco', 'amarillo', 'criollo'].map((t, idx) => (
                       <button key={t} onClick={() => setTipoMaiz(t as any)}
-                        className="w-full rounded-[16px] p-4 border-2 border-slate-100 bg-white hover:border-[#1A5C38]/30 hover:bg-emerald-50/30 text-left transition-all duration-200 active:scale-[0.98] group flex justify-between items-center shadow-sm hover:shadow-md">
-                        <div className="flex items-center gap-3.5">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-slate-500 group-hover:text-[#1A5C38] group-hover:bg-[#1A5C38]/10 bg-[#eef8f2] transition-colors`}>
-                            {idx === 0 ? <Wheat size={20} /> : idx === 1 ? <Sun size={20} /> : <Sprout size={20} />}
+                        className="w-full rounded-[14px] p-3 border-2 border-slate-100 bg-white hover:border-[#1A5C38]/30 hover:bg-emerald-50/30 text-left transition-all duration-200 active:scale-[0.98] group flex justify-between items-center shadow-sm hover:shadow-md">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center text-slate-500 group-hover:text-[#1A5C38] group-hover:bg-[#1A5C38]/10 bg-[#eef8f2] transition-colors`}>
+                            {idx === 0 ? <Wheat size={16} /> : idx === 1 ? <Sun size={16} /> : <Sprout size={16} />}
                           </div>
-                          <p className="text-[15px] font-black text-slate-800 capitalize group-hover:text-[#1A5C38] transition-colors tracking-tight">
+                          <p className="text-[14px] font-black text-slate-800 capitalize group-hover:text-[#1A5C38] transition-colors tracking-tight">
                             Maíz {t}
                           </p>
                         </div>
-                        <ChevronLeft size={18} className="text-slate-300 rotate-180 group-hover:text-[#1A5C38] group-hover:translate-x-1 transition-all" strokeWidth={3} />
+                        <ChevronLeft size={16} className="text-slate-300 rotate-180 group-hover:text-[#1A5C38] group-hover:translate-x-1 transition-all" strokeWidth={3} />
                       </button>
                     ))}
                   </div>
                 ) : (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex items-center justify-between mb-4 bg-[#eef8f2]/80 p-2.5 rounded-[14px] border border-slate-100 shadow-sm">
-                      <p className="font-black text-slate-800 capitalize text-[14px] flex items-center gap-2 px-2">
-                        {tipoMaiz === 'blanco' ? <Wheat size={18} className="text-[#1A5C38]"/> : tipoMaiz === 'amarillo' ? <Sun size={18} className="text-amber-500"/> : <Sprout size={18} className="text-emerald-500"/>} 
+                    <div className="flex items-center justify-between mb-3 bg-[#eef8f2]/80 p-2 rounded-[12px] border border-slate-100 shadow-sm">
+                      <p className="font-black text-slate-800 capitalize text-[13px] flex items-center gap-1.5 px-2">
+                        {tipoMaiz === 'blanco' ? <Wheat size={16} className="text-[#1A5C38]"/> : tipoMaiz === 'amarillo' ? <Sun size={16} className="text-amber-500"/> : <Sprout size={16} className="text-emerald-500"/>} 
                         Maíz {tipoMaiz}
                       </p>
                       <button onClick={() => { setTipoMaiz(''); setForm(f => ({...f, variety_id: '', variety_other: ''})); setEsCriollo(false); }} 
-                        className="text-[#1A5C38] text-[12px] font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:bg-[#eef8f2] transition-colors shadow-sm active:scale-95">
+                        className="text-[#1A5C38] text-[11.5px] font-bold bg-white border border-slate-200 px-2.5 py-1 rounded-[8px] hover:bg-[#eef8f2] transition-colors shadow-sm active:scale-95">
                         Cambiar
                       </button>
                     </div>
                     
-                    <div className="grid grid-cols-1 gap-2 mb-4 max-h-[240px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-slate-200">
+                    <div className="grid grid-cols-1 gap-1.5 mb-3 max-h-[220px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-slate-200">
                       {variedades.map(v => (
                         <button key={v.code}
                           onClick={() => {
                             setForm(f => ({...f, variety_id: v.code, variety_other: ''}));
                             setEsCriollo(v.label.toLowerCase().includes('criollo') || v.code === 'MC_CRIOLLO');
                           }}
-                          className={`w-full rounded-[14px] p-3.5 border-2 text-left transition-all active:scale-[0.98] flex items-center gap-3
+                          className={`w-full rounded-[12px] p-2.5 border-2 text-left transition-all active:scale-[0.98] flex items-center gap-2.5
                             ${form.variety_id === v.code
                               ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm'
                               : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]'}`}>
-                          <div className={`w-4 h-4 rounded-full flex items-center justify-center border-2 shrink-0 transition-colors
+                          <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border-2 shrink-0 transition-colors
                             ${form.variety_id === v.code ? 'bg-[#1A5C38] border-[#1A5C38]' : 'border-slate-300'}`}>
-                            {form.variety_id === v.code && <Check size={10} className="text-white" strokeWidth={4} />}
+                            {form.variety_id === v.code && <Check size={8} className="text-white" strokeWidth={4} />}
                           </div>
-                          <span className={`text-[13px] font-bold ${form.variety_id === v.code ? 'text-[#1A5C38]' : 'text-slate-700'}`}>
+                          <span className={`text-[12.5px] font-bold ${form.variety_id === v.code ? 'text-[#1A5C38]' : 'text-slate-700'}`}>
                             {v.label}
                           </span>
                         </button>
@@ -523,60 +523,60 @@ export default function CicloProductivoPage() {
 
             {/* PASO 3 — Superficie + rendimiento */}
             {paso === 3 && (
-              <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="text-center sm:text-left mb-2">
-                  <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mb-4 mx-auto sm:mx-0 shadow-sm border border-blue-100/50">
-                    <MapPin size={22} strokeWidth={2} />
+              <div className="space-y-4 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="text-center sm:text-left mb-1">
+                  <div className="w-10 h-10 bg-blue-50 rounded-[14px] flex items-center justify-center text-blue-600 mb-3 mx-auto sm:mx-0 shadow-sm border border-blue-100/50">
+                    <MapPin size={18} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-tight mb-1.5">
+                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight leading-tight mb-1">
                     Superficie y cálculo
                   </h2>
                   <p className="text-[13px] text-slate-500 font-medium">Estima las dimensiones de tu siembra actual.</p>
                 </div>
 
                 {areaHaCalc && (
-                  <div className="bg-blue-50/50 border border-blue-100 rounded-[14px] p-3.5 flex gap-2.5 shadow-sm items-start">
-                    <Ruler size={18} className="text-blue-600 shrink-0" />
-                    <p className="text-[12px] text-blue-900 font-medium leading-relaxed">
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-[12px] p-3 flex gap-2.5 shadow-sm items-start">
+                    <Ruler size={16} className="text-blue-600 shrink-0" />
+                    <p className="text-[11.5px] text-blue-900 font-medium leading-relaxed">
                       Tu predio registrado mide <strong className="font-bold">{areaHaCalc} hectáreas</strong>. 
                       La siembra debe ser igual o menor a esta cantidad.
                     </p>
                   </div>
                 )}
 
-                <div className="space-y-3.5">
-                  <div className="p-4 bg-[#eef8f2]/80 border border-slate-100 rounded-[16px] shadow-sm">
-                    <label className="block text-[14px] font-bold text-slate-800 mb-2.5 text-center sm:text-left">
+                <div className="space-y-3">
+                  <div className="p-3.5 bg-[#eef8f2]/80 border border-slate-100 rounded-[14px] shadow-sm">
+                    <label className="block text-[13px] font-bold text-slate-800 mb-2 text-center sm:text-left">
                       ¿Hectáreas a sembrar este ciclo?
                     </label>
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                       <input type="number" min="0.1" step="0.1" max={areaHaCalc ?? 9999}
                         value={form.area_sown_ha}
                         onChange={e => setForm(f => ({...f, area_sown_ha: e.target.value}))}
                         placeholder={areaHaCalc ? String(areaHaCalc) : 'Ej: 5.5'}
-                        className={`${inputCls} text-[20px] font-black text-center flex-1 py-3 shadow-inner`}
+                        className={`${inputCls} text-[18px] font-black text-center flex-1 py-2.5 shadow-inner`}
                       />
-                      <span className="text-slate-400 font-bold text-[14px] px-2">ha</span>
+                      <span className="text-slate-400 font-bold text-[13px] px-2">ha</span>
                     </div>
                     {areaHaCalc && !form.area_sown_ha && (
                       <button onClick={() => setForm(f => ({...f, area_sown_ha: String(areaHaCalc)}))}
-                        className="mt-3 w-full text-blue-700 text-[13px] font-bold border border-blue-200 bg-white py-2.5 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
+                        className="mt-2.5 w-full text-blue-700 text-[12.5px] font-bold border border-blue-200 bg-white py-2 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
                         Usar el total ({areaHaCalc} ha)
                       </button>
                     )}
                   </div>
 
-                  <div className="p-4 bg-[#eef8f2]/80 border border-slate-100 rounded-[16px] shadow-sm">
-                    <label className="block text-[14px] font-bold text-slate-800 mb-1 text-center sm:text-left">
+                  <div className="p-3.5 bg-[#eef8f2]/80 border border-slate-100 rounded-[14px] shadow-sm">
+                    <label className="block text-[13px] font-bold text-slate-800 mb-0.5 text-center sm:text-left">
                       Rendimiento esperado
                     </label>
-                    <p className="text-[12px] text-slate-500 mb-3 font-medium text-center sm:text-left">Por hectárea (ton/ha)</p>
-                    <div className="flex items-center gap-2.5">
+                    <p className="text-[11.5px] text-slate-500 mb-2.5 font-medium text-center sm:text-left">Por hectárea (ton/ha)</p>
+                    <div className="flex items-center gap-2">
                       <input type="number" min="0.1" max="30" step="0.1"
                         value={form.yield_expected}
                         onChange={e => setForm(f => ({...f, yield_expected: e.target.value}))}
                         placeholder="Ej: 8"
-                        className={`${inputCls} text-[20px] font-black text-center flex-1 py-3 shadow-inner`}
+                        className={`${inputCls} text-[18px] font-black text-center flex-1 py-2.5 shadow-inner`}
                       />
                       <span className="text-slate-400 font-bold text-[14px] px-2 leading-tight">ton<br/><span className="text-[11px]">/ ha</span></span>
                     </div>
@@ -597,51 +597,51 @@ export default function CicloProductivoPage() {
 
             {/* PASO 4 — Fechas + destino */}
             {paso === 4 && (
-              <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="text-center sm:text-left mb-2">
-                  <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 mb-4 mx-auto sm:mx-0 shadow-sm border border-indigo-100/50">
-                    <Clock size={22} strokeWidth={2} />
+              <div className="space-y-4 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="text-center sm:text-left mb-1">
+                  <div className="w-10 h-10 bg-indigo-50 rounded-[14px] flex items-center justify-center text-indigo-500 mb-3 mx-auto sm:mx-0 shadow-sm border border-indigo-100/50">
+                    <Clock size={18} strokeWidth={2} />
                   </div>
-                  <h2 className="text-[20px] sm:text-[22px] font-black text-slate-900 tracking-tight leading-tight mb-1.5">
+                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight leading-tight mb-1">
                     Fechas y destino
                   </h2>
                   <p className="text-[13px] text-slate-500 font-medium">Confirma los tiempos de tu cosecha.</p>
                 </div>
 
-                <div className="space-y-3.5">
-                  <div className="bg-[#eef8f2]/80 rounded-[16px] p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[14px] font-bold text-slate-800 mb-2.5 flex items-center gap-2">
-                      <Calendar size={16} className="text-slate-400"/> ¿Cuándo vas a sembrar?
+                <div className="space-y-3">
+                  <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
+                    <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
+                      <Calendar size={14} className="text-slate-400"/> ¿Cuándo vas a sembrar?
                     </label>
                     <input type="date" value={form.planting_date}
                       onChange={e => setForm(f => ({...f, planting_date: e.target.value}))}
-                      className={`${inputCls} font-bold text-slate-700 py-3`}
+                      className={`${inputCls} font-bold text-[14px] text-slate-700 py-2.5`}
                     />
                   </div>
                   
-                  <div className="bg-[#eef8f2]/80 rounded-[16px] p-4 border border-slate-100 shadow-sm">
-                    <label className="text-[14px] font-bold text-slate-800 mb-2.5 flex items-center gap-2">
-                      <Clock size={16} className="text-slate-400"/> ¿Cuándo esperas cosechar? <span className="text-slate-400 font-medium ml-1 text-[11px]">(opcional)</span>
+                  <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
+                    <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
+                      <Clock size={14} className="text-slate-400"/> ¿Cuándo esperas cosechar? <span className="text-slate-400 font-medium ml-1 text-[11px]">(opcional)</span>
                     </label>
                     <input type="date" value={form.estimated_harvest_date}
                       onChange={e => setForm(f => ({...f, estimated_harvest_date: e.target.value}))}
-                      className={`${inputCls} font-bold text-slate-700 py-3`}
+                      className={`${inputCls} font-bold text-[14px] text-slate-700 py-2.5`}
                     />
                   </div>
 
                   <div className="pt-2">
-                    <label className="block text-[14px] font-bold text-slate-800 mb-3 text-center sm:text-left">
+                    <label className="block text-[13px] font-bold text-slate-800 mb-2 text-center sm:text-left">
                       ¿Destino principal de la cosecha? <span className="text-slate-400 font-medium ml-1 text-[11px]">(opcional)</span>
                     </label>
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       {DESTINOS.map((d: any) => (
                         <button key={d.valor}
                           onClick={() => setForm(f => ({...f, destination: f.destination === d.valor ? '' : d.valor}))}
-                          className={`rounded-[16px] p-3.5 border-2 text-left transition-all active:scale-95 flex flex-col gap-2.5 items-center text-center
+                          className={`rounded-[14px] p-3 border-2 text-left transition-all active:scale-95 flex flex-col gap-2 items-center text-center
                             ${form.destination === d.valor
                               ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm'
                               : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]'}`}>
-                          <d.icon size={22} className={form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-400'} strokeWidth={2} />
+                          <d.icon size={18} className={form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-400'} strokeWidth={2} />
                           <span className={`text-[12px] font-black tracking-tight ${form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-600'}`}>
                             {d.label}
                           </span>
@@ -658,38 +658,38 @@ export default function CicloProductivoPage() {
       </div>
       {/* Footer Fixed Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t border-slate-200/50 pb-safe shadow-[0_-8px_20px_rgba(0,0,0,0.04)]">
-        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 py-3.5">
-          <div className="max-w-[500px] mx-auto space-y-2.5">
+        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 py-3">
+          <div className="max-w-[500px] mx-auto space-y-2">
             {paso === 1 && (
               <button onClick={() => { setError(''); setPaso(2); }}
                 disabled={!form.cycle_type}
-                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3.5 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
             )}
             {paso === 2 && (
               <button onClick={() => { setError(''); setPaso(3); }}
                 disabled={!form.variety_id}
-                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3.5 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
             )}
             {paso === 3 && (
               <button onClick={() => { setError(''); setPaso(4); }}
                 disabled={!form.area_sown_ha || Number(form.area_sown_ha) <= 0}
-                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3.5 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
             )}
             {paso === 4 && (
               <button onClick={guardar}
                 disabled={!form.planting_date || loading}
-                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3.5 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)] flex items-center justify-center gap-2">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)] flex items-center justify-center gap-2">
                 {loading ? <><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</> : '✓ Finalizar y guardar'}
               </button>
             )}
             
-            <button onClick={saltar} className="w-full py-1.5 text-slate-400 hover:text-slate-600 text-[13px] font-bold transition-colors active:scale-95">
+            <button onClick={saltar} className="w-full py-1 text-slate-400 hover:text-slate-600 text-[12px] font-bold transition-colors active:scale-95">
               Omitir por ahora
             </button>
           </div>
