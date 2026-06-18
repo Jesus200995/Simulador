@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
@@ -42,22 +42,45 @@ export default function AgregarUPPage() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [, setDrawMode] = useState<DrawMode>('idle');
+  const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
   const [capturandoGPS, setCapturandoGPS] = useState(false);
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [center, setCenter] = useState<[number, number]>([23.6, -102.5]);
   const [mapReady, setMapReady] = useState(false);
+  
+  const [pendingUP, setPendingUP] = useState<{
+    poligono: [number, number][];
+    coords: { lat: number; lng: number };
+    area: number;
+  } | null>(null);
 
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (paso === 'mapa' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => setCenter([pos.coords.latitude, pos.coords.longitude]),
         () => {},
         { enableHighAccuracy: true, timeout: 8000 }
       );
     }
-  }, []);
+  }, [paso]);
+
+  const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
+    setPendingUP({ poligono: poly, coords: centro, area });
+  };
+
+  const confirmarUP = () => {
+    if (pendingUP) {
+      guardar(pendingUP.poligono, pendingUP.coords, pendingUP.area);
+    }
+  };
+
+  const redibujarUP = () => {
+    setPendingUP(null);
+    setPointCount(0);
+    setGpsMsg(null);
+    setTimeout(() => dibujarRef.current?.startEdit?.(), 50);
+  };
 
   const guardar = async (
     poligono: [number, number][] | null,
@@ -189,64 +212,127 @@ export default function AgregarUPPage() {
                 ref={dibujarRef}
                 onModeChange={setDrawMode}
                 onPointCountChange={setPointCount}
-                onPoligonoCompleto={(coords, centroide, area) => {
-                  guardar(coords, centroide, area);
-                }}
+                onPoligonoCompleto={onUPDibujada}
                 onPoligonoEliminado={() => {}}
               />
+              {/* Polígono visible durante confirmación */}
+              {pendingUP && (
+                <Polygon
+                  positions={pendingUP.poligono}
+                  pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
+                />
+              )}
             </MapContainer>
 
-            {/* Buscador de dirección/localidad */}
-            <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
-              <NominatimSearch
-                placeholder="Buscar dirección o localidad…"
-                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
-              />
-            </div>
+            {/* Buscador de dirección/localidad — ocultarlo en confirmación */}
+            {!pendingUP && (
+              <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+                <NominatimSearch
+                  placeholder="Buscar dirección o localidad…"
+                  onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+                />
+              </div>
+            )}
 
-            {/* Controles */}
-            <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5">
-              <p className="text-center text-[11px] text-white bg-black/40 rounded-lg px-3 py-1.5">
-                {pointCount === 0
-                  ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
-                  : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
-              </p>
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-700 text-xs">{error}</p></div>
-              )}
+            {/* ===== PANEL CONFIRMACIÓN (overlay encima del mapa) ===== */}
+            {pendingUP ? (
+              <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
+                <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
+                  <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
 
-              <button
-                onClick={() => {
-                  setCapturandoGPS(true); setGpsMsg(null);
-                  dibujarRef.current?.addPointGPS((info) => {
-                    setCapturandoGPS(false);
-                    if (!info.ok) setGpsMsg(info.error);
-                    else if (info.accuracy > 30) setGpsMsg(`Punto registrado, señal GPS débil (±${Math.round(info.accuracy)} m).`);
-                    else setGpsMsg(`Punto registrado (±${Math.round(info.accuracy)} m).`);
-                  });
-                }}
-                disabled={capturandoGPS}
-                className="w-full bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
-                {capturandoGPS
-                  ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
-                  : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
-              </button>
-              {gpsMsg && <p className="text-center text-[11px] text-gray-600 bg-white/90 rounded-lg px-3 py-1.5">{gpsMsg}</p>}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-green-500/20 flex items-center justify-center ring-1 ring-green-400/30">
+                      <CheckCircle2 size={16} className="text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar esta parcela?</p>
+                      <p className="text-white/50 text-[11px]">Revisa el polígono en el mapa antes de guardar</p>
+                    </div>
+                  </div>
 
-              {pointCount > 0 && (
-                <div className="flex gap-2">
-                  <button onClick={() => dibujarRef.current?.undoVertex()}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/90 ring-1 ring-gray-200 text-gray-700 py-3 rounded-xl text-sm font-semibold">
-                    <Undo2 size={16} /> Deshacer
-                  </button>
-                  <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar || enviando}
-                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-[#1A5C38] text-white py-3 rounded-xl text-sm font-bold disabled:opacity-40">
-                    <CheckCircle2 size={17} />
-                    {enviando ? 'Guardando…' : puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
-                  </button>
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                      <p className="text-green-300 font-black text-[17px] leading-none">{pendingUP.area.toLocaleString('es-MX', { maximumFractionDigits: 2 })}</p>
+                      <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Hectáreas</p>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                      <p className="text-white font-black text-[17px] leading-none">{pendingUP.poligono.length}</p>
+                      <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Vértices</p>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                      <p className="text-white font-black text-[13px] leading-tight truncate">{municipioUp.split(' ')[0]}</p>
+                      <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Municipio</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5">
+                    <button
+                      onClick={redibujarUP}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all"
+                    >
+                      <Undo2 size={16} /> Redibujar
+                    </button>
+                    <button
+                      onClick={confirmarUP}
+                      disabled={enviando}
+                      className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50 disabled:opacity-40"
+                    >
+                      <CheckCircle2 size={17} /> {enviando ? 'Guardando...' : 'Confirmar Parcela'}
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+                <p className="text-center text-xs text-white bg-black/60 backdrop-blur-md rounded-xl px-4 py-2 font-medium ring-1 ring-white/10">
+                  {pointCount === 0
+                    ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
+                    : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
+                </p>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-700 text-xs">{error}</p></div>
+                )}
+
+                <button
+                  onClick={() => {
+                    setCapturandoGPS(true); setGpsMsg(null);
+                    dibujarRef.current?.addPointGPS((info) => {
+                      setCapturandoGPS(false);
+                      if (!info.ok) setGpsMsg(info.error);
+                      else if (info.accuracy > 30) setGpsMsg(`Punto registrado, señal GPS débil (±${Math.round(info.accuracy)} m).`);
+                      else setGpsMsg(`Punto registrado (±${Math.round(info.accuracy)} m).`);
+                    });
+                  }}
+                  disabled={capturandoGPS}
+                  className="w-full bg-[#1A5C38]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+                >
+                  {capturandoGPS
+                    ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
+                    : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
+                </button>
+                {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
+
+                {pointCount > 0 && (
+                  <div className="flex gap-2">
+                    <button onClick={() => dibujarRef.current?.undoVertex()}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
+                      <Undo2 size={16} /> Deshacer
+                    </button>
+                    <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar || enviando}
+                      className="flex-[1.4] flex items-center justify-center gap-1.5 bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-lg shadow-green-900/50">
+                      <CheckCircle2 size={17} /> {puedeTerminar ? `Continuar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
+                    </button>
+                  </div>
+                )}
+                {drawMode === 'editing' && (
+                  <button onClick={() => dibujarRef.current?.saveEdit()}
+                    className="w-full bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-green-900/50 active:scale-[0.98] transition-all">
+                    Guardar ajustes
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
