@@ -157,9 +157,8 @@ export default function RegistroNuevoPage() {
     const errOv = validarOverlapLocal(poly);
     if (errOv) { setErrorOverlap(errOv); return; }
     setErrorOverlap(null);
-    // En lugar de guardar de inmediato, mostramos la pantalla de confirmación
+    // Mostrar confirmación encima del mapa (sin cambiar de pantalla)
     setPendingUP({ poligono: poly, coords: centro, area });
-    setPaso(45);
   };
 
   const confirmarUP = () => {
@@ -178,14 +177,11 @@ export default function RegistroNuevoPage() {
 
   const redibujarUP = () => {
     setPendingUP(null);
-    setPaso(4);
-    // Reiniciar el dibujo
-    setEnDibujo(true);
     setPointCount(0);
     setGpsMsg(null);
     setErrorOverlap(null);
-    // Pequeño delay para que el componente de mapa se remonte
-    setTimeout(() => dibujarRef.current?.startEdit?.(), 100);
+    // El mapa ya está montado, solo reseteamos el dibujo
+    setTimeout(() => dibujarRef.current?.startEdit?.(), 50);
   };
 
   const registrar = async () => {
@@ -228,7 +224,6 @@ export default function RegistroNuevoPage() {
 
   const handleBack = () => {
     if (paso === 6) setPaso(5);
-    else if (paso === 45) { redibujarUP(); }
     else if (paso === 5) {
       const lastUP = ups[ups.length - 1];
       if (lastUP) setUpActual({ estado: lastUP.estado, municipio: lastUP.municipio });
@@ -236,7 +231,8 @@ export default function RegistroNuevoPage() {
       setPaso(3);
     }
     else if (paso === 4 && enDibujo) {
-      setEnDibujo(false); setPaso(3);
+      if (pendingUP) { redibujarUP(); }
+      else { setEnDibujo(false); setPaso(3); }
     }
     else if (paso === 3) {
       if (ups.length > 0) setPaso(5);
@@ -278,17 +274,79 @@ export default function RegistroNuevoPage() {
               onPoligonoCompleto={onUPDibujada}
               onPoligonoEliminado={() => {}}
             />
+            {/* Polígono visible durante confirmación */}
+            {pendingUP && (
+              <Polygon
+                positions={pendingUP.poligono}
+                pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
+              />
+            )}
           </MapContainer>
 
-          {/* Buscador de dirección/localidad */}
-          <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
-            <NominatimSearch
-              placeholder="Buscar dirección o localidad…"
-              onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
-            />
-          </div>
+          {/* Buscador de dirección/localidad — ocultarlo en confirmación */}
+          {!pendingUP && (
+            <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+              <NominatimSearch
+                placeholder="Buscar dirección o localidad…"
+                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+              />
+            </div>
+          )}
 
-          <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+          {/* ===== PANEL CONFIRMACIÓN (overlay encima del mapa) ===== */}
+          {pendingUP ? (
+            <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
+              {/* Backdrop difuminado en la parte superior */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
+              <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
+                {/* Handle */}
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-green-500/20 flex items-center justify-center ring-1 ring-green-400/30">
+                    <CheckCircle2 size={16} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar esta parcela?</p>
+                    <p className="text-white/50 text-[11px]">Revisa el polígono en el mapa antes de guardar</p>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                    <p className="text-green-300 font-black text-[17px] leading-none">{pendingUP.area.toLocaleString('es-MX', { maximumFractionDigits: 2 })}</p>
+                    <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Hectáreas</p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                    <p className="text-white font-black text-[17px] leading-none">{pendingUP.poligono.length}</p>
+                    <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Vértices</p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                    <p className="text-white font-black text-[13px] leading-tight truncate">{upActual.municipio.split(' ')[0]}</p>
+                    <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Municipio</p>
+                  </div>
+                </div>
+
+                {/* Botones */}
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={redibujarUP}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all"
+                  >
+                    <Undo2 size={16} /> Redibujar
+                  </button>
+                  <button
+                    onClick={confirmarUP}
+                    className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50"
+                  >
+                    <CheckCircle2 size={17} /> Confirmar Parcela
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
             {errorOverlap && (
               <div className="bg-red-50 border border-red-300 rounded-xl p-3">
                 <p className="text-red-700 text-sm font-medium flex items-center gap-1.5"><AlertTriangle size={14} /> {errorOverlap}</p>
@@ -341,6 +399,7 @@ export default function RegistroNuevoPage() {
               </button>
             )}
           </div>
+          )}
         </div>
       </div>
     );
@@ -351,7 +410,6 @@ export default function RegistroNuevoPage() {
     if (paso === 1) return 1;
     if (paso === 2) return 2;
     if (paso >= 3 && paso <= 5) return 3;
-    if (paso === 45) return 3;
     if (paso === 6) return 4;
     return 4;
   };
