@@ -191,8 +191,11 @@ export default function RegistroNuevoPage() {
   if (paso === 4 && enDibujo) {
     const puedeTerminar = pointCount >= 3;
     return (
-      <div className="h-screen flex flex-col">
-        <div className="bg-[#0c2e1a] px-4 pb-3 flex items-center gap-3 z-10 shadow-md" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+      <div 
+        className="h-[100dvh] flex flex-col overflow-hidden"
+        style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
           <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
             <ChevronLeft size={20} />
           </button>
@@ -273,7 +276,10 @@ export default function RegistroNuevoPage() {
   const visualStep = getVisualStep();
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden">
+    <div 
+      className="relative h-[100dvh] flex flex-col overflow-hidden"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       {/* Background idéntico a Login */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
@@ -282,7 +288,7 @@ export default function RegistroNuevoPage() {
 
       {/* Header con Stepper */}
       {paso < 99 && (
-        <div className="relative z-10 flex items-center px-4 pb-3 sm:pb-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+        <div className="relative z-10 flex items-center px-4 py-3 sm:py-4">
           <button
             onClick={handleBack}
             className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
@@ -314,7 +320,7 @@ export default function RegistroNuevoPage() {
       )}
 
       {/* Contenedor Principal */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-6 sm:pb-10 pt-2 sm:pt-4">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-6 sm:pb-10 pt-2 sm:pt-4 overflow-y-auto">
         <div className="w-full max-w-sm">
 
           {/* Paso 1 — CURP */}
