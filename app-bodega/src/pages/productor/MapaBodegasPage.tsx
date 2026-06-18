@@ -418,13 +418,14 @@ export default function MapaBodegasPage() {
 
   const comprando  = bodegas.filter(b => b.estado_compra === 'comprando').length;
 
-  // â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── RENDER ────────────────────────────────────
   return (
-    <div className="bg-[#eef8f2]">
+    <div className="bg-[#eef8f2] w-full max-w-2xl mx-auto">
 
-      {/* â”€â”€ HEADER VERDE: tÃ­tulo + stats + filtros â”€â”€ */}
+      {/* ── HEADER VERDE: título + stats + filtros ── */}
       <div className="flex-shrink-0 bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] z-20">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-4">
+        <div className="px-4 sm:px-6 pt-4 pb-4">
+
 
           {/* Título + subtítulo */}
           <p className="text-[10px] font-semibold text-green-300/70 uppercase tracking-widest mb-1">Mapa</p>
@@ -516,7 +517,7 @@ export default function MapaBodegasPage() {
       )}
 
       {/* ——— MAPA (altura adaptable) ——— */}
-      <div className="max-w-2xl mx-auto px-3 pt-3 pb-3 w-full" style={{ height: 'calc(100dvh - 310px)', minHeight: '300px' }}>
+      <div className="px-3 pt-3 pb-3" style={{ height: 'calc(100dvh - 310px)', minHeight: '300px' }}>
         <div className="relative h-full rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.12)] ring-1 ring-black/5">
           <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
 
