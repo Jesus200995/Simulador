@@ -300,9 +300,18 @@ export default function AgregarUPPage() {
                       <CheckCircle2 size={16} className="text-green-400" />
                     </div>
                     <div>
-                      <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar {nombreUP ? `"${nombreUP}"` : 'esta parcela'}?</p>
+                      <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar esta parcela?</p>
                       <p className="text-white/50 text-[11px]">Revisa el polígono en el mapa antes de guardar</p>
                     </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-white/70 text-[12px] font-medium mb-1.5">Nombre de la parcela (opcional)</label>
+                    <input
+                      type="text" value={nombreUP} onChange={e => setNombreUP(e.target.value)}
+                      placeholder="Ej: Parcela Norte, El Potrero, etc."
+                      className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 text-white text-[14px] focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
+                    />
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 mb-4">

@@ -33,6 +33,8 @@ interface UPRegistrada {
   estado: string;
   municipio: string;
   nombre?: string;
+  coincide_area?: boolean | null;
+  area_real_ha?: number | null;
 }
 
 export default function RegistroNuevoPage() {
@@ -51,7 +53,7 @@ export default function RegistroNuevoPage() {
 
   // Pasos 3-5 — UPs
   const [ups, setUps] = useState<UPRegistrada[]>([]);
-  const [upActual, setUpActual] = useState<{ estado: string; municipio: string }>({ estado: '', municipio: '' });
+  const [upActual, setUpActual] = useState<{ estado: string; municipio: string; nombre?: string }>({ estado: '', municipio: '', nombre: '' });
   const [estados, setEstados] = useState<any[]>([]);
   const [municipios, setMunicipios] = useState<any[]>([]);
   const [estadoId, setEstadoId] = useState('');
@@ -75,6 +77,8 @@ export default function RegistroNuevoPage() {
     coords: { lat: number; lng: number };
     area: number;
   } | null>(null);
+  const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
+  const [areaReal, setAreaReal] = useState('');
 
   // Nombre automático de cada parcela según su orden
   const nombreAutomaticoUP = (indice: number): string =>
@@ -153,26 +157,31 @@ export default function RegistroNuevoPage() {
   }, [paso, enDibujo]);
 
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
-    // Overlap: validar al cerrar el polígono
     const errOv = validarOverlapLocal(poly);
     if (errOv) { setErrorOverlap(errOv); return; }
     setErrorOverlap(null);
-    // Mostrar confirmación encima del mapa (sin cambiar de pantalla)
     setPendingUP({ poligono: poly, coords: centro, area });
+    setCoincideArea(null);
+    setAreaReal('');
+    setPaso(45);
   };
 
   const confirmarUP = () => {
-    if (!pendingUP) return;
-    setUps(prev => [...prev, {
-      poligono: pendingUP.poligono,
-      coords: pendingUP.coords,
-      areaCalc: pendingUP.area,
-      estado: upActual.estado,
-      municipio: upActual.municipio,
-      nombre: nombreAutomaticoUP(ups.length),
-    }]);
-    setPendingUP(null);
-    setEnDibujo(false); setPointCount(0); setGpsMsg(null); setPaso(5);
+    if (pendingUP) {
+      setUps(prev => [...prev, {
+        poligono: pendingUP.poligono,
+        coords: pendingUP.coords,
+        areaCalc: pendingUP.area,
+        estado: upActual.estado,
+        municipio: upActual.municipio,
+        nombre: upActual.nombre || nombreAutomaticoUP(prev.length),
+        coincide_area: coincideArea,
+        area_real_ha: (coincideArea === false && areaReal) ? Number(areaReal) : pendingUP.area,
+      }]);
+      setPendingUP(null);
+      setEnDibujo(false);
+      setPaso(5); // Resumen
+    }
   };
 
   const redibujarUP = () => {
@@ -208,8 +217,8 @@ export default function RegistroNuevoPage() {
             lng: up.coords?.lng ?? null,
             poligono: up.poligono ?? null,
             area_calc_ha: up.areaCalc,
-            area_real_ha: up.areaCalc,
-            coincide_area: true,
+            area_real_ha: up.area_real_ha ?? up.areaCalc,
+            coincide_area: up.coincide_area ?? true,
             estado_up: up.estado,
             municipio_up: up.municipio,
             nombre_up: up.nombre || nombreAutomaticoUP(i),
@@ -556,6 +565,17 @@ export default function RegistroNuevoPage() {
                 <p className="text-white/50 text-sm mt-1.5">¿En qué estado y municipio se encuentra?</p>
               </div>
 
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl shadow-black/20 mb-4 text-left">
+                <label className={labelCls}>Nombre de la parcela (opcional)</label>
+                <input
+                  type="text"
+                  value={upActual.nombre || ''}
+                  onChange={e => setUpActual(prev => ({ ...prev, nombre: e.target.value }))}
+                  placeholder="Ej: Parcela Norte, El Potrero, etc."
+                  className={`${inputCls} mt-1 placeholder-white/40`}
+                />
+              </div>
+
               {/* Paso secuencial: primero Sí/No del padrón; los selectores solo aparecen si dice No */}
               {datosPadron?.estado_padron && ups.length === 0 && parcelaEnPadron === null && (
                 <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 space-y-4">
@@ -656,7 +676,7 @@ export default function RegistroNuevoPage() {
                         {i + 1}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">{up.municipio}</p>
+                        <p className="text-sm font-semibold text-white">{up.nombre || up.municipio}</p>
                         <p className="text-xs text-white/50">{up.estado} {up.areaCalc && `· ${up.areaCalc} ha`}</p>
                       </div>
                     </div>
@@ -730,11 +750,48 @@ export default function RegistroNuevoPage() {
                 </div>
               </div>
 
+              {/* ¿El área calculada coincide? */}
+              <div className="mb-4">
+                <p className="text-white/70 text-[12px] font-medium mb-2 text-left">¿El área calculada coincide con tu parcela?</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setCoincideArea(true); setAreaReal(''); }}
+                    className={`flex-1 py-3 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
+                      coincideArea === true ? 'bg-green-500 text-white ring-green-400' : 'bg-white/5 text-white/70 ring-white/15'
+                    }`}
+                  >
+                    Sí, coincide
+                  </button>
+                  <button
+                    onClick={() => setCoincideArea(false)}
+                    className={`flex-1 py-3 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
+                      coincideArea === false ? 'bg-amber-500 text-white ring-amber-400' : 'bg-white/5 text-white/70 ring-white/15'
+                    }`}
+                  >
+                    No, difiere
+                  </button>
+                </div>
+                {coincideArea === false && (
+                  <div className="mt-3 animate-fade-in text-left">
+                    <label className="block text-white/50 text-[11px] mb-1">Superficie real de tu parcela</label>
+                    <div className="relative">
+                      <input
+                        type="number" value={areaReal} onChange={e => setAreaReal(e.target.value)}
+                        placeholder={String(pendingUP.area)} min="0.1" step="0.1" inputMode="decimal"
+                        className={`${inputCls} pr-12`}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-semibold">ha</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Botones de acción */}
               <div className="space-y-3">
                 <button
                   onClick={confirmarUP}
-                  className={btnCls}
+                  disabled={cargando || coincideArea === null || (coincideArea === false && !areaReal)}
+                  className={`${btnCls} disabled:opacity-40 disabled:cursor-not-allowed`}
                 >
                   <CheckCircle2 size={18} /> Confirmar y Guardar Parcela
                 </button>
