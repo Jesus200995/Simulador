@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
+import NominatimSearch from '../../components/productor/NominatimSearch';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -12,6 +13,7 @@ export default function AgregarUPPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem('simac_token') || '';
   const dibujarRef = useRef<DibujarPoligonoHandle>(null);
+  const mapRef = useRef<any>(null);
 
   const [nombreUP, setNombreUP] = useState('');
   const [estadoUp, setEstadoUp] = useState('');
@@ -178,7 +180,7 @@ export default function AgregarUPPage() {
           <p className="text-xs text-center text-gray-500 py-2 bg-white">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
 
           <div className="relative" style={{ height: 'calc(100% - 34px)' }}>
-            <MapContainer center={center} zoom={mapReady ? 16 : 5} style={{ height: '100%', width: '100%' }}
+            <MapContainer ref={mapRef} center={center} zoom={mapReady ? 16 : 5} style={{ height: '100%', width: '100%' }}
               whenReady={() => setMapReady(true)}>
               <TileLayer
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -193,6 +195,14 @@ export default function AgregarUPPage() {
                 onPoligonoEliminado={() => {}}
               />
             </MapContainer>
+
+            {/* Buscador de dirección/localidad */}
+            <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+              <NominatimSearch
+                placeholder="Buscar dirección o localidad…"
+                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+              />
+            </div>
 
             {/* Controles */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5">

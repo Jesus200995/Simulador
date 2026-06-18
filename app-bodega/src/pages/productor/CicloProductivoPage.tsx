@@ -38,6 +38,7 @@ export default function CicloProductivoPage() {
 
   const [upId, setUpId] = useState<number | null>(null);
   const [areaHaCalc, setAreaHaCalc] = useState<number | null>(null);
+  const [errorSuperficie, setErrorSuperficie] = useState<string | null>(null);
   const [todasLasUPs, setTodasLasUPs] = useState<any[]>([]);
   const [upSeleccionadaId, setUpSeleccionadaId] = useState<number | null>(null);
   const [variedades, setVariedades] = useState<Variedad[]>([]);
@@ -356,6 +357,21 @@ export default function CicloProductivoPage() {
         <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
           <div className="max-w-[500px] mx-auto">
 
+            {/* Banner de la parcela seleccionada (cuando hay varias UPs) */}
+            {todasLasUPs.length > 1 && upSeleccionadaId && (
+              <div className="mb-4 bg-[#1A5C38] rounded-[16px] px-4 py-3 flex items-center justify-between shadow-sm">
+                <div className="min-w-0">
+                  <p className="text-[11px] text-emerald-200 font-medium">Registrando ciclo en:</p>
+                  <p className="text-sm font-bold text-white flex items-center gap-1.5 truncate">
+                    <Sprout size={14} className="flex-shrink-0" /> {todasLasUPs.find(u => u.up_id === upSeleccionadaId)?.up_name || 'Parcela'}
+                  </p>
+                </div>
+                <button onClick={() => setUpSeleccionadaId(null)} className="text-emerald-200 text-xs underline font-semibold flex-shrink-0 ml-3">
+                  Cambiar
+                </button>
+              </div>
+            )}
+
             {error && (
               <div className="mb-4 p-3.5 bg-red-50/90 backdrop-blur-sm border border-red-100 rounded-[16px] text-red-700 text-[13px] font-medium flex items-start gap-3 shadow-sm animate-in fade-in slide-in-from-top-4">
                 <AlertTriangle size={18} className="shrink-0 text-red-600 mt-0.5" />
@@ -552,12 +568,34 @@ export default function CicloProductivoPage() {
                     <div className="flex items-center gap-2">
                       <input type="number" min="0.1" step="0.1" max={areaHaCalc ?? 9999}
                         value={form.area_sown_ha}
-                        onChange={e => setForm(f => ({...f, area_sown_ha: e.target.value}))}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          const max = areaHaCalc ? parseFloat(String(areaHaCalc)) : null;
+                          if (e.target.value !== '' && max && val > max) {
+                            setErrorSuperficie(`La superficie sembrada (${val} ha) no puede ser mayor al área de tu parcela (${max} ha).`);
+                          } else if (e.target.value !== '' && val <= 0) {
+                            setErrorSuperficie('La superficie debe ser mayor a 0.');
+                          } else {
+                            setErrorSuperficie(null);
+                          }
+                          setForm(f => ({...f, area_sown_ha: e.target.value}));
+                        }}
                         placeholder={areaHaCalc ? String(areaHaCalc) : 'Ej: 5.5'}
-                        className={`${inputCls} text-[18px] font-black text-center flex-1 py-2.5 shadow-inner`}
+                        className={`${inputCls} text-[18px] font-black text-center flex-1 py-2.5 shadow-inner ${errorSuperficie ? 'border-red-400 ring-1 ring-red-300 bg-red-50' : ''}`}
                       />
                       <span className="text-slate-400 font-bold text-[13px] px-2">ha</span>
                     </div>
+                    {errorSuperficie && (
+                      <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-2.5 mt-2">
+                        <AlertTriangle size={14} className="text-red-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-red-700 text-[12px] font-medium">{errorSuperficie}</p>
+                      </div>
+                    )}
+                    {areaHaCalc && (
+                      <p className={`text-[11.5px] mt-1.5 text-center font-medium ${errorSuperficie ? 'text-red-500' : 'text-slate-400'}`}>
+                        Área máxima: {areaHaCalc} ha
+                      </p>
+                    )}
                     {areaHaCalc && !form.area_sown_ha && (
                       <button onClick={() => setForm(f => ({...f, area_sown_ha: String(areaHaCalc)}))}
                         className="mt-2.5 w-full text-blue-700 text-[12.5px] font-bold border border-blue-200 bg-white py-2 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
@@ -676,7 +714,7 @@ export default function CicloProductivoPage() {
             )}
             {paso === 3 && (
               <button onClick={() => { setError(''); setPaso(4); }}
-                disabled={!form.area_sown_ha || Number(form.area_sown_ha) <= 0}
+                disabled={!form.area_sown_ha || Number(form.area_sown_ha) <= 0 || !!errorSuperficie}
                 className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>

@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
-  ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus, Search, UserCheck, Map, KeyRound
+  ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus, Search, UserCheck, Map, KeyRound, AlertTriangle, Pencil
 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
+import NominatimSearch from '../../components/productor/NominatimSearch';
+import * as turf from '@turf/turf';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -30,6 +32,7 @@ interface UPRegistrada {
   areaCalc: number | null;
   estado: string;
   municipio: string;
+  nombre?: string;
 }
 
 export default function RegistroNuevoPage() {
@@ -62,6 +65,31 @@ export default function RegistroNuevoPage() {
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [center, setCenter] = useState<[number, number]>([23.6, -102.5]);
   const [mapReady, setMapReady] = useState(false);
+  const mapRef = useRef<any>(null);
+  const [errorOverlap, setErrorOverlap] = useState<string | null>(null);
+  const [parcelaEnPadron, setParcelaEnPadron] = useState<boolean | null>(null);
+
+  // Nombre automático de cada parcela según su orden
+  const nombreAutomaticoUP = (indice: number): string =>
+    indice === 0 ? 'Parcela principal' : indice === 1 ? 'Parcela secundaria' : `Parcela ${indice + 1}`;
+
+  // Validación de overlap en cliente contra las parcelas ya dibujadas en esta sesión
+  // (en el registro no hay token aún, así que se valida localmente con turf).
+  const validarOverlapLocal = (poly: [number, number][]): string | null => {
+    if (poly.length < 3) return null;
+    try {
+      const nueva = turf.polygon([[...poly.map(([la, ln]) => [ln, la]), [poly[0][1], poly[0][0]]]]);
+      for (let i = 0; i < ups.length; i++) {
+        const ex = ups[i].poligono;
+        if (!ex || ex.length < 3) continue;
+        const exPoly = turf.polygon([[...ex.map(([la, ln]) => [ln, la]), [ex[0][1], ex[0][0]]]]);
+        if (turf.booleanIntersects(nueva, exPoly)) {
+          return `Esta parcela se intersecta con "${ups[i].nombre || nombreAutomaticoUP(i)}" que ya dibujaste. Dibújala en un área diferente.`;
+        }
+      }
+    } catch { /* si turf falla, no bloquear */ }
+    return null;
+  };
 
   // Paso 6 — PIN
   const [pin, setPin] = useState('');
@@ -118,9 +146,14 @@ export default function RegistroNuevoPage() {
   }, [paso, enDibujo]);
 
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
+    // Overlap: validar al cerrar el polígono (no al final del flujo)
+    const errOv = validarOverlapLocal(poly);
+    if (errOv) { setErrorOverlap(errOv); return; }
+    setErrorOverlap(null);
     setUps(prev => [...prev, {
       poligono: poly, coords: centro, areaCalc: area,
       estado: upActual.estado, municipio: upActual.municipio,
+      nombre: nombreAutomaticoUP(prev.length),
     }]);
     setEnDibujo(false); setPointCount(0); setGpsMsg(null); setPaso(5);
   };
@@ -144,7 +177,7 @@ export default function RegistroNuevoPage() {
           telefono: telefonoEditable,
           correo: datosPadron?.correo,
           pin,
-          ups: ups.map(up => ({
+          ups: ups.map((up, i) => ({
             lat: up.coords?.lat ?? null,
             lng: up.coords?.lng ?? null,
             poligono: up.poligono ?? null,
@@ -153,6 +186,7 @@ export default function RegistroNuevoPage() {
             coincide_area: true,
             estado_up: up.estado,
             municipio_up: up.municipio,
+            nombre_up: up.nombre || nombreAutomaticoUP(i),
           })),
         }),
       });
@@ -204,7 +238,7 @@ export default function RegistroNuevoPage() {
           </div>
         </div>
         <div className="flex-1 relative">
-          <MapContainer center={center} zoom={mapReady ? 16 : 5} style={{ height: '100%', width: '100%' }} whenReady={() => setMapReady(true)}>
+          <MapContainer ref={mapRef} center={center} zoom={mapReady ? 16 : 5} style={{ height: '100%', width: '100%' }} whenReady={() => setMapReady(true)}>
             <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="© Esri" />
             <DibujarPoligonoUP
               ref={dibujarRef}
@@ -215,7 +249,25 @@ export default function RegistroNuevoPage() {
             />
           </MapContainer>
 
+          {/* Buscador de dirección/localidad */}
+          <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+            <NominatimSearch
+              placeholder="Buscar dirección o localidad…"
+              onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+            />
+          </div>
+
           <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+            {errorOverlap && (
+              <div className="bg-red-50 border border-red-300 rounded-xl p-3">
+                <p className="text-red-700 text-sm font-medium flex items-center gap-1.5"><AlertTriangle size={14} /> {errorOverlap}</p>
+                <p className="text-red-600 text-xs mt-1">Ajusta los puntos o redibuja en otra área.</p>
+                <button onClick={() => { setErrorOverlap(null); dibujarRef.current?.startEdit?.(); }}
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-red-600 font-semibold underline">
+                  <Pencil size={12} /> Editar puntos
+                </button>
+              </div>
+            )}
             <p className="text-center text-xs text-white bg-black/60 backdrop-blur-md rounded-xl px-4 py-2 font-medium ring-1 ring-white/10">
               {pointCount === 0
                 ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
@@ -414,23 +466,37 @@ export default function RegistroNuevoPage() {
                 <p className="text-white/50 text-sm mt-1.5">¿En qué estado y municipio se encuentra?</p>
               </div>
 
-              {datosPadron?.estado_padron && ups.length === 0 && (
-                <div className="bg-green-500/20 ring-1 ring-green-400/30 rounded-2xl p-4 mb-4 backdrop-blur-md">
-                  <p className="text-sm text-green-100 text-center leading-relaxed">
-                    Tu domicilio registrado es <strong className="text-white">{datosPadron.municipio_padron}, {datosPadron.estado_padron}</strong>.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setUpActual({ estado: datosPadron.estado_padron || '', municipio: datosPadron.municipio_padron || '' });
-                      setEnDibujo(true); setPaso(4);
-                    }}
-                    className="mt-3 w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-2.5 rounded-xl text-sm transition-all"
-                  >
-                    Mi parcela está ahí
-                  </button>
+              {/* Paso secuencial: primero Sí/No del padrón; los selectores solo aparecen si dice No */}
+              {datosPadron?.estado_padron && ups.length === 0 && parcelaEnPadron === null && (
+                <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 space-y-4">
+                  <p className="text-sm text-white/70 text-center">Según el padrón de SADER, tu domicilio está en:</p>
+                  <div className="bg-green-500/20 ring-1 ring-green-400/30 rounded-xl p-4 text-center">
+                    <p className="text-white font-bold text-base">{datosPadron.municipio_padron}, {datosPadron.estado_padron}</p>
+                  </div>
+                  <p className="text-sm text-white/70 text-center font-medium">¿Tu parcela está en este estado y municipio?</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => {
+                        setParcelaEnPadron(true);
+                        setUpActual({ estado: datosPadron.estado_padron || '', municipio: datosPadron.municipio_padron || '' });
+                        setEnDibujo(true); setPaso(4);
+                      }}
+                      className="py-4 rounded-xl bg-green-500 text-white font-semibold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                    >
+                      <Check size={16} /> Sí, está ahí
+                    </button>
+                    <button
+                      onClick={() => setParcelaEnPadron(false)}
+                      className="py-4 rounded-xl bg-white/10 ring-1 ring-white/20 text-white font-semibold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                    >
+                      <Search size={16} /> No, es otro lugar
+                    </button>
+                  </div>
                 </div>
               )}
 
+              {/* Selectores — solo cuando dijo No, es UP adicional, o no hay datos de padrón */}
+              {(parcelaEnPadron === false || ups.length > 0 || !datosPadron?.estado_padron) && (
               <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl shadow-black/20">
                 <div className="space-y-4">
                   <div>
@@ -477,6 +543,7 @@ export default function RegistroNuevoPage() {
                   <Map size={18} /> Continuar al Mapa
                 </button>
               </div>
+              )}
             </div>
           )}
 
@@ -509,7 +576,7 @@ export default function RegistroNuevoPage() {
                 <h2 className="font-semibold text-white text-center mb-4 text-lg">¿Tienes otra parcela?</h2>
                 <div className="space-y-3">
                   <button onClick={() => {
-                    setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setPaso(3);
+                    setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setParcelaEnPadron(false); setPaso(3);
                   }} className="w-full bg-white/10 hover:bg-white/20 active:bg-white/15 ring-1 ring-white/20 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
                     <Plus size={18} /> Sí, agregar otra
                   </button>

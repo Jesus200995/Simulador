@@ -302,7 +302,7 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
       });
       return;
     }
-    if (error.response?.status === 503 || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+    if (error.response?.status === 503 || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
       res.status(503).json({
         error: 'El servicio de verificación no está disponible. Intenta más tarde.',
         codigo: 'SADER_NO_DISPONIBLE'
@@ -321,6 +321,7 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
   }
 });
 
+
 // Cap de área a NUMERIC(10,4) → máx 999999.9999 ha (evita overflow 22003)
 function capAreaHa(v: any): number | null {
   const n = Number(v);
@@ -332,6 +333,7 @@ function capAreaHa(v: any): number | null {
 // Lanza Error con .code='UP_OVERLAP' y .up_conflicto si el polígono se intersecta con otra UP del productor.
 async function crearUP(client: any, producerId: number, up: any): Promise<number> {
   const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area } = up;
+  const upName = (up.nombre_up && String(up.nombre_up).trim()) || 'Parcela principal';
   let estadoFinal = up.estado_up;
   let municipioFinal = up.municipio_up;
   let stateIdFinal: string | null = null;
@@ -384,14 +386,14 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
     const params = [
       producerId, estadoFinal, municipioFinal, lng, lat,
       ...(useGeom ? [geojson] : []),
-      areaCalc, areaReal, coincide_area ?? null,
+      areaCalc, areaReal, coincide_area ?? null, upName,
     ];
     const r = await client.query(
       `INSERT INTO up
          (producer_id, up_name, up_type, production_system, water_regime,
           state_name, municipality_name, centroid, geom,
           area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
-       VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+       VALUES ($1, $${aIdx + 3}, 'temporal', 'tradicional', 'temporal',
                $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), ${geomSql},
                $${aIdx}, $${aIdx + 1}, $${aIdx + 2}, TRUE, 'productor')
        RETURNING up_id`,
@@ -404,13 +406,13 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
          (producer_id, up_name, up_type, production_system, water_regime,
           state_name, municipality_name, centroid, geom,
           area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
-       VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+       VALUES ($1, $8, 'temporal', 'tradicional', 'temporal',
                $2, $3,
                ST_Centroid(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
                ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
                $5, $6, $7, TRUE, 'poligono_calculado')
        RETURNING up_id`,
-      [producerId, estadoFinal, municipioFinal, geojson, areaCalc, areaReal, coincide_area ?? null]
+      [producerId, estadoFinal, municipioFinal, geojson, areaCalc, areaReal, coincide_area ?? null, upName]
     );
     upId = r.rows[0].up_id;
   } else {
@@ -428,10 +430,10 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
          (producer_id, up_name, up_type, production_system, water_regime,
           state_name, municipality_name, centroid,
           location_confirmed, centroid_source)
-       VALUES ($1, 'Parcela principal', 'temporal', 'tradicional', 'temporal',
+       VALUES ($1, $5, 'temporal', 'tradicional', 'temporal',
                $2, $3, $4::geometry, FALSE, 'municipio')
        RETURNING up_id`,
-      [producerId, estadoFinal, municipioFinal, centroidVal]
+      [producerId, estadoFinal, municipioFinal, centroidVal, upName]
     );
     upId = r.rows[0].up_id;
   }
@@ -1337,5 +1339,45 @@ router.get('/mis-ups-con-ciclos', authMiddleware, async (req: AuthRequest, res: 
   }
 });
 
+
+// POST /api/productor/ups/validar-overlap — valida en vivo que un polígono no se intersecte
+// con UPs ya registradas del mismo productor (se usa al cerrar el polígono en el mapa).
+router.post('/ups/validar-overlap', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const usuarioId = req.user!.userId;
+    const { poligono } = req.body;
+    const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
+    if (!postgisActivo || !poligono || !Array.isArray(poligono) || poligono.length < 3) {
+      res.json({ valido: true });
+      return;
+    }
+    const geojson = JSON.stringify({
+      type: 'Polygon',
+      coordinates: [[
+        ...poligono.map(([lat, lng]: [number, number]) => [lng, lat]),
+        [poligono[0][1], poligono[0][0]],
+      ]],
+    });
+    const result = await pool.query(
+      `SELECT u.up_id, u.up_name
+       FROM up u JOIN producer p ON p.producer_id = u.producer_id
+       WHERE p.usuario_id = $1 AND u.geom IS NOT NULL
+         AND ST_Intersects(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
+       LIMIT 1`,
+      [usuarioId, geojson]
+    );
+    if (result.rows.length > 0) {
+      res.status(409).json({
+        valido: false,
+        error: `Este polígono se intersecta con tu parcela "${result.rows[0].up_name}". Dibújala en un área diferente.`,
+      });
+      return;
+    }
+    res.json({ valido: true });
+  } catch (error) {
+    console.error('[OVERLAP]', error);
+    res.json({ valido: true });
+  }
+});
 
 export default router;

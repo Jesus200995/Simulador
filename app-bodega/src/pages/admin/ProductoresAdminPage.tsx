@@ -47,7 +47,7 @@ function calcularEdadDesdeCurp(curp: string): number | null {
 
 export default function ProductoresAdminPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<'pendiente' | 'todos' | 'suspendido'>('pendiente');
+  const [tab, setTab] = useState<'pendiente' | 'todos' | 'suspendido'>('todos');
   const [productores, setProductores] = useState<Productor[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarStats, setMostrarStats] = useState(false);
@@ -223,24 +223,9 @@ export default function ProductoresAdminPage() {
   return (
     <div className="space-y-6">
       
-      {/* 3 Tabs de navegación en panel */}
+      {/* Tabs de navegación en panel */}
       <div className="flex border-b border-white/5 gap-2">
-        <button 
-          onClick={() => { setTab('pendiente'); setPage(1); }}
-          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
-            tab === 'pendiente' 
-              ? 'border-emerald-500 text-gray-900' 
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Pendientes
-          {productores.filter(p => p.estado_validacion === 'pendiente').length > 0 && (
-            <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none">
-              {productores.filter(p => p.estado_validacion === 'pendiente').length}
-            </span>
-          )}
-        </button>
-        <button 
+        <button
           onClick={() => { setTab('todos'); setPage(1); }}
           className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all ${
             tab === 'todos' 
