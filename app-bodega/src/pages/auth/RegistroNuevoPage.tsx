@@ -191,7 +191,7 @@ export default function RegistroNuevoPage() {
     const puedeTerminar = pointCount >= 3;
     return (
       <div 
-        className="h-[100dvh] flex flex-col overflow-hidden"
+        className="h-[100dvh] flex flex-col overflow-hidden bg-[#0c2e1a]"
         style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
@@ -276,7 +276,7 @@ export default function RegistroNuevoPage() {
 
   return (
     <div 
-      className="relative h-[100dvh] flex flex-col overflow-hidden"
+      className="relative h-[100dvh] flex flex-col overflow-hidden bg-[#061510]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Background idéntico a Login */}
