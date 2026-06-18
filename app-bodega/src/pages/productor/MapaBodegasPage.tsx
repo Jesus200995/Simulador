@@ -374,7 +374,7 @@ export default function MapaBodegasPage() {
                 <p className="text-[10px] text-gray-600 font-medium">Precio hoy</p>
               </div>
               <p className="font-black text-[#1A5C38] text-[14px]">
-                {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}` : 'â€”'}
+                {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}` : '-'}
               </p>
             </div>
 
@@ -392,7 +392,7 @@ export default function MapaBodegasPage() {
             
             {b.senal_activa && (
               <div className="bg-blue-50/80 rounded-lg p-2.5">
-                <p className="text-[9px] font-bold text-blue-600 uppercase mb-0.5">SeÃ±al de compra</p>
+                <p className="text-[9px] font-bold text-blue-600 uppercase mb-0.5">Señal de compra</p>
                 <div className="flex justify-between items-end">
                   <p className="text-[10px] text-gray-700 font-medium">{b.senal_activa.volumen_ton}t {b.senal_activa.tipo_maiz}</p>
                   <p className="text-emerald-600 font-black text-[12px]">${Number(b.senal_activa.precio_oferta).toLocaleString('es-MX')}</p>
@@ -564,7 +564,7 @@ export default function MapaBodegasPage() {
           {loadingBodegas && (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-white/90 backdrop-blur-md rounded-full px-4 py-2 shadow-lg flex items-center gap-2 text-[12px] font-semibold text-gray-700">
               <div className="w-3 h-3 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
-              Cargando bodegasâ€¦
+              Cargando bodegas...
             </div>
           )}
 
