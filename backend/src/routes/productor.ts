@@ -600,24 +600,32 @@ router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response)
     let precio_ayer: number | null = null;
     try {
       const precioRes = await pool.query(
-        `SELECT ROUND(AVG(pr.precio)::numeric, 2) AS precio_hoy
-         FROM precios pr
-         JOIN bodegas b ON b.id = pr.bodega_id
-         WHERE pr.created_at >= CURRENT_DATE
-           AND pr.tipo_precio = 'bodega'
-           AND b.estado ILIKE $1`,
+        `SELECT ROUND(AVG(latest_precio)::numeric, 2) AS precio_hoy
+         FROM (
+           SELECT b.id, 
+                  (SELECT pr.precio FROM precios pr 
+                   WHERE pr.bodega_id = b.id AND pr.tipo_precio = 'bodega' 
+                   ORDER BY pr.created_at DESC LIMIT 1) as latest_precio
+           FROM bodegas b
+           WHERE b.estado ILIKE $1
+         ) sub
+         WHERE latest_precio IS NOT NULL`,
         [up?.state_name || '']
       );
       precio_hoy = precioRes.rows[0]?.precio_hoy;
 
       const ayerRes = await pool.query(
-        `SELECT ROUND(AVG(pr.precio)::numeric, 2) AS precio_ayer
-         FROM precios pr
-         JOIN bodegas b ON b.id = pr.bodega_id
-         WHERE pr.created_at >= CURRENT_DATE - INTERVAL '1 day'
-           AND pr.created_at < CURRENT_DATE
-           AND pr.tipo_precio = 'bodega'
-           AND b.estado ILIKE $1`,
+        `SELECT ROUND(AVG(latest_precio)::numeric, 2) AS precio_ayer
+         FROM (
+           SELECT b.id, 
+                  (SELECT pr.precio FROM precios pr 
+                   WHERE pr.bodega_id = b.id AND pr.tipo_precio = 'bodega' 
+                     AND pr.created_at < CURRENT_DATE
+                   ORDER BY pr.created_at DESC LIMIT 1) as latest_precio
+           FROM bodegas b
+           WHERE b.estado ILIKE $1
+         ) sub
+         WHERE latest_precio IS NOT NULL`,
         [up?.state_name || '']
       );
       precio_ayer = ayerRes.rows[0]?.precio_ayer;

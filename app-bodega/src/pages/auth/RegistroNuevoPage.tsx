@@ -162,20 +162,15 @@ export default function RegistroNuevoPage() {
     setErrorOverlap(null);
     setPendingUP({ poligono: poly, coords: centro, area });
     setCoincideArea(null);
-    setAreaReal('');
-    setPaso(45);
   };
 
   const confirmarUP = () => {
     if (pendingUP) {
-      setUps(prev => [...prev, {
+      setUps(prev => [...prev, { 
+        ...upActual, 
+        areaCalc: pendingUP.area, 
+        coords: pendingUP.coords, 
         poligono: pendingUP.poligono,
-        coords: pendingUP.coords,
-        areaCalc: pendingUP.area,
-        estado: upActual.estado,
-        municipio: upActual.municipio,
-        nombre: upActual.nombre || nombreAutomaticoUP(prev.length),
-        coincide_area: coincideArea,
         area_real_ha: (coincideArea === false && areaReal) ? Number(areaReal) : pendingUP.area,
       }]);
       setPendingUP(null);
@@ -321,6 +316,15 @@ export default function RegistroNuevoPage() {
                   </div>
                 </div>
 
+                <div className="mb-4">
+                  <label className="block text-white/70 text-[12px] font-medium mb-1.5">Nombre de la parcela (opcional)</label>
+                  <input
+                    type="text" value={upActual.nombre || ''} onChange={e => setUpActual(prev => ({ ...prev, nombre: e.target.value }))}
+                    placeholder="Ej: Parcela Norte, El Potrero, etc."
+                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 text-white text-[14px] focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
+                  />
+                </div>
+
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
@@ -337,6 +341,42 @@ export default function RegistroNuevoPage() {
                   </div>
                 </div>
 
+                {/* ¿El área calculada coincide? */}
+                <div className="mb-4">
+                  <p className="text-white/70 text-[12px] font-medium mb-2">¿El área calculada coincide con tu parcela?</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setUpActual(prev => ({ ...prev, coincide_area: true, area_real_ha: '' }))}
+                      className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
+                        upActual.coincide_area === true ? 'bg-green-500 text-white ring-green-400' : 'bg-white/5 text-white/70 ring-white/15'
+                      }`}
+                    >
+                      Sí, coincide
+                    </button>
+                    <button
+                      onClick={() => setUpActual(prev => ({ ...prev, coincide_area: false }))}
+                      className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
+                        upActual.coincide_area === false ? 'bg-amber-500 text-white ring-amber-400' : 'bg-white/5 text-white/70 ring-white/15'
+                      }`}
+                    >
+                      No, difiere
+                    </button>
+                  </div>
+                  {upActual.coincide_area === false && (
+                    <div className="mt-2.5 animate-fade-in">
+                      <label className="block text-white/50 text-[11px] mb-1">Superficie real de tu parcela</label>
+                      <div className="relative">
+                        <input
+                          type="number" value={upActual.area_real_ha || ''} onChange={e => setUpActual(prev => ({ ...prev, area_real_ha: e.target.value }))}
+                          placeholder={String(pendingUP.area)} min="0.1" step="0.1" inputMode="decimal"
+                          className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 pr-12 text-white text-[16px] font-bold focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-semibold">ha</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Botones */}
                 <div className="flex gap-2.5">
                   <button
@@ -347,7 +387,8 @@ export default function RegistroNuevoPage() {
                   </button>
                   <button
                     onClick={confirmarUP}
-                    className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50"
+                    disabled={upActual.coincide_area === undefined || upActual.coincide_area === null || (upActual.coincide_area === false && !upActual.area_real_ha)}
+                    className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50 disabled:opacity-40"
                   >
                     <CheckCircle2 size={17} /> Confirmar Parcela
                   </button>
@@ -694,113 +735,6 @@ export default function RegistroNuevoPage() {
                     No, continuar a crear PIN
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Paso 45 — Vista Previa / Confirmación de Parcela */}
-          {paso === 45 && pendingUP && (
-            <div className="animate-auth-in">
-              <div className="text-center mb-4">
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
-                  <MapPin size={28} className="text-green-300" />
-                </div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">Confirmar Parcela</h1>
-                <p className="text-white/50 text-sm mt-1.5">Revisa que el área sea correcta antes de guardar</p>
-              </div>
-
-              {/* Mini mapa con polígono */}
-              <div className="rounded-2xl overflow-hidden ring-1 ring-white/15 shadow-xl shadow-black/30 mb-4" style={{ height: 220 }}>
-                <MapContainer
-                  center={pendingUP.coords}
-                  zoom={14}
-                  style={{ height: '100%', width: '100%' }}
-                  zoomControl={false}
-                  dragging={false}
-                  scrollWheelZoom={false}
-                  doubleClickZoom={false}
-                  touchZoom={false}
-                  attributionControl={false}
-                >
-                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="© Esri" />
-                  <Polygon
-                    positions={pendingUP.poligono}
-                    pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.35, weight: 2.5 }}
-                  />
-                </MapContainer>
-              </div>
-
-              {/* Datos de la parcela */}
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 shadow-xl shadow-black/20 mb-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white/5 rounded-xl p-3">
-                    <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-wider mb-1">Área Calculada</p>
-                    <p className="text-xl font-black text-white">{pendingUP.area.toLocaleString('es-MX', { maximumFractionDigits: 2 })} ha</p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-3">
-                    <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-wider mb-1">Puntos</p>
-                    <p className="text-xl font-black text-white">{pendingUP.poligono.length}</p>
-                    <p className="text-[10px] text-white/40">vértices del polígono</p>
-                  </div>
-                  <div className="col-span-2 bg-white/5 rounded-xl p-3">
-                    <p className="text-[10px] font-bold text-green-300/80 uppercase tracking-wider mb-1">Ubicación</p>
-                    <p className="text-sm font-semibold text-white">{upActual.municipio}</p>
-                    <p className="text-xs text-white/50">{upActual.estado}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* ¿El área calculada coincide? */}
-              <div className="mb-4">
-                <p className="text-white/70 text-[12px] font-medium mb-2 text-left">¿El área calculada coincide con tu parcela?</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setCoincideArea(true); setAreaReal(''); }}
-                    className={`flex-1 py-3 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
-                      coincideArea === true ? 'bg-green-500 text-white ring-green-400' : 'bg-white/5 text-white/70 ring-white/15'
-                    }`}
-                  >
-                    Sí, coincide
-                  </button>
-                  <button
-                    onClick={() => setCoincideArea(false)}
-                    className={`flex-1 py-3 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
-                      coincideArea === false ? 'bg-amber-500 text-white ring-amber-400' : 'bg-white/5 text-white/70 ring-white/15'
-                    }`}
-                  >
-                    No, difiere
-                  </button>
-                </div>
-                {coincideArea === false && (
-                  <div className="mt-3 animate-fade-in text-left">
-                    <label className="block text-white/50 text-[11px] mb-1">Superficie real de tu parcela</label>
-                    <div className="relative">
-                      <input
-                        type="number" value={areaReal} onChange={e => setAreaReal(e.target.value)}
-                        placeholder={String(pendingUP.area)} min="0.1" step="0.1" inputMode="decimal"
-                        className={`${inputCls} pr-12`}
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-semibold">ha</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Botones de acción */}
-              <div className="space-y-3">
-                <button
-                  onClick={confirmarUP}
-                  disabled={cargando || coincideArea === null || (coincideArea === false && !areaReal)}
-                  className={`${btnCls} disabled:opacity-40 disabled:cursor-not-allowed`}
-                >
-                  <CheckCircle2 size={18} /> Confirmar y Guardar Parcela
-                </button>
-                <button
-                  onClick={redibujarUP}
-                  className="w-full bg-white/10 hover:bg-white/20 active:bg-white/15 ring-1 ring-white/20 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Undo2 size={17} /> Volver a Dibujar
-                </button>
               </div>
             </div>
           )}
