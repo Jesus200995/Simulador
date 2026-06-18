@@ -166,9 +166,9 @@ export default function RegistroNuevoPage() {
   };
 
   // --- STYLES ---
-  const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-sm sm:text-base tracking-wide text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all';
-  const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5';
-  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
+  const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3.5 text-sm sm:text-base tracking-wide text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all';
+  const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1 sm:mb-1.5';
+  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
 
   // --- MAPA (Paso 4) ---
   if (paso === 4 && enDibujo) {
@@ -297,21 +297,21 @@ export default function RegistroNuevoPage() {
       )}
 
       {/* Contenedor Principal */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-10 pt-4">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-6 sm:pb-10 pt-2 sm:pt-4">
         <div className="w-full max-w-sm">
 
           {/* Paso 1 — CURP */}
           {paso === 1 && (
             <div className="animate-auth-in">
-              <div className="text-center mb-6 sm:mb-8">
-                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-white/20 shadow-lg shadow-black/20">
+              <div className="text-center mb-5 sm:mb-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 ring-1 ring-white/20 shadow-lg shadow-black/20">
                   <UserCheck size={32} className="text-green-300" />
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Nuevo Registro</h1>
                 <p className="text-white/50 text-sm sm:text-base mt-2">Verificaremos tu identidad en SADER</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20">
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl shadow-black/20">
                 <label className={labelCls}>Ingresa tu CURP</label>
                 <input
                   type="text" value={curp}
@@ -331,7 +331,7 @@ export default function RegistroNuevoPage() {
                   </div>
                 )}
 
-                <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-5 ${btnCls}`}>
+                <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-4 sm:mt-5 ${btnCls}`}>
                   {cargando ? (<><Loader2 size={18} className="animate-spin" /> Conectando con SADER…</>) : (<><Search size={18} /> Verificar Identidad</>)}
                 </button>
               </div>
@@ -347,7 +347,7 @@ export default function RegistroNuevoPage() {
           {/* Paso 2 — Datos Padron */}
           {paso === 2 && datosPadron && (
             <div className="animate-auth-in">
-              <div className="text-center mb-6">
+              <div className="text-center mb-4 sm:mb-6">
                 <h1 className="text-2xl font-bold text-white tracking-tight">Datos Encontrados</h1>
                 <p className="text-green-300 text-sm mt-1.5 flex items-center justify-center gap-1.5">
                   <CheckCircle2 size={16} /> Identidad verificada
@@ -384,7 +384,7 @@ export default function RegistroNuevoPage() {
           {/* Paso 3 — Ubicación UP */}
           {paso === 3 && (
             <div className="animate-auth-in">
-              <div className="text-center mb-6">
+              <div className="text-center mb-4 sm:mb-6">
                 <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
                   <MapPin size={26} className="text-green-300" />
                 </div>
@@ -409,7 +409,7 @@ export default function RegistroNuevoPage() {
                 </div>
               )}
 
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20">
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl shadow-black/20">
                 <div className="space-y-4">
                   <div>
                     <label className={labelCls}>Estado</label>
@@ -450,7 +450,7 @@ export default function RegistroNuevoPage() {
                     setError(null); setEnDibujo(true); setPaso(4);
                   }}
                   disabled={!upActual.estado || !upActual.municipio}
-                  className={`mt-6 ${btnCls}`}
+                  className={`mt-4 sm:mt-6 ${btnCls}`}
                 >
                   <Map size={18} /> Continuar al Mapa
                 </button>
@@ -461,7 +461,7 @@ export default function RegistroNuevoPage() {
           {/* Paso 5 — ¿Otra UP? */}
           {preguntandoOtraUP && paso !== 99 && (
             <div className="animate-auth-in">
-              <div className="text-center mb-6">
+              <div className="text-center mb-4 sm:mb-6">
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 ring-2 ring-green-400/50">
                   <Check size={32} className="text-green-300" strokeWidth={3} />
                 </div>
@@ -469,8 +469,8 @@ export default function RegistroNuevoPage() {
                 <p className="text-white/70 text-sm mt-1.5">Has registrado {ups.length} {ups.length === 1 ? 'parcela' : 'parcelas'}</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 mb-4">
-                <div className="space-y-3 mb-6">
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl shadow-black/20 mb-2 sm:mb-4">
+                <div className="space-y-2.5 sm:space-y-3 mb-4 sm:mb-6">
                   {ups.map((up, i) => (
                     <div key={i} className="flex items-center gap-3 bg-white/5 rounded-xl p-3 ring-1 ring-white/10">
                       <div className="w-8 h-8 rounded-lg bg-[#1A5C38] flex items-center justify-center text-white font-bold text-sm">
@@ -502,7 +502,7 @@ export default function RegistroNuevoPage() {
           {/* Paso 6 — PIN */}
           {paso === 6 && !preguntandoOtraUP && (
             <div className="animate-auth-in">
-              <div className="text-center mb-6">
+              <div className="text-center mb-4 sm:mb-6">
                 <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 ring-1 ring-white/20">
                   <KeyRound size={26} className="text-green-300" />
                 </div>
@@ -510,7 +510,7 @@ export default function RegistroNuevoPage() {
                 <p className="text-white/50 text-sm mt-1.5">Lo usarás como contraseña junto con tu CURP</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20">
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl shadow-black/20">
                 <div className="space-y-5">
                   <div>
                     <label className={`${labelCls} text-center`}>NIP (4 dígitos)</label>
