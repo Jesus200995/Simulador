@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit2, MapPin, LogOut, Check, CircleDot, CalendarCheck, ChevronRight } from 'lucide-react';
+import { Edit2, MapPin, LogOut, Check, CircleDot, CalendarCheck, ChevronRight, Sprout } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import MapaUP from '../../components/productor/MapaUP';
 
@@ -51,6 +51,7 @@ export default function MiPerfilPage() {
   const [programas, setProgramas] = useState<string[]>([]);
   const [poligono, setPoligono] = useState<[number, number][] | null>(null);
   const [ciclos, setCiclos] = useState<Ciclo[] | null>(null);
+  const [parcelas, setParcelas] = useState<any[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -67,7 +68,9 @@ export default function MiPerfilPage() {
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token2}` } })
       .then(r => r.json())
       .then(d => {
-        const up = d.ups?.[0] ?? d[0];
+        const ups = d.ups ?? (Array.isArray(d) ? d : []);
+        setParcelas(ups);
+        const up = ups[0];
         if (!up) return;
         const geom = up.geom_geojson;
         if (geom?.coordinates) {
@@ -235,9 +238,37 @@ export default function MiPerfilPage() {
           </div>
         </div>
 
-        {/* Mi parcela */}
+        {/* Mis parcelas */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Mis parcelas</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">
+              Mis parcelas{parcelas.length > 0 ? ` (${parcelas.length})` : ''}
+            </p>
+          </div>
+
+          {/* Lista de parcelas con scroll interno */}
+          {parcelas.length > 0 && (
+            <div className="mb-4 max-h-56 overflow-y-auto pr-1 -mr-1 space-y-2">
+              {parcelas.map((p: any, i: number) => (
+                <div key={p.up_id ?? i}
+                  className="flex items-center gap-3 bg-[#f4fbf7] rounded-xl p-3 ring-1 ring-[#1A5C38]/10">
+                  <div className="w-9 h-9 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center flex-shrink-0">
+                    <Sprout size={17} className="text-[#1A5C38]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-semibold text-gray-800 truncate">{p.up_name || `Parcela ${i + 1}`}</p>
+                    <p className="text-[12px] text-gray-500 truncate">
+                      {[p.municipality_name, p.state_name].filter(Boolean).join(', ') || 'Sin ubicación'}
+                      {p.area_ha_calc ? ` · ${Number(p.area_ha_calc).toLocaleString('es-MX', { maximumFractionDigits: 1 })} ha` : ''}
+                    </p>
+                  </div>
+                  {p.geom_geojson
+                    ? <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex-shrink-0">Con mapa</span>
+                    : <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full flex-shrink-0">Sin mapa</span>}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Mapa mini de la UP */}
           {perfil.lat && perfil.lng && (

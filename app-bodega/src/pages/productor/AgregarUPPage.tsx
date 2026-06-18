@@ -54,9 +54,34 @@ export default function AgregarUPPage() {
     coords: { lat: number; lng: number };
     area: number;
   } | null>(null);
+  // Parcelas ya guardadas (para mostrarlas en gris mientras se dibuja la nueva)
+  const [existentes, setExistentes] = useState<[number, number][][]>([]);
+  // Lógica "difiere área": null = aún no responde, true = coincide, false = difiere
+  const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
+  const [areaReal, setAreaReal] = useState('');
+
+  // Cargar polígonos de las parcelas existentes
+  useEffect(() => {
+    fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => {
+        const ups = d.ups || (Array.isArray(d) ? d : []);
+        const polys: [number, number][][] = [];
+        for (const u of ups) {
+          const g = u.geom_geojson;
+          if (!g?.coordinates) continue;
+          const ring = g.type === 'MultiPolygon' ? g.coordinates[0]?.[0] : g.coordinates[0];
+          if (!ring || ring.length < 3) continue;
+          polys.push((ring as [number, number][]).map(([ln, la]) => [la, ln] as [number, number]));
+        }
+        setExistentes(polys);
+        if (polys.length && polys[0][0]) setCenter(polys[0][0]);
+      })
+      .catch(() => {});
+  }, [token]);
 
   useEffect(() => {
-    if (paso === 'mapa' && navigator.geolocation) {
+    if (paso === 'mapa' && existentes.length === 0 && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => setCenter([pos.coords.latitude, pos.coords.longitude]),
         () => {},
@@ -67,6 +92,8 @@ export default function AgregarUPPage() {
 
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
     setPendingUP({ poligono: poly, coords: centro, area });
+    setCoincideArea(null);
+    setAreaReal('');
   };
 
   const confirmarUP = () => {
@@ -100,8 +127,8 @@ export default function AgregarUPPage() {
           lng: coords?.lng ?? null,
           poligono: poligono ?? null,
           area_calc_ha: areaCalc,
-          area_real_ha: areaCalc,
-          coincide_area: true,
+          area_real_ha: (coincideArea === false && areaReal) ? Number(areaReal) : areaCalc,
+          coincide_area: coincideArea ?? true,
           estado_up: estadoUp,
           municipio_up: municipioUp,
         }),
@@ -208,6 +235,11 @@ export default function AgregarUPPage() {
               <TileLayer
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                 attribution="© Esri" />
+              {/* Parcelas ya guardadas — en gris, para ubicarse al agregar otra */}
+              {existentes.map((poly, i) => (
+                <Polygon key={`ex-${i}`} positions={poly}
+                  pathOptions={{ color: '#94a3b8', fillColor: '#94a3b8', fillOpacity: 0.18, weight: 2, dashArray: '5 5' }} />
+              ))}
               <DibujarPoligonoUP
                 ref={dibujarRef}
                 onModeChange={setDrawMode}
@@ -266,6 +298,42 @@ export default function AgregarUPPage() {
                     </div>
                   </div>
 
+                  {/* ¿El área calculada coincide? */}
+                  <div className="mb-4">
+                    <p className="text-white/70 text-[12px] font-medium mb-2">¿El área calculada coincide con tu parcela?</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setCoincideArea(true); setAreaReal(''); }}
+                        className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
+                          coincideArea === true ? 'bg-green-500 text-white ring-green-400' : 'bg-white/5 text-white/70 ring-white/15'
+                        }`}
+                      >
+                        Sí, coincide
+                      </button>
+                      <button
+                        onClick={() => setCoincideArea(false)}
+                        className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
+                          coincideArea === false ? 'bg-amber-500 text-white ring-amber-400' : 'bg-white/5 text-white/70 ring-white/15'
+                        }`}
+                      >
+                        No, difiere
+                      </button>
+                    </div>
+                    {coincideArea === false && (
+                      <div className="mt-2.5 animate-fade-in">
+                        <label className="block text-white/50 text-[11px] mb-1">Superficie real de tu parcela</label>
+                        <div className="relative">
+                          <input
+                            type="number" value={areaReal} onChange={e => setAreaReal(e.target.value)}
+                            placeholder={String(pendingUP.area)} min="0.1" step="0.1" inputMode="decimal"
+                            className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 pr-12 text-white text-[16px] font-bold focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-semibold">ha</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-2.5">
                     <button
                       onClick={redibujarUP}
@@ -275,7 +343,7 @@ export default function AgregarUPPage() {
                     </button>
                     <button
                       onClick={confirmarUP}
-                      disabled={enviando}
+                      disabled={enviando || coincideArea === null || (coincideArea === false && !areaReal)}
                       className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50 disabled:opacity-40"
                     >
                       <CheckCircle2 size={17} /> {enviando ? 'Guardando...' : 'Confirmar Parcela'}
