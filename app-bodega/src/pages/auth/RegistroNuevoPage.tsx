@@ -388,7 +388,7 @@ export default function RegistroNuevoPage() {
                 </button>
                 <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar}
                   className="flex-[1.4] flex items-center justify-center gap-1.5 bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-lg shadow-green-900/50">
-                  <CheckCircle2 size={17} /> {puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
+                  <CheckCircle2 size={17} /> {puedeTerminar ? `Continuar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
                 </button>
               </div>
             )}
