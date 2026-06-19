@@ -67,6 +67,7 @@ export default function MapaBodegasPage() {
   const upMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
   const [up, setUp] = useState<UpData | null>(null);
+  const [parcelas, setParcelas] = useState<ParcelaData[]>([]);
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [loadingBodegas, setLoadingBodegas] = useState(true);
   const [radioKm, setRadioKm] = useState(100);
@@ -170,7 +171,20 @@ export default function MapaBodegasPage() {
             municipio: u.municipio || ''
           }))
           .filter((p: ParcelaData) => p.lat !== 0 && p.lng !== 0);
-        setUp(prev => prev ? { ...prev, parcelas } : null);
+        // Estado independiente: no se pierde por carrera con el fetch del dashboard
+        setParcelas(parcelas);
+        // Si el dashboard no nos dio ubicación, sembramos `up` desde la 1ª parcela
+        // para que el mapa centre, cargue bodegas y se dibujen los polígonos.
+        if (parcelas.length > 0) {
+          setUp(prev => prev ?? {
+            lat: parcelas[0].lat,
+            lng: parcelas[0].lng,
+            location_confirmed: true,
+            centroid_source: 'parcela',
+            municipio: parcelas[0].municipio || '',
+            estado: '',
+          });
+        }
       }).catch(() => {});
   }, []);
 
@@ -207,13 +221,13 @@ export default function MapaBodegasPage() {
     parcelMarkersRef.current.forEach(m => m.remove());
     parcelMarkersRef.current = [];
 
-    // Usar parcelas del backend O sintetizar una desde el centroide del UP
-    const parcelas: ParcelaData[] = (up.parcelas && up.parcelas.length > 0)
-      ? up.parcelas
+    // Usar parcelas del backend (estado separado) O sintetizar una desde el centroide del UP
+    const lista: ParcelaData[] = (parcelas && parcelas.length > 0)
+      ? parcelas
       : [{ id: 0, lat: up.lat, lng: up.lng, poligono: null }];
 
     // --- POLÍGONOS ---
-    const conPoligono = parcelas.filter(p => p.poligono);
+    const conPoligono = lista.filter(p => p.poligono);
     if (conPoligono.length > 0) {
       const features: GeoJSON.Feature[] = conPoligono.map(p => ({
         type: 'Feature' as const,
@@ -238,7 +252,7 @@ export default function MapaBodegasPage() {
     const bounds = new mapboxgl.LngLatBounds();
     let hasBounds = false;
 
-    parcelas.forEach(p => {
+    lista.forEach(p => {
       if (!p.lat || !p.lng) return;
 
       let pLat = p.lat;
@@ -324,7 +338,7 @@ export default function MapaBodegasPage() {
       const maxZoom = conPoligono.length > 0 ? 14 : (up.location_confirmed ? 13 : 9);
       map.current.fitBounds(bounds, { padding, maxZoom, duration: 1200 });
     }
-  }, [up, mapReady]);
+  }, [up, mapReady, parcelas]);
 
   useEffect(() => { drawParcela(); }, [drawParcela]);
 
