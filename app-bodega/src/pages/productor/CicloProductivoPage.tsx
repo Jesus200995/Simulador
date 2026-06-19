@@ -191,24 +191,25 @@ export default function CicloProductivoPage() {
   if (todasLasUPs.length > 1 && !upSeleccionadaId) {
     return (
       <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
-        {/* Deep Header */}
-        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-14 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
+        {/* Slim header */}
+        <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
             <button onClick={() => navigate('/productor')}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all mb-4 active:scale-95 backdrop-blur-sm">
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
-            <h1 className="text-[24px] font-black text-white tracking-tight leading-tight">Ciclo productivo</h1>
-            <p className="text-[14px] text-emerald-100/80 font-medium mt-1">¿En qué parcela es este ciclo?</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[15px] font-black text-slate-900 tracking-tight leading-none">Ciclo productivo</h1>
+              <p className="text-[11px] text-slate-400 font-bold mt-1">¿En qué parcela es este ciclo?</p>
+            </div>
           </div>
         </div>
 
-        {/* Floating Card Content */}
-        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-8">
-          <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
-            <div className="max-w-[500px] mx-auto bg-white/95 backdrop-blur-xl rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white p-2">
-              <div className="space-y-2 p-2">
+        {/* Contenido */}
+        <div className="flex-1 overflow-y-auto w-full pb-safe z-10">
+          <div className="w-full max-w-xl mx-auto px-4 sm:px-6 pt-4 mb-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-2">
+              <div className="space-y-1.5 p-1.5">
                 {todasLasUPs.map((up, i) => (
                   <button
                     key={up.up_id}
@@ -246,29 +247,24 @@ export default function CicloProductivoPage() {
   if (!mostrarFormulario && ciclosExistentes.length > 0) {
     return (
       <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
-        {/* Deep Header */}
-        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-14 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-          <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
-            <div className="flex items-center justify-between mb-4">
-              <button onClick={() => navigate('/productor')}
-                className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md active:scale-95">
-                <ChevronLeft size={20} strokeWidth={2.5} />
-              </button>
-              <div className="text-[11px] font-bold text-emerald-100/90 uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full backdrop-blur-sm">
-                Mis ciclos
-              </div>
-              <div className="w-9" />
+        {/* Slim header */}
+        <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
+            <button onClick={() => navigate('/productor')}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
+              <ChevronLeft size={20} strokeWidth={2.5} />
+            </button>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[15px] font-black text-slate-900 tracking-tight leading-none">Ciclos productivos</h1>
+              <p className="text-[11px] text-slate-400 font-bold mt-1">Tu siembra registrada en SIMAC</p>
             </div>
-            <h1 className="text-[24px] font-black text-white tracking-tight leading-tight">Ciclos productivos</h1>
-            <p className="text-[14px] text-emerald-100/80 font-medium mt-1">Tu siembra registrada en SIMAC</p>
           </div>
         </div>
 
-        {/* Floating Card Content */}
-        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-8">
-          <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
-            <div className="max-w-[500px] mx-auto bg-white/95 backdrop-blur-xl rounded-[32px] p-5 sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white">
+        {/* Contenido */}
+        <div className="flex-1 overflow-y-auto w-full pb-safe z-10">
+          <div className="w-full max-w-xl mx-auto px-4 sm:px-6 pt-4 mb-8">
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100">
               <h3 className="text-[15px] font-black text-slate-800 mb-4 px-1">
                 Ciclos registrados
               </h3>
@@ -332,39 +328,36 @@ export default function CicloProductivoPage() {
   return (
     <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
       
-      {/* Deep Header */}
-      <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-14 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-        
-        <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
-          <div className="flex items-center justify-between mb-5">
+      {/* Slim header sticky */}
+      <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="max-w-xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-3 mb-2.5">
             <button onClick={() => {
                 if (paso > 1) { setPaso(paso - 1); return; }
                 if (ciclosExistentes.length > 0) setMostrarFormulario(false);
                 else navigate('/productor');
               }}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all shadow-sm backdrop-blur-md active:scale-95">
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
-            <div className="text-[11px] font-bold text-emerald-100/90 uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full backdrop-blur-sm">
-              Paso {paso} de 4
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[15px] font-black text-slate-900 tracking-tight leading-none">Registrar ciclo</h1>
+              <p className="text-[11px] text-slate-400 font-bold mt-1">Paso {paso} de 4</p>
             </div>
-            <div className="w-9" />
           </div>
-          
-          <div className="w-full flex justify-center gap-2 px-2">
+          <div className="flex gap-1.5">
             {[1, 2, 3, 4].map(n => (
-              <div key={n} className={`h-1.5 flex-1 max-w-[80px] rounded-full transition-all duration-500 shadow-inner
-                ${n < paso ? 'bg-emerald-400' : n === paso ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'bg-white/10'}`} />
+              <div key={n} className={`h-1 flex-1 rounded-full transition-all duration-500
+                ${n <= paso ? 'bg-[#1A5C38]' : 'bg-slate-200'}`} />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Floating Card Content */}
-      <div className="flex-1 overflow-y-auto w-full pb-[120px] z-20 -mt-8 scroll-smooth">
-        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
-          <div className="max-w-[500px] mx-auto">
+      {/* Contenido */}
+      <div className="flex-1 overflow-y-auto w-full pb-[120px] z-10 scroll-smooth">
+        <div className="w-full max-w-xl mx-auto px-4 sm:px-6 pt-4 mb-8">
+          <div className="w-full">
 
             {/* Banner de la parcela seleccionada (cuando hay varias UPs) */}
             {todasLasUPs.length > 1 && upSeleccionadaId && (
@@ -725,8 +718,8 @@ export default function CicloProductivoPage() {
       </div>
       {/* Footer Fixed Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t border-slate-200/50 pb-safe shadow-[0_-8px_20px_rgba(0,0,0,0.04)]">
-        <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 py-3">
-          <div className="max-w-[500px] mx-auto space-y-2">
+        <div className="w-full max-w-xl mx-auto px-4 sm:px-6 py-3">
+          <div className="w-full space-y-2">
             {paso === 1 && (
               <button onClick={() => { setError(''); setPaso(2); }}
                 disabled={!form.cycle_type}
