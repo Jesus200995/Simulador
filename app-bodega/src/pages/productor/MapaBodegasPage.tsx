@@ -467,7 +467,7 @@ export default function MapaBodegasPage() {
 
   // ── RENDER ────────────────────────────────────
   return (
-    <div className="bg-[#eef8f2] w-full max-w-2xl mx-auto">
+    <div className="bg-[#eef8f2] w-full max-w-2xl mx-auto h-full flex flex-col overflow-hidden">
 
       {/* ── HEADER VERDE: título + stats + filtros ── */}
       <div className="flex-shrink-0 bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] z-20">
@@ -563,8 +563,8 @@ export default function MapaBodegasPage() {
         </div>
       )}
 
-      {/* ——— MAPA (altura adaptable) ——— */}
-      <div className="px-3 pt-3 pb-3" style={{ height: 'calc(100dvh - 310px)', minHeight: '300px' }}>
+      {/* ——— MAPA (llena el espacio restante, sin scroll) ——— */}
+      <div className="flex-1 min-h-0 px-3 pt-3 pb-3">
         <div className="relative h-full rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.12)] ring-1 ring-black/5">
           <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
 

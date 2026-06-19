@@ -180,7 +180,7 @@ export default function CicloProductivoPage() {
   // ── Loader mientras se consultan los ciclos existentes ──
   if (cargandoCiclos) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[#eef8f2] gap-3">
+      <div className="flex flex-col items-center justify-center w-full h-full bg-[#eef8f2] gap-3">
         <div className="w-8 h-8 border-[3px] border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />
         <p className="text-[13px] font-semibold text-slate-400">Cargando tus ciclos…</p>
       </div>
@@ -190,9 +190,9 @@ export default function CicloProductivoPage() {
   // ── Selector de parcela cuando hay más de una UP (#6) ──
   if (todasLasUPs.length > 1 && !upSeleccionadaId) {
     return (
-      <div className="flex flex-col font-sans w-full h-[100dvh] bg-[#eef8f2] overflow-hidden">
+      <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Deep Header */}
-        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-24 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-14 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
           <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
             <button onClick={() => navigate('/productor')}
@@ -205,7 +205,7 @@ export default function CicloProductivoPage() {
         </div>
 
         {/* Floating Card Content */}
-        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-16">
+        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-8">
           <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
             <div className="max-w-[500px] mx-auto bg-white/95 backdrop-blur-xl rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white p-2">
               <div className="space-y-2 p-2">
@@ -245,9 +245,9 @@ export default function CicloProductivoPage() {
   // ── Lista de ciclos existentes + botón para agregar uno nuevo ──
   if (!mostrarFormulario && ciclosExistentes.length > 0) {
     return (
-      <div className="flex flex-col font-sans w-full h-[100dvh] bg-[#eef8f2] overflow-hidden">
+      <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Deep Header */}
-        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-24 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-14 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
           <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
             <div className="flex items-center justify-between mb-4">
@@ -266,7 +266,7 @@ export default function CicloProductivoPage() {
         </div>
 
         {/* Floating Card Content */}
-        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-16">
+        <div className="flex-1 overflow-y-auto w-full pb-safe z-20 -mt-8">
           <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
             <div className="max-w-[500px] mx-auto bg-white/95 backdrop-blur-xl rounded-[32px] p-5 sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white">
               <h3 className="text-[15px] font-black text-slate-800 mb-4 px-1">
@@ -330,10 +330,10 @@ export default function CicloProductivoPage() {
   }
 
   return (
-    <div className="flex flex-col font-sans w-full h-[100dvh] bg-[#eef8f2] overflow-hidden">
+    <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
       
       {/* Deep Header */}
-      <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-24 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="shrink-0 z-10 w-full bg-gradient-to-b from-[#1A5C38] to-[#124227] pb-14 relative overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
         
         <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-5 relative z-20">
@@ -362,7 +362,7 @@ export default function CicloProductivoPage() {
       </div>
 
       {/* Floating Card Content */}
-      <div className="flex-1 overflow-y-auto w-full pb-[120px] z-20 -mt-12 scroll-smooth">
+      <div className="flex-1 overflow-y-auto w-full pb-[120px] z-20 -mt-8 scroll-smooth">
         <div className="w-full max-w-[700px] mx-auto px-4 sm:px-6 mb-8">
           <div className="max-w-[500px] mx-auto">
 

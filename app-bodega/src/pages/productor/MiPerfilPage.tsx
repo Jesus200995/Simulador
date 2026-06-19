@@ -431,6 +431,10 @@ export default function MiPerfilPage() {
                   </div>
                 );
               })}
+              <button onClick={() => navigate('/productor/ciclo', { state: { nuevoCiclo: true } })}
+                className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-2xl text-sm font-semibold hover:bg-[#f4fbf7] active:scale-[0.98] transition-all">
+                <Plus size={16} /> Agregar nuevo ciclo
+              </button>
             </div>
           )}
         </div>
