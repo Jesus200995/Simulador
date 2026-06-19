@@ -123,7 +123,7 @@ export default function AlertasPage() {
   const noLeidas = notifs.filter(n => !n.leida).length;
 
   return (
-    <div className="bg-white min-h-full">
+    <div className="bg-[#eef8f2] min-h-full">
       {/* ── Banner ── */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-5">
