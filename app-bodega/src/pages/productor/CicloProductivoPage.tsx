@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Wheat, Check, Leaf, Calendar, MapPin,
-  Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play
+  Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play,
+  CloudRain, Droplets
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -55,6 +56,7 @@ export default function CicloProductivoPage() {
     planting_date:          '',
     estimated_harvest_date: '',
     destination:            '',
+    tipo_riego:             'temporal',
   });
 
   useEffect(() => {
@@ -133,7 +135,7 @@ export default function CicloProductivoPage() {
       const cicloRes = await fetch(`${BASE}/ups/${upId}/cycles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ cycle_year: form.cycle_year, cycle_type: form.cycle_type }),
+        body: JSON.stringify({ cycle_year: form.cycle_year, cycle_type: form.cycle_type, tipo_riego: form.tipo_riego }),
       }).then(r => r.json());
 
       if (!cicloRes.cycle?.cycle_id) { setError(cicloRes.error || 'Error al crear ciclo'); return; }
@@ -289,6 +291,13 @@ export default function CicloProductivoPage() {
                         <p className="text-[13px] text-slate-500 mt-1 truncate font-medium">
                           {variedad} · {superficie != null ? `${superficie} ha` : '—'}
                         </p>
+                        {ciclo.tipo_riego && (
+                          <p className="text-[12px] text-slate-600 mt-1 flex items-center gap-1 font-medium">
+                            {ciclo.tipo_riego === 'riego'
+                              ? (<><Droplets size={13} className="text-[#1A5C38]" /> Riego</>)
+                              : (<><CloudRain size={13} className="text-[#1A5C38]" /> Temporal</>)}
+                          </p>
+                        )}
                       </div>
                       <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold shrink-0 tracking-wide ${
                         estado === 'activo'
@@ -449,6 +458,26 @@ export default function CicloProductivoPage() {
                         {y}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-100">
+                  <p className="text-[13px] font-bold text-slate-800 mb-2">¿Cómo se riega tu parcela?</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" onClick={() => setForm(f => ({...f, tipo_riego: 'temporal'}))}
+                      className={`p-3 rounded-[12px] border-2 text-left transition-all active:scale-95
+                        ${form.tipo_riego === 'temporal' ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' : 'border-slate-100 bg-white hover:border-slate-200'}`}>
+                      <CloudRain size={18} className={`mb-1 ${form.tipo_riego === 'temporal' ? 'text-[#1A5C38]' : 'text-slate-400'}`} strokeWidth={2} />
+                      <p className="font-black text-[13px] text-slate-800">Temporal</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Depende de la lluvia</p>
+                    </button>
+                    <button type="button" onClick={() => setForm(f => ({...f, tipo_riego: 'riego'}))}
+                      className={`p-3 rounded-[12px] border-2 text-left transition-all active:scale-95
+                        ${form.tipo_riego === 'riego' ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' : 'border-slate-100 bg-white hover:border-slate-200'}`}>
+                      <Droplets size={18} className={`mb-1 ${form.tipo_riego === 'riego' ? 'text-[#1A5C38]' : 'text-slate-400'}`} strokeWidth={2} />
+                      <p className="font-black text-[13px] text-slate-800">Riego</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Agua controlada</p>
+                    </button>
                   </div>
                 </div>
               </div>

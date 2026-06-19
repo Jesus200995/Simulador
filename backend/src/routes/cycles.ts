@@ -10,12 +10,15 @@ const router = Router();
 router.post('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { up_id } = req.params;
-    const { cycle_year, cycle_type } = req.body;
+    const { cycle_year, cycle_type, tipo_riego } = req.body;
 
     if (!cycle_year || !cycle_type) {
       res.status(400).json({ error: 'Se requiere cycle_year y cycle_type' });
       return;
     }
+
+    // Tipo de riego: solo 'temporal' o 'riego' (default temporal)
+    const tipoRiegoValido = ['temporal', 'riego'].includes(tipo_riego) ? tipo_riego : 'temporal';
 
     const validTypes = ['PV', 'OI', 'ANUAL'];
     if (!validTypes.includes(cycle_type)) {
@@ -47,10 +50,10 @@ router.post('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: 
     }
 
     const result = await pool.query(
-      `INSERT INTO cycle (up_id, cycle_year, cycle_type)
-       VALUES ($1, $2, $3)
-       RETURNING cycle_id, up_id, cycle_year, cycle_type, created_at`,
-      [up_id, cycle_year, cycle_type]
+      `INSERT INTO cycle (up_id, cycle_year, cycle_type, tipo_riego)
+       VALUES ($1, $2, $3, $4)
+       RETURNING cycle_id, up_id, cycle_year, cycle_type, tipo_riego, created_at`,
+      [up_id, cycle_year, cycle_type, tipoRiegoValido]
     );
 
     res.status(201).json({ cycle: result.rows[0], message: 'Ciclo creado exitosamente' });
@@ -69,6 +72,7 @@ router.get('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: R
 
     const result = await pool.query(
       `SELECT c.cycle_id, c.up_id, c.cycle_year, c.cycle_type, c.created_at,
+              COALESCE(c.tipo_riego, 'temporal') AS tipo_riego,
               COALESCE(c.estado_ciclo, 'activo') AS estado_ciclo,
               COALESCE(json_agg(
                 json_build_object(
