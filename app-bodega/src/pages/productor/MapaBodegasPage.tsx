@@ -271,7 +271,7 @@ export default function MapaBodegasPage() {
 
       // Marcador punto azul pequeño
       const el = document.createElement('div');
-      el.style.cssText = 'width:14px;height:14px;background-color:#2563EB;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.5);cursor:pointer;';
+      el.style.cssText = 'width:16px;height:16px;background-color:#2563EB;border:2.5px solid #fff;border-radius:50%;cursor:pointer;box-sizing:border-box;';
 
 
       const popupNode = document.createElement('div');
@@ -354,13 +354,11 @@ export default function MapaBodegasPage() {
 
       const el = document.createElement('div');
       el.innerHTML = `
-        <div style="position:relative;cursor:pointer;width:34px;height:40px">
-          <svg viewBox="0 0 34 40" style="width:34px;height:40px;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.3))">
-            <path d="M17 2C9.82 2 4 7.82 4 15c0 9.75 13 23 13 23s13-13.25 13-23C30 7.82 24.18 2 17 2z" fill="${sem.fill}" stroke="white" stroke-width="1.5"/>
-            <circle cx="17" cy="15" r="5" fill="white" opacity="0.9"/>
-          </svg>
-          ${b.is_ventanilla ? `<div style="position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:#7C3AED;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 24 24" style="width:7px;height:7px;fill:white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <div style="position:relative;width:24px;height:24px;cursor:pointer">
+          <div style="position:absolute;inset:0;border-radius:50%;background:${sem.fill};border:2.5px solid #fff;box-sizing:border-box"></div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#fff"></div>
+          ${b.is_ventanilla ? `<div style="position:absolute;top:-3px;right:-3px;width:13px;height:13px;background:#7C3AED;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-sizing:border-box">
+            <svg viewBox="0 0 24 24" style="width:6px;height:6px;fill:#fff"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           </div>` : ''}
         </div>
       `;
@@ -438,12 +436,12 @@ export default function MapaBodegasPage() {
         </div>
       );
 
-      const popup = new mapboxgl.Popup({ 
-        anchor: 'bottom', 
-        offset: [0, -42], 
-        closeButton: false, 
-        className: 'custom-premium-popup', 
-        maxWidth: '300px' 
+      const popup = new mapboxgl.Popup({
+        anchor: 'bottom',
+        offset: [0, -16],
+        closeButton: false,
+        className: 'custom-premium-popup',
+        maxWidth: '300px'
       }).setDOMContent(popupNode);
 
       popup.on('open', () => {
@@ -456,7 +454,7 @@ export default function MapaBodegasPage() {
         });
       });
 
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([b.longitud, b.latitud])
         .setPopup(popup)
         .addTo(map.current!);
