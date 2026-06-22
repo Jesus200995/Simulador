@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
-  ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus, Search, UserCheck, Map, KeyRound, AlertTriangle, Pencil
+  ChevronLeft, Check, CheckCircle2, MapPin, Undo2, Footprints, Loader2, Plus, Search, UserCheck, Map, KeyRound, AlertTriangle, Pencil, ShieldCheck
 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
@@ -106,6 +106,29 @@ export default function RegistroNuevoPage() {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
 
+  // Aviso de privacidad
+  const [avisoAceptado, setAvisoAceptado] = useState(false);
+  const [mostrarAviso, setMostrarAviso] = useState(true);
+  const [cargandoAviso, setCargandoAviso] = useState(false);
+  const [avisoLat, setAvisoLat] = useState<number | null>(null);
+  const [avisoLng, setAvisoLng] = useState<number | null>(null);
+
+  const handleAceptarAviso = async () => {
+    setCargandoAviso(true);
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000 })
+      );
+      setAvisoLat(pos.coords.latitude);
+      setAvisoLng(pos.coords.longitude);
+    } catch {
+      // GPS denegado o no disponible — continuar sin coordenadas
+    }
+    setAvisoAceptado(true);
+    setMostrarAviso(false);
+    setCargandoAviso(false);
+  };
+
   const validarCURP = (c: string) =>
     /^[A-Z]{4}[0-9]{6}[A-Z0-9]{6}[0-9]{2}$/.test(c.toUpperCase().trim());
 
@@ -207,6 +230,8 @@ export default function RegistroNuevoPage() {
           telefono: telefonoEditable,
           correo: datosPadron?.correo,
           pin,
+          aviso_lat: avisoLat,
+          aviso_lng: avisoLng,
           ups: ups.map((up, i) => ({
             lat: up.coords?.lat ?? null,
             lng: up.coords?.lng ?? null,
@@ -467,10 +492,64 @@ export default function RegistroNuevoPage() {
   const visualStep = getVisualStep();
 
   return (
-    <div 
+    <div
       className="relative min-h-[100dvh] flex flex-col overflow-hidden"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
+      {/* Aviso de Privacidad — cubre toda la pantalla hasta que se acepte */}
+      {mostrarAviso && (
+        <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <div className="bg-[#1A5C38] px-4 py-4 flex items-center gap-3">
+            <ShieldCheck size={22} className="text-white" />
+            <h1 className="text-white font-bold text-[16px]">Aviso de privacidad</h1>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
+            <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
+              Antes de continuar, por favor lee y acepta nuestro aviso de privacidad.
+            </p>
+
+            {/* PLACEHOLDER — Sustituir por el texto legal oficial cuando lo entregue el área jurídica. Versión del aviso: 1.0 */}
+            <div className="bg-slate-50 rounded-[12px] border border-slate-200 p-4 text-[12px] text-slate-600 leading-relaxed space-y-3">
+              <p className="font-bold text-slate-800 text-[13px]">
+                Sistema de Información de Mercados Agrícolas del Maíz (SIMAC)
+              </p>
+              <p>
+                [PLACEHOLDER — TEXTO LEGAL DEL AVISO DE PRIVACIDAD PENDIENTE DE APROBACIÓN JURÍDICA]
+              </p>
+              <p>
+                De conformidad con la Ley Federal de Protección de Datos Personales en Posesión
+                de los Particulares, le informamos que los datos personales que proporcione serán
+                utilizados únicamente para los fines del Plan Nacional Maíz 2026.
+              </p>
+              <p>
+                [AGREGAR: responsable del tratamiento, finalidades, transferencias, derechos ARCO,
+                contacto del oficial de privacidad y vigencia del aviso]
+              </p>
+            </div>
+
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Al aceptar, autorizas el uso de tu ubicación GPS en este momento para registrar
+              la fecha, hora y lugar de tu aceptación. Si no cuentas con GPS, tu aceptación
+              se registrará igualmente sin coordenadas.
+            </p>
+          </div>
+
+          <div className="px-4 pb-6 pt-3 border-t border-slate-100">
+            <button
+              onClick={handleAceptarAviso}
+              disabled={cargandoAviso}
+              className="w-full bg-[#1A5C38] text-white font-bold text-[15px] py-4 rounded-[14px] active:scale-95 transition-all disabled:opacity-60"
+            >
+              {cargandoAviso ? 'Registrando…' : 'Acepto el aviso de privacidad'}
+            </button>
+            <p className="text-center text-[11px] text-slate-400 mt-2">
+              Debes aceptar para continuar con tu registro
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Background */}
       <div className="fixed inset-0 z-[-1]">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />

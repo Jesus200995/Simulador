@@ -393,7 +393,7 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
          (producer_id, up_name, up_type, production_system, water_regime,
           state_name, municipality_name, centroid, geom,
           area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
-       VALUES ($1, $${aIdx + 3}, 'temporal', 'tradicional', 'temporal',
+       VALUES ($1, $${aIdx + 3}, 'temporal', 'tradicional', 'temporal' /* DEPRECADO: régimen hídrico real vive en cycle.tipo_riego */,
                $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326), ${geomSql},
                $${aIdx}, $${aIdx + 1}, $${aIdx + 2}, TRUE, 'productor')
        RETURNING up_id`,
@@ -406,7 +406,7 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
          (producer_id, up_name, up_type, production_system, water_regime,
           state_name, municipality_name, centroid, geom,
           area_ha_calc, area_ha_real, coincide_area, location_confirmed, centroid_source)
-       VALUES ($1, $8, 'temporal', 'tradicional', 'temporal',
+       VALUES ($1, $8, 'temporal', 'tradicional', 'temporal' /* DEPRECADO: régimen hídrico real vive en cycle.tipo_riego */,
                $2, $3,
                ST_Centroid(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
                ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
@@ -430,7 +430,7 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
          (producer_id, up_name, up_type, production_system, water_regime,
           state_name, municipality_name, centroid,
           location_confirmed, centroid_source)
-       VALUES ($1, $5, 'temporal', 'tradicional', 'temporal',
+       VALUES ($1, $5, 'temporal', 'tradicional', 'temporal' /* DEPRECADO: régimen hídrico real vive en cycle.tipo_riego */,
                $2, $3, $4::geometry, FALSE, 'municipio')
        RETURNING up_id`,
       [producerId, estadoFinal, municipioFinal, centroidVal, upName]
@@ -459,6 +459,7 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area,
       telefono, pin, programas_beneficiario, correo,
       ups,
+      aviso_lat, aviso_lng,
     } = req.body;
 
     if (!pin || !/^\d{4}$/.test(pin)) {
@@ -507,10 +508,12 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       const p = await client.query(
         `INSERT INTO producer
            (usuario_id, curp, nombres, apellido_paterno, apellido_materno,
-            phone, sexo, tipo_registro, estado_validacion, programas_beneficiario, correo)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,'B','activo',$8,$9) RETURNING producer_id`,
+            phone, sexo, tipo_registro, estado_validacion, programas_beneficiario, correo,
+            aviso_privacidad_aceptado, aviso_privacidad_fecha, aviso_privacidad_lat, aviso_privacidad_lng, aviso_privacidad_version)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,'B','activo',$8,$9,TRUE,NOW(),$10,$11,'1.0') RETURNING producer_id`,
         [u.rows[0].id, curpN, nombresN, apPaternoN, apMaternoN,
-         telefono, genero || null, programas_beneficiario || [], correo || null]
+         telefono, genero || null, programas_beneficiario || [], correo || null,
+         aviso_lat ?? null, aviso_lng ?? null]
       );
       const producerId = p.rows[0].producer_id;
 
@@ -1409,6 +1412,35 @@ router.post('/ups/validar-overlap', authMiddleware, async (req: AuthRequest, res
   } catch (error) {
     console.error('[OVERLAP]', error);
     res.json({ valido: true });
+  }
+});
+
+// POST /api/productor/aviso-privacidad
+// Registra la aceptación del aviso de privacidad con coordenadas y timestamp
+// Usado por productores ya autenticados que necesiten re-registrar su aceptación
+router.post('/aviso-privacidad', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user!.userId;
+    const producerId = await getProducerId(userId);
+    if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    const { latitud, longitud } = req.body;
+
+    await pool.query(
+      `UPDATE producer SET
+         aviso_privacidad_aceptado = TRUE,
+         aviso_privacidad_fecha    = NOW(),
+         aviso_privacidad_lat      = $2,
+         aviso_privacidad_lng      = $3,
+         aviso_privacidad_version  = '1.0'
+       WHERE producer_id = $1`,
+      [producerId, latitud ?? null, longitud ?? null]
+    );
+
+    res.json({ ok: true, mensaje: 'Aviso de privacidad registrado' });
+  } catch (error) {
+    console.error('Error al registrar aviso de privacidad:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
