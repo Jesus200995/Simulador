@@ -59,6 +59,14 @@ export default function CicloProductivoPage() {
     tipo_riego:             'temporal',
   });
 
+  const [cicloInferido, setCicloInferido] = useState<{
+    ciclo: string;
+    label: string;
+    certeza: 'alta' | 'baja';
+  } | null>(null);
+
+  const [cicloConfirmado, setCicloConfirmado] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
@@ -170,6 +178,45 @@ export default function CicloProductivoPage() {
   const saltar = () => {
     localStorage.setItem('ciclo_pendiente', '1');
     navigate('/productor');
+  };
+
+  // Inferencia de ciclo basada en el calendario oficial SIAP
+  const inferirCicloSIAP = (fechaSiembra: string, tipoRiego: string): {
+    ciclo: string;
+    label: string;
+    certeza: 'alta' | 'baja';
+  } | null => {
+    if (!fechaSiembra) return null;
+    if (tipoRiego === 'riego') return null;
+
+    const mes = new Date(fechaSiembra + 'T12:00:00').getMonth() + 1;
+    const año = new Date(fechaSiembra + 'T12:00:00').getFullYear();
+
+    if ([10, 11, 12, 1, 2].includes(mes)) {
+      const añoCiclo = mes >= 10 ? año : año - 1;
+      return { ciclo: 'OI', label: `Otoño-Invierno ${añoCiclo}`, certeza: 'alta' };
+    }
+    if ([4, 5, 6, 7].includes(mes)) {
+      return { ciclo: 'PV', label: `Primavera-Verano ${año}`, certeza: 'alta' };
+    }
+    return { ciclo: '', label: 'Mes de transición', certeza: 'baja' };
+  };
+
+  const handleFechaSiembra = (fecha: string) => {
+    setCicloConfirmado(false);
+    const resultado = inferirCicloSIAP(fecha, form.tipo_riego);
+    setCicloInferido(resultado);
+
+    if (resultado && resultado.certeza === 'alta') {
+      setForm(f => ({
+        ...f,
+        planting_date: fecha,
+        cycle_type: resultado.ciclo,
+        cycle_year: new Date(fecha + 'T12:00:00').getFullYear(),
+      }));
+    } else {
+      setForm(f => ({ ...f, planting_date: fecha, cycle_type: '' }));
+    }
   };
 
   const inputCls = 'w-full bg-[#eef8f2]/50 border border-slate-200 rounded-[14px] px-3.5 py-3 text-[14px] font-semibold text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-2 focus:ring-[#1A5C38]/10 transition-all outline-none';
@@ -384,9 +431,10 @@ export default function CicloProductivoPage() {
             {/* Tarjeta Contenedor */}
             <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-5 sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-white transition-all duration-300">
             
-            {/* PASO 1 — Tipo de ciclo + año */}
+            {/* ── PASO 1 — Riego y fecha de siembra ── */}
             {paso === 1 && (
-              <div className="space-y-4 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-5 relative z-10 animate-in fade-in slide-in-from-right-4 duration-300">
+
                 {esPrimerLogin && (
                   <div className="bg-indigo-50/50 border border-indigo-100 rounded-[12px] p-3 mb-1 flex gap-2.5 items-start">
                     <div className="bg-indigo-100 text-indigo-600 p-1 rounded-full shrink-0">
@@ -400,79 +448,168 @@ export default function CicloProductivoPage() {
                     </div>
                   </div>
                 )}
-                
-                <div className="text-center sm:text-left mb-1">
-                  <div className="w-10 h-10 bg-emerald-50 rounded-[14px] flex items-center justify-center text-[#1A5C38] mb-3 mx-auto sm:mx-0 shadow-sm border border-emerald-100/50">
-                    <Calendar size={18} strokeWidth={2} />
-                  </div>
-                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight leading-tight mb-1">
-                    Tu ciclo productivo
-                  </h2>
-                  <p className="text-[13px] text-slate-500 font-medium">¿Qué ciclo estás sembrando actualmente?</p>
-                </div>
 
-                <div className="space-y-2">
-                  {CICLOS.map(c => (
-                    <button key={c.valor} onClick={() => setForm(f => ({...f, cycle_type: c.valor}))}
-                      className={`w-full border-2 rounded-[14px] py-2.5 px-3 flex items-center gap-3 text-left transition-all duration-200 active:scale-[0.98]
-                        ${form.cycle_type === c.valor 
-                          ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' 
-                          : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]/50'}`}>
-                      <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-all duration-300
-                        ${form.cycle_type === c.valor ? 'bg-[#1A5C38] text-white shadow-md shadow-[#1A5C38]/30 scale-105' : 'bg-slate-100 text-slate-400'}`}>
-                        <Wheat size={16} strokeWidth={2} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-[13px] font-black tracking-tight ${form.cycle_type === c.valor ? 'text-[#1A5C38]' : 'text-slate-800'}`}>
-                          {c.label}
-                        </p>
-                        <p className={`text-[11.5px] font-medium mt-0.5 ${form.cycle_type === c.valor ? 'text-emerald-700/80' : 'text-slate-500'}`}>
-                          {c.desc}
-                        </p>
-                      </div>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center border-2 transition-all duration-300
-                        ${form.cycle_type === c.valor ? 'bg-[#1A5C38] border-[#1A5C38] scale-110' : 'border-slate-200'}`}>
-                        {form.cycle_type === c.valor && <Check size={10} className="text-white" strokeWidth={3} />}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="pt-3 border-t border-slate-100">
-                  <p className="text-[13px] font-bold text-slate-800 mb-2">¿En qué año?</p>
-                  <div className="flex gap-2">
-                    {[AÑO_ACTUAL - 1, AÑO_ACTUAL, AÑO_ACTUAL + 1].map(y => (
-                      <button key={y}
-                        onClick={() => setForm(f => ({...f, cycle_year: y}))}
-                        className={`flex-1 py-2 rounded-[10px] border-2 font-black text-[13px] transition-all active:scale-95
-                          ${form.cycle_year === y 
-                            ? 'border-[#1A5C38] bg-[#1A5C38] text-white shadow-sm shadow-[#1A5C38]/20' 
-                            : 'border-slate-100 text-slate-500 hover:border-slate-200 bg-white'}`}>
-                        {y}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100">
-                  <p className="text-[13px] font-bold text-slate-800 mb-2">¿Cómo se riega tu parcela?</p>
+                {/* Tipo de riego */}
+                <div>
+                  <p className="text-[13px] font-bold text-slate-800 mb-2">
+                    ¿Cómo se riega tu parcela?
+                  </p>
                   <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setForm(f => ({...f, tipo_riego: 'temporal'}))}
+                    <button type="button"
+                      onClick={() => {
+                        setForm(f => ({ ...f, tipo_riego: 'temporal' }));
+                        setCicloInferido(null);
+                        setCicloConfirmado(false);
+                        if (form.planting_date) handleFechaSiembra(form.planting_date);
+                      }}
                       className={`p-3 rounded-[12px] border-2 text-left transition-all active:scale-95
-                        ${form.tipo_riego === 'temporal' ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' : 'border-slate-100 bg-white hover:border-slate-200'}`}>
-                      <CloudRain size={18} className={`mb-1 ${form.tipo_riego === 'temporal' ? 'text-[#1A5C38]' : 'text-slate-400'}`} strokeWidth={2} />
-                      <p className="font-black text-[13px] text-slate-800">Temporal</p>
+                        ${form.tipo_riego === 'temporal'
+                          ? 'border-[#1A5C38] bg-[#1A5C38]/5'
+                          : 'border-slate-200 bg-white'}`}>
+                      <p className="font-black text-[13px] text-slate-800">🌧 Temporal</p>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Depende de la lluvia</p>
                     </button>
-                    <button type="button" onClick={() => setForm(f => ({...f, tipo_riego: 'riego'}))}
+                    <button type="button"
+                      onClick={() => {
+                        setForm(f => ({ ...f, tipo_riego: 'riego', cycle_type: '' }));
+                        setCicloInferido(null);
+                        setCicloConfirmado(false);
+                      }}
                       className={`p-3 rounded-[12px] border-2 text-left transition-all active:scale-95
-                        ${form.tipo_riego === 'riego' ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm shadow-[#1A5C38]/5' : 'border-slate-100 bg-white hover:border-slate-200'}`}>
-                      <Droplets size={18} className={`mb-1 ${form.tipo_riego === 'riego' ? 'text-[#1A5C38]' : 'text-slate-400'}`} strokeWidth={2} />
-                      <p className="font-black text-[13px] text-slate-800">Riego</p>
+                        ${form.tipo_riego === 'riego'
+                          ? 'border-[#1A5C38] bg-[#1A5C38]/5'
+                          : 'border-slate-200 bg-white'}`}>
+                      <p className="font-black text-[13px] text-slate-800">💧 Riego</p>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Agua controlada</p>
                     </button>
                   </div>
                 </div>
+
+                {/* Fecha de siembra */}
+                <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
+                  <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
+                    📅 ¿Cuándo vas a sembrar?
+                  </label>
+                  <input
+                    type="date"
+                    value={form.planting_date}
+                    onChange={e => handleFechaSiembra(e.target.value)}
+                    className="w-full border border-slate-200 rounded-[10px] px-3 py-2.5 font-bold text-[14px] text-slate-700 focus:outline-none focus:border-[#1A5C38] transition-colors"
+                  />
+                </div>
+
+                {/* CASO A — Ciclo inferido con certeza alta, pendiente de confirmar */}
+                {cicloInferido && cicloInferido.certeza === 'alta' && !cicloConfirmado && (
+                  <div className="bg-[#E8F5EE] border border-[#1A5C38]/30 rounded-[14px] p-4">
+                    <p className="text-[13px] font-bold text-[#1A5C38] mb-1">
+                      ✓ Tu ciclo es: {cicloInferido.label}
+                    </p>
+                    <p className="text-[12px] text-slate-600 mb-3">
+                      Determinado con base en tu fecha de siembra según el calendario oficial SIAP.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCicloConfirmado(true)}
+                        className="flex-1 bg-[#1A5C38] text-white font-bold text-[13px] py-2.5 rounded-[10px] active:scale-95 transition-all">
+                        Sí, es correcto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCicloInferido(null);
+                          setForm(f => ({ ...f, cycle_type: '' }));
+                        }}
+                        className="flex-1 border border-slate-300 text-slate-600 font-medium text-[13px] py-2.5 rounded-[10px] active:scale-95 transition-all">
+                        Cambiar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* CASO B — Ciclo confirmado */}
+                {cicloConfirmado && cicloInferido && (
+                  <div className="bg-[#E8F5EE] border border-[#1A5C38]/30 rounded-[14px] p-3 flex items-center gap-2">
+                    <span className="text-[#1A5C38] font-bold text-[13px]">
+                      ✓ Ciclo confirmado: {cicloInferido.label}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCicloConfirmado(false);
+                        setCicloInferido(null);
+                        setForm(f => ({ ...f, cycle_type: '' }));
+                      }}
+                      className="ml-auto text-[11px] text-slate-500 underline font-medium">
+                      Cambiar
+                    </button>
+                  </div>
+                )}
+
+                {/* CASO C — Mes de transición: productor elige manualmente */}
+                {cicloInferido && cicloInferido.certeza === 'baja' && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-[14px] p-4">
+                    <p className="text-[13px] font-bold text-slate-700 mb-1">
+                      📅 Este mes está entre ciclos
+                    </p>
+                    <p className="text-[12px] text-slate-500 mb-3">
+                      Selecciona el ciclo que corresponde a tu siembra:
+                    </p>
+                    <div className="space-y-2">
+                      {CICLOS.map(c => (
+                        <button key={c.valor} type="button"
+                          onClick={() => {
+                            setForm(f => ({
+                              ...f,
+                              cycle_type: c.valor,
+                              cycle_year: new Date(form.planting_date + 'T12:00:00').getFullYear(),
+                            }));
+                            setCicloConfirmado(true);
+                          }}
+                          className={`w-full border-2 rounded-[12px] py-2.5 px-3 text-left transition-all active:scale-[0.98]
+                            ${form.cycle_type === c.valor
+                              ? 'border-[#1A5C38] bg-[#1A5C38]/5'
+                              : 'border-slate-100 bg-white'}`}>
+                          <p className="text-[13px] font-black text-slate-800">{c.label}</p>
+                          <p className="text-[11.5px] text-slate-500 mt-0.5">{c.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CASO D — Producción bajo riego: elige ciclo manualmente */}
+                {form.tipo_riego === 'riego' && form.planting_date && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-[14px] p-4">
+                    <p className="text-[13px] font-bold text-slate-700 mb-1">
+                      💧 Producción bajo riego
+                    </p>
+                    <p className="text-[12px] text-slate-500 mb-3">
+                      Selecciona el ciclo que corresponde a tu producción:
+                    </p>
+                    <div className="space-y-2">
+                      {CICLOS.map(c => (
+                        <button key={c.valor} type="button"
+                          onClick={() => {
+                            setForm(f => ({
+                              ...f,
+                              cycle_type: c.valor,
+                              cycle_year: new Date(form.planting_date + 'T12:00:00').getFullYear(),
+                            }));
+                            setCicloConfirmado(true);
+                          }}
+                          className={`w-full border-2 rounded-[12px] py-2.5 px-3 text-left transition-all active:scale-[0.98]
+                            ${form.cycle_type === c.valor
+                              ? 'border-[#1A5C38] bg-[#1A5C38]/5'
+                              : 'border-slate-100 bg-white'}`}>
+                          <p className="text-[13px] font-black text-slate-800">{c.label}</p>
+                          <p className="text-[11.5px] text-slate-500 mt-0.5">{c.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
 
@@ -671,16 +808,6 @@ export default function CicloProductivoPage() {
                 <div className="space-y-3">
                   <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
                     <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <Calendar size={14} className="text-slate-400"/> ¿Cuándo vas a sembrar?
-                    </label>
-                    <input type="date" value={form.planting_date}
-                      onChange={e => setForm(f => ({...f, planting_date: e.target.value}))}
-                      className={`${inputCls} font-bold text-[14px] text-slate-700 py-2.5`}
-                    />
-                  </div>
-                  
-                  <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
-                    <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
                       <Clock size={14} className="text-slate-400"/> ¿Cuándo esperas cosechar? <span className="text-slate-400 font-medium ml-1 text-[11px]">(opcional)</span>
                     </label>
                     <input type="date" value={form.estimated_harvest_date}
@@ -722,7 +849,7 @@ export default function CicloProductivoPage() {
           <div className="w-full space-y-2">
             {paso === 1 && (
               <button onClick={() => { setError(''); setPaso(2); }}
-                disabled={!form.cycle_type}
+                disabled={!form.cycle_type || !form.planting_date || !cicloConfirmado}
                 className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
@@ -743,7 +870,7 @@ export default function CicloProductivoPage() {
             )}
             {paso === 4 && (
               <button onClick={guardar}
-                disabled={!form.planting_date || loading}
+                disabled={loading}
                 className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)] flex items-center justify-center gap-2">
                 {loading ? <><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</> : '✓ Finalizar y guardar'}
               </button>
