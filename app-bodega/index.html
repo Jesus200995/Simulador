@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>html,body,#root{overflow-x:hidden!important;max-width:100vw;width:100%}</style>
+    <script>
+      // Síncrono: evita flash de fondo crema al abrir la app sin sesión (WelcomePage).
+      // Si no hay token el fondo arranca en verde oscuro antes de que React monte.
+      try {
+        if (!localStorage.getItem('simac_token')) {
+          document.documentElement.style.background = '#092213';
+          document.body && (document.body.style.background = '#092213');
+        }
+      } catch(e) {}
+    </script>
     <meta name="theme-color" content="#1A5C38" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
