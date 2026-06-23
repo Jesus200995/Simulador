@@ -2,13 +2,18 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search, Download, Eye, MapPin, Calendar, User, FileText,
   ShieldCheck, Camera, X, ChevronLeft, ChevronRight, Loader2,
-  CheckCircle2, AlertTriangle, RefreshCw,
+  CheckCircle2, AlertTriangle, RefreshCw, Filter, SortAsc, SortDesc,
+  Phone, Hash, CheckSquare, Square, FileDown, TableProperties,
+  LayoutGrid, ArrowDownToLine, Fingerprint, Globe,
 } from 'lucide-react';
 
-const BASE        = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+/* ─── Configuración ──────────────────────────────────────────────── */
+const BASE         = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const UPLOADS_BASE = BASE.replace('/api', '');
-const HDR         = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
+const HDR          = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
+const POR_PAG      = 25;
 
+/* ─── Tipos ──────────────────────────────────────────────────────── */
 interface Aviso {
   producer_id: number;
   curp: string;
@@ -26,89 +31,135 @@ interface Aviso {
   created_at: string;
 }
 
-const fmtFecha = (iso: string | null) => {
+type SortKey  = 'fecha' | 'nombre' | 'curp' | 'estado';
+type SortDir  = 'asc' | 'desc';
+type Vista    = 'tabla' | 'cards';
+
+/* ─── Helpers ────────────────────────────────────────────────────── */
+const fmt = (iso: string | null, corto = false) => {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-MX', {
+  const d = new Date(iso);
+  if (corto) return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleString('es-MX', {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: true,
   });
 };
 
-const nombreCompleto = (a: Aviso) =>
+const nombre = (a: Aviso) =>
   [a.nombres, a.apellido_paterno, a.apellido_materno].filter(Boolean).join(' ');
 
 const fotoURL = (url: string | null) =>
   url ? `${UPLOADS_BASE}/uploads/${url}` : null;
 
-// ── Generador de PDF vía ventana de impresión ────────────────────────────────
-function generarPDF(aviso: Aviso) {
-  const foto    = fotoURL(aviso.aviso_privacidad_foto_url);
-  const nombre  = nombreCompleto(aviso);
-  const fecha   = fmtFecha(aviso.aviso_privacidad_fecha);
-  const coords  = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng
-    ? `${aviso.aviso_privacidad_lat.toFixed(6)}, ${aviso.aviso_privacidad_lng.toFixed(6)}`
+const completitud = (a: Aviso) => {
+  let n = 0;
+  if (a.aviso_privacidad_aceptado) n++;
+  if (a.aviso_privacidad_fecha)    n++;
+  if (a.aviso_privacidad_lat)      n++;
+  if (a.aviso_privacidad_foto_url) n++;
+  return Math.round((n / 4) * 100);
+};
+
+/* ─── PDF individual ─────────────────────────────────────────────── */
+function generarPDF(a: Aviso) {
+  const foto   = fotoURL(a.aviso_privacidad_foto_url);
+  const nomb   = nombre(a);
+  const coords = a.aviso_privacidad_lat && a.aviso_privacidad_lng
+    ? `${a.aviso_privacidad_lat.toFixed(6)}, ${a.aviso_privacidad_lng.toFixed(6)}`
     : 'No disponible';
+  const mapsURL = a.aviso_privacidad_lat && a.aviso_privacidad_lng
+    ? `https://maps.google.com/?q=${a.aviso_privacidad_lat},${a.aviso_privacidad_lng}`
+    : null;
+  const pct = completitud(a);
 
   const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <title>Aviso de Privacidad — ${nombre}</title>
+  <title>Constancia Aviso Privacidad — ${nomb}</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #111; background: #fff; padding: 32px; }
-    .header { display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #0e5c33; padding-bottom: 16px; margin-bottom: 24px; }
-    .logo-box { width: 48px; height: 48px; background: #0e5c33; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .logo-box span { color: #fff; font-weight: 900; font-size: 14px; letter-spacing: 1px; }
-    .header-text h1 { font-size: 18px; font-weight: 800; color: #0e5c33; }
-    .header-text p  { font-size: 10px; color: #666; margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; }
-    .badge { display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid #86efac; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
-    .card-title { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    .field { margin-bottom: 8px; }
-    .field label { font-size: 9px; color: #94a3b8; font-weight: 600; display: block; margin-bottom: 2px; text-transform: uppercase; }
-    .field value { font-size: 12px; font-weight: 600; color: #1e293b; display: block; }
-    .foto-section { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; gap: 16px; align-items: flex-start; }
-    .foto-box { width: 120px; height: 120px; border-radius: 10px; border: 2px solid #e2e8f0; overflow: hidden; flex-shrink: 0; background: #f1f5f9; display: flex; align-items: center; justify-content: center; }
-    .foto-box img { width: 100%; height: 100%; object-fit: cover; }
-    .foto-info { flex: 1; }
-    .foto-info h3 { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-    .foto-info p { font-size: 10px; color: #64748b; line-height: 1.5; }
-    .legal { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px; margin-bottom: 20px; }
-    .legal h3 { font-size: 11px; font-weight: 700; color: #15803d; margin-bottom: 6px; }
-    .legal p { font-size: 9px; color: #166534; line-height: 1.6; }
-    .footer { border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .footer p { font-size: 9px; color: #94a3b8; }
-    @media print {
-      body { padding: 20px; }
-      .no-print { display: none; }
-    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Helvetica Neue',Arial,sans-serif;color:#111;background:#fff;padding:36px 40px;font-size:12px}
+    /* Header */
+    .hdr{display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;border-bottom:3px solid #0e5c33;margin-bottom:24px}
+    .hdr-left{display:flex;align-items:center;gap:14px}
+    .logo{width:52px;height:52px;background:#0e5c33;border-radius:12px;display:flex;align-items:center;justify-content:center}
+    .logo span{color:#fff;font-weight:900;font-size:13px;letter-spacing:1px}
+    .hdr-title h1{font-size:17px;font-weight:900;color:#0e5c33;letter-spacing:-0.3px}
+    .hdr-title p{font-size:9px;color:#64748b;margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+    .hdr-right{text-align:right}
+    .hdr-right .badge{display:inline-block;background:#dcfce7;color:#15803d;font-size:9px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid #86efac;text-transform:uppercase;letter-spacing:0.5px}
+    .hdr-right p{font-size:9px;color:#94a3b8;margin-top:5px}
+    /* Completitud */
+    .comp-bar{height:6px;background:#e2e8f0;border-radius:6px;margin-bottom:20px;overflow:hidden}
+    .comp-fill{height:100%;background:linear-gradient(90deg,#0e5c33,#22c55e);border-radius:6px;width:${pct}%}
+    .comp-label{font-size:9px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+    /* Grid 2 col */
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+    .card-title{font-size:8px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px}
+    .field{margin-bottom:7px}
+    .field label{font-size:8px;color:#94a3b8;font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase}
+    .field value{font-size:12px;font-weight:700;color:#1e293b;display:block}
+    .field .mono{font-family:monospace;font-size:11px}
+    /* Foto */
+    .foto-section{display:flex;gap:16px;align-items:flex-start;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:16px}
+    .foto-box{width:130px;height:130px;border-radius:10px;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
+    .foto-box img{width:100%;height:100%;object-fit:cover}
+    .foto-box .no-foto{font-size:9px;color:#94a3b8;text-align:center;padding:10px}
+    .foto-info h3{font-size:12px;font-weight:800;color:#1e293b;margin-bottom:5px}
+    .foto-info p{font-size:10px;color:#64748b;line-height:1.6}
+    .foto-info .id-badge{margin-top:8px;display:inline-block;background:#0e5c33;color:#fff;font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.5px}
+    /* GPS link */
+    .gps-link{font-size:9px;color:#2563eb;font-weight:700;text-decoration:underline}
+    /* Legal */
+    .legal{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:16px}
+    .legal h3{font-size:10px;font-weight:800;color:#15803d;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+    .legal p{font-size:9px;color:#166534;line-height:1.7}
+    /* Firmas */
+    .firmas{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:16px}
+    .firma-box{border-top:1.5px solid #cbd5e1;padding-top:8px}
+    .firma-box p{font-size:8px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+    /* Footer */
+    .footer{border-top:1px solid #e2e8f0;padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+    .footer p{font-size:8px;color:#94a3b8}
+    @media print{body{padding:18px 22px}.no-print{display:none}}
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo-box"><span>SIMAC</span></div>
-    <div class="header-text">
-      <h1>Constancia de Aceptación — Aviso de Privacidad</h1>
-      <p>Sistema de Información de Mercados Agrícolas del Maíz · Plan Nacional Maíz 2026</p>
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="logo"><span>SIMAC</span></div>
+      <div class="hdr-title">
+        <h1>Constancia de Aceptación — Aviso de Privacidad</h1>
+        <p>Plan Nacional Maíz 2026 · SADER · Sistema de Información de Mercados Agrícolas</p>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="badge">Aceptado · v${a.aviso_privacidad_version || '1.0'}</div>
+      <p>Folio: #${String(a.producer_id).padStart(6, '0')}</p>
+      <p>Generado: ${new Date().toLocaleString('es-MX')}</p>
     </div>
   </div>
 
-  <div class="badge">Aviso aceptado · Versión ${aviso.aviso_privacidad_version || '1.0'}</div>
+  <div class="comp-label">Completitud del registro: ${pct}%</div>
+  <div class="comp-bar"><div class="comp-fill"></div></div>
 
-  <div class="grid">
+  <div class="grid2">
     <div class="card">
-      <div class="card-title">Datos del Productor</div>
-      <div class="field"><label>Nombre completo</label><value>${nombre}</value></div>
-      <div class="field"><label>CURP</label><value>${aviso.curp}</value></div>
-      <div class="field"><label>Teléfono</label><value>${aviso.phone || '—'}</value></div>
+      <div class="card-title">Datos del Titular</div>
+      <div class="field"><label>Nombre completo</label><value>${nomb}</value></div>
+      <div class="field"><label>CURP</label><value class="mono">${a.curp}</value></div>
+      <div class="field"><label>Teléfono</label><value>${a.phone || '—'}</value></div>
+      <div class="field"><label>Estado de cuenta</label><value>${a.estado_validacion}</value></div>
     </div>
     <div class="card">
-      <div class="card-title">Datos de la Aceptación</div>
-      <div class="field"><label>Fecha y hora</label><value>${fecha}</value></div>
-      <div class="field"><label>Coordenadas GPS</label><value>${coords}</value></div>
-      <div class="field"><label>Versión del aviso</label><value>${aviso.aviso_privacidad_version || '1.0'}</value></div>
+      <div class="card-title">Registro de la Aceptación</div>
+      <div class="field"><label>Fecha y hora exacta</label><value>${fmt(a.aviso_privacidad_fecha)}</value></div>
+      <div class="field"><label>Coordenadas GPS</label><value class="mono">${coords}</value>${mapsURL ? `<a href="${mapsURL}" class="gps-link">Ver en mapa</a>` : ''}</div>
+      <div class="field"><label>Versión del aviso</label><value>${a.aviso_privacidad_version || '1.0'}</value></div>
+      <div class="field"><label>ID Productor</label><value>#${a.producer_id}</value></div>
     </div>
   </div>
 
@@ -116,74 +167,110 @@ function generarPDF(aviso: Aviso) {
     <div class="foto-box">
       ${foto
         ? `<img src="${foto}" alt="Verificación biométrica" crossorigin="anonymous"/>`
-        : '<span style="font-size:10px;color:#94a3b8;text-align:center;padding:8px">Sin fotografía</span>'
+        : '<div class="no-foto">Sin fotografía capturada</div>'
       }
     </div>
     <div class="foto-info">
       <h3>Verificación Biométrica del Titular</h3>
-      <p>La fotografía adjunta fue capturada en el dispositivo del productor en el momento exacto de la aceptación del aviso de privacidad, como constancia de la identidad del titular de la cuenta.</p>
-      <p style="margin-top:8px;color:#0e5c33;font-weight:600;">ID Productor: #${aviso.producer_id} · Estado: ${aviso.estado_validacion}</p>
+      <p>La fotografía fue capturada automáticamente en el dispositivo del productor en el momento exacto de la aceptación del aviso de privacidad, constituyendo prueba fehaciente de la identidad del titular de la cuenta.</p>
+      <p style="margin-top:6px">La imagen fue tomada con la cámara frontal del dispositivo y está asociada de forma inalterable al registro de aceptación con folio <strong>#${String(a.producer_id).padStart(6, '0')}</strong>.</p>
+      <div class="id-badge">ID: #${a.producer_id} · ${a.estado_validacion.toUpperCase()}</div>
     </div>
   </div>
 
   <div class="legal">
     <h3>Fundamento Legal</h3>
     <p>
-      Esta constancia acredita que el productor identificado con CURP <strong>${aviso.curp}</strong> aceptó
-      voluntariamente el Aviso de Privacidad emitido por la Secretaría de Agricultura y Desarrollo Rural (SADER),
-      de conformidad con los artículos 15 y 16 de la Ley Federal de Protección de Datos Personales en Posesión de los
-      Particulares (LFPDPPP), y demás normatividad aplicable. La aceptación fue registrada electrónicamente con
-      marca de tiempo, coordenadas GPS y verificación biométrica facial del titular.
+      Esta constancia acredita que el productor identificado con CURP <strong>${a.curp}</strong> otorgó su consentimiento
+      expreso para el tratamiento de sus datos personales, de conformidad con los Artículos 8, 9, 15 y 16 de la
+      <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong>,
+      y los Artículos 68 al 72 de su Reglamento. La aceptación fue registrada de manera electrónica con marca de
+      tiempo certificada, coordenadas GPS del dispositivo del titular, y verificación biométrica facial. Este documento
+      tiene plena validez legal como evidencia de consentimiento informado.
     </p>
   </div>
 
-  <div class="footer">
-    <p>Generado el ${new Date().toLocaleString('es-MX')} · SIMAC — Plan Nacional Maíz 2026</p>
-    <p>Documento generado automáticamente · No requiere firma física</p>
+  <div class="firmas">
+    <div class="firma-box">
+      <p>Firma Digital del Titular</p>
+      <p style="margin-top:4px;font-size:8px;color:#94a3b8">Consentimiento expresado electrónicamente</p>
+    </div>
+    <div class="firma-box">
+      <p>Responsable del Tratamiento</p>
+      <p style="margin-top:4px;font-size:8px;color:#94a3b8">SADER — Dirección de Información Agroalimentaria</p>
+    </div>
   </div>
 
-  <script>window.onload = () => { window.print(); }</script>
+  <div class="footer">
+    <p>SIMAC — Plan Nacional Maíz 2026 · Secretaría de Agricultura y Desarrollo Rural · Documento generado automáticamente</p>
+    <p>Folio #${String(a.producer_id).padStart(6, '0')} · ${new Date().toISOString()}</p>
+  </div>
+
+  <script>window.onload=()=>window.print()</script>
 </body>
 </html>`;
 
-  const win = window.open('', '_blank', 'width=900,height=700');
+  const win = window.open('', '_blank', 'width=960,height=720');
   if (!win) return;
   win.document.write(html);
   win.document.close();
 }
 
-// ── Modal detalle ─────────────────────────────────────────────────────────────
+/* ─── Exportar CSV ───────────────────────────────────────────────── */
+function exportarCSV(lista: Aviso[]) {
+  const cols = [
+    'ID', 'Nombre', 'CURP', 'Teléfono', 'Fecha Aceptación',
+    'Latitud', 'Longitud', 'Versión', 'Foto URL', 'Estado', 'Completitud %',
+  ];
+  const rows = lista.map(a => [
+    a.producer_id, nombre(a), a.curp, a.phone || '',
+    a.aviso_privacidad_fecha || '',
+    a.aviso_privacidad_lat || '', a.aviso_privacidad_lng || '',
+    a.aviso_privacidad_version || '', a.aviso_privacidad_foto_url || '',
+    a.estado_validacion, completitud(a),
+  ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+
+  const csv  = [cols.join(','), ...rows].join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href  = URL.createObjectURL(blob);
+  link.download = `avisos_privacidad_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/* ─── Modal detalle ──────────────────────────────────────────────── */
 function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void }) {
   const foto   = fotoURL(aviso.aviso_privacidad_foto_url);
-  const nombre = nombreCompleto(aviso);
-  const coords = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng
-    ? `${aviso.aviso_privacidad_lat.toFixed(6)}, ${aviso.aviso_privacidad_lng.toFixed(6)}`
-    : null;
+  const nomb   = nombre(aviso);
+  const coords = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng;
+  const pct    = completitud(aviso);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-gray-950/60 backdrop-blur-md" />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-gray-950/70 backdrop-blur-xl" />
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        className="relative bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header modal */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between rounded-t-2xl z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-              <ShieldCheck size={15} className="text-emerald-600" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-sm shadow-emerald-200">
+              <ShieldCheck size={17} className="text-white" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-gray-900 leading-none">Aviso de Privacidad</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">{aviso.curp}</p>
+              <p className="text-[14px] font-extrabold text-gray-900 leading-none">{nomb}</p>
+              <p className="text-[10px] font-mono text-gray-400 mt-0.5">{aviso.curp}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => generarPDF(aviso)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-[12px] font-bold transition-all shadow-sm shadow-emerald-200"
             >
-              <Download size={12} /> PDF
+              <FileDown size={13} /> PDF
             </button>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
               <X size={15} className="text-gray-500" />
@@ -191,58 +278,81 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
           </div>
         </div>
 
-        <div className="p-5 space-y-4">
-          {/* Foto + datos */}
+        {/* Scroll body */}
+        <div className="overflow-y-auto flex-1 p-5 space-y-4">
+
+          {/* Barra de completitud */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Completitud del registro</p>
+              <span className={`text-[11px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>{pct}%</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-emerald-500' : pct >= 75 ? 'bg-amber-400' : 'bg-red-400'}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Foto */}
           <div className="flex gap-4">
-            <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 flex items-center justify-center">
+            <div className="w-28 h-28 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
               {foto
                 ? <img src={foto} alt="Verificación" className="w-full h-full object-cover" />
-                : <Camera size={22} className="text-gray-300" />
+                : <Camera size={24} className="text-gray-300" />
               }
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-900 text-[15px] leading-tight">{nombre}</p>
-              <p className="text-[11px] text-gray-500 font-mono mt-1">{aviso.curp}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+            <div className="flex-1 min-w-0 space-y-2 pt-1">
+              <div className="flex flex-wrap gap-1.5">
+                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${
                   aviso.estado_validacion === 'activo'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border border-amber-200'
-                }`}>
-                  <CheckCircle2 size={10} /> {aviso.estado_validacion}
-                </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}><CheckCircle2 size={10} /> {aviso.estado_validacion}</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                   v{aviso.aviso_privacidad_version || '1.0'}
                 </span>
+                {foto && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200"><Fingerprint size={10} /> Biométrico</span>}
               </div>
+              <DetailRow icon={<Phone size={12} />} label="Teléfono" val={aviso.phone || '—'} />
+              <DetailRow icon={<Hash size={12} />} label="Folio" val={`#${String(aviso.producer_id).padStart(6,'0')}`} mono />
             </div>
           </div>
 
           {/* Datos de aceptación */}
-          <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Datos de la aceptación</p>
-            <Row icon={<Calendar size={13} className="text-emerald-500" />} label="Fecha y hora" value={fmtFecha(aviso.aviso_privacidad_fecha)} />
-            <Row icon={<MapPin size={13} className="text-emerald-500" />} label="Coordenadas GPS" value={coords || 'No disponible'} mono={!!coords} />
-            <Row icon={<User size={13} className="text-emerald-500" />} label="Teléfono" value={aviso.phone || '—'} />
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100">
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Datos de la Aceptación</p>
+            <DetailRow icon={<Calendar size={13} className="text-emerald-500" />} label="Fecha y hora" val={fmt(aviso.aviso_privacidad_fecha)} />
+            <DetailRow
+              icon={<MapPin size={13} className="text-emerald-500" />}
+              label="Coordenadas GPS"
+              val={coords
+                ? `${aviso.aviso_privacidad_lat!.toFixed(6)}, ${aviso.aviso_privacidad_lng!.toFixed(6)}`
+                : 'No disponible'}
+              mono={!!coords}
+              link={coords
+                ? `https://maps.google.com/?q=${aviso.aviso_privacidad_lat},${aviso.aviso_privacidad_lng}`
+                : undefined}
+            />
           </div>
 
-          {/* Verificación biométrica */}
+          {/* Foto expandida */}
           {foto && (
-            <div className="border border-gray-100 rounded-xl overflow-hidden">
+            <div className="rounded-2xl overflow-hidden border border-gray-100">
               <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
-                <Camera size={12} className="text-gray-400" />
+                <Fingerprint size={12} className="text-gray-400" />
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Verificación biométrica del titular</p>
               </div>
-              <img src={foto} alt="Verificación biométrica" className="w-full object-cover max-h-64" />
+              <img src={foto} alt="Biométrico" className="w-full object-cover max-h-72" />
             </div>
           )}
 
           {/* Nota legal */}
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
             <p className="text-[10px] text-emerald-700 leading-relaxed">
-              Este productor aceptó el aviso de privacidad de conformidad con la LFPDPPP. La aceptación
-              fue registrada con marca de tiempo, coordenadas GPS y verificación biométrica.
-              ID Productor: <strong>#{aviso.producer_id}</strong>
+              Registro con validez legal conforme a la LFPDPPP. Aceptación registrada con marca de tiempo,
+              GPS y verificación biométrica. Folio <strong>#{String(aviso.producer_id).padStart(6,'0')}</strong>.
             </p>
           </div>
         </div>
@@ -251,39 +361,49 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
   );
 }
 
-function Row({ icon, label, value, mono = false }: { icon: React.ReactNode; label: string; value: string; mono?: boolean }) {
+function DetailRow({ icon, label, val, mono = false, link }: {
+  icon: React.ReactNode; label: string; val: string; mono?: boolean; link?: string;
+}) {
   return (
     <div className="flex items-start gap-2.5">
-      <div className="mt-0.5 flex-shrink-0">{icon}</div>
-      <div className="min-w-0">
+      <div className="mt-0.5 flex-shrink-0 text-gray-400">{icon}</div>
+      <div className="min-w-0 flex-1">
         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{label}</p>
-        <p className={`text-[12px] font-semibold text-gray-800 mt-0.5 ${mono ? 'font-mono' : ''}`}>{value}</p>
+        {link
+          ? <a href={link} target="_blank" rel="noopener noreferrer" className={`text-[12px] font-semibold text-blue-600 hover:underline mt-0.5 block ${mono ? 'font-mono' : ''}`}>{val}</a>
+          : <p className={`text-[12px] font-semibold text-gray-800 mt-0.5 ${mono ? 'font-mono' : ''}`}>{val}</p>
+        }
       </div>
     </div>
   );
 }
 
-// ── Página principal ──────────────────────────────────────────────────────────
+/* ─── Página principal ───────────────────────────────────────────── */
 export default function AvisosPrivacidadAdminPage() {
-  const [avisos, setAvisos]           = useState<Aviso[]>([]);
-  const [total, setTotal]             = useState(0);
-  const [cargando, setCargando]       = useState(true);
-  const [error, setError]             = useState<string | null>(null);
-  const [busqueda, setBusqueda]       = useState('');
-  const [pagina, setPagina]           = useState(1);
+  const [avisos,       setAvisos]       = useState<Aviso[]>([]);
+  const [total,        setTotal]        = useState(0);
+  const [cargando,     setCargando]     = useState(true);
+  const [error,        setError]        = useState<string | null>(null);
+  const [busqueda,     setBusqueda]     = useState('');
+  const [pagina,       setPagina]       = useState(1);
   const [seleccionado, setSeleccionado] = useState<Aviso | null>(null);
-  const POR_PAG = 20;
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [vista,        setVista]        = useState<Vista>('tabla');
+  const [seleccion,    setSeleccion]    = useState<Set<number>>(new Set());
+  const [sortKey,      setSortKey]      = useState<SortKey>('fecha');
+  const [sortDir,      setSortDir]      = useState<SortDir>('desc');
+  const [filtros,      setFiltros]      = useState({ conFoto: false, conGPS: false, estado: '' });
+  const [filtrosOpen,  setFiltrosOpen]  = useState(false);
+  const [descargando,  setDescargando]  = useState(false);
+  const debRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const cargar = useCallback(async (q: string, pag: number) => {
+  /* Carga de datos */
+  const cargar = useCallback(async (q: string, pag: number, sk: SortKey, sd: SortDir) => {
     setCargando(true);
     setError(null);
     try {
       const offset = (pag - 1) * POR_PAG;
-      const res = await fetch(
-        `${BASE}/admin/avisos-privacidad?q=${encodeURIComponent(q)}&limit=${POR_PAG}&offset=${offset}`,
-        { headers: HDR() }
-      );
+      const url = `${BASE}/admin/avisos-privacidad?q=${encodeURIComponent(q)}&limit=${POR_PAG}&offset=${offset}&sort=${sk}&dir=${sd}`;
+      const res = await fetch(url, { headers: HDR() });
       if (!res.ok) throw new Error('Error al cargar avisos');
       const data = await res.json();
       setAvisos(data.avisos);
@@ -295,227 +415,527 @@ export default function AvisosPrivacidadAdminPage() {
     }
   }, []);
 
-  useEffect(() => {
-    cargar(busqueda, pagina);
-  }, [pagina]);
+  useEffect(() => { cargar(busqueda, pagina, sortKey, sortDir); }, [pagina, sortKey, sortDir]);
 
   const onBusqueda = (val: string) => {
-    setBusqueda(val);
-    setPagina(1);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => cargar(val, 1), 300);
+    setBusqueda(val); setPagina(1); setSeleccion(new Set());
+    if (debRef.current) clearTimeout(debRef.current);
+    debRef.current = setTimeout(() => cargar(val, 1, sortKey, sortDir), 300);
   };
 
-  const totalPags = Math.ceil(total / POR_PAG);
+  /* Filtrado client-side sobre la página actual */
+  const avisosVis = avisos.filter(a => {
+    if (filtros.conFoto && !a.aviso_privacidad_foto_url) return false;
+    if (filtros.conGPS  && !a.aviso_privacidad_lat)     return false;
+    if (filtros.estado  && a.estado_validacion !== filtros.estado) return false;
+    return true;
+  });
+
+  /* Ordenamiento */
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('desc'); }
+    setPagina(1);
+  };
+
+  /* Selección */
+  const toggleSel = (id: number) => {
+    setSeleccion(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+  const toggleTodos = () => {
+    if (seleccion.size === avisosVis.length) setSeleccion(new Set());
+    else setSeleccion(new Set(avisosVis.map(a => a.producer_id)));
+  };
+
+  /* Descargar todos CSV (todos los registros via API) */
+  const descargarTodosCSV = async () => {
+    setDescargando(true);
+    try {
+      const res = await fetch(`${BASE}/admin/avisos-privacidad?q=${encodeURIComponent(busqueda)}&limit=9999&offset=0`, { headers: HDR() });
+      const data = await res.json();
+      exportarCSV(data.avisos);
+    } finally {
+      setDescargando(false);
+    }
+  };
+
+  /* Descargar PDFs seleccionados (secuencial con delay) */
+  const descargarPDFsSeleccion = async () => {
+    const lista = avisosVis.filter(a => seleccion.has(a.producer_id));
+    for (let i = 0; i < lista.length; i++) {
+      generarPDF(lista[i]);
+      if (i < lista.length - 1) await new Promise(r => setTimeout(r, 800));
+    }
+  };
+
+  const totalPags    = Math.ceil(total / POR_PAG);
+  const conFotoTotal = avisos.filter(a => a.aviso_privacidad_foto_url).length;
+  const conGPSTotal  = avisos.filter(a => a.aviso_privacidad_lat).length;
+  const hayFiltros   = filtros.conFoto || filtros.conGPS || !!filtros.estado;
 
   return (
     <>
       {seleccionado && <ModalDetalle aviso={seleccionado} onClose={() => setSeleccionado(null)} />}
 
-      <div className="space-y-5 h-full flex flex-col">
+      <div className="flex flex-col gap-5 h-full">
 
-        {/* Métricas rápidas */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <MetricCard
-            icon={<ShieldCheck size={18} className="text-emerald-500" />}
-            label="Total de avisos aceptados"
-            value={total}
-            color="emerald"
-          />
-          <MetricCard
-            icon={<Camera size={18} className="text-blue-500" />}
-            label="Con verificación biométrica"
-            value={avisos.filter(a => a.aviso_privacidad_foto_url).length}
-            suffix={`/ ${avisos.length}`}
-            color="blue"
-          />
-          <MetricCard
-            icon={<MapPin size={18} className="text-violet-500" />}
-            label="Con coordenadas GPS"
-            value={avisos.filter(a => a.aviso_privacidad_lat).length}
-            suffix={`/ ${avisos.length}`}
-            color="violet"
+        {/* ── MÉTRICAS ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Metric icon={<ShieldCheck size={18} />} label="Total aceptados" val={total} color="emerald" />
+          <Metric icon={<Fingerprint size={18} />} label="Con biométrico" val={conFotoTotal} of={avisos.length} color="violet" />
+          <Metric icon={<Globe size={18} />} label="Con GPS" val={conGPSTotal} of={avisos.length} color="blue" />
+          <Metric
+            icon={<CheckCircle2 size={18} />}
+            label="Completitud media"
+            val={avisos.length ? Math.round(avisos.reduce((s, a) => s + completitud(a), 0) / avisos.length) : 0}
+            suffix="%"
+            color="amber"
           />
         </div>
 
-        {/* Barra de búsqueda */}
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm px-4 py-3 flex items-center gap-3">
-          <Search size={16} className="text-gray-400 flex-shrink-0" />
-          <input
-            type="text"
-            value={busqueda}
-            onChange={e => onBusqueda(e.target.value)}
-            placeholder="Buscar por nombre, CURP…"
-            className="flex-1 text-[14px] text-gray-700 placeholder-gray-400 bg-transparent outline-none"
-          />
-          {cargando && <Loader2 size={15} className="text-emerald-500 animate-spin flex-shrink-0" />}
-          {busqueda && !cargando && (
-            <button onClick={() => onBusqueda('')} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <X size={15} />
+        {/* ── BARRA DE HERRAMIENTAS ── */}
+        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-3 flex flex-wrap items-center gap-2">
+
+          {/* Búsqueda */}
+          <div className="flex items-center gap-2 flex-1 min-w-[180px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+            <Search size={14} className="text-gray-400 flex-shrink-0" />
+            <input
+              type="text"
+              value={busqueda}
+              onChange={e => onBusqueda(e.target.value)}
+              placeholder="Buscar por nombre, CURP…"
+              className="flex-1 text-[13px] text-gray-700 placeholder-gray-400 bg-transparent outline-none"
+            />
+            {cargando
+              ? <Loader2 size={13} className="text-emerald-500 animate-spin flex-shrink-0" />
+              : busqueda && <button onClick={() => onBusqueda('')}><X size={13} className="text-gray-400 hover:text-gray-600" /></button>
+            }
+          </div>
+
+          {/* Filtros */}
+          <div className="relative">
+            <button
+              onClick={() => setFiltrosOpen(o => !o)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all ${
+                hayFiltros
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                  : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Filter size={13} />
+              Filtros
+              {hayFiltros && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center font-black">
+                {[filtros.conFoto, filtros.conGPS, !!filtros.estado].filter(Boolean).length}
+              </span>}
+            </button>
+
+            {filtrosOpen && (
+              <div className="absolute top-full mt-1.5 left-0 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 w-64">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Filtros activos</p>
+                <div className="space-y-2.5">
+                  <FiltroCheck label="Solo con foto biométrica" checked={filtros.conFoto} onChange={v => setFiltros(f => ({ ...f, conFoto: v }))} />
+                  <FiltroCheck label="Solo con GPS" checked={filtros.conGPS} onChange={v => setFiltros(f => ({ ...f, conGPS: v }))} />
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Estado de cuenta</label>
+                    <select
+                      value={filtros.estado}
+                      onChange={e => setFiltros(f => ({ ...f, estado: e.target.value }))}
+                      className="w-full text-[12px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-700 outline-none"
+                    >
+                      <option value="">Todos</option>
+                      <option value="activo">Activo</option>
+                      <option value="pendiente">Pendiente</option>
+                      <option value="inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+                {hayFiltros && (
+                  <button
+                    onClick={() => setFiltros({ conFoto: false, conGPS: false, estado: '' })}
+                    className="mt-3 text-[11px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
+                  >
+                    <X size={11} /> Limpiar filtros
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Vista toggle */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+            <button
+              onClick={() => setVista('tabla')}
+              className={`p-1.5 rounded-lg transition-all ${vista === 'tabla' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+            ><TableProperties size={15} /></button>
+            <button
+              onClick={() => setVista('cards')}
+              className={`p-1.5 rounded-lg transition-all ${vista === 'cards' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+            ><LayoutGrid size={15} /></button>
+          </div>
+
+          {/* Refresh */}
+          <button
+            onClick={() => cargar(busqueda, pagina, sortKey, sortDir)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
+          ><RefreshCw size={14} /></button>
+
+          {/* Separador */}
+          <div className="h-6 w-px bg-gray-200 hidden sm:block" />
+
+          {/* Acciones de descarga */}
+          {seleccion.size > 0 && (
+            <button
+              onClick={descargarPDFsSeleccion}
+              className="flex items-center gap-1.5 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-[12px] font-bold transition-all active:scale-95 shadow-sm shadow-violet-200"
+            >
+              <FileDown size={13} /> PDF ({seleccion.size})
             </button>
           )}
-          <button onClick={() => cargar(busqueda, pagina)} className="text-gray-400 hover:text-emerald-600 transition-colors ml-1">
-            <RefreshCw size={14} />
+          <button
+            onClick={descargarTodosCSV}
+            disabled={descargando}
+            className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-[12px] font-bold transition-all active:scale-95 disabled:opacity-50"
+          >
+            {descargando ? <Loader2 size={13} className="animate-spin" /> : <ArrowDownToLine size={13} />}
+            CSV
           </button>
         </div>
 
-        {/* Tabla / lista */}
-        <div className="flex-1 bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden flex flex-col">
+        {/* ── CONTENIDO PRINCIPAL ── */}
+        <div className="flex-1 bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden flex flex-col min-h-0">
           {error ? (
-            <div className="flex-1 flex items-center justify-center gap-2 text-red-500">
-              <AlertTriangle size={16} /> <span className="text-sm">{error}</span>
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 p-12">
+              <AlertTriangle size={32} className="text-red-400" strokeWidth={1.5} />
+              <p className="text-[14px] font-bold text-gray-700">{error}</p>
+              <button onClick={() => cargar(busqueda, pagina, sortKey, sortDir)} className="text-[12px] text-emerald-600 font-bold hover:underline">Reintentar</button>
             </div>
-          ) : avisos.length === 0 && !cargando ? (
+          ) : avisosVis.length === 0 && !cargando ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-gray-400 py-16">
-              <FileText size={36} strokeWidth={1.5} />
-              <p className="text-sm font-medium">
-                {busqueda ? 'Sin resultados para la búsqueda' : 'Aún no hay avisos de privacidad registrados'}
+              <FileText size={40} strokeWidth={1.3} />
+              <p className="text-[14px] font-semibold">
+                {busqueda || hayFiltros ? 'Sin resultados para los filtros aplicados' : 'Aún no hay avisos de privacidad registrados'}
               </p>
+              {(busqueda || hayFiltros) && (
+                <button onClick={() => { onBusqueda(''); setFiltros({ conFoto: false, conGPS: false, estado: '' }); }}
+                  className="text-[12px] text-emerald-600 font-bold hover:underline">Limpiar búsqueda</button>
+              )}
             </div>
-          ) : (
+          ) : vista === 'tabla' ? (
             <>
               {/* Header tabla */}
-              <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b border-gray-100 bg-gray-50/60">
-                {['Productor', 'Fecha de aceptación', 'GPS', 'Foto', 'Acciones'].map(h => (
-                  <p key={h} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{h}</p>
+              <div className="hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50/60 flex-shrink-0">
+                <div className="flex items-center">
+                  <button onClick={toggleTodos} className="text-gray-400 hover:text-emerald-600 transition-colors">
+                    {seleccion.size === avisosVis.length && avisosVis.length > 0
+                      ? <CheckSquare size={15} className="text-emerald-600" />
+                      : <Square size={15} />
+                    }
+                  </button>
+                </div>
+                {([
+                  ['nombre', 'Productor'],
+                  ['fecha',  'Fecha aceptación'],
+                  ['curp',   'CURP'],
+                  ['estado', 'Estado'],
+                ] as [SortKey, string][]).map(([k, lbl]) => (
+                  <ColHeader key={k} label={lbl} sk={k} cur={sortKey} dir={sortDir} onClick={() => toggleSort(k)} />
                 ))}
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest self-center">Completitud</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest self-center">Acciones</p>
               </div>
 
               {/* Filas */}
-              <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+              <div className="flex-1 overflow-y-auto divide-y divide-gray-50/80">
                 {cargando
-                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                  : avisos.map(aviso => (
-                    <FilaAviso
-                      key={aviso.producer_id}
-                      aviso={aviso}
-                      onVer={() => setSeleccionado(aviso)}
-                      onPDF={() => generarPDF(aviso)}
+                  ? Array.from({ length: 8 }).map((_, i) => <SkRow key={i} />)
+                  : avisosVis.map(a => (
+                    <FilaTabla
+                      key={a.producer_id}
+                      aviso={a}
+                      sel={seleccion.has(a.producer_id)}
+                      onToggleSel={() => toggleSel(a.producer_id)}
+                      onVer={() => setSeleccionado(a)}
+                      onPDF={() => generarPDF(a)}
                     />
                   ))
                 }
               </div>
-
-              {/* Paginación */}
-              {totalPags > 1 && (
-                <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
-                  <p className="text-[11px] text-gray-400">
-                    {(pagina - 1) * POR_PAG + 1}–{Math.min(pagina * POR_PAG, total)} de {total}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setPagina(p => Math.max(1, p - 1))}
-                      disabled={pagina === 1}
-                      className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
-                    >
-                      <ChevronLeft size={13} />
-                    </button>
-                    <span className="text-[11px] font-bold text-gray-700">{pagina} / {totalPags}</span>
-                    <button
-                      onClick={() => setPagina(p => Math.min(totalPags, p + 1))}
-                      disabled={pagina === totalPags}
-                      className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
-                    >
-                      <ChevronRight size={13} />
-                    </button>
-                  </div>
-                </div>
-              )}
             </>
+          ) : (
+            /* Vista cards */
+            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
+              {cargando
+                ? Array.from({ length: 6 }).map((_, i) => <SkCard key={i} />)
+                : avisosVis.map(a => (
+                  <Card
+                    key={a.producer_id}
+                    aviso={a}
+                    sel={seleccion.has(a.producer_id)}
+                    onToggleSel={() => toggleSel(a.producer_id)}
+                    onVer={() => setSeleccionado(a)}
+                    onPDF={() => generarPDF(a)}
+                  />
+                ))
+              }
+            </div>
+          )}
+
+          {/* Paginación */}
+          {totalPags > 1 && (
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0 bg-white">
+              <p className="text-[11px] text-gray-400 font-medium">
+                {(pagina - 1) * POR_PAG + 1}–{Math.min(pagina * POR_PAG, total)} de <span className="font-bold text-gray-600">{total}</span>
+              </p>
+              <div className="flex items-center gap-1.5">
+                <button onClick={() => setPagina(1)} disabled={pagina === 1}
+                  className="px-2.5 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">1</button>
+                <button onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={pagina === 1}
+                  className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">
+                  <ChevronLeft size={13} /></button>
+                <span className="text-[12px] font-black text-gray-700 px-1">{pagina} / {totalPags}</span>
+                <button onClick={() => setPagina(p => Math.min(totalPags, p + 1))} disabled={pagina === totalPags}
+                  className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">
+                  <ChevronRight size={13} /></button>
+                <button onClick={() => setPagina(totalPags)} disabled={pagina === totalPags}
+                  className="px-2.5 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">{totalPags}</button>
+              </div>
+            </div>
           )}
         </div>
       </div>
+
+      {/* Cerrar filtros al hacer clic fuera */}
+      {filtrosOpen && <div className="fixed inset-0 z-20" onClick={() => setFiltrosOpen(false)} />}
     </>
   );
 }
 
-// ── Sub-componentes ────────────────────────────────────────────────────────────
-function MetricCard({ icon, label, value, suffix, color }: {
-  icon: React.ReactNode; label: string; value: number; suffix?: string; color: string;
+/* ─── Sub-componentes ────────────────────────────────────────────── */
+
+function Metric({ icon, label, val, of: ofVal, suffix, color }: {
+  icon: React.ReactNode; label: string; val: number; of?: number; suffix?: string; color: string;
 }) {
-  const colors: Record<string, string> = {
-    emerald: 'bg-emerald-50 border-emerald-100',
-    blue:    'bg-blue-50 border-blue-100',
-    violet:  'bg-violet-50 border-violet-100',
+  const map: Record<string, string> = {
+    emerald: 'bg-emerald-50 border-emerald-100 text-emerald-500',
+    violet:  'bg-violet-50 border-violet-100 text-violet-500',
+    blue:    'bg-blue-50 border-blue-100 text-blue-500',
+    amber:   'bg-amber-50 border-amber-100 text-amber-500',
   };
+  const cls = map[color] || map.emerald;
   return (
-    <div className={`rounded-2xl border p-4 ${colors[color] || colors.emerald}`}>
-      <div className="flex items-center gap-2 mb-2">{icon}<p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{label}</p></div>
-      <p className="text-2xl font-black text-gray-900">
-        {value} {suffix && <span className="text-sm font-semibold text-gray-400">{suffix}</span>}
+    <div className={`rounded-2xl border p-4 ${cls.split(' ').slice(0,2).join(' ')}`}>
+      <div className={`flex items-center gap-2 mb-2 ${cls.split(' ')[2]}`}>{icon}</div>
+      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide leading-tight mb-1">{label}</p>
+      <p className="text-[26px] font-black text-gray-900 leading-none">
+        {val}{suffix}
+        {ofVal !== undefined && <span className="text-[12px] font-semibold text-gray-400 ml-1">/ {ofVal}</span>}
       </p>
     </div>
   );
 }
 
-function FilaAviso({ aviso, onVer, onPDF }: { aviso: Aviso; onVer: () => void; onPDF: () => void }) {
-  const foto   = fotoURL(aviso.aviso_privacidad_foto_url);
-  const nombre = nombreCompleto(aviso);
-  const coords = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng;
+function ColHeader({ label, sk, cur, dir, onClick }: {
+  label: string; sk: SortKey; cur: SortKey; dir: SortDir; onClick: () => void;
+}) {
+  const active = sk === cur;
+  return (
+    <button onClick={onClick}
+      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest transition-colors text-left ${active ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+    >
+      {label}
+      {active
+        ? (dir === 'asc' ? <SortAsc size={11} /> : <SortDesc size={11} />)
+        : <SortAsc size={11} className="opacity-30" />
+      }
+    </button>
+  );
+}
+
+function FiltroCheck({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-2.5 cursor-pointer group">
+      <div className={`w-4 h-4 rounded flex items-center justify-center border-2 transition-all ${checked ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300 group-hover:border-emerald-400'}`}>
+        {checked && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+      </div>
+      <span className="text-[12px] font-semibold text-gray-700">{label}</span>
+    </label>
+  );
+}
+
+function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
+  aviso: Aviso; sel: boolean; onToggleSel: () => void; onVer: () => void; onPDF: () => void;
+}) {
+  const foto  = fotoURL(aviso.aviso_privacidad_foto_url);
+  const nomb  = nombre(aviso);
+  const pct   = completitud(aviso);
+  const hasGPS = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng;
 
   return (
-    <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_auto] gap-3 px-5 py-3.5 items-center hover:bg-gray-50/60 transition-colors group">
+    <div className={`hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3.5 items-center group transition-colors ${sel ? 'bg-emerald-50/60' : 'hover:bg-gray-50/60'}`}>
+      {/* Checkbox */}
+      <button onClick={onToggleSel} className="text-gray-300 hover:text-emerald-500 transition-colors">
+        {sel ? <CheckSquare size={15} className="text-emerald-600" /> : <Square size={15} />}
+      </button>
+
       {/* Productor */}
-      <div className="min-w-0">
-        <p className="text-[13px] font-semibold text-gray-900 truncate">{nombre}</p>
-        <p className="text-[10px] font-mono text-gray-400 mt-0.5">{aviso.curp}</p>
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 flex items-center justify-center">
+          {foto
+            ? <img src={foto} className="w-full h-full object-cover" alt="" />
+            : <User size={13} className="text-gray-300" />
+          }
+        </div>
+        <div className="min-w-0">
+          <p className="text-[13px] font-bold text-gray-900 truncate">{nomb}</p>
+          <p className="text-[10px] text-gray-400">{aviso.phone || '—'}</p>
+        </div>
       </div>
 
       {/* Fecha */}
       <div className="min-w-0">
-        <p className="text-[11px] text-gray-700 font-medium">{fmtFecha(aviso.aviso_privacidad_fecha)}</p>
+        <p className="text-[12px] font-semibold text-gray-800">{fmt(aviso.aviso_privacidad_fecha, true)}</p>
         <p className="text-[9px] text-gray-400 mt-0.5">v{aviso.aviso_privacidad_version || '1.0'}</p>
       </div>
 
-      {/* GPS */}
-      <div>
-        {coords
-          ? <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full"><CheckCircle2 size={9} /> Capturado</span>
-          : <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full"><X size={9} /> No disp.</span>
-        }
-      </div>
+      {/* CURP */}
+      <p className="text-[10px] font-mono text-gray-500 truncate">{aviso.curp}</p>
 
-      {/* Foto */}
-      <div>
-        {foto
-          ? (
-            <div className="w-9 h-9 rounded-lg overflow-hidden border border-gray-200">
-              <img src={foto} alt="foto" className="w-full h-full object-cover" />
-            </div>
-          )
-          : <div className="w-9 h-9 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center"><Camera size={13} className="text-gray-300" /></div>
-        }
+      {/* Estado */}
+      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${
+        aviso.estado_validacion === 'activo'
+          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'bg-amber-50 text-amber-700 border border-amber-200'
+      }`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+        {aviso.estado_validacion}
+      </span>
+
+      {/* Completitud */}
+      <div className="flex items-center gap-1.5">
+        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden w-12">
+          <div className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : pct >= 75 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${pct}%` }} />
+        </div>
+        <div className="flex gap-1">
+          {hasGPS && <MapPin size={10} className="text-emerald-500" />}
+          {aviso.aviso_privacidad_foto_url && <Camera size={10} className="text-violet-500" />}
+        </div>
       </div>
 
       {/* Acciones */}
-      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={onVer}
-          title="Ver detalle"
-          className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-emerald-50 hover:text-emerald-600 text-gray-500 flex items-center justify-center transition-colors"
-        >
-          <Eye size={13} />
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Btn icon={<Eye size={13} />} title="Ver detalle" onClick={onVer} color="emerald" />
+        <Btn icon={<Download size={13} />} title="PDF" onClick={onPDF} color="blue" />
+      </div>
+    </div>
+  );
+}
+
+function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
+  aviso: Aviso; sel: boolean; onToggleSel: () => void; onVer: () => void; onPDF: () => void;
+}) {
+  const foto = fotoURL(aviso.aviso_privacidad_foto_url);
+  const nomb = nombre(aviso);
+  const pct  = completitud(aviso);
+
+  return (
+    <div className={`rounded-2xl border p-4 transition-all cursor-default ${sel ? 'border-emerald-300 bg-emerald-50/40 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'}`}>
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2.5">
+          <button onClick={onToggleSel} className="flex-shrink-0 text-gray-300 hover:text-emerald-500 transition-colors">
+            {sel ? <CheckSquare size={15} className="text-emerald-600" /> : <Square size={15} />}
+          </button>
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
+            {foto ? <img src={foto} className="w-full h-full object-cover" alt="" /> : <User size={16} className="text-gray-300" />}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold text-gray-900 leading-tight truncate">{nomb}</p>
+            <p className="text-[10px] font-mono text-gray-400">{aviso.curp.slice(0, 12)}…</p>
+          </div>
+        </div>
+        <span className={`flex-shrink-0 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+          aviso.estado_validacion === 'activo'
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : 'bg-amber-50 text-amber-700 border-amber-200'
+        }`}>
+          <span className={`w-1 h-1 rounded-full ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          {aviso.estado_validacion}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2 text-[10px] text-gray-500 mb-3">
+        <Calendar size={11} />
+        <span>{fmt(aviso.aviso_privacidad_fecha, true)}</span>
+        <span className="ml-auto flex items-center gap-1">
+          {aviso.aviso_privacidad_lat && <MapPin size={10} className="text-emerald-500" />}
+          {aviso.aviso_privacidad_foto_url && <Camera size={10} className="text-violet-500" />}
+        </span>
+      </div>
+
+      {/* Barra completitud */}
+      <div className="mb-3">
+        <div className="flex justify-between mb-1">
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Completitud</span>
+          <span className={`text-[9px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>{pct}%</span>
+        </div>
+        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : pct >= 75 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <button onClick={onVer} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-[12px] font-bold border border-gray-200 hover:border-emerald-200 transition-all">
+          <Eye size={13} /> Ver
         </button>
-        <button
-          onClick={onPDF}
-          title="Descargar PDF"
-          className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-500 flex items-center justify-center transition-colors"
-        >
-          <Download size={13} />
+        <button onClick={onPDF} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-700 text-gray-600 text-[12px] font-bold border border-gray-200 hover:border-blue-200 transition-all">
+          <Download size={13} /> PDF
         </button>
       </div>
     </div>
   );
 }
 
-function SkeletonRow() {
+function Btn({ icon, title, onClick, color }: { icon: React.ReactNode; title: string; onClick: () => void; color: string }) {
+  const cls = color === 'emerald'
+    ? 'hover:bg-emerald-50 hover:text-emerald-600'
+    : 'hover:bg-blue-50 hover:text-blue-600';
   return (
-    <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_auto] gap-3 px-5 py-3.5 items-center animate-pulse">
-      <div className="space-y-1.5"><div className="h-3 bg-gray-100 rounded w-3/4" /><div className="h-2 bg-gray-100 rounded w-1/2" /></div>
+    <button onClick={onClick} title={title}
+      className={`w-7 h-7 rounded-lg bg-gray-100 ${cls} text-gray-500 flex items-center justify-center transition-colors`}
+    >{icon}</button>
+  );
+}
+
+function SkRow() {
+  return (
+    <div className="hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3.5 items-center animate-pulse">
+      <div className="w-4 h-4 bg-gray-100 rounded" />
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 bg-gray-100 rounded-xl flex-shrink-0" />
+        <div className="space-y-1.5 flex-1"><div className="h-3 bg-gray-100 rounded w-3/4" /><div className="h-2 bg-gray-100 rounded w-1/3" /></div>
+      </div>
       <div className="h-3 bg-gray-100 rounded w-2/3" />
-      <div className="h-5 bg-gray-100 rounded-full w-20" />
-      <div className="w-9 h-9 bg-gray-100 rounded-lg" />
-      <div className="flex gap-1.5"><div className="w-7 h-7 bg-gray-100 rounded-lg" /><div className="w-7 h-7 bg-gray-100 rounded-lg" /></div>
+      <div className="h-3 bg-gray-100 rounded w-full" />
+      <div className="h-5 bg-gray-100 rounded-full w-16" />
+      <div className="h-1.5 bg-gray-100 rounded-full" />
+      <div className="flex gap-1"><div className="w-7 h-7 bg-gray-100 rounded-lg" /><div className="w-7 h-7 bg-gray-100 rounded-lg" /></div>
+    </div>
+  );
+}
+
+function SkCard() {
+  return (
+    <div className="rounded-2xl border border-gray-200 p-4 animate-pulse space-y-3">
+      <div className="flex gap-2.5">
+        <div className="w-10 h-10 bg-gray-100 rounded-xl flex-shrink-0" />
+        <div className="flex-1 space-y-1.5"><div className="h-3 bg-gray-100 rounded w-3/4" /><div className="h-2 bg-gray-100 rounded w-1/2" /></div>
+      </div>
+      <div className="h-2 bg-gray-100 rounded w-2/3" />
+      <div className="h-1.5 bg-gray-100 rounded-full" />
+      <div className="flex gap-2"><div className="flex-1 h-8 bg-gray-100 rounded-xl" /><div className="flex-1 h-8 bg-gray-100 rounded-xl" /></div>
     </div>
   );
 }
