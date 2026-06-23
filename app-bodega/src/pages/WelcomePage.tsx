@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Wheat, Building2, ChevronRight, X, LogIn, ShieldCheck, UserPlus } from 'lucide-react';
 
@@ -32,129 +32,418 @@ const OPCIONES: Record<'productor' | 'bodega', { titulo: string; subtitulo: stri
   },
 };
 
+/* ── Canvas corn animation ── */
+function CornCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    let W = canvas.offsetWidth;
+    let H = canvas.offsetHeight;
+    canvas.width = W;
+    canvas.height = H;
+
+    // Particles (pollen / firefly dots)
+    const particles = Array.from({ length: 70 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 2.2 + 0.6,
+      speed: Math.random() * 0.35 + 0.1,
+      drift: (Math.random() - 0.5) * 0.25,
+      alpha: Math.random() * 0.55 + 0.15,
+      hue: Math.random() * 25 + 42, // gold–amber range
+      phase: Math.random() * Math.PI * 2,
+    }));
+
+    function drawStalk(x: number, baseY: number, totalH: number, alpha: number, tick: number, idx: number) {
+      const sway = Math.sin(tick * 0.007 + idx * 1.1) * 5;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(sway * 0.5, 0);
+
+      // Main stalk — bezier curve for natural bend
+      ctx.beginPath();
+      ctx.moveTo(x, baseY);
+      ctx.bezierCurveTo(
+        x + sway * 0.3, baseY - totalH * 0.4,
+        x + sway * 0.6, baseY - totalH * 0.7,
+        x + sway,       baseY - totalH
+      );
+      ctx.strokeStyle = '#2a6e45';
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Leaves
+      const leafData = [
+        { t: 0.28, side: 1, len: 52, curve: 18 },
+        { t: 0.52, side: -1, len: 58, curve: 20 },
+        { t: 0.74, side: 1, len: 42, curve: 14 },
+      ];
+      leafData.forEach(({ t, side, len, curve }) => {
+        const lx = x + sway * t;
+        const ly = baseY - totalH * t;
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.bezierCurveTo(
+          lx + side * len * 0.6, ly - curve,
+          lx + side * len * 0.9, ly + curve * 0.5,
+          lx + side * len * 0.5, ly + curve * 1.2
+        );
+        ctx.bezierCurveTo(
+          lx + side * len * 0.3, ly + curve * 0.8,
+          lx + side * 10, ly + 4,
+          lx, ly
+        );
+        const leafGrad = ctx.createLinearGradient(lx, ly - curve, lx + side * len, ly + curve);
+        leafGrad.addColorStop(0, `rgba(26,92,56,${alpha * 0.95})`);
+        leafGrad.addColorStop(1, `rgba(40,120,70,${alpha * 0.55})`);
+        ctx.fillStyle = leafGrad;
+        ctx.fill();
+      });
+
+      // Corn cob (ear)
+      const cobX = x + sway * 0.45;
+      const cobY = baseY - totalH * 0.55;
+      const cobAngle = 0.22;
+
+      ctx.save();
+      ctx.translate(cobX + 18, cobY);
+      ctx.rotate(cobAngle);
+      // Husk leaves behind cob
+      ctx.beginPath();
+      ctx.moveTo(0, -28);
+      ctx.bezierCurveTo(30, -40, 42, -8, 24, 12);
+      ctx.bezierCurveTo(10, 20, -4, 4, 0, -28);
+      ctx.fillStyle = `rgba(34,112,60,${alpha * 0.75})`;
+      ctx.fill();
+      // Cob body
+      const cobGrad = ctx.createLinearGradient(-8, -20, 8, 20);
+      cobGrad.addColorStop(0, `rgba(220,170,30,${alpha})`);
+      cobGrad.addColorStop(0.5, `rgba(245,195,50,${alpha})`);
+      cobGrad.addColorStop(1, `rgba(190,140,20,${alpha})`);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 7, 21, 0, 0, Math.PI * 2);
+      ctx.fillStyle = cobGrad;
+      ctx.fill();
+      // Kernel grid dots
+      ctx.fillStyle = `rgba(160,110,10,${alpha * 0.5})`;
+      for (let row = -3; row <= 3; row++) {
+        for (let col = -1; col <= 1; col++) {
+          ctx.beginPath();
+          ctx.arc(col * 4.5, row * 5.8, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    // Stalk layout — spread across bottom
+    const stalks = [
+      { xr: 0.04, hr: 0.52, a: 0.55 },
+      { xr: 0.14, hr: 0.63, a: 0.75 },
+      { xr: 0.26, hr: 0.70, a: 0.90 },
+      { xr: 0.38, hr: 0.68, a: 0.85 },
+      { xr: 0.50, hr: 0.75, a: 1.00 },
+      { xr: 0.62, hr: 0.67, a: 0.88 },
+      { xr: 0.74, hr: 0.71, a: 0.90 },
+      { xr: 0.86, hr: 0.62, a: 0.72 },
+      { xr: 0.95, hr: 0.50, a: 0.55 },
+    ];
+
+    let tick = 0;
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Sky glow — radial from top center
+      const skyGrad = ctx.createRadialGradient(W * 0.5, -H * 0.1, 0, W * 0.5, H * 0.4, W * 0.85);
+      skyGrad.addColorStop(0, 'rgba(26,92,56,0.18)');
+      skyGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Ground strip
+      const groundGrad = ctx.createLinearGradient(0, H * 0.75, 0, H);
+      groundGrad.addColorStop(0, 'rgba(5,25,10,0)');
+      groundGrad.addColorStop(1, 'rgba(3,15,6,0.75)');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, H * 0.75, W, H * 0.25);
+
+      // Draw stalks
+      stalks.forEach((s, i) => {
+        drawStalk(s.xr * W, H, s.hr * H, s.a, tick, i);
+      });
+
+      // Particles (pollen / fireflies)
+      particles.forEach(p => {
+        p.y -= p.speed;
+        p.x += p.drift + Math.sin(tick * 0.012 + p.phase) * 0.18;
+        if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
+        if (p.x < -8) p.x = W + 8;
+        if (p.x > W + 8) p.x = -8;
+
+        const pulse = 0.55 + 0.45 * Math.sin(tick * 0.025 + p.phase);
+        ctx.save();
+        ctx.globalAlpha = p.alpha * pulse;
+        // Glow
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.5);
+        glow.addColorStop(0, `hsla(${p.hue},85%,65%,0.8)`);
+        glow.addColorStop(1, `hsla(${p.hue},85%,65%,0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        // Core dot
+        ctx.fillStyle = `hsla(${p.hue},90%,75%,1)`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      tick++;
+      animId = requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    const ro = new ResizeObserver(() => {
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width = W;
+      canvas.height = H;
+    });
+    ro.observe(canvas);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      ro.disconnect();
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+}
+
+/* ── Main page ── */
 export default function WelcomePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  // Permite abrir un menú automáticamente al llegar (p. ej. desde "¿Eres productor?")
   const menuInicial = (location.state as { menu?: Menu } | null)?.menu ?? null;
   const [menu, setMenu] = useState<Menu>(menuInicial);
+  const [visible, setVisible] = useState(false);
   const data = menu ? OPCIONES[menu] : null;
 
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 30);
+    return () => clearTimeout(t);
+  }, []);
+
+  const closeMenu = () => setMenu(null);
+
   return (
-    <div className="relative min-h-[100dvh] flex flex-col overflow-hidden">
-      {/* Background */}
-      <div className="fixed inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(52,208,121,0.12),transparent)]" />
-        <div className="absolute bottom-0 inset-x-0 h-40 flex items-end justify-around px-6 opacity-[0.05] pointer-events-none">
-          {[0,1,2,3,4,5,6,7,8,9,10,11].map(i => (
-            <Wheat
-              key={i}
-              size={i % 3 === 0 ? 48 : i % 2 === 0 ? 36 : 26}
-              className="text-white mb-1"
-              style={{ transform: `rotate(${(i - 5) * 4}deg)` }}
-            />
-          ))}
+    <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#040f08]">
+
+      {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
+        {/* Deep green gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#030d06] via-[#071a0c] to-[#0a2412]" />
+        {/* Top vignette */}
+        <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
+        {/* Bottom vignette */}
+        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
+        {/* Right fade — blends into right panel */}
+        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#040f08] to-transparent z-10 pointer-events-none" />
+
+        {/* Canvas animation */}
+        <CornCanvas />
+
+        {/* Overlay content */}
+        <div className="relative z-20 flex flex-col h-full px-10 py-10">
+          {/* Top badge */}
+          <div
+            className="inline-flex items-center gap-2 bg-white/8 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 w-fit"
+            style={{ opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(-10px)', transition: 'opacity 0.5s ease, transform 0.5s ease' }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] font-bold text-emerald-300/90 tracking-widest uppercase">Plan Nacional Maíz 2026</span>
+          </div>
+
+          {/* Bottom text */}
+          <div className="mt-auto">
+            <div
+              style={{ opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(20px)', transition: 'opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s' }}
+            >
+              <h2 className="text-[38px] xl:text-[46px] font-black text-white leading-tight tracking-tight">
+                El campo mexicano<br />
+                <span className="text-emerald-400">conectado</span> al mercado
+              </h2>
+              <p className="text-white/45 text-[15px] font-medium mt-3 leading-relaxed max-w-md">
+                Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="relative flex-1 flex flex-col items-center justify-center px-5 py-12 sm:py-16">
+      {/* ── RIGHT PANEL — login options ── */}
+      <div className="flex-1 flex flex-col min-h-[100dvh] lg:min-h-auto relative">
+        {/* Mobile background */}
+        <div className="lg:hidden absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#040f08] via-[#071a0c] to-[#0c2416]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(34,197,94,0.10),transparent)]" />
+          {/* Mobile canvas too */}
+          <CornCanvas />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#040f08]/70 via-transparent to-[#040f08]/80" />
+        </div>
 
-        {/* Logo + brand */}
-        <div className="animate-auth-in flex flex-col items-center mb-10 sm:mb-12">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] sm:rounded-[24px] bg-white/10 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-2xl mb-4">
-            <img src="/icono.png" alt="SIMAC" className="w-11 h-11 sm:w-14 sm:h-14 rounded-[12px]" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+        {/* Right panel content */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12 sm:py-16 lg:bg-[#040f08]/0">
+
+          {/* Logo */}
+          <div
+            className="flex flex-col items-center mb-8 lg:mb-10"
+            style={{ opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(-16px) scale(0.95)', transition: 'opacity 0.5s ease, transform 0.5s ease' }}
+          >
+            <div className="w-[72px] h-[72px] lg:w-20 lg:h-20 rounded-[22px] lg:rounded-[26px] bg-white/10 backdrop-blur-xl ring-1 ring-white/20 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-4">
+              <img
+                src="/icono.png"
+                alt="SIMAC"
+                className="w-12 h-12 lg:w-14 lg:h-14 rounded-[14px]"
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+            <h1 className="text-[34px] lg:text-[38px] font-black text-white tracking-[-1px] leading-none">
+              SIMAC
+            </h1>
+            <p className="text-[13px] text-emerald-400/70 font-semibold mt-1.5 tracking-[0.12em] uppercase text-center">
+              Plan Nacional Maíz 2026
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-[-0.5px] leading-none">
-            SIMAC
-          </h1>
-          <p className="text-sm sm:text-base text-green-300/70 font-medium mt-1.5 tracking-wide text-center">
-            Plan Nacional Maíz 2026
+
+          {/* Subtitle */}
+          <div
+            className="mb-6 text-center"
+            style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.5s ease 0.08s' }}
+          >
+            <p className="text-white/50 text-[15px] font-medium">¿Cómo deseas ingresar?</p>
+          </div>
+
+          {/* Cards */}
+          <div className="w-full max-w-[360px] space-y-3">
+
+            {/* Productor */}
+            <button
+              onClick={() => setMenu('productor')}
+              className="w-full group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-300"
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'none' : 'translateY(20px)',
+                transition: 'opacity 0.5s ease 0.12s, transform 0.5s ease 0.12s',
+                background: 'linear-gradient(135deg, rgba(34,197,94,0.4) 0%, rgba(26,92,56,0.2) 100%)',
+              }}
+            >
+              <div className="relative bg-[#0d2a18]/90 backdrop-blur-xl hover:bg-[#112f1c]/90 active:bg-[#0a1f12]/90 rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-200">
+                {/* Shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-[calc(1rem-1px)]" />
+                <div className="flex items-center gap-4 relative">
+                  <div className="w-13 h-13 bg-gradient-to-br from-[#1A5C38] to-[#0f3821] rounded-xl flex items-center justify-center shadow-[0_4px_16px_rgba(26,92,56,0.6)] shrink-0 transition-transform duration-200 group-hover:scale-105">
+                    <Wheat size={24} className="text-emerald-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-[17px] leading-tight">Soy Productor</p>
+                    <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión, activar o registrar tu cuenta</p>
+                  </div>
+                  <ChevronRight size={18} className="text-emerald-500/60 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all duration-200 shrink-0" />
+                </div>
+              </div>
+            </button>
+
+            {/* Bodega / Industria */}
+            <button
+              onClick={() => setMenu('bodega')}
+              className="w-full group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-300"
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'none' : 'translateY(20px)',
+                transition: 'opacity 0.5s ease 0.18s, transform 0.5s ease 0.18s',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
+              }}
+            >
+              <div className="relative bg-white/[0.05] backdrop-blur-xl hover:bg-white/[0.08] active:bg-white/[0.03] rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-200">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-[calc(1rem-1px)]" />
+                <div className="flex items-center gap-4 relative">
+                  <div className="w-13 h-13 bg-white/10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
+                    <Building2 size={24} className="text-white/60" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white/80 font-bold text-[17px] leading-tight">Soy Bodega / Industria</p>
+                    <p className="text-white/35 text-[13px] mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
+                  </div>
+                  <ChevronRight size={18} className="text-white/25 group-hover:text-white/50 group-hover:translate-x-1 transition-all duration-200 shrink-0" />
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Footer */}
+          <p
+            className="mt-8 text-center text-[10px] text-white/18 max-w-[260px] leading-relaxed"
+            style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.6s ease 0.28s' }}
+          >
+            Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México
           </p>
         </div>
-
-        {/* Subtitle */}
-        <div className="animate-auth-in mb-6 sm:mb-8 text-center" style={{ animationDelay: '0.05s' }}>
-          <p className="text-white/60 text-sm sm:text-base">¿Cómo deseas ingresar?</p>
-        </div>
-
-        {/* Cards */}
-        <div className="w-full max-w-sm space-y-3 sm:space-y-4">
-
-          {/* Productor */}
-          <button
-            onClick={() => setMenu('productor')}
-            className="animate-auth-in w-full group relative bg-white/10 hover:bg-white/15 active:bg-white/20 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-left transition-all duration-200 active:scale-[0.98]"
-            style={{ animationDelay: '0.1s' }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#1A5C38] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-green-900/40 shrink-0">
-                <Wheat size={22} className="text-white sm:hidden" />
-                <Wheat size={26} className="text-white hidden sm:block" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-bold text-base sm:text-lg leading-tight">Soy Productor</p>
-                <p className="text-white/50 text-xs sm:text-sm mt-0.5 leading-snug">Iniciar sesión, activar o registrar tu cuenta</p>
-              </div>
-              <ChevronRight size={18} className="text-white/30 group-hover:text-white/60 transition-colors shrink-0" />
-            </div>
-          </button>
-
-          {/* Bodega / Industria */}
-          <button
-            onClick={() => setMenu('bodega')}
-            className="animate-auth-in w-full group relative bg-white/06 hover:bg-white/10 active:bg-white/15 backdrop-blur-md ring-1 ring-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-left transition-all duration-200 active:scale-[0.98]"
-            style={{ animationDelay: '0.15s' }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-                <Building2 size={22} className="text-white/70 sm:hidden" />
-                <Building2 size={26} className="text-white/70 hidden sm:block" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white/80 font-bold text-base sm:text-lg leading-tight">Soy Bodega / Industria</p>
-                <p className="text-white/40 text-xs sm:text-sm mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
-              </div>
-              <ChevronRight size={18} className="text-white/20 group-hover:text-white/50 transition-colors shrink-0" />
-            </div>
-          </button>
-        </div>
-
-        {/* Footer */}
-        <p className="animate-auth-in mt-6 text-center text-[10px] sm:text-[11px] text-white/20 max-w-xs leading-relaxed px-4" style={{ animationDelay: '0.25s' }}>
-          Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México
-        </p>
       </div>
 
-      {/* ── Bottom sheet de opciones ── */}
+      {/* ── Bottom sheet / Dialog de opciones ── */}
       {data && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/60 animate-backdrop-in" onClick={() => setMenu(null)} />
+        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center">
+          {/* Backdrop */}
           <div
-            className="relative bg-white rounded-t-[28px] px-5 pt-3 shadow-[0_-10px_40px_rgba(0,0,0,0.4)] animate-sheet-up max-h-[88dvh] overflow-y-auto"
-            style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            style={{ animation: 'fadeIn 0.2s ease forwards' }}
+            onClick={closeMenu}
+          />
+
+          {/* Sheet — bottom on mobile, centered dialog on desktop */}
+          <div
+            className="
+              relative bg-white rounded-t-[28px] lg:rounded-[28px]
+              px-5 pt-3 pb-8 lg:pb-6
+              shadow-[0_-10px_60px_rgba(0,0,0,0.5)] lg:shadow-[0_24px_80px_rgba(0,0,0,0.4)]
+              max-h-[90dvh] overflow-y-auto
+              w-full lg:max-w-[420px]
+            "
+            style={{ animation: 'sheetUp 0.28s cubic-bezier(0.32,0.72,0,1) forwards' }}
           >
-            {/* Handle */}
-            <div className="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mb-4" />
+            {/* Handle (mobile only) */}
+            <div className="w-10 h-1.5 bg-gray-200 rounded-full mx-auto mb-5 lg:hidden" />
 
             {/* Header */}
             <div className="flex items-start justify-between mb-1">
               <div>
-                <h2 className="text-xl font-black text-gray-900 tracking-tight">{data.titulo}</h2>
-                <p className="text-gray-400 text-sm mt-0.5">{data.subtitulo}</p>
+                <h2 className="text-[21px] font-black text-gray-900 tracking-tight">{data.titulo}</h2>
+                <p className="text-gray-400 text-[13px] mt-0.5">{data.subtitulo}</p>
               </div>
               <button
-                onClick={() => setMenu(null)}
+                onClick={closeMenu}
                 aria-label="Cerrar"
-                className="w-9 h-9 rounded-full bg-[#eef8f2] flex items-center justify-center text-gray-500 active:scale-90 transition-transform shrink-0"
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 active:scale-90 transition-all shrink-0"
               >
-                <X size={18} />
+                <X size={17} />
               </button>
             </div>
 
-            {/* Opciones */}
-            <div className="space-y-2.5 mt-4">
+            {/* Options */}
+            <div className="space-y-2.5 mt-5">
               {data.items.map(item => {
                 const Icon = item.icon;
                 return (
@@ -163,32 +452,43 @@ export default function WelcomePage() {
                     onClick={() => navigate(item.to)}
                     className={`w-full flex items-center gap-3.5 p-4 rounded-2xl text-left transition-all active:scale-[0.98] border
                       ${item.accent
-                        ? 'bg-[#1A5C38] border-[#1A5C38] shadow-lg shadow-green-900/20'
-                        : 'bg-[#f4fbf7] border-gray-100 hover:bg-[#eef8f2]'}`}
+                        ? 'bg-[#1A5C38] border-[#1A5C38] shadow-lg shadow-green-900/25 hover:bg-[#155030]'
+                        : 'bg-[#f5fbf7] border-gray-100 hover:bg-[#edf8f2] hover:border-gray-200'}`}
                   >
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm'}`}>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm border border-gray-100'}`}>
                       <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1A5C38]'} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-bold text-[15px] leading-tight ${item.accent ? 'text-white' : 'text-gray-900'}`}>{item.title}</p>
-                      <p className={`text-xs mt-1 leading-snug ${item.accent ? 'text-green-100/80' : 'text-gray-500'}`}>{item.desc}</p>
+                      <p className={`text-[12px] mt-0.5 leading-snug ${item.accent ? 'text-green-100/75' : 'text-gray-500'}`}>{item.desc}</p>
                     </div>
-                    <ChevronRight size={18} className={`shrink-0 ${item.accent ? 'text-white/60' : 'text-gray-300'}`} />
+                    <ChevronRight size={17} className={`shrink-0 ${item.accent ? 'text-white/55' : 'text-gray-300'}`} />
                   </button>
                 );
               })}
             </div>
 
-            {/* Volver */}
+            {/* Back */}
             <button
-              onClick={() => setMenu(null)}
-              className="w-full mt-4 py-3 text-gray-400 text-sm font-semibold active:text-gray-600 transition-colors"
+              onClick={closeMenu}
+              className="w-full mt-4 py-3 text-gray-400 text-[13px] font-semibold hover:text-gray-600 transition-colors"
             >
               ← Volver
             </button>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes sheetUp {
+          from { opacity: 0; transform: translateY(32px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
