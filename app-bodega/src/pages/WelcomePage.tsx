@@ -198,6 +198,8 @@ export default function WelcomePage() {
 
   return (
     <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#092213]">
+      {/* Status bar color band — cubre safe-area-inset-top en iOS, invisible en desktop */}
+      <div className="fixed top-0 inset-x-0 z-[999] bg-[#1A5C38]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
