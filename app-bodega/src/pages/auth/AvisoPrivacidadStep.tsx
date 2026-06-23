@@ -190,13 +190,14 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
   // ────────────────────────────────────────────────────
   //  RENDER
   // ────────────────────────────────────────────────────
-  const pageCls = 'relative min-h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]';
-
   return (
-    <div className={pageCls} style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div
+      className="h-[100dvh] flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
 
-      {/* Header */}
-      <div className="relative z-10 flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-black/20 backdrop-blur-md">
+      {/* Header — fijo en la parte superior, nunca hace scroll */}
+      <div className="flex-shrink-0 z-10 flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-black/20 backdrop-blur-md">
         <button
           onClick={fase === 'verificacion' ? () => setFase('texto') : onBack}
           className="p-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
