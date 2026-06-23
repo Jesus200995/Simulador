@@ -150,7 +150,7 @@ function generarPDF(a: Aviso) {
       <div class="field"><label>Nombre completo</label><value>${nomb}</value></div>
       <div class="field"><label>CURP</label><value class="mono">${a.curp}</value></div>
       <div class="field"><label>Teléfono</label><value>${a.telefono || '—'}</value></div>
-      <div class="field"><label>Tipo de registro</label><value>${a.tipo}</value></div>
+      <div class="field"><label>Tipo de registro</label><value>${a.tipo.charAt(0).toUpperCase() + a.tipo.slice(1)}</value></div>
       <div class="field"><label>Estado de cuenta</label><value>${a.estado_validacion.charAt(0).toUpperCase() + a.estado_validacion.slice(1)}</value></div>
     </div>
     <div class="card">
@@ -202,7 +202,7 @@ function generarPDF(a: Aviso) {
 
   <div class="footer">
     <p>SIMAC — Plan Nacional Maíz 2026 · Secretaría de Agricultura y Desarrollo Rural · Documento generado automáticamente</p>
-    <p>Folio #${String(a.id).padStart(6, '0')} · ${a.tipo} · ${new Date().toISOString()}</p>
+    <p>Folio #${String(a.id).padStart(6, '0')} · ${a.tipo.charAt(0).toUpperCase() + a.tipo.slice(1)} · ${new Date().toISOString()}</p>
   </div>
 
   <script>window.onload=()=>window.print()</script>
@@ -222,7 +222,7 @@ function exportarCSV(lista: Aviso[]) {
     'Latitud', 'Longitud', 'Versión', 'Foto URL', 'Estado', 'Completitud %',
   ];
   const rows = lista.map(a => [
-    a.id, a.tipo, nombre(a), a.curp, a.telefono || '',
+    a.id, a.tipo.charAt(0).toUpperCase() + a.tipo.slice(1), nombre(a), a.curp, a.telefono || '',
     a.aviso_privacidad_fecha || '',
     a.aviso_privacidad_lat || '', a.aviso_privacidad_lng || '',
     a.aviso_privacidad_version || '', a.aviso_privacidad_foto_url || '',
@@ -315,7 +315,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
                 {foto && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200"><Fingerprint size={10} /> Biométrico</span>}
               </div>
               <DetailRow icon={<Phone size={12} />} label="Teléfono" val={aviso.telefono || '—'} />
-              <DetailRow icon={<Hash size={12} />} label="Folio" val={`#${String(aviso.id).padStart(6,'0')} · ${aviso.tipo}`} mono />
+              <DetailRow icon={<Hash size={12} />} label="Folio" val={`#${String(aviso.id).padStart(6,'0')} · ${aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}`} mono />
             </div>
           </div>
 
@@ -351,7 +351,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
             <p className="text-[10px] text-emerald-700 leading-relaxed">
               Registro con validez legal conforme a la LFPDPPP. Aceptación registrada con marca de tiempo,
-              GPS y verificación biométrica. Folio <strong>#{String(aviso.id).padStart(6,'0')}</strong> · {aviso.tipo}.
+              GPS y verificación biométrica. Folio <strong>#{String(aviso.id).padStart(6,'0')}</strong> · {aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}.
             </p>
           </div>
         </div>
@@ -821,7 +821,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
               aviso.tipo === 'productor'
                 ? 'bg-green-50 text-green-700 border border-green-200'
                 : 'bg-blue-50 text-blue-700 border border-blue-200'
-            }`}>{aviso.tipo}</span>
+            }`}>{aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}</span>
             <p className="text-[10px] text-gray-400">{aviso.telefono || '—'}</p>
           </div>
         </div>
@@ -890,7 +890,7 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
                 aviso.tipo === 'productor'
                   ? 'bg-green-50 text-green-700 border border-green-200'
                   : 'bg-blue-50 text-blue-700 border border-blue-200'
-              }`}>{aviso.tipo}</span>
+              }`}>{aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}</span>
               <p className="text-[10px] font-mono text-gray-400">{aviso.curp.slice(0, 10)}…</p>
             </div>
           </div>

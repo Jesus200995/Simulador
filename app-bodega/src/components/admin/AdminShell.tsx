@@ -121,7 +121,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </p>
         <div className="flex items-center">
           <span className="bg-white/10 font-['Outfit'] text-white/80 text-[7px] font-bold uppercase tracking-widest px-1.5 py-[3px] rounded leading-none group-hover:text-white group-hover:bg-white/20 transition-colors">
-            {user?.rol === 'admin' ? 'Administrador' : (user?.rol || 'Administrador')}
+            {user?.rol === 'admin' ? 'Administrador' : user?.rol ? user.rol.charAt(0).toUpperCase() + user.rol.slice(1) : 'Administrador'}
           </span>
         </div>
       </div>
@@ -263,7 +263,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </p>
               <div className="flex justify-end">
                 <span className="text-emerald-500 text-[7px] font-bold uppercase tracking-widest leading-none transition-colors duration-300 group-hover:text-emerald-400">
-                  {user?.rol === 'admin' ? 'Super Administrador' : (user?.rol || 'Administrador')}
+                  {user?.rol === 'admin' ? 'Super Administrador' : user?.rol ? user.rol.charAt(0).toUpperCase() + user.rol.slice(1) : 'Administrador'}
                 </span>
               </div>
             </div>

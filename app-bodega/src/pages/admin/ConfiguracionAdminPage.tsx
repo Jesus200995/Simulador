@@ -227,7 +227,7 @@ export default function ConfiguracionAdminPage() {
                   <td className="px-4 py-2.5 text-[12px] text-gray-500">{u.email}</td>
                   <td className="px-4 py-2.5">
                     <span className="text-[10px] font-bold text-blue-600 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5 uppercase">
-                      {u.rol}
+                      {u.rol.charAt(0).toUpperCase() + u.rol.slice(1)}
                     </span>
                   </td>
                   <td className="px-4 py-2.5 text-center">
