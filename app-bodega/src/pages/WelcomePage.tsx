@@ -32,7 +32,7 @@ const OPCIONES: Record<'productor' | 'bodega', { titulo: string; subtitulo: stri
   },
 };
 
-/* ── Canvas corn animation ── */
+/* ── Canvas corn animation — Golden Hour Field ── */
 function CornCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -48,166 +48,325 @@ function CornCanvas() {
     canvas.width = W;
     canvas.height = H;
 
-    // Particles (pollen / firefly dots)
-    const particles = Array.from({ length: 70 }, () => ({
+    // Simple noise helper (value noise)
+    function noise(x: number, y: number): number {
+      const ix = Math.floor(x), iy = Math.floor(y);
+      const fx = x - ix, fy = y - iy;
+      const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+      const r = (n: number) => { let v = Math.sin(n * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+      const a = r(ix + iy * 57), b = r(ix + 1 + iy * 57), c = r(ix + (iy + 1) * 57), d = r(ix + 1 + (iy + 1) * 57);
+      return a + ux * (b - a) + uy * (c - a) + ux * uy * (a - b - c + d);
+    }
+
+    // ── Pollen particles (warm gold/amber)
+    const pollen = Array.from({ length: 90 }, () => ({
       x: Math.random() * W,
       y: Math.random() * H,
-      r: Math.random() * 2.2 + 0.6,
-      speed: Math.random() * 0.35 + 0.1,
-      drift: (Math.random() - 0.5) * 0.25,
-      alpha: Math.random() * 0.55 + 0.15,
-      hue: Math.random() * 25 + 42, // gold–amber range
+      r: Math.random() * 2.5 + 0.5,
+      vy: -(Math.random() * 0.4 + 0.08),
+      vx: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.6 + 0.15,
+      hue: 38 + Math.random() * 22,   // warm gold → amber
       phase: Math.random() * Math.PI * 2,
     }));
 
-    function drawStalk(x: number, baseY: number, totalH: number, alpha: number, tick: number, idx: number) {
-      const sway = Math.sin(tick * 0.007 + idx * 1.1) * 5;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.translate(sway * 0.5, 0);
+    // ── Stalk layer system (background → foreground)
+    interface StalkLayer { xr: number; hr: number; a: number; w: number; tint: string; leafTint: string; cobVis: boolean; idx: number }
 
-      // Main stalk — bezier curve for natural bend
+    const layers: StalkLayer[] = [
+      // Far background (blurry, muted)
+      ...Array.from({ length: 14 }, (_, i) => ({
+        xr: (i / 13) * 1.05 - 0.025, hr: 0.30 + Math.random() * 0.12, a: 0.22 + Math.random() * 0.1,
+        w: 1.2, tint: '#3d7a55', leafTint: '#2e6045', cobVis: false, idx: i,
+      })),
+      // Mid layer
+      ...Array.from({ length: 11 }, (_, i) => ({
+        xr: (i / 10) * 1.05 - 0.025, hr: 0.45 + Math.random() * 0.15, a: 0.45 + Math.random() * 0.15,
+        w: 2.2, tint: '#2d7048', leafTint: '#236038', cobVis: false, idx: i + 14,
+      })),
+      // Foreground (full detail)
+      ...Array.from({ length: 9 }, (_, i) => ({
+        xr: (i / 8) * 1.05 - 0.025, hr: 0.60 + Math.random() * 0.18, a: 0.80 + Math.random() * 0.20,
+        w: 3.8, tint: '#1e5c36', leafTint: '#1a5030', cobVis: true, idx: i + 25,
+      })),
+    ];
+
+    function drawStalk(s: StalkLayer, tick: number) {
+      const x = s.xr * W;
+      const baseY = H + 10;
+      const totalH = s.hr * H;
+      const noiseVal = noise(s.xr * 3.5 + tick * 0.002, tick * 0.001 + s.idx * 0.5);
+      const sway = (noiseVal - 0.5) * 24 * s.w * 0.7;
+
+      ctx.save();
+      ctx.globalAlpha = s.a;
+
+      // Stalk
+      const cp1x = x + sway * 0.2, cp1y = baseY - totalH * 0.35;
+      const cp2x = x + sway * 0.7, cp2y = baseY - totalH * 0.72;
+      const tipX  = x + sway,       tipY  = baseY - totalH;
+
       ctx.beginPath();
       ctx.moveTo(x, baseY);
-      ctx.bezierCurveTo(
-        x + sway * 0.3, baseY - totalH * 0.4,
-        x + sway * 0.6, baseY - totalH * 0.7,
-        x + sway,       baseY - totalH
-      );
-      ctx.strokeStyle = '#2a6e45';
-      ctx.lineWidth = 3.5;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, tipX, tipY);
+      const stalkGrad = ctx.createLinearGradient(x, baseY, tipX, tipY);
+      stalkGrad.addColorStop(0, s.tint);
+      stalkGrad.addColorStop(0.6, s.tint);
+      stalkGrad.addColorStop(1, '#a8c878');
+      ctx.strokeStyle = stalkGrad;
+      ctx.lineWidth = s.w;
       ctx.lineCap = 'round';
       ctx.stroke();
 
-      // Leaves
-      const leafData = [
-        { t: 0.28, side: 1, len: 52, curve: 18 },
-        { t: 0.52, side: -1, len: 58, curve: 20 },
-        { t: 0.74, side: 1, len: 42, curve: 14 },
-      ];
-      leafData.forEach(({ t, side, len, curve }) => {
-        const lx = x + sway * t;
-        const ly = baseY - totalH * t;
-        ctx.beginPath();
-        ctx.moveTo(lx, ly);
-        ctx.bezierCurveTo(
-          lx + side * len * 0.6, ly - curve,
-          lx + side * len * 0.9, ly + curve * 0.5,
-          lx + side * len * 0.5, ly + curve * 1.2
-        );
-        ctx.bezierCurveTo(
-          lx + side * len * 0.3, ly + curve * 0.8,
-          lx + side * 10, ly + 4,
-          lx, ly
-        );
-        const leafGrad = ctx.createLinearGradient(lx, ly - curve, lx + side * len, ly + curve);
-        leafGrad.addColorStop(0, `rgba(26,92,56,${alpha * 0.95})`);
-        leafGrad.addColorStop(1, `rgba(40,120,70,${alpha * 0.55})`);
-        ctx.fillStyle = leafGrad;
-        ctx.fill();
-      });
-
-      // Corn cob (ear)
-      const cobX = x + sway * 0.45;
-      const cobY = baseY - totalH * 0.55;
-      const cobAngle = 0.22;
-
-      ctx.save();
-      ctx.translate(cobX + 18, cobY);
-      ctx.rotate(cobAngle);
-      // Husk leaves behind cob
-      ctx.beginPath();
-      ctx.moveTo(0, -28);
-      ctx.bezierCurveTo(30, -40, 42, -8, 24, 12);
-      ctx.bezierCurveTo(10, 20, -4, 4, 0, -28);
-      ctx.fillStyle = `rgba(34,112,60,${alpha * 0.75})`;
-      ctx.fill();
-      // Cob body
-      const cobGrad = ctx.createLinearGradient(-8, -20, 8, 20);
-      cobGrad.addColorStop(0, `rgba(220,170,30,${alpha})`);
-      cobGrad.addColorStop(0.5, `rgba(245,195,50,${alpha})`);
-      cobGrad.addColorStop(1, `rgba(190,140,20,${alpha})`);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 7, 21, 0, 0, Math.PI * 2);
-      ctx.fillStyle = cobGrad;
-      ctx.fill();
-      // Kernel grid dots
-      ctx.fillStyle = `rgba(160,110,10,${alpha * 0.5})`;
-      for (let row = -3; row <= 3; row++) {
-        for (let col = -1; col <= 1; col++) {
+      // Tassel at tip
+      if (s.cobVis) {
+        for (let t = 0; t < 7; t++) {
+          const angle = -Math.PI / 2 + (t - 3) * 0.22 + Math.sin(tick * 0.008 + t) * 0.08;
+          const tLen = 18 + t * 2.5;
           ctx.beginPath();
-          ctx.arc(col * 4.5, row * 5.8, 1.5, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(tipX, tipY);
+          ctx.lineTo(tipX + Math.cos(angle) * tLen, tipY + Math.sin(angle) * tLen - 4);
+          ctx.strokeStyle = `rgba(190,210,120,${s.a * 0.8})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
         }
       }
-      ctx.restore();
+
+      // Leaves (3 pairs along stalk)
+      const leafConfigs = [
+        { t: 0.25, side: 1,  len: s.cobVis ? 68 : 42, curve: s.cobVis ? 22 : 14 },
+        { t: 0.48, side: -1, len: s.cobVis ? 74 : 46, curve: s.cobVis ? 26 : 16 },
+        { t: 0.70, side: 1,  len: s.cobVis ? 55 : 35, curve: s.cobVis ? 18 : 11 },
+      ];
+
+      leafConfigs.forEach(({ t, side, len, curve }) => {
+        // Point on bezier at parameter t
+        const bt = t;
+        const bx = Math.pow(1-bt,3)*x + 3*Math.pow(1-bt,2)*bt*cp1x + 3*(1-bt)*bt*bt*cp2x + Math.pow(bt,3)*tipX;
+        const by = Math.pow(1-bt,3)*baseY + 3*Math.pow(1-bt,2)*bt*cp1y + 3*(1-bt)*bt*bt*cp2y + Math.pow(bt,3)*tipY;
+
+        const windLeaf = Math.sin(tick * 0.009 + s.idx * 0.7 + t * 3) * 8;
+        const ex = bx + side * (len + windLeaf) * 0.55;
+        const ey = by - curve * 0.5 + windLeaf * 0.3;
+
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.bezierCurveTo(
+          bx + side * len * 0.45, by - curve + windLeaf * 0.4,
+          ex + side * 8, ey + curve * 0.3,
+          bx + side * len * 0.1, by + 5
+        );
+
+        const lg = ctx.createLinearGradient(bx, by - curve, bx + side * len, by + curve);
+        lg.addColorStop(0, `rgba(30,90,50,${s.a * 0.95})`);
+        lg.addColorStop(0.5, `rgba(50,130,70,${s.a * 0.80})`);
+        lg.addColorStop(1, `rgba(80,160,90,${s.a * 0.40})`);
+        ctx.fillStyle = lg;
+        ctx.fill();
+
+        // Leaf vein
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx + side * len * 0.5, by - curve * 0.3 + windLeaf * 0.2);
+        ctx.strokeStyle = `rgba(20,70,35,${s.a * 0.5})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      });
+
+      // Corn cob (foreground layer only)
+      if (s.cobVis) {
+        const cobT = 0.52;
+        const cobX = Math.pow(1-cobT,3)*x + 3*Math.pow(1-cobT,2)*cobT*cp1x + 3*(1-cobT)*cobT*cobT*cp2x + Math.pow(cobT,3)*tipX;
+        const cobY = Math.pow(1-cobT,3)*baseY + 3*Math.pow(1-cobT,2)*cobT*cp1y + 3*(1-cobT)*cobT*cobT*cp2y + Math.pow(cobT,3)*tipY;
+
+        ctx.save();
+        ctx.translate(cobX + 20 * (s.idx % 2 === 0 ? 1 : -1), cobY);
+        ctx.rotate(0.28 * (s.idx % 2 === 0 ? 1 : -1));
+
+        // Husk (back)
+        ctx.beginPath();
+        ctx.moveTo(0, -30);
+        ctx.bezierCurveTo(28, -44, 46, -6, 26, 16);
+        ctx.bezierCurveTo(12, 24, -6, 6, 0, -30);
+        const huskGrad = ctx.createLinearGradient(-4, -30, 26, 16);
+        huskGrad.addColorStop(0, `rgba(38,100,55,${s.a * 0.90})`);
+        huskGrad.addColorStop(1, `rgba(24,72,38,${s.a * 0.70})`);
+        ctx.fillStyle = huskGrad;
+        ctx.fill();
+
+        // Cob body
+        const cobGrad = ctx.createLinearGradient(-10, -24, 10, 24);
+        cobGrad.addColorStop(0,   `rgba(235,185,40,${s.a})`);
+        cobGrad.addColorStop(0.3, `rgba(255,210,60,${s.a})`);
+        cobGrad.addColorStop(0.7, `rgba(240,195,45,${s.a})`);
+        cobGrad.addColorStop(1,   `rgba(190,145,20,${s.a})`);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 8, 24, 0, 0, Math.PI * 2);
+        ctx.fillStyle = cobGrad;
+        ctx.fill();
+        // Highlight
+        ctx.beginPath();
+        ctx.ellipse(-2, -6, 2.5, 10, -0.3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,235,140,${s.a * 0.45})`;
+        ctx.fill();
+
+        // Kernel rows
+        for (let row = -4; row <= 4; row++) {
+          for (let col = -1; col <= 1; col++) {
+            const kx = col * 5 + (row % 2) * 2.5;
+            const ky = row * 5.5;
+            ctx.beginPath();
+            ctx.ellipse(kx, ky, 2, 2.2, 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(185,135,18,${s.a * 0.6})`;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(kx - 0.7, ky - 0.7, 0.8, 0.9, 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,220,100,${s.a * 0.4})`;
+            ctx.fill();
+          }
+        }
+
+        // Husk front tip
+        ctx.beginPath();
+        ctx.moveTo(0, -30);
+        ctx.bezierCurveTo(-22, -48, -38, -10, -20, 14);
+        ctx.bezierCurveTo(-10, 22, 2, 4, 0, -30);
+        const hFront = ctx.createLinearGradient(-22, -32, -10, 14);
+        hFront.addColorStop(0, `rgba(48,120,64,${s.a * 0.85})`);
+        hFront.addColorStop(1, `rgba(30,85,44,${s.a * 0.65})`);
+        ctx.fillStyle = hFront;
+        ctx.fill();
+
+        ctx.restore();
+      }
 
       ctx.restore();
     }
 
-    // Stalk layout — spread across bottom
-    const stalks = [
-      { xr: 0.04, hr: 0.52, a: 0.55 },
-      { xr: 0.14, hr: 0.63, a: 0.75 },
-      { xr: 0.26, hr: 0.70, a: 0.90 },
-      { xr: 0.38, hr: 0.68, a: 0.85 },
-      { xr: 0.50, hr: 0.75, a: 1.00 },
-      { xr: 0.62, hr: 0.67, a: 0.88 },
-      { xr: 0.74, hr: 0.71, a: 0.90 },
-      { xr: 0.86, hr: 0.62, a: 0.72 },
-      { xr: 0.95, hr: 0.50, a: 0.55 },
-    ];
+    // ── Light rays (volumetric sun beams)
+    function drawLightRays(tick: number) {
+      const cx = W * 0.62, cy = H * 0.08;
+      const numRays = 8;
+      ctx.save();
+      for (let i = 0; i < numRays; i++) {
+        const angle = -0.55 + (i / (numRays - 1)) * 1.1;
+        const pulse = 0.5 + 0.5 * Math.sin(tick * 0.018 + i * 0.7);
+        const rayAlpha = 0.04 + pulse * 0.06;
+        const rayLen = H * (1.2 + pulse * 0.3);
+        const ex = cx + Math.sin(angle) * rayLen;
+        const ey = cy + Math.cos(angle) * rayLen;
+        const rg = ctx.createLinearGradient(cx, cy, ex, ey);
+        rg.addColorStop(0, `rgba(255,220,120,${rayAlpha})`);
+        rg.addColorStop(0.4, `rgba(255,190,80,${rayAlpha * 0.6})`);
+        rg.addColorStop(1, 'rgba(255,160,60,0)');
+        ctx.beginPath();
+        ctx.moveTo(cx - Math.cos(angle) * 6, cy + Math.sin(angle) * 6);
+        ctx.lineTo(ex - Math.cos(angle) * 40, ey + Math.sin(angle) * 40);
+        ctx.lineTo(ex + Math.cos(angle) * 40, ey - Math.sin(angle) * 40);
+        ctx.lineTo(cx + Math.cos(angle) * 6, cy - Math.sin(angle) * 6);
+        ctx.closePath();
+        ctx.fillStyle = rg;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
 
     let tick = 0;
 
     function draw() {
       ctx.clearRect(0, 0, W, H);
 
-      // Sky glow — radial from top center
-      const skyGrad = ctx.createRadialGradient(W * 0.5, -H * 0.1, 0, W * 0.5, H * 0.4, W * 0.85);
-      skyGrad.addColorStop(0, 'rgba(26,92,56,0.18)');
-      skyGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      // ── Sky — warm golden hour (less dark, warm amber/teal gradient)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+      skyGrad.addColorStop(0.00, '#1a3a28');   // deep teal-green at top
+      skyGrad.addColorStop(0.30, '#2d5e3e');   // forest green
+      skyGrad.addColorStop(0.55, '#4a7c3f');   // warmer olive-green
+      skyGrad.addColorStop(0.72, '#7a6030');   // golden horizon
+      skyGrad.addColorStop(0.84, '#c48c3a');   // amber glow
+      skyGrad.addColorStop(0.93, '#1a3a1a');   // dark ground transition
+      skyGrad.addColorStop(1.00, '#0d1f0e');   // very dark base
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, W, H);
 
-      // Ground strip
-      const groundGrad = ctx.createLinearGradient(0, H * 0.75, 0, H);
-      groundGrad.addColorStop(0, 'rgba(5,25,10,0)');
-      groundGrad.addColorStop(1, 'rgba(3,15,6,0.75)');
+      // ── Sun glow on horizon
+      const sunGrad = ctx.createRadialGradient(W * 0.62, H * 0.72, 0, W * 0.62, H * 0.72, W * 0.55);
+      sunGrad.addColorStop(0.00, 'rgba(255,220,100,0.28)');
+      sunGrad.addColorStop(0.25, 'rgba(255,170,60,0.14)');
+      sunGrad.addColorStop(0.55, 'rgba(200,120,30,0.06)');
+      sunGrad.addColorStop(1.00, 'rgba(0,0,0,0)');
+      ctx.fillStyle = sunGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // ── Atmosphere haze band near horizon
+      const hazeGrad = ctx.createLinearGradient(0, H * 0.62, 0, H * 0.80);
+      hazeGrad.addColorStop(0, 'rgba(200,160,80,0.0)');
+      hazeGrad.addColorStop(0.5, 'rgba(200,160,80,0.12)');
+      hazeGrad.addColorStop(1, 'rgba(200,160,80,0.0)');
+      ctx.fillStyle = hazeGrad;
+      ctx.fillRect(0, H * 0.62, W, H * 0.18);
+
+      // ── Volumetric light rays
+      drawLightRays(tick);
+
+      // ── Background stalks (far, muted)
+      layers.slice(0, 14).forEach(s => drawStalk(s, tick));
+
+      // ── Mid-ground mist
+      const mistGrad = ctx.createLinearGradient(0, H * 0.60, 0, H * 0.78);
+      mistGrad.addColorStop(0, 'rgba(60,100,50,0.0)');
+      mistGrad.addColorStop(0.5, 'rgba(40,80,35,0.18)');
+      mistGrad.addColorStop(1, 'rgba(20,50,20,0.0)');
+      ctx.fillStyle = mistGrad;
+      ctx.fillRect(0, H * 0.60, W, H * 0.18);
+
+      // ── Mid stalks
+      layers.slice(14, 25).forEach(s => drawStalk(s, tick));
+
+      // ── Foreground stalks (full detail)
+      layers.slice(25).forEach(s => drawStalk(s, tick));
+
+      // ── Ground
+      const groundGrad = ctx.createLinearGradient(0, H * 0.78, 0, H);
+      groundGrad.addColorStop(0, 'rgba(10,30,12,0)');
+      groundGrad.addColorStop(0.5, 'rgba(6,20,8,0.70)');
+      groundGrad.addColorStop(1, 'rgba(2,8,3,0.95)');
       ctx.fillStyle = groundGrad;
-      ctx.fillRect(0, H * 0.75, W, H * 0.25);
+      ctx.fillRect(0, H * 0.78, W, H * 0.22);
 
-      // Draw stalks
-      stalks.forEach((s, i) => {
-        drawStalk(s.xr * W, H, s.hr * H, s.a, tick, i);
-      });
+      // ── Pollen particles
+      pollen.forEach(p => {
+        p.y += p.vy;
+        p.x += p.vx + Math.sin(tick * 0.014 + p.phase) * 0.22;
+        if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
 
-      // Particles (pollen / fireflies)
-      particles.forEach(p => {
-        p.y -= p.speed;
-        p.x += p.drift + Math.sin(tick * 0.012 + p.phase) * 0.18;
-        if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
-        if (p.x < -8) p.x = W + 8;
-        if (p.x > W + 8) p.x = -8;
-
-        const pulse = 0.55 + 0.45 * Math.sin(tick * 0.025 + p.phase);
+        const pulse = 0.55 + 0.45 * Math.sin(tick * 0.022 + p.phase);
         ctx.save();
         ctx.globalAlpha = p.alpha * pulse;
-        // Glow
-        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.5);
-        glow.addColorStop(0, `hsla(${p.hue},85%,65%,0.8)`);
-        glow.addColorStop(1, `hsla(${p.hue},85%,65%,0)`);
+        // Glow aura
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4.5);
+        glow.addColorStop(0, `hsla(${p.hue},90%,72%,0.9)`);
+        glow.addColorStop(0.5, `hsla(${p.hue},80%,65%,0.3)`);
+        glow.addColorStop(1, `hsla(${p.hue},70%,60%,0)`);
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.r * 4.5, 0, Math.PI * 2);
         ctx.fill();
-        // Core dot
-        ctx.fillStyle = `hsla(${p.hue},90%,75%,1)`;
+        // Core
+        ctx.fillStyle = `hsla(${p.hue},95%,80%,1)`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       });
+
+      // ── Subtle vignette overlay
+      const vigGrad = ctx.createRadialGradient(W*0.5, H*0.5, H*0.25, W*0.5, H*0.5, H*0.85);
+      vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      vigGrad.addColorStop(1, 'rgba(0,0,0,0.30)');
+      ctx.fillStyle = vigGrad;
+      ctx.fillRect(0, 0, W, H);
 
       tick++;
       animId = requestAnimationFrame(draw);
@@ -249,16 +408,16 @@ export default function WelcomePage() {
   const closeMenu = () => setMenu(null);
 
   return (
-    <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#040f08]">
+    <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#0d1f0e]">
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
-        {/* Deep green gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#030d06] via-[#071a0c] to-[#0a2412]" />
+        {/* Warm teal-green gradient background — matches golden hour canvas */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1a3a28] via-[#2d5e3e] to-[#0d1f0e]" />
         {/* Top vignette */}
-        <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/30 to-transparent z-10 pointer-events-none" />
         {/* Bottom vignette */}
-        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
+        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none" />
         {/* Right fade — blends into right panel */}
         <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#040f08] to-transparent z-10 pointer-events-none" />
 
@@ -297,11 +456,11 @@ export default function WelcomePage() {
       <div className="flex-1 flex flex-col min-h-[100dvh] lg:min-h-auto relative">
         {/* Mobile background */}
         <div className="lg:hidden absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#040f08] via-[#071a0c] to-[#0c2416]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(34,197,94,0.10),transparent)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a3a28] via-[#2d5e3e] to-[#0d1f0e]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(196,140,58,0.15),transparent)]" />
           {/* Mobile canvas too */}
           <CornCanvas />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#040f08]/70 via-transparent to-[#040f08]/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0d1f0e]/60 via-transparent to-[#0d1f0e]/75" />
         </div>
 
         {/* Right panel content */}
