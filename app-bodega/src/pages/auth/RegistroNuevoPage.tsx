@@ -556,14 +556,11 @@ export default function RegistroNuevoPage() {
 
   return (
     <div
-      className="relative min-h-[100dvh] flex flex-col overflow-hidden"
+      className="relative min-h-[100dvh] flex flex-col overflow-hidden bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      {/* Background */}
-      <div className="fixed inset-0 z-[-1]">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
-      </div>
+      {/* Background radial overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)] pointer-events-none" />
 
       {/* Header con Stepper */}
       {paso < 99 && (
