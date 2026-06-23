@@ -186,6 +186,7 @@ export default function WelcomePage() {
   const menuInicial = (location.state as { menu?: Menu } | null)?.menu ?? null;
   const [menu, setMenu] = useState<Menu>(menuInicial);
   const [visible, setVisible] = useState(false);
+  const [pressed, setPressed] = useState<Menu>(null);
   const data = menu ? OPCIONES[menu] : null;
 
   useEffect(() => {
@@ -304,26 +305,35 @@ export default function WelcomePage() {
             {/* Productor */}
             <button
               onClick={() => setMenu('productor')}
-              className="w-full group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-300"
+              onPointerDown={() => setPressed('productor')}
+              onPointerUp={() => setPressed(null)}
+              onPointerLeave={() => setPressed(null)}
+              className="w-full group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-200"
               style={{
                 opacity: visible ? 1 : 0,
-                transform: visible ? 'none' : 'translateY(20px)',
+                transform: visible ? (pressed === 'productor' ? 'scale(0.97)' : 'none') : 'translateY(20px)',
                 transition: 'opacity 0.5s ease 0.12s, transform 0.5s ease 0.12s',
-                background: 'linear-gradient(135deg, rgba(34,197,94,0.4) 0%, rgba(26,92,56,0.2) 100%)',
+                background: pressed === 'productor'
+                  ? 'linear-gradient(135deg, rgba(34,197,94,0.55) 0%, rgba(26,92,56,0.35) 100%)'
+                  : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
               }}
             >
-              <div className="relative bg-[#133c23]/90 backdrop-blur-xl hover:bg-[#194a2b]/90 active:bg-[#0e2c1a]/90 rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-200">
-                {/* Shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-[calc(1rem-1px)]" />
+              <div
+                className="relative backdrop-blur-xl rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-150"
+                style={{ background: pressed === 'productor' ? 'rgba(14,40,22,0.92)' : 'rgba(255,255,255,0.05)' }}
+              >
                 <div className="flex items-center gap-4 relative">
-                  <div className="w-13 h-13 bg-gradient-to-br from-[#1A5C38] to-[#0f3821] rounded-xl flex items-center justify-center shadow-[0_4px_16px_rgba(26,92,56,0.6)] shrink-0 transition-transform duration-200 group-hover:scale-105">
-                    <Wheat size={24} className="text-emerald-300" />
+                  <div
+                    className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
+                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#1A5C38,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
+                  >
+                    <Wheat size={24} className={pressed === 'productor' ? 'text-emerald-300' : 'text-white/60'} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-[17px] leading-tight">Soy Productor</p>
                     <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión, activar o registrar tu cuenta</p>
                   </div>
-                  <ChevronRight size={18} className="text-emerald-500/60 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all duration-200 shrink-0" />
+                  <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'productor' ? 'text-emerald-400 translate-x-1' : 'text-white/25'}`} />
                 </div>
               </div>
             </button>
@@ -331,25 +341,35 @@ export default function WelcomePage() {
             {/* Bodega / Industria */}
             <button
               onClick={() => setMenu('bodega')}
-              className="w-full group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-300"
+              onPointerDown={() => setPressed('bodega')}
+              onPointerUp={() => setPressed(null)}
+              onPointerLeave={() => setPressed(null)}
+              className="w-full group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-200"
               style={{
                 opacity: visible ? 1 : 0,
-                transform: visible ? 'none' : 'translateY(20px)',
+                transform: visible ? (pressed === 'bodega' ? 'scale(0.97)' : 'none') : 'translateY(20px)',
                 transition: 'opacity 0.5s ease 0.18s, transform 0.5s ease 0.18s',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
+                background: pressed === 'bodega'
+                  ? 'linear-gradient(135deg, rgba(34,197,94,0.55) 0%, rgba(26,92,56,0.35) 100%)'
+                  : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
               }}
             >
-              <div className="relative bg-white/[0.05] backdrop-blur-xl hover:bg-white/[0.08] active:bg-white/[0.03] rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-200">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-[calc(1rem-1px)]" />
+              <div
+                className="relative backdrop-blur-xl rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-150"
+                style={{ background: pressed === 'bodega' ? 'rgba(14,40,22,0.92)' : 'rgba(255,255,255,0.05)' }}
+              >
                 <div className="flex items-center gap-4 relative">
-                  <div className="w-13 h-13 bg-white/10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
-                    <Building2 size={24} className="text-white/60" />
+                  <div
+                    className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
+                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#1A5C38,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
+                  >
+                    <Building2 size={24} className={pressed === 'bodega' ? 'text-emerald-300' : 'text-white/60'} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white/80 font-bold text-[17px] leading-tight">Soy Bodega / Industria</p>
-                    <p className="text-white/35 text-[13px] mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
+                    <p className="text-white font-bold text-[17px] leading-tight">Soy Bodega / Industria</p>
+                    <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
                   </div>
-                  <ChevronRight size={18} className="text-white/25 group-hover:text-white/50 group-hover:translate-x-1 transition-all duration-200 shrink-0" />
+                  <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'bodega' ? 'text-emerald-400 translate-x-1' : 'text-white/25'}`} />
                 </div>
               </div>
             </button>
