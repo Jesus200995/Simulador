@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   ChevronLeft, Shield, MapPin, CheckCircle2, Camera, Loader2,
-  RefreshCw, AlertTriangle, Check, FileText, Eye,
+  RefreshCw, AlertTriangle, Check, FileText, Eye, Mail, ChevronRight,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -276,9 +276,9 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
 
             <Section title="Derechos ARCO">
               Tienes derecho de <strong className="text-white">Acceso, Rectificación, Cancelación y Oposición (ARCO)</strong> sobre tus datos. Para ejercerlos, envía una solicitud a:
-              <div className="mt-2 bg-white/5 rounded-xl p-3 ring-1 ring-white/10">
-                <p>📧 privacidad@agricultura.gob.mx</p>
-                <p className="mt-0.5">📍 Municipio Libre 377, Col. Santa Cruz Atoyac, CDMX</p>
+              <div className="mt-2 bg-white/5 rounded-xl p-3 ring-1 ring-white/10 space-y-1.5">
+                <p className="flex items-center gap-2"><Mail size={13} className="text-green-400 flex-shrink-0" /> privacidad@agricultura.gob.mx</p>
+                <p className="flex items-center gap-2"><MapPin size={13} className="text-green-400 flex-shrink-0" /> Municipio Libre 377, Col. Santa Cruz Atoyac, CDMX</p>
               </div>
               Tu solicitud será atendida en un plazo máximo de <strong className="text-white">20 días hábiles</strong>.
             </Section>
@@ -292,7 +292,7 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
             </Section>
 
             <div className="bg-amber-500/10 ring-1 ring-amber-400/30 rounded-2xl p-4 text-[12px] text-amber-200">
-              <p className="font-bold mb-1">⚠️ Importante</p>
+              <p className="font-bold mb-1 flex items-center gap-1.5"><AlertTriangle size={13} className="flex-shrink-0" /> Importante</p>
               <p>Al presionar <em>"Acepto y Continúo"</em> en el siguiente paso, confirmas haber leído y entendido este aviso, y autorizas el tratamiento de tus datos conforme a lo aquí descrito. Esta aceptación queda registrada con tu fotografía, ubicación GPS y marca de tiempo.</p>
             </div>
 
@@ -507,7 +507,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function ListItem({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex gap-2">
-      <span className="text-green-400 flex-shrink-0 mt-0.5">▸</span>
+      <ChevronRight size={13} className="text-green-400 flex-shrink-0 mt-0.5" />
       <span>{children}</span>
     </li>
   );
