@@ -344,18 +344,18 @@ export default function WelcomePage() {
   const closeMenu = () => setMenu(null);
 
   return (
-    <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#040f08]">
+    <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#092213]">
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
         {/* Deep green gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#030d06] via-[#071a0c] to-[#0a2412]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#05160d] via-[#0b2b18] to-[#124225]" />
         {/* Top vignette */}
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
         {/* Bottom vignette */}
         <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
         {/* Right fade — blends into right panel */}
-        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#040f08] to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#092213] to-transparent z-10 pointer-events-none" />
 
         {/* Canvas animation */}
         <CornCanvas />
@@ -392,11 +392,11 @@ export default function WelcomePage() {
       <div className="flex-1 flex flex-col min-h-[100dvh] lg:min-h-auto relative">
         {/* Mobile background */}
         <div className="lg:hidden absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#040f08] via-[#071a0c] to-[#0c2416]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#092213] via-[#0b2b18] to-[#144728]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(34,197,94,0.10),transparent)]" />
           {/* Mobile canvas too */}
           <CornCanvas />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#040f08]/70 via-transparent to-[#040f08]/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#092213]/70 via-transparent to-[#092213]/80" />
         </div>
 
         {/* Right panel content */}
@@ -445,7 +445,7 @@ export default function WelcomePage() {
                 background: 'linear-gradient(135deg, rgba(34,197,94,0.4) 0%, rgba(26,92,56,0.2) 100%)',
               }}
             >
-              <div className="relative bg-[#0d2a18]/90 backdrop-blur-xl hover:bg-[#112f1c]/90 active:bg-[#0a1f12]/90 rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-200">
+              <div className="relative bg-[#133c23]/90 backdrop-blur-xl hover:bg-[#194a2b]/90 active:bg-[#0e2c1a]/90 rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-200">
                 {/* Shimmer */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-[calc(1rem-1px)]" />
                 <div className="flex items-center gap-4 relative">
