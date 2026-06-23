@@ -209,12 +209,10 @@ export default function WelcomePage() {
   return (
     <div
       className="relative flex overflow-hidden bg-[#092213]"
-      style={{ minHeight: '100dvh', overscrollBehavior: 'none' }}
+      style={{ position: 'fixed', inset: 0, overscrollBehavior: 'none' }}
     >
       {/* Status bar color band — cubre safe-area-inset-top en iOS */}
       <div className="fixed top-0 inset-x-0 z-[999] bg-[#1A5C38]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
-      {/* Bottom overscroll cover */}
-      <div className="fixed bottom-0 inset-x-0 z-[999] bg-[#092213]" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
