@@ -86,8 +86,20 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
 
   // ── CÁMARA ───────────────────────────────────────────
   const iniciarCamara = async () => {
-    setCamStatus('requesting');
     setCamError(null);
+
+    // getUserMedia solo funciona en contexto seguro (HTTPS/localhost).
+    // En móvil también preferimos el flujo nativo del SO para mejor UX.
+    const isSecure  = window.isSecureContext || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const isMobile  = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const hasGetUM  = !!navigator.mediaDevices?.getUserMedia;
+
+    if (!isSecure || isMobile || !hasGetUM) {
+      setCamStatus('fallback');
+      return;
+    }
+
+    setCamStatus('requesting');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } },
@@ -100,7 +112,6 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
       }
       setCamStatus('active');
     } catch {
-      // Fallback: input file con captura nativa
       setCamStatus('fallback');
     }
   };
@@ -413,13 +424,14 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
               </div>
             )}
 
-            {/* Input file fallback */}
+            {/* Input file fallback — id vinculado al label de arriba */}
             <input
               ref={fileInputRef}
+              id="cam-bio-input"
               type="file"
               accept="image/*"
               capture="user"
-              className="hidden"
+              className="sr-only"
               onChange={onFileChange}
             />
 
@@ -427,7 +439,7 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
             {camStatus === 'idle' && (
               <button
                 onClick={iniciarCamara}
-                className="w-full bg-white/10 hover:bg-white/20 ring-1 ring-white/20 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                className="w-full bg-white/10 hover:bg-white/20 ring-1 ring-white/20 text-white py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
               >
                 <Camera size={16} /> Iniciar verificación biométrica
               </button>
@@ -444,17 +456,18 @@ export default function AvisoPrivacidadStep({ nombreTitular, onAceptar, onBack }
                 onClick={tomarFoto}
                 className="w-full bg-white text-[#1A5C38] py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg"
               >
-                <Camera size={17} /> Capturar
+                <Camera size={17} /> Capturar foto
               </button>
             )}
 
+            {/* Fallback: label nativo — funciona en iOS/Android sin JS .click() */}
             {camStatus === 'fallback' && (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-white/10 hover:bg-white/20 ring-1 ring-white/20 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+              <label
+                htmlFor="cam-bio-input"
+                className="w-full bg-white text-[#1A5C38] py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg cursor-pointer select-none"
               >
-                <Camera size={16} /> Tomar foto con cámara
-              </button>
+                <Camera size={17} /> Tomar foto de verificación
+              </label>
             )}
 
             {(camStatus === 'ok' || camStatus === 'error') && (
