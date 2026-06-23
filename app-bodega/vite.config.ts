@@ -19,8 +19,8 @@ export default defineConfig({
         description: 'Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México — Módulo Bodega',
         start_url: '/',
         display: 'standalone',
-        background_color: '#1A5C38',
-        theme_color: '#1A5C38',
+        background_color: '#092213',
+        theme_color: '#092213',
         lang: 'es',
         icons: [
           { src: '/icono.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
