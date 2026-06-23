@@ -174,7 +174,7 @@ export default function MiPerfilPage() {
                   perfil.estado_validacion === 'activo' ? 'bg-green-400/90 text-green-950'
                   : perfil.estado_validacion === 'pendiente' ? 'bg-amber-300/90 text-amber-950'
                   : 'bg-red-400/90 text-red-950'}`}>
-                  {perfil.estado_validacion}
+                  {perfil.estado_validacion.charAt(0).toUpperCase() + perfil.estado_validacion.slice(1)}
                 </span>
               </div>
             </div>
@@ -208,7 +208,7 @@ export default function MiPerfilPage() {
                 ${perfil.estado_validacion === 'activo' ? 'bg-green-100 text-green-700'
                 : perfil.estado_validacion === 'pendiente' ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-red-100 text-red-700'}`}>
-                {perfil.estado_validacion}
+                {perfil.estado_validacion.charAt(0).toUpperCase() + perfil.estado_validacion.slice(1)}
               </span>
             </div>
           </div>

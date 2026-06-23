@@ -275,7 +275,7 @@ export default function ProductorDetalleAdminPage() {
               data.estado_validacion === 'pendiente' ? 'text-amber-500' :
               data.estado_validacion === 'rechazado' ? 'text-red-500' : 'text-gray-500'
             }`}>
-              {data.estado_validacion}
+              {data.estado_validacion.charAt(0).toUpperCase() + data.estado_validacion.slice(1)}
             </span>
           </div>
 

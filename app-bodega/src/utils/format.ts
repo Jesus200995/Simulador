@@ -1,3 +1,7 @@
+/** Capitaliza la primera letra de un string (ej: 'activo' → 'Activo') */
+export const cap = (s: string | null | undefined): string =>
+  s ? s.charAt(0).toUpperCase() + s.slice(1) : '—';
+
 export const formatNum = (
   value: number | string | null | undefined,
   decimals = 1

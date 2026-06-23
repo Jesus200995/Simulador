@@ -433,7 +433,7 @@ export default function BodegasAdminPage() {
                       b.estatus === 'aprobada' ? 'text-emerald-600 bg-emerald-500/10' :
                       b.estatus === 'pendiente' ? 'text-amber-500 bg-amber-500/10' : 'text-gray-500 bg-white/5'
                     }`}>
-                      {b.estatus}
+                      {b.estatus.charAt(0).toUpperCase() + b.estatus.slice(1)}
                     </span>
                   </div>
 
@@ -495,7 +495,7 @@ export default function BodegasAdminPage() {
                       b.estatus === 'pendiente' ? 'text-amber-600 bg-amber-500/10 border border-amber-500/20' :
                       'text-gray-500 bg-white/5 border border-gray-200'
                     }`}>
-                      {b.estatus}
+                      {b.estatus.charAt(0).toUpperCase() + b.estatus.slice(1)}
                     </span>
                     <span className={`w-2.5 h-2.5 rounded-full ${
                       b.semaforo_compra === 'verde' ? 'bg-emerald-500 animate-pulse' :

@@ -151,7 +151,7 @@ function generarPDF(a: Aviso) {
       <div class="field"><label>CURP</label><value class="mono">${a.curp}</value></div>
       <div class="field"><label>Teléfono</label><value>${a.telefono || '—'}</value></div>
       <div class="field"><label>Tipo de registro</label><value>${a.tipo}</value></div>
-      <div class="field"><label>Estado de cuenta</label><value>${a.estado_validacion}</value></div>
+      <div class="field"><label>Estado de cuenta</label><value>${a.estado_validacion.charAt(0).toUpperCase() + a.estado_validacion.slice(1)}</value></div>
     </div>
     <div class="card">
       <div class="card-title">Registro de la Aceptación</div>
@@ -226,7 +226,7 @@ function exportarCSV(lista: Aviso[]) {
     a.aviso_privacidad_fecha || '',
     a.aviso_privacidad_lat || '', a.aviso_privacidad_lng || '',
     a.aviso_privacidad_version || '', a.aviso_privacidad_foto_url || '',
-    a.estado_validacion, completitud(a),
+    a.estado_validacion.charAt(0).toUpperCase() + a.estado_validacion.slice(1), completitud(a),
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
 
   const csv  = [cols.join(','), ...rows].join('\n');
@@ -308,7 +308,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
                   aviso.estado_validacion === 'activo'
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     : 'bg-amber-50 text-amber-700 border-amber-200'
-                }`}><CheckCircle2 size={10} /> {aviso.estado_validacion}</span>
+                }`}><CheckCircle2 size={10} /> {aviso.estado_validacion.charAt(0).toUpperCase() + aviso.estado_validacion.slice(1)}</span>
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                   v{aviso.aviso_privacidad_version || '1.0'}
                 </span>
@@ -843,7 +843,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
           : 'bg-amber-50 text-amber-700 border border-amber-200'
       }`}>
         <span className={`w-1.5 h-1.5 rounded-full ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-        {aviso.estado_validacion}
+        {aviso.estado_validacion.charAt(0).toUpperCase() + aviso.estado_validacion.slice(1)}
       </span>
 
       {/* Completitud */}
@@ -901,7 +901,7 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
             : 'bg-amber-50 text-amber-700 border-amber-200'
         }`}>
           <span className={`w-1 h-1 rounded-full ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-          {aviso.estado_validacion}
+          {aviso.estado_validacion.charAt(0).toUpperCase() + aviso.estado_validacion.slice(1)}
         </span>
       </div>
 

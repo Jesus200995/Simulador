@@ -226,7 +226,7 @@ export default function BodegaDetalleAdminPage() {
               data.estatus === 'aprobada' ? 'text-emerald-500' :
               data.estatus === 'pendiente' ? 'text-amber-500' : 'text-red-500'
             }`}>
-              {data.estatus}
+              {data.estatus.charAt(0).toUpperCase() + data.estatus.slice(1)}
             </span>
           </div>
 

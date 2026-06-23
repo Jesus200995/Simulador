@@ -349,7 +349,7 @@ export default function CicloProductivoPage() {
                           ? 'bg-blue-50 text-blue-700 border border-blue-100'
                           : 'bg-gray-50 text-gray-500 border border-gray-200'
                       }`}>
-                        {estado}
+                        {estado.charAt(0).toUpperCase() + estado.slice(1)}
                       </span>
                     </div>
                   );
