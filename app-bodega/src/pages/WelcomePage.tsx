@@ -342,8 +342,13 @@ function CornCanvas() {
     const particleCount = 4000;
     const particles = Array.from({ length: particleCount }, () => new AmbientParticle(bounds));
 
+    const colors = [
+      [134, 239, 172], // Verde claro
+      [22, 163, 74],   // Verde fuerte
+      [143, 10, 48]    // Guinda / Vino
+    ];
+
     let tick = 0;
-    let hue = 0;
 
     function draw() {
       // 1. Transparent trail fade via destination-out
@@ -366,11 +371,21 @@ function CornCanvas() {
         p.step(noiseGen, monitor);
         p.render(ctx);
       });
-      ctx.strokeStyle = `hsla(${hue}, 75%, 50%, 0.55)`;
+
+      // Interpolate colors between light green, strong green, and guinda
+      const colorProgress = (tick / 250) % 3;
+      const phase = Math.floor(colorProgress);
+      const factor = colorProgress - phase;
+      const cStart = colors[phase];
+      const cEnd = colors[(phase + 1) % 3];
+      const r = Math.round(cStart[0] + (cEnd[0] - cStart[0]) * factor);
+      const g = Math.round(cStart[1] + (cEnd[1] - cStart[1]) * factor);
+      const b = Math.round(cStart[2] + (cEnd[2] - cStart[2]) * factor);
+
+      ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.55)`;
       ctx.lineWidth = 1.0;
       ctx.stroke();
 
-      hue = (hue + 0.5) % 360;
       tick++;
       animId = requestAnimationFrame(draw);
     }
