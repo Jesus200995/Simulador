@@ -9,6 +9,7 @@ import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
 import * as turf from '@turf/turf';
+import AvisoPrivacidadStep, { type AvisoData } from './AvisoPrivacidadStep';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -101,6 +102,9 @@ export default function RegistroNuevoPage() {
     } catch { /* si turf falla, no bloquear */ }
     return null;
   };
+
+  // Paso 25 — Aviso de privacidad
+  const [avisoData, setAvisoData] = useState<AvisoData | null>(null);
 
   // Paso 6 — PIN
   const [pin, setPin] = useState('');
@@ -207,6 +211,12 @@ export default function RegistroNuevoPage() {
           telefono: telefonoEditable,
           correo: datosPadron?.correo,
           pin,
+          aviso_privacidad_aceptado: avisoData?.aceptado ?? true,
+          aviso_privacidad_fecha: avisoData?.fecha ?? new Date().toISOString(),
+          aviso_privacidad_lat: avisoData?.lat ?? null,
+          aviso_privacidad_lng: avisoData?.lng ?? null,
+          aviso_privacidad_version: avisoData?.version ?? '1.0',
+          aviso_privacidad_foto_url: avisoData?.fotoUrl ?? null,
           ups: ups.map((up, i) => ({
             lat: up.coords?.lat ?? null,
             lng: up.coords?.lng ?? null,
@@ -240,8 +250,9 @@ export default function RegistroNuevoPage() {
     }
     else if (paso === 3) {
       if (ups.length > 0) setPaso(5);
-      else setPaso(2);
+      else setPaso(25); // volver al aviso, no a datos
     }
+    else if (paso === 25) setPaso(2);
     else if (paso === 2) setPaso(1);
     else navigate(-1);
   };
@@ -455,6 +466,21 @@ export default function RegistroNuevoPage() {
     );
   }
 
+  // Paso 25 — renderizado completo (toma toda la pantalla, sin el shell de abajo)
+  if (paso === 25) {
+    return (
+      <AvisoPrivacidadStep
+        nombreTitular={datosPadron ? `${datosPadron.nombres} ${datosPadron.apellido_paterno}` : ''}
+        onAceptar={(datos) => {
+          setAvisoData(datos);
+          cargarEstados();
+          setPaso(3);
+        }}
+        onBack={() => setPaso(2)}
+      />
+    );
+  }
+
   // Helper para saber el "paso visual" en el header (1 al 4)
   const getVisualStep = () => {
     if (paso === 1) return 1;
@@ -588,7 +614,7 @@ export default function RegistroNuevoPage() {
                     placeholder="10 dígitos" maxLength={10} className={inputCls} />
                 </div>
 
-                <button onClick={() => { cargarEstados(); setPaso(3); }} className={`mt-2 ${btnCls}`}>
+                <button onClick={() => setPaso(25)} className={`mt-2 ${btnCls}`}>
                   <Check size={18} /> Confirmar y Continuar
                 </button>
               </div>

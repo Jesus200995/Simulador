@@ -1,10 +1,37 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { reverseGeocode } from '../utils/geocode';
 import { consultarPersonaPorCURP } from '../services/saderService';
+
+// Directorio de almacenamiento para verificaciones biométricas
+const UPLOAD_DIR = process.env.NODE_ENV === 'production'
+  ? '/var/www/Simulador/uploads/verificacion'
+  : path.join(__dirname, '../../../uploads/verificacion');
+
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const storageVerificacion = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+  filename: (_req, _file, cb) => {
+    const ts = Date.now();
+    const rand = Math.random().toString(36).slice(2, 8);
+    cb(null, `vrf_${ts}_${rand}.jpg`);
+  },
+});
+const uploadVerificacion = multer({
+  storage: storageVerificacion,
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Solo se permiten imágenes'));
+  },
+});
 
 const router = Router();
 
@@ -16,6 +43,19 @@ function normalizeText(str: string): string {
     .toUpperCase()
     .trim();
 }
+
+// ─────────────────────────────────────────────
+// POST /api/productor/auth/upload-verificacion
+// Sube la foto de verificación biométrica del titular antes del registro.
+// Devuelve la ruta relativa para incluirla en el payload de registro.
+// ─────────────────────────────────────────────
+router.post('/auth/upload-verificacion', uploadVerificacion.single('foto'), (req, res): void => {
+  if (!req.file) {
+    res.status(400).json({ error: 'No se recibió ninguna imagen' });
+    return;
+  }
+  res.json({ path: `verificacion/${req.file.filename}` });
+});
 
 // ─────────────────────────────────────────────
 // AUTH — Activación por CURP (Tipo A)
@@ -459,6 +499,12 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area,
       telefono, pin, programas_beneficiario, correo,
       ups,
+      aviso_privacidad_aceptado,
+      aviso_privacidad_fecha,
+      aviso_privacidad_lat,
+      aviso_privacidad_lng,
+      aviso_privacidad_version,
+      aviso_privacidad_foto_url,
     } = req.body;
 
     if (!pin || !/^\d{4}$/.test(pin)) {
@@ -468,6 +514,11 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
 
     if (!curp || curp.length !== 18) {
       res.status(400).json({ error: 'CURP inválida' });
+      return;
+    }
+
+    if (aviso_privacidad_aceptado !== true) {
+      res.status(400).json({ error: 'Debe aceptar el aviso de privacidad para continuar' });
       return;
     }
 
@@ -507,10 +558,21 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       const p = await client.query(
         `INSERT INTO producer
            (usuario_id, curp, nombres, apellido_paterno, apellido_materno,
-            phone, sexo, tipo_registro, estado_validacion, programas_beneficiario, correo)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,'B','activo',$8,$9) RETURNING producer_id`,
-        [u.rows[0].id, curpN, nombresN, apPaternoN, apMaternoN,
-         telefono, genero || null, programas_beneficiario || [], correo || null]
+            phone, sexo, tipo_registro, estado_validacion, programas_beneficiario, correo,
+            aviso_privacidad_aceptado, aviso_privacidad_fecha, aviso_privacidad_lat,
+            aviso_privacidad_lng, aviso_privacidad_version, aviso_privacidad_foto_url)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,'B','activo',$8,$9,$10,$11,$12,$13,$14,$15)
+         RETURNING producer_id`,
+        [
+          u.rows[0].id, curpN, nombresN, apPaternoN, apMaternoN,
+          telefono, genero || null, programas_beneficiario || [], correo || null,
+          true,
+          aviso_privacidad_fecha || new Date().toISOString(),
+          aviso_privacidad_lat || null,
+          aviso_privacidad_lng || null,
+          aviso_privacidad_version || '1.0',
+          aviso_privacidad_foto_url || null,
+        ]
       );
       const producerId = p.rows[0].producer_id;
 
