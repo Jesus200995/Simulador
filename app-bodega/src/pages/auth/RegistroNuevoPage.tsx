@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -37,8 +37,22 @@ interface UPRegistrada {
   area_real_ha?: number | null;
 }
 
+interface DatosManual {
+  nombres: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
+  telefono: string;
+  correo: string;
+  genero: string;
+  estadoPadron: string;
+  municipioPadron: string;
+}
+
 export default function RegistroNuevoPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const esModoManual = searchParams.get('modo') === 'manual';
+  const curpDesdeActivar = searchParams.get('curp') ?? '';
 
   const [paso, setPaso] = useState(1);
   const [cargando, setCargando] = useState(false);
@@ -106,6 +120,19 @@ export default function RegistroNuevoPage() {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
 
+  // Modo manual (registro sin padrón SADER)
+  const [datosManual, setDatosManual] = useState<DatosManual>({
+    nombres: '',
+    apellidoPaterno: '',
+    apellidoMaterno: '',
+    telefono: '',
+    correo: '',
+    genero: '',
+    estadoPadron: '',
+    municipioPadron: '',
+  });
+  const [erroresManual, setErroresManual] = useState<Record<string, string>>({});
+
   // Aviso de privacidad
   const [avisoAceptado, setAvisoAceptado] = useState(false);
   const [mostrarAviso, setMostrarAviso] = useState(true);
@@ -171,6 +198,13 @@ export default function RegistroNuevoPage() {
   };
 
   useEffect(() => {
+    if (!esModoManual) return;
+    if (curpDesdeActivar) setCurp(curpDesdeActivar);
+    cargarEstados();
+    setPaso(2);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (paso === 4 && enDibujo && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => setCenter([pos.coords.latitude, pos.coords.longitude]),
@@ -211,39 +245,67 @@ export default function RegistroNuevoPage() {
     setTimeout(() => dibujarRef.current?.startEdit?.(), 50);
   };
 
+  const validarFormularioManual = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!datosManual.nombres.trim()) errs.nombres = 'Requerido';
+    if (!datosManual.apellidoPaterno.trim()) errs.apellidoPaterno = 'Requerido';
+    if (!datosManual.telefono || datosManual.telefono.length < 10) errs.telefono = 'Teléfono de 10 dígitos requerido';
+    if (!datosManual.estadoPadron) errs.estadoPadron = 'Selecciona tu estado';
+    if (!datosManual.municipioPadron) errs.municipioPadron = 'Selecciona tu municipio';
+    setErroresManual(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const registrar = async () => {
     if (pin !== confirmPin) { setError('Los PINs no coinciden.'); return; }
     if (pin.length !== 4) { setError('El PIN debe ser de 4 dígitos.'); return; }
 
     setCargando(true); setError(null);
     try {
+      const upsPayload = ups.map((up, i) => ({
+        lat: up.coords?.lat ?? null,
+        lng: up.coords?.lng ?? null,
+        poligono: up.poligono ?? null,
+        area_calc_ha: up.areaCalc,
+        area_real_ha: up.area_real_ha ?? up.areaCalc,
+        coincide_area: up.coincide_area ?? true,
+        estado_up: up.estado,
+        municipio_up: up.municipio,
+        nombre_up: up.nombre || nombreAutomaticoUP(i),
+      }));
+
+      const body = esModoManual ? {
+        curp: curp.toUpperCase().trim(),
+        nombres: datosManual.nombres,
+        apellido_paterno: datosManual.apellidoPaterno,
+        apellido_materno: datosManual.apellidoMaterno,
+        fecha_nacimiento: null,
+        genero: datosManual.genero || null,
+        telefono: datosManual.telefono,
+        correo: datosManual.correo || null,
+        pin,
+        aviso_lat: avisoLat,
+        aviso_lng: avisoLng,
+        ups: upsPayload,
+      } : {
+        curp: curp.toUpperCase().trim(),
+        nombres: datosPadron?.nombres,
+        apellido_paterno: datosPadron?.apellido_paterno,
+        apellido_materno: datosPadron?.apellido_materno,
+        fecha_nacimiento: datosPadron?.fecha_nacimiento,
+        genero: datosPadron?.genero,
+        telefono: telefonoEditable,
+        correo: datosPadron?.correo,
+        pin,
+        aviso_lat: avisoLat,
+        aviso_lng: avisoLng,
+        ups: upsPayload,
+      };
+
       const res = await fetch(`${BASE}/productor/auth/registro-nuevo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          curp: curp.toUpperCase().trim(),
-          nombres: datosPadron?.nombres,
-          apellido_paterno: datosPadron?.apellido_paterno,
-          apellido_materno: datosPadron?.apellido_materno,
-          fecha_nacimiento: datosPadron?.fecha_nacimiento,
-          genero: datosPadron?.genero,
-          telefono: telefonoEditable,
-          correo: datosPadron?.correo,
-          pin,
-          aviso_lat: avisoLat,
-          aviso_lng: avisoLng,
-          ups: ups.map((up, i) => ({
-            lat: up.coords?.lat ?? null,
-            lng: up.coords?.lng ?? null,
-            poligono: up.poligono ?? null,
-            area_calc_ha: up.areaCalc,
-            area_real_ha: up.area_real_ha ?? up.areaCalc,
-            coincide_area: up.coincide_area ?? true,
-            estado_up: up.estado,
-            municipio_up: up.municipio,
-            nombre_up: up.nombre || nombreAutomaticoUP(i),
-          })),
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Error al registrar.'); return; }
@@ -267,7 +329,7 @@ export default function RegistroNuevoPage() {
       if (ups.length > 0) setPaso(5);
       else setPaso(2);
     }
-    else if (paso === 2) setPaso(1);
+    else if (paso === 2) { if (esModoManual) navigate(-1); else setPaso(1); }
     else navigate(-1);
   };
 
@@ -637,8 +699,124 @@ export default function RegistroNuevoPage() {
             </div>
           )}
 
-          {/* Paso 2 — Datos Padron */}
-          {paso === 2 && datosPadron && (
+          {/* Paso 2 — Registro manual (no está en padrón SADER) */}
+          {paso === 2 && esModoManual && (
+            <div className="animate-auth-in">
+              <div className="text-center mb-4 sm:mb-6">
+                <h1 className="text-2xl font-bold text-white tracking-tight">Tus datos</h1>
+                <p className="text-white/50 text-sm mt-1.5">Completa tu información de registro</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl shadow-black/20 space-y-4">
+                {/* CURP (pre-llenada, editable) */}
+                <div>
+                  <label className={labelCls}>CURP</label>
+                  <input type="text" value={curp}
+                    onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                    placeholder="AAAA000000AAAAAA00" maxLength={18}
+                    className={`${inputCls} font-mono uppercase text-center text-lg`} />
+                  <p className="text-[11px] text-white/30 text-right mt-1">{curp.length}/18</p>
+                </div>
+
+                {/* Nombre(s) */}
+                <div>
+                  <label className={labelCls}>Nombre(s) <span className="text-red-400">*</span></label>
+                  <input type="text" value={datosManual.nombres}
+                    onChange={e => setDatosManual(p => ({ ...p, nombres: e.target.value }))}
+                    placeholder="Ej: Juan Carlos" className={inputCls} />
+                  {erroresManual.nombres && <p className="text-red-300 text-xs mt-1">{erroresManual.nombres}</p>}
+                </div>
+
+                {/* Apellido Paterno */}
+                <div>
+                  <label className={labelCls}>Apellido Paterno <span className="text-red-400">*</span></label>
+                  <input type="text" value={datosManual.apellidoPaterno}
+                    onChange={e => setDatosManual(p => ({ ...p, apellidoPaterno: e.target.value }))}
+                    placeholder="Ej: García" className={inputCls} />
+                  {erroresManual.apellidoPaterno && <p className="text-red-300 text-xs mt-1">{erroresManual.apellidoPaterno}</p>}
+                </div>
+
+                {/* Apellido Materno */}
+                <div>
+                  <label className={labelCls}>Apellido Materno</label>
+                  <input type="text" value={datosManual.apellidoMaterno}
+                    onChange={e => setDatosManual(p => ({ ...p, apellidoMaterno: e.target.value }))}
+                    placeholder="Ej: López" className={inputCls} />
+                </div>
+
+                {/* Género */}
+                <div>
+                  <label className={labelCls}>Género</label>
+                  <select value={datosManual.genero}
+                    onChange={e => setDatosManual(p => ({ ...p, genero: e.target.value }))}
+                    className={`${inputCls} appearance-none [&>option]:text-gray-900`}>
+                    <option value="">Selecciona...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                  </select>
+                </div>
+
+                {/* Teléfono */}
+                <div>
+                  <label className={labelCls}>Teléfono <span className="text-red-400">*</span></label>
+                  <input type="tel" inputMode="numeric" value={datosManual.telefono}
+                    onChange={e => setDatosManual(p => ({ ...p, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                    placeholder="10 dígitos" maxLength={10} className={inputCls} />
+                  {erroresManual.telefono && <p className="text-red-300 text-xs mt-1">{erroresManual.telefono}</p>}
+                </div>
+
+                {/* Correo */}
+                <div>
+                  <label className={labelCls}>Correo electrónico</label>
+                  <input type="email" value={datosManual.correo}
+                    onChange={e => setDatosManual(p => ({ ...p, correo: e.target.value }))}
+                    placeholder="correo@ejemplo.com" className={inputCls} />
+                </div>
+
+                {/* Estado */}
+                <div>
+                  <label className={labelCls}>Estado <span className="text-red-400">*</span></label>
+                  <select value={estadoId}
+                    onChange={e => {
+                      const sel = estados.find(s => String(s.state_id) === e.target.value);
+                      setEstadoId(e.target.value);
+                      setDatosManual(p => ({ ...p, estadoPadron: sel?.name || sel?.state_name || '', municipioPadron: '' }));
+                      setMunicipios([]);
+                      if (e.target.value) cargarMunicipios(e.target.value);
+                    }}
+                    className={`${inputCls} appearance-none [&>option]:text-gray-900`}>
+                    <option value="">Selecciona estado...</option>
+                    {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name || s.state_name}</option>)}
+                  </select>
+                  {erroresManual.estadoPadron && <p className="text-red-300 text-xs mt-1">{erroresManual.estadoPadron}</p>}
+                </div>
+
+                {/* Municipio */}
+                {estadoId && (
+                  <div className="animate-auth-in">
+                    <label className={labelCls}>Municipio <span className="text-red-400">*</span></label>
+                    <select value={datosManual.municipioPadron}
+                      onChange={e => setDatosManual(p => ({ ...p, municipioPadron: e.target.value }))}
+                      className={`${inputCls} appearance-none [&>option]:text-gray-900`}>
+                      <option value="">Selecciona municipio...</option>
+                      {municipios.map(m => <option key={m.municipality_id} value={m.name || m.municipality_name}>{m.name || m.municipality_name}</option>)}
+                    </select>
+                    {erroresManual.municipioPadron && <p className="text-red-300 text-xs mt-1">{erroresManual.municipioPadron}</p>}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => { if (validarFormularioManual()) { setPaso(3); } }}
+                  className={`mt-2 ${btnCls}`}
+                >
+                  <Check size={18} /> Continuar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Paso 2 — Datos Padron (SADER) */}
+          {paso === 2 && datosPadron && !esModoManual && (
             <div className="animate-auth-in">
               <div className="text-center mb-4 sm:mb-6">
                 <h1 className="text-2xl font-bold text-white tracking-tight">Datos Encontrados</h1>

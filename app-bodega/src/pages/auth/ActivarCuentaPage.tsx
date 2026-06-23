@@ -8,6 +8,7 @@ export default function ActivarCuentaPage() {
   const [curp, setCurp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [modoNoEncontrado, setModoNoEncontrado] = useState(false);
   const navigate = useNavigate();
 
   const handleBuscar = async () => {
@@ -23,7 +24,7 @@ export default function ActivarCuentaPage() {
       const data = await res.json();
 
       if (!data.encontrado) {
-        setError('Tu CURP no está en el padrón. Puedes registrarte como nuevo productor.');
+        setModoNoEncontrado(true);
         return;
       }
       if (data.ya_tiene_cuenta) {
@@ -114,6 +115,26 @@ export default function ActivarCuentaPage() {
               <span className="text-xs text-white/30 font-mono">{curp.length}/18</span>
             </div>
 
+            {modoNoEncontrado && (
+              <div className="mt-3 space-y-2">
+                <div className="p-3 bg-amber-500/15 ring-1 ring-amber-400/30 rounded-xl text-amber-200 text-sm flex items-start gap-2">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>Tu CURP no está en el padrón de SADER. Puedes registrarte directamente con tus datos.</span>
+                </div>
+                <button
+                  onClick={() => navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`)}
+                  className="w-full bg-amber-500 hover:bg-amber-400 text-white rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                >
+                  <UserPlus size={16} /> Registrarme con mis datos
+                </button>
+                <button
+                  onClick={() => { setModoNoEncontrado(false); setCurp(''); setError(''); }}
+                  className="w-full bg-white/10 text-white/80 rounded-xl py-2.5 text-sm font-medium active:scale-[0.98] transition-all"
+                >
+                  Intentar con otra CURP
+                </button>
+              </div>
+            )}
             {error && (
               <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl
                               text-red-300 text-sm flex items-start gap-2">
@@ -152,7 +173,7 @@ export default function ActivarCuentaPage() {
                 </div>
                 <ChevronRight size={16} className="text-white/30 shrink-0" />
               </button>
-              <button onClick={() => navigate('/registro-nuevo')}
+              <button onClick={() => navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`)}
                 className="w-full flex items-center gap-3 bg-white/8 ring-1 ring-white/12 hover:bg-white/12 rounded-xl p-3 text-left active:scale-[0.98] transition-all">
                 <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
                   <UserPlus size={17} className="text-green-300" />
