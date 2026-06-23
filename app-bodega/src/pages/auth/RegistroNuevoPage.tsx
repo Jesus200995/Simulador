@@ -153,7 +153,15 @@ export default function RegistroNuevoPage() {
         body: JSON.stringify({ curp: curp.toUpperCase().trim() }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'No se pudo verificar la CURP.'); return; }
+      if (!res.ok) {
+        // CURP no encontrada o inactiva en el padrón SADER → registro manual
+        if (data.codigo === 'NO_EN_PADRON' || data.codigo === 'INACTIVO_PADRON') {
+          navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`);
+          return;
+        }
+        setError(data.error || 'No se pudo verificar la CURP.');
+        return;
+      }
       setDatosPadron(data.datos);
       setTelefonoEditable(data.datos.telefono || '');
       setPaso(2);
@@ -183,7 +191,7 @@ export default function RegistroNuevoPage() {
     if (curpDesdeActivar) setCurp(curpDesdeActivar);
     cargarEstados();
     setPaso(2);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [esModoManual]); // reacciona cuando React Router cambia los query params en la misma ruta
 
   useEffect(() => {
     if (paso === 4 && enDibujo && navigator.geolocation) {

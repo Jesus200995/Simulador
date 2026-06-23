@@ -255,4 +255,51 @@ router.patch('/cycle-crops/:id', authMiddleware, async (req: AuthRequest, res: R
   }
 });
 
+// =============================================
+// PATCH /api/cycles/:cycle_id/estado - Cambiar estado del ciclo
+// Valores: activo | cosechado | cancelado (no elimina el registro)
+// =============================================
+router.patch('/cycles/:cycle_id/estado', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { cycle_id } = req.params;
+    const { estado } = req.body;
+
+    const estadosValidos = ['activo', 'cosechado', 'cancelado'];
+    if (!estadosValidos.includes(estado)) {
+      res.status(400).json({ error: `Estado inválido. Valores permitidos: ${estadosValidos.join(', ')}` });
+      return;
+    }
+
+    // Verificar que el ciclo pertenece a una UP del productor autenticado
+    const check = await pool.query(
+      `SELECT c.cycle_id
+       FROM cycle c
+       JOIN up u ON u.up_id = c.up_id
+       JOIN producer p ON p.producer_id = u.producer_id
+       WHERE c.cycle_id = $1 AND p.usuario_id = $2`,
+      [cycle_id, req.user?.userId]
+    );
+
+    if (check.rows.length === 0) {
+      res.status(404).json({ error: 'Ciclo no encontrado o sin permiso' });
+      return;
+    }
+
+    const result = await pool.query(
+      `UPDATE cycle SET estado_ciclo = $1 WHERE cycle_id = $2
+       RETURNING cycle_id, estado_ciclo`,
+      [estado, cycle_id]
+    );
+
+    res.json({
+      ok: true,
+      cycle_id: result.rows[0].cycle_id,
+      estado_ciclo: result.rows[0].estado_ciclo,
+    });
+  } catch (error) {
+    console.error('Error al actualizar estado del ciclo:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

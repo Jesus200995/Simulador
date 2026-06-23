@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Wheat, Check, Leaf, Calendar, MapPin,
   Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play,
-  CloudRain, Droplets
+  CloudRain, Droplets, X, Pencil
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -66,6 +66,16 @@ export default function CicloProductivoPage() {
   } | null>(null);
 
   const [cicloConfirmado, setCicloConfirmado] = useState(false);
+
+  // C8 — Cancelar ciclo
+  const [cicloACancelar, setCicloACancelar] = useState<number | null>(null);
+  const [cancelando, setCancelando] = useState(false);
+
+  // C9 — Editar cultivo
+  const [cicloEditando, setCicloEditando] = useState<any | null>(null);
+  const [formEdicion, setFormEdicion] = useState<any | null>(null);
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+  const [errorEdicion, setErrorEdicion] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('simac_token');
@@ -178,6 +188,100 @@ export default function CicloProductivoPage() {
   const saltar = () => {
     localStorage.setItem('ciclo_pendiente', '1');
     navigate('/productor');
+  };
+
+  // C8 — Cancelar ciclo (estado_ciclo = 'cancelado'). No borra el registro.
+  const handleCancelarCiclo = async () => {
+    if (!cicloACancelar) return;
+    setCancelando(true);
+    const token = localStorage.getItem('simac_token');
+    try {
+      const res = await fetch(`${BASE}/cycles/${cicloACancelar}/estado`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ estado: 'cancelado' }),
+      });
+      if (res.ok) {
+        // Quitar el ciclo cancelado de la lista local sin recargar
+        setCiclosExistentes(prev => prev.filter(c => c.cycle_id !== cicloACancelar));
+      }
+    } catch (e) {
+      console.error('Error al cancelar ciclo:', e);
+    } finally {
+      setCancelando(false);
+      setCicloACancelar(null);
+    }
+  };
+
+  // C9 — Abrir el panel de edición con los datos actuales del cultivo
+  const handleAbrirEdicion = (ciclo: any) => {
+    const crop = ciclo.crops?.[0] || {};
+    setCicloEditando({
+      cycle_id:      ciclo.cycle_id,
+      cycle_type:    ciclo.cycle_type,
+      cycle_year:    ciclo.cycle_year,
+      cycle_crop_id: crop.cycle_crop_id,
+    });
+    setFormEdicion({
+      area_sown_ha:           crop.area_sown_ha ?? '',
+      planting_date:          crop.planting_date ? String(crop.planting_date).slice(0, 10) : '',
+      estimated_harvest_date: crop.estimated_harvest_date ? String(crop.estimated_harvest_date).slice(0, 10) : '',
+      yield_expected:         crop.yield_expected ?? '',
+      destination:            crop.destination ?? '',
+    });
+    setErrorEdicion(null);
+  };
+
+  // C9 — Guardar la edición del cultivo (PATCH /cycle-crops/:id)
+  const handleGuardarEdicion = async () => {
+    if (!cicloEditando?.cycle_crop_id) return;
+    // Validar superficie contra el área de la parcela
+    if (areaHaCalc && Number(formEdicion.area_sown_ha) > Number(areaHaCalc)) {
+      setErrorEdicion(`La superficie sembrada no puede ser mayor al área de tu parcela (${areaHaCalc} ha).`);
+      return;
+    }
+    if (formEdicion.yield_expected) {
+      const r = Number(formEdicion.yield_expected);
+      if (r < 1 || r > 15) {
+        setErrorEdicion('El rendimiento debe estar entre 1 y 15 ton/ha para maíz en México.');
+        return;
+      }
+    }
+    setGuardandoEdicion(true);
+    setErrorEdicion(null);
+    const token = localStorage.getItem('simac_token');
+    try {
+      const res = await fetch(`${BASE}/cycle-crops/${cicloEditando.cycle_crop_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          area_sown_ha:           Number(formEdicion.area_sown_ha) || null,
+          planting_date:          formEdicion.planting_date || null,
+          estimated_harvest_date: formEdicion.estimated_harvest_date || null,
+          yield_expected:         formEdicion.yield_expected ? Number(formEdicion.yield_expected) : null,
+          destination:            formEdicion.destination || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrorEdicion(data.error || 'No se pudo guardar. Intenta de nuevo.');
+        return;
+      }
+      // Actualizar la lista local: el cultivo editado vive en ciclo.crops[0]
+      setCiclosExistentes(prev =>
+        prev.map(c =>
+          c.cycle_id === cicloEditando.cycle_id
+            ? { ...c, crops: [{ ...(c.crops?.[0] || {}), ...formEdicion, area_sown_ha: Number(formEdicion.area_sown_ha) || null }] }
+            : c
+        )
+      );
+      setCicloEditando(null);
+      setFormEdicion(null);
+    } catch {
+      setErrorEdicion('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setGuardandoEdicion(false);
+    }
   };
 
   // Inferencia de ciclo basada en el calendario oficial SIAP
@@ -325,32 +429,54 @@ export default function CicloProductivoPage() {
                     <div
                       key={ciclo.cycle_id}
                       style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
-                      className="bg-white border border-gray-100 rounded-[24px] p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow animate-in fade-in slide-in-from-bottom-2"
+                      className="bg-white border border-gray-100 rounded-[24px] p-5 flex flex-col shadow-sm hover:shadow-md transition-shadow animate-in fade-in slide-in-from-bottom-2"
                     >
-                      <div className="min-w-0 pr-3">
-                        <p className="font-bold text-slate-800 text-[16px] tracking-tight">
-                          {cycleTypeLabel(ciclo.cycle_type)} {ciclo.cycle_year}
-                        </p>
-                        <p className="text-[13px] text-slate-500 mt-1 truncate font-medium">
-                          {variedad} · {superficie != null ? `${superficie} ha` : '—'}
-                        </p>
-                        {ciclo.tipo_riego && (
-                          <p className="text-[12px] text-slate-600 mt-1 flex items-center gap-1 font-medium">
-                            {ciclo.tipo_riego === 'riego'
-                              ? (<><Droplets size={13} className="text-[#1A5C38]" /> Riego</>)
-                              : (<><CloudRain size={13} className="text-[#1A5C38]" /> Temporal</>)}
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0 pr-3">
+                          <p className="font-bold text-slate-800 text-[16px] tracking-tight">
+                            {cycleTypeLabel(ciclo.cycle_type)} {ciclo.cycle_year}
                           </p>
-                        )}
+                          <p className="text-[13px] text-slate-500 mt-1 truncate font-medium">
+                            {variedad} · {superficie != null ? `${superficie} ha` : '—'}
+                          </p>
+                          {ciclo.tipo_riego && (
+                            <p className="text-[12px] text-slate-600 mt-1 flex items-center gap-1 font-medium">
+                              {ciclo.tipo_riego === 'riego'
+                                ? (<><Droplets size={13} className="text-[#1A5C38]" /> Riego</>)
+                                : (<><CloudRain size={13} className="text-[#1A5C38]" /> Temporal</>)}
+                            </p>
+                          )}
+                        </div>
+                        <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold shrink-0 tracking-wide ${
+                          estado === 'activo'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                            : estado === 'cosechado'
+                            ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                            : 'bg-gray-50 text-gray-500 border border-gray-200'
+                        }`}>
+                          {estado.charAt(0).toUpperCase() + estado.slice(1)}
+                        </span>
                       </div>
-                      <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold shrink-0 tracking-wide ${
-                        estado === 'activo'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                          : estado === 'cosechado'
-                          ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                          : 'bg-gray-50 text-gray-500 border border-gray-200'
-                      }`}>
-                        {estado.charAt(0).toUpperCase() + estado.slice(1)}
-                      </span>
+
+                      {/* Acciones — solo en ciclos activos */}
+                      {estado === 'activo' && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between items-center">
+                          <button
+                            type="button"
+                            onClick={() => handleAbrirEdicion(ciclo)}
+                            className="text-[12.5px] text-[#1A5C38] font-bold flex items-center gap-1.5 active:opacity-60 transition-opacity"
+                          >
+                            <Pencil size={14} /> Editar cultivo
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCicloACancelar(ciclo.cycle_id)}
+                            className="text-[12.5px] text-red-500 font-bold flex items-center gap-1.5 active:opacity-60 transition-opacity"
+                          >
+                            <X size={14} /> Cancelar ciclo
+                          </button>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -368,6 +494,143 @@ export default function CicloProductivoPage() {
             </div>
           </div>
         </div>
+
+        {/* C8 — Modal de confirmación para cancelar ciclo */}
+        {cicloACancelar && (
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end animate-in fade-in duration-200"
+            onClick={() => !cancelando && setCicloACancelar(null)}>
+            <div className="bg-white w-full rounded-t-[24px] px-5 pt-4 pb-8 space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] animate-in slide-in-from-bottom duration-300"
+              style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+              onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1.5 bg-slate-200 rounded-full mx-auto mb-1" />
+
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                  <AlertTriangle size={18} className="text-red-500" />
+                </div>
+                <h2 className="font-black text-slate-800 text-[16px] tracking-tight">¿Cancelar este ciclo?</h2>
+              </div>
+
+              <p className="text-[13px] text-slate-600 leading-relaxed">
+                El ciclo quedará cancelado y no aparecerá en tu lista activa.
+                Tu información no se borrará — quedará guardada en el sistema.
+              </p>
+
+              <button type="button" onClick={handleCancelarCiclo} disabled={cancelando}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-[15px] py-3.5 rounded-[14px] active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                {cancelando ? (<><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Cancelando…</>) : 'Sí, cancelar ciclo'}
+              </button>
+
+              <button type="button" onClick={() => setCicloACancelar(null)} disabled={cancelando}
+                className="w-full border border-slate-200 text-slate-600 font-bold text-[14px] py-3 rounded-[14px] active:scale-[0.98] transition-all">
+                No, mantener ciclo
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* C9 — Panel de edición de cultivo */}
+        {cicloEditando && formEdicion && (
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end animate-in fade-in duration-200"
+            onClick={() => { if (!guardandoEdicion) { setCicloEditando(null); setFormEdicion(null); } }}>
+            <div className="bg-white w-full rounded-t-[24px] px-5 pt-4 pb-8 max-h-[90vh] overflow-y-auto space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] animate-in slide-in-from-bottom duration-300"
+              style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+              onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1.5 bg-slate-200 rounded-full mx-auto mb-1" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-black text-slate-800 text-[16px] tracking-tight">Editar cultivo</h2>
+                  <p className="text-[12px] text-slate-500 mt-0.5 font-medium">
+                    {cycleTypeLabel(cicloEditando.cycle_type)} {cicloEditando.cycle_year}
+                  </p>
+                </div>
+                <button type="button" onClick={() => { setCicloEditando(null); setFormEdicion(null); }}
+                  className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 active:scale-90 transition-all">
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Superficie sembrada */}
+              <div>
+                <label className="text-[13px] font-bold text-slate-700 mb-1.5 block">Superficie sembrada (ha)</label>
+                <input type="number" inputMode="decimal" min="0.1" step="0.1"
+                  value={formEdicion.area_sown_ha}
+                  onChange={e => setFormEdicion((f: any) => ({ ...f, area_sown_ha: e.target.value }))}
+                  className={inputCls} />
+                {areaHaCalc && (
+                  <p className="text-[11.5px] text-slate-400 mt-1 font-medium">Área máxima de tu parcela: {areaHaCalc} ha</p>
+                )}
+              </div>
+
+              {/* Fecha de siembra */}
+              <div>
+                <label className="text-[13px] font-bold text-slate-700 mb-1.5 block">Fecha de siembra</label>
+                <input type="date"
+                  value={formEdicion.planting_date}
+                  onChange={e => setFormEdicion((f: any) => ({ ...f, planting_date: e.target.value }))}
+                  className={`${inputCls} font-bold text-slate-700`} />
+              </div>
+
+              {/* Fecha estimada de cosecha */}
+              <div>
+                <label className="text-[13px] font-bold text-slate-700 mb-1.5 block">
+                  Fecha estimada de cosecha <span className="text-slate-400 font-medium ml-1">(opcional)</span>
+                </label>
+                <input type="date"
+                  value={formEdicion.estimated_harvest_date}
+                  onChange={e => setFormEdicion((f: any) => ({ ...f, estimated_harvest_date: e.target.value }))}
+                  className={`${inputCls} font-bold text-slate-700`} />
+              </div>
+
+              {/* Rendimiento esperado */}
+              <div>
+                <label className="text-[13px] font-bold text-slate-700 mb-1.5 block">
+                  Rendimiento esperado (ton/ha) <span className="text-slate-400 font-medium ml-1">(opcional)</span>
+                </label>
+                <input type="number" inputMode="decimal" min="1" max="15" step="0.1"
+                  value={formEdicion.yield_expected}
+                  onChange={e => setFormEdicion((f: any) => ({ ...f, yield_expected: e.target.value }))}
+                  className={inputCls} />
+              </div>
+
+              {/* Destino de la cosecha */}
+              <div>
+                <label className="text-[13px] font-bold text-slate-700 mb-1.5 block">
+                  Destino de la cosecha <span className="text-slate-400 font-medium ml-1">(opcional)</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {DESTINOS.map((d: any) => (
+                    <button key={d.valor} type="button"
+                      onClick={() => setFormEdicion((f: any) => ({ ...f, destination: f.destination === d.valor ? '' : d.valor }))}
+                      className={`py-2.5 px-3 rounded-[12px] border-2 text-[12px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5
+                        ${formEdicion.destination === d.valor
+                          ? 'border-[#1A5C38] bg-[#1A5C38]/5 text-[#1A5C38]'
+                          : 'border-slate-200 text-slate-600'}`}>
+                      <d.icon size={15} className={formEdicion.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-400'} />
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Error */}
+              {errorEdicion && (
+                <div className="bg-red-50 border border-red-200 rounded-[12px] p-3 flex items-start gap-2">
+                  <AlertTriangle size={15} className="text-red-500 shrink-0 mt-0.5" />
+                  <p className="text-red-600 text-[12px] font-medium leading-relaxed">{errorEdicion}</p>
+                </div>
+              )}
+
+              {/* Guardar */}
+              <button type="button" onClick={handleGuardarEdicion} disabled={guardandoEdicion}
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white font-bold text-[15px] py-3.5 rounded-[14px] active:scale-[0.98] transition-all disabled:opacity-60 mt-1 flex items-center justify-center gap-2">
+                {guardandoEdicion ? (<><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando…</>) : 'Guardar cambios'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
