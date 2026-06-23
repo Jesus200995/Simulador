@@ -32,236 +32,52 @@ const OPCIONES: Record<'productor' | 'bodega', { titulo: string; subtitulo: stri
   },
 };
 
-/* ── Canvas corn animation ── */
-/* ── Canvas ambient swarm animation ── */
-class Perlin {
-  private grad3 = [
-    { x: 1, y: 1, z: 0 }, { x: -1, y: 1, z: 0 }, { x: 1, y: -1, z: 0 }, { x: -1, y: -1, z: 0 },
-    { x: 1, y: 0, z: 1 }, { x: -1, y: 0, z: 1 }, { x: 1, y: 0, z: -1 }, { x: -1, y: 0, z: -1 },
-    { x: 0, y: 1, z: 1 }, { x: 0, y: -1, z: 1 }, { x: 0, y: 1, z: -1 }, { x: 0, y: -1, z: -1 }
-  ];
-
-  private p = [
-    0x97, 0xa0, 0x89, 0x5b, 0x5a, 0x0f, 0x83, 0x0d, 0xc9, 0x5f, 0x60, 0x35, 0xc2, 0xe9, 0x07, 0xe1, 
-    0x8c, 0x24, 0x67, 0x1e, 0x45, 0x8e, 0x08, 0x63, 0x25, 0xf0, 0x15, 0x0a, 0x17, 0xbe, 0x06, 0x94, 
-    0xf7, 0x78, 0xea, 0x4b, 0x00, 0x1a, 0xc5, 0x3e, 0x5e, 0xfc, 0xdb, 0xcb, 0x75, 0x23, 0x0b, 0x20, 
-    0x39, 0xb1, 0x21, 0x58, 0xed, 0x95, 0x38, 0x57, 0xae, 0x14, 0x7d, 0x88, 0xab, 0xa8, 0x44, 0xaf, 
-    0x4a, 0xa5, 0x47, 0x86, 0x8b, 0x30, 0x1b, 0xa6, 0x4d, 0x92, 0x9e, 0xe7, 0x53, 0x6f, 0xe5, 0x7a, 
-    0x3c, 0xd3, 0x85, 0xe6, 0xdc, 0x69, 0x5c, 0x29, 0x37, 0x2e, 0xf5, 0x28, 0xf4, 0x66, 0x8f, 0x36, 
-    0x41, 0x19, 0x3f, 0xa1, 0x01, 0xd8, 0x50, 0x49, 0xd1, 0x4c, 0x84, 0xbb, 0xd0, 0x59, 0x12, 0xa9, 
-    0xc8, 0xc4, 0x87, 0x82, 0x74, 0xbc, 0x9f, 0x56, 0xa4, 0x64, 0x6d, 0xc6, 0xad, 0xba, 0x03, 0x40, 
-    0x34, 0xd9, 0xe2, 0xfa, 0x7c, 0x7b, 0x05, 0xca, 0x26, 0x93, 0x76, 0x7e, 0xff, 0x52, 0x55, 0xd4, 
-    0xcf, 0xce, 0x3b, 0xe3, 0x2f, 0x10, 0x3a, 0x11, 0xb6, 0xbd, 0x1c, 0x2a, 0xdf, 0xb7, 0xaa, 0xd5, 
-    0x77, 0xf8, 0x98, 0x02, 0x2c, 0x9a, 0xa3, 0x46, 0xdd, 0x99, 0x65, 0x9b, 0xa7, 0x2b, 0xac, 0x09, 
-    0x81, 0x16, 0x27, 0xfd, 0x13, 0x62, 0x6c, 0x6e, 0x4f, 0x71, 0xe0, 0xe8, 0xb2, 0xb9, 0x70, 0x68, 
-    0xda, 0xf6, 0x61, 0xe4, 0xfb, 0x22, 0xf2, 0xc1, 0xee, 0xd2, 0x90, 0x0c, 0xbf, 0xb3, 0xa2, 0xf1, 
-    0x51, 0x33, 0x91, 0xeb, 0xf9, 0x0e, 0xef, 0x6b, 0x31, 0xc0, 0xd6, 0x1f, 0xb5, 0xc7, 0x6a, 0x9d, 
-    0xb8, 0x54, 0xcc, 0xb0, 0x73, 0x79, 0x32, 0x2d, 0x7f, 0x04, 0x96, 0xfe, 0x8a, 0xec, 0xcd, 0x5d, 
-    0xde, 0x72, 0x43, 0x1d, 0x18, 0x48, 0xf3, 0x8d, 0x80, 0xc3, 0x4e, 0x42, 0xd7, 0x3d, 0x9c, 0xb4
-  ];
-
-  private permutation = new Array<number>(512);
-  private gradP = new Array<{ x: number; y: number; z: number }>(512);
-  private F3 = 1 / 3;
-  private G3 = 1 / 6;
-
-  constructor() {
-    this.init();
-  }
-
-  private init() {
-    const shuffle = Array.from({ length: 256 }, (_, i) => this.p[i]);
-    for (let i = 255; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = shuffle[i];
-      shuffle[i] = shuffle[j];
-      shuffle[j] = temp;
-    }
-    for (let i = 0; i < 256; i++) {
-      const randval = shuffle[i];
-      this.permutation[i] = this.permutation[i + 256] = randval;
-      this.gradP[i] = this.gradP[i + 256] = this.grad3[randval % this.grad3.length];
-    }
-  }
-
-  simplex3d(x: number, y: number, z: number): number {
-    let n0 = 0, n1 = 0, n2 = 0, n3 = 0;
-    let i1 = 0, j1 = 0, k1 = 0;
-    let i2 = 0, j2 = 0, k2 = 0;
-
-    const s = (x + y + z) * this.F3;
-    const i = Math.floor(x + s);
-    const j = Math.floor(y + s);
-    const k = Math.floor(z + s);
-
-    const t = (i + j + k) * this.G3;
-    const x0 = x - i + t;
-    const y0 = y - j + t;
-    const z0 = z - k + t;
-
-    if (x0 >= y0) {
-      if (y0 >= z0) {
-        i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
-      } else if (x0 >= z0) {
-        i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1;
-      } else {
-        i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1;
-      }
-    } else {
-      if (y0 < z0) {
-        i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1;
-      } else if (x0 < z0) {
-        i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1;
-      } else {
-        i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
-      }
-    }
-
-    const x1 = x0 - i1 + this.G3;
-    const y1 = y0 - j1 + this.G3;
-    const z1 = z0 - k1 + this.G3;
-
-    const x2 = x0 - i2 + 2 * this.G3;
-    const y2 = y0 - j2 + 2 * this.G3;
-    const z2 = z0 - k2 + 2 * this.G3;
-
-    const x3 = x0 - 1 + 3 * this.G3;
-    const y3 = y0 - 1 + 3 * this.G3;
-    const z3 = z0 - 1 + 3 * this.G3;
-
-    const ii = i & 255;
-    const jj = j & 255;
-    const kk = k & 255;
-
-    const gi0 = this.gradP[ii + this.permutation[jj + this.permutation[kk]]];
-    const gi1 = this.gradP[ii + i1 + this.permutation[jj + j1 + this.permutation[kk + k1]]];
-    const gi2 = this.gradP[ii + i2 + this.permutation[jj + j2 + this.permutation[kk + k2]]];
-    const gi3 = this.gradP[ii + 1 + this.permutation[jj + 1 + this.permutation[kk + 1]]];
-
-    let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
-    let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
-    let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
-    let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
-
-    if (t0 >= 0) {
-      t0 *= t0;
-      n0 = t0 * t0 * (gi0.x * x0 + gi0.y * y0 + gi0.z * z0);
-    }
-    if (t1 >= 0) {
-      t1 *= t1;
-      n1 = t1 * t1 * (gi1.x * x1 + gi1.y * y1 + gi1.z * z1);
-    }
-    if (t2 >= 0) {
-      t2 *= t2;
-      n2 = t2 * t2 * (gi2.x * x2 + gi2.y * y2 + gi2.z * z2);
-    }
-    if (t3 >= 0) {
-      t3 *= t3;
-      n3 = t3 * t3 * (gi3.x * x3 + gi3.y * y3 + gi3.z * z3);
-    }
-
-    return 32 * (n0 + n1 + n2 + n3);
-  }
-}
-
-class AmbientParticle {
-  x: number = 0;
-  y: number = 0;
-  tx: number = 0;
-  ty: number = 0;
-  vx: number = 0;
-  vy: number = 0;
-  life: number = 0;
-  age: number = 0;
+/* ── Canvas ribbons animation (ribbons-2) ── */
+class RibbonPoint {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  color: string;
+  neighbor!: RibbonPoint;
   bounds: { x: number; y: number };
 
-  constructor(bounds: { x: number; y: number }) {
+  constructor(bounds: { x: number; y: number }, color: string) {
     this.bounds = bounds;
-    this.reset();
-  }
-
-  reset() {
-    this.x = this.tx = Math.random() * this.bounds.x;
-    this.y = this.ty = Math.random() * this.bounds.y;
-    this.vx = 1;
-    this.vy = 1;
-    this.life = 1000 + Math.random() * 9000;
-    this.age = 0;
-  }
-
-  step(
-    noiseGen: Perlin,
-    monitor: { position: { x: number; y: number }; state: { left: boolean; middle: boolean; right: boolean } }
-  ) {
-    if (this.age++ > this.life) {
-      this.reset();
-      return;
-    }
-
-    const xx = this.x / 200;
-    const yy = this.y / 200;
-    const zz = Date.now() / 5000;
+    this.x = Math.random() * bounds.x;
+    this.y = Math.random() * bounds.y;
     const a = Math.random() * Math.PI * 2;
-    const rnd = Math.random() / 4;
-
-    this.vx += rnd * Math.sin(a) + noiseGen.simplex3d(xx, yy, -zz);
-    this.vy += rnd * Math.cos(a) + noiseGen.simplex3d(xx, yy, zz);
-
-    if (monitor.state.left) {
-      const dx = monitor.position.x - this.x;
-      const dy = monitor.position.y - this.y;
-      this.vx += dx * 0.00085;
-      this.vy += dy * 0.00085;
-    }
-
-    if (monitor.state.right) {
-      const dx = this.x - monitor.position.x;
-      const dy = this.y - monitor.position.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 225) {
-        this.vx += dx * 0.02;
-        this.vy += dy * 0.02;
-      }
-    }
-
-    if (monitor.state.middle) {
-      const dx = this.x - monitor.position.x;
-      const dy = this.y - monitor.position.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 225) {
-        this.vx *= (dist / 225);
-        this.vy *= (dist / 225);
-      }
-    }
-
-    this.tx = this.x;
-    this.ty = this.y;
-    this.x += this.vx;
-    this.y += this.vy;
-
-    this.vx *= 0.94;
-    this.vy *= 0.94;
-
-    if (this.x > this.bounds.x) {
-      this.x = 0;
-      this.tx = this.x;
-    } else if (this.x < 0) {
-      this.x = this.bounds.x;
-      this.tx = this.x;
-    }
-
-    if (this.y > this.bounds.y) {
-      this.y = 0;
-      this.ty = this.y;
-    } else if (this.y < 0) {
-      this.y = this.bounds.y;
-      this.ty = this.y;
-    }
+    this.dx = Math.cos(a) * 0.85; // Smooth movement speed
+    this.dy = Math.sin(a) * 0.85;
+    this.color = color;
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    ctx.moveTo(this.tx, this.ty);
-    ctx.lineTo(this.x, this.y);
+  update(ctx: CanvasRenderingContext2D) {
+    this.x += this.dx;
+    this.y += this.dy;
+
+    // Bounce off edges
+    if (this.x < 0) {
+      this.x = 0;
+      this.dx *= -1;
+    } else if (this.x >= this.bounds.x) {
+      this.x = this.bounds.x;
+      this.dx *= -1;
+    }
+
+    if (this.y < 0) {
+      this.y = 0;
+      this.dy *= -1;
+    } else if (this.y >= this.bounds.y) {
+      this.y = this.bounds.y;
+      this.dy *= -1;
+    }
+
+    ctx.strokeStyle = this.color;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.neighbor.x, this.neighbor.y);
+    ctx.stroke();
   }
 }
 
@@ -281,112 +97,48 @@ function CornCanvas() {
     canvas.height = H;
 
     const bounds = { x: W, y: H };
-    const noiseGen = new Perlin();
+    const points: RibbonPoint[] = [];
 
-    const monitor = {
-      position: { x: 0, y: 0 },
-      state: { left: false, middle: false, right: false }
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      monitor.position.x = e.clientX - rect.left;
-      monitor.position.y = e.clientY - rect.top;
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (e.button === 0) monitor.state.left = true;
-      if (e.button === 1) monitor.state.middle = true;
-      if (e.button === 2) monitor.state.right = true;
-    };
-
-    const handleMouseUp = () => {
-      monitor.state.left = false;
-      monitor.state.middle = false;
-      monitor.state.right = false;
-    };
-
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        monitor.state.left = true;
-        const rect = canvas.getBoundingClientRect();
-        monitor.position.x = e.touches[0].clientX - rect.left;
-        monitor.position.y = e.touches[0].clientY - rect.top;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        monitor.position.x = e.touches[0].clientX - rect.left;
-        monitor.position.y = e.touches[0].clientY - rect.top;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      monitor.state.left = false;
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd);
-
-    const particleCount = 4000;
-    const particles = Array.from({ length: particleCount }, () => new AmbientParticle(bounds));
-
-    const colors = [
-      [134, 239, 172], // Verde claro
-      [22, 163, 74],   // Verde fuerte
-      [143, 10, 48]    // Guinda / Vino
+    const colorPalette = [
+      'rgba(134, 239, 172, 0.015)', // Verde claro
+      'rgba(22, 163, 74, 0.015)',   // Verde fuerte
+      'rgba(143, 10, 48, 0.015)'    // Guinda / Vino
     ];
 
-    let tick = 0;
+    const initPoints = () => {
+      points.length = 0;
+      const numPoints = 12; // Divisible by 3 for equal color distribution
+      for (let i = 0; i < numPoints; i++) {
+        const color = colorPalette[i % colorPalette.length];
+        points.push(new RibbonPoint(bounds, color));
+      }
+
+      for (let i = 0; i < points.length; i++) {
+        let j = i;
+        while (j === i) {
+          j = Math.floor(Math.random() * points.length);
+        }
+        points[i].neighbor = points[j];
+      }
+    };
+
+    initPoints();
 
     function draw() {
       // 1. Transparent trail fade via destination-out
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.085)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.003)'; // Extremely slow fade for long silk trails
       ctx.fillRect(0, 0, W, H);
 
-      // 2. Draw ambient radial sky gradient underneath particles
-      ctx.globalCompositeOperation = 'destination-over';
-      const skyGrad = ctx.createRadialGradient(W * 0.5, -H * 0.1, 0, W * 0.5, H * 0.4, W * 0.85);
-      skyGrad.addColorStop(0, 'rgba(26,92,56,0.18)');
-      skyGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, W, H);
-
-      // 3. Draw particles in 'lighter' composite mode with color rotation
+      // 2. Draw ribbons in 'lighter' composite mode
       ctx.globalCompositeOperation = 'lighter';
-      ctx.beginPath();
-      particles.forEach(p => {
-        p.step(noiseGen, monitor);
-        p.render(ctx);
-      });
+      ctx.lineWidth = 1.3;
 
-      // Interpolate colors between light green, strong green, and guinda
-      const colorProgress = (tick / 250) % 3;
-      const phase = Math.floor(colorProgress);
-      const factor = colorProgress - phase;
-      const cStart = colors[phase];
-      const cEnd = colors[(phase + 1) % 3];
-      const r = Math.round(cStart[0] + (cEnd[0] - cStart[0]) * factor);
-      const g = Math.round(cStart[1] + (cEnd[1] - cStart[1]) * factor);
-      const b = Math.round(cStart[2] + (cEnd[2] - cStart[2]) * factor);
+      // Update positions and draw lines multiple times per frame to form ribbons
+      for (let n = 0; n < 10; n++) {
+        points.forEach(p => p.update(ctx));
+      }
 
-      ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.55)`;
-      ctx.lineWidth = 1.0;
-      ctx.stroke();
-
-      tick++;
       animId = requestAnimationFrame(draw);
     }
 
@@ -399,19 +151,14 @@ function CornCanvas() {
       canvas.height = H;
       bounds.x = W;
       bounds.y = H;
+      ctx.clearRect(0, 0, W, H);
+      initPoints();
     });
     ro.observe(canvas);
 
     return () => {
       cancelAnimationFrame(animId);
       ro.disconnect();
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
 
