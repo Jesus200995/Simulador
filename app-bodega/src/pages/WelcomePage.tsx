@@ -424,8 +424,16 @@ export default function WelcomePage() {
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
-        {/* Deep green gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#05160d] via-[#0b2b18] to-[#124225]" />
+        {/* Wheat field background image with referrerPolicy to bypass hotlink block */}
+        <img
+          src="https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&q=80&w=1920"
+          referrerPolicy="no-referrer"
+          alt="Campos de trigo"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.25] saturate-[0.4]"
+        />
+        {/* Deep green gradient background (on top to filter the image green) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#05160d]/80 via-[#0b2b18]/85 to-[#124225]/85 mix-blend-color" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#05160d]/40 via-[#0b2b18]/50 to-[#124225]/40" />
         {/* Top vignette */}
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
         {/* Bottom vignette */}
@@ -468,7 +476,16 @@ export default function WelcomePage() {
       <div className="flex-1 flex flex-col min-h-[100dvh] lg:min-h-auto relative">
         {/* Mobile background */}
         <div className="lg:hidden absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#092213] via-[#0b2b18] to-[#144728]" />
+          {/* Wheat field background image with referrerPolicy to bypass hotlink block */}
+          <img
+            src="https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&q=80&w=1920"
+            referrerPolicy="no-referrer"
+            alt="Campos de trigo"
+            className="absolute inset-0 w-full h-full object-cover brightness-[0.22] saturate-[0.4]"
+          />
+          {/* Deep green gradient overlay (on top to filter the image green) */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#092213]/80 via-[#0b2b18]/85 to-[#144728]/90 mix-blend-color" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#092213]/40 via-[#0b2b18]/50 to-[#144728]/40" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(34,197,94,0.10),transparent)]" />
           {/* Mobile canvas too */}
           <CornCanvas />
