@@ -98,16 +98,18 @@ function CornCanvas() {
 
     const bounds = { x: W, y: H };
     const points: RibbonPoint[] = [];
+    let ticks = 0;
+    const maxTicks = 3000;
 
     const colorPalette = [
-      'rgba(134, 239, 172, 0.015)', // Verde claro
-      'rgba(22, 163, 74, 0.015)',   // Verde fuerte
-      'rgba(143, 10, 48, 0.015)'    // Guinda / Vino
+      'rgba(134, 239, 172, 0.005)', // Verde claro muy transparente
+      'rgba(22, 163, 74, 0.005)'    // Verde fuerte muy transparente
     ];
 
     const initPoints = () => {
+      ticks = 0;
       points.length = 0;
-      const numPoints = 12; // Divisible by 3 for equal color distribution
+      const numPoints = 12;
       for (let i = 0; i < numPoints; i++) {
         const color = colorPalette[i % colorPalette.length];
         points.push(new RibbonPoint(bounds, color));
@@ -125,24 +127,35 @@ function CornCanvas() {
     initPoints();
 
     function draw() {
-      // 1. Transparent trail fade via destination-out
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.003)'; // Extremely slow fade for long silk trails
-      ctx.fillRect(0, 0, W, H);
+      if (ticks >= maxTicks) {
+        return; // Freeze the animation (no longer requests frames)
+      }
 
-      // 2. Draw ribbons in 'lighter' composite mode
+      // No clear screen in draw() to let the lines accumulate
       ctx.globalCompositeOperation = 'lighter';
-      ctx.lineWidth = 1.3;
+      ctx.lineWidth = 1.0;
 
-      // Update positions and draw lines multiple times per frame to form ribbons
+      // Update positions and draw lines 10 times per frame
       for (let n = 0; n < 10; n++) {
+        if (ticks >= maxTicks) break;
         points.forEach(p => p.update(ctx));
+        ticks++;
       }
 
       animId = requestAnimationFrame(draw);
     }
 
     draw();
+
+    const handleWindowClick = () => {
+      ctx.clearRect(0, 0, W, H);
+      initPoints();
+      // Restart loop if it was stopped
+      cancelAnimationFrame(animId);
+      draw();
+    };
+
+    window.addEventListener('click', handleWindowClick);
 
     const ro = new ResizeObserver(() => {
       W = canvas.offsetWidth;
@@ -159,6 +172,7 @@ function CornCanvas() {
     return () => {
       cancelAnimationFrame(animId);
       ro.disconnect();
+      window.removeEventListener('click', handleWindowClick);
     };
   }, []);
 
