@@ -99,17 +99,17 @@ function CornCanvas() {
     const bounds = { x: W, y: H };
     const points: RibbonPoint[] = [];
     let ticks = 0;
-    const maxTicks = 3000;
+    const maxTicks = 1200;
 
     const colorPalette = [
-      'rgba(134, 239, 172, 0.005)', // Verde claro muy transparente
-      'rgba(22, 163, 74, 0.005)'    // Verde fuerte muy transparente
+      'rgba(74, 222, 128, 0.004)',  // Verde claro suave (green-400)
+      'rgba(34, 197, 94, 0.004)'    // Verde medio suave (green-500)
     ];
 
     const initPoints = () => {
       ticks = 0;
       points.length = 0;
-      const numPoints = 12;
+      const numPoints = 6; // Fewer points for a cleaner, minimal design
       for (let i = 0; i < numPoints; i++) {
         const color = colorPalette[i % colorPalette.length];
         points.push(new RibbonPoint(bounds, color));
@@ -131,12 +131,12 @@ function CornCanvas() {
         return; // Freeze the animation (no longer requests frames)
       }
 
-      // No clear screen in draw() to let the lines accumulate
-      ctx.globalCompositeOperation = 'lighter';
+      // Use source-over instead of lighter to prevent additive white hotspots
+      ctx.globalCompositeOperation = 'source-over';
       ctx.lineWidth = 1.0;
 
-      // Update positions and draw lines 10 times per frame
-      for (let n = 0; n < 10; n++) {
+      // Update positions and draw lines 4 times per frame for a slower, calmer flow
+      for (let n = 0; n < 4; n++) {
         if (ticks >= maxTicks) break;
         points.forEach(p => p.update(ctx));
         ticks++;
