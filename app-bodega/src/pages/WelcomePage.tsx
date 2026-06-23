@@ -191,15 +191,30 @@ export default function WelcomePage() {
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 30);
-    return () => clearTimeout(t);
+    // Fuerza el fondo de body/html a verde oscuro para evitar que el overscroll
+    // muestre el fondo blanco del resto de la app
+    const prev = document.body.style.background;
+    const prevHtml = document.documentElement.style.background;
+    document.body.style.background = '#092213';
+    document.documentElement.style.background = '#092213';
+    return () => {
+      clearTimeout(t);
+      document.body.style.background = prev;
+      document.documentElement.style.background = prevHtml;
+    };
   }, []);
 
   const closeMenu = () => setMenu(null);
 
   return (
-    <div className="relative min-h-[100dvh] flex overflow-hidden bg-[#092213]">
-      {/* Status bar color band — cubre safe-area-inset-top en iOS, invisible en desktop */}
+    <div
+      className="relative flex overflow-hidden bg-[#092213]"
+      style={{ minHeight: '100dvh', overscrollBehavior: 'none' }}
+    >
+      {/* Status bar color band — cubre safe-area-inset-top en iOS */}
       <div className="fixed top-0 inset-x-0 z-[999] bg-[#1A5C38]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+      {/* Bottom overscroll cover */}
+      <div className="fixed bottom-0 inset-x-0 z-[999] bg-[#092213]" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
