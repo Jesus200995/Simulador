@@ -43,6 +43,7 @@ export default function AgregarUPPage() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorOverlap, setErrorOverlap] = useState<string | null>(null);
+  const [advertenciaOverlap, setAdvertenciaOverlap] = useState<string | null>(null);
 
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
@@ -92,26 +93,82 @@ export default function AgregarUPPage() {
     }
   }, [paso]);
 
-  const validarOverlapLocal = (poly: [number, number][]): string | null => {
-    if (poly.length < 3) return null;
+  // Umbral de traslape permitido: 10% del área de la nueva UP
+  const UMBRAL_TRASLAPE = 0.10;
+
+  const validarOverlapLocal = (poly: [number, number][]): {
+    bloqueado: boolean;
+    mensaje: string | null;
+    porcentaje: number;
+  } => {
+    if (poly.length < 3) return { bloqueado: false, mensaje: null, porcentaje: 0 };
+
     try {
-      const nueva = turf.polygon([[...poly.map(([la, ln]) => [ln, la]), [poly[0][1], poly[0][0]]]]);
+      const nueva = turf.polygon([[
+        ...poly.map(([la, ln]) => [ln, la]),
+        [poly[0][1], poly[0][0]]
+      ]]);
+      const areaNueva = turf.area(nueva);
+
+      if (areaNueva <= 0) return { bloqueado: false, mensaje: null, porcentaje: 0 };
+
       for (let i = 0; i < existentes.length; i++) {
         const ex = existentes[i];
         if (!ex || ex.length < 3) continue;
-        const exPoly = turf.polygon([[...ex.map(([la, ln]) => [ln, la]), [ex[0][1], ex[0][0]]]]);
-        if (turf.booleanIntersects(nueva, exPoly)) {
-          return `Tu nueva parcela se empalma con una parcela existente. Dibújala en un área diferente.`;
+
+        const exPoly = turf.polygon([[
+          ...ex.map(([la, ln]) => [ln, la]),
+          [ex[0][1], ex[0][0]]
+        ]]);
+
+        if (!turf.booleanIntersects(nueva, exPoly)) continue;
+
+        const interseccion = turf.intersect(turf.featureCollection([nueva, exPoly]));
+        if (!interseccion) continue; // solo bordes/vértices — sin área real
+
+        const areaInterseccion = turf.area(interseccion);
+        const porcentaje = areaInterseccion / areaNueva;
+
+        if (porcentaje > UMBRAL_TRASLAPE) {
+          const pct = Math.round(porcentaje * 100);
+          return {
+            bloqueado: true,
+            mensaje: `Tu parcela se empalma un ${pct}% con una parcela existente. El máximo permitido es 10%. Edita los puntos para reducir el traslape.`,
+            porcentaje: pct,
+          };
+        }
+
+        if (porcentaje > 0) {
+          const pct = Math.round(porcentaje * 100);
+          return {
+            bloqueado: false,
+            mensaje: `Tu parcela tiene un traslape menor del ${pct}% con una parcela colindante. Esto es aceptable, pero intenta ajustar los bordes si puedes.`,
+            porcentaje: pct,
+          };
         }
       }
     } catch { /* si turf falla, no bloquear */ }
-    return null;
+
+    return { bloqueado: false, mensaje: null, porcentaje: 0 };
   };
 
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
-    const errOv = validarOverlapLocal(poly);
-    if (errOv) { setErrorOverlap(errOv); return; }
+    const resultado = validarOverlapLocal(poly);
+
+    if (resultado.bloqueado) {
+      setErrorOverlap(resultado.mensaje);
+      setAdvertenciaOverlap(null);
+      return;
+    }
+
     setErrorOverlap(null);
+
+    if (resultado.mensaje) {
+      setAdvertenciaOverlap(resultado.mensaje);
+    } else {
+      setAdvertenciaOverlap(null);
+    }
+
     setPendingUP({ poligono: poly, coords: centro, area });
     setCoincideArea(null);
     setAreaReal('');
@@ -384,12 +441,37 @@ export default function AgregarUPPage() {
               </div>
             ) : (
               <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+                {/* Error bloqueante — traslape > 10% */}
                 {errorOverlap && (
                   <div className="bg-red-50 border border-red-300 rounded-xl p-3 shadow-lg">
-                    <p className="text-red-700 text-sm font-bold flex items-center gap-1.5">{errorOverlap}</p>
-                    <button onClick={() => { setErrorOverlap(null); dibujarRef.current?.startEdit?.(); }}
+                    <p className="text-red-700 text-sm font-bold flex items-center gap-1.5">
+                      ⚠️ {errorOverlap}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setErrorOverlap(null);
+                        setAdvertenciaOverlap(null);
+                        dibujarRef.current?.startEdit?.();
+                      }}
                       className="mt-2 text-xs text-red-600 font-bold underline bg-white/50 px-2 py-1 rounded-md hover:bg-white transition-colors">
                       Editar puntos para corregir
+                    </button>
+                  </div>
+                )}
+
+                {/* Advertencia informativa — traslape ≤ 10% (no bloquea) */}
+                {advertenciaOverlap && !errorOverlap && (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 shadow-lg">
+                    <p className="text-amber-700 text-sm font-bold flex items-center gap-1.5">
+                      📐 {advertenciaOverlap}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setAdvertenciaOverlap(null);
+                        dibujarRef.current?.startEdit?.();
+                      }}
+                      className="mt-2 text-xs text-amber-600 font-medium underline bg-white/50 px-2 py-1 rounded-md hover:bg-white transition-colors">
+                      Ajustar bordes de todas formas
                     </button>
                   </div>
                 )}
