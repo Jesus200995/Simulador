@@ -73,6 +73,7 @@ import RegistroAdminPage from './pages/admin/RegistroAdminPage';
 import ProduccionAdminPage from './pages/admin/ProduccionAdminPage';
 import MercadoAdminPage from './pages/admin/MercadoAdminPage';
 import ConfiguracionAdminPage from './pages/admin/ConfiguracionAdminPage';
+import AvisosPrivacidadAdminPage from './pages/admin/AvisosPrivacidadAdminPage';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -286,6 +287,7 @@ export const router = createBrowserRouter([
       { path: 'produccion', element: <ProduccionAdminPage /> },
       { path: 'mercado', element: <MercadoAdminPage /> },
       { path: 'configuracion', element: <ConfiguracionAdminPage /> },
+      { path: 'avisos-privacidad', element: <AvisosPrivacidadAdminPage /> },
     ],
   },
 

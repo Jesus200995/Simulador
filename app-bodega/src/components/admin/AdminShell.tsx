@@ -24,6 +24,7 @@ const MENU: SidebarItem[] = [
   { label: 'Producción',   subtitle: 'Registro, seguimiento y estimación de cosechas activas',        path: '/admin/produccion',     icon: Sprout },
   { label: 'Mercado',      subtitle: 'Análisis estadístico y proyecciones comerciales a futuro',          path: '/admin/mercado',        icon: BarChart3 },
   { label: 'Configuración',subtitle: 'Preferencias, roles de usuario y ajustes del sistema',         path: '/admin/configuracion',  icon: Settings },
+  { label: 'Avisos Privacidad', subtitle: 'Constancias de aceptación con verificación biométrica y GPS', path: '/admin/avisos-privacidad', icon: ShieldCheck },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

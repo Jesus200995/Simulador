@@ -553,4 +553,58 @@ router.get('/bodegas/estadisticas', authMiddleware, soloAdmin, async (req: AuthR
   }
 });
 
+// =============================================
+// GET /api/admin/avisos-privacidad
+// Lista productores que aceptaron el aviso, con búsqueda en tiempo real
+// =============================================
+router.get('/avisos-privacidad', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const q      = (req.query.q as string) || '';
+    const limite = Math.min(parseInt(req.query.limit as string) || 50, 200);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const like   = `%${q.trim()}%`;
+
+    const { rows } = await pool.query(
+      `SELECT
+         p.producer_id,
+         p.curp,
+         p.nombres,
+         p.apellido_paterno,
+         p.apellido_materno,
+         p.phone,
+         p.aviso_privacidad_aceptado,
+         p.aviso_privacidad_fecha,
+         p.aviso_privacidad_lat,
+         p.aviso_privacidad_lng,
+         p.aviso_privacidad_version,
+         p.aviso_privacidad_foto_url,
+         p.estado_validacion,
+         p.created_at
+       FROM producer p
+       WHERE p.aviso_privacidad_aceptado = TRUE
+         AND (
+           p.curp            ILIKE $1 OR
+           p.nombres         ILIKE $1 OR
+           p.apellido_paterno ILIKE $1 OR
+           p.apellido_materno ILIKE $1
+         )
+       ORDER BY p.aviso_privacidad_fecha DESC NULLS LAST
+       LIMIT $2 OFFSET $3`,
+      [like, limite, offset]
+    );
+
+    const { rows: tot } = await pool.query(
+      `SELECT COUNT(*) FROM producer p
+       WHERE p.aviso_privacidad_aceptado = TRUE
+         AND (p.curp ILIKE $1 OR p.nombres ILIKE $1 OR p.apellido_paterno ILIKE $1 OR p.apellido_materno ILIKE $1)`,
+      [like]
+    );
+
+    res.json({ avisos: rows, total: parseInt(tot[0].count) });
+  } catch (error) {
+    console.error('Error avisos privacidad:', error);
+    res.status(500).json({ error: 'Error al obtener avisos de privacidad' });
+  }
+});
+
 export default router;

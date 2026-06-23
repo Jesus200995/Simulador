@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import authRoutes from './routes/auth';
 import bodegasRoutes from './routes/bodegas';
 import misBodegasRoutes from './routes/mis-bodegas';
@@ -63,6 +64,12 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json({ limit: '5mb' }));
+
+// Archivos estáticos — verificaciones biométricas (avisos de privacidad)
+const UPLOADS_DIR = process.env.NODE_ENV === 'production'
+  ? '/var/www/Simulador/uploads'
+  : path.join(__dirname, '../../uploads');
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Rutas
 app.use('/api/auth', authRoutes);
