@@ -555,50 +555,68 @@ router.get('/bodegas/estadisticas', authMiddleware, soloAdmin, async (req: AuthR
 
 // =============================================
 // GET /api/admin/avisos-privacidad
-// Lista productores que aceptaron el aviso, con búsqueda en tiempo real
+// Avisos unificados: productores + usuarios (bodegueros/industria)
+// ?tipo=productor|usuario|all  &q=  &limit=  &offset=
 // =============================================
 router.get('/avisos-privacidad', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const q      = (req.query.q as string) || '';
-    const limite = Math.min(parseInt(req.query.limit as string) || 50, 200);
+    const tipo   = (req.query.tipo as string) || 'all';
+    const limite = Math.min(parseInt(req.query.limit as string) || 50, 500);
     const offset = parseInt(req.query.offset as string) || 0;
     const like   = `%${q.trim()}%`;
 
-    const { rows } = await pool.query(
-      `SELECT
-         p.producer_id,
-         p.curp,
-         p.nombres,
-         p.apellido_paterno,
-         p.apellido_materno,
-         p.phone,
-         p.aviso_privacidad_aceptado,
-         p.aviso_privacidad_fecha,
-         p.aviso_privacidad_lat,
-         p.aviso_privacidad_lng,
-         p.aviso_privacidad_version,
-         p.aviso_privacidad_foto_url,
-         p.estado_validacion,
-         p.created_at
-       FROM producer p
-       WHERE p.aviso_privacidad_aceptado = TRUE
-         AND (
-           p.curp            ILIKE $1 OR
-           p.nombres         ILIKE $1 OR
-           p.apellido_paterno ILIKE $1 OR
-           p.apellido_materno ILIKE $1
-         )
-       ORDER BY p.aviso_privacidad_fecha DESC NULLS LAST
-       LIMIT $2 OFFSET $3`,
-      [like, limite, offset]
-    );
+    // ── Productores ──────────────────────────────────────────
+    const sqlProd = `
+      SELECT
+        'productor'                         AS tipo,
+        p.producer_id::text                 AS id,
+        p.curp,
+        CONCAT_WS(' ', p.nombres, p.apellido_paterno, p.apellido_materno) AS nombre,
+        p.phone                             AS telefono,
+        p.aviso_privacidad_aceptado,
+        p.aviso_privacidad_fecha,
+        p.aviso_privacidad_lat,
+        p.aviso_privacidad_lng,
+        p.aviso_privacidad_version,
+        p.aviso_privacidad_foto_url,
+        p.estado_validacion,
+        p.created_at
+      FROM producer p
+      WHERE p.aviso_privacidad_aceptado = TRUE
+        AND (p.curp ILIKE $1 OR p.nombres ILIKE $1 OR p.apellido_paterno ILIKE $1 OR p.apellido_materno ILIKE $1)`;
 
-    const { rows: tot } = await pool.query(
-      `SELECT COUNT(*) FROM producer p
-       WHERE p.aviso_privacidad_aceptado = TRUE
-         AND (p.curp ILIKE $1 OR p.nombres ILIKE $1 OR p.apellido_paterno ILIKE $1 OR p.apellido_materno ILIKE $1)`,
-      [like]
-    );
+    // ── Usuarios bodegueros/industria ─────────────────────────
+    const sqlUser = `
+      SELECT
+        COALESCE(u.rol, 'bodeguero')        AS tipo,
+        u.id::text                          AS id,
+        u.curp,
+        u.nombre_completo                   AS nombre,
+        u.telefono,
+        u.aviso_privacidad_aceptado,
+        u.aviso_privacidad_fecha,
+        u.aviso_privacidad_lat,
+        u.aviso_privacidad_lng,
+        u.aviso_privacidad_version,
+        u.aviso_privacidad_foto_url,
+        'activo'                            AS estado_validacion,
+        u.created_at
+      FROM usuarios u
+      WHERE u.aviso_privacidad_aceptado = TRUE
+        AND u.rol IN ('bodeguero','bodega','industria')
+        AND (u.curp ILIKE $1 OR u.nombre_completo ILIKE $1 OR u.telefono ILIKE $1)`;
+
+    let unionSQL: string;
+    if (tipo === 'productor')  unionSQL = sqlProd;
+    else if (tipo === 'usuario') unionSQL = sqlUser;
+    else unionSQL = `${sqlProd} UNION ALL ${sqlUser}`;
+
+    const dataSQL  = `SELECT * FROM (${unionSQL}) t ORDER BY aviso_privacidad_fecha DESC NULLS LAST LIMIT $2 OFFSET $3`;
+    const countSQL = `SELECT COUNT(*) FROM (${unionSQL}) t`;
+
+    const { rows }      = await pool.query(dataSQL,  [like, limite, offset]);
+    const { rows: tot } = await pool.query(countSQL, [like]);
 
     res.json({ avisos: rows, total: parseInt(tot[0].count) });
   } catch (error) {

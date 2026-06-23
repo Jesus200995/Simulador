@@ -1,25 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Warehouse, Factory, Eye, EyeOff, AlertCircle, Loader2, Wheat, Check } from 'lucide-react';
+import {
+  ChevronLeft, Warehouse, Factory, Eye, EyeOff,
+  AlertCircle, Loader2, Wheat, Check,
+} from 'lucide-react';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
+import AvisoPrivacidadStep, { type AvisoData } from './auth/AvisoPrivacidadStep';
 
-type Rol = 'bodega' | 'industria';
+type Rol  = 'bodega' | 'industria';
+type Paso = 'form' | 'aviso';
 
 export default function B02Register() {
-  const [rol, setRol] = useState<Rol>('bodega');
-  const [form, setForm] = useState({
+  const [paso,  setPaso]  = useState<Paso>('form');
+  const [rol,   setRol]   = useState<Rol>('bodega');
+  const [form,  setForm]  = useState({
     nombre_completo: '', email: '', telefono: '', curp: '',
     state_id: '', municipality_id: '', password: '', confirm: '',
   });
-  const [states, setStates] = useState<any[]>([]);
-  const [municipalities, setMunicipalities] = useState<any[]>([]);
-  const [showPwd, setShowPwd] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [avisoData,       setAvisoData]       = useState<AvisoData | null>(null);
+  const [states,          setStates]          = useState<any[]>([]);
+  const [municipalities,  setMunicipalities]  = useState<any[]>([]);
+  const [showPwd,         setShowPwd]         = useState(false);
+  const [showConfirm,     setShowConfirm]     = useState(false);
+  const [error,           setError]           = useState('');
+  const [loading,         setLoading]         = useState(false);
   const { setAuth } = useAuthStore();
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
 
   useEffect(() => {
     api.auth.states().then((res: any) => setStates(res.states || res)).catch(() => {});
@@ -36,38 +43,48 @@ export default function B02Register() {
   function normalizarTexto(v: string) {
     return v.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
   }
-  function setNombre(v: string) { setForm(f => ({ ...f, nombre_completo: normalizarTexto(v) })); }
-  function setTelefono(v: string) { setForm(f => ({ ...f, telefono: v.replace(/\D/g, '').slice(0, 10) })); }
-  function setCurp(v: string) { setForm(f => ({ ...f, curp: normalizarTexto(v).replace(/[^A-Z0-9]/g, '').slice(0, 18) })); }
-  function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
+  const setNombre   = (v: string) => setForm(f => ({ ...f, nombre_completo: normalizarTexto(v) }));
+  const setTelefono = (v: string) => setForm(f => ({ ...f, telefono: v.replace(/\D/g, '').slice(0, 10) }));
+  const setCurp     = (v: string) => setForm(f => ({ ...f, curp: normalizarTexto(v).replace(/[^A-Z0-9]/g, '').slice(0, 18) }));
+  const set         = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const CURP_REGEX = /^[A-Z]{4}\d{6}[HM][A-Z]{2}[A-Z]{3}[A-Z0-9]\d$/;
 
-  async function handleSubmit(e: React.FormEvent) {
+  /* Validar form y pasar al aviso */
+  function handleContinuarAlAviso(e: React.FormEvent) {
     e.preventDefault();
     if (!form.nombre_completo.trim()) { setError('El nombre es obligatorio'); return; }
-    if (form.telefono.length !== 10) { setError('El teléfono debe tener exactamente 10 dígitos'); return; }
-    if (!form.curp.trim()) { setError('La CURP es obligatoria'); return; }
-    if (form.curp.length !== 18 || !CURP_REGEX.test(form.curp)) {
-      setError('CURP inválida. Revisa el formato.');
-      return;
-    }
-    if (!form.state_id) { setError('Selecciona tu estado'); return; }
-    if (!form.municipality_id) { setError('Selecciona tu municipio'); return; }
+    if (form.telefono.length !== 10)  { setError('El teléfono debe tener exactamente 10 dígitos'); return; }
+    if (!form.curp.trim())            { setError('La CURP es obligatoria'); return; }
+    if (form.curp.length !== 18 || !CURP_REGEX.test(form.curp)) { setError('CURP inválida. Revisa el formato.'); return; }
+    if (!form.state_id)               { setError('Selecciona tu estado'); return; }
+    if (!form.municipality_id)        { setError('Selecciona tu municipio'); return; }
     if (form.password !== form.confirm) { setError('Las contraseñas no coinciden'); return; }
-    if (form.password.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
+    if (form.password.length < 8)      { setError('La contraseña debe tener al menos 8 caracteres'); return; }
     setError('');
+    setPaso('aviso');
+  }
+
+  /* Aviso aceptado → submit final */
+  async function handleAvisoAceptado(datos: AvisoData) {
+    setAvisoData(datos);
     setLoading(true);
     try {
       const payload: any = {
         nombre_completo: form.nombre_completo.trim(),
-        email: form.email.trim(),
-        telefono: form.telefono,
-        curp: form.curp,
-        state_id: form.state_id,
+        email:           form.email.trim(),
+        telefono:        form.telefono,
+        curp:            form.curp,
+        state_id:        form.state_id,
         municipality_id: form.municipality_id,
-        password: form.password,
+        password:        form.password,
         rol,
+        aviso_privacidad_aceptado:  datos.aceptado,
+        aviso_privacidad_fecha:     datos.fecha,
+        aviso_privacidad_lat:       datos.lat,
+        aviso_privacidad_lng:       datos.lng,
+        aviso_privacidad_version:   datos.version,
+        aviso_privacidad_foto_url:  datos.fotoUrl,
       };
       const res = await api.auth.registro(payload);
       if (res.token) {
@@ -79,14 +96,25 @@ export default function B02Register() {
       }
     } catch (err: any) {
       setError(err.message || 'Error al registrar');
+      setPaso('form');   // volver al form para mostrar el error
     } finally {
       setLoading(false);
     }
   }
 
-  const inp =
-    'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white ' +
-    'placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
+  /* ── Mostrar aviso de privacidad ── */
+  if (paso === 'aviso') {
+    return (
+      <AvisoPrivacidadStep
+        contexto="bodeguero"
+        onAceptar={handleAvisoAceptado}
+        onBack={() => setPaso('form')}
+      />
+    );
+  }
+
+  /* ── Formulario principal ── */
+  const inp = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base text-white placeholder-white/30 focus:ring-2 focus:ring-white/50 focus:outline-none transition-all';
   const sel = `${inp} appearance-none`;
   const lbl = 'block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5';
 
@@ -115,21 +143,20 @@ export default function B02Register() {
       <div className="relative flex-1 px-5 pb-8">
         <div className="w-full max-w-sm mx-auto animate-auth-in">
 
-          {/* Title */}
           <div className="mb-5">
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Crear cuenta</h1>
             <p className="text-white/50 text-sm sm:text-base mt-1">Bodega o Industria · Plan Maíz 2026</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleContinuarAlAviso} className="space-y-5">
 
             {/* Tipo de cuenta */}
             <div>
               <p className={lbl}>Tipo de cuenta</p>
               <div className="grid grid-cols-2 gap-2.5">
                 {([
-                  { key: 'bodega' as Rol, icon: Warehouse, label: 'Bodega', desc: 'Almacenista · Acopiador' },
-                  { key: 'industria' as Rol, icon: Factory, label: 'Industria', desc: 'Tortillería · Nixtamal' },
+                  { key: 'bodega'    as Rol, icon: Warehouse, label: 'Bodega',    desc: 'Almacenista · Acopiador' },
+                  { key: 'industria' as Rol, icon: Factory,   label: 'Industria', desc: 'Tortillería · Nixtamal' },
                 ]).map(({ key, icon: Icon, label, desc }) => (
                   <button key={key} type="button" onClick={() => setRol(key)}
                     className={`flex flex-col items-center gap-2 py-4 px-3 rounded-2xl ring-1 transition-all duration-150 active:scale-[0.97]
@@ -176,7 +203,7 @@ export default function B02Register() {
                 required className={sel} style={{ colorScheme: 'dark' }}>
                 <option value="" style={{ background: '#0c2e1a' }}>Estado donde opera</option>
                 {states.map((s: any) => (
-                  <option key={s.state_id||s.id} value={s.state_id||s.id} style={{ background: '#0c2e1a' }}>{s.name||s.nombre}</option>
+                  <option key={s.state_id || s.id} value={s.state_id || s.id} style={{ background: '#0c2e1a' }}>{s.name || s.nombre}</option>
                 ))}
               </select>
               <select value={form.municipality_id}
@@ -184,7 +211,7 @@ export default function B02Register() {
                 required disabled={!form.state_id} className={`${sel} disabled:opacity-30`} style={{ colorScheme: 'dark' }}>
                 <option value="" style={{ background: '#0c2e1a' }}>{form.state_id ? 'Municipio' : 'Primero elige el estado'}</option>
                 {municipalities.map((m: any) => (
-                  <option key={m.municipality_id||m.id} value={m.municipality_id||m.id} style={{ background: '#0c2e1a' }}>{m.name||m.nombre}</option>
+                  <option key={m.municipality_id || m.id} value={m.municipality_id || m.id} style={{ background: '#0c2e1a' }}>{m.name || m.nombre}</option>
                 ))}
               </select>
             </div>
@@ -217,14 +244,20 @@ export default function B02Register() {
               </div>
             )}
 
+            {/* Aviso previo al botón */}
+            <div className="bg-white/5 ring-1 ring-white/15 rounded-xl p-3 text-[11px] text-white/50 leading-relaxed">
+              Al continuar se te solicitará leer y aceptar el Aviso de Privacidad, así como tomar una foto de verificación de identidad y capturar tu ubicación GPS.
+            </div>
+
             <button type="submit" disabled={loading}
-              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
-                         disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
-              {loading ? <><Loader2 size={18} className="animate-spin" /> Creando cuenta…</> : 'Crear cuenta'}
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+              {loading
+                ? <><Loader2 size={18} className="animate-spin" /> Creando cuenta…</>
+                : 'Continuar con el Aviso de Privacidad'
+              }
             </button>
           </form>
 
-          {/* Opciones */}
           <div className="mt-6 space-y-3 text-center">
             <button onClick={() => navigate('/login')}
               className="text-sm font-semibold text-white/60 hover:text-white transition-colors">

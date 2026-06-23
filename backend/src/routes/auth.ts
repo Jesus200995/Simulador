@@ -106,12 +106,35 @@ router.post('/registro', async (req: Request, res: Response): Promise<void> => {
     // Normalizar nombre
     const nombreNormalizado = normalizarNombre(nombre_completo);
 
+    // Campos de aviso de privacidad (opcionales en registro)
+    const {
+      aviso_privacidad_aceptado = false,
+      aviso_privacidad_fecha    = null,
+      aviso_privacidad_lat      = null,
+      aviso_privacidad_lng      = null,
+      aviso_privacidad_version  = null,
+      aviso_privacidad_foto_url = null,
+    } = req.body;
+
     // Insertar usuario
     const result = await pool.query(
-      `INSERT INTO usuarios (email, curp, nombre_completo, password_hash, telefono, rol, state_id, municipality_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO usuarios (
+         email, curp, nombre_completo, password_hash, telefono, rol, state_id, municipality_id,
+         aviso_privacidad_aceptado, aviso_privacidad_fecha, aviso_privacidad_lat,
+         aviso_privacidad_lng, aviso_privacidad_version, aviso_privacidad_foto_url
+       )
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
        RETURNING id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id, created_at`,
-      [email.toLowerCase().trim(), curpUpper || null, nombreNormalizado, passwordHash, telefonoLimpio, rol, state_id || null, municipality_id || null]
+      [
+        email.toLowerCase().trim(), curpUpper || null, nombreNormalizado, passwordHash,
+        telefonoLimpio, rol, state_id || null, municipality_id || null,
+        aviso_privacidad_aceptado || false,
+        aviso_privacidad_fecha    || null,
+        aviso_privacidad_lat      || null,
+        aviso_privacidad_lng      || null,
+        aviso_privacidad_version  || null,
+        aviso_privacidad_foto_url || null,
+      ]
     );
 
     const usuario = result.rows[0];

@@ -15,12 +15,11 @@ const POR_PAG      = 25;
 
 /* ─── Tipos ──────────────────────────────────────────────────────── */
 interface Aviso {
-  producer_id: number;
+  tipo: string;           // 'productor' | 'bodega' | 'industria' | 'bodeguero'
+  id: string;
   curp: string;
-  nombres: string;
-  apellido_paterno: string;
-  apellido_materno: string;
-  phone: string | null;
+  nombre: string;         // ya unificado desde el backend
+  telefono: string | null;
   aviso_privacidad_aceptado: boolean;
   aviso_privacidad_fecha: string | null;
   aviso_privacidad_lat: number | null;
@@ -46,8 +45,7 @@ const fmt = (iso: string | null, corto = false) => {
   });
 };
 
-const nombre = (a: Aviso) =>
-  [a.nombres, a.apellido_paterno, a.apellido_materno].filter(Boolean).join(' ');
+const nombre = (a: Aviso) => a.nombre || '—';
 
 const fotoURL = (url: string | null) =>
   url ? `${UPLOADS_BASE}/uploads/${url}` : null;
@@ -138,7 +136,7 @@ function generarPDF(a: Aviso) {
     </div>
     <div class="hdr-right">
       <div class="badge">Aceptado · v${a.aviso_privacidad_version || '1.0'}</div>
-      <p>Folio: #${String(a.producer_id).padStart(6, '0')}</p>
+      <p>Folio: #${String(a.id).padStart(6, '0')}</p>
       <p>Generado: ${new Date().toLocaleString('es-MX')}</p>
     </div>
   </div>
@@ -151,7 +149,8 @@ function generarPDF(a: Aviso) {
       <div class="card-title">Datos del Titular</div>
       <div class="field"><label>Nombre completo</label><value>${nomb}</value></div>
       <div class="field"><label>CURP</label><value class="mono">${a.curp}</value></div>
-      <div class="field"><label>Teléfono</label><value>${a.phone || '—'}</value></div>
+      <div class="field"><label>Teléfono</label><value>${a.telefono || '—'}</value></div>
+      <div class="field"><label>Tipo de registro</label><value>${a.tipo}</value></div>
       <div class="field"><label>Estado de cuenta</label><value>${a.estado_validacion}</value></div>
     </div>
     <div class="card">
@@ -159,7 +158,7 @@ function generarPDF(a: Aviso) {
       <div class="field"><label>Fecha y hora exacta</label><value>${fmt(a.aviso_privacidad_fecha)}</value></div>
       <div class="field"><label>Coordenadas GPS</label><value class="mono">${coords}</value>${mapsURL ? `<a href="${mapsURL}" class="gps-link">Ver en mapa</a>` : ''}</div>
       <div class="field"><label>Versión del aviso</label><value>${a.aviso_privacidad_version || '1.0'}</value></div>
-      <div class="field"><label>ID Productor</label><value>#${a.producer_id}</value></div>
+      <div class="field"><label>ID Registro</label><value>#${a.id}</value></div>
     </div>
   </div>
 
@@ -173,15 +172,15 @@ function generarPDF(a: Aviso) {
     <div class="foto-info">
       <h3>Verificación Biométrica del Titular</h3>
       <p>La fotografía fue capturada automáticamente en el dispositivo del productor en el momento exacto de la aceptación del aviso de privacidad, constituyendo prueba fehaciente de la identidad del titular de la cuenta.</p>
-      <p style="margin-top:6px">La imagen fue tomada con la cámara frontal del dispositivo y está asociada de forma inalterable al registro de aceptación con folio <strong>#${String(a.producer_id).padStart(6, '0')}</strong>.</p>
-      <div class="id-badge">ID: #${a.producer_id} · ${a.estado_validacion.toUpperCase()}</div>
+      <p style="margin-top:6px">La imagen fue tomada con la cámara frontal del dispositivo y está asociada de forma inalterable al registro de aceptación con folio <strong>#${String(a.id).padStart(6, '0')}</strong>.</p>
+      <div class="id-badge">ID: #${a.id} · ${a.tipo.toUpperCase()} · ${a.estado_validacion.toUpperCase()}</div>
     </div>
   </div>
 
   <div class="legal">
     <h3>Fundamento Legal</h3>
     <p>
-      Esta constancia acredita que el productor identificado con CURP <strong>${a.curp}</strong> otorgó su consentimiento
+      Esta constancia acredita que el titular identificado con CURP <strong>${a.curp}</strong> otorgó su consentimiento
       expreso para el tratamiento de sus datos personales, de conformidad con los Artículos 8, 9, 15 y 16 de la
       <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong>,
       y los Artículos 68 al 72 de su Reglamento. La aceptación fue registrada de manera electrónica con marca de
@@ -203,7 +202,7 @@ function generarPDF(a: Aviso) {
 
   <div class="footer">
     <p>SIMAC — Plan Nacional Maíz 2026 · Secretaría de Agricultura y Desarrollo Rural · Documento generado automáticamente</p>
-    <p>Folio #${String(a.producer_id).padStart(6, '0')} · ${new Date().toISOString()}</p>
+    <p>Folio #${String(a.id).padStart(6, '0')} · ${a.tipo} · ${new Date().toISOString()}</p>
   </div>
 
   <script>window.onload=()=>window.print()</script>
@@ -219,11 +218,11 @@ function generarPDF(a: Aviso) {
 /* ─── Exportar CSV ───────────────────────────────────────────────── */
 function exportarCSV(lista: Aviso[]) {
   const cols = [
-    'ID', 'Nombre', 'CURP', 'Teléfono', 'Fecha Aceptación',
+    'ID', 'Tipo', 'Nombre', 'CURP', 'Teléfono', 'Fecha Aceptación',
     'Latitud', 'Longitud', 'Versión', 'Foto URL', 'Estado', 'Completitud %',
   ];
   const rows = lista.map(a => [
-    a.producer_id, nombre(a), a.curp, a.phone || '',
+    a.id, a.tipo, nombre(a), a.curp, a.telefono || '',
     a.aviso_privacidad_fecha || '',
     a.aviso_privacidad_lat || '', a.aviso_privacidad_lng || '',
     a.aviso_privacidad_version || '', a.aviso_privacidad_foto_url || '',
@@ -315,8 +314,8 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
                 </span>
                 {foto && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200"><Fingerprint size={10} /> Biométrico</span>}
               </div>
-              <DetailRow icon={<Phone size={12} />} label="Teléfono" val={aviso.phone || '—'} />
-              <DetailRow icon={<Hash size={12} />} label="Folio" val={`#${String(aviso.producer_id).padStart(6,'0')}`} mono />
+              <DetailRow icon={<Phone size={12} />} label="Teléfono" val={aviso.telefono || '—'} />
+              <DetailRow icon={<Hash size={12} />} label="Folio" val={`#${String(aviso.id).padStart(6,'0')} · ${aviso.tipo}`} mono />
             </div>
           </div>
 
@@ -352,7 +351,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
             <p className="text-[10px] text-emerald-700 leading-relaxed">
               Registro con validez legal conforme a la LFPDPPP. Aceptación registrada con marca de tiempo,
-              GPS y verificación biométrica. Folio <strong>#{String(aviso.producer_id).padStart(6,'0')}</strong>.
+              GPS y verificación biométrica. Folio <strong>#{String(aviso.id).padStart(6,'0')}</strong> · {aviso.tipo}.
             </p>
           </div>
         </div>
@@ -388,7 +387,7 @@ export default function AvisosPrivacidadAdminPage() {
   const [pagina,       setPagina]       = useState(1);
   const [seleccionado, setSeleccionado] = useState<Aviso | null>(null);
   const [vista,        setVista]        = useState<Vista>('tabla');
-  const [seleccion,    setSeleccion]    = useState<Set<number>>(new Set());
+  const [seleccion,    setSeleccion]    = useState<Set<string>>(new Set());
   const [sortKey,      setSortKey]      = useState<SortKey>('fecha');
   const [sortDir,      setSortDir]      = useState<SortDir>('desc');
   const [filtros,      setFiltros]      = useState({ conFoto: false, conGPS: false, estado: '' });
@@ -439,7 +438,7 @@ export default function AvisosPrivacidadAdminPage() {
   };
 
   /* Selección */
-  const toggleSel = (id: number) => {
+  const toggleSel = (id: string) => {
     setSeleccion(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -448,7 +447,7 @@ export default function AvisosPrivacidadAdminPage() {
   };
   const toggleTodos = () => {
     if (seleccion.size === avisosVis.length) setSeleccion(new Set());
-    else setSeleccion(new Set(avisosVis.map(a => a.producer_id)));
+    else setSeleccion(new Set(avisosVis.map(a => a.id)));
   };
 
   /* Descargar todos CSV (todos los registros via API) */
@@ -465,7 +464,7 @@ export default function AvisosPrivacidadAdminPage() {
 
   /* Descargar PDFs seleccionados (secuencial con delay) */
   const descargarPDFsSeleccion = async () => {
-    const lista = avisosVis.filter(a => seleccion.has(a.producer_id));
+    const lista = avisosVis.filter(a => seleccion.has(a.id));
     for (let i = 0; i < lista.length; i++) {
       generarPDF(lista[i]);
       if (i < lista.length - 1) await new Promise(r => setTimeout(r, 800));
@@ -654,10 +653,10 @@ export default function AvisosPrivacidadAdminPage() {
                   ? Array.from({ length: 8 }).map((_, i) => <SkRow key={i} />)
                   : avisosVis.map(a => (
                     <FilaTabla
-                      key={a.producer_id}
+                      key={a.id}
                       aviso={a}
-                      sel={seleccion.has(a.producer_id)}
-                      onToggleSel={() => toggleSel(a.producer_id)}
+                      sel={seleccion.has(a.id)}
+                      onToggleSel={() => toggleSel(a.id)}
                       onVer={() => setSeleccionado(a)}
                       onPDF={() => generarPDF(a)}
                     />
@@ -672,10 +671,10 @@ export default function AvisosPrivacidadAdminPage() {
                 ? Array.from({ length: 6 }).map((_, i) => <SkCard key={i} />)
                 : avisosVis.map(a => (
                   <Card
-                    key={a.producer_id}
+                    key={a.id}
                     aviso={a}
-                    sel={seleccion.has(a.producer_id)}
-                    onToggleSel={() => toggleSel(a.producer_id)}
+                    sel={seleccion.has(a.id)}
+                    onToggleSel={() => toggleSel(a.id)}
                     onVer={() => setSeleccionado(a)}
                     onPDF={() => generarPDF(a)}
                   />
@@ -791,7 +790,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
         </div>
         <div className="min-w-0">
           <p className="text-[13px] font-bold text-gray-900 truncate">{nomb}</p>
-          <p className="text-[10px] text-gray-400">{aviso.phone || '—'}</p>
+          <p className="text-[10px] text-gray-400">{aviso.telefono || '—'}</p>
         </div>
       </div>
 
