@@ -390,7 +390,7 @@ export default function AvisosPrivacidadAdminPage() {
   const [seleccion,    setSeleccion]    = useState<Set<string>>(new Set());
   const [sortKey,      setSortKey]      = useState<SortKey>('fecha');
   const [sortDir,      setSortDir]      = useState<SortDir>('desc');
-  const [filtros,      setFiltros]      = useState({ conFoto: false, conGPS: false, estado: '' });
+  const [filtros,      setFiltros]      = useState({ conFoto: false, conGPS: false, estado: '', tipo: '' });
   const [filtrosOpen,  setFiltrosOpen]  = useState(false);
   const [descargando,  setDescargando]  = useState(false);
   const debRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -427,6 +427,11 @@ export default function AvisosPrivacidadAdminPage() {
     if (filtros.conFoto && !a.aviso_privacidad_foto_url) return false;
     if (filtros.conGPS  && !a.aviso_privacidad_lat)     return false;
     if (filtros.estado  && a.estado_validacion !== filtros.estado) return false;
+    if (filtros.tipo) {
+      // 'productor' agrupa solo productor; 'bodeguero' agrupa bodega, industria, bodeguero
+      if (filtros.tipo === 'productor' && a.tipo !== 'productor') return false;
+      if (filtros.tipo === 'bodeguero' && !['bodega', 'industria', 'bodeguero'].includes(a.tipo)) return false;
+    }
     return true;
   });
 
@@ -474,7 +479,7 @@ export default function AvisosPrivacidadAdminPage() {
   const totalPags    = Math.ceil(total / POR_PAG);
   const conFotoTotal = avisos.filter(a => a.aviso_privacidad_foto_url).length;
   const conGPSTotal  = avisos.filter(a => a.aviso_privacidad_lat).length;
-  const hayFiltros   = filtros.conFoto || filtros.conGPS || !!filtros.estado;
+  const hayFiltros   = filtros.conFoto || filtros.conGPS || !!filtros.estado || !!filtros.tipo;
 
   return (
     <>
@@ -528,7 +533,7 @@ export default function AvisosPrivacidadAdminPage() {
               <Filter size={13} />
               Filtros
               {hayFiltros && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center font-black">
-                {[filtros.conFoto, filtros.conGPS, !!filtros.estado].filter(Boolean).length}
+                {[filtros.conFoto, filtros.conGPS, !!filtros.estado, !!filtros.tipo].filter(Boolean).length}
               </span>}
             </button>
 
@@ -536,6 +541,27 @@ export default function AvisosPrivacidadAdminPage() {
               <div className="absolute top-full mt-1.5 left-0 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 w-64">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Filtros activos</p>
                 <div className="space-y-2.5">
+                  {/* Tipo */}
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Tipo de usuario</label>
+                    <div className="flex gap-1.5">
+                      {[
+                        { val: '',           label: 'Todos' },
+                        { val: 'productor',  label: 'Productor' },
+                        { val: 'bodeguero',  label: 'Bodega / Industria' },
+                      ].map(opt => (
+                        <button
+                          key={opt.val}
+                          onClick={() => setFiltros(f => ({ ...f, tipo: opt.val }))}
+                          className={`flex-1 text-[10px] font-bold px-2 py-1.5 rounded-lg border transition-all ${
+                            filtros.tipo === opt.val
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >{opt.label}</button>
+                      ))}
+                    </div>
+                  </div>
                   <FiltroCheck label="Solo con foto biométrica" checked={filtros.conFoto} onChange={v => setFiltros(f => ({ ...f, conFoto: v }))} />
                   <FiltroCheck label="Solo con GPS" checked={filtros.conGPS} onChange={v => setFiltros(f => ({ ...f, conGPS: v }))} />
                   <div>
@@ -554,7 +580,7 @@ export default function AvisosPrivacidadAdminPage() {
                 </div>
                 {hayFiltros && (
                   <button
-                    onClick={() => setFiltros({ conFoto: false, conGPS: false, estado: '' })}
+                    onClick={() => setFiltros({ conFoto: false, conGPS: false, estado: '', tipo: '' })}
                     className="mt-3 text-[11px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
                   >
                     <X size={11} /> Limpiar filtros
@@ -790,7 +816,14 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
         </div>
         <div className="min-w-0">
           <p className="text-[13px] font-bold text-gray-900 truncate">{nomb}</p>
-          <p className="text-[10px] text-gray-400">{aviso.telefono || '—'}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+              aviso.tipo === 'productor'
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-blue-50 text-blue-700 border border-blue-200'
+            }`}>{aviso.tipo}</span>
+            <p className="text-[10px] text-gray-400">{aviso.telefono || '—'}</p>
+          </div>
         </div>
       </div>
 
@@ -852,7 +885,14 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
           </div>
           <div className="min-w-0">
             <p className="text-[13px] font-bold text-gray-900 leading-tight truncate">{nomb}</p>
-            <p className="text-[10px] font-mono text-gray-400">{aviso.curp.slice(0, 12)}…</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                aviso.tipo === 'productor'
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : 'bg-blue-50 text-blue-700 border border-blue-200'
+              }`}>{aviso.tipo}</span>
+              <p className="text-[10px] font-mono text-gray-400">{aviso.curp.slice(0, 10)}…</p>
+            </div>
           </div>
         </div>
         <span className={`flex-shrink-0 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border ${
