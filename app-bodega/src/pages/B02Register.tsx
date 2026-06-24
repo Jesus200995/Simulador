@@ -18,7 +18,6 @@ export default function B02Register() {
     nombre_completo: '', email: '', telefono: '', curp: '',
     state_id: '', municipality_id: '', password: '', confirm: '',
   });
-  const [avisoData,       setAvisoData]       = useState<AvisoData | null>(null);
   const [states,          setStates]          = useState<any[]>([]);
   const [municipalities,  setMunicipalities]  = useState<any[]>([]);
   const [showPwd,         setShowPwd]         = useState(false);
@@ -67,7 +66,6 @@ export default function B02Register() {
 
   /* Aviso aceptado → submit final */
   async function handleAvisoAceptado(datos: AvisoData) {
-    setAvisoData(datos);
     setLoading(true);
     try {
       const payload: any = {

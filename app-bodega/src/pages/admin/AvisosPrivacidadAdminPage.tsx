@@ -645,7 +645,7 @@ export default function AvisosPrivacidadAdminPage() {
                 {busqueda || hayFiltros ? 'Sin resultados para los filtros aplicados' : 'Aún no hay avisos de privacidad registrados'}
               </p>
               {(busqueda || hayFiltros) && (
-                <button onClick={() => { onBusqueda(''); setFiltros({ conFoto: false, conGPS: false, estado: '' }); }}
+                <button onClick={() => { onBusqueda(''); setFiltros({ conFoto: false, conGPS: false, estado: '', tipo: '' }); }}
                   className="text-[12px] text-emerald-600 font-bold hover:underline">Limpiar búsqueda</button>
               )}
             </div>
@@ -782,7 +782,7 @@ function ColHeader({ label, sk, cur, dir, onClick }: {
 
 function FiltroCheck({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-2.5 cursor-pointer group">
+    <label onClick={() => onChange(!checked)} className="flex items-center gap-2.5 cursor-pointer group">
       <div className={`w-4 h-4 rounded flex items-center justify-center border-2 transition-all ${checked ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300 group-hover:border-emerald-400'}`}>
         {checked && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
       </div>

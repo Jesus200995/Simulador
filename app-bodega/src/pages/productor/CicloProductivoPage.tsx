@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  ChevronLeft, ChevronRight, Wheat, Check, Leaf, Calendar, MapPin,
+  ChevronLeft, ChevronRight, Wheat, Check, Leaf, MapPin,
   Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play,
   CloudRain, Droplets, X, Pencil
 } from 'lucide-react';

@@ -68,7 +68,7 @@ export default function RegistroNuevoPage() {
 
   // Pasos 3-5 — UPs
   const [ups, setUps] = useState<UPRegistrada[]>([]);
-  const [upActual, setUpActual] = useState<{ estado: string; municipio: string; nombre?: string }>({ estado: '', municipio: '', nombre: '' });
+  const [upActual, setUpActual] = useState<{ estado: string; municipio: string; nombre?: string; coincide_area?: boolean | null; area_real_ha?: string }>({ estado: '', municipio: '', nombre: '' });
   const [estados, setEstados] = useState<any[]>([]);
   const [municipios, setMunicipios] = useState<any[]>([]);
   const [estadoId, setEstadoId] = useState('');
@@ -92,8 +92,6 @@ export default function RegistroNuevoPage() {
     coords: { lat: number; lng: number };
     area: number;
   } | null>(null);
-  const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
-  const [areaReal, setAreaReal] = useState('');
 
   // Nombre automático de cada parcela según su orden
   const nombreAutomaticoUP = (indice: number): string =>
@@ -207,17 +205,17 @@ export default function RegistroNuevoPage() {
     if (errOv) { setErrorOverlap(errOv); return; }
     setErrorOverlap(null);
     setPendingUP({ poligono: poly, coords: centro, area });
-    setCoincideArea(null);
+    setUpActual(prev => ({ ...prev, coincide_area: null, area_real_ha: '' }));
   };
 
   const confirmarUP = () => {
     if (pendingUP) {
-      setUps(prev => [...prev, { 
-        ...upActual, 
-        areaCalc: pendingUP.area, 
-        coords: pendingUP.coords, 
+      setUps(prev => [...prev, {
+        ...upActual,
+        areaCalc: pendingUP.area,
+        coords: pendingUP.coords,
         poligono: pendingUP.poligono,
-        area_real_ha: (coincideArea === false && areaReal) ? Number(areaReal) : pendingUP.area,
+        area_real_ha: (upActual.coincide_area === false && upActual.area_real_ha) ? Number(upActual.area_real_ha) : pendingUP.area,
       }]);
       setPendingUP(null);
       setEnDibujo(false);
