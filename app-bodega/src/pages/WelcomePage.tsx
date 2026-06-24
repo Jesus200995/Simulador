@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Wheat, Building2, ChevronRight, X, LogIn, ShieldCheck, UserPlus } from 'lucide-react';
+import { Wheat, Building2, ChevronRight, X, LogIn, UserPlus } from 'lucide-react';
 
 type Menu = null | 'productor' | 'bodega';
 
@@ -18,7 +18,6 @@ const OPCIONES: Record<'productor' | 'bodega', { titulo: string; subtitulo: stri
     subtitulo: 'Elige la opción según tu caso',
     items: [
       { icon: LogIn,       title: 'Ya tengo cuenta',        desc: 'Entra con tu CURP y tu PIN de 4 dígitos.', to: '/login-productor', accent: true },
-      { icon: ShieldCheck, title: 'Activar mi cuenta',      desc: 'Ya estás en el padrón del Plan Maíz. Crea tu PIN con tu CURP.', to: '/activar' },
       { icon: UserPlus,    title: 'Soy nuevo, registrarme', desc: 'No estás en el padrón. Crea tu cuenta desde cero con tu CURP.', to: '/registro-nuevo' },
     ],
   },
@@ -346,7 +345,7 @@ export default function WelcomePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-[17px] leading-tight">Soy Productor</p>
-                    <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión, activar o registrar tu cuenta</p>
+                    <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión o registrar tu cuenta</p>
                   </div>
                   <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'productor' ? 'text-emerald-400 translate-x-1' : 'text-white/25'}`} />
                 </div>

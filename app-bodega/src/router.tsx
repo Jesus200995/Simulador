@@ -8,8 +8,6 @@ import B01Login from './pages/B01Login';
 import B02Register from './pages/B02Register';
 
 // Productor — onboarding
-import ActivarCuentaPage from './pages/auth/ActivarCuentaPage';
-import CrearPinPage from './pages/auth/CrearPinPage';
 import RegistroNuevoPage from './pages/auth/RegistroNuevoPage';
 import LoginPinPage from './pages/auth/LoginPinPage';
 // Productor — páginas
@@ -239,8 +237,6 @@ export const router = createBrowserRouter([
     element: <ProtectedLayout><B25ConfiguracionPage /></ProtectedLayout>,
   },
   // Onboarding productor (sin auth)
-  { path: '/activar', element: <ActivarCuentaPage /> },
-  { path: '/activar/pin', element: <CrearPinPage /> },
   { path: '/registro-nuevo', element: <RegistroNuevoPage /> },
   { path: '/login-productor', element: <LoginPinPage /> },
 

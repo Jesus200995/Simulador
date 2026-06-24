@@ -172,10 +172,6 @@ export const api = {
     variedades: () => request('/infraestructura/catalogos'),
   },
   productor: {
-    buscarCurp: (curp: string) =>
-      request('/productor/auth/buscar-curp', { method: 'POST', body: JSON.stringify({ curp }) }),
-    activarCuenta: (producer_id: number, pin: string) =>
-      request('/productor/auth/activar-cuenta', { method: 'POST', body: JSON.stringify({ producer_id, pin }) }),
     loginPin: (curp: string, pin: string) =>
       request('/productor/auth/login-pin', { method: 'POST', body: JSON.stringify({ curp, pin }) }),
     registroNuevo: (data: Record<string, unknown>) =>
