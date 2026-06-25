@@ -88,8 +88,8 @@ export default function B04Dashboard() {
               </span>
             </div>
             <div className="min-w-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
-              <h1 className="text-[20px] sm:text-[24px] font-black text-white leading-tight tracking-tight drop-shadow-sm">
-                {saludo}
+              <h1 className="text-[20px] sm:text-[24px] font-black text-white leading-tight tracking-tight drop-shadow-sm flex items-center gap-2">
+                {saludo} <span role="img" aria-label="feliz">😊</span>
               </h1>
               <p className="text-[13px] sm:text-[14px] font-medium text-white/80 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
             </div>
