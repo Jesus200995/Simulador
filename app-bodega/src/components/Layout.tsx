@@ -59,7 +59,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* ── Main content ───────────────────────────────── */}
       {/* En desktop el contenido se centra en una columna para verse profesional
           (como en "seleccionar bodegas") en vez de estirarse a todo lo ancho. */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full pb-[calc(72px+env(safe-area-inset-bottom,0px))] bg-[#eef8f2]">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full pb-[calc(72px+env(safe-area-inset-bottom,0px))] bg-[#eef8f2]" style={{ overscrollBehaviorY: 'contain' }}>
         <div className="w-full max-w-5xl mx-auto">{children}</div>
       </main>
 

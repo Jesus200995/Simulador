@@ -4,9 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
-      /* iOS PWA: ancla el root al viewport físico para evitar saltos al reanudar la app */
-      html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
-      #root { position: fixed; inset: 0; overflow: hidden; }
+      /*
+       * iOS PWA — evitar el espacio blanco inferior al reanudar la app.
+       *
+       * TÉCNICA: min-height extendido + padding safe-area en html.
+       * Cuando iOS mueve el documento hacia arriba para acomodar el notch,
+       * el html es suficientemente alto para cubrir el hueco inferior.
+       * overscroll-behavior:none detiene el rubber-band sin bloquear scroll interno.
+       * El fondo blanco hace invisibles cualquier flash residual bajo el nav.
+       */
+      html {
+        min-height: calc(100% + env(safe-area-inset-top));
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        background: #ffffff;
+        background-attachment: fixed;
+        overscroll-behavior: none;
+      }
+      body {
+        margin: 0;
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: auto;
+      }
+      #root {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+      }
     </style>
     <script>
       // Síncrono: evita flash de fondo crema al abrir la app sin sesión (WelcomePage).

@@ -72,7 +72,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       {/* ── Main content ───────────────────────────────── */}
       {/* En desktop el contenido se centra en una columna (como en "seleccionar
           bodegas"); las vistas de mapa a pantalla completa van a todo lo ancho. */}
-      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#eef8f2]">
+      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#eef8f2]" style={{ overscrollBehaviorY: 'contain' }}>
         {(pathname === '/productor/mapa' || pathname.startsWith('/productor/mapa/') || pathname.startsWith('/productor/ubicacion') || pathname.startsWith('/productor/ciclo'))
           ? children
           : <div className="w-full max-w-2xl mx-auto">{children}</div>}
