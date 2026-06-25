@@ -60,6 +60,22 @@ if (typeof window !== 'undefined' && !import.meta.env.DEV) {
   }
 }
 
+// iOS PWA: al reanudar la app desde background, forzar scroll a 0 para evitar
+// el desfase de viewport que deja un espacio blanco en la parte inferior.
+if (typeof window !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  });
+  // pageshow cubre el caso de "back/forward cache" de iOS Safari
+  window.addEventListener('pageshow', () => {
+    window.scrollTo(0, 0);
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

@@ -44,7 +44,7 @@ export function Layout({ children }: { children: ReactNode }) {
     : 'U';
 
   return (
-    <div className="flex flex-col h-dvh bg-[#eef8f2] overflow-hidden w-full">
+    <div className="fixed inset-0 flex flex-col bg-[#eef8f2] overflow-hidden w-full">
 
       {/* ── Header premium "liquid glass" (compartido) ── */}
       <AppHeader
