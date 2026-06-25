@@ -197,39 +197,43 @@ export default function B23Notificaciones() {
                 {/* ── Cabecera clickeable ── */}
                 <button
                   onClick={() => toggleNotif(n)}
-                  className="w-full flex items-center gap-3.5 px-4 sm:px-5 py-4 text-left transition-colors duration-200 active:bg-black/[0.02]"
+                  className="w-full flex items-start gap-3 px-4 sm:px-5 py-4 text-left transition-colors duration-200 active:bg-black/[0.02]"
                 >
                   {/* Icono */}
-                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-[1rem] flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${isOpen ? cfg.bgDark : cfg.bg} ${isOpen ? 'scale-105' : ''}`}>
-                    <Icon size={20} className={cfg.color} />
+                  <div className={`w-10 h-10 rounded-[0.875rem] flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300 ${isOpen ? cfg.bgDark + ' scale-105' : cfg.bg}`}>
+                    <Icon size={18} className={cfg.color} />
                   </div>
 
-                  {/* Contenido */}
+                  {/* Todo el texto ocupa el ancho disponible */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-[11px] font-bold uppercase tracking-wider ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
-                        {cfg.label}
-                      </span>
-                      {!n.leida && (
-                        <span className="w-2 h-2 rounded-full bg-[#1A5C38] shadow-[0_0_6px_rgba(26,92,56,0.6)] animate-pulse flex-shrink-0" />
-                      )}
+                    {/* Fila superior: categoría · tiempo · punto · chevron */}
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className={`text-[10.5px] font-bold uppercase tracking-wider flex-shrink-0 ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
+                          {cfg.label}
+                        </span>
+                        <span className="text-gray-300 flex-shrink-0">·</span>
+                        <span className="text-[10.5px] text-gray-400 font-medium flex-shrink-0">
+                          {timeAgo(n.created_at)}
+                        </span>
+                        {!n.leida && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#1A5C38] animate-pulse flex-shrink-0" />
+                        )}
+                      </div>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
+                        <ChevronDown size={13} className={isOpen ? 'text-[#1A5C38]' : 'text-gray-400'} />
+                      </div>
                     </div>
-                    <p className={`text-[15px] leading-snug truncate ${n.leida ? 'font-semibold text-gray-700' : 'font-bold text-gray-900'}`}>
+
+                    {/* Título — ancho completo, envuelve hasta 2 líneas */}
+                    <p className={`text-[15px] leading-snug ${isOpen ? '' : 'line-clamp-2'} ${n.leida ? 'font-semibold text-gray-700' : 'font-bold text-gray-900'}`}>
                       {titulo}
                     </p>
-                    {!isOpen && mensaje && (
-                      <p className="text-[12px] text-gray-400 font-medium mt-0.5 truncate">{mensaje}</p>
-                    )}
-                  </div>
 
-                  {/* Derecha: tiempo + chevron */}
-                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">
-                      {timeAgo(n.created_at)}
-                    </span>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
-                      <ChevronDown size={14} className={`transition-colors duration-200 ${isOpen ? 'text-[#1A5C38]' : 'text-gray-400'}`} />
-                    </div>
+                    {/* Preview del mensaje (solo cerrado) */}
+                    {!isOpen && mensaje && (
+                      <p className="text-[12px] text-gray-400 font-medium mt-1 line-clamp-1">{mensaje}</p>
+                    )}
                   </div>
                 </button>
 

@@ -263,45 +263,46 @@ export default function AlertasPage() {
               {/* ── Cabecera clickeable ── */}
               <button
                 onClick={() => toggleNotif(n)}
-                className="w-full flex items-center gap-3.5 px-4 py-3.5 text-left transition-colors duration-200 active:bg-black/[0.02]"
+                className="w-full flex items-start gap-3 px-4 py-3.5 text-left transition-colors duration-200 active:bg-black/[0.02]"
               >
                 {/* Icono */}
-                <div className={`relative w-11 h-11 rounded-[1rem] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                <div className={`relative w-10 h-10 rounded-[0.875rem] flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300
                   ${isOpen ? cfg.bgDark + ' scale-105' : cfg.bg}`}>
-                  <Icon size={19} className={cfg.color} strokeWidth={2.1} />
+                  <Icon size={18} className={cfg.color} strokeWidth={2.1} />
                   {!n.leida && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#1A5C38] ring-2 ring-white animate-pulse" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#1A5C38] ring-2 ring-white animate-pulse" />
                   )}
                 </div>
 
-                {/* Texto */}
+                {/* Todo el texto ocupa el ancho disponible */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`text-[10.5px] font-bold uppercase tracking-wider ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
-                      {cfg.label}
-                    </span>
+                  {/* Fila superior: categoría · tiempo · chevron/flecha */}
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className={`text-[10.5px] font-bold uppercase tracking-wider flex-shrink-0 ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
+                        {cfg.label}
+                      </span>
+                      <span className="text-gray-300 flex-shrink-0">·</span>
+                      <span className="text-[10.5px] text-gray-400 font-medium flex-shrink-0">
+                        {timeAgo(n.created_at)}
+                      </span>
+                    </div>
+                    {!esTx ? (
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300
+                        ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
+                        <ChevronDown size={13} className={isOpen ? 'text-[#1A5C38]' : 'text-gray-400'} />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <ArrowRight size={12} className="text-blue-500" />
+                      </div>
+                    )}
                   </div>
+
+                  {/* Mensaje — ancho completo, envuelve hasta 2 líneas */}
                   <p className={`text-[14px] leading-snug ${isOpen ? '' : 'line-clamp-2'} ${n.leida ? 'font-medium text-gray-600' : 'font-bold text-gray-900'}`}>
                     {n.mensaje}
                   </p>
-                </div>
-
-                {/* Tiempo + chevron */}
-                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                  <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">
-                    {timeAgo(n.created_at)}
-                  </span>
-                  {!esTx && (
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300
-                      ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
-                      <ChevronDown size={14} className={isOpen ? 'text-[#1A5C38]' : 'text-gray-400'} />
-                    </div>
-                  )}
-                  {esTx && (
-                    <div className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center">
-                      <ArrowRight size={13} className="text-blue-500" />
-                    </div>
-                  )}
                 </div>
               </button>
 
