@@ -114,8 +114,8 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       <div className={`fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
         {/* Drawer header */}
-        <div className="bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] px-5 pt-12 pb-6">
-          <button onClick={() => setDrawerOpen(false)} className="absolute top-4 right-4 text-white/70 active:text-white">
+        <div className="bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] px-5 pb-6" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2rem)' }}>
+          <button onClick={() => setDrawerOpen(false)} className="absolute text-white/70 active:text-white" style={{ top: 'calc(env(safe-area-inset-top) + 1rem)', right: '1rem' }}>
             <X size={22} />
           </button>
           <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mb-3 shadow-inner">

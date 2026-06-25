@@ -18,7 +18,7 @@ interface Props {
  */
 export default function AppHeader({ subtitle, initials, notifCount = 0, onBrand, onBell, onMenu }: Props) {
   return (
-    <header className="flex-none relative z-30 h-16 isolate">
+    <header className="flex-none relative z-30 isolate" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       {/* Capa de vidrio */}
       <div className="absolute inset-0 bg-white/60 backdrop-blur-2xl backdrop-saturate-150" />
       {/* Tinte de profundidad sutil */}
@@ -33,7 +33,7 @@ export default function AppHeader({ subtitle, initials, notifCount = 0, onBrand,
       </div>
 
       {/* Contenido */}
-      <div className="simac-header-in relative z-10 h-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+      <div className="simac-header-in relative z-10 h-16 max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
         {/* Marca */}
         <button onClick={onBrand} className="group flex items-center gap-2.5 min-w-0">
           <div
