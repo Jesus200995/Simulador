@@ -79,7 +79,9 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       </main>
 
       {/* ── Bottom nav ─────────────────────────────────── */}
-      <nav className="flex-none z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 flex items-stretch shadow-[0_-4px_20px_rgb(0,0,0,0.02)]">
+      <nav className="flex-none z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 shadow-[0_-4px_20px_rgb(0,0,0,0.02)]"
+           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex items-stretch">
         {NAV.map(({ path, icon: Icon, label }) => {
           const active = pathname === path || (path !== '/productor' && pathname.startsWith(path + '/'))
             || (path === '/productor' && pathname === '/productor');
@@ -88,7 +90,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
             <Link
               key={path}
               to={path}
-              className={`flex-1 flex flex-col items-center justify-center pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] gap-1 transition-colors
+              className={`flex-1 flex flex-col items-center justify-center pt-2.5 pb-3 gap-1 transition-colors
                 ${active ? 'text-[#1A5C38]' : 'text-slate-400 hover:text-slate-500'}`}
             >
               <div className="relative">
@@ -101,6 +103,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
             </Link>
           );
         })}
+        </div>
       </nav>
 
       {/* ── Profile Drawer ─────────────────────────────── */}

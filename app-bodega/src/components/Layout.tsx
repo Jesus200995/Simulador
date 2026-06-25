@@ -64,14 +64,17 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
 
       {/* ── Bottom nav ─────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-xl border-t border-black/[0.06] flex items-stretch shadow-[0_-1px_0_rgba(0,0,0,0.04)]">
+      {/* padding-bottom en el CONTENEDOR extiende el fondo blanco hasta el borde físico (home indicator iOS) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-xl border-t border-black/[0.06] shadow-[0_-1px_0_rgba(0,0,0,0.04)]"
+           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex items-stretch">
         {NAV.map(({ path, icon: Icon, label }) => {
           const active = pathname === path || (path !== '/dashboard' && pathname.startsWith(path + '/'));
           return (
             <Link
               key={path}
               to={path}
-              className={`flex-1 flex flex-col items-center justify-center pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] gap-[3px] transition-colors
+              className={`flex-1 flex flex-col items-center justify-center pt-2 pb-2 gap-[3px] transition-colors
                 ${active ? 'text-[#1A5C38]' : 'text-gray-400'}`}
             >
               <Icon size={23} strokeWidth={active ? 2.4 : 1.7} />
@@ -80,6 +83,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </Link>
           );
         })}
+        </div>
       </nav>
 
       {/* ── Profile Drawer ─────────────────────────────── */}
