@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bell, ShieldAlert, CloudRain, ShoppingCart, Receipt, Heart,
-  MapPin, ChevronDown, ChevronUp, Check, Loader2, BellRing, X, ClipboardCheck,
+  Bell, BellRing, ShieldAlert, CloudRain, ShoppingCart, Receipt, Heart,
+  MapPin, ChevronDown, Check, Loader2, X, ClipboardCheck,
+  Clock, ArrowRight, AlertCircle,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -17,26 +18,44 @@ const parseExtra = (d: any) => {
   try { return typeof d === 'string' ? JSON.parse(d) : d; } catch { return {}; }
 };
 
-type Cfg = { Icon: any; label: string; tile: string; chip: string };
-const TIPO_CFG: Record<string, Cfg> = {
-  alerta_sanitaria:        { Icon: ShieldAlert, label: 'Sanitaria',       tile: 'bg-red-50 text-red-600 ring-red-100',         chip: 'bg-red-50 text-red-600' },
-  alerta_climatica:        { Icon: CloudRain,   label: 'Climática',       tile: 'bg-orange-50 text-orange-600 ring-orange-100', chip: 'bg-orange-50 text-orange-600' },
-  senal_compra:            { Icon: ShoppingCart,label: 'Señal de compra', tile: 'bg-emerald-50 text-emerald-600 ring-emerald-100', chip: 'bg-emerald-50 text-emerald-700' },
-  interes_senal:           { Icon: Heart,       label: 'Interés',         tile: 'bg-rose-50 text-rose-600 ring-rose-100',      chip: 'bg-rose-50 text-rose-600' },
-  interes_bodega_oferta:   { Icon: Heart,       label: 'Interés de bodega', tile: 'bg-rose-50 text-rose-600 ring-rose-100',   chip: 'bg-rose-50 text-rose-600' },
-  confirmacion_transaccion:{ Icon: Receipt,     label: 'Transacción',     tile: 'bg-blue-50 text-blue-600 ring-blue-100',      chip: 'bg-blue-50 text-blue-600' },
-  transaccion:             { Icon: Receipt,     label: 'Transacción',     tile: 'bg-blue-50 text-blue-600 ring-blue-100',      chip: 'bg-blue-50 text-blue-600' },
+type Cfg = {
+  Icon: any; label: string;
+  color: string; bg: string; bgDark: string;
+  route?: string;
 };
-const DEFAULT_CFG: Cfg = { Icon: Bell, label: 'Aviso', tile: 'bg-[#eef8f2] text-gray-500 ring-gray-200', chip: 'bg-[#eef8f2] text-gray-500' };
+
+const TIPO_CFG: Record<string, Cfg> = {
+  alerta_sanitaria:         { Icon: ShieldAlert,   label: 'Sanitaria',         color: 'text-red-600',     bg: 'bg-red-50',     bgDark: 'bg-red-100' },
+  alerta_climatica:         { Icon: CloudRain,     label: 'Climática',         color: 'text-orange-600',  bg: 'bg-orange-50',  bgDark: 'bg-orange-100' },
+  senal_compra:             { Icon: ShoppingCart,  label: 'Señal de compra',   color: 'text-emerald-600', bg: 'bg-emerald-50', bgDark: 'bg-emerald-100' },
+  interes_senal:            { Icon: Heart,         label: 'Interés',           color: 'text-rose-600',    bg: 'bg-rose-50',    bgDark: 'bg-rose-100' },
+  interes_bodega_oferta:    { Icon: Heart,         label: 'Interés de bodega', color: 'text-rose-600',    bg: 'bg-rose-50',    bgDark: 'bg-rose-100' },
+  confirmacion_transaccion: { Icon: Receipt,       label: 'Transacción',       color: 'text-blue-600',    bg: 'bg-blue-50',    bgDark: 'bg-blue-100',  route: '/productor' },
+  transaccion:              { Icon: Receipt,       label: 'Transacción',       color: 'text-blue-600',    bg: 'bg-blue-50',    bgDark: 'bg-blue-100' },
+};
+const DEFAULT_CFG: Cfg = {
+  Icon: Bell, label: 'Aviso',
+  color: 'text-gray-500', bg: 'bg-gray-50', bgDark: 'bg-gray-100',
+};
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'ahora';
-  if (mins < 60) return `hace ${mins}m`;
+  if (mins < 1) return 'Justo ahora';
+  if (mins < 60) return `Hace ${mins} min`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `hace ${hrs}h`;
-  return `hace ${Math.floor(hrs / 24)}d`;
+  if (hrs < 24) return `Hace ${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'Ayer';
+  if (days < 7) return `Hace ${days} días`;
+  return new Date(dateStr).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+}
+
+function fullDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
 }
 
 const INTERES_KEY = 'simac_senales_interes';
@@ -46,12 +65,12 @@ const loadInteres = (): Set<number> => {
 
 export default function AlertasPage() {
   const navigate = useNavigate();
-  const [notifs, setNotifs] = useState<Notif[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState<number | null>(null);
-  const [interes, setInteres] = useState<Set<number>>(loadInteres());
+  const [notifs, setNotifs]     = useState<Notif[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [expandida, setExpandida] = useState<number | null>(null);
+  const [interes, setInteres]   = useState<Set<number>>(loadInteres());
   const [enviando, setEnviando] = useState<number | null>(null);
-  const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [toast, setToast]       = useState<{ ok: boolean; msg: string } | null>(null);
 
   useEffect(() => {
     const cargar = () => {
@@ -80,7 +99,6 @@ export default function AlertasPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Abre Google Maps hacia la bodega usando datos_extra de la notificación
   const abrirMapaBodega = (n: Notif) => {
     const x = parseExtra(n.datos_extra);
     if (x.bodega_lat && x.bodega_lng) {
@@ -92,7 +110,6 @@ export default function AlertasPage() {
     }
   };
 
-  // "Me interesa": registra interés, marca leída y abre el mapa de la bodega
   const marcarInteres = async (n: Notif) => {
     const senalId = n.referencia_id!;
     setEnviando(senalId);
@@ -114,137 +131,268 @@ export default function AlertasPage() {
     }
   };
 
-  // "No me interesa": solo marca la notificación como leída
   const descartarSenal = (n: Notif) => {
     if (!n.leida) marcarLeida(n.id);
     mostrarToast(true, 'Listo, no te mostraremos esta señal de nuevo.');
   };
 
+  const toggleNotif = (n: Notif) => {
+    if (n.tipo === 'confirmacion_transaccion' && n.referencia_id) {
+      if (!n.leida) marcarLeida(n.id);
+      navigate(`/productor/transaccion/${n.referencia_id}/confirmar`);
+      return;
+    }
+    if (!n.leida) marcarLeida(n.id);
+    setExpandida(prev => prev === n.id ? null : n.id);
+  };
+
   const noLeidas = notifs.filter(n => !n.leida).length;
 
   return (
-    <div className="bg-[#eef8f2] min-h-full">
-      {/* ── Banner ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)]">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20 flex-shrink-0">
-              <BellRing size={19} className="text-white" strokeWidth={2.2} />
+    <div className="w-full">
+
+      {/* ── Banner sticky verde ── */}
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
+        <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-white/[0.03] pointer-events-none" />
+
+        <div className="relative z-10 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center ring-1 ring-white/20 flex-shrink-0">
+                <BellRing size={19} className="text-white" strokeWidth={2.2} />
+              </div>
+              <div>
+                <h1 className="text-[20px] sm:text-[23px] font-black text-white leading-tight tracking-tight">
+                  Notificaciones
+                </h1>
+                <p className="text-[12.5px] font-medium text-green-100/70 mt-0.5">
+                  {loading ? 'Cargando…' : noLeidas > 0
+                    ? `${noLeidas} sin leer · ${notifs.length} en total`
+                    : `Todo al día · ${notifs.length} notificación${notifs.length !== 1 ? 'es' : ''}`}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Notificaciones</h1>
-              <p className="text-[12.5px] font-medium text-green-100/70 mt-0.5">
-                {noLeidas > 0 ? `${noLeidas} sin leer` : 'Todo al día'}
-              </p>
-            </div>
+
+            {noLeidas > 0 && (
+              <button
+                onClick={async () => {
+                  const token = localStorage.getItem('simac_token');
+                  await fetch(`${BASE}/alertas/notificaciones/leer-todas`, {
+                    method: 'PATCH', headers: { Authorization: `Bearer ${token}` },
+                  }).catch(() => {});
+                  setNotifs(prev => prev.map(n => ({ ...n, leida: true })));
+                }}
+                className="flex-shrink-0 flex items-center gap-1.5 bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/20 text-white rounded-xl px-3 py-2 text-[12px] font-bold transition-all duration-200 active:scale-[0.97]"
+              >
+                <Check size={13} />
+                <span className="hidden sm:inline">Marcar </span>todas
+              </button>
+            )}
           </div>
+
+          {/* Chips resumen */}
+          {!loading && notifs.length > 0 && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              {noLeidas > 0 && (
+                <span className="inline-flex items-center gap-1 bg-white/15 border border-white/20 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  {noLeidas} nuevas
+                </span>
+              )}
+              {Array.from(new Set(notifs.map(n => n.tipo).filter(Boolean))).slice(0, 3).map(tipo => {
+                const cfg = TIPO_CFG[tipo] || DEFAULT_CFG;
+                const count = notifs.filter(n => n.tipo === tipo).length;
+                return (
+                  <span key={tipo} className="inline-flex items-center gap-1 bg-white/10 border border-white/10 text-white/80 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                    {cfg.label} ({count})
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-10 space-y-2.5">
+      {/* ── Lista ── */}
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-10 space-y-2.5">
+
         {loading && (
           <div className="space-y-2.5">
-            {[1, 2, 3].map(i => <div key={i} className="h-[84px] bg-white/70 rounded-2xl animate-pulse" />)}
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-[80px] bg-white rounded-2xl animate-pulse" />
+            ))}
           </div>
         )}
 
         {!loading && notifs.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-sm ring-1 ring-gray-100 mb-4">
-              <Bell size={30} className="text-gray-300" />
+          <div className="text-center py-20 bg-white rounded-[1.75rem] border border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
+            <div className="w-20 h-20 bg-[#f4fbf7] rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Bell size={38} className="text-gray-300" />
             </div>
-            <p className="text-[15px] font-semibold text-gray-700">Sin notificaciones</p>
-            <p className="text-[13px] text-gray-400 mt-1">Aquí verás señales de compra, alertas y avisos</p>
+            <p className="text-[16px] text-gray-700 font-bold tracking-tight">Sin notificaciones</p>
+            <p className="text-[13px] text-gray-400 mt-1.5 font-medium max-w-xs mx-auto leading-relaxed">
+              Aquí verás señales de compra, alertas y avisos.
+            </p>
           </div>
         )}
 
-        {!loading && notifs.map((n, i) => {
+        {!loading && notifs.map((n, idx) => {
           const cfg = TIPO_CFG[n.tipo] || DEFAULT_CFG;
           const Icon = cfg.Icon;
-          const isOpen = expanded === n.id;
+          const isOpen = expandida === n.id;
           const esSenal = n.tipo === 'senal_compra' && !!n.referencia_id;
+          const esTx = n.tipo === 'confirmacion_transaccion' && !!n.referencia_id;
           const yaInteresado = esSenal && interes.has(n.referencia_id!);
           const enviandoEste = enviando === n.referencia_id;
+          const titulo = n.titulo || cfg.label;
 
           return (
             <div
               key={n.id}
-              style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
-              className={`bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] ring-1 overflow-hidden animate-fade-in transition-all duration-300
-                ${n.leida ? 'ring-gray-100' : 'ring-[#1A5C38]/15'}`}
+              style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
+              className={`w-full rounded-[1.5rem] border overflow-hidden transition-all duration-300
+                ${isOpen
+                  ? 'shadow-[0_8px_32px_rgba(0,0,0,0.1)] border-[#1A5C38]/25'
+                  : n.leida
+                    ? 'bg-white border-black/[0.05] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]'
+                    : 'bg-emerald-50/40 border-[#1A5C38]/20 shadow-[0_4px_16px_rgba(26,92,56,0.1)]'}
+                ${isOpen ? 'bg-white' : ''}
+              `}
             >
-              {/* Header (toca para expandir + marcar leída; transacción → confirmar) */}
+              {/* ── Cabecera clickeable ── */}
               <button
-                onClick={() => {
-                  if (n.tipo === 'confirmacion_transaccion' && n.referencia_id) {
-                    if (!n.leida) marcarLeida(n.id);
-                    navigate(`/productor/transaccion/${n.referencia_id}/confirmar`);
-                    return;
-                  }
-                  setExpanded(isOpen ? null : n.id);
-                  if (!n.leida) marcarLeida(n.id);
-                }}
-                className="w-full flex items-start gap-3 p-3.5 text-left active:bg-[#f4fbf7]/60 transition-colors"
+                onClick={() => toggleNotif(n)}
+                className="w-full flex items-center gap-3.5 px-4 py-3.5 text-left transition-colors duration-200 active:bg-black/[0.02]"
               >
-                {/* Icono profesional */}
-                <div className={`relative w-10 h-10 rounded-2xl ring-1 flex items-center justify-center flex-shrink-0 ${cfg.tile}`}>
-                  <Icon size={18} strokeWidth={2.1} />
-                  {!n.leida && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#1A5C38] ring-2 ring-white" />}
+                {/* Icono */}
+                <div className={`relative w-11 h-11 rounded-[1rem] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                  ${isOpen ? cfg.bgDark + ' scale-105' : cfg.bg}`}>
+                  <Icon size={19} className={cfg.color} strokeWidth={2.1} />
+                  {!n.leida && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#1A5C38] ring-2 ring-white animate-pulse" />
+                  )}
                 </div>
 
+                {/* Texto */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10.5px] px-2 py-0.5 rounded-full font-bold ${cfg.chip}`}>{cfg.label}</span>
-                    <span className="text-[11px] text-gray-400 font-medium">{timeAgo(n.created_at)}</span>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={`text-[10.5px] font-bold uppercase tracking-wider ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
+                      {cfg.label}
+                    </span>
                   </div>
-                  <p className={`text-[13.5px] leading-snug whitespace-pre-line ${isOpen ? '' : 'line-clamp-2'} ${n.leida ? 'text-gray-500' : 'text-gray-800 font-medium'}`}>
+                  <p className={`text-[14px] leading-snug ${isOpen ? '' : 'line-clamp-2'} ${n.leida ? 'font-medium text-gray-600' : 'font-bold text-gray-900'}`}>
                     {n.mensaje}
                   </p>
                 </div>
 
-                <span className="text-gray-300 shrink-0 mt-0.5">
-                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </span>
-              </button>
-
-              {/* Acciones para señal de compra (#9) */}
-              {esSenal && (
-                <div className="px-3.5 pb-3.5 -mt-0.5">
-                  {yaInteresado ? (
-                    <div className="flex items-center justify-between gap-2 bg-emerald-50 ring-1 ring-emerald-200 rounded-xl px-3 py-2.5">
-                      <span className="flex items-center gap-1.5 text-[12.5px] font-bold text-emerald-700">
-                        <Check size={15} strokeWidth={2.6} /> Ya respondiste a esta señal
-                      </span>
-                      <button onClick={() => abrirMapaBodega(n)}
-                        className="flex items-center gap-1 text-[12px] font-bold text-[#1A5C38] hover:underline">
-                        <MapPin size={13} /> Ver en mapa
-                      </button>
+                {/* Tiempo + chevron */}
+                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                  <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">
+                    {timeAgo(n.created_at)}
+                  </span>
+                  {!esTx && (
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300
+                      ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
+                      <ChevronDown size={14} className={isOpen ? 'text-[#1A5C38]' : 'text-gray-400'} />
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => !enviandoEste && marcarInteres(n)}
-                        disabled={enviandoEste}
-                        className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-[#1A5C38] text-white shadow-[0_4px_14px_rgba(26,92,56,0.3)] hover:bg-[#16512f] active:scale-[0.97] transition-all duration-200 disabled:opacity-60"
-                      >
-                        {enviandoEste
-                          ? <><Loader2 size={15} className="animate-spin" /> Enviando…</>
-                          : <><Heart size={15} strokeWidth={2.3} /> Me interesa</>}
-                      </button>
-                      <button
-                        onClick={() => descartarSenal(n)}
-                        className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-[#f4fbf7] ring-1 ring-gray-200 hover:bg-[#eef8f2] active:scale-[0.97] transition-all duration-200"
-                      >
-                        <X size={15} strokeWidth={2.4} /> No me interesa
-                      </button>
+                  )}
+                  {esTx && (
+                    <div className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center">
+                      <ArrowRight size={13} className="text-blue-500" />
                     </div>
                   )}
                 </div>
+              </button>
+
+              {/* ── Contenido expandible ── */}
+              {!esTx && (
+                <div
+                  className="transition-all duration-300 ease-in-out overflow-hidden"
+                  style={{ display: 'grid', gridTemplateRows: isOpen ? '1fr' : '0fr' }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-4 pb-4">
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-3.5" />
+
+                      {/* Mensaje completo */}
+                      <p className="text-[13.5px] text-gray-700 font-medium leading-relaxed mb-3 whitespace-pre-line">
+                        {n.mensaje}
+                      </p>
+
+                      {/* Fecha */}
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-gray-400 font-medium mb-4">
+                        <Clock size={11} />
+                        <span className="capitalize">{fullDate(n.created_at)}</span>
+                      </div>
+
+                      {/* Acciones señal de compra */}
+                      {esSenal && (
+                        yaInteresado ? (
+                          <div className="flex items-center justify-between gap-2 bg-emerald-50 ring-1 ring-emerald-200 rounded-xl px-3.5 py-3">
+                            <span className="flex items-center gap-1.5 text-[12.5px] font-bold text-emerald-700">
+                              <Check size={14} strokeWidth={2.6} /> Ya respondiste a esta señal
+                            </span>
+                            <button
+                              onClick={() => abrirMapaBodega(n)}
+                              className="flex items-center gap-1 text-[12px] font-bold text-[#1A5C38] hover:underline"
+                            >
+                              <MapPin size={13} /> Ver mapa
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => !enviandoEste && marcarInteres(n)}
+                              disabled={enviandoEste}
+                              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-[#1A5C38] text-white shadow-[0_4px_14px_rgba(26,92,56,0.3)] hover:bg-[#16512f] active:scale-[0.97] transition-all duration-200 disabled:opacity-60"
+                            >
+                              {enviandoEste
+                                ? <><Loader2 size={14} className="animate-spin" /> Enviando…</>
+                                : <><Heart size={14} strokeWidth={2.3} /> Me interesa</>}
+                            </button>
+                            <button
+                              onClick={() => descartarSenal(n)}
+                              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-[#f4fbf7] ring-1 ring-gray-200 hover:bg-[#eef8f2] active:scale-[0.97] transition-all duration-200"
+                            >
+                              <X size={14} strokeWidth={2.4} /> No me interesa
+                            </button>
+                          </div>
+                        )
+                      )}
+
+                      {/* Acciones genéricas (si no es señal) */}
+                      {!esSenal && (
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>
+                            <Icon size={11} />
+                            {cfg.label}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {!n.leida && (
+                              <button
+                                onClick={e => { e.stopPropagation(); marcarLeida(n.id); }}
+                                className="flex items-center gap-1 text-[12px] text-gray-500 font-semibold px-3 py-1.5 rounded-xl border border-gray-200 hover:border-gray-300 active:bg-gray-50 transition-colors"
+                              >
+                                <Check size={12} /> Marcar leída
+                              </button>
+                            )}
+                            {!n.leida && !cfg.route && (
+                              <span className="flex items-center gap-1 text-[11px] text-gray-400 font-medium">
+                                <AlertCircle size={11} /> Sin acción
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
 
-              {/* Acción para confirmar transacción (#8) */}
-              {n.tipo === 'confirmacion_transaccion' && n.referencia_id && (
-                <div className="px-3.5 pb-3.5 -mt-0.5">
+              {/* Acción directa para transacción (visible siempre, sin expandir) */}
+              {esTx && (
+                <div className="px-4 pb-4 -mt-1">
                   <button
                     onClick={() => { if (!n.leida) marcarLeida(n.id); navigate(`/productor/transaccion/${n.referencia_id}/confirmar`); }}
                     className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:bg-blue-700 active:scale-[0.97] transition-all duration-200"
@@ -258,13 +406,13 @@ export default function AlertasPage() {
         })}
       </div>
 
-      {/* ── Toast flotante premium ── */}
+      {/* ── Toast flotante ── */}
       {toast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000] w-[calc(100%-2rem)] max-w-xs animate-fade-in">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000] w-[calc(100%-2rem)] max-w-xs">
           <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md
             ${toast.ok ? 'bg-[#1A5C38] text-white' : 'bg-red-600 text-white'}`}>
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-              {toast.ok ? <Check size={16} strokeWidth={2.8} /> : <ShieldAlert size={16} />}
+              {toast.ok ? <Check size={15} strokeWidth={2.8} /> : <ShieldAlert size={15} />}
             </div>
             <p className="text-[13px] font-semibold leading-snug">{toast.msg}</p>
           </div>

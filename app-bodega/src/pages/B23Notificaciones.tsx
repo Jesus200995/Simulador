@@ -109,7 +109,6 @@ export default function B23Notificaciones() {
         <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-bold text-green-300/80 uppercase tracking-widest mb-0.5">Centro de mensajes</p>
               <h1 className="text-[22px] sm:text-[26px] font-bold text-white leading-tight drop-shadow-sm flex items-center gap-2">
                 <Bell size={20} className="text-white/70" />
                 Notificaciones
