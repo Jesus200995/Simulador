@@ -8,14 +8,21 @@ export default function UpdateToast() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_swUrl, r) {
-      if (r) {
-        setInterval(() => { r.update(); }, 10 * 60 * 1000);
-      }
+      // Verificar actualizaciones cada 30 segundos
+      if (r) setInterval(() => { r.update(); }, 30 * 1000);
     },
   });
 
   const [applying, setApplying] = useState(false);
   const applied = useRef(false);
+
+  // Cuando el nuevo SW toma control, recargar la página automáticamente
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const handler = () => { window.location.reload(); };
+    navigator.serviceWorker.addEventListener('controllerchange', handler);
+    return () => navigator.serviceWorker.removeEventListener('controllerchange', handler);
+  }, []);
 
   useEffect(() => {
     if (!needRefresh || applied.current) return;
@@ -23,7 +30,7 @@ export default function UpdateToast() {
     setApplying(true);
     const t = setTimeout(() => {
       updateServiceWorker(true);
-    }, 2200);
+    }, 1500);
     return () => clearTimeout(t);
   }, [needRefresh, updateServiceWorker]);
 
