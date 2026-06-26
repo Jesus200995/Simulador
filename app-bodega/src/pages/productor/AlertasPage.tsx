@@ -245,7 +245,6 @@ export default function AlertasPage() {
           const esTx = n.tipo === 'confirmacion_transaccion' && !!n.referencia_id;
           const yaInteresado = esSenal && interes.has(n.referencia_id!);
           const enviandoEste = enviando === n.referencia_id;
-          const titulo = n.titulo || cfg.label;
 
           return (
             <div
