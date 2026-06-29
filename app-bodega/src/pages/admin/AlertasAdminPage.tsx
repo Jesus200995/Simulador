@@ -448,7 +448,7 @@ export default function AlertasAdminPage() {
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingAlerta(null); setNotasResolucion(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -473,6 +473,7 @@ export default function AlertasAdminPage() {
     </div>
   );
 }
+
 
 
 

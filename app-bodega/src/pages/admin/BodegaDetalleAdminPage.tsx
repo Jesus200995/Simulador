@@ -380,7 +380,7 @@ export default function BodegaDetalleAdminPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-gray-700">
                     {data.transacciones.map(tx => (
-                      <tr key={tx.id} className="hover:bg-white/[0.01]">
+                      <tr key={tx.id} className="hover:bg-[#eef8f2]">
                         <td className="py-3 font-bold text-gray-900">{tx.productor_nombre}</td>
                         <td className="py-3 text-gray-500 font-mono text-[11px]">{tx.tipo_maiz}</td>
                         <td className="py-3 text-emerald-600 font-bold">{tx.volumen} t</td>
@@ -455,7 +455,7 @@ export default function BodegaDetalleAdminPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setModalType(null); setMotivoRechazo(''); setActionError(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -483,6 +483,7 @@ export default function BodegaDetalleAdminPage() {
     </div>
   );
 }
+
 
 
 

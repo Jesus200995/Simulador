@@ -457,7 +457,7 @@ export default function PreciosAdminPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
                   {bodegasHoy.map((b, idx) => (
-                    <tr key={idx} className="hover:bg-white/[0.01]">
+                    <tr key={idx} className="hover:bg-[#eef8f2]">
                       <td className="py-3 font-bold text-gray-900">{b.nombre}</td>
                       <td className="py-3 text-gray-500">{b.municipio}, {b.estado}</td>
                       <td className="py-3 font-black text-gray-900">{fmt(b.precio)}</td>
@@ -607,7 +607,7 @@ export default function PreciosAdminPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
               {brechas.map((br, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.01]">
+                <tr key={idx} className="hover:bg-[#eef8f2]">
                   <td className="py-3 font-bold text-gray-900">{br.estado}</td>
                   <td className="py-3 font-bold">${((preciosHoy?.po ?? 0) + (idx % 2 === 0 ? 50 : -20)).toLocaleString()}</td>
                   <td className="py-3 font-bold">{fmt(preciosHoy?.precio_venta ?? 0)}</td>
@@ -682,7 +682,7 @@ export default function PreciosAdminPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
               <button 
                 type="button"
                 onClick={() => { setShowFiraModal(false); setSelectedFile(null); setFiraError(''); setFiraResult(null); }}
@@ -733,7 +733,7 @@ export default function PreciosAdminPage() {
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingDisc(null); setNotaResolucion(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -757,6 +757,7 @@ export default function PreciosAdminPage() {
     </div>
   );
 }
+
 
 
 

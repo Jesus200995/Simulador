@@ -479,7 +479,7 @@ export default function BodegasAdminPage() {
                     </p>
                   </div>
 
-                  <div className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-2.5 space-y-1">
+                  <div className="text-[11px] text-gray-700 bg-gray-50 border border-gray-100 rounded-xl p-2.5 space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500 font-medium">Capacidad:</span>
                       <strong className="text-gray-900 font-bold">{b.capacidad_total.toLocaleString()} t</strong>
@@ -519,7 +519,7 @@ export default function BodegasAdminPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {bodegas.filter(b => b.estatus === 'pendiente').map(b => (
-                <div key={b.id} className="bg-white/80 border border-amber-500/30 rounded-2xl p-5 flex flex-col justify-between">
+                <div key={b.id} className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-extrabold text-gray-900 text-[15px]">{b.nombre}</h3>
@@ -528,7 +528,7 @@ export default function BodegasAdminPage() {
                     <p className="text-gray-500 text-[12px] flex items-center gap-1 mb-3">
                       <MapPin size={12} /> {b.municipio}, {b.estado}
                     </p>
-                    <div className="text-[12px] text-gray-700 bg-white/5 rounded-lg p-3 space-y-1">
+                    <div className="text-[12px] text-gray-700 bg-gray-50 border border-gray-100 rounded-xl p-3 space-y-1">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Capacidad:</span>
                         <strong className="text-gray-900">{b.capacidad_total.toLocaleString()} t</strong>
@@ -584,7 +584,7 @@ export default function BodegasAdminPage() {
             <div className="p-4 flex gap-3">
               <button
                 onClick={() => setModalConfirmacion({ visible: false, tipo: 'aprobar', bodegaId: null, bodegaNombre: '' })}
-                className="flex-1 py-3 px-4 rounded-xl text-[13px] font-bold text-gray-700 bg-white/5 hover:bg-white/10 transition-colors"
+                className="flex-1 py-3 px-4 rounded-xl text-[13px] font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 Cancelar
               </button>
@@ -618,6 +618,7 @@ export default function BodegasAdminPage() {
     </div>
   );
 }
+
 
 
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useAuthStore } from '../../store/auth';
@@ -194,7 +194,7 @@ export default function LoginAdminPage() {
             </div>
 
             {/* Tarjeta del form en mobile */}
-            <div className="rounded-3xl overflow-hidden border border-white/8 bg-white/[0.03] backdrop-blur-sm lg:bg-transparent lg:border-0 lg:backdrop-blur-none">
+            <div className="rounded-3xl overflow-hidden border border-gray-100 bg-white/[0.03] backdrop-blur-sm lg:bg-transparent lg:border-0 lg:backdrop-blur-none">
               <form onSubmit={handleSubmit} className="p-5 sm:p-6 lg:p-0 space-y-4">
 
                 {/* Email */}
@@ -283,3 +283,4 @@ export default function LoginAdminPage() {
     </div>
   );
 }
+

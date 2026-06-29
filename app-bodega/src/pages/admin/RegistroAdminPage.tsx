@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Eye, EyeOff, ShieldAlert, User, Mail, Lock,
@@ -225,7 +225,7 @@ export default function RegistroAdminPage() {
               <p className="text-[12.5px] text-white/30">Completa los datos para registrarte</p>
             </div>
 
-            <div className="rounded-3xl border border-white/8 bg-white/[0.03] backdrop-blur-sm lg:bg-transparent lg:border-0 lg:backdrop-blur-none overflow-hidden">
+            <div className="rounded-3xl border border-gray-100 bg-white/[0.03] backdrop-blur-sm lg:bg-transparent lg:border-0 lg:backdrop-blur-none overflow-hidden">
               <form onSubmit={handleSubmit} className="p-5 sm:p-6 lg:p-0 space-y-3.5">
 
                 {/* Nombre */}
@@ -356,3 +356,4 @@ export default function RegistroAdminPage() {
     </div>
   );
 }
+

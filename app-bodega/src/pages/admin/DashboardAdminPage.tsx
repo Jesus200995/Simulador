@@ -212,7 +212,7 @@ export default function DashboardAdminPage() {
                   {kpis.alertas_criticas} crít · {kpis.alertas_medias} medias
                 </p>
               </div>
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${kpis.alertas_criticas > 0 ? 'bg-red-500/10 border border-red-500/20 text-red-600' : 'bg-[#f4fbf7]0/10 border border-gray-500/20 text-gray-500'}`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${kpis.alertas_criticas > 0 ? 'bg-red-500/10 border border-red-500/20 text-red-600' : 'bg-gray-100 border border-gray-500/20 text-gray-500'}`}>
                 <AlertTriangle size={16} />
               </div>
             </div>
@@ -288,9 +288,9 @@ export default function DashboardAdminPage() {
           {eventos.length === 0 ? (
             <div className="px-5 py-6 text-center text-[12px] text-gray-500">Sin actividad reciente</div>
           ) : eventos.map((ev, idx) => (
-            <div key={idx} className="px-4 py-3 hover:bg-[#f4fbf7] transition-colors">
+            <div key={idx} className="px-4 py-3 hover:bg-[#eef8f2] transition-colors">
               <div className="flex items-start justify-between gap-2 mb-1.5">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${tipoColor[ev.tipo] || 'text-gray-500 bg-[#f4fbf7]0/10 border-gray-500/20'}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${tipoColor[ev.tipo] || 'text-gray-500 bg-gray-100 border-gray-500/20'}`}>
                   {ev.tipo}
                 </span>
                 <span className="text-[10px] text-gray-500 flex-shrink-0">{ev.fecha}</span>
@@ -319,9 +319,9 @@ export default function DashboardAdminPage() {
                   <td colSpan={5} className="px-5 py-8 text-center text-[12px] text-gray-500">Sin actividad reciente registrada</td>
                 </tr>
               ) : eventos.map((ev, idx) => (
-                <tr key={idx} className="hover:bg-[#f4fbf7] transition-colors group">
+                <tr key={idx} className="hover:bg-[#eef8f2] transition-colors group">
                   <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${tipoColor[ev.tipo] || 'text-gray-500 bg-[#f4fbf7]0/10 border-gray-500/20'}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${tipoColor[ev.tipo] || 'text-gray-500 bg-gray-100 border-gray-500/20'}`}>
                       {ev.tipo}
                     </span>
                   </td>
@@ -345,4 +345,5 @@ export default function DashboardAdminPage() {
     </div>
   );
 }
+
 

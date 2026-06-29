@@ -299,7 +299,7 @@ export default function ProductorDetalleAdminPage() {
           {data.estado_validacion === 'activo' && (
             <button 
               onClick={() => setModalType('suspender')}
-              className="px-4 py-2 bg-white/5 hover:bg-red-500/10 hover:text-red-600 text-gray-500 font-bold text-[12.5px] rounded-xl border border-white/5 transition-all"
+              className="px-4 py-2 bg-red-50 border border-red-100 hover:bg-red-100 text-red-600 text-gray-500 font-bold text-[12.5px] rounded-xl border border-white/5 transition-all"
             >
               Suspender Cuenta
             </button>
@@ -308,7 +308,7 @@ export default function ProductorDetalleAdminPage() {
           {data.estado_validacion === 'suspendido' && (
             <button 
               onClick={() => setModalType('reactivar')}
-              className="px-4 py-2 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-600 text-gray-500 font-bold text-[12.5px] rounded-xl border border-white/5 transition-all"
+              className="px-4 py-2 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 text-emerald-700 text-gray-500 font-bold text-[12.5px] rounded-xl border border-white/5 transition-all"
             >
               Reactivar Cuenta
             </button>
@@ -460,7 +460,7 @@ export default function ProductorDetalleAdminPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
               {data.disponibilidades.map(disp => (
-                <tr key={disp.id} className="hover:bg-white/[0.01] transition-colors">
+                <tr key={disp.id} className="hover:bg-[#eef8f2] transition-colors">
                   <td className="py-3.5 px-4 font-bold text-gray-900">{disp.tipo_maiz}</td>
                   <td className="py-3.5 px-4 text-gray-500 font-mono text-[12.5px]">{disp.variedad}</td>
                   <td className="py-3.5 px-4 text-emerald-600 font-black text-[14px]">
@@ -538,7 +538,7 @@ export default function ProductorDetalleAdminPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setModalType(null); setNotaInterna(''); setActionError(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -566,6 +566,7 @@ export default function ProductorDetalleAdminPage() {
     </div>
   );
 }
+
 
 
 
