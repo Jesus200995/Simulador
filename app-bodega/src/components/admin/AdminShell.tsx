@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/auth';
 import {
   LayoutDashboard, Users, Warehouse, AlertTriangle,
   TrendingUp, LogOut, Menu, X, ShieldCheck, ChevronRight,
-  Sprout, BarChart3, Settings
+  Sprout, BarChart3, Settings, Leaf
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -23,6 +23,7 @@ const MENU: SidebarItem[] = [
   { label: 'Precios',      subtitle: 'Monitoreo de cotizaciones y variaciones del mercado',     path: '/admin/precios',        icon: TrendingUp },
   { label: 'Producción',   subtitle: 'Registro, seguimiento y estimación de cosechas activas',        path: '/admin/produccion',     icon: Sprout },
   { label: 'Mercado',      subtitle: 'Análisis estadístico y proyecciones comerciales a futuro',          path: '/admin/mercado',        icon: BarChart3 },
+  { label: 'SENASICA',     subtitle: 'Carga de alertas fitosanitarias y notificación a productores',  path: '/admin/senasica',       icon: Leaf },
   { label: 'Configuración',subtitle: 'Preferencias, roles de usuario y ajustes del sistema',         path: '/admin/configuracion',  icon: Settings },
   { label: 'Avisos Privacidad', subtitle: 'Constancias de aceptación con verificación biométrica y GPS', path: '/admin/avisos-privacidad', icon: ShieldCheck },
 ];

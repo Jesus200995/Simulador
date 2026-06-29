@@ -1503,4 +1503,39 @@ router.post('/aviso-privacidad', authMiddleware, async (req: AuthRequest, res: R
   }
 });
 
+// ─────────────────────────────────────────────
+// POST /api/productor/push/suscribir
+// Registra suscripción push del dispositivo del productor
+// ─────────────────────────────────────────────
+router.post('/push/suscribir', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { endpoint, p256dh, auth } = req.body;
+    const usuarioId = req.user?.userId;
+    if (!endpoint || !p256dh || !auth) { res.status(400).json({ error: 'Suscripción incompleta' }); return; }
+    await pool.query(
+      `UPDATE usuarios SET push_endpoint = $1, push_p256dh = $2, push_auth = $3, push_activo = TRUE WHERE id = $4`,
+      [endpoint, p256dh, auth, usuarioId]
+    );
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error al registrar suscripción push:', error);
+    res.status(500).json({ error: 'Error al registrar suscripción' });
+  }
+});
+
+// ─────────────────────────────────────────────
+// DELETE /api/productor/push/cancelar
+// Desactiva las notificaciones push del productor
+// ─────────────────────────────────────────────
+router.delete('/push/cancelar', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const usuarioId = req.user?.userId;
+    await pool.query(`UPDATE usuarios SET push_activo = FALSE WHERE id = $1`, [usuarioId]);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error al cancelar suscripción push:', error);
+    res.status(500).json({ error: 'Error al cancelar suscripción' });
+  }
+});
+
 export default router;

@@ -32,6 +32,7 @@ import ofertaRoutes from './routes/oferta';
 import productoresRoutes from './routes/productores';
 import disponibilidadRoutes from './routes/disponibilidad';
 import productorRoutes from './routes/productor';
+import senasicaRoutes from './routes/senasica';
 import { scheduleBodegaDailyJobs } from './jobs/bodegaDailyJobs';
 import { schedulePreciosCron } from './jobs/preciosCron';
 import pool from './config/database';
@@ -102,6 +103,7 @@ app.use('/api/oferta', ofertaRoutes);
 app.use('/api/productores', productoresRoutes);
 app.use('/api/productor/disponibilidad', disponibilidadRoutes);
 app.use('/api/productor', productorRoutes);
+app.use('/api/senasica', senasicaRoutes);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

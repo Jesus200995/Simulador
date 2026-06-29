@@ -148,8 +148,66 @@ export default function AlertasPage() {
 
   const noLeidas = notifs.filter(n => !n.leida).length;
 
+  // ── Push nativas ──────────────────────────────
+  const [pushPermiso, setPushPermiso] = useState<NotificationPermission | null>(null);
+
+  useEffect(() => {
+    if ('Notification' in window) setPushPermiso(Notification.permission);
+  }, []);
+
+  const suscribirPush = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try {
+      const sw = await navigator.serviceWorker.ready;
+      const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      if (!vapidKey) return;
+      const suscripcion = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: vapidKey
+      });
+      const { endpoint, keys } = suscripcion.toJSON() as any;
+      const token = localStorage.getItem('simac_token');
+      await fetch(`${BASE}/productor/push/suscribir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ endpoint, p256dh: keys.p256dh, auth: keys.auth })
+      });
+      setPushPermiso('granted');
+    } catch (err) {
+      console.warn('Push no disponible:', err);
+    }
+  };
+
+  const solicitarPermisoPush = async () => {
+    if (!('Notification' in window)) return;
+    const permiso = await Notification.requestPermission();
+    setPushPermiso(permiso);
+    if (permiso === 'granted') await suscribirPush();
+  };
+  // ─────────────────────────────────────────────
+
   return (
     <div className="w-full">
+
+      {/* ── Banner push nativas (si aún no ha respondido) ── */}
+      {pushPermiso === 'default' && (
+        <div className="mx-4 mt-4 mb-2 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+          <span className="text-2xl mt-0.5">🔔</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-bold text-amber-800">Activa alertas en tu celular</p>
+            <p className="text-[11.5px] text-amber-700 mt-0.5 leading-relaxed">
+              Recibe avisos de plagas cercanas a tu parcela aunque no tengas la app abierta.
+            </p>
+          </div>
+          <button
+            onClick={solicitarPermisoPush}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11.5px] px-3 py-2
+                       rounded-xl transition-all whitespace-nowrap shrink-0"
+          >
+            Activar
+          </button>
+        </div>
+      )}
 
       {/* ── Banner sticky verde ── */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden">
