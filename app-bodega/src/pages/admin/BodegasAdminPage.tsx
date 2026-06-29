@@ -395,39 +395,44 @@ export default function BodegasAdminPage() {
           ) : (
             filteredList.map(b => (
               <div key={b.id} onClick={() => focusBodega(b)}
-                className={`px-3 py-3 cursor-pointer transition-all duration-150 flex items-start gap-2.5 border-b border-gray-50 last:border-0 ${
-                  selectedBodegaId === b.id ? 'bg-[#eef8f2]' : 'hover:bg-gray-50'
+                className={`px-3 py-3 cursor-pointer transition-all duration-150 flex items-start gap-3 border-b border-gray-50 last:border-0 ${
+                  selectedBodegaId === b.id ? 'bg-emerald-50/60 border-l-2 border-l-[#1A5C38]' : 'hover:bg-gray-50/70'
                 }`}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                  b.semaforo_compra === 'verde'    ? 'bg-emerald-50 text-emerald-600' :
-                  b.semaforo_compra === 'amarillo' ? 'bg-amber-50 text-amber-500' :
-                  b.semaforo_compra === 'rojo'     ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400'
+                {/* Avatar coloreado por estatus */}
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm ${
+                  b.estatus === 'aprobada'  ? 'bg-emerald-100 text-emerald-700' :
+                  b.estatus === 'pendiente' ? 'bg-amber-100 text-amber-600' :
+                                             'bg-gray-100 text-gray-400'
                 }`}>
-                  <Warehouse size={16} />
+                  <Warehouse size={15} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-1 mb-0.5">
-                    <p className="text-[12px] font-bold text-gray-900 leading-tight line-clamp-1 flex-1">{b.nombre}</p>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0 uppercase tracking-wide ${
+                  {/* Nombre + badge */}
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-[12px] font-bold text-gray-900 leading-snug line-clamp-2 flex-1">{b.nombre}</p>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 uppercase tracking-wide ${
                       b.estatus === 'aprobada'  ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
                       b.estatus === 'pendiente' ? 'text-amber-700 bg-amber-50 border-amber-200' :
-                      'text-gray-500 bg-gray-100 border-gray-200'
+                                                  'text-gray-500 bg-gray-100 border-gray-200'
                     }`}>{b.estatus}</span>
                   </div>
-                  <p className="text-[10.5px] text-gray-400 flex items-center gap-1 mb-1.5">
-                    <MapPin size={9} /> {b.municipio}, {b.estado}
+                  {/* Ubicación */}
+                  <p className="text-[10.5px] text-gray-400 flex items-center gap-1 mb-2">
+                    <MapPin size={9} className="flex-shrink-0" /> {b.municipio}, {b.estado}
                   </p>
+                  {/* Capacidad + acción */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                        b.semaforo_compra === 'verde' ? 'bg-emerald-400' :
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        b.semaforo_compra === 'verde'    ? 'bg-emerald-400' :
                         b.semaforo_compra === 'amarillo' ? 'bg-amber-400' :
-                        b.semaforo_compra === 'rojo' ? 'bg-red-400' : 'bg-gray-300'
+                        b.semaforo_compra === 'rojo'     ? 'bg-red-400' :
+                        b.estatus === 'aprobada'         ? 'bg-emerald-300' : 'bg-gray-300'
                       }`} />
-                      <span className="text-[10.5px] text-gray-500 font-medium">{b.capacidad_total.toLocaleString()} t</span>
+                      <span className="text-[10.5px] text-gray-500 font-semibold">{b.capacidad_total.toLocaleString()} t</span>
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/bodegas/${b.id}`); }}
-                      className="text-[10px] font-bold text-[#1A5C38] flex items-center gap-0.5 hover:underline">
+                      className="text-[10px] font-bold text-[#1A5C38] bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-2 py-0.5 rounded-lg flex items-center gap-0.5 transition-colors duration-150">
                       Ver <Eye size={9} />
                     </button>
                   </div>
