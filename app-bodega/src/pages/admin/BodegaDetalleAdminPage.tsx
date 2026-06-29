@@ -202,10 +202,10 @@ export default function BodegaDetalleAdminPage() {
   );
 
   return (
-    <div className="space-y-6">
-      
+    <div className="flex flex-col gap-3">
+
       {/* Back button and Header controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 border border-white/5 rounded-2xl p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-100 shadow-sm rounded-2xl px-4 py-3">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/admin/bodegas')}
@@ -253,7 +253,7 @@ export default function BodegaDetalleAdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Datos generales */}
-        <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-5">
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-5">
           <div className="flex items-center gap-2 border-b border-white/5 pb-3">
             <Layers size={14} className="text-emerald-500" />
             <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider font-bold">Datos de Silo</h3>
@@ -301,7 +301,7 @@ export default function BodegaDetalleAdminPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Inventario Actual */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <Inbox size={15} className="text-emerald-500" />
@@ -330,7 +330,7 @@ export default function BodegaDetalleAdminPage() {
           </div>
 
           {/* Tarifario de Servicios */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
               <Coins size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Tarifario Autorizado de Servicios (S)</h3>
@@ -358,7 +358,7 @@ export default function BodegaDetalleAdminPage() {
           </div>
 
           {/* Transacciones Recientes (30d) */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
               <ClipboardList size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Transacciones Recientes (Últimos 30 días)</h3>

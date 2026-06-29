@@ -4,7 +4,7 @@ import {
   ShieldCheck, Camera, X, ChevronLeft, ChevronRight, Loader2,
   CheckCircle2, AlertTriangle, RefreshCw, Filter, SortAsc, SortDesc,
   Phone, Hash, CheckSquare, Square, FileDown, TableProperties,
-  LayoutGrid, ArrowDownToLine, Fingerprint, Globe,
+  LayoutGrid, ArrowDownToLine, Fingerprint, Globe, FileCheck,
 } from 'lucide-react';
 
 /* ─── Configuración ──────────────────────────────────────────────── */
@@ -485,7 +485,24 @@ export default function AvisosPrivacidadAdminPage() {
     <>
       {seleccionado && <ModalDetalle aviso={seleccionado} onClose={() => setSeleccionado(null)} />}
 
-      <div className="flex flex-col gap-5 h-full">
+      <div className="flex flex-col gap-3 h-full">
+
+        {/* ── HEADER COMPACTO ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
+              <FileCheck size={16} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Avisos de Privacidad</h1>
+              <p className="text-[10.5px] text-gray-400 mt-0.5">Padrón de productores aceptantes del APCP</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-[10px] text-gray-500">
+            <span className="font-bold text-[#1A5C38] text-[13px]">{total}</span>
+            <span className="ml-0.5">registros</span>
+          </div>
+        </div>
 
         {/* ── MÉTRICAS ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

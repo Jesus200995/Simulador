@@ -249,10 +249,10 @@ export default function ProductorDetalleAdminPage() {
   }
 
   return (
-    <div className="space-y-6">
-      
+    <div className="flex flex-col gap-3">
+
       {/* Back button and title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 border border-white/5 rounded-2xl p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-100 shadow-sm rounded-2xl px-4 py-3">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/admin/productores')}
@@ -320,7 +320,7 @@ export default function ProductorDetalleAdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* 1. DATOS GENERALES (Col 1) */}
-        <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-5">
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-5">
           <div className="flex items-center gap-2 border-b border-white/5 pb-3">
             <Users size={15} className="text-emerald-500" />
             <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Identidad y Contacto</h3>
@@ -376,7 +376,7 @@ export default function ProductorDetalleAdminPage() {
         </div>
 
         {/* 2. DATOS DE LA UNIDAD DE PRODUCCIÓN (UP) & MAPA (Col 2 & 3) */}
-        <div className="lg:col-span-2 bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4 flex flex-col justify-between">
           
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
@@ -441,7 +441,7 @@ export default function ProductorDetalleAdminPage() {
       </div>
 
       {/* ── DISPONIBILIDADES DECLARADAS ── */}
-      <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+      <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
         <div className="flex items-center gap-2 border-b border-white/5 pb-3">
           <Sprout size={15} className="text-emerald-500" />
           <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Cosecha Declarada Disponible</h3>

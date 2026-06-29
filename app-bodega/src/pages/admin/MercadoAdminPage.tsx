@@ -84,19 +84,24 @@ export default function MercadoAdminPage() {
 
   const dispIdsConCoincidencia = useMemo(() => new Set(coincidencias.map(c => c.disp.id)), [coincidencias]);
   const reqIdsConCoincidencia  = useMemo(() => new Set(coincidencias.map(c => c.req.id)), [coincidencias]);
-  const CARD = 'bg-white border border-gray-200/70 rounded-2xl p-4 flex flex-col gap-2';
+  const CARD = 'bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-2';
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-3">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Módulo</p>
-          <h1 className="text-[17px] sm:text-[19px] font-black text-gray-900 tracking-tight leading-none">Mercado</h1>
+      {/* Header compacto */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
+            <BarChart3 size={16} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Mercado</h1>
+            <p className="text-[10.5px] text-gray-400 mt-0.5">Oferta · Demanda · Coincidencias geográficas</p>
+          </div>
         </div>
-        <button onClick={cargar} disabled={loading} className="flex items-center gap-2 text-[11px] font-bold text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 px-3.5 py-2 rounded-xl active:scale-95 transition-all disabled:opacity-50">
-          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Recargar
+        <button onClick={cargar} disabled={loading} className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+          <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> Recargar
         </button>
       </div>
 
@@ -127,7 +132,7 @@ export default function MercadoAdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Mapa Leaflet */}
-        <div className="lg:col-span-2 bg-white border border-gray-200/70 rounded-2xl overflow-hidden" style={{ minHeight: 380 }}>
+        <div className="lg:col-span-2 bg-white border border-gray-100 rounded-2xl overflow-hidden" style={{ minHeight: 380 }}>
           {coincidencias.length > 0 && (
             <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block" />
@@ -201,7 +206,7 @@ export default function MercadoAdminPage() {
         {/* Listas */}
         <div className="space-y-3">
           {/* Top disponibilidades */}
-          <div className="bg-white border border-gray-200/70 rounded-2xl overflow-hidden">
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
             <div className="px-3 py-2.5 border-b border-gray-200/60">
               <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Disponibilidades recientes</p>
             </div>
@@ -221,7 +226,7 @@ export default function MercadoAdminPage() {
           </div>
 
           {/* Top requerimientos */}
-          <div className="bg-white border border-gray-200/70 rounded-2xl overflow-hidden">
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
             <div className="px-3 py-2.5 border-b border-gray-200/60">
               <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Requerimientos recientes</p>
             </div>

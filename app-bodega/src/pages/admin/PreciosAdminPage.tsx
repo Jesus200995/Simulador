@@ -290,10 +290,10 @@ export default function PreciosAdminPage() {
   }
 
   return (
-    <div className="space-y-6">
-      
+    <div className="flex flex-col gap-3">
+
       {/* ── BARRA DE ESTADO SUPERIOR (ANCHO COMPLETO) ── */}
-      <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 flex-wrap">
           <div className="space-y-0.5">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Futuros Chicago (CME ZC=F)</span>
@@ -353,7 +353,7 @@ export default function PreciosAdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
             {/* Margen */}
-            <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
+            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Margen Negociación</span>
                 <p className="text-[26px] font-black text-gray-900 leading-none">{fmt(preciosHoy.precio_venta)}</p>
@@ -363,7 +363,7 @@ export default function PreciosAdminPage() {
             </div>
 
             {/* Compra */}
-            <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
+            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Precio de Compra</span>
                 <p className="text-[26px] font-black text-gray-900 leading-none">{fmt(preciosHoy.total_compra)}</p>
@@ -375,7 +375,7 @@ export default function PreciosAdminPage() {
             </div>
 
             {/* Venta */}
-            <div className="bg-white/80 border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
+            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/20 transition-all duration-300">
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Precio de Venta</span>
                 <p className={`text-[26px] font-black leading-none ${preciosHoy.precio_venta < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
@@ -390,7 +390,7 @@ export default function PreciosAdminPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white/80 border border-white/5 rounded-2xl p-4 animate-pulse space-y-3">
+                <div key={i} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 animate-pulse space-y-3">
                   <div className="h-2.5 bg-white/10 rounded w-1/2" />
                   <div className="h-7 bg-white/10 rounded w-3/4" />
                   <div className="h-2 bg-white/10 rounded w-2/3" />
@@ -400,7 +400,7 @@ export default function PreciosAdminPage() {
           )}
 
           {/* Gráfica 30d */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Activity size={14} className="text-emerald-500" />
@@ -435,7 +435,7 @@ export default function PreciosAdminPage() {
           </div>
 
           {/* Bodegas que publicaron hoy */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <Store size={15} className="text-emerald-500" />
@@ -478,7 +478,7 @@ export default function PreciosAdminPage() {
         <div className="space-y-6">
 
           {/* Utilidad FIRA */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <Wheat size={15} className="text-emerald-500" />
@@ -521,7 +521,7 @@ export default function PreciosAdminPage() {
           </div>
 
           {/* Discrepancias */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
               <ShieldCheck size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Discrepancias de Precios</h3>
@@ -553,7 +553,7 @@ export default function PreciosAdminPage() {
           </div>
 
           {/* Logs */}
-          <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/5 pb-3">
               <Clock size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Logs de Actualización (Chicago/TC)</h3>
@@ -584,7 +584,7 @@ export default function PreciosAdminPage() {
       </div>
 
       {/* ── SECTION TABLA BRECHAS (ANCHO COMPLETO, ABAJO) ── */}
-      <section className="bg-white/80 border border-white/5 rounded-2xl p-5 shadow-sm space-y-4">
+      <section className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-white/5 pb-3">
           <div className="flex items-center gap-2">
             <AlertTriangle size={15} className="text-emerald-500" />

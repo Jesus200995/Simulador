@@ -250,46 +250,45 @@ export default function BodegasAdminPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-88px)] gap-4 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
 
-      {/* ── TAB BAR ── */}
-      <div className="flex border-b border-white/5 gap-2 flex-shrink-0">
-        <button
-          onClick={() => setTabActivo('lista')}
-          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
-            tabActivo === 'lista'
-              ? 'border-emerald-500 text-gray-900'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <Warehouse size={14} />
-          Lista + Mapa
-        </button>
-        <button
-          onClick={() => setTabActivo('estadisticas')}
-          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
-            tabActivo === 'estadisticas'
-              ? 'border-emerald-500 text-gray-900'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <BarChart3 size={14} />
-          Estadísticas
-        </button>
-        <button
-          onClick={() => setTabActivo('pendientes')}
-          className={`px-4 py-3 text-[13px] font-bold border-b-2 transition-all flex items-center gap-2 ${
-            tabActivo === 'pendientes'
-              ? 'border-emerald-500 text-gray-900'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <ShieldAlert size={14} />
-          Por Aprobar
-          <span className="bg-amber-500/20 text-amber-500 text-[10px] px-1.5 py-0.5 rounded-full ml-1">
-            {bodegas.filter(b => b.estatus === 'pendiente').length}
-          </span>
-        </button>
+      {/* ── Header + Tab Bar ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex-shrink-0">
+        <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
+              <Warehouse size={16} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Bodegas</h1>
+              <p className="text-[10.5px] text-gray-400 mt-0.5">Lista · Estadísticas · Aprobaciones</p>
+            </div>
+          </div>
+          <button onClick={cargarBodegas} disabled={loading}
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+        <div className="flex">
+          {[
+            { key: 'lista',        label: 'Lista + Mapa', icon: <Warehouse size={12} />, badge: null },
+            { key: 'estadisticas', label: 'Estadísticas', icon: <BarChart3 size={12} />, badge: null },
+            { key: 'pendientes',   label: 'Por aprobar',  icon: <ShieldAlert size={12} />,
+              badge: bodegas.filter(b => b.estatus === 'pendiente').length },
+          ].map(({ key, label, icon, badge }) => (
+            <button key={key} onClick={() => setTabActivo(key as any)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-[11.5px] font-bold border-b-2 transition-all duration-150 ${
+                tabActivo === key
+                  ? 'border-[#1A5C38] text-[#1A5C38]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}>
+              {icon}{label}
+              {badge !== null && badge > 0 && (
+                <span className="bg-amber-100 text-amber-600 border border-amber-200 text-[9px] font-black px-1.5 py-0.5 rounded-full">{badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── TAB: ESTADÍSTICAS ── */}

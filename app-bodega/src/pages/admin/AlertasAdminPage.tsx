@@ -191,38 +191,52 @@ export default function AlertasAdminPage() {
   }).length;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-88px)] gap-4 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
 
-      {/* ── TOGGLE STATS ── */}
-      <div className="flex-shrink-0">
-        <button
-          onClick={() => setMostrarStats(!mostrarStats)}
-          className="flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all px-1"
-        >
-          <BarChart3 size={14} className="text-emerald-500" />
-          Panel de Estadísticas
-          <ChevronDown size={14} className={`transition-transform duration-200 ${mostrarStats ? 'rotate-180' : ''}`} />
-        </button>
+      {/* ── Header compacto + toggle stats ── */}
+      <div className="flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
+              <ShieldAlert size={16} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Incidencias y Alertas</h1>
+              <p className="text-[10.5px] text-gray-400 mt-0.5">Fitosanitarias · Climáticas · Operativas · Mercado</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={cargarAlertas} disabled={loading}
+              className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+              <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button
+              onClick={() => setMostrarStats(!mostrarStats)}
+              className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all duration-150 active:scale-95 ${mostrarStats ? 'text-[#1A5C38] bg-[#eef8f2] border-[#1A5C38]/20' : 'text-gray-500 bg-gray-50 border-gray-200 hover:border-gray-300'}`}
+            >
+              <BarChart3 size={11} />
+              Estadísticas
+              <ChevronDown size={11} className={`transition-transform duration-150 ${mostrarStats ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        </div>
 
         {mostrarStats && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-            {/* KPI: Productores afectados */}
-            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 space-y-1">
-              <p className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">Zonas Afectadas</p>
-              <p className="text-[28px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
-              <p className="text-[11px] text-red-600/60">Estados con alertas activas</p>
+          <div className="grid grid-cols-3 gap-0 border-t border-gray-100">
+            <div className="px-4 py-3 border-r border-gray-100">
+              <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-0.5">Zonas afectadas</p>
+              <p className="text-[22px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">estados con alertas activas</p>
             </div>
-            {/* KPI: Alertas activas hoy */}
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 space-y-1">
-              <p className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">Alertas Activas</p>
-              <p className="text-[28px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
-              <p className="text-[11px] text-amber-600/60">Incidencias vigentes hoy</p>
+            <div className="px-4 py-3 border-r border-gray-100">
+              <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-0.5">Alertas activas</p>
+              <p className="text-[22px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">incidencias vigentes hoy</p>
             </div>
-            {/* KPI: Atendidas este mes */}
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 space-y-1">
-              <p className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">Atendidas este Mes</p>
-              <p className="text-[28px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
-              <p className="text-[11px] text-emerald-600/60">Resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
+            <div className="px-4 py-3">
+              <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mb-0.5">Atendidas este mes</p>
+              <p className="text-[22px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
             </div>
           </div>
         )}
