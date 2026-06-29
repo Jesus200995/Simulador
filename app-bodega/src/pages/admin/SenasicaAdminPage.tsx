@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Upload, CheckCircle, AlertCircle, Clock, FileText, Leaf, RefreshCw,
-  Info, Settings2, MapPin, Bell, Check, X, Loader2, Activity
+  Info, Settings2, Bell, Check, X, Loader2, Activity
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
