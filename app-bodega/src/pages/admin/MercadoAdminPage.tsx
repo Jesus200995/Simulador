@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, TrendingUp, Users, Warehouse, BarChart3, ArrowUpDown, Star } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -96,8 +96,8 @@ export default function MercadoAdminPage() {
             <BarChart3 size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Mercado</h1>
-            <p className="text-[10.5px] text-gray-400 mt-0.5">Oferta · Demanda · Coincidencias geográficas</p>
+            <h1 className="text-[15px] font-bold text-gray-900">Mercado</h1>
+            <p className="text-[11px] text-gray-400 mt-0.5">Oferta · Demanda · Coincidencias geográficas</p>
           </div>
         </div>
         <button onClick={cargar} disabled={loading} className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
@@ -117,7 +117,7 @@ export default function MercadoAdminPage() {
         ].map((kpi, i) => (
           <div key={i} className={CARD}>
             <div className="flex items-start justify-between">
-              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{kpi.label}</p>
+              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">{kpi.label}</p>
               <div className={`w-7 h-7 rounded-lg ${kpi.bg} border flex items-center justify-center ${kpi.color} flex-shrink-0`}>{kpi.icon}</div>
             </div>
             <p className={`text-[18px] sm:text-[22px] font-black leading-none tracking-tight ${loading ? 'text-gray-500 animate-pulse' : kpi.color}`}>
@@ -208,7 +208,7 @@ export default function MercadoAdminPage() {
           {/* Top disponibilidades */}
           <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
             <div className="px-3 py-2.5 border-b border-gray-200/60">
-              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Disponibilidades recientes</p>
+              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Disponibilidades recientes</p>
             </div>
             <div className="divide-y divide-gray-100">
               {loading ? (
@@ -228,7 +228,7 @@ export default function MercadoAdminPage() {
           {/* Top requerimientos */}
           <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
             <div className="px-3 py-2.5 border-b border-gray-200/60">
-              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Requerimientos recientes</p>
+              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Requerimientos recientes</p>
             </div>
             <div className="divide-y divide-gray-100">
               {loading ? (
@@ -249,3 +249,4 @@ export default function MercadoAdminPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -260,8 +260,8 @@ export default function BodegasAdminPage() {
               <Warehouse size={16} className="text-white" />
             </div>
             <div>
-              <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Bodegas</h1>
-              <p className="text-[10.5px] text-gray-400 mt-0.5">Lista · Estadísticas · Aprobaciones</p>
+              <h1 className="text-[15px] font-bold text-gray-900">Bodegas</h1>
+              <p className="text-[11px] text-gray-400 mt-0.5">Lista · Estadísticas · Aprobaciones</p>
             </div>
           </div>
           <button onClick={cargarBodegas} disabled={loading}
@@ -303,31 +303,31 @@ export default function BodegasAdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* KPI: Capacidad total */}
               <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Capacidad Total</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Capacidad Total</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.capacidad_total || 0).toLocaleString()}</p>
                 <p className="text-[11px] text-gray-500">toneladas</p>
               </div>
               {/* KPI: Stock actual */}
               <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Stock Actual</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Stock Actual</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.stock_total || 0).toLocaleString()}</p>
                 <p className="text-[11px] text-gray-500">toneladas</p>
               </div>
               {/* KPI: % Ocupación */}
               <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">% Ocupación</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">% Ocupación</p>
                 <p className="text-[28px] font-black text-emerald-600 leading-none">{stats.pct_ocupacion || 0}<span className="text-[14px] text-gray-500 ml-1">%</span></p>
                 <p className="text-[11px] text-gray-500">capacidad utilizada</p>
               </div>
               {/* KPI: Con tarifario */}
               <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Con Tarifario</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Con Tarifario</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{stats.con_tarifario || 0}</p>
                 <p className="text-[11px] text-gray-500">bodegas con tarifa activa</p>
               </div>
               {/* KPI: Ventanillas activas */}
               <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Ventanillas Activas</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Ventanillas Activas</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{stats.ventanillas_activas || 0}</p>
                 <p className="text-[11px] text-gray-500">puntos de atención</p>
               </div>
@@ -340,53 +340,38 @@ export default function BodegasAdminPage() {
 
       {/* ── TAB: LISTA + MAPA ── */}
       {tabActivo === 'lista' && (
-      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
-      
-      {/* ── COLUMNA IZQUIERDA: LISTA & FILTROS (40%) ── */}
-      <div className="w-full lg:w-[400px] flex flex-col h-full bg-white/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
-        
-        {/* Controles y Contadores */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
-              <Warehouse size={15} className="text-emerald-500" />
-              Infraestructura Silos
-            </h2>
-            <span className="text-[10px] font-bold text-gray-500 uppercase bg-white/5 border border-gray-200 px-2 py-0.5 rounded-full">
-              {filteredList.length} Silos
+      <div className="flex flex-col lg:flex-row flex-1 gap-3 overflow-hidden min-h-0">
+
+      {/* ── COLUMNA IZQUIERDA: LISTA & FILTROS ── */}
+      <div className="w-full lg:w-[380px] flex flex-col bg-white border border-gray-100 shadow-sm rounded-2xl flex-shrink-0 overflow-hidden">
+
+        {/* Barra de búsqueda + filtros */}
+        <div className="p-3 space-y-2 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar bodega o silo..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:border-[#1A5C38]/40 focus:bg-white transition-all duration-150"
+              />
+            </div>
+            <span className="text-[10px] font-bold text-[#1A5C38] bg-[#eef8f2] border border-[#1A5C38]/20 px-2 py-1 rounded-lg flex-shrink-0">
+              {filteredList.length}
             </span>
           </div>
-
-          {/* Search bar */}
-          <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input 
-              type="text"
-              placeholder="Buscar silo o bodega..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
-            />
-          </div>
-
-          {/* Grid de selects compactos */}
-          <div className="grid grid-cols-2 gap-2 text-[11.5px]">
-            <select
-              value={estadoFilter}
-              onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-2 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
-            >
+          <div className="grid grid-cols-2 gap-2">
+            <select value={estadoFilter} onChange={e => setEstadoFilter(e.target.value)}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-2 text-[11.5px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150">
               <option value="">Estados</option>
               <option value="Sinaloa">Sinaloa</option>
               <option value="Jalisco">Jalisco</option>
               <option value="Guanajuato">Guanajuato</option>
             </select>
-
-            <select
-              value={estatusFilter}
-              onChange={e => setEstatusFilter(e.target.value)}
-              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-2 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
-            >
+            <select value={estatusFilter} onChange={e => setEstatusFilter(e.target.value)}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-2 text-[11.5px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150">
               <option value="">Estatus</option>
               <option value="aprobada">Aprobada</option>
               <option value="pendiente">Pendiente</option>
@@ -395,75 +380,59 @@ export default function BodegasAdminPage() {
           </div>
         </div>
 
-        {/* Scrollable list area */}
-        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+        {/* Lista scroll */}
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-2">
-              <RefreshCw size={20} className="text-emerald-500 animate-spin" />
-              <p className="text-[12px] text-gray-500">Cargando bodegas...</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
+              <RefreshCw size={18} className="text-[#1A5C38] animate-spin" />
+              <p className="text-[11.5px] text-gray-400">Cargando bodegas...</p>
             </div>
           ) : filteredList.length === 0 ? (
-            <div className="text-center py-16 text-gray-500 text-[12px] space-y-1">
-              <ShieldAlert size={24} className="mx-auto mb-2 text-gray-500" />
-              <p className="font-bold text-gray-500">Sin bodegas filtradas</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
+              <ShieldAlert size={20} className="text-gray-300" />
+              <p className="text-[12px] font-medium text-gray-400">Sin bodegas filtradas</p>
             </div>
           ) : (
             filteredList.map(b => (
-              <div 
-                key={b.id}
-                onClick={() => focusBodega(b)}
-                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-[#eef8f2] transition-all relative ${
-                  selectedBodegaId === b.id 
-                    ? 'border-emerald-500 bg-emerald-500/[0.02]' 
-                    : 'border-white/5'
-                }`}
-              >
-                {/* Semaphore color strip */}
-                <div className={`absolute top-0 bottom-0 left-0 w-1 rounded-l-xl ${
-                  b.semaforo_compra === 'verde' ? 'bg-emerald-500' :
-                  b.semaforo_compra === 'amarillo' ? 'bg-amber-500' :
-                  b.semaforo_compra === 'rojo' ? 'bg-red-500' : 'bg-gray-400'
+              <div key={b.id} onClick={() => focusBodega(b)}
+                className={`relative px-4 py-3 cursor-pointer hover:bg-[#f8fffe] transition-all duration-150 ${
+                  selectedBodegaId === b.id ? 'bg-[#f0faf5]' : ''
+                }`}>
+                <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${
+                  b.semaforo_compra === 'verde' ? 'bg-emerald-400' :
+                  b.semaforo_compra === 'amarillo' ? 'bg-amber-400' :
+                  b.semaforo_compra === 'rojo' ? 'bg-red-400' : 'bg-gray-200'
                 }`} />
-
-                <div className="pl-2 space-y-2">
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-extrabold text-gray-900 text-[13.5px] leading-tight truncate">{b.nombre}</h3>
-                    <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded ${
-                      b.estatus === 'aprobada' ? 'text-emerald-600 bg-emerald-500/10' :
-                      b.estatus === 'pendiente' ? 'text-amber-500 bg-amber-500/10' : 'text-gray-500 bg-white/5'
-                    }`}>
-                      {b.estatus.charAt(0).toUpperCase() + b.estatus.slice(1)}
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] text-gray-500 flex items-center gap-1 leading-none">
-                    <MapPin size={11} className="text-gray-500" />
-                    {b.municipio}, {b.estado}
-                  </p>
-
-                  <div className="flex justify-between items-center text-[11px] pt-1">
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Box size={11} className="text-gray-500" />
-                      Capacidad: <strong>{b.capacidad_total.toLocaleString()} t</strong>
-                    </div>
-                    
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); navigate(`/admin/bodegas/${b.id}`); }}
-                      className="text-emerald-500 hover:text-emerald-600 font-bold hover:underline inline-flex items-center gap-0.5"
-                    >
-                      Detalle <Eye size={11} />
-                    </button>
-                  </div>
+                <div className="flex justify-between items-start gap-2 mb-1">
+                  <p className="text-[12.5px] font-semibold text-gray-900 leading-snug line-clamp-1">{b.nombre}</p>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 ${
+                    b.estatus === 'aprobada' ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' :
+                    b.estatus === 'pendiente' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
+                    'text-gray-500 bg-gray-50 border border-gray-200'
+                  }`}>
+                    {b.estatus.charAt(0).toUpperCase() + b.estatus.slice(1)}
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                  <MapPin size={10} /> {b.municipio}, {b.estado}
+                </p>
+                <div className="flex justify-between items-center mt-1.5">
+                  <span className="text-[11px] text-gray-500 flex items-center gap-1">
+                    <Box size={10} /> <strong className="font-semibold">{b.capacidad_total.toLocaleString()} t</strong>
+                  </span>
+                  <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/bodegas/${b.id}`); }}
+                    className="text-[10.5px] font-semibold text-[#1A5C38] hover:underline flex items-center gap-0.5">
+                    Detalle <Eye size={10} />
+                  </button>
                 </div>
               </div>
             ))
           )}
         </div>
-
       </div>
 
-      {/* ── COLUMNA DERECHA: LEAFLET MAPA SATELITAL (60%) ── */}
-      <div className="flex-1 bg-white/80 border border-white/5 rounded-2xl overflow-hidden relative z-10">
+      {/* ── COLUMNA DERECHA: MAPA SATELITAL ── */}
+      <div className="flex-1 bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden relative z-10">
         
         <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -649,4 +618,5 @@ export default function BodegasAdminPage() {
     </div>
   );
 }
+
 

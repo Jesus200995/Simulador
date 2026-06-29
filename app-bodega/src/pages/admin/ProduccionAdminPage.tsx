@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Sprout, RefreshCw, AlertTriangle, TrendingUp, MapPin, Layers, CheckCircle, XCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -60,8 +60,8 @@ export default function ProduccionAdminPage() {
             <Sprout size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Producción</h1>
-            <p className="text-[10.5px] text-gray-400 mt-0.5">Cultivos · Ciclos · Cobertura por estado</p>
+            <h1 className="text-[15px] font-bold text-gray-900">Producción</h1>
+            <p className="text-[11px] text-gray-400 mt-0.5">Cultivos · Ciclos · Cobertura por estado</p>
           </div>
         </div>
         <button onClick={cargar} disabled={loading} className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
@@ -80,7 +80,7 @@ export default function ProduccionAdminPage() {
         ].map((kpi, i) => (
           <div key={i} className={CARD}>
             <div className="flex items-start justify-between">
-              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{kpi.label}</p>
+              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">{kpi.label}</p>
               <div className={`w-7 h-7 rounded-lg ${kpi.bg} border flex items-center justify-center ${kpi.color} flex-shrink-0`}>{kpi.icon}</div>
             </div>
             <p className={`text-[22px] sm:text-[26px] font-black leading-none tracking-tight ${loading ? 'text-gray-500 animate-pulse' : kpi.color}`}>
@@ -121,7 +121,7 @@ export default function ProduccionAdminPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="text-gray-500 text-[9px] uppercase tracking-widest font-bold">
+              <tr className="text-gray-500 text-[9px] uppercase tracking-wide font-bold">
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3 text-right">Predios</th>
                 <th className="px-4 py-3 text-right">Con ciclo</th>
@@ -156,3 +156,4 @@ export default function ProduccionAdminPage() {
     </div>
   );
 }
+

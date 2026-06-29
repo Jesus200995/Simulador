@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
@@ -201,8 +201,8 @@ export default function AlertasAdminPage() {
               <ShieldAlert size={16} className="text-white" />
             </div>
             <div>
-              <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Incidencias y Alertas</h1>
-              <p className="text-[10.5px] text-gray-400 mt-0.5">Fitosanitarias · Climáticas · Operativas · Mercado</p>
+              <h1 className="text-[15px] font-bold text-gray-900">Incidencias y Alertas</h1>
+              <p className="text-[11px] text-gray-400 mt-0.5">Fitosanitarias · Climáticas · Operativas · Mercado</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -224,17 +224,17 @@ export default function AlertasAdminPage() {
         {mostrarStats && (
           <div className="grid grid-cols-3 gap-0 border-t border-gray-100">
             <div className="px-4 py-3 border-r border-gray-100">
-              <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-0.5">Zonas afectadas</p>
+              <p className="text-[9px] font-bold text-red-500 uppercase tracking-wide mb-0.5">Zonas afectadas</p>
               <p className="text-[22px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">estados con alertas activas</p>
             </div>
             <div className="px-4 py-3 border-r border-gray-100">
-              <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-0.5">Alertas activas</p>
+              <p className="text-[9px] font-bold text-amber-500 uppercase tracking-wide mb-0.5">Alertas activas</p>
               <p className="text-[22px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">incidencias vigentes hoy</p>
             </div>
             <div className="px-4 py-3">
-              <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mb-0.5">Atendidas este mes</p>
+              <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wide mb-0.5">Atendidas este mes</p>
               <p className="text-[22px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
             </div>
@@ -246,38 +246,31 @@ export default function AlertasAdminPage() {
       <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: ALERTAS & FILTROS (35%) ── */}
-      <div className="w-full lg:w-[380px] flex flex-col h-full bg-white/80 border border-white/5 rounded-2xl flex-shrink-0 p-4 space-y-4 overflow-hidden">
-        
-        {/* Controles */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
-              <AlertTriangle size={15} className="text-emerald-500" />
-              Incidencias y Riesgos
-            </h2>
-            <span className="text-[10px] font-bold text-gray-500 bg-white/5 border border-gray-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
-              {filteredList.length} Activas
+      <div className="w-full lg:w-[370px] flex flex-col bg-white border border-gray-100 shadow-sm rounded-2xl flex-shrink-0 overflow-hidden">
+
+        {/* Búsqueda + filtros */}
+        <div className="p-3 space-y-2 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar alertas..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:border-[#1A5C38]/40 focus:bg-white transition-all duration-150"
+              />
+            </div>
+            <span className="text-[10px] font-bold text-[#1A5C38] bg-[#eef8f2] border border-[#1A5C38]/20 px-2 py-1 rounded-lg flex-shrink-0">
+              {filteredList.length}
             </span>
           </div>
 
-          {/* Search bar */}
-          <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input 
-              type="text"
-              placeholder="Buscar alertas..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-[12px] text-gray-900 placeholder-gray-500 outline-none focus:border-emerald-500/50 transition-all"
-            />
-          </div>
-
-          {/* Filtros grid */}
-          <div className="grid grid-cols-3 gap-1.5 text-[11px] font-bold">
+          <div className="grid grid-cols-3 gap-1.5">
             <select
               value={tipoFilter}
               onChange={e => setTipoFilter(e.target.value)}
-              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150"
             >
               <option value="">Tipos</option>
               <option value="fitosanitaria">Fitosanitaria</option>
@@ -289,98 +282,77 @@ export default function AlertasAdminPage() {
             <select
               value={nivelFilter}
               onChange={e => setNivelFilter(e.target.value)}
-              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150"
             >
               <option value="">Severidad</option>
               <option value="ALTA">Alta</option>
               <option value="MEDIA">Media</option>
               <option value="BAJA">Baja</option>
             </select>
-
-            <select
-              value={estadoFilter}
-              onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-[#f4fbf7] border border-white/5 rounded-lg px-1.5 py-2 text-gray-900 outline-none focus:border-emerald-500/50"
-            >
+            <select value={estadoFilter} onChange={e => setEstadoFilter(e.target.value)}
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150">
               <option value="activa">Activas</option>
               <option value="atendida">Atendidas</option>
             </select>
           </div>
         </div>
 
-        {/* Scroll list */}
-        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+        {/* Lista scroll */}
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-2">
-              <RefreshCw size={20} className="text-emerald-500 animate-spin" />
-              <p className="text-[12px] text-gray-500">Cargando incidencias...</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
+              <RefreshCw size={18} className="text-[#1A5C38] animate-spin" />
+              <p className="text-[11.5px] text-gray-400">Cargando incidencias...</p>
             </div>
           ) : filteredList.length === 0 ? (
-            <div className="text-center py-16 text-gray-500 text-[12px] space-y-1">
-              <ShieldAlert size={24} className="mx-auto mb-2 text-gray-500" />
-              <p className="font-bold text-gray-500">Sin incidencias reportadas</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
+              <ShieldAlert size={20} className="text-gray-300" />
+              <p className="text-[12px] font-medium text-gray-400">Sin incidencias reportadas</p>
             </div>
           ) : (
             filteredList.map(a => (
-              <div 
-                key={a.id}
-                onClick={() => focusAlerta(a)}
-                className={`bg-white/[0.01] border rounded-xl p-3.5 cursor-pointer hover:bg-[#eef8f2] transition-all relative ${
-                  selectedAlertaId === a.id 
-                    ? 'border-emerald-500 bg-emerald-500/[0.01]' 
-                    : 'border-white/5'
-                }`}
-              >
-                {/* Severity strip */}
-                <div className={`absolute top-0 bottom-0 left-0 w-1 rounded-l-xl ${
-                  a.nivel_criticidad === 'ALTA' ? 'bg-red-500' :
-                  a.nivel_criticidad === 'MEDIA' ? 'bg-amber-500' : 'bg-blue-500'
+              <div key={a.id} onClick={() => focusAlerta(a)}
+                className={`relative px-4 py-3 cursor-pointer hover:bg-[#f8fffe] transition-all duration-150 ${
+                  selectedAlertaId === a.id ? 'bg-[#f0faf5]' : ''
+                }`}>
+                <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${
+                  a.nivel_criticidad === 'ALTA' ? 'bg-red-400' :
+                  a.nivel_criticidad === 'MEDIA' ? 'bg-amber-400' : 'bg-blue-400'
                 }`} />
-
-                <div className="pl-2 space-y-2">
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-extrabold text-gray-900 text-[13px] leading-tight line-clamp-1">{a.titulo}</h3>
-                    <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded ${
-                      a.nivel_criticidad === 'ALTA' ? 'text-red-600 bg-red-500/10' :
-                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-600 bg-amber-500/10' : 'text-blue-600 bg-blue-500/10'
-                    }`}>
-                      {a.nivel_criticidad}
+                <div className="flex justify-between items-start gap-2 mb-1">
+                  <p className="text-[12.5px] font-semibold text-gray-900 leading-snug line-clamp-1">{a.titulo}</p>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 ${
+                    a.nivel_criticidad === 'ALTA' ? 'text-red-700 bg-red-50 border border-red-200' :
+                    a.nivel_criticidad === 'MEDIA' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
+                    'text-blue-700 bg-blue-50 border border-blue-200'
+                  }`}>{a.nivel_criticidad}</span>
+                </div>
+                <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{a.descripcion}</p>
+                <div className="flex justify-between items-center">
+                  <p className="text-[10.5px] text-gray-400 flex items-center gap-1">
+                    <Clock size={10} />
+                    {a.estado_afectado} · {new Date(a.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                  </p>
+                  {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
+                    <button onClick={(e) => { e.stopPropagation(); setResolvingAlerta(a); }}
+                      className="text-[10.5px] font-semibold text-[#1A5C38] hover:underline flex items-center gap-0.5">
+                      Atender <Check size={10} />
+                    </button>
+                  )}
+                  {a.estado === 'atendida' && (
+                    <span className="text-[10.5px] text-gray-400 flex items-center gap-0.5">
+                      Resuelta <Check size={10} className="text-emerald-500" />
                     </span>
-                  </div>
-
-                  <p className="text-[11.5px] text-gray-500 leading-relaxed line-clamp-2">{a.descripcion}</p>
-
-                  <div className="flex justify-between items-center text-[10.5px] pt-1">
-                    <p className="text-gray-500 flex items-center gap-1">
-                      <Clock size={11} />
-                      {a.estado_afectado} · {new Date(a.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
-                    </p>
-                    
-                    {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setResolvingAlerta(a); }}
-                        className="text-emerald-500 hover:text-emerald-600 font-extrabold flex items-center gap-0.5 hover:underline"
-                      >
-                        Atender <Check size={11} />
-                      </button>
-                    )}
-
-                    {a.estado === 'atendida' && (
-                      <span className="text-gray-500 font-bold flex items-center gap-0.5">
-                        Resuelta <Check size={11} className="text-emerald-500" />
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             ))
           )}
         </div>
-
       </div>
 
       {/* ── COLUMNA DERECHA: LEAFLET MAPA (65%) ── */}
-      <div className="flex-1 bg-white/80 border border-white/5 rounded-2xl overflow-hidden relative z-10">
+      <div className="flex-1 bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden relative z-10">
         
         <MapContainer center={[23.6345, -102.5528]} zoom={5} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -463,7 +435,7 @@ export default function AlertasAdminPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block">
                   Notas de Resolución e Inspección
                 </label>
                 <textarea 
@@ -501,3 +473,4 @@ export default function AlertasAdminPage() {
     </div>
   );
 }
+

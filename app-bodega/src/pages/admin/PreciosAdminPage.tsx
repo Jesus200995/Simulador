@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend,
@@ -404,7 +404,7 @@ export default function PreciosAdminPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Activity size={14} className="text-emerald-500" />
-                <h3 className="text-[12px] font-bold text-gray-900 uppercase tracking-widest">Gráfica Tendencia Histórica (30 días)</h3>
+                <h3 className="text-[12px] font-bold text-gray-900 uppercase tracking-wide">Gráfica Tendencia Histórica (30 días)</h3>
               </div>
               <span className="text-[10px] text-gray-500">Base: MXN/ton</span>
             </div>
@@ -720,7 +720,7 @@ export default function PreciosAdminPage() {
               <p className="text-[13px] text-gray-700 leading-normal">{resolvingDisc.descripcion}</p>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block">
                   Notas de Resolución (Auditoría)
                 </label>
                 <textarea 
@@ -757,3 +757,4 @@ export default function PreciosAdminPage() {
     </div>
   );
 }
+

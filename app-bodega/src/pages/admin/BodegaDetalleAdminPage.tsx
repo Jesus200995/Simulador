@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Phone, MapPin, Inbox, Coins, 
@@ -431,7 +431,7 @@ export default function BodegaDetalleAdminPage() {
               </p>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block">
                   {modalType === 'rechazar' ? 'Motivo del Rechazo (Obligatorio)' : 'Nota Adicional (Opcional)'}
                 </label>
                 <textarea 
@@ -483,3 +483,4 @@ export default function BodegaDetalleAdminPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, Warehouse, Landmark, AlertTriangle, TrendingUp,
@@ -119,8 +119,8 @@ export default function DashboardAdminPage() {
             <Activity size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Panel de Control</h1>
-            <p className="text-[10.5px] text-gray-400 mt-0.5 flex items-center gap-1">
+            <h1 className="text-[15px] font-bold text-gray-900">Panel de Control</h1>
+            <p className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1">
               {lastUpdate ? <><Clock size={9} /> Actualizado a las {lastUpdate}</> : 'Resumen operativo general'}
             </p>
           </div>
@@ -146,7 +146,7 @@ export default function DashboardAdminPage() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 hover:border-emerald-500/20 hover:shadow-sm transition-all duration-150 group">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Productores</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-2">Productores</p>
                 <p className="text-[26px] sm:text-[32px] font-black text-gray-900 leading-none tracking-tight">{kpis.productores_activos}</p>
                 <p className="text-[10px] text-gray-500 mt-1">activos y validados</p>
               </div>
@@ -166,7 +166,7 @@ export default function DashboardAdminPage() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 hover:border-blue-500/20 transition-all duration-150">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Bodegas</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-2">Bodegas</p>
                 <p className="text-[26px] sm:text-[32px] font-black text-gray-900 leading-none tracking-tight">{kpis.bodegas_activas}</p>
                 <p className="text-[10px] text-gray-500 mt-1">aprobadas con silo</p>
               </div>
@@ -186,7 +186,7 @@ export default function DashboardAdminPage() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 hover:border-indigo-500/20 transition-all duration-150">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Transacciones</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-2">Transacciones</p>
                 <p className="text-[26px] sm:text-[32px] font-black text-gray-900 leading-none tracking-tight">{kpis.transacciones_7d}</p>
                 <p className="text-[10px] text-gray-500 mt-1">últimos 7 días</p>
               </div>
@@ -204,7 +204,7 @@ export default function DashboardAdminPage() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 hover:border-red-500/20 transition-all duration-150">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Alertas</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-2">Alertas</p>
                 <p className={`text-[26px] sm:text-[32px] font-black leading-none tracking-tight ${kpis.alertas_criticas > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                   {kpis.alertas_criticas + kpis.alertas_medias}
                 </p>
@@ -228,7 +228,7 @@ export default function DashboardAdminPage() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 hover:border-emerald-500/20 transition-all duration-150">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Disponibilidad</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-2">Disponibilidad</p>
                 <p className="text-[22px] sm:text-[26px] font-black text-gray-900 leading-none tracking-tight">
                   {fmtTon(kpis.disponibilidades_ton)}
                 </p>
@@ -248,7 +248,7 @@ export default function DashboardAdminPage() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 hover:border-amber-500/20 transition-all duration-150">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Requerimientos</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-2">Requerimientos</p>
                 <p className="text-[22px] sm:text-[26px] font-black text-gray-900 leading-none tracking-tight">
                   {fmtTon(kpis.requerimientos_ton)}
                 </p>
@@ -305,7 +305,7 @@ export default function DashboardAdminPage() {
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left divide-y divide-gray-100">
             <thead>
-              <tr className="text-gray-500 text-[9px] uppercase tracking-widest font-bold">
+              <tr className="text-gray-500 text-[9px] uppercase tracking-wide font-bold">
                 <th className="px-5 py-3">Tipo</th>
                 <th className="px-5 py-3">Descripción</th>
                 <th className="px-5 py-3">Actor</th>
@@ -345,3 +345,4 @@ export default function DashboardAdminPage() {
     </div>
   );
 }
+

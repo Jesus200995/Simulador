@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import {
   Upload, CheckCircle, AlertCircle, Clock, FileText, Leaf, RefreshCw,
   Info, Settings2, Bell, Check, X, Loader2, Activity, MapPin,
@@ -106,8 +106,8 @@ export default function SenasicaAdminPage() {
             <Leaf size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Alertas Fitosanitarias SENASICA</h1>
-            <p className="text-[10.5px] text-gray-400 mt-0.5">Carga CSV · Notificaciones geoespaciales automáticas</p>
+            <h1 className="text-[15px] font-bold text-gray-900">Alertas Fitosanitarias SENASICA</h1>
+            <p className="text-[11px] text-gray-400 mt-0.5">Carga CSV · Notificaciones geoespaciales automáticas</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -219,7 +219,7 @@ export default function SenasicaAdminPage() {
                       <p className="text-[11px] text-gray-400 mt-0.5">{(archivo.size / 1024 / 1024).toFixed(1)} MB</p>
                     )}
                     {!archivo && (
-                      <p className="text-[10.5px] text-gray-400 mt-0.5">Formato .csv · Máx 250 MB</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">Formato .csv · Máx 250 MB</p>
                     )}
                   </div>
                   {archivo && (
@@ -442,3 +442,4 @@ export default function SenasicaAdminPage() {
     </div>
   );
 }
+

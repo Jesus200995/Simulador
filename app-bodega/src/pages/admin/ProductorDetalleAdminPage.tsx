@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
 import { 
@@ -450,7 +450,7 @@ export default function ProductorDetalleAdminPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px] divide-y divide-white/5">
             <thead>
-              <tr className="text-gray-500 font-bold text-[10.5px] uppercase tracking-widest bg-white/[0.01]">
+              <tr className="text-gray-500 font-bold text-[10.5px] uppercase tracking-wide bg-white/[0.01]">
                 <th className="py-3 px-4">Tipo Maíz</th>
                 <th className="py-3 px-4">Variedad de Semilla</th>
                 <th className="py-3 px-4">Volumen Declarado</th>
@@ -514,7 +514,7 @@ export default function ProductorDetalleAdminPage() {
               </p>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block">
                   {modalType === 'rechazar' ? 'Motivo del Rechazo (Obligatorio)' : 'Nota Interna (Opcional)'}
                 </label>
                 <textarea 
@@ -566,3 +566,4 @@ export default function ProductorDetalleAdminPage() {
     </div>
   );
 }
+

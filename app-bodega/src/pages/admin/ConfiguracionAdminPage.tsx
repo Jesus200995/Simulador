@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Settings, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle, Settings2 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -99,7 +99,7 @@ export default function ConfiguracionAdminPage() {
   }
 
   const INPUT = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#1A5C38]/40 focus:bg-white transition-all duration-150';
-  const LABEL = 'text-[9.5px] font-bold text-gray-400 uppercase tracking-widest mb-1 block';
+  const LABEL = 'text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mb-1 block';
 
   return (
     <div className="flex flex-col gap-3">
@@ -111,8 +111,8 @@ export default function ConfiguracionAdminPage() {
             <Settings2 size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Configuración del Sistema</h1>
-            <p className="text-[10.5px] text-gray-400 mt-0.5">Parámetros · Usuarios · Catálogos</p>
+            <h1 className="text-[15px] font-bold text-gray-900">Configuración del Sistema</h1>
+            <p className="text-[11px] text-gray-400 mt-0.5">Parámetros · Usuarios · Catálogos</p>
           </div>
         </div>
       </div>
@@ -173,7 +173,7 @@ export default function ConfiguracionAdminPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="text-gray-400 text-[9.5px] uppercase tracking-widest font-bold bg-gray-50/60">
+              <tr className="text-gray-400 text-[9.5px] uppercase tracking-wide font-bold bg-gray-50/60">
                 <th className="px-4 py-2.5">Nombre</th>
                 <th className="px-4 py-2.5">Email</th>
                 <th className="px-4 py-2.5">Rol</th>
@@ -226,7 +226,7 @@ export default function ConfiguracionAdminPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="text-gray-400 text-[9.5px] uppercase tracking-widest font-bold bg-gray-50/60">
+              <tr className="text-gray-400 text-[9.5px] uppercase tracking-wide font-bold bg-gray-50/60">
                 <th className="px-4 py-2.5">Nombre</th>
                 <th className="px-4 py-2.5 text-center">Estatus</th>
                 <th className="px-4 py-2.5 text-center">Acción</th>
@@ -347,3 +347,4 @@ export default function ConfiguracionAdminPage() {
     </div>
   );
 }
+

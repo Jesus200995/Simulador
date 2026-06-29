@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search, Download, Eye, MapPin, Calendar, User, FileText,
   ShieldCheck, Camera, X, ChevronLeft, ChevronRight, Loader2,
@@ -283,7 +283,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
           {/* Barra de completitud */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Completitud del registro</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Completitud del registro</p>
               <span className={`text-[11px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>{pct}%</span>
             </div>
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -321,7 +321,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
 
           {/* Datos de aceptación */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100">
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Datos de la Aceptación</p>
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-wide">Datos de la Aceptación</p>
             <DetailRow icon={<Calendar size={13} className="text-emerald-500" />} label="Fecha y hora" val={fmt(aviso.aviso_privacidad_fecha)} />
             <DetailRow
               icon={<MapPin size={13} className="text-emerald-500" />}
@@ -341,7 +341,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
             <div className="rounded-2xl overflow-hidden border border-gray-100">
               <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <Fingerprint size={12} className="text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Verificación biométrica del titular</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Verificación biométrica del titular</p>
               </div>
               <img src={foto} alt="Biométrico" className="w-full object-cover max-h-72" />
             </div>
@@ -494,8 +494,8 @@ export default function AvisosPrivacidadAdminPage() {
               <FileCheck size={16} className="text-white" />
             </div>
             <div>
-              <h1 className="text-[14px] font-black text-gray-900 tracking-tight">Avisos de Privacidad</h1>
-              <p className="text-[10.5px] text-gray-400 mt-0.5">Padrón de productores aceptantes del APCP</p>
+              <h1 className="text-[15px] font-bold text-gray-900">Avisos de Privacidad</h1>
+              <p className="text-[11px] text-gray-400 mt-0.5">Padrón de productores aceptantes del APCP</p>
             </div>
           </div>
           <div className="flex items-center gap-1 text-[10px] text-gray-500">
@@ -556,7 +556,7 @@ export default function AvisosPrivacidadAdminPage() {
 
             {filtrosOpen && (
               <div className="absolute top-full mt-1.5 left-0 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 w-64">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Filtros activos</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">Filtros activos</p>
                 <div className="space-y-2.5">
                   {/* Tipo */}
                   <div>
@@ -686,8 +686,8 @@ export default function AvisosPrivacidadAdminPage() {
                 ] as [SortKey, string][]).map(([k, lbl]) => (
                   <ColHeader key={k} label={lbl} sk={k} cur={sortKey} dir={sortDir} onClick={() => toggleSort(k)} />
                 ))}
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest self-center">Completitud</p>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest self-center">Acciones</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-wide self-center">Completitud</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-wide self-center">Acciones</p>
               </div>
 
               {/* Filas */}
@@ -786,7 +786,7 @@ function ColHeader({ label, sk, cur, dir, onClick }: {
   const active = sk === cur;
   return (
     <button onClick={onClick}
-      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest transition-colors text-left ${active ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-wide transition-colors text-left ${active ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
     >
       {label}
       {active
@@ -934,7 +934,7 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
       {/* Barra completitud */}
       <div className="mb-3">
         <div className="flex justify-between mb-1">
-          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Completitud</span>
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Completitud</span>
           <span className={`text-[9px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>{pct}%</span>
         </div>
         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -995,3 +995,4 @@ function SkCard() {
     </div>
   );
 }
+
