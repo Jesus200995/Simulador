@@ -302,31 +302,31 @@ export default function BodegasAdminPage() {
           ) : stats ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* KPI: Capacidad total */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
+              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Capacidad Total</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.capacidad_total || 0).toLocaleString()}</p>
                 <p className="text-[11px] text-gray-500">toneladas</p>
               </div>
               {/* KPI: Stock actual */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
+              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Stock Actual</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.stock_total || 0).toLocaleString()}</p>
                 <p className="text-[11px] text-gray-500">toneladas</p>
               </div>
               {/* KPI: % Ocupación */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
+              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">% Ocupación</p>
                 <p className="text-[28px] font-black text-emerald-600 leading-none">{stats.pct_ocupacion || 0}<span className="text-[14px] text-gray-500 ml-1">%</span></p>
                 <p className="text-[11px] text-gray-500">capacidad utilizada</p>
               </div>
               {/* KPI: Con tarifario */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
+              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Con Tarifario</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{stats.con_tarifario || 0}</p>
                 <p className="text-[11px] text-gray-500">bodegas con tarifa activa</p>
               </div>
               {/* KPI: Ventanillas activas */}
-              <div className="bg-white/80 border border-white/5 rounded-2xl p-5 space-y-1">
+              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Ventanillas Activas</p>
                 <p className="text-[28px] font-black text-gray-900 leading-none">{stats.ventanillas_activas || 0}</p>
                 <p className="text-[11px] text-gray-500">puntos de atención</p>
@@ -395,10 +395,10 @@ export default function BodegasAdminPage() {
           ) : (
             filteredList.map(b => (
               <div key={b.id} onClick={() => focusBodega(b)}
-                className={`relative px-4 py-3 cursor-pointer hover:bg-[#f8fffe] transition-all duration-150 ${
+                className={`relative px-4 py-3 cursor-pointer hover:bg-[#eef8f2] transition-all duration-150 ${
                   selectedBodegaId === b.id ? 'bg-[#f0faf5]' : ''
                 }`}>
-                <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${
+                <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full ${
                   b.semaforo_compra === 'verde' ? 'bg-emerald-400' :
                   b.semaforo_compra === 'amarillo' ? 'bg-amber-400' :
                   b.semaforo_compra === 'rojo' ? 'bg-red-400' : 'bg-gray-200'
@@ -457,7 +457,7 @@ export default function BodegasAdminPage() {
             >
               <Popup className="custom-premium-popup" autoPan={false}>
                 <div className="p-3.5 space-y-2.5 text-gray-900">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
+                  <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
                       b.estatus === 'aprobada' ? 'text-emerald-600 bg-emerald-500/10 border border-emerald-500/20' :
                       b.estatus === 'pendiente' ? 'text-amber-600 bg-amber-500/10 border border-amber-500/20' :
@@ -479,7 +479,7 @@ export default function BodegasAdminPage() {
                     </p>
                   </div>
 
-                  <div className="text-[11px] text-gray-700 bg-[#f4fbf7] border border-white/5 rounded-xl p-2.5 space-y-1">
+                  <div className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-2.5 space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500 font-medium">Capacidad:</span>
                       <strong className="text-gray-900 font-bold">{b.capacidad_total.toLocaleString()} t</strong>
@@ -539,7 +539,7 @@ export default function BodegasAdminPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button 
                       onClick={() => confirmarAprobar(b.id, b.nombre)}
                       className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl text-[12px] transition-all"
@@ -563,9 +563,9 @@ export default function BodegasAdminPage() {
       {/* ── MODAL DE CONFIRMACIÓN (APPLE 2026 STYLE) ── */}
       {modalConfirmacion.visible && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/30 backdrop-blur-sm p-4">
-          <div className="bg-[#f4fbf7] border border-gray-200 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white border border-gray-100 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Header del modal */}
-            <div className={`p-6 pb-4 border-b border-white/5 flex flex-col items-center text-center`}>
+            <div className={`p-6 pb-4 border-b border-gray-100 flex flex-col items-center text-center`}>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                 modalConfirmacion.tipo === 'aprobar' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
               }`}>
@@ -618,5 +618,7 @@ export default function BodegasAdminPage() {
     </div>
   );
 }
+
+
 
 

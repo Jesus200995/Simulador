@@ -262,7 +262,7 @@ export default function PreciosAdminPage() {
   // Mientras carga o si hay error — NO mostrar números ficticios
   if (!preciosData) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-3">
         {preciosError ? (
           <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center">
             <p className="text-red-600 font-bold text-[14px]">Error al cargar precios</p>
@@ -328,7 +328,7 @@ export default function PreciosAdminPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <button 
             onClick={exportarPreciosHoy}
-            className="flex items-center gap-1 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all duration-200"
+            className="flex items-center gap-1 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-gray-100 rounded-xl text-[12px] font-bold text-gray-500 hover:text-gray-900 transition-all duration-200"
           >
             <Download size={12} /> Descargar CSV
           </button>
@@ -436,7 +436,7 @@ export default function PreciosAdminPage() {
 
           {/* Bodegas que publicaron hoy */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
                 <Store size={15} className="text-emerald-500" />
                 <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Acopios Reportados Hoy</h3>
@@ -445,7 +445,7 @@ export default function PreciosAdminPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-[12.5px] divide-y divide-white/5">
+              <table className="w-full text-left text-[12.5px] divide-y divide-gray-100">
                 <thead>
                   <tr className="text-gray-500 font-bold text-[10px] uppercase tracking-wider">
                     <th className="py-2.5">Silo / Bodega</th>
@@ -455,7 +455,7 @@ export default function PreciosAdminPage() {
                     <th className="py-2.5 text-right">Vs. Promedio</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-gray-700">
+                <tbody className="divide-y divide-gray-100 text-gray-700">
                   {bodegasHoy.map((b, idx) => (
                     <tr key={idx} className="hover:bg-white/[0.01]">
                       <td className="py-3 font-bold text-gray-900">{b.nombre}</td>
@@ -475,11 +475,11 @@ export default function PreciosAdminPage() {
         </div>
 
         {/* ── COLUMNA DERECHA (40%) ── */}
-        <div className="space-y-6">
+        <div className="flex flex-col gap-3">
 
           {/* Utilidad FIRA */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
                 <Wheat size={15} className="text-emerald-500" />
                 <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Costos de Producción FIRA</h3>
@@ -499,7 +499,7 @@ export default function PreciosAdminPage() {
                     const costoHa = (fira as any).costo_por_ha || (fira as any).precio_fira || (fira as any).costo_por_ton || 0;
                     const utilidad = (preciosHoy?.po ?? 0) - costoHa;
                     return (
-                      <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 flex justify-between items-center">
+                      <div key={idx} className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex justify-between items-center">
                         <div>
                           <p className="font-extrabold text-gray-900">{fira.estado}</p>
                           <p className="text-[10px] text-gray-500 mt-0.5">{fira.ciclo} · {fira.modalidad}</p>
@@ -522,7 +522,7 @@ export default function PreciosAdminPage() {
 
           {/* Discrepancias */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
               <ShieldCheck size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Discrepancias de Precios</h3>
             </div>
@@ -532,7 +532,7 @@ export default function PreciosAdminPage() {
                 <p className="text-[12px] text-gray-500 py-3 text-center">Sin discrepancias de precios pendientes.</p>
               ) : (
                 discrepancias.map((disc, idx) => (
-                  <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 space-y-2 text-[12.5px]">
+                  <div key={idx} className="bg-gray-50 border border-gray-100 rounded-xl p-3 space-y-2 text-[12.5px]">
                     <div className="flex justify-between items-start">
                       <span className="px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider rounded text-red-600 bg-red-500/10 border border-red-500/20">
                         {disc.prioridad}
@@ -554,7 +554,7 @@ export default function PreciosAdminPage() {
 
           {/* Logs */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
               <Clock size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Logs de Actualización (Chicago/TC)</h3>
             </div>
@@ -564,7 +564,7 @@ export default function PreciosAdminPage() {
                 <p className="text-[12px] text-gray-500 py-2">Sin actualizaciones manuales registradas.</p>
               ) : (
                 logs.slice(0, 5).map((log, idx) => (
-                  <div key={idx} className="text-[11.5px] bg-white/[0.01] border border-white/5 rounded-xl p-2.5 flex justify-between items-center text-gray-500">
+                  <div key={idx} className="text-[11.5px] bg-gray-50 border border-gray-100 rounded-xl p-2.5 flex justify-between items-center text-gray-500">
                     <div>
                       <p className="font-bold text-gray-900">{new Date(log.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
                       <p className="text-[9px] text-gray-500 mt-0.5">Fuente: {log.fuente}</p>
@@ -585,7 +585,7 @@ export default function PreciosAdminPage() {
 
       {/* ── SECTION TABLA BRECHAS (ANCHO COMPLETO, ABAJO) ── */}
       <section className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <div className="flex items-center gap-2">
             <AlertTriangle size={15} className="text-emerald-500" />
             <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Auditoría de Brechas Regionales</h3>
@@ -594,7 +594,7 @@ export default function PreciosAdminPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px] divide-y divide-white/5">
+          <table className="w-full text-left text-[13px] divide-y divide-gray-100">
             <thead>
               <tr className="text-gray-500 font-bold text-[10px] uppercase tracking-wider">
                 <th className="py-2.5">Estado</th>
@@ -605,7 +605,7 @@ export default function PreciosAdminPage() {
                 <th className="py-2.5 text-right">Muestras (7d)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-gray-700">
+            <tbody className="divide-y divide-gray-100 text-gray-700">
               {brechas.map((br, idx) => (
                 <tr key={idx} className="hover:bg-white/[0.01]">
                   <td className="py-3 font-bold text-gray-900">{br.estado}</td>
@@ -631,9 +631,9 @@ export default function PreciosAdminPage() {
       {/* ── MODAL: SUBIR CSV FIRA ── */}
       {showFiraModal && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleUploadFira} className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <form onSubmit={handleUploadFira} className="bg-white border border-gray-100 rounded-2xl max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                 <Upload size={16} />
               </div>
@@ -682,7 +682,7 @@ export default function PreciosAdminPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
               <button 
                 type="button"
                 onClick={() => { setShowFiraModal(false); setSelectedFile(null); setFiraError(''); setFiraResult(null); }}
@@ -707,9 +707,9 @@ export default function PreciosAdminPage() {
       {/* ── MODAL: RESOLVER DISCREPANCIA ── */}
       {resolvingDisc && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-white border border-gray-100 rounded-2xl max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                 <Check size={16} />
               </div>
@@ -728,12 +728,12 @@ export default function PreciosAdminPage() {
                   placeholder="Detalla las acciones o el veredicto administrativo tomado sobre esta discrepancia de precios..."
                   value={notaResolucion}
                   onChange={e => setNotaResolucion(e.target.value)}
-                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingDisc(null); setNotaResolucion(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -757,4 +757,6 @@ export default function PreciosAdminPage() {
     </div>
   );
 }
+
+
 

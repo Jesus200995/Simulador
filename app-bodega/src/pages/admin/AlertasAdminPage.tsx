@@ -243,7 +243,7 @@ export default function AlertasAdminPage() {
       </div>
 
       {/* ── LAYOUT PRINCIPAL ── */}
-      <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 gap-3 overflow-hidden min-h-0">
       
       {/* ── COLUMNA IZQUIERDA: ALERTAS & FILTROS (35%) ── */}
       <div className="w-full lg:w-[370px] flex flex-col bg-white border border-gray-100 shadow-sm rounded-2xl flex-shrink-0 overflow-hidden">
@@ -312,10 +312,10 @@ export default function AlertasAdminPage() {
           ) : (
             filteredList.map(a => (
               <div key={a.id} onClick={() => focusAlerta(a)}
-                className={`relative px-4 py-3 cursor-pointer hover:bg-[#f8fffe] transition-all duration-150 ${
+                className={`relative px-4 py-3 cursor-pointer hover:bg-[#eef8f2] transition-all duration-150 ${
                   selectedAlertaId === a.id ? 'bg-[#f0faf5]' : ''
                 }`}>
-                <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${
+                <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full ${
                   a.nivel_criticidad === 'ALTA' ? 'bg-red-400' :
                   a.nivel_criticidad === 'MEDIA' ? 'bg-amber-400' : 'bg-blue-400'
                 }`} />
@@ -377,7 +377,7 @@ export default function AlertasAdminPage() {
             >
               <Popup className="custom-premium-popup" autoPan={false}>
                 <div className="p-3.5 space-y-2.5 text-gray-900">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
+                  <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
                       a.nivel_criticidad === 'ALTA' ? 'text-red-600 bg-red-500/10 border border-red-500/20' :
                       a.nivel_criticidad === 'MEDIA' ? 'text-amber-600 bg-amber-500/10 border border-amber-500/20' :
@@ -395,7 +395,7 @@ export default function AlertasAdminPage() {
                     <p className="text-[11px] text-gray-700 leading-relaxed font-medium line-clamp-3">{a.descripcion}</p>
                   </div>
 
-                  <div className="text-[10.5px] text-gray-500 border-t border-white/5 pt-2 flex justify-between items-center">
+                  <div className="text-[10.5px] text-gray-500 border-t border-gray-100 pt-2 flex justify-between items-center">
                     <span>Zona: <strong className="text-gray-900">{a.estado_afectado}</strong></span>
                     <span className="capitalize">Estatus: <strong className="text-gray-900">{a.estado}</strong></span>
                   </div>
@@ -419,9 +419,9 @@ export default function AlertasAdminPage() {
       {/* ── MODAL: ATENDER ALERTA ── */}
       {resolvingAlerta && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-white border border-gray-100 rounded-2xl max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                 <Check size={16} />
               </div>
@@ -443,12 +443,12 @@ export default function AlertasAdminPage() {
                   placeholder="Detalla las medidas preventivas, correctivas o la auditoría del mercado ejecutada sobre esta alerta..."
                   value={notasResolucion}
                   onChange={e => setNotasResolucion(e.target.value)}
-                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setResolvingAlerta(null); setNotasResolucion(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -473,4 +473,6 @@ export default function AlertasAdminPage() {
     </div>
   );
 }
+
+
 

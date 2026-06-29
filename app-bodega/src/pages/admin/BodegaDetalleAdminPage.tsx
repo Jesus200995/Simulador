@@ -220,7 +220,7 @@ export default function BodegaDetalleAdminPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-[#f4fbf7] border border-white/5 px-3 py-1.5 rounded-xl text-[12px]">
+          <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl text-[12px]">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Estatus:</span>
             <span className={`text-[11px] font-bold uppercase tracking-wide ${
               data.estatus === 'aprobada' ? 'text-emerald-500' :
@@ -254,7 +254,7 @@ export default function BodegaDetalleAdminPage() {
 
         {/* Datos generales */}
         <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-5">
-          <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+          <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
             <Layers size={14} className="text-emerald-500" />
             <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider font-bold">Datos de Silo</h3>
           </div>
@@ -302,7 +302,7 @@ export default function BodegaDetalleAdminPage() {
           
           {/* Inventario Actual */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
                 <Inbox size={15} className="text-emerald-500" />
                 <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Inventario en Silo</h3>
@@ -317,7 +317,7 @@ export default function BodegaDetalleAdminPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[13px]">
                 {data.inventario.map((item, idx) => (
-                  <div key={idx} className="bg-white/[0.01] border border-white/5 rounded-xl p-3 flex justify-between items-center">
+                  <div key={idx} className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex justify-between items-center">
                     <div>
                       <p className="font-extrabold text-gray-900 text-[13.5px]">{item.tipo_maiz}</p>
                       <p className="text-[10px] text-gray-500 mt-0.5">Semilla: {item.variedad}</p>
@@ -331,12 +331,12 @@ export default function BodegaDetalleAdminPage() {
 
           {/* Tarifario de Servicios */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
               <Coins size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Tarifario Autorizado de Servicios (S)</h3>
             </div>
 
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-gray-100">
               {data.tarifarios.map((tar, idx) => {
                 const isOld = new Date().getTime() - new Date(tar.updated_at).getTime() > 60 * 24 * 60 * 60 * 1000;
                 return (
@@ -359,7 +359,7 @@ export default function BodegaDetalleAdminPage() {
 
           {/* Transacciones Recientes (30d) */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
               <ClipboardList size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Transacciones Recientes (Últimos 30 días)</h3>
             </div>
@@ -368,7 +368,7 @@ export default function BodegaDetalleAdminPage() {
               <p className="text-[12px] text-gray-500 py-4 text-center">No se registran transacciones liquidadas este mes.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-[12.5px] divide-y divide-white/5">
+                <table className="w-full text-left text-[12.5px] divide-y divide-gray-100">
                   <thead>
                     <tr className="text-gray-500 font-bold text-[10px] uppercase tracking-wider">
                       <th className="py-2.5">Productor</th>
@@ -378,7 +378,7 @@ export default function BodegaDetalleAdminPage() {
                       <th className="py-2.5 text-right">Estatus</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 text-gray-700">
+                  <tbody className="divide-y divide-gray-100 text-gray-700">
                     {data.transacciones.map(tx => (
                       <tr key={tx.id} className="hover:bg-white/[0.01]">
                         <td className="py-3 font-bold text-gray-900">{tx.productor_nombre}</td>
@@ -409,9 +409,9 @@ export default function BodegaDetalleAdminPage() {
       {/* Modales de Aprobación / Rechazo */}
       {modalType && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-white border border-gray-100 rounded-2xl max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                 modalType === 'aprobar' 
                   ? 'bg-emerald-500/10 text-emerald-500' 
@@ -443,7 +443,7 @@ export default function BodegaDetalleAdminPage() {
                   }
                   value={motivoRechazo}
                   onChange={e => setMotivoRechazo(e.target.value)}
-                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 
@@ -455,7 +455,7 @@ export default function BodegaDetalleAdminPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setModalType(null); setMotivoRechazo(''); setActionError(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -483,4 +483,6 @@ export default function BodegaDetalleAdminPage() {
     </div>
   );
 }
+
+
 

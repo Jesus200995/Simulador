@@ -268,7 +268,7 @@ export default function ProductorDetalleAdminPage() {
 
         {/* Estatus indicator + action buttons */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-[#f4fbf7] border border-white/5 px-3 py-1.5 rounded-xl">
+          <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Estado:</span>
             <span className={`text-[11px] font-bold uppercase tracking-wide ${
               data.estado_validacion === 'activo' ? 'text-emerald-500' :
@@ -321,7 +321,7 @@ export default function ProductorDetalleAdminPage() {
 
         {/* 1. DATOS GENERALES (Col 1) */}
         <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-5">
-          <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+          <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
             <Users size={15} className="text-emerald-500" />
             <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Identidad y Contacto</h3>
           </div>
@@ -365,7 +365,7 @@ export default function ProductorDetalleAdminPage() {
                     <p className="text-[10.5px] text-indigo-300 leading-normal">Cuenta con verificación biométrica o báscula autorizada en bodega. Capacidad operativa aprobada.</p>
                   </div>
                 ) : (
-                  <div className="bg-[#f4fbf7] border border-white/5 text-gray-500 p-3 rounded-xl mt-1 space-y-1">
+                  <div className="bg-gray-50 border border-gray-200 text-gray-500 p-3 rounded-xl mt-1 space-y-1">
                     <p className="text-[12px] font-bold">Productor Tipo A</p>
                     <p className="text-[10.5px] text-gray-500 leading-normal">Registro autodeclarado en la plataforma. Sujeto a auditorías físicas de silo y rendimiento.</p>
                   </div>
@@ -379,13 +379,13 @@ export default function ProductorDetalleAdminPage() {
         <div className="lg:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4 flex flex-col justify-between">
           
           <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
               <MapPin size={15} className="text-emerald-500" />
               <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Ubicación y Parcela (UP)</h3>
             </div>
 
             {data.up ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/[0.01] border border-white/5 rounded-xl p-3.5 text-[12.5px]">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 border border-gray-100 rounded-xl p-3.5 text-[12.5px]">
                 <div>
                   <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Estado</span>
                   <strong className="text-gray-900 font-bold">{data.up.estado}</strong>
@@ -442,13 +442,13 @@ export default function ProductorDetalleAdminPage() {
 
       {/* ── DISPONIBILIDADES DECLARADAS ── */}
       <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-4">
-        <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+        <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
           <Sprout size={15} className="text-emerald-500" />
           <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Cosecha Declarada Disponible</h3>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px] divide-y divide-white/5">
+          <table className="w-full text-left text-[13px] divide-y divide-gray-100">
             <thead>
               <tr className="text-gray-500 font-bold text-[10.5px] uppercase tracking-wide bg-white/[0.01]">
                 <th className="py-3 px-4">Tipo Maíz</th>
@@ -458,7 +458,7 @@ export default function ProductorDetalleAdminPage() {
                 <th className="py-3 px-4">Estatus Operación</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-gray-700">
+            <tbody className="divide-y divide-gray-100 text-gray-700">
               {data.disponibilidades.map(disp => (
                 <tr key={disp.id} className="hover:bg-white/[0.01] transition-colors">
                   <td className="py-3.5 px-4 font-bold text-gray-900">{disp.tipo_maiz}</td>
@@ -486,9 +486,9 @@ export default function ProductorDetalleAdminPage() {
       {/* Modales de Confirmación */}
       {modalType && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f4fbf7] border border-gray-200 rounded-[24px] max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
+          <div className="bg-white border border-gray-100 rounded-2xl max-w-[440px] w-full shadow-2xl overflow-hidden animate-zoomIn">
             
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
+            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                 modalType === 'aprobar' || modalType === 'reactivar' 
                   ? 'bg-emerald-500/10 text-emerald-500' 
@@ -526,7 +526,7 @@ export default function ProductorDetalleAdminPage() {
                   }
                   value={notaInterna}
                   onChange={e => setNotaInterna(e.target.value)}
-                  className="w-full bg-[#f4fbf7] border border-white/5 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-[13px] text-gray-900 placeholder-gray-600 outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 
@@ -538,7 +538,7 @@ export default function ProductorDetalleAdminPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex justify-end gap-2">
+            <div className="px-6 py-4 bg-white/[0.01] border-t border-gray-100 flex justify-end gap-2">
               <button 
                 onClick={() => { setModalType(null); setNotaInterna(''); setActionError(''); }}
                 className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-gray-500 hover:text-gray-900 hover:bg-white/5 transition-all"
@@ -566,4 +566,6 @@ export default function ProductorDetalleAdminPage() {
     </div>
   );
 }
+
+
 
