@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Upload, CheckCircle, AlertCircle, Clock, FileText, Leaf, RefreshCw,
   Info, Settings2, Bell, Check, X, Loader2, Activity, MapPin,
-  BarChart3, Zap, Shield, ChevronRight, Database
+  BarChart3, Zap, Shield, Database
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
@@ -90,11 +90,11 @@ export default function SenasicaAdminPage() {
     if (f?.name.endsWith('.csv')) { setArchivo(f); setResultado(null); setErrorMsg(null); }
   };
 
-  const TABS = [
+  const TABS: { key: 'cargar' | 'historial' | 'parametros'; label: string; icon: any; badge?: number }[] = [
     { key: 'cargar',     label: 'Cargar CSV',      icon: Upload },
     { key: 'historial',  label: 'Historial',        icon: Clock,    badge: historial.length || undefined },
     { key: 'parametros', label: 'Radios de alerta', icon: Settings2 },
-  ] as const;
+  ];
 
   return (
     <div className="flex flex-col gap-3 h-full">
