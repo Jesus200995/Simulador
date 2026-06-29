@@ -192,7 +192,9 @@ export default function AlertasPage() {
       {/* ── Banner push nativas (si aún no ha respondido) ── */}
       {pushPermiso === 'default' && (
         <div className="mx-4 mt-4 mb-2 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-          <span className="text-2xl mt-0.5">🔔</span>
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+            <Bell size={16} className="text-amber-600" />
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-bold text-amber-800">Activa alertas en tu celular</p>
             <p className="text-[11.5px] text-amber-700 mt-0.5 leading-relaxed">

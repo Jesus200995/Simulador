@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Upload, CheckCircle, AlertCircle, Clock, FileText, Leaf, RefreshCw } from 'lucide-react';
+import {
+  Upload, CheckCircle, AlertCircle, Clock, FileText, Leaf, RefreshCw,
+  Info, Settings2, MapPin, Bell, Check, X, Loader2, Activity
+} from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -133,13 +136,16 @@ export default function SenasicaAdminPage() {
 
               {/* Instrucciones */}
               <div className="bg-[#eef8f2] border border-[#1A5C38]/15 rounded-xl p-4">
-                <p className="text-[12px] font-bold text-[#1A5C38] mb-2">📋 Instrucciones</p>
-                <ul className="text-[11.5px] text-gray-600 space-y-1">
-                  <li>• Sube un CSV por plaga (ej: <em>Gusano cogollero-Riego.csv</em>)</li>
-                  <li>• Columnas: CVEGEO, CVE_ENT, CVE_MUN, CULTIVO, X (lng), Y (lat), HECTAREAS, RIESGO</li>
-                  <li>• Cada carga reemplaza las alertas anteriores de la misma fuente</li>
-                  <li>• Los productores reciben notificación automática según su parcela</li>
-                  <li>• Tamaño máximo: 250 MB</li>
+                <div className="flex items-center gap-2 mb-3">
+                  <Info size={13} className="text-[#1A5C38]" />
+                  <p className="text-[12px] font-bold text-[#1A5C38]">Instrucciones de carga</p>
+                </div>
+                <ul className="text-[11.5px] text-gray-600 space-y-1.5">
+                  <li className="flex items-start gap-2"><FileText size={11} className="text-[#1A5C38] mt-0.5 shrink-0" /> Sube un CSV por plaga (ej: <em>Gusano cogollero-Riego.csv</em>)</li>
+                  <li className="flex items-start gap-2"><Activity size={11} className="text-[#1A5C38] mt-0.5 shrink-0" /> Columnas: CVEGEO, CVE_ENT, CVE_MUN, CULTIVO, X (lng), Y (lat), HECTAREAS, RIESGO</li>
+                  <li className="flex items-start gap-2"><RefreshCw size={11} className="text-[#1A5C38] mt-0.5 shrink-0" /> Cada carga reemplaza las alertas anteriores de la misma fuente</li>
+                  <li className="flex items-start gap-2"><Bell size={11} className="text-[#1A5C38] mt-0.5 shrink-0" /> Los productores reciben notificación automática según su parcela</li>
+                  <li className="flex items-start gap-2"><Upload size={11} className="text-[#1A5C38] mt-0.5 shrink-0" /> Tamaño máximo: 250 MB</li>
                 </ul>
               </div>
 
@@ -250,12 +256,13 @@ export default function SenasicaAdminPage() {
                       <FileText size={14} className="text-gray-400 shrink-0" />
                       <p className="font-bold text-gray-800 text-[12px] truncate">{c.nombre_archivo}</p>
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                    <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
                       c.estado === 'completado' ? 'bg-emerald-100 text-emerald-700' :
                       c.estado === 'error'      ? 'bg-red-100 text-red-700'         :
                                                   'bg-amber-100 text-amber-700'}`}>
-                      {c.estado === 'completado' ? '✓ Completado' :
-                       c.estado === 'error'      ? '✗ Error'      : '⏳ Procesando'}
+                      {c.estado === 'completado' ? <><Check size={10} /> Completado</> :
+                       c.estado === 'error'      ? <><X size={10} /> Error</> :
+                                                   <><Loader2 size={10} className="animate-spin" /> Procesando</>}
                     </span>
                   </div>
 
@@ -292,9 +299,10 @@ export default function SenasicaAdminPage() {
           {/* ── TAB: PARÁMETROS ── */}
           {tab === 'parametros' && (
             <div className="space-y-4 max-w-sm mx-auto">
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-start gap-2">
+                <Settings2 size={13} className="text-amber-600 mt-0.5 shrink-0" />
                 <p className="text-[11.5px] text-amber-700">
-                  ⚙️ Radio de notificación por nivel de riesgo. Actualiza sin tocar código cuando SENASICA defina las distancias oficiales.
+                  Radio de notificación por nivel de riesgo. Actualiza sin tocar código cuando SENASICA defina las distancias oficiales.
                 </p>
               </div>
 
@@ -306,7 +314,9 @@ export default function SenasicaAdminPage() {
                     <span className={`w-3 h-3 rounded-full ${nivelColor(p.nivel_riesgo)}`} />
                     <p className="font-bold text-gray-800 text-[13px] capitalize">Riesgo {p.nivel_riesgo}</p>
                     {guardado === p.nivel_riesgo && (
-                      <span className="text-[10px] text-emerald-600 font-bold ml-auto">✓ Guardado</span>
+                      <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold ml-auto">
+                        <Check size={10} /> Guardado
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
