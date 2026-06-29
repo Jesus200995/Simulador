@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
-  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, Box, BarChart3, X, CheckCircle
+  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, BarChart3, X, CheckCircle
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
@@ -395,35 +395,42 @@ export default function BodegasAdminPage() {
           ) : (
             filteredList.map(b => (
               <div key={b.id} onClick={() => focusBodega(b)}
-                className={`relative px-4 py-3 cursor-pointer hover:bg-[#eef8f2] transition-all duration-150 ${
-                  selectedBodegaId === b.id ? 'bg-[#f0faf5]' : ''
+                className={`px-3 py-3 cursor-pointer transition-all duration-150 flex items-start gap-2.5 border-b border-gray-50 last:border-0 ${
+                  selectedBodegaId === b.id ? 'bg-[#eef8f2]' : 'hover:bg-gray-50'
                 }`}>
-                <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full ${
-                  b.semaforo_compra === 'verde' ? 'bg-emerald-400' :
-                  b.semaforo_compra === 'amarillo' ? 'bg-amber-400' :
-                  b.semaforo_compra === 'rojo' ? 'bg-red-400' : 'bg-gray-200'
-                }`} />
-                <div className="flex justify-between items-start gap-2 mb-1">
-                  <p className="text-[12.5px] font-semibold text-gray-900 leading-snug line-clamp-1">{b.nombre}</p>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 ${
-                    b.estatus === 'aprobada' ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' :
-                    b.estatus === 'pendiente' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
-                    'text-gray-500 bg-gray-50 border border-gray-200'
-                  }`}>
-                    {b.estatus.charAt(0).toUpperCase() + b.estatus.slice(1)}
-                  </span>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                  b.semaforo_compra === 'verde'    ? 'bg-emerald-50 text-emerald-600' :
+                  b.semaforo_compra === 'amarillo' ? 'bg-amber-50 text-amber-500' :
+                  b.semaforo_compra === 'rojo'     ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400'
+                }`}>
+                  <Warehouse size={16} />
                 </div>
-                <p className="text-[11px] text-gray-400 flex items-center gap-1">
-                  <MapPin size={10} /> {b.municipio}, {b.estado}
-                </p>
-                <div className="flex justify-between items-center mt-1.5">
-                  <span className="text-[11px] text-gray-500 flex items-center gap-1">
-                    <Box size={10} /> <strong className="font-semibold">{b.capacidad_total.toLocaleString()} t</strong>
-                  </span>
-                  <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/bodegas/${b.id}`); }}
-                    className="text-[10.5px] font-semibold text-[#1A5C38] hover:underline flex items-center gap-0.5">
-                    Detalle <Eye size={10} />
-                  </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-1 mb-0.5">
+                    <p className="text-[12px] font-bold text-gray-900 leading-tight line-clamp-1 flex-1">{b.nombre}</p>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0 uppercase tracking-wide ${
+                      b.estatus === 'aprobada'  ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
+                      b.estatus === 'pendiente' ? 'text-amber-700 bg-amber-50 border-amber-200' :
+                      'text-gray-500 bg-gray-100 border-gray-200'
+                    }`}>{b.estatus}</span>
+                  </div>
+                  <p className="text-[10.5px] text-gray-400 flex items-center gap-1 mb-1.5">
+                    <MapPin size={9} /> {b.municipio}, {b.estado}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                        b.semaforo_compra === 'verde' ? 'bg-emerald-400' :
+                        b.semaforo_compra === 'amarillo' ? 'bg-amber-400' :
+                        b.semaforo_compra === 'rojo' ? 'bg-red-400' : 'bg-gray-300'
+                      }`} />
+                      <span className="text-[10.5px] text-gray-500 font-medium">{b.capacidad_total.toLocaleString()} t</span>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/bodegas/${b.id}`); }}
+                      className="text-[10px] font-bold text-[#1A5C38] flex items-center gap-0.5 hover:underline">
+                      Ver <Eye size={9} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -517,40 +524,43 @@ export default function BodegasAdminPage() {
               <p>No hay bodegas pendientes de aprobación</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {bodegas.filter(b => b.estatus === 'pendiente').map(b => (
-                <div key={b.id} className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between">
+                <div key={b.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between">
                   <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-extrabold text-gray-900 text-[15px]">{b.nombre}</h3>
-                      <span className="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded-full uppercase font-black">Pendiente</span>
-                    </div>
-                    <p className="text-gray-500 text-[12px] flex items-center gap-1 mb-3">
-                      <MapPin size={12} /> {b.municipio}, {b.estado}
-                    </p>
-                    <div className="text-[12px] text-gray-700 bg-gray-50 border border-gray-100 rounded-xl p-3 space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Capacidad:</span>
-                        <strong className="text-gray-900">{b.capacidad_total.toLocaleString()} t</strong>
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
+                        <Warehouse size={18} />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Encargado:</span>
-                        <strong className="text-gray-900">{b.encargado_nombre || '—'}</strong>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-1">
+                          <h3 className="font-bold text-gray-900 text-[13px] leading-tight line-clamp-2">{b.nombre}</h3>
+                          <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase flex-shrink-0">Pendiente</span>
+                        </div>
+                        <p className="text-gray-400 text-[10.5px] flex items-center gap-1 mt-0.5">
+                          <MapPin size={9} /> {b.municipio}, {b.estado}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-gray-50 rounded-xl p-2.5">
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Capacidad</p>
+                        <p className="text-[14px] font-black text-gray-900">{b.capacidad_total.toLocaleString()} t</p>
+                      </div>
+                      <div className="bg-gray-50 rounded-xl p-2.5">
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Encargado</p>
+                        <p className="text-[11px] font-semibold text-gray-700 line-clamp-1">{b.encargado_nombre || '—'}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                    <button 
-                      onClick={() => confirmarAprobar(b.id, b.nombre)}
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl text-[12px] transition-all"
-                    >
-                      Aprobar
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <button onClick={() => confirmarAprobar(b.id, b.nombre)}
+                      className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white font-bold py-2 rounded-xl text-[12px] transition-all duration-150 flex items-center justify-center gap-1.5">
+                      <CheckCircle size={13} /> Aprobar
                     </button>
-                    <button 
-                      onClick={() => confirmarRechazar(b.id, b.nombre)}
-                      className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold py-2 rounded-xl text-[12px] transition-all"
-                    >
-                      Rechazar
+                    <button onClick={() => confirmarRechazar(b.id, b.nombre)}
+                      className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 font-bold py-2 rounded-xl text-[12px] transition-all duration-150 flex items-center justify-center gap-1.5">
+                      <X size={13} /> Rechazar
                     </button>
                   </div>
                 </div>

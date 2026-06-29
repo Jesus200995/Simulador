@@ -312,38 +312,43 @@ export default function AlertasAdminPage() {
           ) : (
             filteredList.map(a => (
               <div key={a.id} onClick={() => focusAlerta(a)}
-                className={`relative px-4 py-3 cursor-pointer hover:bg-[#eef8f2] transition-all duration-150 ${
-                  selectedAlertaId === a.id ? 'bg-[#f0faf5]' : ''
+                className={`px-3 py-3 cursor-pointer transition-all duration-150 flex items-start gap-2.5 border-b border-gray-50 last:border-0 ${
+                  selectedAlertaId === a.id ? 'bg-[#eef8f2]' : 'hover:bg-gray-50'
                 }`}>
-                <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full ${
-                  a.nivel_criticidad === 'ALTA' ? 'bg-red-400' :
-                  a.nivel_criticidad === 'MEDIA' ? 'bg-amber-400' : 'bg-blue-400'
-                }`} />
-                <div className="flex justify-between items-start gap-2 mb-1">
-                  <p className="text-[12.5px] font-semibold text-gray-900 leading-snug line-clamp-1">{a.titulo}</p>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 ${
-                    a.nivel_criticidad === 'ALTA' ? 'text-red-700 bg-red-50 border border-red-200' :
-                    a.nivel_criticidad === 'MEDIA' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
-                    'text-blue-700 bg-blue-50 border border-blue-200'
-                  }`}>{a.nivel_criticidad}</span>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                  a.nivel_criticidad === 'ALTA'  ? 'bg-red-50 text-red-500' :
+                  a.nivel_criticidad === 'MEDIA' ? 'bg-amber-50 text-amber-500' :
+                  'bg-blue-50 text-blue-500'
+                }`}>
+                  <ShieldAlert size={16} />
                 </div>
-                <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{a.descripcion}</p>
-                <div className="flex justify-between items-center">
-                  <p className="text-[10.5px] text-gray-400 flex items-center gap-1">
-                    <Clock size={10} />
-                    {a.estado_afectado} · {new Date(a.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
-                  </p>
-                  {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
-                    <button onClick={(e) => { e.stopPropagation(); setResolvingAlerta(a); }}
-                      className="text-[10.5px] font-semibold text-[#1A5C38] hover:underline flex items-center gap-0.5">
-                      Atender <Check size={10} />
-                    </button>
-                  )}
-                  {a.estado === 'atendida' && (
-                    <span className="text-[10.5px] text-gray-400 flex items-center gap-0.5">
-                      Resuelta <Check size={10} className="text-emerald-500" />
-                    </span>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-1 mb-0.5">
+                    <p className="text-[12px] font-bold text-gray-900 leading-tight line-clamp-1 flex-1">{a.titulo}</p>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0 uppercase tracking-wide ${
+                      a.nivel_criticidad === 'ALTA'  ? 'text-red-700 bg-red-50 border-red-200' :
+                      a.nivel_criticidad === 'MEDIA' ? 'text-amber-700 bg-amber-50 border-amber-200' :
+                      'text-blue-700 bg-blue-50 border-blue-200'
+                    }`}>{a.nivel_criticidad}</span>
+                  </div>
+                  <p className="text-[10.5px] text-gray-500 line-clamp-2 mb-1.5 leading-snug">{a.descripcion}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10.5px] text-gray-400 flex items-center gap-1">
+                      <Clock size={9} />
+                      {a.estado_afectado} · {new Date(a.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                    </p>
+                    {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
+                      <button onClick={(e) => { e.stopPropagation(); setResolvingAlerta(a); }}
+                        className="text-[10px] font-bold text-[#1A5C38] flex items-center gap-0.5 hover:underline">
+                        Atender <Check size={9} />
+                      </button>
+                    )}
+                    {a.estado === 'atendida' && (
+                      <span className="text-[10px] text-emerald-600 flex items-center gap-0.5 font-semibold">
+                        Resuelta <Check size={9} />
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))

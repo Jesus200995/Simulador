@@ -134,9 +134,9 @@ export default function MercadoAdminPage() {
         {/* Mapa Leaflet */}
         <div className="lg:col-span-2 bg-white border border-gray-100 rounded-2xl overflow-hidden" style={{ minHeight: 380 }}>
           {coincidencias.length > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block" />
-              <span className="text-[11px] font-bold text-amber-300">
+            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-b border-amber-200">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block" />
+              <span className="text-[11px] font-bold text-amber-700">
                 {coincidencias.length} coincidencia{coincidencias.length !== 1 ? 's' : ''} geográfica{coincidencias.length !== 1 ? 's' : ''} detectada{coincidencias.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -149,7 +149,7 @@ export default function MercadoAdminPage() {
             {coincidencias.length > 0 && (
               <>
                 <span className="w-3 h-3 rounded-full bg-amber-400 border-2 border-amber-500 inline-block ml-3" />
-                <span className="text-[11px] font-bold text-amber-300">Con coincidencia</span>
+                <span className="text-[11px] font-bold text-amber-600">Con coincidencia</span>
               </>
             )}
           </div>
@@ -212,11 +212,16 @@ export default function MercadoAdminPage() {
             </div>
             <div className="divide-y divide-gray-100">
               {loading ? (
-                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-[#f4fbf7]" />)
+                [1,2,3].map(i => <div key={i} className="px-3 py-2.5 h-12 animate-pulse bg-gray-50" />)
               ) : (data?.disponibilidades ?? []).slice(0, 5).map((d, i) => (
-                <div key={i} className="px-3 py-2 hover:bg-[#eef8f2] transition-colors">
-                  <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{d.nombre_productor}</p>
-                  <p className="text-[10px] text-gray-500">{d.municipio}, {d.estado} · <span className="text-emerald-600">{fmtNum(d.volumen_estimado_ton, 0)} t</span></p>
+                <div key={i} className="px-3 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <Users size={12} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{d.nombre_productor}</p>
+                    <p className="text-[10px] text-gray-400">{d.municipio}, {d.estado} · <span className="text-emerald-600 font-semibold">{fmtNum(d.volumen_estimado_ton, 0)} t</span></p>
+                  </div>
                 </div>
               ))}
               {!loading && (data?.disponibilidades ?? []).length === 0 && (
@@ -232,11 +237,16 @@ export default function MercadoAdminPage() {
             </div>
             <div className="divide-y divide-gray-100">
               {loading ? (
-                [1,2,3].map(i => <div key={i} className="px-3 py-2 h-12 animate-pulse bg-[#f4fbf7]" />)
+                [1,2,3].map(i => <div key={i} className="px-3 py-2.5 h-12 animate-pulse bg-gray-50" />)
               ) : (data?.requerimientos ?? []).slice(0, 5).map((r, i) => (
-                <div key={i} className="px-3 py-2 hover:bg-[#eef8f2] transition-colors">
-                  <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{r.nombre_bodega}</p>
-                  <p className="text-[10px] text-gray-500">{r.municipio}, {r.estado} · <span className="text-blue-600">{fmtNum(r.volumen_ton, 0)} t</span></p>
+                <div key={i} className="px-3 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <Warehouse size={12} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold text-gray-800 line-clamp-1">{r.nombre_bodega}</p>
+                    <p className="text-[10px] text-gray-400">{r.municipio}, {r.estado} · <span className="text-blue-600 font-semibold">{fmtNum(r.volumen_ton, 0)} t</span></p>
+                  </div>
                 </div>
               ))}
               {!loading && (data?.requerimientos ?? []).length === 0 && (
