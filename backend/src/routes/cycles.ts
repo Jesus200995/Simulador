@@ -93,7 +93,7 @@ router.get('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: R
        FROM cycle c
        LEFT JOIN cycle_crop cc ON c.cycle_id = cc.cycle_id
        WHERE c.up_id = $1
-       GROUP BY c.cycle_id
+       GROUP BY c.cycle_id, c.up_id, c.cycle_year, c.cycle_type, c.created_at, c.tipo_riego, c.estado_ciclo
        ORDER BY c.cycle_year DESC, c.cycle_type`,
       [up_id]
     );
