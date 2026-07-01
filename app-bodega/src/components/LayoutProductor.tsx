@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Map, TrendingUp, Award, User, Bell, X, LogOut, Settings, ChevronRight, ChevronLeft, CalendarCheck } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 import AppHeader from './AppHeader';
+import PushPrompt from './PushPrompt';
 
 const NAV = [
   { path: '/productor', icon: Home, label: 'Inicio' },
@@ -105,6 +106,9 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
         })}
         </div>
       </nav>
+
+      {/* ── Push prompt global (productor) ── */}
+      <PushPrompt rol="productor" />
 
       {/* ── Profile Drawer ─────────────────────────────── */}
       {drawerOpen && (

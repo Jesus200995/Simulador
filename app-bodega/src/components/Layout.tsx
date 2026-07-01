@@ -4,6 +4,7 @@ import { LayoutDashboard, Warehouse, Users, Receipt, MoreHorizontal, ChevronLeft
 import { useAuthStore } from '../store/auth';
 import { api } from '../services/api';
 import AppHeader from './AppHeader';
+import PushPrompt from './PushPrompt';
 
 const NAV = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Tablero' },
@@ -85,6 +86,9 @@ export function Layout({ children }: { children: ReactNode }) {
         })}
         </div>
       </nav>
+
+      {/* ── Push prompt global (bodeguero) ── */}
+      <PushPrompt rol="bodeguero" />
 
       {/* ── Profile Drawer ─────────────────────────────── */}
       {/* Backdrop */}
