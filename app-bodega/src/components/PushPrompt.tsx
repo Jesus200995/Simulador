@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Bell, X, BellRing, Loader2, Smartphone } from 'lucide-react';
+import { Bell, X, BellRing, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 const BASE      = import.meta.env.VITE_API_URL || '/api';
 const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY ?? '';
@@ -17,8 +17,8 @@ function urlBase64ToUint8Array(b64: string): ArrayBuffer {
 function esPWA(): boolean {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as any).standalone === true ||           // iOS Safari
-    document.referrer.startsWith('android-app://')      // TWA Android
+    (navigator as any).standalone === true ||
+    document.referrer.startsWith('android-app://')
   );
 }
 
@@ -35,28 +35,23 @@ export default function PushPrompt({ rol }: Props) {
   const [cargando, setCargando] = useState(false);
   const [exito, setExito]       = useState(false);
 
-  // Decide si mostrar el banner
   useEffect(() => {
     if (!pushSoportado()) return;
     if (!('Notification' in window)) return;
-    if (Notification.permission === 'granted') return;     // ya activado
-    if (Notification.permission === 'denied') return;      // usuario bloqueó — no molestar
+    if (Notification.permission === 'granted') return;
+    if (Notification.permission === 'denied') return;
 
-    // Si ya lo descartó recientemente, esperar
     const dismissedUntil = localStorage.getItem(STORAGE_KEY);
     if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) return;
 
-    // Mostrar inmediatamente si está en PWA instalada, si no esperar 8 seg
     const delay = esPWA() ? 1200 : 8000;
     const timer = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(timer);
   }, []);
 
-  // Detectar instalación de PWA (Android/Desktop) — pedir permiso automáticamente
   useEffect(() => {
     if (!pushSoportado()) return;
     const onInstall = () => {
-      // Pequeño delay para que el OS procese la instalación
       setTimeout(() => {
         if (Notification.permission === 'default') setVisible(true);
       }, 2000);
@@ -70,10 +65,7 @@ export default function PushPrompt({ rol }: Props) {
     setCargando(true);
     try {
       const perm = await Notification.requestPermission();
-      if (perm !== 'granted') {
-        setVisible(false);
-        return;
-      }
+      if (perm !== 'granted') { setVisible(false); return; }
       const sw  = await navigator.serviceWorker.ready;
       const sub = await sw.pushManager.subscribe({
         userVisibleOnly: true,
@@ -87,7 +79,7 @@ export default function PushPrompt({ rol }: Props) {
         body: JSON.stringify({ endpoint, p256dh: keys.p256dh, auth: keys.auth }),
       });
       setExito(true);
-      setTimeout(() => setVisible(false), 2800);
+      setTimeout(() => setVisible(false), 3500);
     } catch (e) {
       console.warn('Push error:', e);
       setVisible(false);
@@ -97,7 +89,6 @@ export default function PushPrompt({ rol }: Props) {
   }, []);
 
   const descartar = () => {
-    // Ocultar por 3 días
     localStorage.setItem(STORAGE_KEY, String(Date.now() + 3 * 24 * 60 * 60 * 1000));
     setVisible(false);
   };
@@ -106,12 +97,16 @@ export default function PushPrompt({ rol }: Props) {
 
   const textos = {
     bodeguero: {
-      titulo: 'Activa alertas instantáneas',
-      desc: 'Entérate de nuevos requerimientos, intereses de productores y transacciones aunque no tengas la app abierta.',
+      titulo: 'Mantente al tanto en tiempo real',
+      subtitulo: 'Alertas instantáneas para tu bodega',
+      desc: 'Recibe avisos de nuevos requerimientos, intereses de productores y transacciones aunque tengas la app cerrada.',
+      puntos: ['Nuevos requerimientos', 'Interesados en tu oferta', 'Confirmaciones de venta'],
     },
     productor: {
-      titulo: 'Activa alertas en tu celular',
-      desc: 'Recibe avisos de plagas cerca de tu parcela y señales de compra de bodegas aunque cierres la app.',
+      titulo: 'Alertas directas a tu celular',
+      subtitulo: 'Notificaciones para tu parcela',
+      desc: 'Entérate de alertas sanitarias, señales de compra y novedades importantes aunque no tengas la app abierta.',
+      puntos: ['Alertas de plagas cercanas', 'Señales de compra de bodegas', 'Apoyos y programas disponibles'],
     },
   };
 
@@ -119,89 +114,139 @@ export default function PushPrompt({ rol }: Props) {
 
   return (
     <>
-      {/* Overlay semitransparente solo en mobile PWA para mayor impacto */}
-      {esPWA() && !exito && (
-        <div
-          className="fixed inset-0 bg-black/30 z-[998] backdrop-blur-[2px]"
-          onClick={descartar}
-          style={{ animation: 'fadeIn .2s ease' }}
-        />
-      )}
-
+      {/* Backdrop siempre presente */}
       <div
-        className="fixed z-[999] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm"
+        className="fixed inset-0 z-[998]"
         style={{
-          bottom: esPWA() ? '5.5rem' : '1.25rem',   // sobre la barra de navegación en PWA
-          animation: 'slideUp .3s cubic-bezier(0.34,1.56,0.64,1)',
+          background: 'rgba(0,0,0,0.55)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          animation: 'ppFadeIn .25s ease',
         }}
+        onClick={!exito ? descartar : undefined}
+      />
+
+      {/* Modal centrado */}
+      <div
+        className="fixed inset-0 z-[999] flex items-center justify-center p-4"
+        style={{ animation: 'ppSlideIn .35s cubic-bezier(0.34,1.4,0.64,1)' }}
       >
-        <div className={`rounded-2xl shadow-2xl overflow-hidden border ${
-          exito ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-100'
-        }`}>
-
-          {/* Barra de color superior */}
-          {!exito && (
-            <div className="h-1 bg-gradient-to-r from-[#1A5C38] via-emerald-400 to-[#1A5C38]" />
-          )}
-
-          <div className="p-4">
-            {exito ? (
-              /* Estado éxito */
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                  <BellRing size={18} className="text-emerald-600" />
+        <div
+          className="w-full max-w-sm sm:max-w-md"
+          onClick={e => e.stopPropagation()}
+        >
+          {exito ? (
+            /* ── Estado éxito ── */
+            <div
+              className="rounded-3xl overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.35)]"
+              style={{ animation: 'ppSlideIn .3s cubic-bezier(0.34,1.4,0.64,1)' }}
+            >
+              <div className="bg-gradient-to-br from-emerald-500 to-[#1A5C38] px-8 pt-10 pb-8 flex flex-col items-center text-center">
+                {/* Icono animado */}
+                <div
+                  className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-5 shadow-xl"
+                  style={{ animation: 'ppPop .4s cubic-bezier(0.34,1.56,0.64,1) .1s both' }}
+                >
+                  <CheckCircle2 size={40} className="text-white" strokeWidth={2} />
                 </div>
-                <div>
-                  <p className="text-[13px] font-black text-emerald-800">¡Listo! Notificaciones activadas</p>
-                  <p className="text-[11px] text-emerald-600 mt-0.5">Ya recibirás alertas aunque la app esté cerrada.</p>
-                </div>
+                <p className="text-white font-black text-[22px] leading-tight tracking-tight">
+                  ¡Notificaciones activadas!
+                </p>
+                <p className="text-emerald-100/90 text-[14px] mt-2.5 leading-relaxed max-w-xs">
+                  Recibirás alertas importantes aunque la app esté cerrada. No te perderás nada.
+                </p>
               </div>
-            ) : (
-              /* Estado normal */
-              <>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#eef8f2] flex items-center justify-center shrink-0 mt-0.5">
-                    <Smartphone size={17} className="text-[#1A5C38]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-black text-gray-900 leading-tight">{txt.titulo}</p>
-                    <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">{txt.desc}</p>
-                  </div>
-                  <button
-                    onClick={descartar}
-                    className="w-6 h-6 rounded-lg hover:bg-gray-100 flex items-center justify-center shrink-0 transition-colors -mt-0.5 -mr-0.5"
-                  >
-                    <X size={13} className="text-gray-400" />
-                  </button>
+              <div className="bg-white px-8 py-5 flex items-center justify-center gap-2.5">
+                <BellRing size={16} className="text-[#1A5C38]" />
+                <p className="text-[13px] text-slate-500 font-medium">
+                  Puedes desactivarlas en cualquier momento desde Alertas
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* ── Estado normal ── */
+            <div className="rounded-3xl overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.35)]">
+
+              {/* Cabecera con gradiente */}
+              <div className="bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] relative overflow-hidden px-7 pt-8 pb-7">
+                {/* Círculos decorativos de fondo */}
+                <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
+                <div className="absolute -bottom-10 -left-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
+
+                {/* Botón cerrar */}
+                <button
+                  onClick={descartar}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                >
+                  <X size={15} className="text-white/80" />
+                </button>
+
+                {/* Icono principal */}
+                <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center mb-5 shadow-lg">
+                  <Bell size={28} className="text-white" strokeWidth={1.8} />
                 </div>
 
-                <div className="flex gap-2 mt-3.5">
-                  <button
-                    onClick={descartar}
-                    className="flex-1 py-2 text-[12px] font-semibold text-gray-400 hover:text-gray-600 rounded-xl transition-colors"
-                  >
-                    Ahora no
-                  </button>
+                <p className="text-green-300/80 text-[11px] font-bold uppercase tracking-widest mb-1.5">
+                  {txt.subtitulo}
+                </p>
+                <h2 className="text-white font-black text-[22px] sm:text-[24px] leading-tight tracking-tight">
+                  {txt.titulo}
+                </h2>
+                <p className="text-green-100/75 text-[13px] mt-2.5 leading-relaxed">
+                  {txt.desc}
+                </p>
+              </div>
+
+              {/* Cuerpo blanco */}
+              <div className="bg-white px-7 pt-6 pb-7">
+
+                {/* Puntos de valor */}
+                <div className="space-y-3 mb-7">
+                  {txt.puntos.map((punto) => (
+                    <div key={punto} className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-[#eef8f2] flex items-center justify-center shrink-0">
+                        <ShieldCheck size={13} className="text-[#1A5C38]" />
+                      </div>
+                      <p className="text-[13px] text-slate-600 font-medium">{punto}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Botones */}
+                <div className="space-y-2.5">
                   <button
                     onClick={activar}
                     disabled={cargando}
-                    className="flex-[2] flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#154d2f] active:scale-[0.98] text-white font-bold text-[12.5px] py-2 rounded-xl transition-all disabled:opacity-60 shadow-md shadow-[#1A5C38]/20"
+                    className="w-full flex items-center justify-center gap-2.5 bg-[#1A5C38] hover:bg-[#154d2f] active:scale-[0.98] text-white font-bold text-[15px] py-4 rounded-2xl transition-all duration-200 disabled:opacity-60 shadow-lg shadow-[#1A5C38]/25"
                   >
-                    {cargando
-                      ? <><Loader2 size={12} className="animate-spin" /> Activando…</>
-                      : <><Bell size={13} /> Activar notificaciones</>
-                    }
+                    {cargando ? (
+                      <><Loader2 size={18} className="animate-spin" /> Activando…</>
+                    ) : (
+                      <><Bell size={17} strokeWidth={2} /> Activar notificaciones</>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={descartar}
+                    className="w-full py-3.5 text-[13px] font-semibold text-slate-400 hover:text-slate-600 transition-colors rounded-2xl"
+                  >
+                    Ahora no
                   </button>
                 </div>
-              </>
-            )}
-          </div>
+
+                <p className="text-center text-[11px] text-slate-300 mt-3">
+                  Puedes desactivarlas cuando quieras · Sin spam
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       <style>{`
-        @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
-        @keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(20px) } to { opacity:1; transform:translateX(-50%) translateY(0) } }
+        @keyframes ppFadeIn  { from { opacity:0 } to { opacity:1 } }
+        @keyframes ppSlideIn { from { opacity:0; transform:scale(0.92) translateY(24px) } to { opacity:1; transform:scale(1) translateY(0) } }
+        @keyframes ppPop     { from { transform:scale(0.5); opacity:0 } to { transform:scale(1); opacity:1 } }
       `}</style>
     </>
   );
