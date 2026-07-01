@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Search, Download, Eye, MapPin, Calendar, User, FileText,
+  Search, Download, Eye, MapPin, Calendar, FileText,
   ShieldCheck, Camera, X, ChevronLeft, ChevronRight, Loader2,
   CheckCircle2, AlertTriangle, RefreshCw, Filter, SortAsc, SortDesc,
   Phone, Hash, CheckSquare, Square, FileDown, TableProperties,
@@ -239,6 +239,13 @@ function exportarCSV(lista: Aviso[]) {
   document.body.removeChild(link);
 }
 
+/* ─── Foto con fallback ──────────────────────────────────────────── */
+function FotoAviso({ src, className, size = 24 }: { src: string | null; className?: string; size?: number }) {
+  const [err, setErr] = useState(false);
+  if (!src || err) return <Camera size={size} className="text-gray-300" />;
+  return <img src={src} alt="Verificación" className={className} onError={() => setErr(true)} />;
+}
+
 /* ─── Modal detalle ──────────────────────────────────────────────── */
 function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void }) {
   const foto   = fotoURL(aviso.aviso_privacidad_foto_url);
@@ -297,10 +304,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
           {/* Foto */}
           <div className="flex gap-4">
             <div className="w-28 h-28 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
-              {foto
-                ? <img src={foto} alt="Verificación" className="w-full h-full object-cover" />
-                : <Camera size={24} className="text-gray-300" />
-              }
+              <FotoAviso src={foto} className="w-full h-full object-cover" size={24} />
             </div>
             <div className="flex-1 min-w-0 space-y-2 pt-1">
               <div className="flex flex-wrap gap-1.5">
@@ -343,7 +347,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
                 <Fingerprint size={12} className="text-gray-400" />
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Verificación biométrica del titular</p>
               </div>
-              <img src={foto} alt="Biométrico" className="w-full object-cover max-h-72" />
+              <FotoAviso src={foto} className="w-full object-cover max-h-72" size={48} />
             </div>
           )}
 
@@ -814,10 +818,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
       {/* Productor */}
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 flex items-center justify-center">
-          {foto
-            ? <img src={foto} className="w-full h-full object-cover" alt="" />
-            : <User size={13} className="text-gray-300" />
-          }
+          <FotoAviso src={foto} className="w-full h-full object-cover" size={13} />
         </div>
         <div className="min-w-0">
           <p className="text-[13px] font-bold text-gray-900 truncate">{nomb}</p>
@@ -886,7 +887,7 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
             {sel ? <CheckSquare size={15} className="text-emerald-600" /> : <Square size={15} />}
           </button>
           <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
-            {foto ? <img src={foto} className="w-full h-full object-cover" alt="" /> : <User size={16} className="text-gray-300" />}
+            <FotoAviso src={foto} className="w-full h-full object-cover" size={16} />
           </div>
           <div className="min-w-0">
             <p className="text-[13px] font-bold text-gray-900 leading-tight truncate">{nomb}</p>
