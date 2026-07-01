@@ -31,20 +31,31 @@ export default function VentanillasPage() {
       .finally(() => setCoordsCargadas(true));
   }, []);
 
-  // Cargar ventanillas (filtradas por distancia si hay coordenadas)
+  // Cargar ventanillas (sin filtro de distancia — hay pocas a nivel nacional)
   useEffect(() => {
     if (!coordsCargadas) return;
     const token = localStorage.getItem('simac_token');
     setLoading(true);
     const params = new URLSearchParams({ es_ventanilla: 'true', is_ventanilla: 'true' });
-    if (coordsProductor) {
-      params.set('lat', String(coordsProductor.lat));
-      params.set('lng', String(coordsProductor.lng));
-      params.set('radio_km', '200');
-    }
     fetch(`${BASE}/infraestructura?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => setItems(d.infraestructura || (Array.isArray(d) ? d : d.data) || []))
+      .then(d => {
+        let lista: Ventanilla[] = d.infraestructura || (Array.isArray(d) ? d : d.data) || [];
+        // Ordenar por proximidad si hay coords del productor
+        if (coordsProductor && lista.length > 0) {
+          lista = lista.slice().sort((a: any, b: any) => {
+            const dist = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+              const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
+              const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+              return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+            };
+            const dA = (a.latitud && a.longitud) ? dist(coordsProductor.lat, coordsProductor.lng, a.latitud, a.longitud) : 99999;
+            const dB = (b.latitud && b.longitud) ? dist(coordsProductor.lat, coordsProductor.lng, b.latitud, b.longitud) : 99999;
+            return dA - dB;
+          });
+        }
+        setItems(lista);
+      })
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, [coordsCargadas, coordsProductor]);
@@ -89,11 +100,19 @@ export default function VentanillasPage() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 sm:px-6 pt-4 space-y-3">
+      <div className="max-w-lg mx-auto px-4 sm:px-6 pt-4 pb-28 space-y-3">
         {loading && <p className="text-zinc-400 text-center py-8">Cargando ventanillas...</p>}
 
         {!loading && items.length === 0 && (
-          <p className="text-zinc-400 text-center py-8">No hay ventanillas disponibles en tu region</p>
+          <div className="flex flex-col items-center text-center py-12 px-4 gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-zinc-100 flex items-center justify-center">
+              <MapPin size={24} className="text-zinc-300" />
+            </div>
+            <p className="text-zinc-700 font-semibold text-[15px]">No hay ventanillas disponibles</p>
+            <p className="text-zinc-400 text-[13px] leading-relaxed max-w-xs">
+              Por el momento no hay ventanillas activas en tu zona. Cuando se habiliten podrás solicitar información directamente desde aquí.
+            </p>
+          </div>
         )}
 
         {items.map(v => (

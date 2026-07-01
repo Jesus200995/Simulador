@@ -31,12 +31,11 @@ self.addEventListener('push', (event: PushEvent) => {
     body:    data.body   ?? '',
     icon:    data.icon   ?? '/icono.png',
     badge:   data.badge  ?? '/icono.png',
-    tag:     data.data?.tipo ?? 'simac-notif',   // agrupa notificaciones del mismo tipo
-    renotify: true,
+    tag:     data.data?.tipo ?? 'simac-notif',
     data:    data.data   ?? {},
-    // vibration para Android
-    // @ts-ignore
+    // @ts-ignore — vibrate y renotify existen en Chrome/Android pero no en los tipos DOM estándar
     vibrate: [200, 100, 200],
+    renotify: true,
   };
 
   event.waitUntil(
@@ -92,12 +91,9 @@ self.addEventListener('pushsubscriptionchange', (event: Event) => {
 
 async function getToken(): Promise<string | null> {
   try {
-    const clients = await (self.clients as any).matchAll({ type: 'window', includeUncontrolled: true });
-    // El token está en localStorage del cliente — no lo podemos leer directamente desde el SW,
-    // pero podemos usar un MessageChannel para pedírselo si está disponible.
-    // Por simplicidad, el token se puede poner en IndexedDB o en el propio SW via postMessage.
-    // Aquí intentamos leerlo del cache de headers de una request previa.
-    return null; // fallback: el browser maneja la re-suscripción
+    // El token vive en localStorage del cliente — no accesible directamente desde SW.
+    // Retornamos null; el browser maneja la re-suscripción automáticamente.
+    return null;
   } catch {
     return null;
   }

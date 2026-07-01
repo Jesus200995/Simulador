@@ -5,10 +5,13 @@ const BASE      = import.meta.env.VITE_API_URL || '/api';
 const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY ?? '';
 const STORAGE_KEY = 'simac_push_dismissed_until';
 
-function urlBase64ToUint8Array(b64: string): Uint8Array {
+function urlBase64ToUint8Array(b64: string): ArrayBuffer {
   const padding = '='.repeat((4 - b64.length % 4) % 4);
   const base64 = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
-  return Uint8Array.from([...window.atob(base64)].map(c => c.charCodeAt(0)));
+  const raw = window.atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr.buffer;
 }
 
 function esPWA(): boolean {

@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { notificar } from '../utils/notificacion';
 import { reverseGeocode } from '../utils/geocode';
 import { consultarPersonaPorCURP } from '../services/saderService';
 
@@ -1067,15 +1068,10 @@ router.post('/solicitar-apoyo', authMiddleware, async (req: AuthRequest, res: Re
       return;
     }
     const apoyoId = resolve.rows[0].apoyo_id_tipo || resolve.rows[0].apoyo_id_any;
-    if (!apoyoId) {
-      res.status(400).json({ error: 'La ventanilla aún no tiene apoyos publicados' });
-      return;
-    }
-
     const solicitud = await pool.query(
       `INSERT INTO solicitudes_apoyo (ventanilla_id, apoyo_id, producer_id, estado, notas)
        VALUES ($1, $2, $3, 'recibida', $4) RETURNING id`,
-      [resolve.rows[0].ventanilla_id, apoyoId, producerId, notas || null]
+      [resolve.rows[0].ventanilla_id, apoyoId || null, producerId, notas || null]
     );
 
     // Notificar al bodeguero dueño de la bodega/ventanilla (best-effort)
@@ -1086,13 +1082,14 @@ router.post('/solicitar-apoyo', authMiddleware, async (req: AuthRequest, res: Re
         [infraestructura_id]
       );
       if (bodegaUsuario.rows.length > 0) {
-        await pool.query(
-          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-           VALUES ($1, 'solicitud_apoyo', $2, $3, 'solicitudes')`,
-          [bodegaUsuario.rows[0].usuario_id,
-           'Un productor solicitó información sobre tu ventanilla de apoyo.',
-           solicitud.rows[0].id]
-        );
+        notificar({
+          usuarioId: bodegaUsuario.rows[0].usuario_id,
+          tipo: 'solicitud_apoyo',
+          titulo: '📋 Nueva solicitud de apoyo',
+          mensaje: 'Un productor solicitó información sobre tu ventanilla de apoyo.',
+          referenciaId: solicitud.rows[0].id,
+          referenciaTipo: 'solicitudes',
+        }).catch(() => {});
       }
     } catch (_) { /* best-effort */ }
 
