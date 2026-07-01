@@ -213,7 +213,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* ── MAIN ── */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
-        <header className="relative h-16 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#0a3c20]/95 backdrop-blur-2xl flex-shrink-0 border-b border-emerald-500/20 shadow-[0_8px_30px_rgba(3,21,10,0.6)] z-10 group/header overflow-hidden">
+        <header className="relative h-16 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#0a3c20]/95 backdrop-blur-2xl flex-shrink-0 border-b border-emerald-500/20 z-10 group/header overflow-hidden">
           {/* Animated background accent */}
           <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-emerald-400/10 to-transparent opacity-0 group-hover/header:opacity-100 transition-opacity duration-700 pointer-events-none" />
           <div className="absolute -bottom-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent opacity-50" />
@@ -278,7 +278,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        <main className="flex-1 p-3 sm:p-5 lg:p-6 overflow-y-auto">
+        <main className="flex-1 px-3 pb-3 pt-0 overflow-y-auto">
           <div key={location.pathname} className="max-w-[1400px] mx-auto h-full animate-fade-in">
             {children}
           </div>

@@ -4,7 +4,7 @@ import {
   ShieldCheck, Camera, X, ChevronLeft, ChevronRight, Loader2,
   CheckCircle2, AlertTriangle, RefreshCw, Filter, SortAsc, SortDesc,
   Phone, Hash, CheckSquare, Square, FileDown, TableProperties,
-  LayoutGrid, ArrowDownToLine, Fingerprint, Globe, FileCheck,
+  LayoutGrid, ArrowDownToLine, Fingerprint, Globe,
 } from 'lucide-react';
 
 /* ─── Configuración ──────────────────────────────────────────────── */
@@ -487,21 +487,9 @@ export default function AvisosPrivacidadAdminPage() {
 
       <div className="flex flex-col gap-3 h-full">
 
-        {/* ── HEADER COMPACTO ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
-              <FileCheck size={16} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-[15px] font-bold text-gray-900">Avisos de Privacidad</h1>
-              <p className="text-[11px] text-gray-400 mt-0.5">Padrón de productores aceptantes del APCP</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-[10px] text-gray-500">
-            <span className="font-bold text-[#1A5C38] text-[13px]">{total}</span>
-            <span className="ml-0.5">registros</span>
-          </div>
+        {/* ── Barra de acción ── */}
+        <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
+          <span className="text-[10px] font-bold text-[#1A5C38]/70 uppercase tracking-wide">{total} registros totales</span>
         </div>
 
         {/* ── MÉTRICAS ── */}

@@ -2,8 +2,9 @@
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { 
-  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, BarChart3, X, CheckCircle
+import {
+  Search, MapPin, Eye, ShieldAlert, RefreshCw, Warehouse, BarChart3, X, CheckCircle,
+  Weight, Package, Percent, FileText, LayoutGrid
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
@@ -237,7 +238,7 @@ export default function BodegasAdminPage() {
     if (estatus === 'rechazada') color = '#6B7280'; // Gris
 
     const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28">
         <path stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" paint-order="stroke fill" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
       </svg>
     `;
@@ -252,42 +253,35 @@ export default function BodegasAdminPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
 
-      {/* ── Header + Tab Bar ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex-shrink-0">
-        <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
-              <Warehouse size={16} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-[15px] font-bold text-gray-900">Bodegas</h1>
-              <p className="text-[11px] text-gray-400 mt-0.5">Lista · Estadísticas · Aprobaciones</p>
-            </div>
+      {/* ── Tab Bar ── */}
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl overflow-hidden border border-[#1A5C38]/30 border-t-0">
+        <div className="flex items-center justify-between gap-1.5 px-2 py-1.5">
+          <div className="flex items-center gap-1">
+            {[
+              { key: 'lista',        label: 'Lista + Mapa', icon: <Warehouse size={11} />, badge: null },
+              { key: 'estadisticas', label: 'Estadísticas', icon: <BarChart3 size={11} />, badge: null },
+              { key: 'pendientes',   label: 'Por aprobar',  icon: <ShieldAlert size={11} />,
+                badge: bodegas.filter(b => b.estatus === 'pendiente').length },
+            ].map(({ key, label, icon, badge }) => (
+              <button key={key} onClick={() => setTabActivo(key as any)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${
+                  tabActivo === key
+                    ? 'bg-[#1A5C38] text-white shadow-sm'
+                    : 'text-[#1A5C38] hover:bg-[#d4efe1] hover:text-[#0e3d24]'
+                }`}>
+                {icon}{label}
+                {badge !== null && badge > 0 && (
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+                    tabActivo === key ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-600 border border-amber-200'
+                  }`}>{badge}</span>
+                )}
+              </button>
+            ))}
           </div>
           <button onClick={cargarBodegas} disabled={loading}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50 flex-shrink-0">
             <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
           </button>
-        </div>
-        <div className="flex">
-          {[
-            { key: 'lista',        label: 'Lista + Mapa', icon: <Warehouse size={12} />, badge: null },
-            { key: 'estadisticas', label: 'Estadísticas', icon: <BarChart3 size={12} />, badge: null },
-            { key: 'pendientes',   label: 'Por aprobar',  icon: <ShieldAlert size={12} />,
-              badge: bodegas.filter(b => b.estatus === 'pendiente').length },
-          ].map(({ key, label, icon, badge }) => (
-            <button key={key} onClick={() => setTabActivo(key as any)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-[11.5px] font-bold border-b-2 transition-all duration-150 ${
-                tabActivo === key
-                  ? 'border-[#1A5C38] text-[#1A5C38]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}>
-              {icon}{label}
-              {badge !== null && badge > 0 && (
-                <span className="bg-amber-100 text-amber-600 border border-amber-200 text-[9px] font-black px-1.5 py-0.5 rounded-full">{badge}</span>
-              )}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -300,36 +294,57 @@ export default function BodegasAdminPage() {
               <p className="text-[13px] text-gray-500">Cargando estadísticas...</p>
             </div>
           ) : stats ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* KPI: Capacidad total */}
-              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Capacidad Total</p>
-                <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.capacidad_total || 0).toLocaleString()}</p>
-                <p className="text-[11px] text-gray-500">toneladas</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              {/* Hero: Ocupación */}
+              <div className="lg:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-5 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10.5px] font-bold text-gray-500 uppercase tracking-wide">Ocupación de almacenamiento</p>
+                    <p className="text-[36px] font-black text-gray-900 leading-none mt-1.5">
+                      {stats.pct_ocupacion || 0}<span className="text-[16px] text-gray-400 ml-0.5">%</span>
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <Percent size={20} />
+                  </div>
+                </div>
+                <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(100, Number(stats.pct_ocupacion) || 0)}%` }} />
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-gray-100 mt-1">
+                  <div className="flex items-center gap-2.5 pt-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center flex-shrink-0"><Weight size={15} /></div>
+                    <div className="min-w-0">
+                      <p className="text-[16px] font-black text-gray-900 leading-none">{Number(stats.capacidad_total || 0).toLocaleString()}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Capacidad total (t)</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 pt-3">
+                    <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center flex-shrink-0"><Package size={15} /></div>
+                    <div className="min-w-0">
+                      <p className="text-[16px] font-black text-gray-900 leading-none">{Number(stats.stock_total || 0).toLocaleString()}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Stock actual (t)</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              {/* KPI: Stock actual */}
-              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Stock Actual</p>
-                <p className="text-[28px] font-black text-gray-900 leading-none">{Number(stats.stock_total || 0).toLocaleString()}</p>
-                <p className="text-[11px] text-gray-500">toneladas</p>
-              </div>
-              {/* KPI: % Ocupación */}
-              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">% Ocupación</p>
-                <p className="text-[28px] font-black text-emerald-600 leading-none">{stats.pct_ocupacion || 0}<span className="text-[14px] text-gray-500 ml-1">%</span></p>
-                <p className="text-[11px] text-gray-500">capacidad utilizada</p>
-              </div>
-              {/* KPI: Con tarifario */}
-              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Con Tarifario</p>
-                <p className="text-[28px] font-black text-gray-900 leading-none">{stats.con_tarifario || 0}</p>
-                <p className="text-[11px] text-gray-500">bodegas con tarifa activa</p>
-              </div>
-              {/* KPI: Ventanillas activas */}
-              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 space-y-1">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Ventanillas Activas</p>
-                <p className="text-[28px] font-black text-gray-900 leading-none">{stats.ventanillas_activas || 0}</p>
-                <p className="text-[11px] text-gray-500">puntos de atención</p>
+
+              {/* Side stack: Con tarifario + Ventanillas */}
+              <div className="flex flex-col gap-3">
+                <div className="flex-1 bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center flex-shrink-0"><FileText size={17} /></div>
+                  <div className="min-w-0">
+                    <p className="text-[22px] font-black text-gray-900 leading-none">{stats.con_tarifario || 0}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mt-1">Con Tarifario</p>
+                  </div>
+                </div>
+                <div className="flex-1 bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center flex-shrink-0"><LayoutGrid size={17} /></div>
+                  <div className="min-w-0">
+                    <p className="text-[22px] font-black text-gray-900 leading-none">{stats.ventanillas_activas || 0}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mt-1">Ventanillas Activas</p>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
@@ -340,6 +355,33 @@ export default function BodegasAdminPage() {
 
       {/* ── TAB: LISTA + MAPA ── */}
       {tabActivo === 'lista' && (
+      <div className="flex flex-col flex-1 gap-3 overflow-hidden min-h-0">
+
+      {/* Franja de stats rápidos */}
+      <div className="grid grid-cols-3 gap-3 flex-shrink-0">
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center flex-shrink-0"><Warehouse size={14} /></div>
+          <div className="min-w-0">
+            <p className="text-[16px] font-black text-gray-900 leading-none">{bodegas.length}</p>
+            <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Total</p>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0"><CheckCircle size={14} /></div>
+          <div className="min-w-0">
+            <p className="text-[16px] font-black text-gray-900 leading-none">{bodegas.filter(b => b.estatus === 'aprobada').length}</p>
+            <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Aprobadas</p>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center flex-shrink-0"><ShieldAlert size={14} /></div>
+          <div className="min-w-0">
+            <p className="text-[16px] font-black text-gray-900 leading-none">{bodegas.filter(b => b.estatus === 'pendiente').length}</p>
+            <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Pendientes</p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col lg:flex-row flex-1 gap-3 overflow-hidden min-h-0">
 
       {/* ── COLUMNA IZQUIERDA: LISTA & FILTROS ── */}
@@ -478,7 +520,7 @@ export default function BodegasAdminPage() {
                       {b.estatus.charAt(0).toUpperCase() + b.estatus.slice(1)}
                     </span>
                     <span className={`w-2.5 h-2.5 rounded-full ${
-                      b.semaforo_compra === 'verde' ? 'bg-emerald-500 animate-pulse' :
+                      b.semaforo_compra === 'verde' ? 'bg-emerald-500' :
                       b.semaforo_compra === 'amarillo' ? 'bg-amber-500' :
                       b.semaforo_compra === 'rojo' ? 'bg-red-500' : 'bg-gray-400'
                     }`} />
@@ -516,6 +558,7 @@ export default function BodegasAdminPage() {
           ))}
         </MapContainer>
 
+      </div>
       </div>
       </div>
       )}

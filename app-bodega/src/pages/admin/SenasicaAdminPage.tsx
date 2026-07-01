@@ -1,6 +1,6 @@
 ﻿import { useState, useRef, useEffect } from 'react';
 import {
-  Upload, CheckCircle, AlertCircle, Clock, FileText, Leaf, RefreshCw,
+  Upload, CheckCircle, AlertCircle, Clock, FileText, RefreshCw,
   Info, Settings2, Bell, Check, X, Loader2, Activity, MapPin,
   BarChart3, Zap, Shield, Database
 } from 'lucide-react';
@@ -99,50 +99,29 @@ export default function SenasicaAdminPage() {
   return (
     <div className="flex flex-col gap-3 h-full">
 
-      {/* ── Header compacto ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm">
-            <Leaf size={16} className="text-white" />
+      {/* ── Tab Bar ── */}
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 overflow-hidden">
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <div className="flex items-center gap-1">
+            {TABS.map(({ key, label, icon: Icon, badge }) => (
+              <button key={key} onClick={() => setTab(key)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${
+                  tab === key ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1] hover:text-[#0e3d24]'
+                }`}>
+                <Icon size={11} />{label}
+                {badge ? <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${tab === key ? 'bg-white/20 text-white' : 'bg-[#1A5C38]/10 text-[#1A5C38]'}`}>{badge}</span> : null}
+              </button>
+            ))}
           </div>
-          <div>
-            <h1 className="text-[15px] font-bold text-gray-900">Alertas Fitosanitarias SENASICA</h1>
-            <p className="text-[11px] text-gray-400 mt-0.5">Carga CSV · Notificaciones geoespaciales automáticas</p>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-semibold text-[#1A5C38]/60">Activo</span>
           </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] font-semibold text-gray-400">Activo</span>
         </div>
       </div>
 
-      {/* ── Tabs + Contenido ── */}
+      {/* ── Contenido ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
-
-        {/* Tabs */}
-        <div className="flex border-b border-gray-100 bg-gray-50/50 px-1 pt-1 gap-1">
-          {TABS.map(({ key, label, icon: Icon, badge }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-[11.5px] font-bold rounded-t-xl border-b-2 transition-all duration-150 ${
-                tab === key
-                  ? 'border-[#1A5C38] text-[#1A5C38] bg-white'
-                  : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-white/60'
-              }`}
-            >
-              <Icon size={12} />
-              {label}
-              {badge ? (
-                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                  tab === key ? 'bg-[#eef8f2] text-[#1A5C38]' : 'bg-gray-100 text-gray-500'
-                }`}>{badge}</span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-
-        {/* Contenido */}
         <div className="flex-1 overflow-y-auto p-4">
 
           {/* ── TAB CARGAR CSV ── */}

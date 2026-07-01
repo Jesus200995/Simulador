@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { Settings, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle, Settings2 } from 'lucide-react';
+import { Settings, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -104,17 +104,24 @@ export default function ConfiguracionAdminPage() {
   return (
     <div className="flex flex-col gap-3">
 
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm">
-            <Settings2 size={16} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-[15px] font-bold text-gray-900">Configuración del Sistema</h1>
-            <p className="text-[11px] text-gray-400 mt-0.5">Parámetros · Usuarios · Catálogos</p>
-          </div>
+      {/* ── Barra de acciones ── */}
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-[10.5px] text-[#1A5C38]/70 font-medium">
+          <Settings size={11} className="text-[#1A5C38]" />
+          <span>Sistema SIMAC</span>
+          <span className="text-[#1A5C38]/30">·</span>
+          <span>Parámetros · Usuarios · Catálogos</span>
         </div>
+        <button
+          onClick={guardarParams} disabled={savingParams}
+          className={`flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
+            savedParams
+              ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
+              : 'bg-[#d4efe1] border-[#1A5C38]/30 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
+          }`}>
+          <Save size={10} />
+          {savedParams ? 'Guardado ✓' : savingParams ? 'Guardando…' : 'Guardar parámetros'}
+        </button>
       </div>
 
       {/* Parámetros */}

@@ -165,7 +165,7 @@ export default function AlertasAdminPage() {
     if (nivel === 'ALTA') color = '#ef4444'; // ALTA (Rojo)
 
     const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="28" height="28">
         <path stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" paint-order="stroke fill" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
       </svg>
     `;
@@ -193,50 +193,37 @@ export default function AlertasAdminPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
 
-      {/* ── Header compacto + toggle stats ── */}
-      <div className="flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
-              <ShieldAlert size={16} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-[15px] font-bold text-gray-900">Incidencias y Alertas</h1>
-              <p className="text-[11px] text-gray-400 mt-0.5">Fitosanitarias · Climáticas · Operativas · Mercado</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={cargarAlertas} disabled={loading}
-              className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
-              <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-            </button>
-            <button
-              onClick={() => setMostrarStats(!mostrarStats)}
-              className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all duration-150 active:scale-95 ${mostrarStats ? 'text-[#1A5C38] bg-[#eef8f2] border-[#1A5C38]/20' : 'text-gray-500 bg-gray-50 border-gray-200 hover:border-gray-300'}`}
-            >
-              <BarChart3 size={11} />
-              Estadísticas
+      {/* ── Barra de acción + stats toggle ── */}
+      <div className="flex-shrink-0 bg-[#eef8f2] rounded-b-2xl border border-[#1A5C38]/30 border-t-0 overflow-hidden">
+        <div className="px-2 py-1.5 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <button onClick={() => setMostrarStats(!mostrarStats)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${mostrarStats ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1]'}`}>
+              <BarChart3 size={11} /> Estadísticas
               <ChevronDown size={11} className={`transition-transform duration-150 ${mostrarStats ? 'rotate-180' : ''}`} />
             </button>
           </div>
+          <button onClick={cargarAlertas} disabled={loading}
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
+          </button>
         </div>
-
         {mostrarStats && (
-          <div className="grid grid-cols-3 gap-0 border-t border-gray-100">
-            <div className="px-4 py-3 border-r border-gray-100">
+          <div className="grid grid-cols-3 gap-0 border-t border-[#1A5C38]/10">
+            <div className="px-4 py-2.5 border-r border-[#1A5C38]/10">
               <p className="text-[9px] font-bold text-red-500 uppercase tracking-wide mb-0.5">Zonas afectadas</p>
-              <p className="text-[22px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">estados con alertas activas</p>
+              <p className="text-[20px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
+              <p className="text-[10px] text-[#1A5C38]/50 mt-0.5">estados con alertas activas</p>
             </div>
-            <div className="px-4 py-3 border-r border-gray-100">
+            <div className="px-4 py-2.5 border-r border-[#1A5C38]/10">
               <p className="text-[9px] font-bold text-amber-500 uppercase tracking-wide mb-0.5">Alertas activas</p>
-              <p className="text-[22px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">incidencias vigentes hoy</p>
+              <p className="text-[20px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
+              <p className="text-[10px] text-[#1A5C38]/50 mt-0.5">incidencias vigentes hoy</p>
             </div>
-            <div className="px-4 py-3">
+            <div className="px-4 py-2.5">
               <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wide mb-0.5">Atendidas este mes</p>
-              <p className="text-[22px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
+              <p className="text-[20px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
+              <p className="text-[10px] text-[#1A5C38]/50 mt-0.5">resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
             </div>
           </div>
         )}

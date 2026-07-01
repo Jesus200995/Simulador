@@ -2,11 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "app-bodega",
+      "name": "app-bodega-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "$PORT"],
-      "port": 5174,
-      "autoPort": true
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
     }
   ]
 }

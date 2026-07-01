@@ -2,3 +2,6 @@
 certificados/
 *.key
 *.pem
+
+# Agent configurations and credentials
+.agents/

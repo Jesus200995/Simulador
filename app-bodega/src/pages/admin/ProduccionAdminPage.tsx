@@ -53,18 +53,10 @@ export default function ProduccionAdminPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Header compacto */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center shadow-sm flex-shrink-0">
-            <Sprout size={16} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-[15px] font-bold text-gray-900">Producción</h1>
-            <p className="text-[11px] text-gray-400 mt-0.5">Cultivos · Ciclos · Cobertura por estado</p>
-          </div>
-        </div>
-        <button onClick={cargar} disabled={loading} className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#eef8f2] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+      {/* ── Barra de acción ── */}
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex justify-end">
+        <button onClick={cargar} disabled={loading}
+          className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
           <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> Recargar
         </button>
       </div>
