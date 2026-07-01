@@ -378,44 +378,51 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
         className="relative flex flex-col items-center text-center px-6 pb-8"
         style={{ paddingTop: back !== undefined ? 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' : 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
       >
-        {/* Badge de rol — encima del avatar */}
-        <div
-          className="flex items-center gap-1.5 mb-4"
-          style={{ animation: 'phFadeUp .3s .04s ease both' }}
+        {/* "Mi Perfil" — primero arriba de todo */}
+        <p
+          className="text-[11px] sm:text-[12px] font-semibold text-white/45 uppercase tracking-[0.22em] mb-3"
+          style={{ animation: 'phFadeUp .28s ease both', fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif", letterSpacing: '0.22em' }}
         >
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide border
+          {titulo}
+        </p>
+
+        {/* Badge de rol */}
+        <div
+          className="flex items-center gap-1.5 mb-5"
+          style={{ animation: 'phFadeUp .3s .07s ease both' }}
+        >
+          <div className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11.5px] font-semibold tracking-wide border backdrop-blur-sm
             ${variant === 'productor'
-              ? 'bg-emerald-400/20 border-emerald-300/30 text-emerald-100'
-              : 'bg-sky-400/20 border-sky-300/30 text-sky-100'}`}>
+              ? 'bg-emerald-400/15 border-emerald-300/25 text-emerald-100'
+              : 'bg-sky-400/15 border-sky-300/25 text-sky-100'}`}
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             {variant === 'productor'
-              ? <Sprout size={12} strokeWidth={2.5} />
-              : <Warehouse size={12} strokeWidth={2.5} />}
-            {variant === 'productor' ? 'Productor' : 'Bodega / Industria'}
+              ? <Sprout size={12} strokeWidth={2} />
+              : <Warehouse size={12} strokeWidth={2} />}
+            {variant === 'productor' ? 'Productor agrícola' : 'Bodega / Industria'}
           </div>
         </div>
 
         {/* Avatar — círculo */}
         <div
-          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/15 backdrop-blur-sm ring-[3px] ring-white/30 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.3)] mb-4"
-          style={{ animation: 'phPop .45s cubic-bezier(0.34,1.56,0.64,1) .06s both' }}
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/15 backdrop-blur-sm ring-[3px] ring-white/30 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.3)] mb-5"
+          style={{ animation: 'phPop .45s cubic-bezier(0.34,1.56,0.64,1) .1s both' }}
         >
-          <span className="text-white text-[28px] sm:text-[32px] font-black tracking-tight select-none">
+          <span className="text-white text-[26px] sm:text-[30px] font-bold tracking-tight select-none"
+            style={{ fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif" }}>
             {initials}
           </span>
         </div>
 
-        {/* Etiqueta título */}
-        <p
-          className="text-[10px] sm:text-[11px] font-bold text-green-300/70 uppercase tracking-[0.18em] mb-2"
-          style={{ animation: 'phFadeUp .35s .14s ease both' }}
-        >
-          {titulo}
-        </p>
-
         {/* Nombre */}
         <h1
-          className="text-[22px] sm:text-[26px] font-black text-white leading-tight tracking-tight max-w-xs sm:max-w-sm"
-          style={{ animation: 'phFadeUp .35s .18s ease both' }}
+          className="text-[21px] sm:text-[24px] text-white leading-snug max-w-xs sm:max-w-sm"
+          style={{
+            animation: 'phFadeUp .35s .18s ease both',
+            fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+          }}
         >
           {nombre}
         </h1>
