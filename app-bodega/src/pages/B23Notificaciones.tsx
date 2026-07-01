@@ -2,9 +2,74 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell, CheckCheck, Signal, Receipt, Store, Megaphone,
-  ClipboardList, Tag, Wheat, ChevronDown, ArrowRight, Clock, AlertCircle
+  ClipboardList, Tag, Wheat, ChevronDown, ArrowRight, Clock, AlertCircle,
+  BellRing, BellOff, Loader2
 } from 'lucide-react';
 import { api } from '../services/api';
+
+const BASE = import.meta.env.VITE_API_URL || '/api';
+const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY ?? '';
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = window.atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+function usePushSubscription() {
+  const [permiso, setPermiso] = useState<NotificationPermission | null>(null);
+  const [cargando, setCargando] = useState(false);
+
+  useEffect(() => {
+    if ('Notification' in window) setPermiso(Notification.permission);
+  }, []);
+
+  const activar = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !VAPID_KEY) return;
+    setCargando(true);
+    try {
+      const perm = await Notification.requestPermission();
+      setPermiso(perm);
+      if (perm !== 'granted') return;
+      const sw = await navigator.serviceWorker.ready;
+      const sub = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+      });
+      const { endpoint, keys } = sub.toJSON() as any;
+      const token = localStorage.getItem('simac_token');
+      await fetch(`${BASE}/productor/push/suscribir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ endpoint, p256dh: keys.p256dh, auth: keys.auth }),
+      });
+    } catch (e) {
+      console.warn('Push no disponible:', e);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const desactivar = async () => {
+    setCargando(true);
+    try {
+      const token = localStorage.getItem('simac_token');
+      await fetch(`${BASE}/productor/push/cancelar`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const sw = await navigator.serviceWorker.ready;
+      const sub = await sw.pushManager.getSubscription();
+      await sub?.unsubscribe();
+      setPermiso('default');
+    } catch { /**/ } finally {
+      setCargando(false);
+    }
+  };
+
+  return { permiso, cargando, activar, desactivar };
+}
 
 interface Notif {
   id: number;
@@ -63,6 +128,7 @@ export default function B23Notificaciones() {
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandida, setExpandida] = useState<number | null>(null);
+  const push = usePushSubscription();
 
   useEffect(() => {
     const cargar = () => {
@@ -151,6 +217,53 @@ export default function B23Notificaciones() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Banner push nativas ── */}
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4">
+        {'Notification' in window && push.permiso === 'default' && (
+          <div className="mb-3 bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+              <BellRing size={16} className="text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12.5px] font-bold text-amber-800">Activa alertas en tu dispositivo</p>
+              <p className="text-[11px] text-amber-700 leading-snug mt-0.5">
+                Recibe avisos aunque la app esté cerrada — requerimientos, transacciones y más.
+              </p>
+            </div>
+            <button
+              onClick={push.activar}
+              disabled={push.cargando}
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] px-3 py-2 rounded-xl transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
+            >
+              {push.cargando ? <Loader2 size={11} className="animate-spin" /> : <BellRing size={11} />}
+              Activar
+            </button>
+          </div>
+        )}
+        {'Notification' in window && push.permiso === 'granted' && (
+          <div className="mb-3 bg-emerald-50 border border-emerald-100 rounded-2xl p-3 flex items-center gap-2.5">
+            <BellRing size={14} className="text-emerald-600 shrink-0" />
+            <p className="text-[11.5px] text-emerald-700 font-semibold flex-1">Notificaciones push activas en este dispositivo</p>
+            <button
+              onClick={push.desactivar}
+              disabled={push.cargando}
+              className="flex items-center gap-1 text-[10.5px] text-emerald-600 hover:text-red-500 font-semibold transition-colors disabled:opacity-50"
+            >
+              {push.cargando ? <Loader2 size={10} className="animate-spin" /> : <BellOff size={10} />}
+              Desactivar
+            </button>
+          </div>
+        )}
+        {'Notification' in window && push.permiso === 'denied' && (
+          <div className="mb-3 bg-gray-50 border border-gray-100 rounded-2xl p-3 flex items-center gap-2.5">
+            <BellOff size={14} className="text-gray-400 shrink-0" />
+            <p className="text-[11px] text-gray-500 leading-snug">
+              Notificaciones bloqueadas en este dispositivo. Actívalas desde la configuración del navegador.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* ── Lista de notificaciones ── */}

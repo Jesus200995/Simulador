@@ -18,8 +18,21 @@ export interface PushPayload {
   titulo:  string;
   mensaje: string;
   tipo:    string;
-  nivel:   string;
+  nivel?:  string;
 }
+
+// URL a la que abre la app al tocar la notificación, por tipo de evento
+const URL_POR_TIPO: Record<string, string> = {
+  senal_compra:             '/productor/alertas',
+  interes_senal:            '/notificaciones',
+  confirmacion_transaccion: '/productor/alertas',
+  interes_bodega_oferta:    '/notificaciones',
+  nueva_disponibilidad:     '/oferta',
+  alerta_sanitaria:         '/productor/alertas',
+  alerta_tarifario:         '/notificaciones',
+  solicitud_apoyo:          '/ventanillas',
+  nuevo_requerimiento:      '/requerimientos',
+};
 
 export const enviarPushNativa = async (
   suscripcion: PushSubscription,
@@ -27,17 +40,19 @@ export const enviarPushNativa = async (
 ): Promise<void> => {
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
 
+  const url = URL_POR_TIPO[payload.tipo] ?? '/notificaciones';
+
   await webpush.sendNotification(
     {
       endpoint: suscripcion.endpoint,
       keys: { p256dh: suscripcion.p256dh, auth: suscripcion.auth }
     },
     JSON.stringify({
-      title: payload.titulo,
-      body:  payload.mensaje,
-      icon:  '/icons/icon-192x192.png',
-      badge: '/icons/badge-72x72.png',
-      data: { tipo: payload.tipo, nivel: payload.nivel, url: '/productor/alertas' }
+      title:  payload.titulo,
+      body:   payload.mensaje,
+      icon:   '/icono.png',
+      badge:  '/icono.png',
+      data:   { tipo: payload.tipo, nivel: payload.nivel ?? 'info', url },
     })
   );
 };

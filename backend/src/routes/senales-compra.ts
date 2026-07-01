@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { notificar } from '../utils/notificacion';
 
 const router = Router();
 
@@ -177,13 +178,15 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
             precio_ofrecido,
             tipo_maiz,
           });
-          try {
-            await pool.query(
-              `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo, datos_extra)
-               VALUES ($1, 'senal_compra', $2, $3, 'senales_compra', $4)`,
-              [prod.usuario_id, msg, senal.id, datosExtra]
-            );
-          } catch (_) { /* best-effort per user */ }
+          notificar({
+            usuarioId: prod.usuario_id,
+            tipo: 'senal_compra',
+            titulo: '🌽 Nueva señal de compra cerca de ti',
+            mensaje: msg,
+            referenciaId: senal.id,
+            referenciaTipo: 'senales_compra',
+            datosExtra,
+          }).catch(() => {});
         }
       }
     } catch (_) { /* best-effort */ }
@@ -247,13 +250,14 @@ router.post('/:id/interes', authMiddleware, async (req: AuthRequest, res: Respon
       }
     } catch (_) { /* best-effort: tabla puede no existir aún */ }
 
-    try {
-      await pool.query(
-        `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-         VALUES ($1, 'interes_senal', $2, $3, 'senales_compra')`,
-        [s.usuario_id, `Un productor respondió a tu señal. Ya tienes ${s.interesados_count} interesados.`, s.id]
-      );
-    } catch (_) { /* best-effort */ }
+    notificar({
+      usuarioId: s.usuario_id,
+      tipo: 'interes_senal',
+      titulo: '📩 Nuevo interesado en tu señal',
+      mensaje: `Un productor respondió a tu señal. Ya tienes ${s.interesados_count} interesado${s.interesados_count !== 1 ? 's' : ''}.`,
+      referenciaId: s.id,
+      referenciaTipo: 'senales_compra',
+    }).catch(() => {});
 
     res.json({ ok: true, interesados_count: s.interesados_count });
   } catch (err: any) { res.status(500).json({ error: err.message }); }

@@ -8,9 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      // injectManifest: usamos nuestro propio SW (src/sw.ts) que incluye
+      // el handler push para notificaciones nativas aunque la app esté cerrada.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      // En desarrollo NO registrar Service Worker (evita que intercepte la API en local)
       devOptions: { enabled: false },
       includeAssets: ['icono.png'],
       manifest: {
@@ -28,17 +32,11 @@ export default defineConfig({
           { src: '/icono.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' }
         ]
       },
-      workbox: {
-        cacheId: 'simac-v2',
-        clientsClaim: true,
-        skipWaiting: true,
-        cleanupOutdatedCaches: true,
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024
-      }
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+      },
     }),
   ],
-  // host: true expone el dev server en la red local para abrir el frontend
-  // desde cualquier dispositivo (celular/otra laptop) vía http://IP-DEL-EQUIPO:5174
   server: { host: true, port: Number(process.env.PORT) || 5174 },
 })

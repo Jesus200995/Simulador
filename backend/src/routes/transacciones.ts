@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { notificar } from '../utils/notificacion';
 
 const router = Router();
 
@@ -181,11 +182,14 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
         ]);
         if (prodR.rows.length > 0) {
           const msg = `La Bodega ${bodegaR.rows[0]?.nombre} registró una compra tuya: ${volumen_ton} ton a $${precio_ton}/ton. ¿Es correcto?`;
-          await pool.query(
-            `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-             VALUES ($1, 'confirmacion_transaccion', $2, $3, 'transacciones')`,
-            [prodR.rows[0].id, msg, tx.id]
-          );
+          notificar({
+            usuarioId: prodR.rows[0].id,
+            tipo: 'confirmacion_transaccion',
+            titulo: '🧾 Nueva transacción registrada',
+            mensaje: msg,
+            referenciaId: tx.id,
+            referenciaTipo: 'transacciones',
+          }).catch(() => {});
         }
       } catch (_) { /* best-effort */ }
     }

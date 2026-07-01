@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { notificar } from '../utils/notificacion';
 
 const router = Router();
 
@@ -241,11 +242,14 @@ router.post('/municipios/:municipio/interes', authMiddleware, async (req: AuthRe
     let notificados = 0;
     for (const prod of productores.rows) {
       try {
-        await pool.query(
-          `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id, referencia_tipo)
-           VALUES ($1, 'interes_bodega_oferta', $2, $3, 'bodegas')`,
-          [prod.usuario_id, msg, bodega_id]
-        );
+        notificar({
+          usuarioId: prod.usuario_id,
+          tipo: 'interes_bodega_oferta',
+          titulo: '🏪 Una bodega quiere comprarte',
+          mensaje: msg,
+          referenciaId: bodega_id,
+          referenciaTipo: 'bodegas',
+        }).catch(() => {});
         notificados++;
       } catch (_) { /* best-effort */ }
     }
