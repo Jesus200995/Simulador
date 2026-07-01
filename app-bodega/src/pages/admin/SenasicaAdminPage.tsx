@@ -43,7 +43,7 @@ export default function SenasicaAdminPage() {
   const [guardado, setGuardado]     = useState<string | null>(null);
   const [drag, setDrag]             = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const token   = localStorage.getItem('token') ?? '';
+  const token   = localStorage.getItem('simac_token') ?? '';
 
   const cargarDatos = () => {
     setCargando(true);
