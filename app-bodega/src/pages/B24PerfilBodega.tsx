@@ -327,6 +327,7 @@ export default function B24PerfilBodega() {
       {showUbicacion && <ModalUbicacion stateIdActual={perfil?.state_id ?? null} muniIdActual={perfil?.municipality_id ?? null} onSave={guardarUbicacion} onClose={() => setShowUbicacion(false)} />}
 
       <ProfileHero
+        variant="bodega"
         titulo="Mi Perfil"
         nombre={perfil?.nombre_completo || user?.nombre_completo || '—'}
         initials={initials}

@@ -141,6 +141,7 @@ export default function MiPerfilPage() {
       `}</style>
 
       <ProfileHero
+        variant="productor"
         titulo="Mi Perfil"
         nombre={nombreCompleto || 'Productor'}
         initials={initials}
