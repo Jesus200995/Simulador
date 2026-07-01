@@ -6,7 +6,7 @@ import {
   MapPin, AlertTriangle, CreditCard
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
-import { PageBanner } from '../components/Layout';
+import ProfileHero from '../components/ProfileHero';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}`, 'Content-Type': 'application/json' });
@@ -479,27 +479,25 @@ export default function B24PerfilBodega() {
         />
       )}
 
-      <PageBanner title="Mi Perfil" subtitle={rolDisplay} back="/dashboard" />
+      <ProfileHero
+        titulo="Mi Perfil"
+        nombre={perfil?.nombre_completo || user?.nombre_completo || '—'}
+        initials={initials}
+        back="/dashboard"
+        meta={perfil?.email || user?.email || undefined}
+        badges={
+          <span className="text-[11px] font-bold text-white/90 bg-white/15 rounded-full px-3 py-1 capitalize">
+            {rolDisplay}
+          </span>
+        }
+      />
 
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
         <div className="max-w-4xl mx-auto space-y-6">
         {loading ? (
           <div className="flex justify-center pt-16"><Spinner /></div>
         ) : (
           <>
-            {/* Avatar card */}
-            <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] flex items-center gap-5">
-              <div className="w-20 h-20 rounded-[1.25rem] bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] flex items-center justify-center flex-shrink-0 shadow-[0_4px_16px_rgba(26,92,56,0.3)]">
-                <span className="text-white text-[28px] font-black">{initials}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[20px] font-black text-gray-900 leading-tight truncate">{perfil?.nombre_completo || user?.nombre_completo || '—'}</p>
-                <p className="text-[14px] text-gray-500 mt-1 font-medium truncate">{perfil?.email || user?.email || '—'}</p>
-                <span className="inline-block mt-2 bg-[#1A5C38]/10 text-[#1A5C38] text-[12px] font-bold px-3 py-1 rounded-full capitalize">
-                  {rolDisplay}
-                </span>
-              </div>
-            </div>
 
             {/* ── Datos de cuenta ─────────────────────────────────── */}
             <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">

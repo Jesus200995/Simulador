@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Edit2, MapPin, LogOut, CircleDot, CalendarCheck, ChevronRight, Sprout, Trash2, Plus } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import MapaUP from '../../components/productor/MapaUP';
+import ProfileHero from '../../components/ProfileHero';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -157,30 +158,29 @@ export default function MiPerfilPage() {
   const nombreCompleto = [perfil.nombres, perfil.apellido_paterno, perfil.apellido_materno].filter(Boolean).join(' ');
   const initials = [perfil.nombres, perfil.apellido_paterno].filter(Boolean).map(w => w[0]).join('').toUpperCase() || 'P';
 
+  const estadoBadgeColor = perfil.estado_validacion === 'activo'
+    ? 'bg-emerald-400/90 text-emerald-950'
+    : perfil.estado_validacion === 'pendiente'
+    ? 'bg-amber-300/90 text-amber-950'
+    : 'bg-red-400/90 text-red-950';
+
   return (
     <div className="bg-[#eef8f2] min-h-screen">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[28px] shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6">
-          <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-3">Perfil</p>
-          <div className="flex items-center gap-3.5">
-            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm ring-2 ring-white/20 flex items-center justify-center flex-shrink-0 shadow-lg">
-              <span className="text-white text-[18px] font-black">{initials}</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-[18px] sm:text-[20px] font-black text-white leading-tight tracking-tight">{nombreCompleto || 'Mi perfil'}</h1>
-              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                <span className="text-[10px] font-bold text-white bg-white/15 rounded-full px-2 py-0.5">Tipo {perfil.tipo_registro}</span>
-                <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
-                  perfil.estado_validacion === 'activo' ? 'bg-green-400/90 text-green-950'
-                  : perfil.estado_validacion === 'pendiente' ? 'bg-amber-300/90 text-amber-950'
-                  : 'bg-red-400/90 text-red-950'}`}>
-                  {perfil.estado_validacion.charAt(0).toUpperCase() + perfil.estado_validacion.slice(1)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ProfileHero
+        titulo="Mi Perfil"
+        nombre={nombreCompleto || 'Productor'}
+        initials={initials}
+        badges={
+          <>
+            <span className="text-[11px] font-bold text-white/90 bg-white/15 rounded-full px-3 py-1">
+              Tipo {perfil.tipo_registro}
+            </span>
+            <span className={`text-[11px] font-bold rounded-full px-3 py-1 ${estadoBadgeColor}`}>
+              {perfil.estado_validacion.charAt(0).toUpperCase() + perfil.estado_validacion.slice(1)}
+            </span>
+          </>
+        }
+      />
 
       <div className="max-w-5xl mx-auto px-4 pt-4 space-y-4">
         {/* Datos personales — no editables */}
