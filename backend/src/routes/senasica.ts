@@ -17,7 +17,7 @@ if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename: (_req, file, cb) => cb(null, `senasica_${Date.now()}_${file.originalname}`)
+  filename:    (_req, file, cb) => cb(null, `senasica_${Date.now()}_${file.originalname}`)
 });
 
 const upload = multer({
@@ -29,79 +29,141 @@ const upload = multer({
   limits: { fileSize: Infinity }
 });
 
-// ─────────────────────────────────────────────
-// POST /api/senasica/cargar-csv
-// ─────────────────────────────────────────────
-router.post('/cargar-csv', authMiddleware, upload.single('archivo'), async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!req.file) { res.status(400).json({ error: 'No se recibió ningún archivo' }); return; }
+// ─── Normaliza texto para comparar (sin tildes, minúsculas) ──────────
+function norm(s: string) {
+  return s.toLowerCase()
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u');
+}
 
-  const usuarioId = req.user?.userId;
-  const filePath  = req.file.path;
-  let cargaId: number | null = null;
+// ─── Parsea CSV detectando columnas por nombre ────────────────────────
+interface Punto {
+  cve_geo: string; cve_ent: string; cve_mun: string;
+  lng: number; lat: number; hectareas: number; riesgo: string;
+}
 
-  try {
-    // 1. Registrar inicio
-    const cargaRes = await pool.query(
-      `INSERT INTO senasica_cargas (nombre_archivo, usuario_id, estado) VALUES ($1, $2, 'procesando') RETURNING id`,
-      [req.file.originalname, usuarioId]
-    );
-    cargaId = cargaRes.rows[0].id;
-
-    // 2. Desactivar alertas anteriores de SENASICA
-    await pool.query(`UPDATE alertas_externas SET activa = FALSE WHERE fuente = 'SENASICA'`);
-
-    // 3. Parsear CSV
-    const puntos: {
-      cve_geo: string; cve_ent: string; cve_mun: string; cultivo: string;
-      lng: number; lat: number; hectareas: number; riesgo: string;
-    }[] = [];
-
-    await new Promise<void>((resolve, reject) => {
-      const rl = readline.createInterface({ input: fs.createReadStream(filePath), crlfDelay: Infinity });
-      let isHeader = true;
-      rl.on('line', (line) => {
-        if (isHeader) { isHeader = false; return; }
-        const cols = line.split(',');
-        if (cols.length < 8) return;
-        const lng = parseFloat(cols[4]);
-        const lat = parseFloat(cols[5]);
-        if (isNaN(lng) || isNaN(lat)) return;
-        if (!cols[3]?.toLowerCase().includes('ma')) return;
-        puntos.push({
-          cve_geo:   cols[0]?.trim() ?? '',
-          cve_ent:   cols[1]?.trim() ?? '',
-          cve_mun:   cols[2]?.trim() ?? '',
-          cultivo:   cols[3]?.trim() ?? '',
-          lng, lat,
-          hectareas: parseFloat(cols[6]) || 0,
-          riesgo:    cols[7]?.trim().toLowerCase() ?? 'medio'
-        });
-      });
-      rl.on('close', resolve);
-      rl.on('error', reject);
+async function parsearCSV(filePath: string): Promise<Punto[]> {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: fs.createReadStream(filePath, { encoding: 'latin1' }),
+      crlfDelay: Infinity
     });
 
-    // 4. Parámetros de radio
-    const radiosRes = await pool.query(`SELECT nivel_riesgo, radio_km FROM senasica_parametros WHERE activo = TRUE`);
+    let isHeader = true;
+    let iCveGeo = -1, iCveEnt = -1, iCveMun = -1;
+    let iX = -1, iY = -1, iHect = -1, iRiesgo = -1;
+
+    const puntos: Punto[] = [];
+
+    rl.on('line', (raw) => {
+      const cols = raw.split(',');
+
+      if (isHeader) {
+        isHeader = false;
+        const h = cols.map(c => norm(c.trim()));
+        iCveGeo = h.findIndex(c => c === 'cvegeo');
+        iCveEnt = h.findIndex(c => c === 'cve_ent');
+        iCveMun = h.findIndex(c => c === 'cve_mun');
+        iX      = h.findIndex(c => c === 'x');
+        iY      = h.findIndex(c => c === 'y');
+        iHect   = h.findIndex(c => c === 'hectareas');
+        iRiesgo = h.findIndex(c => c === 'riesgo');
+        return;
+      }
+
+      if (iX < 0 || iY < 0 || iRiesgo < 0) return;
+      if (cols.length <= Math.max(iX, iY, iRiesgo)) return;
+
+      const lng = parseFloat(cols[iX]);
+      const lat = parseFloat(cols[iY]);
+      if (isNaN(lng) || isNaN(lat)) return;
+
+      puntos.push({
+        cve_geo:  iCveGeo >= 0 ? (cols[iCveGeo]?.trim() ?? '') : '',
+        cve_ent:  iCveEnt >= 0 ? (cols[iCveEnt]?.trim() ?? '') : '',
+        cve_mun:  iCveMun >= 0 ? (cols[iCveMun]?.trim() ?? '') : '',
+        lng, lat,
+        hectareas: iHect >= 0 ? (parseFloat(cols[iHect]) || 0) : 0,
+        riesgo:    cols[iRiesgo]?.trim().toLowerCase() ?? 'medio'
+      });
+    });
+
+    rl.on('close', () => resolve(puntos));
+    rl.on('error', reject);
+  });
+}
+
+// ─── Deduplica por (cve_geo, nivel) promediando coordenadas ──────────
+interface Grupo {
+  cve_geo: string; cve_ent: string; cve_mun: string;
+  lng: number; lat: number; hectareas: number; nivel: string; count: number;
+}
+
+function deduplicar(puntos: Punto[]): Grupo[] {
+  const map = new Map<string, Grupo>();
+
+  for (const p of puntos) {
+    const nivelNorm = norm(p.riesgo);
+    const nivel = nivelNorm.includes('alto') ? 'alto'
+                : nivelNorm.includes('medio') ? 'medio' : 'bajo';
+    const key = `${p.cve_geo}|${nivel}`;
+
+    const ex = map.get(key);
+    if (!ex) {
+      map.set(key, { cve_geo: p.cve_geo, cve_ent: p.cve_ent, cve_mun: p.cve_mun,
+                     lng: p.lng, lat: p.lat, hectareas: p.hectareas, nivel, count: 1 });
+    } else {
+      // Promedio acumulativo de coordenadas
+      ex.lng       = (ex.lng * ex.count + p.lng) / (ex.count + 1);
+      ex.lat       = (ex.lat * ex.count + p.lat) / (ex.count + 1);
+      ex.hectareas += p.hectareas;
+      ex.count++;
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+// ─── Procesamiento principal (corre en background) ───────────────────
+async function procesarCSV(
+  filePath: string,
+  cargaId: number,
+  nombrePlaga: string,
+  totalPuntosCSV: number
+) {
+  try {
+    const puntos = await parsearCSV(filePath);
+
+    // Actualizar total de puntos leídos
+    await pool.query(
+      `UPDATE senasica_cargas SET total_puntos = $1 WHERE id = $2`,
+      [puntos.length, cargaId]
+    );
+
+    // Desactivar alertas anteriores de SENASICA
+    await pool.query(`UPDATE alertas_externas SET activa = FALSE WHERE fuente = 'SENASICA'`);
+
+    // Parámetros de radio
+    const radiosRes = await pool.query(
+      `SELECT nivel_riesgo, radio_km FROM senasica_parametros WHERE activo = TRUE`
+    );
     const radios: Record<string, number> = { alto: 50, medio: 25, bajo: 10 };
     for (const r of radiosRes.rows) radios[r.nivel_riesgo] = r.radio_km;
 
-    // 5. Nombre de plaga desde el nombre del archivo
-    const nombrePlaga = req.file!.originalname
-      .replace(/-(Riego|Temporal|Mixto)/i, '')
-      .replace(/\.csv$/i, '')
-      .trim() || 'Plaga detectada';
+    // Deduplicar por municipio × nivel
+    const grupos = deduplicar(puntos);
 
-    let totalUpsAfectadas = 0;
-    let totalNotificaciones = 0;
+    let totalUps = 0;
+    let totalNotif = 0;
 
-    for (const punto of puntos) {
-      const nivelNorm = punto.riesgo
-        .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u');
-      const nivel = nivelNorm.includes('alto') ? 'alto' : nivelNorm.includes('medio') ? 'medio' : 'bajo';
-      const radioKm = radios[nivel] ?? 25;
+    for (const g of grupos) {
+      const radioKm = radios[g.nivel] ?? 25;
 
-      // Insertar alerta externa
+      const desc  = `Detección de ${nombrePlaga} en cultivo de maíz. ` +
+                    `Superficie estimada: ${Math.round(g.hectareas).toLocaleString('es-MX')} ha (${g.count} puntos).`;
+      const recom = g.nivel === 'alto'  ? 'Inspecciona tu cultivo de inmediato y contacta a tu técnico de campo.'
+                  : g.nivel === 'medio' ? 'Revisa tu cultivo en los próximos días y mantente alerta.'
+                  :                       'Mantente informado. El riesgo es bajo en este momento.';
+
       const alertaRes = await pool.query(
         `INSERT INTO alertas_externas
            (tipo_alerta, subtipo, nivel_riesgo, descripcion, recomendacion,
@@ -112,28 +174,24 @@ router.post('/cargar-csv', authMiddleware, upload.single('archivo'), async (req:
             ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography,
             $7, $8, $9, NOW()::date, 'SENASICA', $10, TRUE)
          ON CONFLICT (id_alerta_origen) DO UPDATE
-           SET activa = TRUE, nivel_riesgo = EXCLUDED.nivel_riesgo
+           SET activa = TRUE, nivel_riesgo = EXCLUDED.nivel_riesgo,
+               descripcion = EXCLUDED.descripcion
          RETURNING id`,
         [
-          nombrePlaga,
-          nivel,
-          `Detección de ${nombrePlaga} en cultivo de maíz. Superficie: ${punto.hectareas} ha.`,
-          nivel === 'alto'  ? 'Inspecciona tu cultivo de inmediato y contacta a tu técnico de campo.' :
-          nivel === 'medio' ? 'Revisa tu cultivo en los próximos días y mantente alerta.' :
-                              'Mantente informado. El riesgo es bajo en este momento.',
-          punto.lng, punto.lat, radioKm,
-          punto.cve_ent, punto.cve_mun,
-          `SENASICA-${punto.cve_geo}-${punto.riesgo}-${Date.now()}-${Math.random()}`
+          nombrePlaga, g.nivel, desc, recom,
+          g.lng, g.lat, radioKm,
+          g.cve_ent, g.cve_mun,
+          `SENASICA-${g.cve_geo}-${g.nivel}-${cargaId}`
         ]
       );
 
       const alertaId = alertaRes.rows[0]?.id;
       if (!alertaId) continue;
 
-      // 6. Buscar UPs dentro del radio usando PostGIS
+      // Buscar UPs dentro del radio (una sola query por grupo)
       const upsRes = await pool.query(
         `SELECT
-           u.up_id, p.producer_id, p.nombres,
+           u.up_id, p.producer_id,
            us.id AS usuario_id,
            us.push_endpoint, us.push_p256dh, us.push_auth, us.push_activo,
            ROUND(
@@ -143,36 +201,37 @@ router.post('/cargar-csv', authMiddleware, upload.single('archivo'), async (req:
              ) / 1000.0)::numeric
            , 1) AS distancia_km
          FROM up u
-         JOIN producer p ON p.producer_id = u.producer_id
+         JOIN producer p  ON p.producer_id = u.producer_id
          JOIN usuarios us ON us.id = p.usuario_id
-         WHERE
-           ST_DWithin(
-             ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
-             u.geom::geography,
-             $3 * 1000
-           )
-           AND us.activo = TRUE
-           AND u.geom IS NOT NULL`,
-        [punto.lng, punto.lat, radioKm]
+         WHERE ST_DWithin(
+           ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+           u.geom::geography,
+           $3 * 1000
+         )
+         AND us.activo = TRUE
+         AND u.geom IS NOT NULL`,
+        [g.lng, g.lat, radioKm]
       );
 
+      const emoji = g.nivel === 'alto' ? '🔴' : g.nivel === 'medio' ? '🟡' : '🟢';
+      const titulo = `${emoji} Alerta fitosanitaria — ${nombrePlaga}`;
+
       for (const up of upsRes.rows) {
-        totalUpsAfectadas++;
+        totalUps++;
+
         await pool.query(
           `INSERT INTO alertas_up (alerta_id, up_id, distancia_km, notificado)
-           VALUES ($1, $2, $3, FALSE) ON CONFLICT (alerta_id, up_id) DO NOTHING`,
+           VALUES ($1, $2, $3, FALSE)
+           ON CONFLICT (alerta_id, up_id) DO NOTHING`,
           [alertaId, up.up_id, up.distancia_km]
         );
 
-        const emoji   = nivel === 'alto' ? '🔴' : nivel === 'medio' ? '🟡' : '🟢';
-        const titulo  = `${emoji} Alerta fitosanitaria — ${nombrePlaga}`;
-        const mensaje = nivel === 'alto'
+        const mensaje = g.nivel === 'alto'
           ? `Se detectó ${nombrePlaga} con riesgo ALTO a ${up.distancia_km} km de tu parcela. Inspecciona tu cultivo de inmediato.`
-          : nivel === 'medio'
+          : g.nivel === 'medio'
           ? `Se detectó ${nombrePlaga} con riesgo MEDIO a ${up.distancia_km} km de tu parcela. Revisa tu cultivo pronto.`
           : `Se detectó ${nombrePlaga} cerca de tu zona (${up.distancia_km} km). Riesgo BAJO. Mantente informado.`;
 
-        // Notificación in-app
         await pool.query(
           `INSERT INTO notificaciones (usuario_id, alerta_externa_id, titulo, mensaje, tipo, leida)
            VALUES ($1, $2, $3, $4, 'alerta_sanitaria', FALSE)`,
@@ -184,54 +243,94 @@ router.post('/cargar-csv', authMiddleware, upload.single('archivo'), async (req:
           [alertaId, up.up_id]
         );
 
-        // Push nativa
         if (up.push_activo && up.push_endpoint) {
           await enviarPushNativa(
             { endpoint: up.push_endpoint, p256dh: up.push_p256dh, auth: up.push_auth },
-            { titulo, mensaje, tipo: 'alerta_sanitaria', nivel }
+            { titulo, mensaje, tipo: 'alerta_sanitaria', nivel: g.nivel }
           ).catch(err => console.error(`Push fallida usuario ${up.usuario_id}:`, err));
         }
 
-        totalNotificaciones++;
+        totalNotif++;
       }
     }
 
-    // 7. Marcar carga completada
     await pool.query(
       `UPDATE senasica_cargas SET
-         estado = 'completado', total_puntos = $1,
-         total_ups_afectadas = $2, total_notificaciones = $3, completado_en = NOW()
+         estado = 'completado',
+         total_puntos = $1,
+         total_ups_afectadas = $2,
+         total_notificaciones = $3,
+         completado_en = NOW()
        WHERE id = $4`,
-      [puntos.length, totalUpsAfectadas, totalNotificaciones, cargaId]
+      [puntos.length, totalUps, totalNotif, cargaId]
     );
 
-    fs.unlinkSync(filePath);
-    res.json({
-      ok: true,
-      resumen: {
-        archivo: req.file!.originalname,
-        puntos_procesados: puntos.length,
-        ups_afectadas: totalUpsAfectadas,
-        notificaciones: totalNotificaciones
-      }
-    });
-
-  } catch (error) {
-    console.error('Error procesando CSV SENASICA:', error);
-    if (cargaId) {
-      await pool.query(
-        `UPDATE senasica_cargas SET estado = 'error', error_detalle = $1 WHERE id = $2`,
-        [String(error), cargaId]
-      ).catch(() => {});
-    }
+  } catch (err) {
+    console.error('Error procesando CSV SENASICA:', err);
+    await pool.query(
+      `UPDATE senasica_cargas SET estado = 'error', error_detalle = $1 WHERE id = $2`,
+      [String(err), cargaId]
+    ).catch(() => {});
+  } finally {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    res.status(500).json({ error: 'Error al procesar el archivo' });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// POST /api/senasica/cargar-csv  — recibe archivo, responde INMEDIATO
+// ─────────────────────────────────────────────────────────────────────
+router.post('/cargar-csv', authMiddleware, upload.single('archivo'), async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!req.file) { res.status(400).json({ error: 'No se recibió ningún archivo' }); return; }
+
+  const usuarioId  = req.user?.userId;
+  const filePath   = req.file.path;
+  const nombrePlaga = req.file.originalname
+    .replace(/-(Riego|Temporal|Mixto)/i, '')
+    .replace(/\.csv$/i, '')
+    .trim() || 'Plaga detectada';
+
+  try {
+    const cargaRes = await pool.query(
+      `INSERT INTO senasica_cargas (nombre_archivo, usuario_id, estado)
+       VALUES ($1, $2, 'procesando') RETURNING id`,
+      [req.file.originalname, usuarioId]
+    );
+    const cargaId = cargaRes.rows[0].id;
+
+    // Responder de inmediato — el procesamiento sigue en background
+    res.json({ ok: true, cargaId, mensaje: 'Archivo recibido. Procesando en background.' });
+
+    // Procesar sin bloquear
+    procesarCSV(filePath, cargaId, nombrePlaga, 0).catch(() => {});
+
+  } catch (err) {
+    console.error('Error registrando carga:', err);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    res.status(500).json({ error: 'Error al registrar la carga' });
   }
 });
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
+// GET /api/senasica/estado/:id  — polling del estado de procesamiento
+// ─────────────────────────────────────────────────────────────────────
+router.get('/estado/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(
+      `SELECT id, nombre_archivo, estado, total_puntos, total_ups_afectadas,
+              total_notificaciones, error_detalle, created_at, completado_en
+       FROM senasica_cargas WHERE id = $1`,
+      [req.params.id]
+    );
+    if (!result.rows.length) { res.status(404).json({ error: 'No encontrado' }); return; }
+    res.json(result.rows[0]);
+  } catch {
+    res.status(500).json({ error: 'Error al obtener estado' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────
 // GET /api/senasica/historial
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 router.get('/historial', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(
@@ -246,9 +345,9 @@ router.get('/historial', authMiddleware, async (_req: AuthRequest, res: Response
   }
 });
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 // GET /api/senasica/parametros
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 router.get('/parametros', authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(`SELECT * FROM senasica_parametros ORDER BY radio_km DESC`);
@@ -258,9 +357,9 @@ router.get('/parametros', authMiddleware, async (_req: AuthRequest, res: Respons
   }
 });
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 // PATCH /api/senasica/parametros/:nivel
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 router.patch('/parametros/:nivel', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { nivel } = req.params;
