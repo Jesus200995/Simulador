@@ -26,7 +26,7 @@ const upload = multer({
     if (!file.originalname.match(/\.csv$/i)) return cb(new Error('Solo se permiten archivos CSV'));
     cb(null, true);
   },
-  limits: { fileSize: 250 * 1024 * 1024 }
+  limits: { fileSize: Infinity }
 });
 
 // ─────────────────────────────────────────────
