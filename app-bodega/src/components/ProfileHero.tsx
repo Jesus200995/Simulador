@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Warehouse, Sprout } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
@@ -378,10 +378,26 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
         className="relative flex flex-col items-center text-center px-6 pb-8"
         style={{ paddingTop: back !== undefined ? 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' : 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
       >
-        {/* Avatar */}
+        {/* Badge de rol — encima del avatar */}
         <div
-          className="w-20 h-20 sm:w-24 sm:h-24 rounded-[22px] sm:rounded-[26px] bg-white/15 backdrop-blur-sm ring-[2.5px] ring-white/25 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.25)] mb-5"
-          style={{ animation: 'phPop .45s cubic-bezier(0.34,1.56,0.64,1) both' }}
+          className="flex items-center gap-1.5 mb-4"
+          style={{ animation: 'phFadeUp .3s .04s ease both' }}
+        >
+          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide border
+            ${variant === 'productor'
+              ? 'bg-emerald-400/20 border-emerald-300/30 text-emerald-100'
+              : 'bg-sky-400/20 border-sky-300/30 text-sky-100'}`}>
+            {variant === 'productor'
+              ? <Sprout size={12} strokeWidth={2.5} />
+              : <Warehouse size={12} strokeWidth={2.5} />}
+            {variant === 'productor' ? 'Productor' : 'Bodega / Industria'}
+          </div>
+        </div>
+
+        {/* Avatar — círculo */}
+        <div
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/15 backdrop-blur-sm ring-[3px] ring-white/30 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.3)] mb-4"
+          style={{ animation: 'phPop .45s cubic-bezier(0.34,1.56,0.64,1) .06s both' }}
         >
           <span className="text-white text-[28px] sm:text-[32px] font-black tracking-tight select-none">
             {initials}
@@ -391,7 +407,7 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
         {/* Etiqueta título */}
         <p
           className="text-[10px] sm:text-[11px] font-bold text-green-300/70 uppercase tracking-[0.18em] mb-2"
-          style={{ animation: 'phFadeUp .35s .12s ease both' }}
+          style={{ animation: 'phFadeUp .35s .14s ease both' }}
         >
           {titulo}
         </p>
