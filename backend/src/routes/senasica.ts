@@ -137,10 +137,10 @@ router.post('/cargar-csv', authMiddleware, upload.single('archivo'), async (req:
            us.id AS usuario_id,
            us.push_endpoint, us.push_p256dh, us.push_auth, us.push_activo,
            ROUND(
-             ST_Distance(
+             (ST_Distance(
                ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                u.geom::geography
-             ) / 1000.0
+             ) / 1000.0)::numeric
            , 1) AS distancia_km
          FROM up u
          JOIN producer p ON p.producer_id = u.producer_id
