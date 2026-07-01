@@ -29,6 +29,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        cacheId: 'simac-v2',
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
