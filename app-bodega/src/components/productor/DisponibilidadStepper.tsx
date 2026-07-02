@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+﻿import { Check } from 'lucide-react';
 
 export default function DisponibilidadStepper({ paso }: { paso: 1 | 2 | 3 }) {
   const labels = ['Tipo', 'Variedad', 'Volumen y fecha'];
@@ -9,14 +9,14 @@ export default function DisponibilidadStepper({ paso }: { paso: 1 | 2 | 3 }) {
           <div key={n} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center
               text-sm font-bold transition-all duration-200
-              ${n < paso  ? 'bg-[#1A5C38] text-white'
-              : n === paso ? 'bg-[#1A5C38] text-white ring-4 ring-green-100'
+              ${n < paso  ? 'bg-[#1e5b4f] text-white'
+              : n === paso ? 'bg-[#1e5b4f] text-white ring-4 ring-green-100'
               : 'bg-zinc-200 text-zinc-400'}`}>
               {n < paso ? <Check size={16} strokeWidth={3} /> : n}
             </div>
             {n < 3 && (
               <div className={`h-0.5 w-8 transition-all duration-200
-                ${n < paso ? 'bg-[#1A5C38]' : 'bg-zinc-200'}`}
+                ${n < paso ? 'bg-[#1e5b4f]' : 'bg-zinc-200'}`}
               />
             )}
           </div>

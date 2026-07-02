@@ -1,12 +1,12 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { Landmark, ShieldCheck, ChevronRight, Warehouse } from 'lucide-react';
 
 export default function IncentivosPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[#eef8f2]">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+    <div className="bg-[#e8f5f3]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
           <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Apoyos</p>
           <h1 className="text-[19px] sm:text-[22px] font-black text-white leading-tight tracking-tight">Apoyos disponibles</h1>
@@ -20,7 +20,7 @@ export default function IncentivosPage() {
           className="w-full bg-white rounded-2xl p-5 shadow-sm ring-1 ring-zinc-100
                      flex items-center gap-4 mb-3 text-left active:scale-[0.98] hover:ring-zinc-200 transition-all duration-200">
           <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center shrink-0">
-            <Landmark size={26} className="text-[#1A5C38]" />
+            <Landmark size={26} className="text-[#1e5b4f]" />
           </div>
           <div className="flex-1">
             <p className="font-bold text-zinc-800">Incentivos</p>
@@ -62,7 +62,7 @@ export default function IncentivosPage() {
                   No son apoyos del gobierno. Los cobra la bodega directamente.
                 </p>
                 <button onClick={() => navigate('/productor/mapa')}
-                  className="mt-3 text-[#1A5C38] text-sm font-semibold flex items-center gap-1 hover:underline">
+                  className="mt-3 text-[#1e5b4f] text-sm font-semibold flex items-center gap-1 hover:underline">
                   Ver bodegas con servicios <ChevronRight size={14} />
                 </button>
               </div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+﻿import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   ChevronLeft, Shield, MapPin, CheckCircle2, Camera, Loader2,
   RefreshCw, AlertTriangle, Check, FileText, Eye, Mail, ChevronRight,
@@ -129,7 +129,7 @@ export default function AvisoPrivacidadStep({
   /* ── RENDER ──────────────────────────────────── */
   return (
     <div
-      className="h-[100dvh] flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
+      className="h-[100dvh] flex flex-col bg-gradient-to-b from-[#020e0c] via-[#091f1b] to-[#1e5b4f]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Header */}
@@ -243,7 +243,7 @@ export default function AvisoPrivacidadStep({
           <div className="px-5 py-4 border-t border-white/10 bg-black/20 backdrop-blur-md">
             <button
               onClick={() => setFase('verificacion')}
-              className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#1A5C38] rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 transition-all shadow-xl shadow-black/30"
+              className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#1e5b4f] rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 transition-all shadow-xl shadow-black/30"
             >
               <Eye size={18} /> He leído el aviso — Continuar
             </button>
@@ -360,7 +360,7 @@ export default function AvisoPrivacidadStep({
                 <div className="px-4 pb-4">
                   <div className="relative overflow-hidden rounded-xl">
                     {/* Botón visual */}
-                    <div className="w-full bg-white text-[#1A5C38] py-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-2 shadow-lg select-none pointer-events-none">
+                    <div className="w-full bg-white text-[#1e5b4f] py-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-2 shadow-lg select-none pointer-events-none">
                       <Camera size={19} />
                       {camStatus === 'error' ? 'Volver a capturar' : 'Tomar foto de verificación'}
                     </div>
@@ -409,7 +409,7 @@ export default function AvisoPrivacidadStep({
               <button
                 onClick={handleAceptar}
                 disabled={!puedeAceptar}
-                className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#1A5C38] rounded-xl py-4 font-bold flex items-center justify-center gap-2 transition-all shadow-xl shadow-black/30 disabled:opacity-30 disabled:cursor-not-allowed text-[15px]"
+                className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#1e5b4f] rounded-xl py-4 font-bold flex items-center justify-center gap-2 transition-all shadow-xl shadow-black/30 disabled:opacity-30 disabled:cursor-not-allowed text-[15px]"
               >
                 {aceptando
                   ? <><Loader2 size={18} className="animate-spin" /> Registrando aceptación…</>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Warehouse, Factory, Eye, EyeOff,
@@ -119,7 +119,7 @@ export default function B02Register() {
 
   return (
     <div
-      className="fixed inset-0 flex bg-gradient-to-br from-[#061510] via-[#0b271a] to-[#142e1d]"
+      className="fixed inset-0 flex bg-gradient-to-br from-[#020e0c] via-[#081f1b] to-[#0f2e2a]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Fondo decorativo */}
@@ -220,7 +220,7 @@ export default function B02Register() {
                             ? 'ring-white/40 bg-white/15 shadow-lg shadow-black/20'
                             : 'ring-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08]'}`}>
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${rol === key ? 'bg-white' : 'bg-white/10'}`}>
-                          <Icon size={18} className={rol === key ? 'text-[#0b271a]' : 'text-white/50'} strokeWidth={2} />
+                          <Icon size={18} className={rol === key ? 'text-[#081f1b]' : 'text-white/50'} strokeWidth={2} />
                         </div>
                         <div className="min-w-0">
                           <p className={`text-sm font-bold leading-tight ${rol === key ? 'text-white' : 'text-white/55'}`}>{label}</p>
@@ -296,7 +296,7 @@ export default function B02Register() {
                       <label className={lbl}>Estado <span className="text-red-400">*</span></label>
                       <select value={form.state_id}
                         onChange={e => { set('state_id', e.target.value); set('municipality_id', ''); }}
-                        required className={`${inp} appearance-none [&>option]:bg-[#0c2e1a] [&>option]:text-white`}>
+                        required className={`${inp} appearance-none [&>option]:bg-[#091f1b] [&>option]:text-white`}>
                         <option value="">Selecciona...</option>
                         {states.map((s: any) => (
                           <option key={s.state_id || s.id} value={s.state_id || s.id}>{s.name || s.nombre}</option>
@@ -308,7 +308,7 @@ export default function B02Register() {
                       <select value={form.municipality_id}
                         onChange={e => set('municipality_id', e.target.value)}
                         required disabled={!form.state_id}
-                        className={`${inp} appearance-none [&>option]:bg-[#0c2e1a] [&>option]:text-white disabled:opacity-35`}>
+                        className={`${inp} appearance-none [&>option]:bg-[#091f1b] [&>option]:text-white disabled:opacity-35`}>
                         <option value="">{form.state_id ? 'Selecciona...' : 'Elige estado primero'}</option>
                         {municipalities.map((m: any) => (
                           <option key={m.municipality_id || m.id} value={m.municipality_id || m.id}>{m.name || m.nombre}</option>
@@ -378,7 +378,7 @@ export default function B02Register() {
 
                 {/* Botón */}
                 <button type="submit" disabled={loading}
-                  className="w-full bg-white hover:bg-white/90 active:bg-white/80 active:scale-[0.98] text-[#0b271a] py-3.5 rounded-xl text-sm sm:text-base font-bold disabled:opacity-40 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-black/20">
+                  className="w-full bg-white hover:bg-white/90 active:bg-white/80 active:scale-[0.98] text-[#081f1b] py-3.5 rounded-xl text-sm sm:text-base font-bold disabled:opacity-40 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-black/20">
                   {loading
                     ? <><Loader2 size={17} className="animate-spin" /> Creando cuenta…</>
                     : <><ShieldCheck size={17} /> Continuar con el Aviso de Privacidad</>

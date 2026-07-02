@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRight, BadgeCheck, CalendarCheck } from 'lucide-react';
 import { formatNum } from '../../utils/format';
@@ -40,7 +40,7 @@ const SEMAFORO: Record<string, { cls: string; texto: string }> = {
 function SkeletonDashboard() {
   return (
     <div className="min-h-screen bg-white animate-pulse">
-      <div className="bg-[#1A5C38] h-28" />
+      <div className="bg-[#1e5b4f] h-28" />
       <div className="max-w-2xl mx-auto px-4">
         <div className="-mt-4 bg-white rounded-2xl h-32" />
         <div className="mt-5 space-y-3">
@@ -110,10 +110,10 @@ export default function DashboardProductorPage() {
   // Ciclo obligatorio: sin ciclo productivo registrado no se puede usar el tablero.
   if (ciclo === null && !isPendiente) {
     return (
-      <div className="absolute inset-0 flex flex-col bg-[#eef8f2] overflow-hidden">
+      <div className="absolute inset-0 flex flex-col bg-[#e8f5f3] overflow-hidden">
         {/* Fondo decorativo */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-[#1A5C38]/10 to-transparent"></div>
+          <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-[#1e5b4f]/10 to-transparent"></div>
           <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full"></div>
         </div>
 
@@ -121,9 +121,9 @@ export default function DashboardProductorPage() {
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">
           <div className="w-full max-w-[340px] animate-in fade-in zoom-in-95 slide-in-from-bottom-8 duration-700 ease-out">
             <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 shadow-[0_20px_60px_-15px_rgba(26,92,56,0.15)] border border-white relative overflow-hidden text-center group">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#1A5C38]/[0.02] to-transparent pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1e5b4f]/[0.02] to-transparent pointer-events-none"></div>
               
-              <div className="w-16 h-16 bg-gradient-to-br from-[#1A5C38] to-[#124227] rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-[0_8px_25px_-5px_rgba(26,92,56,0.4)] transform group-hover:scale-105 transition-transform duration-500">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#1e5b4f] to-[#124227] rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-[0_8px_25px_-5px_rgba(26,92,56,0.4)] transform group-hover:scale-105 transition-transform duration-500">
                 <Wheat size={32} className="text-white" strokeWidth={2} />
               </div>
               
@@ -136,7 +136,7 @@ export default function DashboardProductorPage() {
               </p>
               
               <button onClick={() => navigate('/productor/ciclo')}
-                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3.5 rounded-full font-bold text-[15px] shadow-[0_6px_15px_rgba(26,92,56,0.2)] active:scale-[0.98] transition-all duration-200">
+                className="w-full bg-[#1e5b4f] hover:bg-[#124227] text-white py-3.5 rounded-full font-bold text-[15px] shadow-[0_6px_15px_rgba(26,92,56,0.2)] active:scale-[0.98] transition-all duration-200">
                 Registrar ciclo
               </button>
             </div>
@@ -158,7 +158,7 @@ export default function DashboardProductorPage() {
   const sinUbicacion = !data?.lat || !data?.location_confirmed;
 
   return (
-    <div className="bg-[#eef8f2]">
+    <div className="bg-[#e8f5f3]">
       {alertaActiva && (
         <div className={`px-4 sm:px-6 py-3 flex items-center justify-between
           ${alertaActiva.tipo === 'alerta_climatica' ? 'bg-orange-500' : 'bg-red-600'}`}>
@@ -172,7 +172,7 @@ export default function DashboardProductorPage() {
         </div>
       )}
 
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative overflow-hidden">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative overflow-hidden">
         <BannerCanvas />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5 relative z-10">
           <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Inicio</p>
@@ -258,7 +258,7 @@ export default function DashboardProductorPage() {
             
             <button 
               onClick={() => navigate('/productor/precios')}
-              className="mt-5 inline-flex items-center gap-1.5 px-4 py-2 bg-[#1A5C38]/10 text-[#1A5C38] text-[13px] font-bold rounded-xl active:scale-95 transition-all duration-300 hover:bg-[#1A5C38] hover:text-white group/btn"
+              className="mt-5 inline-flex items-center gap-1.5 px-4 py-2 bg-[#1e5b4f]/10 text-[#1e5b4f] text-[13px] font-bold rounded-xl active:scale-95 transition-all duration-300 hover:bg-[#1e5b4f] hover:text-white group/btn"
             >
               Ver desglose de precios 
               <ChevronRight size={14} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
@@ -283,7 +283,7 @@ export default function DashboardProductorPage() {
                       <p className="text-xs text-zinc-500 mt-0.5">
                         {b.municipio} - {Number(b.distancia_km).toFixed(0)} km
                         {b.is_ventanilla && (
-                          <span className="ml-2 bg-emerald-50 text-[#1A5C38] text-xs px-2 py-0.5 rounded-full font-medium">
+                          <span className="ml-2 bg-emerald-50 text-[#1e5b4f] text-xs px-2 py-0.5 rounded-full font-medium">
                             Ventanilla
                           </span>
                         )}
@@ -304,8 +304,8 @@ export default function DashboardProductorPage() {
             )}
           </div>
           <button onClick={() => navigate('/productor/mapa')}
-            className="w-full mt-3 py-3 text-[#1A5C38] text-sm font-semibold
-                       ring-2 ring-[#1A5C38] rounded-2xl hover:bg-emerald-50 active:scale-[0.98] transition-all duration-200">
+            className="w-full mt-3 py-3 text-[#1e5b4f] text-sm font-semibold
+                       ring-2 ring-[#1e5b4f] rounded-2xl hover:bg-emerald-50 active:scale-[0.98] transition-all duration-200">
             Ver mapa completo
           </button>
         </div>
@@ -317,7 +317,7 @@ export default function DashboardProductorPage() {
             className={`w-full py-5 rounded-2xl text-white text-lg font-semibold
               flex items-center justify-center gap-3 transition-all duration-200
               ${isPendiente ? 'bg-zinc-300 cursor-not-allowed'
-                : 'bg-[#1A5C38] hover:bg-[#15482d] active:scale-[0.97] shadow-lg shadow-green-900/20'}`}
+                : 'bg-[#1e5b4f] hover:bg-[#195049] active:scale-[0.97] shadow-lg shadow-green-900/20'}`}
           >
             <Wheat size={24} />
             Propuesta de venta
@@ -325,7 +325,7 @@ export default function DashboardProductorPage() {
           {!isPendiente && (
             <button
               onClick={() => navigate('/productor/ups/nueva')}
-              className="w-full border-2 border-dashed border-[#1A5C38] text-[#1A5C38] py-3 rounded-2xl text-sm font-medium
+              className="w-full border-2 border-dashed border-[#1e5b4f] text-[#1e5b4f] py-3 rounded-2xl text-sm font-medium
                 hover:bg-green-50 flex items-center justify-center gap-2 mt-3"
             >
               <span className="text-lg">+</span>
@@ -368,8 +368,8 @@ export default function DashboardProductorPage() {
         )}
 
         {ciclo === null && !dismissedCiclo && !isPendiente && (
-          <div className="mt-4 bg-emerald-50 ring-2 ring-[#1A5C38]/20 rounded-2xl p-4">
-            <p className="text-[#1A5C38] text-sm font-bold flex items-center gap-1.5">
+          <div className="mt-4 bg-emerald-50 ring-2 ring-[#1e5b4f]/20 rounded-2xl p-4">
+            <p className="text-[#1e5b4f] text-sm font-bold flex items-center gap-1.5">
               <CalendarCheck size={14} /> Declara tu ciclo productivo
             </p>
             <p className="text-emerald-700 text-xs mt-1">
@@ -377,11 +377,11 @@ export default function DashboardProductorPage() {
             </p>
             <div className="flex gap-2 mt-3">
               <button onClick={() => navigate('/productor/ciclo')}
-                className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white text-sm py-2.5 rounded-xl font-semibold transition-colors">
+                className="flex-1 bg-[#1e5b4f] hover:bg-[#195049] text-white text-sm py-2.5 rounded-xl font-semibold transition-colors">
                 Registrar ciclo
               </button>
               <button onClick={() => { localStorage.setItem('dismiss_ciclo', '1'); setDismissedCiclo(true); }}
-                className="px-4 text-[#1A5C38] text-sm hover:underline">
+                className="px-4 text-[#1e5b4f] text-sm hover:underline">
                 Despues
               </button>
             </div>

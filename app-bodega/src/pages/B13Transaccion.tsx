@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, UserCheck, PenLine } from 'lucide-react';
 import { PageBanner } from '../components/Layout';
@@ -99,7 +99,7 @@ export default function B13Transaccion() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#eef8f2] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0';
+  const inputClass = 'w-full bg-[#e8f5f3] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
@@ -132,7 +132,7 @@ export default function B13Transaccion() {
                     className={`${inputClass} pl-10`}
                   />
                   {producerSeleccionado && (
-                    <UserCheck size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1A5C38]" />
+                    <UserCheck size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1e5b4f]" />
                   )}
                 </div>
                 {sugerencias.length > 0 && (
@@ -140,21 +140,21 @@ export default function B13Transaccion() {
                     {sugerencias.map(p => (
                       <button type="button" key={p.producer_id}
                         onClick={() => seleccionarProducer(p)}
-                        className="w-full text-left px-4 py-3 hover:bg-[#eef8f2] active:bg-[#eef8f2] border-b border-gray-50 last:border-0">
+                        className="w-full text-left px-4 py-3 hover:bg-[#e8f5f3] active:bg-[#e8f5f3] border-b border-gray-50 last:border-0">
                         <p className="text-[14px] font-semibold text-gray-900">{p.nombre_completo}</p>
                         <p className="text-[12px] text-gray-400">{p.municipio} · CURP: …{p.curp_parcial}</p>
                       </button>
                     ))}
                     <button type="button"
                       onClick={activarModoLibre}
-                      className="w-full text-left px-4 py-3 text-[#1A5C38] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#eef8f2]">
+                      className="w-full text-left px-4 py-3 text-[#1e5b4f] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#e8f5f3]">
                       <PenLine size={14} /> + Registrar nombre manualmente
                     </button>
                   </div>
                 )}
                 {busqueda.length >= 3 && sugerencias.length === 0 && !producerSeleccionado && (
                   <button type="button" onClick={activarModoLibre}
-                    className="mt-1.5 text-[13px] text-[#1A5C38] font-semibold flex items-center gap-1.5">
+                    className="mt-1.5 text-[13px] text-[#1e5b4f] font-semibold flex items-center gap-1.5">
                     <PenLine size={13} /> + Registrar nombre manualmente
                   </button>
                 )}
@@ -225,7 +225,7 @@ export default function B13Transaccion() {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
+          className="w-full bg-[#1e5b4f] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
           {loading ? 'Registrando…' : 'Registrar transacción'}
         </button>
       </form>

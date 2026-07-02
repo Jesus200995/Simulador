@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Edit2, MapPin, LogOut, CalendarCheck, ChevronRight,
@@ -119,8 +119,8 @@ export default function MiPerfilPage() {
     setProgramas(prev => prev.includes(clave) ? prev.filter(p => p !== clave) : [...prev, clave]);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#eef8f2] flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border-[3px] border-[#1A5C38]/20 border-t-[#1A5C38] animate-spin" />
+    <div className="min-h-screen bg-[#e8f5f3] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-[3px] border-[#1e5b4f]/20 border-t-[#1e5b4f] animate-spin" />
     </div>
   );
   if (!perfil) return null;
@@ -136,7 +136,7 @@ export default function MiPerfilPage() {
   const delay = (i: number) => ({ animation: `pfFadeUp .4s ${i * 55}ms ease both` });
 
   return (
-    <div className="bg-[#eef8f2] min-h-screen pb-28">
+    <div className="bg-[#e8f5f3] min-h-screen pb-28">
       <style>{`
         @keyframes pfFadeUp { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
         @keyframes pfPop    { from { opacity:0; transform:scale(0.92) }       to { opacity:1; transform:scale(1) }    }
@@ -175,15 +175,15 @@ export default function MiPerfilPage() {
           <div className="px-5 pt-3 pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Phone size={15} className="text-[#1A5C38]" />
+                <Phone size={15} className="text-[#1e5b4f]" />
                 <span className="text-[13px] text-slate-500 font-medium">Teléfono</span>
               </div>
               {!editTel && (
                 <div className="flex items-center gap-2">
                   {savedTel && <span className="text-[11px] text-emerald-600 font-bold">Guardado ✓</span>}
                   <span className="text-[14px] font-semibold text-slate-800">{perfil.telefono || <span className="text-slate-300 font-normal text-[13px]">sin teléfono</span>}</span>
-                  <button onClick={() => setEditTel(true)} className="w-7 h-7 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform">
-                    <Edit2 size={13} className="text-[#1A5C38]" />
+                  <button onClick={() => setEditTel(true)} className="w-7 h-7 rounded-xl bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-transform">
+                    <Edit2 size={13} className="text-[#1e5b4f]" />
                   </button>
                 </div>
               )}
@@ -192,9 +192,9 @@ export default function MiPerfilPage() {
               <div className="mt-2.5 flex gap-2" style={{ animation: 'pfPop .25s ease both' }}>
                 <input type="tel" inputMode="numeric" autoFocus value={telefono} maxLength={10}
                   onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  className="flex-1 bg-[#f4fbf7] border-2 border-[#1A5C38]/20 focus:border-[#1A5C38] rounded-xl px-3 py-2.5 text-[15px] outline-none transition-colors" />
+                  className="flex-1 bg-[#f4fbf7] border-2 border-[#1e5b4f]/20 focus:border-[#1e5b4f] rounded-xl px-3 py-2.5 text-[15px] outline-none transition-colors" />
                 <button onClick={guardarTelefono} disabled={telefono.length < 10}
-                  className="w-11 h-11 rounded-xl bg-[#1A5C38] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#1A5C38]/20">
+                  className="w-11 h-11 rounded-xl bg-[#1e5b4f] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#1e5b4f]/20">
                   <Check size={16} className="text-white" />
                 </button>
                 <button onClick={() => { setEditTel(false); setTelefono(perfil.telefono || ''); }}
@@ -211,7 +211,7 @@ export default function MiPerfilPage() {
           <div className="px-5 pt-3 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Mail size={15} className="text-[#1A5C38]" />
+                <Mail size={15} className="text-[#1e5b4f]" />
                 <span className="text-[13px] text-slate-500 font-medium">Correo</span>
               </div>
               {!editCorreo && (
@@ -220,8 +220,8 @@ export default function MiPerfilPage() {
                   <span className="text-[13px] font-medium text-slate-700 truncate max-w-[170px]">
                     {perfil.correo || <span className="text-slate-300 font-normal">sin correo</span>}
                   </span>
-                  <button onClick={() => setEditCorreo(true)} className="w-7 h-7 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform">
-                    <Edit2 size={13} className="text-[#1A5C38]" />
+                  <button onClick={() => setEditCorreo(true)} className="w-7 h-7 rounded-xl bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-transform">
+                    <Edit2 size={13} className="text-[#1e5b4f]" />
                   </button>
                 </div>
               )}
@@ -230,10 +230,10 @@ export default function MiPerfilPage() {
               <div className="mt-2.5 flex gap-2" style={{ animation: 'pfPop .25s ease both' }}>
                 <input type="email" inputMode="email" autoFocus autoCapitalize="off" autoCorrect="off"
                   value={correo} onChange={e => setCorreo(e.target.value)}
-                  className="flex-1 bg-[#f4fbf7] border-2 border-[#1A5C38]/20 focus:border-[#1A5C38] rounded-xl px-3 py-2.5 text-[14px] outline-none transition-colors"
+                  className="flex-1 bg-[#f4fbf7] border-2 border-[#1e5b4f]/20 focus:border-[#1e5b4f] rounded-xl px-3 py-2.5 text-[14px] outline-none transition-colors"
                   placeholder="tu@correo.com" />
                 <button onClick={guardarCorreo}
-                  className="w-11 h-11 rounded-xl bg-[#1A5C38] flex items-center justify-center active:scale-95 transition-all shadow-sm shadow-[#1A5C38]/20">
+                  className="w-11 h-11 rounded-xl bg-[#1e5b4f] flex items-center justify-center active:scale-95 transition-all shadow-sm shadow-[#1e5b4f]/20">
                   <Check size={16} className="text-white" />
                 </button>
                 <button onClick={() => { setEditCorreo(false); setCorreo(perfil.correo || ''); }}
@@ -249,14 +249,14 @@ export default function MiPerfilPage() {
         <div style={delay(2)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <div className="flex items-center gap-2">
-              <Leaf size={15} className="text-[#1A5C38]" />
+              <Leaf size={15} className="text-[#1e5b4f]" />
               <p className="text-[13px] font-bold text-slate-700">
                 Mis parcelas
                 {parcelas.length > 0 && <span className="ml-1.5 text-[11px] text-slate-400 font-normal">({parcelas.length})</span>}
               </p>
             </div>
             <button onClick={() => navigate('/productor/ups/nueva')}
-              className="flex items-center gap-1 text-[#1A5C38] text-[12px] font-bold active:opacity-60 transition-opacity">
+              className="flex items-center gap-1 text-[#1e5b4f] text-[12px] font-bold active:opacity-60 transition-opacity">
               <Plus size={13} /> Agregar
             </button>
           </div>
@@ -270,8 +270,8 @@ export default function MiPerfilPage() {
           {parcelas.length === 0 ? (
             <button onClick={() => navigate('/productor/ups/nueva')}
               className="w-full flex flex-col items-center py-6 gap-2 text-center px-5 active:opacity-80 transition-opacity">
-              <div className="w-11 h-11 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
-                <Sprout size={18} className="text-[#1A5C38]/40" />
+              <div className="w-11 h-11 rounded-2xl bg-[#e8f5f3] flex items-center justify-center">
+                <Sprout size={18} className="text-[#1e5b4f]/40" />
               </div>
               <p className="text-[13px] font-semibold text-slate-500">Registra tu primera parcela</p>
               <p className="text-[11.5px] text-slate-400">Toca para agregar</p>
@@ -294,8 +294,8 @@ export default function MiPerfilPage() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0">
-                        <Sprout size={16} className="text-[#1A5C38]" />
+                      <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
+                        <Sprout size={16} className="text-[#1e5b4f]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[14px] font-bold text-slate-800 truncate">{p.up_name || 'Parcela'}</p>
@@ -305,8 +305,8 @@ export default function MiPerfilPage() {
                         </p>
                       </div>
                       <button onClick={() => navigate(`/productor/ubicacion?up_id=${p.up_id}`)}
-                        className="w-8 h-8 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform flex-shrink-0">
-                        <MapPin size={14} className="text-[#1A5C38]" />
+                        className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-transform flex-shrink-0">
+                        <MapPin size={14} className="text-[#1e5b4f]" />
                       </button>
                       <button onClick={() => { setConfirmDel(p.up_id); setDelError(''); }}
                         className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center active:scale-95 transition-transform flex-shrink-0">
@@ -324,7 +324,7 @@ export default function MiPerfilPage() {
         <div style={delay(3)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
-              <CalendarCheck size={15} className="text-[#1A5C38]" />
+              <CalendarCheck size={15} className="text-[#1e5b4f]" />
               <p className="text-[13px] font-bold text-slate-700">
                 Ciclo productivo
                 {ciclos && ciclos.length > 0 && (
@@ -333,21 +333,21 @@ export default function MiPerfilPage() {
               </p>
             </div>
             <button onClick={() => navigate('/productor/ciclo')}
-              className="flex items-center gap-1 text-[#1A5C38] text-[12px] font-bold active:opacity-60 transition-opacity">
+              className="flex items-center gap-1 text-[#1e5b4f] text-[12px] font-bold active:opacity-60 transition-opacity">
               <Plus size={13} /> Agregar
             </button>
           </div>
 
           {ciclos === null ? (
             <div className="px-5 pb-5 flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full border-2 border-[#1A5C38]/20 border-t-[#1A5C38] animate-spin" />
+              <div className="w-4 h-4 rounded-full border-2 border-[#1e5b4f]/20 border-t-[#1e5b4f] animate-spin" />
               <span className="text-[13px] text-slate-400">Cargando ciclos…</span>
             </div>
           ) : ciclos.length === 0 ? (
             <button onClick={() => navigate('/productor/ciclo')}
               className="w-full flex flex-col items-center py-6 gap-2 text-center px-5 active:opacity-80 transition-opacity">
-              <div className="w-11 h-11 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
-                <CalendarCheck size={18} className="text-[#1A5C38]/40" />
+              <div className="w-11 h-11 rounded-2xl bg-[#e8f5f3] flex items-center justify-center">
+                <CalendarCheck size={18} className="text-[#1e5b4f]/40" />
               </div>
               <p className="text-[13px] font-semibold text-slate-500">Sin ciclos registrados</p>
               <p className="text-[11.5px] text-slate-400">Toca para agregar tu primer ciclo</p>
@@ -396,7 +396,7 @@ export default function MiPerfilPage() {
                           )}
                           <div className="mt-3 flex flex-wrap gap-1.5">
                             {cropPrincipal.area_sown_ha != null && (
-                              <span className="text-[12px] font-semibold bg-[#eef8f2] text-[#1A5C38] px-2.5 py-1 rounded-xl">
+                              <span className="text-[12px] font-semibold bg-[#e8f5f3] text-[#1e5b4f] px-2.5 py-1 rounded-xl">
                                 {cropPrincipal.area_sown_ha} ha
                               </span>
                             )}
@@ -418,7 +418,7 @@ export default function MiPerfilPage() {
                       ) : (
                         <p className="text-[13px] text-slate-400 mt-1">Sin cultivos registrados</p>
                       )}
-                      <div className="mt-3 flex items-center gap-1 text-[#1A5C38]/60 group-active/card:text-[#1A5C38] transition-colors">
+                      <div className="mt-3 flex items-center gap-1 text-[#1e5b4f]/60 group-active/card:text-[#1e5b4f] transition-colors">
                         <span className="text-[11px] font-bold">Ver detalle</span>
                         <ChevronRight size={11} />
                       </div>
@@ -434,11 +434,11 @@ export default function MiPerfilPage() {
         <div style={delay(4)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
-              <Award size={15} className="text-[#1A5C38]" />
+              <Award size={15} className="text-[#1e5b4f]" />
               <p className="text-[13px] font-bold text-slate-700">Programas de apoyo</p>
             </div>
-            <button onClick={() => setEditProg(!editProg)} className="w-7 h-7 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform">
-              {editProg ? <X size={14} className="text-slate-400" /> : <Edit2 size={13} className="text-[#1A5C38]" />}
+            <button onClick={() => setEditProg(!editProg)} className="w-7 h-7 rounded-xl bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-transform">
+              {editProg ? <X size={14} className="text-slate-400" /> : <Edit2 size={13} className="text-[#1e5b4f]" />}
             </button>
           </div>
 
@@ -448,15 +448,15 @@ export default function MiPerfilPage() {
                 {PROGRAMAS_GOBIERNO.map(p => (
                   <button key={p.clave} onClick={() => togglePrograma(p.clave)}
                     className={`w-full text-left px-3.5 py-2.5 rounded-xl ring-1 text-[13px] transition-all duration-200 flex items-center gap-2.5
-                      ${programas.includes(p.clave) ? 'ring-[#1A5C38]/40 bg-[#eef8f2] text-[#1A5C38] font-semibold' : 'ring-slate-100 text-slate-600 hover:bg-slate-50'}`}>
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${programas.includes(p.clave) ? 'border-[#1A5C38] bg-[#1A5C38]' : 'border-slate-300'}`}>
+                      ${programas.includes(p.clave) ? 'ring-[#1e5b4f]/40 bg-[#e8f5f3] text-[#1e5b4f] font-semibold' : 'ring-slate-100 text-slate-600 hover:bg-slate-50'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${programas.includes(p.clave) ? 'border-[#1e5b4f] bg-[#1e5b4f]' : 'border-slate-300'}`}>
                       {programas.includes(p.clave) && <Check size={9} className="text-white" strokeWidth={3} />}
                     </div>
                     {p.nombre}
                   </button>
                 ))}
                 <button onClick={guardarProgramas}
-                  className="w-full mt-2 bg-[#1A5C38] text-white py-3 rounded-xl text-[13px] font-bold active:scale-[0.98] transition-all shadow-sm shadow-[#1A5C38]/20">
+                  className="w-full mt-2 bg-[#1e5b4f] text-white py-3 rounded-xl text-[13px] font-bold active:scale-[0.98] transition-all shadow-sm shadow-[#1e5b4f]/20">
                   Guardar cambios
                 </button>
               </div>
@@ -468,7 +468,7 @@ export default function MiPerfilPage() {
                   (perfil.programas_beneficiario || []).map(clave => {
                     const prog = PROGRAMAS_GOBIERNO.find(p => p.clave === clave);
                     return (
-                      <span key={clave} className="inline-flex items-center gap-1.5 bg-[#eef8f2] text-[#1A5C38] text-[11.5px] font-semibold px-2.5 py-1 rounded-full">
+                      <span key={clave} className="inline-flex items-center gap-1.5 bg-[#e8f5f3] text-[#1e5b4f] text-[11.5px] font-semibold px-2.5 py-1 rounded-full">
                         <CircleDot size={10} />
                         {prog?.nombre || clave}
                       </span>
@@ -486,21 +486,21 @@ export default function MiPerfilPage() {
           {/* Mis solicitudes */}
           <button onClick={() => navigate('/productor/mis-solicitudes')}
             className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
-            <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
-              <ClipboardList size={17} className="text-[#1A5C38]" />
+            <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
+              <ClipboardList size={17} className="text-[#1e5b4f]" />
             </div>
             <div className="flex-1">
               <p className="text-[14px] font-bold text-slate-800">Mis solicitudes de apoyo</p>
               <p className="text-[12px] text-slate-400 mt-0.5">Ver estado de solicitudes a ventanillas</p>
             </div>
-            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors flex-shrink-0" />
+            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1e5b4f] transition-colors flex-shrink-0" />
           </button>
 
           {/* Alertas */}
           <button onClick={() => navigate('/productor/alertas')}
             className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
-            <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors relative">
-              <Bell size={17} className="text-[#1A5C38]" />
+            <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors relative">
+              <Bell size={17} className="text-[#1e5b4f]" />
               {notifCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center">
                   {notifCount > 9 ? '9+' : notifCount}
@@ -513,7 +513,7 @@ export default function MiPerfilPage() {
                 {notifCount > 0 ? `${notifCount} sin leer` : 'Sin alertas pendientes'}
               </p>
             </div>
-            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors flex-shrink-0" />
+            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1e5b4f] transition-colors flex-shrink-0" />
           </button>
         </div>
 

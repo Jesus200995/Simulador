@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+﻿import { type ReactNode } from 'react';
 import { TrendingUp, TrendingDown, Minus, ChevronRight } from 'lucide-react';
 
 interface KPICardProps {
@@ -27,7 +27,7 @@ const gradientBg: Record<string, string> = {
 };
 
 const TrendIcon = { up: TrendingUp, down: TrendingDown, neutral: Minus };
-const trendColor = { up: 'text-[#1A5C38]', down: 'text-red-500', neutral: 'text-gray-400' };
+const trendColor = { up: 'text-[#1e5b4f]', down: 'text-red-500', neutral: 'text-gray-400' };
 
 export function KPICard({ title, value, subtitle, icon, trend, trendText, color = 'green', onClick }: KPICardProps) {
   const TIcon = trend ? TrendIcon[trend] : null;

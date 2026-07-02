@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+﻿import { type ReactNode } from 'react';
 
 interface Props {
   icono: ReactNode;
@@ -11,8 +11,8 @@ interface Props {
 
 export default function BotonGrande({ icono, texto, subtexto, onClick, disabled, variante = 'primary' }: Props) {
   const base = variante === 'primary'
-    ? 'bg-[#1A5C38] hover:bg-[#15482d] text-white shadow-lg shadow-green-900/20'
-    : 'bg-white hover:bg-[#eef8f2] text-zinc-800 ring-1 ring-zinc-200';
+    ? 'bg-[#1e5b4f] hover:bg-[#195049] text-white shadow-lg shadow-green-900/20'
+    : 'bg-white hover:bg-[#e8f5f3] text-zinc-800 ring-1 ring-zinc-200';
 
   return (
     <button

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { PageHeader } from '../components/Layout';
@@ -81,7 +81,7 @@ export default function B26DetalleTransaccion() {
     return (
       <div className="p-6 space-y-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-16 bg-[#eef8f2] rounded-xl animate-pulse" />
+          <div key={i} className="h-16 bg-[#e8f5f3] rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -133,7 +133,7 @@ export default function B26DetalleTransaccion() {
             ].map(item => (
               <div key={item.label} className="flex justify-between items-center py-3 border-b border-gray-100/50 last:border-0 last:pb-0">
                 <span className="text-gray-500 font-medium text-[14px]">{item.label}</span>
-                <span className={`text-[15px] capitalize ${item.destacado ? 'text-[#1A5C38] font-black text-[18px]' : 'text-gray-900 font-bold'}`}>
+                <span className={`text-[15px] capitalize ${item.destacado ? 'text-[#1e5b4f] font-black text-[18px]' : 'text-gray-900 font-bold'}`}>
                   {item.valor}
                 </span>
               </div>
@@ -150,7 +150,7 @@ export default function B26DetalleTransaccion() {
         )}
 
         {/* Peso en Precio Sistema */}
-        <div className="bg-[#eef8f2] rounded-[1.25rem] p-5">
+        <div className="bg-[#e8f5f3] rounded-[1.25rem] p-5">
           <p className="text-[14px] text-gray-500 text-center font-medium">
             Peso en Precio Sistema:{' '}
             <span className="font-bold text-gray-900 ml-1">

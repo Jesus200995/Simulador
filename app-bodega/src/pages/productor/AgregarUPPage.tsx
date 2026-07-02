@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -231,9 +231,9 @@ export default function AgregarUPPage() {
   const puedeTerminar = pointCount >= 3;
 
   return (
-    <div className="min-h-screen bg-[#eef8f2]">
+    <div className="min-h-screen bg-[#e8f5f3]">
       <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-[1100]">
-        <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-[#eef8f2]">
+        <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-[#e8f5f3]">
           <ChevronLeft size={20} />
         </button>
         <div>
@@ -248,7 +248,7 @@ export default function AgregarUPPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la parcela (opcional)</label>
             <input type="text" value={nombreUP} onChange={e => setNombreUP(e.target.value)}
               placeholder="Ej: Parcela Norte, El Potrero, etc."
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e5b4f]" />
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
@@ -264,7 +264,7 @@ export default function AgregarUPPage() {
                     setMunicipios([]);
                     setMunicipioUp('');
                   }}
-                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e5b4f]"
                 >
                   <option value="">Selecciona tu estado</option>
                   {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name}</option>)}
@@ -279,7 +279,7 @@ export default function AgregarUPPage() {
                   value={municipioUp}
                   onChange={e => setMunicipioUp(e.target.value)}
                   disabled={!estadoId}
-                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38] disabled:bg-[#f4fbf7] disabled:text-gray-400"
+                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e5b4f] disabled:bg-[#f4fbf7] disabled:text-gray-400"
                 >
                   <option value="">{estadoId ? 'Selecciona tu municipio' : 'Primero elige el estado'}</option>
                   {municipios.map(m => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
@@ -294,7 +294,7 @@ export default function AgregarUPPage() {
           )}
 
           <button onClick={() => setPaso('mapa')} disabled={!estadoUp || !municipioUp}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-semibold disabled:opacity-40">
+            className="w-full bg-[#1e5b4f] text-white py-4 rounded-2xl font-semibold disabled:opacity-40">
             Continuar → Dibujar en mapa
           </button>
           <button onClick={() => guardar(null, null, null)} disabled={!estadoUp || !municipioUp || enviando}
@@ -349,7 +349,7 @@ export default function AgregarUPPage() {
             {pendingUP ? (
               <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
-                <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
+                <div className="relative bg-[#091f1b]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
                   <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
 
                   <div className="flex items-center gap-2 mb-3">
@@ -495,13 +495,13 @@ export default function AgregarUPPage() {
                     });
                   }}
                   disabled={capturandoGPS}
-                  className="w-full bg-[#1A5C38]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+                  className="w-full bg-[#1e5b4f]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
                 >
                   {capturandoGPS
                     ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
                     : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
                 </button>
-                {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
+                {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1e5b4f]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
 
                 {pointCount > 0 && (
                   <div className="flex gap-2">

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, MapPin, Undo2, Pencil, Trash2, CheckCircle2, Loader2, Footprints,
@@ -114,7 +114,7 @@ export default function CompletarUbicacionPage() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col bg-[#0c2e1a] z-[2000]"
+      className="fixed inset-0 flex flex-col bg-[#091f1b] z-[2000]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Header */}
@@ -264,7 +264,7 @@ export default function CompletarUbicacionPage() {
                   <Undo2 size={16} /> Deshacer
                 </button>
                 <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar}
-                  className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1A5C38] py-3 rounded-xl text-sm font-bold disabled:opacity-30 active:scale-[0.97] transition-all">
+                  className="flex-[1.4] flex items-center justify-center gap-1.5 bg-white text-[#1e5b4f] py-3 rounded-xl text-sm font-bold disabled:opacity-30 active:scale-[0.97] transition-all">
                   <CheckCircle2 size={17} />
                   {puedeTerminar ? `Finalizar (${pointCount})` : `Faltan ${puntosNecesarios}`}
                 </button>
@@ -315,7 +315,7 @@ export default function CompletarUbicacionPage() {
             )}
 
             <button onClick={guardar} disabled={loading}
-              className="w-full bg-white text-[#1A5C38] py-4 rounded-2xl text-base font-bold disabled:opacity-40 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              className="w-full bg-white text-[#1e5b4f] py-4 rounded-2xl text-base font-bold disabled:opacity-40 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
               {loading ? <><Loader2 size={18} className="animate-spin" /> Guardando...</> : 'Guardar ubicación'}
             </button>
 

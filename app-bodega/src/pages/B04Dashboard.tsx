@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity, BadgeCheck, Factory, Sun, Sunset, Moon } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
@@ -65,11 +65,11 @@ export default function B04Dashboard() {
   const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
 
   const ocupPct = stats.ocupacion_pct ?? 0;
-  const barColor = ocupPct < 70 ? 'bg-[#1A5C38]' : ocupPct < 90 ? 'bg-amber-400' : 'bg-red-500';
+  const barColor = ocupPct < 70 ? 'bg-[#1e5b4f]' : ocupPct < 90 ? 'bg-amber-400' : 'bg-red-500';
   const kpiColor = ocupPct < 70 ? 'green' : ocupPct < 90 ? 'yellow' : 'red';
 
   const acciones = [
-    { icon: Tag,        label: 'Publicar precio del día',   path: '/precio-diario',       desc: 'Precio que ofreces hoy',        iconColor: 'text-[#1A5C38]',  bg: 'bg-[#1A5C38]/[0.08]' },
+    { icon: Tag,        label: 'Publicar precio del día',   path: '/precio-diario',       desc: 'Precio que ofreces hoy',        iconColor: 'text-[#1e5b4f]',  bg: 'bg-[#1e5b4f]/[0.08]' },
     { icon: Eye,        label: 'Ver oferta de productores', path: '/oferta',               desc: 'Disponibilidad por municipio',  iconColor: 'text-blue-600',   bg: 'bg-blue-50' },
     { icon: PenLine,    label: 'Registrar transacción',     path: '/transacciones/nueva',  desc: 'Compra o venta de maíz',        iconColor: 'text-orange-500', bg: 'bg-orange-50' },
     { icon: Activity,   label: 'Actualizar inventario',     path: '/inventario',           desc: 'Volumen almacenado hoy',        iconColor: 'text-purple-600', bg: 'bg-purple-50' },
@@ -78,7 +78,7 @@ export default function B04Dashboard() {
   return (
     <div className="w-full">
       {/* ── Banner full-bleed ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[2rem] shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-[2rem] shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
         <BannerCanvas />
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10">
@@ -121,7 +121,7 @@ export default function B04Dashboard() {
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#1e5b4f]/30 border-t-[#1e5b4f] rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -239,7 +239,7 @@ export default function B04Dashboard() {
                 value={`${ocupPct}%`}
                 subtitle={
                   <div className="space-y-1.5 mt-1">
-                    <div className="bg-[#eef8f2] rounded-full h-2 w-full overflow-hidden">
+                    <div className="bg-[#e8f5f3] rounded-full h-2 w-full overflow-hidden">
                       <div className={`h-full rounded-full ${barColor} transition-all`} style={{ width: `${Math.min(ocupPct, 100)}%` }} />
                     </div>
                     <span className="block text-[11px]">{formatNum(stats.total_stock ?? 0)} ton de {formatNum(stats.total_capacidad ?? 0)} ton · {formatNum(stats.espacio_libre ?? Math.max(0, (stats.total_capacidad ?? 0) - (stats.total_stock ?? 0)))} ton libres</span>

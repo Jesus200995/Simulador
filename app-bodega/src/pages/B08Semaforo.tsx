@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageBanner } from '../components/Layout';
 import { api } from '../services/api';
@@ -69,7 +69,7 @@ export default function B08Semaforo() {
           <button
             onClick={guardar}
             disabled={saving}
-            className="w-full mt-4 bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[16px] font-bold shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:hover:translate-y-0"
+            className="w-full mt-4 bg-[#1e5b4f] text-white rounded-[1.25rem] py-4 text-[16px] font-bold shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:hover:translate-y-0"
           >
             {saving ? 'Guardando…' : 'Guardar estado'}
           </button>

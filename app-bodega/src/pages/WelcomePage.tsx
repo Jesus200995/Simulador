@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Wheat, Building2, ChevronRight, X, LogIn, UserPlus } from 'lucide-react';
 
@@ -211,7 +211,7 @@ export default function WelcomePage() {
       style={{ position: 'fixed', inset: 0, overscrollBehavior: 'none' }}
     >
       {/* Status bar color band — cubre safe-area-inset-top en iOS */}
-      <div className="fixed top-0 inset-x-0 z-[999] bg-[#1A5C38]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+      <div className="fixed top-0 inset-x-0 z-[999] bg-[#1e5b4f]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
@@ -339,7 +339,7 @@ export default function WelcomePage() {
                 <div className="flex items-center gap-4 relative">
                   <div
                     className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
-                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#1A5C38,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
+                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#1e5b4f,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
                   >
                     <Wheat size={24} className={pressed === 'productor' ? 'text-emerald-300' : 'text-white/60'} />
                   </div>
@@ -375,7 +375,7 @@ export default function WelcomePage() {
                 <div className="flex items-center gap-4 relative">
                   <div
                     className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
-                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#1A5C38,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
+                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#1e5b4f,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
                   >
                     <Building2 size={24} className={pressed === 'bodega' ? 'text-emerald-300' : 'text-white/60'} />
                   </div>
@@ -448,11 +448,11 @@ export default function WelcomePage() {
                     onClick={() => navigate(item.to)}
                     className={`w-full flex items-center gap-3.5 p-4 rounded-2xl text-left transition-all active:scale-[0.98] border
                       ${item.accent
-                        ? 'bg-[#1A5C38] border-[#1A5C38] shadow-lg shadow-green-900/25 hover:bg-[#155030]'
+                        ? 'bg-[#1e5b4f] border-[#1e5b4f] shadow-lg shadow-green-900/25 hover:bg-[#155030]'
                         : 'bg-[#f5fbf7] border-gray-100 hover:bg-[#edf8f2] hover:border-gray-200'}`}
                   >
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm border border-gray-100'}`}>
-                      <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1A5C38]'} />
+                      <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1e5b4f]'} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-bold text-[15px] leading-tight ${item.accent ? 'text-white' : 'text-gray-900'}`}>{item.title}</p>

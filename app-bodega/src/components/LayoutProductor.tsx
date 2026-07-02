@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode, useState } from 'react';
+﻿import { useEffect, type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Map, TrendingUp, Award, User, Bell, X, LogOut, ChevronRight, ChevronLeft, CalendarCheck } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
@@ -58,7 +58,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
     : 'P';
 
   return (
-    <div className="fixed inset-0 bg-[#eef8f2] flex flex-col w-full overflow-hidden">
+    <div className="fixed inset-0 bg-[#e8f5f3] flex flex-col w-full overflow-hidden">
 
       {/* ── Header premium "liquid glass" (compartido) ── */}
       <AppHeader
@@ -73,7 +73,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
       {/* ── Main content ───────────────────────────────── */}
       {/* En desktop el contenido se centra en una columna (como en "seleccionar
           bodegas"); las vistas de mapa a pantalla completa van a todo lo ancho. */}
-      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#eef8f2]" style={{ overscrollBehaviorY: 'contain' }}>
+      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth bg-[#e8f5f3]" style={{ overscrollBehaviorY: 'contain' }}>
         {(pathname === '/productor/mapa' || pathname.startsWith('/productor/mapa/') || pathname.startsWith('/productor/ubicacion') || pathname.startsWith('/productor/ciclo'))
           ? children
           : <div className="w-full max-w-2xl mx-auto">{children}</div>}
@@ -92,7 +92,7 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
               key={path}
               to={path}
               className={`flex-1 flex flex-col items-center justify-center pt-2.5 pb-3 gap-1 transition-colors
-                ${active ? 'text-[#1A5C38]' : 'text-slate-400 hover:text-slate-500'}`}
+                ${active ? 'text-[#1e5b4f]' : 'text-slate-400 hover:text-slate-500'}`}
             >
               <div className="relative">
                 <Icon size={24} strokeWidth={active ? 2.5 : 2} />
@@ -123,10 +123,10 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
         style={{ boxShadow: '-4px 0 40px rgba(0,0,0,0.18)' }}
       >
         {/* Safe-area spacer — ocupa el status bar sin duplicar el padding global */}
-        <div className="bg-[#14482c] flex-shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+        <div className="bg-[#0d3d35] flex-shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
         {/* Header con info del usuario */}
-        <div className="bg-gradient-to-br from-[#14482c] via-[#1A5C38] to-[#1e6b42] px-5 pt-4 pb-5 relative flex-shrink-0">
+        <div className="bg-gradient-to-br from-[#0d3d35] via-[#1e5b4f] to-[#267a6b] px-5 pt-4 pb-5 relative flex-shrink-0">
           <button
             onClick={() => setDrawerOpen(false)}
             className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-colors"
@@ -161,9 +161,9 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
             { icon: Bell,          label: 'Alertas',          desc: notifNoLeidas > 0 ? `${notifNoLeidas} sin leer` : 'Al día', route: '/productor/alertas' },
           ].map(({ icon: Icon, label, desc, route }) => (
             <button key={route} onClick={() => { setDrawerOpen(false); navigate(route); }}
-              className="w-full flex items-center gap-3 px-3 py-3.5 rounded-2xl text-left active:bg-[#eef8f2] transition-colors group">
-              <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] group-active:bg-[#dcf3e7] flex items-center justify-center flex-shrink-0 transition-colors">
-                <Icon size={19} className="text-[#1A5C38]" strokeWidth={1.8} />
+              className="w-full flex items-center gap-3 px-3 py-3.5 rounded-2xl text-left active:bg-[#e8f5f3] transition-colors group">
+              <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] group-active:bg-[#dcf3e7] flex items-center justify-center flex-shrink-0 transition-colors">
+                <Icon size={19} className="text-[#1e5b4f]" strokeWidth={1.8} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-semibold text-gray-800 leading-tight">{label}</p>
@@ -210,7 +210,7 @@ export function PageHeaderProductor({
             {back !== undefined && (
               <button
                 onClick={() => typeof back === 'number' ? navigate(back) : navigate(back)}
-                className="flex items-center gap-0.5 text-[#1A5C38] text-[14px] font-bold mb-2 hover:opacity-70 transition-opacity"
+                className="flex items-center gap-0.5 text-[#1e5b4f] text-[14px] font-bold mb-2 hover:opacity-70 transition-opacity"
               >
                 <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" />
                 Volver

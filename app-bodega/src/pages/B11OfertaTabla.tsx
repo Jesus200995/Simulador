@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
@@ -78,7 +78,7 @@ export default function B11OfertaTabla() {
   return (
     <div className="w-full">
       {/* Banner full-bleed */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-4 relative z-10">
           {/* Fila: título + botón Mis intereses */}
@@ -105,7 +105,7 @@ export default function B11OfertaTabla() {
                 onClick={() => setTipoMaiz(val)}
                 className={'flex-shrink-0 px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-200 ' +
                   (tipoMaiz === val
-                    ? 'bg-white text-[#1A5C38] shadow-sm'
+                    ? 'bg-white text-[#1e5b4f] shadow-sm'
                     : 'bg-white/15 text-white/80 hover:bg-white/25 hover:text-white border border-white/10')}
               >
                 {label}
@@ -125,7 +125,7 @@ export default function B11OfertaTabla() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#1e5b4f]/30 border-t-[#1e5b4f] rounded-full animate-spin" />
           </div>
         ) : datos.length === 0 ? (
           <div className="flex flex-col items-center py-16 gap-3 text-gray-400">
@@ -138,11 +138,11 @@ export default function B11OfertaTabla() {
               <div key={i} className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 flex flex-col gap-4 h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] transition-all duration-500 group/card">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-bold text-[16px] text-gray-900 leading-tight group-hover/card:text-[#1A5C38] transition-colors">{d.municipio}</p>
+                    <p className="font-bold text-[16px] text-gray-900 leading-tight group-hover/card:text-[#1e5b4f] transition-colors">{d.municipio}</p>
                     <p className="text-[12.5px] text-gray-500 font-medium truncate">{d.estado}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="bg-[#1A5C38]/[0.08] text-[#1A5C38] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 capitalize">
+                    <span className="bg-[#1e5b4f]/[0.08] text-[#1e5b4f] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 capitalize">
                       {d.ventana_predominante === 'esta_semana' ? 'Esta semana' : d.ventana_predominante === '15_dias' ? '15 días' : d.ventana_predominante || 'Esta semana'}
                     </span>
                     {Number(d.distancia_km) > 0 && (
@@ -155,7 +155,7 @@ export default function B11OfertaTabla() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className={`rounded-xl p-3 ${
                     Number(d.productores_disponibles) >= 10 ? 'bg-green-100' :
-                    Number(d.productores_disponibles) >= 5 ? 'bg-yellow-50' : 'bg-[#eef8f2]'
+                    Number(d.productores_disponibles) >= 5 ? 'bg-yellow-50' : 'bg-[#e8f5f3]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Users size={12} className="text-gray-400" />
@@ -163,12 +163,12 @@ export default function B11OfertaTabla() {
                     </div>
                     <p className={`text-[22px] font-black ${
                       Number(d.productores_disponibles) >= 10 ? 'text-green-700' :
-                      Number(d.productores_disponibles) >= 5 ? 'text-amber-700' : 'text-[#1A5C38]'
+                      Number(d.productores_disponibles) >= 5 ? 'text-amber-700' : 'text-[#1e5b4f]'
                     }`}>{d.productores_disponibles}</p>
                   </div>
                   <div className={`rounded-xl p-3 ${
                     Number(d.toneladas_estimadas) >= 500 ? 'bg-green-100' :
-                    Number(d.toneladas_estimadas) >= 100 ? 'bg-yellow-50' : 'bg-[#eef8f2]'
+                    Number(d.toneladas_estimadas) >= 100 ? 'bg-yellow-50' : 'bg-[#e8f5f3]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Wheat size={12} className="text-gray-400" />
@@ -182,8 +182,8 @@ export default function B11OfertaTabla() {
                 </div>
                 {Number(d.precio_minimo_promedio) > 0 && (
                   <div className="flex items-center gap-1.5 -mt-1">
-                    <Tag size={13} className="text-[#1A5C38]" />
-                    <p className="text-[13px] font-bold text-[#1A5C38]">
+                    <Tag size={13} className="text-[#1e5b4f]" />
+                    <p className="text-[13px] font-bold text-[#1e5b4f]">
                       desde ${Number(d.precio_minimo_promedio).toLocaleString('es-MX')}/ton
                     </p>
                   </div>
@@ -207,7 +207,7 @@ export default function B11OfertaTabla() {
                         onClick={() => yaInteresa ? navigate('/oferta/mis-intereses') : marcarInteres(d.municipio, d.estado)}
                         disabled={cargando}
                         className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold active:scale-[0.98] transition-all duration-300 disabled:opacity-50 ${
-                          yaInteresa ? 'bg-[#1A5C38] hover:bg-[#154a2d] text-white shadow-md' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                          yaInteresa ? 'bg-[#1e5b4f] hover:bg-[#154a2d] text-white shadow-md' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
                         }`}
                       >
                         <Heart size={14} className={yaInteresa ? 'fill-white' : ''} />
@@ -217,7 +217,7 @@ export default function B11OfertaTabla() {
                   })()}
                   <button
                     onClick={() => navigate(`/requerimientos?municipio=${encodeURIComponent(d.municipio)}`)}
-                    className="w-full flex items-center justify-center gap-2 bg-[#1A5C38]/[0.08] hover:bg-[#1A5C38]/[0.12] text-[#1A5C38] rounded-xl py-2.5 text-[13px] font-bold active:scale-[0.98] transition-all duration-300"
+                    className="w-full flex items-center justify-center gap-2 bg-[#1e5b4f]/[0.08] hover:bg-[#1e5b4f]/[0.12] text-[#1e5b4f] rounded-xl py-2.5 text-[13px] font-bold active:scale-[0.98] transition-all duration-300"
                   >
                     <Signal size={14} /> Requerimiento
                   </button>

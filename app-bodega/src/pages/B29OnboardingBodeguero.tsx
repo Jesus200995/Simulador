@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Circle, ChevronRight, ChevronLeft, Tag, Activity, Signal, Warehouse, PartyPopper } from 'lucide-react';
 import { api } from '../services/api';
@@ -80,7 +80,7 @@ export default function B29OnboardingBodeguero() {
   return (
     <div className="w-full">
       {/* Banner */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-6 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
           <button onClick={() => navigate('/dashboard')}
@@ -102,7 +102,7 @@ export default function B29OnboardingBodeguero() {
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-4xl mx-auto space-y-4">
         {cargando ? (
-          [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-[#eef8f2] rounded-2xl animate-pulse" />)
+          [1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-[#e8f5f3] rounded-2xl animate-pulse" />)
         ) : (
           <>
             {pasos.map((p, i) => (
@@ -118,14 +118,14 @@ export default function B29OnboardingBodeguero() {
                 </span>
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
                   <div className="flex items-center gap-2.5">
-                    <span className={`p-1.5 rounded-lg ${p.hecho ? 'bg-green-100 text-green-600' : 'bg-[#1A5C38]/10 text-[#1A5C38]'}`}>{p.icon}</span>
-                    <p className={`text-[16px] font-bold ${p.hecho ? 'text-gray-400 line-through' : 'text-gray-900 group-hover/card:text-[#1A5C38]'} transition-colors`}>
+                    <span className={`p-1.5 rounded-lg ${p.hecho ? 'bg-green-100 text-green-600' : 'bg-[#1e5b4f]/10 text-[#1e5b4f]'}`}>{p.icon}</span>
+                    <p className={`text-[16px] font-bold ${p.hecho ? 'text-gray-400 line-through' : 'text-gray-900 group-hover/card:text-[#1e5b4f]'} transition-colors`}>
                       {i + 1}. {p.titulo}
                     </p>
                   </div>
                   <p className="text-[13px] text-gray-500 font-medium mt-1 ml-10 leading-snug">{p.desc}</p>
                 </div>
-                <ChevronRight size={18} className={`flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 ${p.hecho ? 'text-green-300' : 'text-gray-300 group-hover/card:text-[#1A5C38]'}`} />
+                <ChevronRight size={18} className={`flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 ${p.hecho ? 'text-green-300' : 'text-gray-300 group-hover/card:text-[#1e5b4f]'}`} />
               </button>
             ))}
 
@@ -138,7 +138,7 @@ export default function B29OnboardingBodeguero() {
                 <p className="text-green-700 font-medium text-[14px] mt-1.5">Ya estás listo para operar en SIMAC con todas las funciones.</p>
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="mt-6 px-8 py-3.5 bg-[#1A5C38] text-white rounded-[1.25rem] text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] inline-flex items-center gap-2"
+                  className="mt-6 px-8 py-3.5 bg-[#1e5b4f] text-white rounded-[1.25rem] text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] inline-flex items-center gap-2"
                 >
                   Ir al tablero <ChevronRight size={16} />
                 </button>

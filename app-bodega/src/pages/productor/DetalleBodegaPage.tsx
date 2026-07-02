@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, MapPin, Phone, Warehouse, Package, Wrench } from 'lucide-react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
@@ -60,8 +60,8 @@ export default function DetalleBodegaPage() {
   if (!bodega) return <div className="min-h-screen flex items-center justify-center text-gray-400">No encontrada</div>;
 
   return (
-    <div className="bg-[#eef8f2]">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+    <div className="bg-[#e8f5f3]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -88,7 +88,7 @@ export default function DetalleBodegaPage() {
                 ? 'bg-amber-100 text-amber-700'
                 : bodega.estado_compra === 'no_compra'
                 ? 'bg-red-100 text-red-700'
-                : 'bg-[#eef8f2] text-gray-500'
+                : 'bg-[#e8f5f3] text-gray-500'
             }`}>
               <span className={`w-2 h-2 rounded-full ${
                 bodega.estado_compra === 'comprando' ? 'bg-green-500'
@@ -126,7 +126,7 @@ export default function DetalleBodegaPage() {
           )}
 
           {bodega.responsable && (
-            <div className="mt-2 flex justify-between bg-[#eef8f2] rounded-xl p-3">
+            <div className="mt-2 flex justify-between bg-[#e8f5f3] rounded-xl p-3">
               <span className="text-zinc-500 text-sm">Responsable</span>
               <span className="font-medium text-zinc-800 text-sm">{bodega.responsable}</span>
             </div>
@@ -141,12 +141,12 @@ export default function DetalleBodegaPage() {
             </h3>
             {stockActual !== null && (
               <>
-                <div className="w-full bg-[#eef8f2] rounded-full h-3 mb-2">
+                <div className="w-full bg-[#e8f5f3] rounded-full h-3 mb-2">
                   <div
                     className={`h-3 rounded-full transition-all ${
                       (stockActual / bodega.capacidad_ton) > 0.9 ? 'bg-red-400'
                       : (stockActual / bodega.capacidad_ton) > 0.7 ? 'bg-amber-400'
-                      : 'bg-[#1A5C38]'
+                      : 'bg-[#1e5b4f]'
                     }`}
                     style={{ width: `${Math.min(100, (stockActual / bodega.capacidad_ton) * 100).toFixed(0)}%` }}
                   />
@@ -178,7 +178,7 @@ export default function DetalleBodegaPage() {
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
             <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2"><Package size={18} className="text-gray-500" /> Stock actual</h3>
             {stockActual !== null ? (
-              <p className="text-3xl font-bold text-[#1A5C38]">
+              <p className="text-3xl font-bold text-[#1e5b4f]">
                 {stockActual.toLocaleString('es-MX')}
                 <span className="text-base font-normal text-gray-500 ml-2">toneladas</span>
               </p>
@@ -196,7 +196,7 @@ export default function DetalleBodegaPage() {
           {cargandoServicios ? (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="h-10 bg-[#eef8f2] rounded-lg animate-pulse" />
+                <div key={i} className="h-10 bg-[#e8f5f3] rounded-lg animate-pulse" />
               ))}
             </div>
           ) : tarifario.length > 0 ? (
@@ -204,7 +204,7 @@ export default function DetalleBodegaPage() {
               {tarifario.map((servicio, i) => (
                 <div key={i} className="flex items-center justify-between py-3">
                   <p className="text-gray-700">{servicio.concepto || servicio.nombre}</p>
-                  <p className="font-semibold text-[#1A5C38]">
+                  <p className="font-semibold text-[#1e5b4f]">
                     ${Number(servicio.precio)?.toLocaleString('es-MX')}
                     <span className="text-xs font-normal text-gray-400 ml-1">{servicio.unidad || 'MXN'}</span>
                   </p>
@@ -233,13 +233,13 @@ export default function DetalleBodegaPage() {
 
         {bodega.telefono && (
           <a href={`tel:${bodega.telefono}`}
-            className="flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
+            className="flex items-center justify-center gap-2 bg-[#1e5b4f] hover:bg-[#195049] text-white py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
             <Phone size={18} /> Llamar a la bodega
           </a>
         )}
 
         <button onClick={() => navigate('/productor/mapa')}
-          className="w-full ring-1 ring-zinc-300 text-zinc-600 py-3 rounded-2xl text-sm font-medium hover:bg-[#eef8f2] transition-colors">
+          className="w-full ring-1 ring-zinc-300 text-zinc-600 py-3 rounded-2xl text-sm font-medium hover:bg-[#e8f5f3] transition-colors">
           Volver al mapa
         </button>
       </div>

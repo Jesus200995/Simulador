@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import DisponibilidadStepper from '../../components/productor/DisponibilidadStepper';
@@ -50,8 +50,8 @@ export default function DisponibilidadVolumenPage() {
   };
 
   return (
-    <div className="bg-[#eef8f2] flex flex-col min-h-0">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+    <div className="bg-[#e8f5f3] flex flex-col min-h-0">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -67,12 +67,12 @@ export default function DisponibilidadVolumenPage() {
         <div className="max-w-lg mx-auto px-4 sm:px-6 pb-4">
           <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 text-center mb-1">Cuantas toneladas?</h2>
           <div className="text-center mt-4 mb-2">
-            <span className="text-5xl font-bold text-[#1A5C38]">{volumen}</span>
+            <span className="text-5xl font-bold text-[#1e5b4f]">{volumen}</span>
             <span className="text-xl text-zinc-400 ml-1">ton</span>
           </div>
           <input type="range" min={1} max={200} step={1} value={volumen}
             onChange={e => setVolumen(Number(e.target.value))}
-            className="w-full accent-[#1A5C38]" />
+            className="w-full accent-[#1e5b4f]" />
           <div className="flex justify-between text-xs text-zinc-400 mt-1">
             <span>1 ton</span><span>200 ton</span>
           </div>
@@ -82,7 +82,7 @@ export default function DisponibilidadVolumenPage() {
             {RANGOS_RAPIDOS.map((r, i) => (
               <button key={i} onClick={() => selectRango(i)}
                 className={`py-3 rounded-xl text-sm font-medium ring-1 transition-all duration-200
-                  ${rangoIdx === i ? 'ring-2 ring-[#1A5C38] bg-emerald-50 text-[#1A5C38]' : 'ring-zinc-200 text-zinc-600 hover:bg-[#eef8f2]'}`}>
+                  ${rangoIdx === i ? 'ring-2 ring-[#1e5b4f] bg-emerald-50 text-[#1e5b4f]' : 'ring-zinc-200 text-zinc-600 hover:bg-[#e8f5f3]'}`}>
                 {r.label}
               </button>
             ))}
@@ -93,12 +93,12 @@ export default function DisponibilidadVolumenPage() {
               <div>
                 <label className="text-xs text-zinc-500 font-medium">Desde</label>
                 <input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)}
-                  className="w-full bg-white ring-1 ring-zinc-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5C38] focus:outline-none transition-shadow" />
+                  className="w-full bg-white ring-1 ring-zinc-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1e5b4f] focus:outline-none transition-shadow" />
               </div>
               <div>
                 <label className="text-xs text-zinc-500 font-medium">Hasta</label>
                 <input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)}
-                  className="w-full bg-white ring-1 ring-zinc-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5C38] focus:outline-none transition-shadow" />
+                  className="w-full bg-white ring-1 ring-zinc-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1e5b4f] focus:outline-none transition-shadow" />
               </div>
             </div>
           )}
@@ -108,7 +108,7 @@ export default function DisponibilidadVolumenPage() {
       <div className="px-4 sm:px-6 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto">
           <button onClick={confirmar} disabled={!canContinue}
-            className="w-full bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-2xl text-base font-semibold
+            className="w-full bg-[#1e5b4f] hover:bg-[#195049] text-white py-4 rounded-2xl text-base font-semibold
                        disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
             Continuar
           </button>

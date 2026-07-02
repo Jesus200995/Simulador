@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid,
@@ -50,7 +50,7 @@ export default function PreciosProductorPage() {
     return () => clearTimeout(timer);
   }, [busquedaBodega]);
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-[#1e5b4f]/20 border-t-[#1e5b4f] rounded-full animate-spin" /></div>;
   if (!data) return null;
 
   // ── Cálculos ────────────────────────────────────────────────────────────
@@ -85,10 +85,10 @@ export default function PreciosProductorPage() {
   const esFavorable = precioVenta != null && precioVenta >= 0;
 
   return (
-    <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#eef8f2]">
+    <div className="flex flex-col font-sans w-full min-h-full pb-8 bg-[#e8f5f3]">
       
       {/* ── HEADER VERDE ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-[32px] shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative z-10">
         <div className="max-w-[700px] mx-auto px-4 sm:px-6 pt-4 pb-5">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between mb-1">
@@ -119,7 +119,7 @@ export default function PreciosProductorPage() {
               type="radio"
               checked={modoPrecio === 'estatal'}
               onChange={() => { setModoPrecio('estatal'); setBodegaSeleccionada(null); setPreciosBodega(null); setBusquedaBodega(''); }}
-              className="w-4 h-4 accent-[#1A5C38]"
+              className="w-4 h-4 accent-[#1e5b4f]"
             />
             <span className="text-sm text-slate-800">
               Promedio de mi estado
@@ -131,7 +131,7 @@ export default function PreciosProductorPage() {
               type="radio"
               checked={modoPrecio === 'bodega'}
               onChange={() => setModoPrecio('bodega')}
-              className="w-4 h-4 accent-[#1A5C38]"
+              className="w-4 h-4 accent-[#1e5b4f]"
             />
             <span className="text-sm text-slate-800">Una bodega específica</span>
           </label>
@@ -145,7 +145,7 @@ export default function PreciosProductorPage() {
               value={busquedaBodega}
               onChange={e => { setBusquedaBodega(e.target.value); setBodegaSeleccionada(null); setPreciosBodega(null); }}
               placeholder="Buscar bodega por nombre o municipio..."
-              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e5b4f]"
             />
 
             {buscando && <p className="text-xs text-slate-400 mt-2">Buscando…</p>}
@@ -164,13 +164,13 @@ export default function PreciosProductorPage() {
                         setPreciosBodega(await r.json());
                       } catch { /* ignore */ }
                     }}
-                    className="w-full text-left px-4 py-3 hover:bg-[#eef8f2] border-b border-slate-50 last:border-0"
+                    className="w-full text-left px-4 py-3 hover:bg-[#e8f5f3] border-b border-slate-50 last:border-0"
                   >
                     <p className="text-sm font-medium text-slate-800">{b.nombre}</p>
                     <p className="text-xs text-slate-500">
                       {b.municipio}, {b.estado}
                       {b.precio_compra_hoy > 0 && (
-                        <span className="ml-2 text-[#1A5C38] font-medium">
+                        <span className="ml-2 text-[#1e5b4f] font-medium">
                           ${Number(b.precio_compra_hoy).toLocaleString('es-MX')}/ton hoy
                         </span>
                       )}
@@ -229,7 +229,7 @@ export default function PreciosProductorPage() {
       {/* ── PRECIO 1 — Referencia internacional ── */}
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex items-center gap-3 p-4">
-          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
+          <div className="w-8 h-8 bg-[#1e5b4f] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
             1
           </div>
           <div>
@@ -295,7 +295,7 @@ export default function PreciosProductorPage() {
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
+            <div className="w-8 h-8 bg-[#1e5b4f] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
               2
             </div>
             <div>
@@ -314,14 +314,14 @@ export default function PreciosProductorPage() {
 
             {/* PO */}
             <div className="w-full sm:flex-1 bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3 sm:p-4 shadow-sm flex items-center sm:flex-col sm:items-start sm:justify-center">
-              <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
+              <div className="w-8 h-8 bg-[#1e5b4f] text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 mr-3 sm:mr-0 sm:mb-2">
                 <CircleDollarSign size={16} />
               </div>
               <div>
-                <p className="text-[9px] text-[#1A5C38] font-bold uppercase tracking-wider mb-0.5">
+                <p className="text-[9px] text-[#1e5b4f] font-bold uppercase tracking-wider mb-0.5">
                   Pago bodega (PO)
                 </p>
-                <p className="text-[18px] sm:text-[20px] font-black text-[#1A5C38] tracking-tight leading-none">
+                <p className="text-[18px] sm:text-[20px] font-black text-[#1e5b4f] tracking-tight leading-none">
                   {tienePO ? `$${po.toLocaleString('es-MX')}` : <span className="text-[14px] text-slate-400 font-medium tracking-normal">Sin datos</span>}
                 </p>
               </div>
@@ -367,7 +367,7 @@ export default function PreciosProductorPage() {
       {/* ── PRECIO 3 — Precio de venta ── */}
       <div className="bg-white rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
         <div className="flex items-center gap-3 p-4 pb-2">
-          <div className="w-8 h-8 bg-[#1A5C38] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
+          <div className="w-8 h-8 bg-[#1e5b4f] text-white rounded-lg flex items-center justify-center text-[14px] font-bold shadow-md shrink-0">
             3
           </div>
           <div>
@@ -381,7 +381,7 @@ export default function PreciosProductorPage() {
         </div>
 
         <div className="px-4 pb-4">
-          <div className="bg-[#eef8f2] rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
+          <div className="bg-[#e8f5f3] rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-3">
               Versión 1 — Productor con servicios
             </p>
@@ -412,7 +412,7 @@ export default function PreciosProductorPage() {
                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 w-fit">
                   <span className={`text-[18px] sm:text-[20px] font-black tracking-tight leading-none
                     ${precioVenta == null ? 'text-slate-400'
-                      : esFavorable ? 'text-[#1A5C38]'
+                      : esFavorable ? 'text-[#1e5b4f]'
                       : 'text-rose-600'}`}>
                     {precioVenta != null
                       ? `$${Math.abs(precioVenta).toLocaleString('es-MX', { maximumFractionDigits: 0 })}`
@@ -439,7 +439,7 @@ export default function PreciosProductorPage() {
             )}
           </div>
 
-          <div className="border border-dashed border-slate-200 rounded-2xl p-4 bg-[#eef8f2]/50">
+          <div className="border border-dashed border-slate-200 rounded-2xl p-4 bg-[#e8f5f3]/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
               <p className="text-[12px] font-bold text-slate-600">
                 Versión 2 — Precio CEDIS
@@ -467,7 +467,7 @@ export default function PreciosProductorPage() {
                 Histórico a 30 días
               </p>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-[#eef8f2] px-2.5 py-1 rounded-md border border-slate-100">MXN / TON</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-[#e8f5f3] px-2.5 py-1 rounded-md border border-slate-100">MXN / TON</p>
           </div>
           
           {data.tendencia?.length > 0 ? (
@@ -511,7 +511,7 @@ export default function PreciosProductorPage() {
 
       {/* ── FIRA ── */}
       {data.fira && (
-        <div className="bg-[#eef8f2] border border-slate-200 rounded-[24px] p-4 sm:p-5 shadow-sm">
+        <div className="bg-[#e8f5f3] border border-slate-200 rounded-[24px] p-4 sm:p-5 shadow-sm">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center text-slate-600 shadow-inner">
               <BookOpen size={16} />
@@ -534,7 +534,7 @@ export default function PreciosProductorPage() {
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-emerald-50 rounded-xl p-3 border border-emerald-100 shadow-sm">
               <span className="text-emerald-700 font-bold mb-0.5 sm:mb-0">Precio FIRA sugerido</span>
-              <span className="font-black text-[#1A5C38] text-[14px]">
+              <span className="font-black text-[#1e5b4f] text-[14px]">
                 ${data.fira.precio_fira.toLocaleString('es-MX')} / ton
               </span>
             </div>

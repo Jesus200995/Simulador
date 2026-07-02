@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Wheat, AlertCircle, Loader2, UserPlus, KeyRound, Building2, ChevronRight, HelpCircle } from 'lucide-react';
 import PinInput from '../../components/productor/PinInput';
@@ -92,7 +92,7 @@ export default function LoginPinPage() {
     >
       {/* Background */}
       <div className="fixed inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c] via-[#091f1b] to-[#1e5b4f]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
       </div>
 
@@ -118,7 +118,7 @@ export default function LoginPinPage() {
 
           {/* Icon */}
           <div className="flex justify-center mb-6 sm:mb-8">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#1A5C38] rounded-[18px] sm:rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#1e5b4f] rounded-[18px] sm:rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
               {step === 'curp'
                 ? <Wheat size={24} className="text-white sm:hidden" />
                 : <KeyRound size={24} className="text-white sm:hidden" />
@@ -162,7 +162,7 @@ export default function LoginPinPage() {
                 <button
                   onClick={handleContinuar}
                   disabled={curp.length !== 18}
-                  className="mt-4 sm:mt-5 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38]
+                  className="mt-4 sm:mt-5 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1e5b4f]
                              rounded-xl py-3.5 sm:py-4 text-sm sm:text-base font-bold
                              disabled:opacity-30 active:scale-[0.98] transition-all duration-200"
                 >
@@ -242,7 +242,7 @@ export default function LoginPinPage() {
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-2" />
 
             <div className="flex items-center gap-2">
-              <HelpCircle size={20} className="text-[#1A5C38]" />
+              <HelpCircle size={20} className="text-[#1e5b4f]" />
               <h2 className="font-bold text-slate-800 text-[16px]">¿Olvidaste tu PIN?</h2>
             </div>
 

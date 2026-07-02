@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -74,8 +74,8 @@ export default function B09PrecioCompra() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#eef8f2] rounded-[1rem] px-4 py-3.5 text-[16px] font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1A5C38]/40 focus:bg-white border-2 border-transparent focus:border-[#1A5C38]/10';
-  const labelClass = 'block text-[14px] font-bold text-gray-600 mb-1.5 transition-colors group-hover/card:text-[#1A5C38]';
+  const inputClass = 'w-full bg-[#e8f5f3] rounded-[1rem] px-4 py-3.5 text-[16px] font-medium outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1e5b4f]/40 focus:bg-white border-2 border-transparent focus:border-[#1e5b4f]/10';
+  const labelClass = 'block text-[14px] font-bold text-gray-600 mb-1.5 transition-colors group-hover/card:text-[#1e5b4f]';
   const cardClass = 'bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-4 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-500 group/card hover:-translate-y-0.5';
 
   return (
@@ -86,7 +86,7 @@ export default function B09PrecioCompra() {
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-5">
           {/* Bodega y tipo */}
           <div className={cardClass}>
-            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Bodega y tipo de maíz</p>
+            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1e5b4f]/60">Bodega y tipo de maíz</p>
             <div>
               <label className={labelClass}>Bodega</label>
               <select value={form.bodega_id} onChange={e => set('bodega_id', e.target.value)} required className={inputClass}>
@@ -123,7 +123,7 @@ export default function B09PrecioCompra() {
 
           {/* Precio destacado */}
           <div className={cardClass}>
-            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1A5C38]/60">Precio</p>
+            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover/card:text-[#1e5b4f]/60">Precio</p>
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className={labelClass + ' mb-0'}>Precio (MXN/ton)</label>
@@ -138,7 +138,7 @@ export default function B09PrecioCompra() {
                 required
                 step="1"
                 placeholder="6200"
-                className="w-full bg-[#eef8f2] rounded-[1rem] px-4 py-4 text-[28px] font-bold outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1A5C38]/40 focus:bg-white border-2 border-transparent focus:border-[#1A5C38]/10 text-[#1A5C38]"
+                className="w-full bg-[#e8f5f3] rounded-[1rem] px-4 py-4 text-[28px] font-bold outline-none transition-all duration-300 focus:ring-2 focus:ring-[#1e5b4f]/40 focus:bg-white border-2 border-transparent focus:border-[#1e5b4f]/10 text-[#1e5b4f]"
               />
             </div>
             <div>
@@ -149,7 +149,7 @@ export default function B09PrecioCompra() {
           </div>
 
           <button type="submit" disabled={loading}
-            className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[16px] font-bold shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:hover:translate-y-0">
+            className="w-full bg-[#1e5b4f] text-white rounded-[1.25rem] py-4 text-[16px] font-bold shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:hover:translate-y-0">
             {loading ? 'Publicando…' : 'Publicar precio'}
           </button>
         </form>
@@ -158,14 +158,14 @@ export default function B09PrecioCompra() {
         {historialPrecios.length > 1 && (
           <div className="max-w-4xl mx-auto pb-8 mt-5">
             <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 transition-all duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5">
-              <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-6 transition-colors hover:text-[#1A5C38]/60">Historial de precios — últimos 30 días</p>
+              <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-6 transition-colors hover:text-[#1e5b4f]/60">Historial de precios — últimos 30 días</p>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={historialPrecios} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#9ca3af' }} />
                   <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `$${formatNum(v)}`} width={72} />
                   <Tooltip formatter={(v) => [`$${formatNum(Number(v))}/ton`, 'Precio']} labelStyle={{ fontSize: 12, fontWeight: 'bold' }} contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }} />
-                  <Line type="monotone" dataKey="precio" stroke="#1A5C38" strokeWidth={3} dot={{ r: 4, fill: '#1A5C38', strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                  <Line type="monotone" dataKey="precio" stroke="#1e5b4f" strokeWidth={3} dot={{ r: 4, fill: '#1e5b4f', strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 6, strokeWidth: 0 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
