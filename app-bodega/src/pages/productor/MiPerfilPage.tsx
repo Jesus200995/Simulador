@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Edit2, MapPin, LogOut, CircleDot, CalendarCheck, ChevronRight,
+  Edit2, MapPin, LogOut, CalendarCheck, ChevronRight,
   Sprout, Trash2, Plus, Phone, Mail, Check, X, Leaf,
-  ClipboardList, Award,
+  ClipboardList, Award, CircleDot, Bell,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
-import MapaUP from '../../components/productor/MapaUP';
 import ProfileHero from '../../components/ProfileHero';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -40,30 +39,25 @@ interface CropInfo {
 interface Ciclo { cycle_id: number; cycle_year: number; cycle_type: string; crops: CropInfo[]; }
 
 export default function MiPerfilPage() {
-  const navigate    = useNavigate();
-  const { logout }  = useAuthStore();
-  const [perfil, setPerfil]       = useState<Perfil | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [editTel, setEditTel]     = useState(false);
-  const [telefono, setTelefono]   = useState('');
+  const navigate   = useNavigate();
+  const { logout } = useAuthStore();
+
+  const [perfil, setPerfil]         = useState<Perfil | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [editTel, setEditTel]       = useState(false);
+  const [telefono, setTelefono]     = useState('');
   const [editCorreo, setEditCorreo] = useState(false);
-  const [correo, setCorreo]       = useState('');
-  const [editProg, setEditProg]   = useState(false);
-  const [programas, setProgramas] = useState<string[]>([]);
-  const [ciclos, setCiclos]       = useState<Ciclo[] | null>(null);
-  const [parcelas, setParcelas]   = useState<any[]>([]);
+  const [correo, setCorreo]         = useState('');
+  const [editProg, setEditProg]     = useState(false);
+  const [programas, setProgramas]   = useState<string[]>([]);
+  const [ciclos, setCiclos]         = useState<Ciclo[] | null>(null);
+  const [parcelas, setParcelas]     = useState<any[]>([]);
   const [confirmDel, setConfirmDel] = useState<number | null>(null);
   const [eliminando, setEliminando] = useState<number | null>(null);
-  const [delError, setDelError]   = useState('');
-  const [savedTel, setSavedTel]   = useState(false);
+  const [delError, setDelError]     = useState('');
+  const [savedTel, setSavedTel]     = useState(false);
   const [savedCorreo, setSavedCorreo] = useState(false);
-
-  const ringDe = (u: any): [number, number][] | null => {
-    const g = u?.geom_geojson;
-    if (!g?.coordinates) return null;
-    const ring = g.type === 'MultiPolygon' ? g.coordinates[0]?.[0] : g.coordinates[0];
-    return ring && ring.length >= 3 ? (ring as [number, number][]) : null;
-  };
+  const [notifCount, setNotifCount] = useState(0);
 
   const eliminarParcela = async (upId: number) => {
     setEliminando(upId); setDelError('');
@@ -84,17 +78,21 @@ export default function MiPerfilPage() {
       .then(r => r.json())
       .then(d => { setPerfil(d); setTelefono(d.telefono || ''); setCorreo(d.correo || ''); setProgramas(d.programas_beneficiario || []); })
       .finally(() => setLoading(false));
-    const t2 = localStorage.getItem('simac_token');
-    fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${t2}` } })
+
+    fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
         const ups = d.ups ?? (Array.isArray(d) ? d : []);
         setParcelas(ups);
-        const up = ups[0];
-        if (!up) return;
-        return fetch(`${BASE}/ups/${up.up_id}/cycles`, { headers: { Authorization: `Bearer ${t2}` } })
+        if (!ups[0]) return;
+        return fetch(`${BASE}/ups/${ups[0].up_id}/cycles`, { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.json()).then(d => setCiclos(d.cycles ?? d));
       }).catch(() => setCiclos([]));
+
+    fetch(`${BASE}/alertas/notificaciones/mis`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setNotifCount((d.notificaciones || d || []).filter((n: any) => !n.leida).length))
+      .catch(() => {});
   }, []);
 
   const guardarTelefono = async () => {
@@ -129,7 +127,14 @@ export default function MiPerfilPage() {
 
   const nombreCompleto = [perfil.nombres, perfil.apellido_paterno, perfil.apellido_materno].filter(Boolean).join(' ');
   const initials = [perfil.nombres, perfil.apellido_paterno].filter(Boolean).map(w => w[0]).join('').toUpperCase() || 'P';
-  const estadoColor = perfil.estado_validacion === 'activo' ? 'bg-emerald-400/90 text-emerald-950' : perfil.estado_validacion === 'pendiente' ? 'bg-amber-300/90 text-amber-950' : 'bg-red-400/90 text-red-950';
+  const estadoColor = perfil.estado_validacion === 'activo'
+    ? 'bg-emerald-400/90 text-emerald-950'
+    : perfil.estado_validacion === 'pendiente'
+    ? 'bg-amber-300/90 text-amber-950'
+    : 'bg-red-400/90 text-red-950';
+
+  const cicloActual = ciclos && ciclos.length > 0 ? ciclos[0] : null;
+  const tipoCicloLabel = (t: string) => t === 'PV' ? 'Prim-Ver' : t === 'OI' ? 'Oto-Inv' : 'Anual';
 
   const delay = (i: number) => ({ animation: `pfFadeUp .4s ${i * 55}ms ease both` });
 
@@ -159,7 +164,7 @@ export default function MiPerfilPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-5 space-y-3">
 
-        {/* ── CURP pill (dato único no repetido) ── */}
+        {/* ── CURP pill ── */}
         <div style={delay(0)} className="bg-white rounded-2xl px-5 py-3.5 shadow-sm ring-1 ring-black/[0.04] flex items-center justify-between">
           <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-widest">CURP</span>
           <span className="font-mono text-[13px] text-slate-700 tracking-wider">{perfil.curp || '—'}</span>
@@ -188,12 +193,9 @@ export default function MiPerfilPage() {
             </div>
             {editTel && (
               <div className="mt-2.5 flex gap-2" style={{ animation: 'pfPop .25s ease both' }}>
-                <input
-                  type="tel" inputMode="numeric" autoFocus
-                  value={telefono} maxLength={10}
+                <input type="tel" inputMode="numeric" autoFocus value={telefono} maxLength={10}
                   onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  className="flex-1 bg-[#f4fbf7] border-2 border-[#1A5C38]/20 focus:border-[#1A5C38] rounded-xl px-3 py-2.5 text-[15px] outline-none transition-colors"
-                />
+                  className="flex-1 bg-[#f4fbf7] border-2 border-[#1A5C38]/20 focus:border-[#1A5C38] rounded-xl px-3 py-2.5 text-[15px] outline-none transition-colors" />
                 <button onClick={guardarTelefono} disabled={telefono.length < 10}
                   className="w-11 h-11 rounded-xl bg-[#1A5C38] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#1A5C38]/20">
                   <Check size={16} className="text-white" />
@@ -229,12 +231,10 @@ export default function MiPerfilPage() {
             </div>
             {editCorreo && (
               <div className="mt-2.5 flex gap-2" style={{ animation: 'pfPop .25s ease both' }}>
-                <input
-                  type="email" inputMode="email" autoFocus autoCapitalize="off" autoCorrect="off"
+                <input type="email" inputMode="email" autoFocus autoCapitalize="off" autoCorrect="off"
                   value={correo} onChange={e => setCorreo(e.target.value)}
                   className="flex-1 bg-[#f4fbf7] border-2 border-[#1A5C38]/20 focus:border-[#1A5C38] rounded-xl px-3 py-2.5 text-[14px] outline-none transition-colors"
-                  placeholder="tu@correo.com"
-                />
+                  placeholder="tu@correo.com" />
                 <button onClick={guardarCorreo}
                   className="w-11 h-11 rounded-xl bg-[#1A5C38] flex items-center justify-center active:scale-95 transition-all shadow-sm shadow-[#1A5C38]/20">
                   <Check size={16} className="text-white" />
@@ -248,180 +248,109 @@ export default function MiPerfilPage() {
           </div>
         </div>
 
-        {/* ── Mis parcelas ── */}
+        {/* ── Mis parcelas — lista compacta sin mapas ── */}
         <div style={delay(2)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+          <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <div className="flex items-center gap-2">
               <Leaf size={15} className="text-[#1A5C38]" />
               <p className="text-[13px] font-bold text-slate-700">
-                Mis parcelas{parcelas.length > 0 && <span className="ml-1.5 text-[11px] text-slate-400 font-normal">({parcelas.length})</span>}
+                Mis parcelas
+                {parcelas.length > 0 && <span className="ml-1.5 text-[11px] text-slate-400 font-normal">({parcelas.length})</span>}
               </p>
             </div>
+            <button onClick={() => navigate('/productor/ups/nueva')}
+              className="flex items-center gap-1 text-[#1A5C38] text-[12px] font-bold active:opacity-60 transition-opacity">
+              <Plus size={13} /> Agregar
+            </button>
           </div>
 
           {delError && (
-            <div className="mx-5 mb-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+            <div className="mx-4 mb-2 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
               <p className="text-[12px] text-red-600">{delError}</p>
             </div>
           )}
 
           {parcelas.length === 0 ? (
-            <div className="flex flex-col items-center py-8 gap-2 text-center px-5">
-              <div className="w-12 h-12 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
-                <Sprout size={20} className="text-[#1A5C38]/40" />
-              </div>
-              <p className="text-[14px] font-semibold text-slate-600 mt-1">Aún sin parcelas</p>
-              <p className="text-[12px] text-slate-400">Agrega tu primera unidad de producción y dibújala en el mapa</p>
-            </div>
-          ) : (
-            <div className="px-4 space-y-2.5 pb-4">
-              {parcelas.map((p: any, i: number) => {
-                const ring = ringDe(p);
-                const lat  = p.centroid_lat ?? p.lat;
-                const lng  = p.centroid_lng ?? p.lng;
-                return (
-                  <div key={p.up_id ?? i} className="rounded-2xl border border-slate-100 overflow-hidden" style={{ animation: `pfFadeUp .35s ${i * 60 + 80}ms ease both` }}>
-                    {lat && lng ? (
-                      <MapaUP lat={lat} lng={lng} locationConfirmed={!!p.location_confirmed} centroidSource={p.centroid_source} radioKm={3} height="120px" zoom={14} poligono={ring} />
-                    ) : (
-                      <div className="h-20 bg-[#f4fbf7] flex items-center justify-center gap-2">
-                        <MapPin size={16} className="text-[#1A5C38]/30" />
-                        <span className="text-[12px] text-slate-400">Sin ubicación</span>
-                      </div>
-                    )}
-                    <div className="p-3.5">
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="min-w-0">
-                          <p className="text-[14px] font-bold text-slate-900 truncate">{p.up_name || `Parcela ${i + 1}`}</p>
-                          <p className="text-[12px] text-slate-400 truncate mt-0.5">{[p.municipality_name, p.state_name].filter(Boolean).join(', ') || 'Sin ubicación'}</p>
-                        </div>
-                        {p.area_ha_calc != null && (
-                          <span className="flex-shrink-0 text-[12px] font-bold text-[#1A5C38] bg-[#eef8f2] px-2.5 py-1 rounded-full">
-                            {Number(p.area_ha_calc).toLocaleString('es-MX', { maximumFractionDigits: 1 })} ha
-                          </span>
-                        )}
-                      </div>
-
-                      {confirmDel === p.up_id ? (
-                        <div className="bg-red-50 ring-1 ring-red-100 rounded-xl p-3 flex items-center justify-between gap-2">
-                          <span className="text-[12.5px] font-semibold text-red-700">¿Eliminar?</span>
-                          <div className="flex gap-1.5">
-                            <button onClick={() => setConfirmDel(null)} disabled={eliminando === p.up_id}
-                              className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-slate-600 bg-white ring-1 ring-slate-200 active:scale-95 transition-transform">
-                              Cancelar
-                            </button>
-                            <button onClick={() => eliminarParcela(p.up_id)} disabled={eliminando === p.up_id}
-                              className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-white bg-red-500 active:scale-95 transition-all disabled:opacity-60">
-                              {eliminando === p.up_id ? '…' : 'Sí, quitar'}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button onClick={() => navigate(`/productor/ubicacion?up_id=${p.up_id}`)}
-                            className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A5C38] text-white py-2.5 rounded-xl text-[13px] font-bold active:scale-[0.97] transition-all shadow-[0_3px_10px_rgba(26,92,56,0.2)]">
-                            <MapPin size={13} /> {ring ? 'Editar' : 'Dibujar'}
-                          </button>
-                          <button onClick={() => { setConfirmDel(p.up_id); setDelError(''); }}
-                            className="px-4 py-2.5 rounded-xl text-[13px] font-bold text-red-500 bg-red-50 active:scale-[0.97] transition-all">
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="px-4 pb-4">
             <button onClick={() => navigate('/productor/ups/nueva')}
-              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-[#1A5C38]/30 text-[#1A5C38] py-3 rounded-2xl text-[13px] font-bold hover:bg-[#f4fbf7] active:scale-[0.98] transition-all">
-              <Plus size={15} /> Agregar parcela
+              className="w-full flex flex-col items-center py-6 gap-2 text-center px-5 active:opacity-80 transition-opacity">
+              <div className="w-11 h-11 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
+                <Sprout size={18} className="text-[#1A5C38]/40" />
+              </div>
+              <p className="text-[13px] font-semibold text-slate-500">Registra tu primera parcela</p>
+              <p className="text-[11.5px] text-slate-400">Toca para agregar</p>
             </button>
-          </div>
-        </div>
-
-        {/* ── Ciclo productivo ── */}
-        <div style={delay(3)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
-            <div className="flex items-center gap-2">
-              <CalendarCheck size={15} className="text-[#1A5C38]" />
-              <p className="text-[13px] font-bold text-slate-700">Ciclo productivo</p>
-            </div>
-            <button onClick={() => navigate('/productor/ciclo')} className="w-7 h-7 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform">
-              {ciclos && ciclos.length > 0 ? <Edit2 size={13} className="text-[#1A5C38]" /> : <ChevronRight size={14} className="text-[#1A5C38]" />}
-            </button>
-          </div>
-
-          {ciclos === null && <p className="px-5 pb-4 text-[12px] text-slate-400">Cargando...</p>}
-
-          {ciclos !== null && ciclos.length === 0 && (
-            <button onClick={() => navigate('/productor/ciclo')}
-              className="w-full px-5 pb-5 flex items-center gap-2 text-[#1A5C38] text-[13px] font-semibold">
-              <Plus size={14} /> Declarar ciclo {new Date().getFullYear()}
-            </button>
-          )}
-
-          {ciclos !== null && ciclos.length > 0 && (
-            <div className="px-4 pb-4 space-y-2.5">
-              {ciclos.map(c => {
-                const crop = c.crops?.[0];
-                const tipoCiclo = c.cycle_type === 'PV' ? 'Primavera-Verano' : c.cycle_type === 'OI' ? 'Otoño-Invierno' : 'Anual';
-                const total = crop?.area_sown_ha && crop?.yield_expected ? (Number(crop.area_sown_ha) * Number(crop.yield_expected)).toFixed(1) : null;
-                return (
-                  <div key={c.cycle_id} className="bg-gradient-to-br from-[#f4fbf7] to-[#eef8f2] rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-[14px] font-bold text-slate-800">{tipoCiclo} {c.cycle_year}</p>
-                        {crop && <p className="text-[12px] text-slate-500 mt-0.5">{crop.variety_other || crop.variety_id || 'Maíz blanco'}</p>}
-                      </div>
-                      <button onClick={() => navigate('/productor/ciclo', { state: { cicloId: c.cycle_id } })}
-                        className="text-[11px] text-[#1A5C38] font-bold border border-[#1A5C38]/30 px-3 py-1.5 rounded-xl bg-white active:scale-95 transition-transform">
-                        Editar
+          ) : (
+            <div className="divide-y divide-slate-50">
+              {parcelas.map((p: any) => (
+                <div key={p.up_id} className="px-4 py-3.5">
+                  {confirmDel === p.up_id ? (
+                    <div className="flex items-center justify-between gap-3 bg-red-50 rounded-2xl px-3.5 py-3">
+                      <span className="text-[12.5px] font-semibold text-red-700 flex-1">¿Eliminar "{p.up_name || 'parcela'}"?</span>
+                      <button onClick={() => setConfirmDel(null)} disabled={eliminando === p.up_id}
+                        className="px-3 py-1.5 rounded-xl text-[12px] font-bold text-slate-600 bg-white ring-1 ring-slate-200 active:scale-95 transition-transform">
+                        Cancelar
+                      </button>
+                      <button onClick={() => eliminarParcela(p.up_id)} disabled={eliminando === p.up_id}
+                        className="px-3 py-1.5 rounded-xl text-[12px] font-bold text-white bg-red-500 active:scale-95 transition-all disabled:opacity-60">
+                        {eliminando === p.up_id ? '…' : 'Sí'}
                       </button>
                     </div>
-                    {crop && (
-                      <div className="grid grid-cols-3 gap-2">
-                        {crop.area_sown_ha && (
-                          <div className="bg-white rounded-xl p-2.5 text-center ring-1 ring-black/[0.04]">
-                            <p className="text-[10px] text-slate-400 font-medium">Sembrado</p>
-                            <p className="text-[14px] font-black text-slate-800 mt-0.5">{crop.area_sown_ha} <span className="text-[10px] font-normal text-slate-500">ha</span></p>
-                          </div>
-                        )}
-                        {crop.yield_expected && (
-                          <div className="bg-white rounded-xl p-2.5 text-center ring-1 ring-black/[0.04]">
-                            <p className="text-[10px] text-slate-400 font-medium">Rendim.</p>
-                            <p className="text-[14px] font-black text-slate-800 mt-0.5">{crop.yield_expected} <span className="text-[10px] font-normal text-slate-500">t/ha</span></p>
-                          </div>
-                        )}
-                        {total && (
-                          <div className="bg-[#1A5C38] rounded-xl p-2.5 text-center shadow-sm shadow-[#1A5C38]/25">
-                            <p className="text-[10px] text-green-200/80 font-medium">Total est.</p>
-                            <p className="text-[14px] font-black text-white mt-0.5">{total} <span className="text-[10px] font-normal text-green-200/80">ton</span></p>
-                          </div>
-                        )}
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0">
+                        <Sprout size={16} className="text-[#1A5C38]" />
                       </div>
-                    )}
-                    {crop?.planting_date && (
-                      <p className="text-[11px] text-slate-400 mt-2.5">
-                        Siembra: {new Date(crop.planting_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
-                        {crop.estimated_harvest_date && ` · Cosecha est.: ${new Date(crop.estimated_harvest_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}`}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-              <button onClick={() => navigate('/productor/ciclo', { state: { nuevoCiclo: true } })}
-                className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-[#1A5C38]/30 text-[#1A5C38] py-2.5 rounded-2xl text-[13px] font-bold hover:bg-[#f4fbf7] active:scale-[0.98] transition-all">
-                <Plus size={14} /> Nuevo ciclo
-              </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] font-bold text-slate-800 truncate">{p.up_name || 'Parcela'}</p>
+                        <p className="text-[11.5px] text-slate-400 truncate mt-0.5">
+                          {[p.municipality_name, p.state_name].filter(Boolean).join(', ') || 'Sin ubicación'}
+                          {p.area_ha_calc != null && ` · ${Number(p.area_ha_calc).toLocaleString('es-MX', { maximumFractionDigits: 1 })} ha`}
+                        </p>
+                      </div>
+                      <button onClick={() => navigate(`/productor/ubicacion?up_id=${p.up_id}`)}
+                        className="w-8 h-8 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform flex-shrink-0">
+                        <MapPin size={14} className="text-[#1A5C38]" />
+                      </button>
+                      <button onClick={() => { setConfirmDel(p.up_id); setDelError(''); }}
+                        className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center active:scale-95 transition-transform flex-shrink-0">
+                        <Trash2 size={14} className="text-red-400" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* ── Programas ── */}
+        {/* ── Ciclo productivo — tarjeta de navegación ── */}
+        <button style={delay(3)} onClick={() => navigate('/productor/ciclo')}
+          className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
+          <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
+            <CalendarCheck size={18} className="text-[#1A5C38]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-bold text-slate-800">Ciclo productivo</p>
+            {cicloActual ? (
+              <p className="text-[12px] text-slate-400 mt-0.5 truncate">
+                {tipoCicloLabel(cicloActual.cycle_type)} {cicloActual.cycle_year}
+                {cicloActual.crops?.[0]?.area_sown_ha && ` · ${cicloActual.crops[0].area_sown_ha} ha sembradas`}
+              </p>
+            ) : (
+              <p className="text-[12px] text-slate-400 mt-0.5">
+                {ciclos === null ? 'Cargando…' : 'Sin ciclo registrado — toca para agregar'}
+              </p>
+            )}
+          </div>
+          {cicloActual && (
+            <span className="flex-shrink-0 text-[11px] font-bold bg-[#eef8f2] text-[#1A5C38] px-2.5 py-1 rounded-full">
+              {ciclos!.length} ciclo{ciclos!.length !== 1 ? 's' : ''}
+            </span>
+          )}
+          <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors flex-shrink-0" />
+        </button>
+
+        {/* ── Programas de apoyo ── */}
         <div style={delay(4)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
@@ -471,18 +400,42 @@ export default function MiPerfilPage() {
           </div>
         </div>
 
-        {/* ── Mis solicitudes ── */}
-        <button style={delay(5)} onClick={() => navigate('/productor/mis-solicitudes')}
-          className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
-          <div className="w-10 h-10 rounded-xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
-            <ClipboardList size={17} className="text-[#1A5C38]" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[14px] font-bold text-slate-800">Mis solicitudes de apoyo</p>
-            <p className="text-[12px] text-slate-400 mt-0.5">Ver estado de solicitudes a ventanillas</p>
-          </div>
-          <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors" />
-        </button>
+        {/* ── Accesos rápidos ── */}
+        <div style={delay(5)} className="space-y-2">
+
+          {/* Mis solicitudes */}
+          <button onClick={() => navigate('/productor/mis-solicitudes')}
+            className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
+            <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
+              <ClipboardList size={17} className="text-[#1A5C38]" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] font-bold text-slate-800">Mis solicitudes de apoyo</p>
+              <p className="text-[12px] text-slate-400 mt-0.5">Ver estado de solicitudes a ventanillas</p>
+            </div>
+            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors flex-shrink-0" />
+          </button>
+
+          {/* Alertas */}
+          <button onClick={() => navigate('/productor/alertas')}
+            className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
+            <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors relative">
+              <Bell size={17} className="text-[#1A5C38]" />
+              {notifCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center">
+                  {notifCount > 9 ? '9+' : notifCount}
+                </span>
+              )}
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] font-bold text-slate-800">Alertas</p>
+              <p className="text-[12px] text-slate-400 mt-0.5">
+                {notifCount > 0 ? `${notifCount} sin leer` : 'Sin alertas pendientes'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors flex-shrink-0" />
+          </button>
+        </div>
 
         {/* ── Cerrar sesión ── */}
         <button style={delay(6)} onClick={() => { logout(); navigate('/login-productor'); }}
