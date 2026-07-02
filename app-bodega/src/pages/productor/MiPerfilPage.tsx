@@ -133,9 +133,6 @@ export default function MiPerfilPage() {
     ? 'bg-amber-300/90 text-amber-950'
     : 'bg-red-400/90 text-red-950';
 
-  const cicloActual = ciclos && ciclos.length > 0 ? ciclos[0] : null;
-  const tipoCicloLabel = (t: string) => t === 'PV' ? 'Prim-Ver' : t === 'OI' ? 'Oto-Inv' : 'Anual';
-
   const delay = (i: number) => ({ animation: `pfFadeUp .4s ${i * 55}ms ease both` });
 
   return (
@@ -323,32 +320,102 @@ export default function MiPerfilPage() {
           )}
         </div>
 
-        {/* ── Ciclo productivo — tarjeta de navegación ── */}
-        <button style={delay(3)} onClick={() => navigate('/productor/ciclo')}
-          className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
-          <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
-            <CalendarCheck size={18} className="text-[#1A5C38]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-bold text-slate-800">Ciclo productivo</p>
-            {cicloActual ? (
-              <p className="text-[12px] text-slate-400 mt-0.5 truncate">
-                {tipoCicloLabel(cicloActual.cycle_type)} {cicloActual.cycle_year}
-                {cicloActual.crops?.[0]?.area_sown_ha && ` · ${cicloActual.crops[0].area_sown_ha} ha sembradas`}
+        {/* ── Ciclo productivo — cards con scroll ── */}
+        <div style={delay(3)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+            <div className="flex items-center gap-2">
+              <CalendarCheck size={15} className="text-[#1A5C38]" />
+              <p className="text-[13px] font-bold text-slate-700">
+                Ciclo productivo
+                {ciclos && ciclos.length > 0 && (
+                  <span className="ml-1.5 text-[11px] text-slate-400 font-normal">({ciclos.length})</span>
+                )}
               </p>
-            ) : (
-              <p className="text-[12px] text-slate-400 mt-0.5">
-                {ciclos === null ? 'Cargando…' : 'Sin ciclo registrado — toca para agregar'}
-              </p>
-            )}
+            </div>
+            <button onClick={() => navigate('/productor/ciclo')}
+              className="flex items-center gap-1 text-[#1A5C38] text-[12px] font-bold active:opacity-60 transition-opacity">
+              <Plus size={13} /> Agregar
+            </button>
           </div>
-          {cicloActual && (
-            <span className="flex-shrink-0 text-[11px] font-bold bg-[#eef8f2] text-[#1A5C38] px-2.5 py-1 rounded-full">
-              {ciclos!.length} ciclo{ciclos!.length !== 1 ? 's' : ''}
-            </span>
+
+          {ciclos === null ? (
+            <div className="px-5 pb-5 flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-[#1A5C38]/20 border-t-[#1A5C38] animate-spin" />
+              <span className="text-[13px] text-slate-400">Cargando ciclos…</span>
+            </div>
+          ) : ciclos.length === 0 ? (
+            <button onClick={() => navigate('/productor/ciclo')}
+              className="w-full flex flex-col items-center py-6 gap-2 text-center px-5 active:opacity-80 transition-opacity">
+              <div className="w-11 h-11 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
+                <CalendarCheck size={18} className="text-[#1A5C38]/40" />
+              </div>
+              <p className="text-[13px] font-semibold text-slate-500">Sin ciclos registrados</p>
+              <p className="text-[11.5px] text-slate-400">Toca para agregar tu primer ciclo</p>
+            </button>
+          ) : (
+            <div className="overflow-x-auto pb-4 px-4" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+              <div className="flex gap-3" style={{ width: 'max-content' }}>
+                {ciclos.map((c, i) => {
+                  const cropPrincipal = c.crops?.[0];
+                  const typeLabel = c.cycle_type === 'PV' ? 'Prim-Ver' : c.cycle_type === 'OI' ? 'Oto-Inv' : c.cycle_type === 'AN' ? 'Anual' : c.cycle_type;
+                  const typeColor = c.cycle_type === 'PV'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : c.cycle_type === 'OI'
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'bg-amber-50 text-amber-700';
+                  return (
+                    <button key={c.cycle_id} onClick={() => navigate('/productor/ciclo')}
+                      style={{ animation: `pfFadeUp .35s ${i * 60}ms ease both` }}
+                      className="flex-shrink-0 w-52 bg-[#f8fcfa] rounded-2xl p-4 ring-1 ring-[#1A5C38]/10 text-left active:scale-[0.97] transition-all group/card">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${typeColor}`}>
+                          {typeLabel}
+                        </span>
+                        <span className="text-[13px] font-black text-slate-700">{c.cycle_year}</span>
+                      </div>
+                      {cropPrincipal ? (
+                        <>
+                          <p className="text-[14px] font-bold text-slate-800 truncate leading-tight">
+                            {cropPrincipal.crop || 'Cultivo'}
+                          </p>
+                          {cropPrincipal.variety_other && (
+                            <p className="text-[11.5px] text-slate-400 truncate mt-0.5">{cropPrincipal.variety_other}</p>
+                          )}
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {cropPrincipal.area_sown_ha != null && (
+                              <span className="text-[11px] font-semibold bg-white text-slate-500 px-2 py-0.5 rounded-lg ring-1 ring-slate-100">
+                                {cropPrincipal.area_sown_ha} ha
+                              </span>
+                            )}
+                            {cropPrincipal.yield_expected != null && (
+                              <span className="text-[11px] font-semibold bg-white text-slate-500 px-2 py-0.5 rounded-lg ring-1 ring-slate-100">
+                                {cropPrincipal.yield_expected} ton/ha
+                              </span>
+                            )}
+                            {cropPrincipal.destination && (
+                              <span className="text-[11px] font-semibold bg-white text-slate-500 px-2 py-0.5 rounded-lg ring-1 ring-slate-100 capitalize">
+                                {cropPrincipal.destination}
+                              </span>
+                            )}
+                          </div>
+                          {c.crops.length > 1 && (
+                            <p className="text-[11px] text-slate-400 mt-2">+{c.crops.length - 1} cultivo{c.crops.length > 2 ? 's' : ''} más</p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-[13px] text-slate-400 mt-1">Sin cultivos registrados</p>
+                      )}
+                      <div className="mt-3 flex items-center gap-1 text-[#1A5C38]/60 group-active/card:text-[#1A5C38] transition-colors">
+                        <span className="text-[11px] font-bold">Ver detalle</span>
+                        <ChevronRight size={11} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
-          <ChevronRight size={16} className="text-slate-300 group-active:text-[#1A5C38] transition-colors flex-shrink-0" />
-        </button>
+        </div>
 
         {/* ── Programas de apoyo ── */}
         <div style={delay(4)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
