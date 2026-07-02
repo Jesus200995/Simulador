@@ -81,9 +81,22 @@ export async function consultarPersonaPorCURP(
     const municipio = municipio0?.ln_nombre || null;      // "GUAYMAS"
     const localidad = localidad0?.ln_nombre || null;      // "PÓTAM"
 
-    // Estatus — cat_estatus_renapo.estatus="AR", cat_estatus_persona.sn_estatus_persona="ACTIVO"
+    // Estatus — dos formatos posibles:
+    // Formato completo: cat_estatus_renapo.estatus="AR", cat_estatus_persona.sn_estatus_persona="ACTIVO"
+    // Formato mínimo:   id_nu_estatus_renapo=3 (sin objetos de estatus)
+    // Si SADER devolvió datos con sn_curp/ln_nombre, la persona existe → activa por defecto.
     const estatusRenapo  = d.cat_estatus_renapo?.estatus || null;
     const estatusPersona = d.cat_estatus_persona?.sn_estatus_persona || null;
+    const tieneData      = !!(d.sn_curp || d.ln_nombre);
+
+    const activo_renapo =
+      estatusRenapo === 'AR' ||
+      (estatusRenapo === null && d.id_nu_estatus_renapo != null) ||
+      (estatusRenapo === null && tieneData);
+
+    const activo_padron =
+      estatusPersona === 'ACTIVO' ||
+      (estatusPersona === null && tieneData);
 
     return {
       curp: d.sn_curp || curp,
@@ -98,8 +111,8 @@ export async function consultarPersonaPorCURP(
       estado,
       municipio,
       localidad,
-      activo_renapo: estatusRenapo === 'AR',
-      activo_padron: estatusPersona === 'ACTIVO'
+      activo_renapo,
+      activo_padron
     };
 
   } catch (error: any) {
