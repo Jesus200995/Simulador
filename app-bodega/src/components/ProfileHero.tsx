@@ -366,7 +366,6 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
         <button
           onClick={() => typeof back === 'number' ? navigate(back as number) : navigate(back as string)}
           className="absolute top-4 left-4 flex items-center gap-1 text-green-200/80 text-[13px] font-semibold z-10 active:opacity-60 transition-opacity"
-          style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
         >
           <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" />
           Volver
@@ -376,7 +375,7 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
       {/* Contenido centrado */}
       <div
         className="relative flex flex-col items-center text-center px-6 pb-8"
-        style={{ paddingTop: back !== undefined ? 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' : 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
+        style={{ paddingTop: back !== undefined ? '3.5rem' : '1.5rem' }}
       >
         {/* "Mi Perfil" — primero arriba de todo */}
         <p
