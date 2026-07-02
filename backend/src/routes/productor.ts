@@ -335,30 +335,45 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
       }
     });
   } catch (error: any) {
-    console.error('[SADER] Error:', error.message);
-    if (error.message?.includes('no configuradas')) {
+    console.error('[SADER] Error:', error.message, error.code, error.response?.status);
+    // SADER_API_URL no configurada en .env — mensaje singular/plural, ambos capturados
+    if (error.message?.includes('no configurada') || error.message?.includes('SADER_API_URL')) {
       res.status(503).json({
-        error: 'El servicio de verificación aún no está configurado. Intenta más tarde.',
+        error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
         codigo: 'SADER_NO_DISPONIBLE'
       });
       return;
     }
-    if (error.response?.status === 503 || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+    // Red/timeout/conexión rechazada
+    if (
+      error.response?.status === 503 ||
+      error.response?.status >= 500 ||
+      error.code === 'ECONNREFUSED' ||
+      error.code === 'ETIMEDOUT' ||
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ENOTFOUND'
+    ) {
       res.status(503).json({
-        error: 'El servicio de verificación no está disponible. Intenta más tarde.',
+        error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
         codigo: 'SADER_NO_DISPONIBLE'
       });
       return;
     }
-    if (error.response?.status === 401) {
-      console.error('[SADER] Error de autenticación — verificar API KEY');
+    // API key inválida / no autorizado
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.error('[SADER] Error de autenticación — verificar SADER_API_KEY en .env');
       res.status(503).json({
-        error: 'El servicio de verificación no está disponible. Intenta más tarde.',
+        error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
         codigo: 'SADER_NO_DISPONIBLE'
       });
       return;
     }
-    res.status(500).json({ error: 'Error interno del servidor.' });
+    // Cualquier otro error inesperado — tratarlo igual, no bloquear al usuario
+    console.error('[SADER] Error inesperado al consultar padrón:', error);
+    res.status(503).json({
+      error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
+      codigo: 'SADER_NO_DISPONIBLE'
+    });
   }
 });
 

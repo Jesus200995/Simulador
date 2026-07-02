@@ -152,8 +152,13 @@ export default function RegistroNuevoPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        // CURP no encontrada o inactiva en el padrón SADER → registro manual
-        if (data.codigo === 'NO_EN_PADRON' || data.codigo === 'INACTIVO_PADRON') {
+        // CURP no encontrada, inactiva o padrón no disponible → registro manual
+        if (
+          data.codigo === 'NO_EN_PADRON' ||
+          data.codigo === 'INACTIVO_PADRON' ||
+          data.codigo === 'SADER_NO_DISPONIBLE' ||
+          res.status === 503
+        ) {
           navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`);
           return;
         }
