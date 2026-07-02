@@ -91,65 +91,77 @@ export function Layout({ children }: { children: ReactNode }) {
       <PushPrompt rol="bodeguero" />
 
       {/* ── Profile Drawer ─────────────────────────────── */}
-      {/* Backdrop */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]"
-          onClick={() => setDrawerOpen(false)}
-        />
-      )}
+      {/* Backdrop con transición suave */}
+      <div
+        className={`fixed inset-0 z-40 transition-all duration-300 ${drawerOpen ? 'bg-black/40 backdrop-blur-[3px] pointer-events-auto' : 'bg-transparent backdrop-blur-none pointer-events-none'}`}
+        onClick={() => setDrawerOpen(false)}
+      />
 
-      {/* Slide-in panel */}
-      <div className={`fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      {/* Panel lateral moderno */}
+      <div
+        className={`fixed top-0 right-0 bottom-0 z-50 w-[82%] max-w-[320px] bg-white flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ boxShadow: '-4px 0 40px rgba(0,0,0,0.18)' }}
+      >
+        {/* Safe-area spacer — ocupa el status bar sin duplicar el padding global */}
+        <div className="bg-[#14482c] flex-shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
-        {/* Drawer header */}
-        <div className="bg-gradient-to-br from-[#1A5C38] to-[#2d7a52] px-5 pb-6" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2rem)' }}>
-          <button onClick={() => setDrawerOpen(false)} className="absolute text-white/70 active:text-white" style={{ top: 'calc(env(safe-area-inset-top) + 1rem)', right: '1rem' }}>
-            <X size={22} />
+        {/* Header con info del usuario */}
+        <div className="bg-gradient-to-br from-[#14482c] via-[#1A5C38] to-[#1e6b42] px-5 pt-4 pb-5 relative flex-shrink-0">
+          <button
+            onClick={() => setDrawerOpen(false)}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-colors"
+          >
+            <X size={18} className="text-white/80" />
           </button>
-          <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mb-3 shadow-inner">
-            <span className="text-white text-[22px] font-bold">{initials}</span>
+
+          {/* Avatar circular */}
+          <div className="w-[60px] h-[60px] rounded-full bg-white/15 border-2 border-white/30 flex items-center justify-center mb-3 shadow-lg">
+            <span className="text-white text-[22px] font-bold tracking-tight">{initials}</span>
           </div>
-          <p className="text-white font-bold text-[17px] leading-tight">{user?.nombre_completo || 'Usuario'}</p>
-          <p className="text-green-200 text-[13px] mt-0.5">{user?.email || ''}</p>
-          <span className="inline-block mt-2 bg-white/20 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize">
-            {user?.rol || 'bodega'}
-          </span>
+
+          <p className="text-white font-semibold text-[16px] leading-tight pr-8" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {user?.nombre_completo || 'Usuario'}
+          </p>
+          {user?.email && (
+            <p className="text-white/55 text-[12px] mt-0.5 truncate">{user.email}</p>
+          )}
+          <div className="mt-2.5 inline-flex items-center gap-1.5 bg-white/12 border border-white/20 rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
+            <span className="text-white/90 text-[11px] font-semibold capitalize">{user?.rol || 'Bodega'}</span>
+          </div>
         </div>
 
-        {/* Drawer menu */}
-        <div className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+        <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent flex-shrink-0" />
+
+        {/* Opciones de menú — solo rutas reales */}
+        <div className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
           {[
-            { icon: User, label: 'Mi perfil', action: () => { setDrawerOpen(false); navigate('/perfil'); } },
-            { icon: Bell, label: 'Notificaciones', action: () => { setDrawerOpen(false); navigate('/notificaciones'); } },
-            { icon: Settings, label: 'Configuración', action: () => { setDrawerOpen(false); navigate('/configuracion'); } },
-          ].map(({ icon: Icon, label, action }) => (
-            <button key={label} onClick={action}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-[#f4fbf7] active:bg-[#eef8f2] transition-colors text-left">
-              <div className="w-9 h-9 rounded-xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0">
-                <Icon size={18} className="text-[#1A5C38]" />
+            { icon: User,     label: 'Mi perfil',      desc: 'Ver y editar cuenta',                            route: '/perfil' },
+            { icon: Bell,     label: 'Notificaciones', desc: noLeidas > 0 ? `${noLeidas} sin leer` : 'Al día', route: '/notificaciones' },
+            { icon: Settings, label: 'Configuración',  desc: 'Ajustes de la app',                              route: '/configuracion' },
+          ].map(({ icon: Icon, label, desc, route }) => (
+            <button key={route} onClick={() => { setDrawerOpen(false); navigate(route); }}
+              className="w-full flex items-center gap-3 px-3 py-3.5 rounded-2xl text-left active:bg-[#eef8f2] transition-colors group">
+              <div className="w-10 h-10 rounded-2xl bg-[#eef8f2] group-active:bg-[#dcf3e7] flex items-center justify-center flex-shrink-0 transition-colors">
+                <Icon size={19} className="text-[#1A5C38]" strokeWidth={1.8} />
               </div>
-              <span className="flex-1 text-[15px] font-medium">{label}</span>
-              <ChevronRight size={15} className="text-gray-300" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-gray-800 leading-tight">{label}</p>
+                <p className="text-[11.5px] text-gray-400 mt-0.5">{desc}</p>
+              </div>
+              <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />
             </button>
           ))}
         </div>
 
-        {/* App info */}
-        <div className="px-5 py-3 border-t border-gray-100">
-          <p className="text-[11px] text-gray-400 text-center leading-snug">
-            {SYSTEM_NAME}
-          </p>
-          <p className="text-[10px] text-gray-300 text-center mt-0.5">Plan Nacional Maíz 2026 · v1.0</p>
-        </div>
-
-        {/* Logout */}
-        <div className="px-4 pb-8 pt-2">
+        {/* Footer: versión + cerrar sesión */}
+        <div className="flex-shrink-0 border-t border-gray-100 px-4 pt-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
+          <p className="text-[10px] text-gray-300 text-center mb-3">Plan Nacional Maíz 2026 · v1.0</p>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 rounded-2xl py-3.5 text-[15px] font-semibold active:bg-red-100 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-red-50 active:bg-red-100 text-red-600 rounded-2xl py-3.5 text-[14px] font-semibold transition-colors"
           >
-            <LogOut size={18} />
+            <LogOut size={17} strokeWidth={2} />
             Cerrar sesión
           </button>
         </div>
