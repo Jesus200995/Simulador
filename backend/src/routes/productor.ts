@@ -270,7 +270,8 @@ router.get('/geo/reverse', async (req, res): Promise<void> => {
 });
 
 // POST /api/productor/auth/consultar-curp
-// Verifica la CURP contra el padrón de SADER/RENAPO y precarga los datos
+// Verifica la CURP contra el padrón de SADER/RENAPO y precarga los datos.
+// El chequeo de BD y la llamada a SADER corren en PARALELO para mayor velocidad.
 router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
   const { curp } = req.body;
 
@@ -280,16 +281,47 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
   }
   const curpN = curp.toUpperCase().trim();
 
-  // ¿Ya existe en SIMAC?
+  // Lanzar chequeo BD y llamada SADER simultáneamente
+  const saderPromise = consultarPersonaPorCURP(curpN);
+
   try {
-    const existe = await pool.query(
-      'SELECT id FROM usuarios WHERE UPPER(curp) = $1 LIMIT 1',
-      [curpN]
-    );
-    if (existe.rows.length > 0) {
+    // Revisar producer (incluye admin-registrados sin cuenta) Y usuarios en una sola query
+    const [prodResult, usuResult] = await Promise.all([
+      pool.query(
+        `SELECT p.producer_id, u.id AS usuario_id, p.nombres, p.apellido_paterno
+         FROM producer p LEFT JOIN usuarios u ON u.id = p.usuario_id
+         WHERE UPPER(p.curp) = $1 LIMIT 1`,
+        [curpN]
+      ),
+      pool.query(
+        'SELECT id FROM usuarios WHERE UPPER(curp) = $1 LIMIT 1',
+        [curpN]
+      ),
+    ]);
+
+    if (prodResult.rows.length > 0) {
+      const row = prodResult.rows[0];
+      if (row.usuario_id) {
+        // Cuenta completa activa
+        res.status(409).json({
+          error: `Esta CURP ya tiene cuenta en SIMAC. Inicia sesión con tu CURP y NIP.`,
+          codigo: 'CURP_DUPLICADA',
+          nombres: row.nombres,
+        });
+      } else {
+        // Está en el padrón interno pero sin cuenta — debe activarla
+        res.status(409).json({
+          error: 'Tu CURP ya está registrada en SIMAC pero aún no tienes cuenta activa. Contacta a tu técnico territorial.',
+          codigo: 'PUEDE_ACTIVAR',
+          nombres: row.nombres,
+        });
+      }
+      return;
+    }
+    if (usuResult.rows.length > 0) {
       res.status(409).json({
-        error: 'Esta CURP ya tiene cuenta en SIMAC. Inicia sesión.',
-        codigo: 'CURP_DUPLICADA'
+        error: 'Esta CURP ya tiene cuenta en SIMAC. Inicia sesión con tu CURP y NIP.',
+        codigo: 'CURP_DUPLICADA',
       });
       return;
     }
@@ -298,9 +330,9 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     return;
   }
 
-  // Consultar API SADER
+  // BD no tiene esta CURP — esperar resultado de SADER (ya estaba corriendo en paralelo)
   try {
-    const datos = await consultarPersonaPorCURP(curpN);
+    const datos = await saderPromise;
 
     if (!datos) {
       res.status(404).json({

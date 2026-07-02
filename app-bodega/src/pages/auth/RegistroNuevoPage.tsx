@@ -58,6 +58,8 @@ export default function RegistroNuevoPage() {
   const [paso, setPaso] = useState(1);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorTipo, setErrorTipo] = useState<'duplicada' | 'puede_activar' | null>(null);
+  const [errorNombres, setErrorNombres] = useState<string | null>(null);
 
   // Paso 1
   const [curp, setCurp] = useState('');
@@ -143,7 +145,7 @@ export default function RegistroNuevoPage() {
       setError('El formato de la CURP no es válido.');
       return;
     }
-    setCargando(true); setError(null);
+    setCargando(true); setError(null); setErrorTipo(null); setErrorNombres(null);
     try {
       const res = await fetch(`${BASE}/productor/auth/consultar-curp`, {
         method: 'POST',
@@ -152,6 +154,16 @@ export default function RegistroNuevoPage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.codigo === 'CURP_DUPLICADA') {
+          setErrorTipo('duplicada');
+          setErrorNombres(data.nombres || null);
+          return;
+        }
+        if (data.codigo === 'PUEDE_ACTIVAR') {
+          setErrorTipo('puede_activar');
+          setErrorNombres(data.nombres || null);
+          return;
+        }
         // CURP no encontrada, inactiva o padrón no disponible → registro manual
         if (
           data.codigo === 'NO_EN_PADRON' ||
@@ -694,14 +706,67 @@ export default function RegistroNuevoPage() {
                       <span className="text-[11px] text-white/30">18 caracteres</span>
                       <span className={`text-[11px] font-mono font-semibold ${curp.length === 18 ? 'text-green-400' : 'text-white/30'}`}>{curp.length}/18</span>
                     </div>
-                    {error && (
+                    {error && !errorTipo && (
                       <div className="mt-4 p-3 bg-red-500/15 ring-1 ring-red-400/25 rounded-xl text-red-200 text-sm flex gap-2">
                         <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" /><span>{error}</span>
                       </div>
                     )}
-                    <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-5 ${btnCls}`}>
-                      {cargando ? <><Loader2 size={17} className="animate-spin" /> Consultando SADER…</> : <><Search size={17} /> Verificar Identidad</>}
-                    </button>
+
+                    {/* Cuenta duplicada — UI especial */}
+                    {errorTipo === 'duplicada' && (
+                      <div className="mt-4 rounded-xl ring-1 ring-amber-400/25 bg-amber-500/10 p-4 animate-auth-in">
+                        <div className="flex items-start gap-2.5 mb-3">
+                          <div className="w-8 h-8 rounded-lg bg-amber-400/15 ring-1 ring-amber-400/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <UserCheck size={15} className="text-amber-300" />
+                          </div>
+                          <div>
+                            <p className="text-amber-200 font-bold text-sm leading-tight">Ya tienes una cuenta</p>
+                            {errorNombres && <p className="text-amber-300/70 text-xs mt-0.5">Registrado como: <span className="font-semibold text-amber-200">{errorNombres}</span></p>}
+                            <p className="text-amber-300/60 text-xs mt-1">Esta CURP ya está registrada en SIMAC. Inicia sesión con tu CURP y NIP.</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => navigate('/login-productor')}
+                          className="w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-[#1a1200] py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+                        >
+                          <UserCheck size={15} /> Iniciar Sesión
+                        </button>
+                        <button
+                          onClick={() => { setCurp(''); setErrorTipo(null); setErrorNombres(null); }}
+                          className="w-full mt-2 text-amber-300/60 hover:text-amber-200 text-xs font-medium py-1.5 transition-colors"
+                        >
+                          Usar otra CURP
+                        </button>
+                      </div>
+                    )}
+
+                    {/* En padrón pero sin cuenta activa */}
+                    {errorTipo === 'puede_activar' && (
+                      <div className="mt-4 rounded-xl ring-1 ring-sky-400/25 bg-sky-500/10 p-4 animate-auth-in">
+                        <div className="flex items-start gap-2.5 mb-3">
+                          <div className="w-8 h-8 rounded-lg bg-sky-400/15 ring-1 ring-sky-400/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <AlertTriangle size={15} className="text-sky-300" />
+                          </div>
+                          <div>
+                            <p className="text-sky-200 font-bold text-sm leading-tight">CURP en el padrón SIMAC</p>
+                            {errorNombres && <p className="text-sky-300/70 text-xs mt-0.5">Nombre registrado: <span className="font-semibold text-sky-200">{errorNombres}</span></p>}
+                            <p className="text-sky-300/60 text-xs mt-1">Tu CURP ya está en SIMAC pero tu cuenta no ha sido activada. Contacta a tu técnico territorial.</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setCurp(''); setErrorTipo(null); setErrorNombres(null); }}
+                          className="w-full mt-1 text-sky-300/60 hover:text-sky-200 text-xs font-medium py-1.5 transition-colors"
+                        >
+                          Usar otra CURP
+                        </button>
+                      </div>
+                    )}
+
+                    {!errorTipo && (
+                      <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-5 ${btnCls}`}>
+                        {cargando ? <><Loader2 size={17} className="animate-spin" /> Verificando…</> : <><Search size={17} /> Verificar Identidad</>}
+                      </button>
+                    )}
                   </div>
 
                   <p className="text-center mt-5">
