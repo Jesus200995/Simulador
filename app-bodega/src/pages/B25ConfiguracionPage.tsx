@@ -96,7 +96,7 @@ export default function B25ConfiguracionPage() {
       <PageBanner
         title="Configuración"
         subtitle="Seguridad y preferencias"
-        back="/perfil"
+        back={-1}
       />
 
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">

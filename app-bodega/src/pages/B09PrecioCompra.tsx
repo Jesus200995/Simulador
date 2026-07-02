@@ -80,7 +80,7 @@ export default function B09PrecioCompra() {
 
   return (
     <div className="w-full">
-      <PageBanner title="Publicar Precio de Compra" subtitle="Precio diario que ofreces al productor" back="/dashboard" />
+      <PageBanner title="Publicar Precio de Compra" subtitle="Precio diario que ofreces al productor" back={-1} />
 
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-5">

@@ -74,7 +74,7 @@ export default function B22PreciosMercado() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-gray-50/50 to-gray-100/30">
-      <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas en tiempo real" back="/dashboard" />
+      <PageBanner title="Precios del maíz blanco · Hoy" subtitle="Referencias de mercado actualizadas en tiempo real" back={-1} />
 
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Top Control Bar */}

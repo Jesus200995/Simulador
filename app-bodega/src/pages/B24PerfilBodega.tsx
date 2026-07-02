@@ -331,7 +331,7 @@ export default function B24PerfilBodega() {
         titulo="Mi Perfil"
         nombre={perfil?.nombre_completo || user?.nombre_completo || '—'}
         initials={initials}
-        back="/dashboard"
+        back={-1}
         meta={perfil?.email || user?.email || undefined}
         badges={
           <span className="text-[11px] font-bold text-white/90 bg-white/15 rounded-full px-3 py-1 capitalize">
