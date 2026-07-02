@@ -326,8 +326,12 @@ export default function RegistroNuevoPage() {
       else setPaso(25); // volver al aviso, no a datos
     }
     else if (paso === 25) setPaso(2);
-    else if (paso === 2) { if (esModoManual) navigate(-1); else setPaso(1); }
-    else navigate(-1);
+    else if (paso === 2) {
+      // Siempre volver a paso 1 (CURP). En modo manual limpiar también la URL para evitar blank page.
+      setPaso(1);
+      if (esModoManual) navigate('/registro-nuevo', { replace: true });
+    }
+    else navigate('/login-productor');
   };
 
   // --- STYLES ---
