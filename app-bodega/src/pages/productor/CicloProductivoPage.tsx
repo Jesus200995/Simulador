@@ -343,15 +343,15 @@ export default function CicloProductivoPage() {
     return (
       <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Slim header */}
-        <div className="shrink-0 z-20 w-full bg-[#eef8f2]/95 backdrop-blur-xl border-b border-[#1A5C38]/10">
+        <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
             <button onClick={() => navigate('/productor')}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-[#1A5C38]/10 text-[#1A5C38] hover:bg-[#1A5C38]/20 transition-all active:scale-95">
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 text-white hover:bg-white/25 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-[15px] font-black text-slate-900 tracking-tight leading-none">Ciclo productivo</h1>
-              <p className="text-[11px] text-slate-400 font-bold mt-1">¿En qué parcela es este ciclo?</p>
+              <h1 className="text-[15px] font-black text-white tracking-tight leading-none">Ciclo productivo</h1>
+              <p className="text-[11px] text-white/60 font-bold mt-1">¿En qué parcela es este ciclo?</p>
             </div>
           </div>
         </div>
@@ -399,15 +399,15 @@ export default function CicloProductivoPage() {
     return (
       <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Slim header */}
-        <div className="shrink-0 z-20 w-full bg-[#eef8f2]/95 backdrop-blur-xl border-b border-[#1A5C38]/10">
+        <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
             <button onClick={() => navigate('/productor')}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-[#1A5C38]/10 text-[#1A5C38] hover:bg-[#1A5C38]/20 transition-all active:scale-95">
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 text-white hover:bg-white/25 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-[15px] font-black text-slate-900 tracking-tight leading-none">Ciclos productivos</h1>
-              <p className="text-[11px] text-slate-400 font-bold mt-1">Tu siembra registrada en SIMAC</p>
+              <h1 className="text-[15px] font-black text-white tracking-tight leading-none">Ciclos productivos</h1>
+              <p className="text-[11px] text-white/60 font-bold mt-1">Tu siembra registrada en SIMAC</p>
             </div>
           </div>
         </div>
@@ -639,7 +639,7 @@ export default function CicloProductivoPage() {
     <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
       
       {/* Slim header sticky */}
-      <div className="shrink-0 z-20 w-full bg-[#eef8f2]/95 backdrop-blur-xl border-b border-[#1A5C38]/10">
+      <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
         <div className="max-w-xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center gap-3 mb-2.5">
             <button onClick={() => {
@@ -647,18 +647,18 @@ export default function CicloProductivoPage() {
                 if (ciclosExistentes.length > 0) setMostrarFormulario(false);
                 else navigate('/productor');
               }}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-[#1A5C38]/10 text-[#1A5C38] hover:bg-[#1A5C38]/20 transition-all active:scale-95">
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 text-white hover:bg-white/25 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-[15px] font-black text-slate-900 tracking-tight leading-none">Registrar ciclo</h1>
-              <p className="text-[11px] text-slate-400 font-bold mt-1">Paso {paso} de 4</p>
+              <h1 className="text-[15px] font-black text-white tracking-tight leading-none">Registrar ciclo</h1>
+              <p className="text-[11px] text-white/60 font-bold mt-1">Paso {paso} de 4</p>
             </div>
           </div>
           <div className="flex gap-1.5">
             {[1, 2, 3, 4].map(n => (
               <div key={n} className={`h-1 flex-1 rounded-full transition-all duration-500
-                ${n <= paso ? 'bg-[#1A5C38]' : 'bg-[#1A5C38]/15'}`} />
+                ${n <= paso ? 'bg-white' : 'bg-white/25'}`} />
             ))}
           </div>
         </div>
