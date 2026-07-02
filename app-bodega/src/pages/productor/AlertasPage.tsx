@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bell, BellRing, ShieldAlert, CloudRain, ShoppingCart, Receipt, Heart,
   MapPin, ChevronDown, Check, Loader2, X, ClipboardCheck,
-  Clock, ArrowRight, AlertCircle,
+  Clock, ArrowRight, AlertCircle, ChevronLeft,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -188,6 +188,27 @@ export default function AlertasPage() {
 
   return (
     <div className="w-full">
+
+      {/* ── Header con volver ── */}
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.2)]">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-3 pb-4">
+          <button onClick={() => navigate(-1)}
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
+          </button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-[19px] font-black text-white leading-tight">Alertas</h1>
+              {noLeidas > 0 && (
+                <p className="text-[12px] text-green-200/70 mt-0.5">{noLeidas} sin leer</p>
+              )}
+            </div>
+            <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+              {noLeidas > 0 ? <BellRing size={20} className="text-white" /> : <Bell size={20} className="text-white/70" />}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ── Banner push nativas (si aún no ha respondido) ── */}
       {pushPermiso === 'default' && (

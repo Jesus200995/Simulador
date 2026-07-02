@@ -32,7 +32,7 @@ export default function B20Solicitudes() {
 
   return (
     <div className="w-full pb-10">
-      <PageHeader title="Solicitudes" subtitle="Productores interesados" back={`/ventanillas/${id}`} />
+      <PageHeader title="Solicitudes" subtitle="Productores interesados" back="/ventanillas" />
 
       <div className="w-full max-w-3xl mx-auto">
 

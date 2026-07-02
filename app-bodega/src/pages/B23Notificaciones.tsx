@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bell, CheckCheck, Signal, Receipt, Store, Megaphone,
   ClipboardList, Tag, Wheat, ChevronDown, ArrowRight, Clock, AlertCircle,
-  BellRing, BellOff, Loader2
+  BellRing, BellOff, Loader2, ChevronLeft,
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -174,7 +174,11 @@ export default function B23Notificaciones() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
         <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-white/[0.03] pointer-events-none" />
 
-        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5">
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-3 pb-5">
+          <button onClick={() => navigate(-1)}
+            className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
+            <ChevronLeft size={16} strokeWidth={2.5} className="-ml-1" /> Volver
+          </button>
           <div className="flex items-start justify-between gap-3">
             <div>
               <h1 className="text-[22px] sm:text-[26px] font-bold text-white leading-tight drop-shadow-sm flex items-center gap-2">

@@ -263,6 +263,7 @@ export const router = createBrowserRouter([
       { path: 'incentivos', element: <IncentivosPage /> },
       { path: 'ventanillas', element: <VentanillasPage /> },
       { path: 'solicitud/:id', element: <EstadoSolicitudPage /> },
+      { path: 'mis-solicitudes', element: <EstadoSolicitudPage /> },
       { path: 'perfil', element: <MiPerfilPage /> },
     ],
   },

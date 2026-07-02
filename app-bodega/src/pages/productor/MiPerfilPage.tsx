@@ -472,7 +472,7 @@ export default function MiPerfilPage() {
         </div>
 
         {/* ── Mis solicitudes ── */}
-        <button style={delay(5)} onClick={() => navigate('/productor/solicitud/0')}
+        <button style={delay(5)} onClick={() => navigate('/productor/mis-solicitudes')}
           className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
           <div className="w-10 h-10 rounded-xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
             <ClipboardList size={17} className="text-[#1A5C38]" />
@@ -485,7 +485,7 @@ export default function MiPerfilPage() {
         </button>
 
         {/* ── Cerrar sesión ── */}
-        <button style={delay(6)} onClick={() => { logout(); navigate('/login'); }}
+        <button style={delay(6)} onClick={() => { logout(); navigate('/login-productor'); }}
           className="w-full flex items-center justify-center gap-2 py-4 text-red-500 font-semibold text-[14px] active:opacity-70 transition-opacity">
           <LogOut size={16} /> Cerrar sesión
         </button>
