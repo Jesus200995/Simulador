@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity, BadgeCheck, Factory } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
+import BannerCanvas from '../components/BannerCanvas';
 import { useAuthStore } from '../store/auth';
 import { api } from '../services/api';
 import { formatNum } from '../utils/format';
@@ -78,6 +79,7 @@ export default function B04Dashboard() {
       {/* ── Banner full-bleed ── */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-[2rem] shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
+        <BannerCanvas />
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10">
           <p className="text-[11px] font-bold text-emerald-300/80 uppercase tracking-widest mb-2 transition-colors duration-500 group-hover/banner:text-emerald-200">Tablero Principal</p>
           <div className="flex items-center gap-3">

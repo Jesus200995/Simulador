@@ -4,6 +4,7 @@ import { MapPin, ChevronRight, Wheat, AlertTriangle, ArrowUpRight, ArrowDownRigh
 import { formatNum } from '../../utils/format';
 import { useAuthStore } from '../../store/auth';
 import HistorialVentasSection from './HistorialVentasSection';
+import BannerCanvas from '../../components/BannerCanvas';
 import MisDisponibilidadesSection from './MisDisponibilidadesSection';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -171,8 +172,9 @@ export default function DashboardProductorPage() {
         </div>
       )}
 
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] relative overflow-hidden">
+        <BannerCanvas />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-5 relative z-10">
           <p className="text-[11px] font-semibold text-green-300/70 uppercase tracking-widest mb-2">Inicio</p>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 ring-2 ring-white/20">
