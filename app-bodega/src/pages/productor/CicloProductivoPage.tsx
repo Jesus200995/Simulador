@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Wheat, Check, Leaf, MapPin,
   Sun, Sprout, Ruler, Home, Store, Globe, Package, Clock, AlertTriangle, Play,
-  CloudRain, Droplets, X, Pencil
+  CloudRain, Droplets, X, Pencil, Calendar, CheckCircle2
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -729,7 +729,7 @@ export default function CicloProductivoPage() {
                         ${form.tipo_riego === 'temporal'
                           ? 'border-[#1A5C38] bg-[#1A5C38]/5'
                           : 'border-slate-200 bg-white'}`}>
-                      <p className="font-black text-[13px] text-slate-800">🌧 Temporal</p>
+                      <p className="font-black text-[13px] text-slate-800 flex items-center gap-1.5"><CloudRain size={14} className="text-slate-500" /> Temporal</p>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Depende de la lluvia</p>
                     </button>
                     <button type="button"
@@ -742,7 +742,7 @@ export default function CicloProductivoPage() {
                         ${form.tipo_riego === 'riego'
                           ? 'border-[#1A5C38] bg-[#1A5C38]/5'
                           : 'border-slate-200 bg-white'}`}>
-                      <p className="font-black text-[13px] text-slate-800">💧 Riego</p>
+                      <p className="font-black text-[13px] text-slate-800 flex items-center gap-1.5"><Droplets size={14} className="text-blue-400" /> Riego</p>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Agua controlada</p>
                     </button>
                   </div>
@@ -751,7 +751,7 @@ export default function CicloProductivoPage() {
                 {/* Fecha de siembra */}
                 <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
                   <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    📅 ¿Cuándo vas a sembrar?
+                    <Calendar size={14} className="text-[#1A5C38]" /> ¿Cuándo vas a sembrar?
                   </label>
                   <input
                     type="date"
@@ -765,7 +765,7 @@ export default function CicloProductivoPage() {
                 {cicloInferido && cicloInferido.certeza === 'alta' && !cicloConfirmado && (
                   <div className="bg-[#E8F5EE] border border-[#1A5C38]/30 rounded-[14px] p-4">
                     <p className="text-[13px] font-bold text-[#1A5C38] mb-1">
-                      ✓ Tu ciclo es: {cicloInferido.label}
+                      <CheckCircle2 size={14} className="inline mr-1 text-[#1A5C38]" /> Tu ciclo es: {cicloInferido.label}
                     </p>
                     <p className="text-[12px] text-slate-600 mb-3">
                       Determinado con base en tu fecha de siembra según el calendario oficial SIAP.
@@ -794,7 +794,7 @@ export default function CicloProductivoPage() {
                 {cicloConfirmado && cicloInferido && (
                   <div className="bg-[#E8F5EE] border border-[#1A5C38]/30 rounded-[14px] p-3 flex items-center gap-2">
                     <span className="text-[#1A5C38] font-bold text-[13px]">
-                      ✓ Ciclo confirmado: {cicloInferido.label}
+                      <CheckCircle2 size={14} className="inline mr-1 text-[#1A5C38]" /> Ciclo confirmado: {cicloInferido.label}
                     </span>
                     <button
                       type="button"
@@ -813,7 +813,7 @@ export default function CicloProductivoPage() {
                 {cicloInferido && cicloInferido.certeza === 'baja' && (
                   <div className="bg-slate-50 border border-slate-200 rounded-[14px] p-4">
                     <p className="text-[13px] font-bold text-slate-700 mb-1">
-                      📅 Este mes está entre ciclos
+                      <Calendar size={14} className="inline mr-1 text-slate-600" /> Este mes está entre ciclos
                     </p>
                     <p className="text-[12px] text-slate-500 mb-3">
                       Selecciona el ciclo que corresponde a tu siembra:
@@ -845,7 +845,7 @@ export default function CicloProductivoPage() {
                 {form.tipo_riego === 'riego' && form.planting_date && (
                   <div className="bg-slate-50 border border-slate-200 rounded-[14px] p-4">
                     <p className="text-[13px] font-bold text-slate-700 mb-1">
-                      💧 Producción bajo riego
+                      <Droplets size={14} className="inline mr-1 text-blue-400" /> Producción bajo riego
                     </p>
                     <p className="text-[12px] text-slate-500 mb-3">
                       Selecciona el ciclo que corresponde a tu producción:
@@ -1135,7 +1135,7 @@ export default function CicloProductivoPage() {
               <button onClick={guardar}
                 disabled={loading}
                 className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)] flex items-center justify-center gap-2">
-                {loading ? <><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</> : '✓ Finalizar y guardar'}
+                {loading ? <><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</> : <><Check size={16} /> Finalizar y guardar</>}
               </button>
             )}
             

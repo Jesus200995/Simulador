@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown } from 'lucide-react';
+import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown, AlertTriangle, Ruler } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
@@ -445,7 +445,7 @@ export default function AgregarUPPage() {
                 {errorOverlap && (
                   <div className="bg-red-50 border border-red-300 rounded-xl p-3 shadow-lg">
                     <p className="text-red-700 text-sm font-bold flex items-center gap-1.5">
-                      ⚠️ {errorOverlap}
+                      <AlertTriangle size={14} className="shrink-0" /> {errorOverlap}
                     </p>
                     <button
                       onClick={() => {
@@ -463,7 +463,7 @@ export default function AgregarUPPage() {
                 {advertenciaOverlap && !errorOverlap && (
                   <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 shadow-lg">
                     <p className="text-amber-700 text-sm font-bold flex items-center gap-1.5">
-                      📐 {advertenciaOverlap}
+                      <Ruler size={14} className="shrink-0" /> {advertenciaOverlap}
                     </p>
                     <button
                       onClick={() => {

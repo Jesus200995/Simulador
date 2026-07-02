@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity, BadgeCheck, Factory } from 'lucide-react';
+import { DollarSign, FileText, Package, Tag, Eye, PenLine, ChevronRight, Warehouse, Activity, BadgeCheck, Factory, Sun, Sunset, Moon } from 'lucide-react';
 import { KPICard } from '../components/KPICard';
 import BannerCanvas from '../components/BannerCanvas';
 import { useAuthStore } from '../store/auth';
@@ -61,6 +61,7 @@ export default function B04Dashboard() {
 
   const hora = getMexicoHour();
   const saludo = hora < 12 ? '¡Buenos días!' : hora < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
+  const SaludoIcon = hora < 12 ? Sun : hora < 19 ? Sunset : Moon;
   const hoy = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long', day: 'numeric', month: 'long' });
 
   const ocupPct = stats.ocupacion_pct ?? 0;
@@ -91,7 +92,7 @@ export default function B04Dashboard() {
             </div>
             <div className="min-w-0 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
               <h1 className="text-[20px] sm:text-[24px] font-black text-white leading-tight tracking-tight drop-shadow-sm flex items-center gap-2">
-                {saludo} <span role="img" aria-label="feliz">😊</span>
+                {saludo} <SaludoIcon size={20} className="opacity-80" />
               </h1>
               <p className="text-[13px] sm:text-[14px] font-medium text-white/80 mt-0.5 truncate">{user?.nombre_completo || ''}</p>
             </div>
