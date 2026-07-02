@@ -343,7 +343,7 @@ export default function CicloProductivoPage() {
     return (
       <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Slim header */}
-        <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60">
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
             <button onClick={() => navigate('/productor')}
               className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
@@ -399,7 +399,7 @@ export default function CicloProductivoPage() {
     return (
       <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Slim header */}
-        <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60">
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
             <button onClick={() => navigate('/productor')}
               className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
@@ -639,7 +639,7 @@ export default function CicloProductivoPage() {
     <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
       
       {/* Slim header sticky */}
-      <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="shrink-0 z-20 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/60">
         <div className="max-w-xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center gap-3 mb-2.5">
             <button onClick={() => {
