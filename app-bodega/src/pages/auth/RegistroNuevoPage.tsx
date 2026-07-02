@@ -568,220 +568,186 @@ export default function RegistroNuevoPage() {
   };
 
   const visualStep = getVisualStep();
-
   const stepLabels = ['Verificar CURP', 'Tus datos', 'Parcela', 'NIP'];
+  const stepDesc   = ['Verificación en SADER', 'Información personal', 'Geolocalización', 'Contraseña de acceso'];
 
-  // Clases responsivas compartidas
-  const cardCls = 'bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl lg:rounded-3xl shadow-xl shadow-black/20';
+  const card = 'bg-white/[0.08] backdrop-blur-md ring-1 ring-white/10 rounded-2xl shadow-2xl shadow-black/30';
+  const sectionTitle = (icon: React.ReactNode, title: string, subtitle: string, iconBg: string) => (
+    <div className="flex items-start gap-3 px-1 mb-5">
+      <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>{icon}</div>
+      <div>
+        <h1 className="text-xl sm:text-2xl lg:text-[26px] font-bold text-white leading-tight">{title}</h1>
+        <p className="text-white/45 text-sm mt-0.5">{subtitle}</p>
+      </div>
+    </div>
+  );
 
   return (
     <div
-      className="relative min-h-[100dvh] flex flex-col bg-gradient-to-br from-[#061510] via-[#0c2e1a] to-[#183d24]"
-      style={{ paddingTop: paso === 4 && enDibujo ? undefined : 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed inset-0 flex bg-gradient-to-br from-[#061510] via-[#0b271a] to-[#142e1d]"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Fondo decorativo */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-green-500/5 blur-3xl" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-green-400/5 blur-3xl" />
-        <div className="absolute bottom-0 right-1/3 w-64 h-64 rounded-full bg-emerald-600/5 blur-3xl" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-green-500/[0.04] blur-3xl" />
+        <div className="absolute bottom-0 -left-20 w-80 h-80 rounded-full bg-green-400/[0.04] blur-3xl" />
       </div>
 
-      {/* ── LAYOUT PRINCIPAL: sidebar en desktop, columna en móvil ── */}
-      <div className="relative z-10 flex flex-1 min-h-[100dvh]">
-
-        {/* Panel lateral izquierdo — solo desktop (lg+), oculto en pasos de mapa */}
-        {paso !== 4 && paso !== 99 && (
-          <aside className="hidden lg:flex lg:w-[380px] xl:w-[420px] flex-shrink-0 flex-col justify-between px-10 py-12 border-r border-white/5">
-            {/* Logo / Marca */}
+      {/* ── SIDEBAR — solo desktop, oculto en mapa ── */}
+      {paso !== 4 && (
+        <aside className="hidden lg:flex w-[260px] xl:w-[290px] flex-shrink-0 flex-col z-10 border-r border-white/[0.06] px-7 py-10">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 mb-10">
+            <div className="w-9 h-9 bg-green-400/15 rounded-xl flex items-center justify-center ring-1 ring-green-400/20">
+              <UserCheck size={18} className="text-green-300" />
+            </div>
             <div>
-              <div className="flex items-center gap-3 mb-10">
-                <div className="w-10 h-10 bg-green-400/20 rounded-xl flex items-center justify-center ring-1 ring-green-400/30">
-                  <UserCheck size={20} className="text-green-300" />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm leading-tight">SIMAC</p>
-                  <p className="text-white/40 text-xs">Sistema de Maíz</p>
-                </div>
-              </div>
+              <p className="text-white font-bold text-sm leading-none">SIMAC</p>
+              <p className="text-white/35 text-[11px] mt-0.5">Sistema de Maíz</p>
+            </div>
+          </div>
 
-              {/* Pasos laterales */}
-              <div className="space-y-3">
-                {stepLabels.map((label, i) => {
-                  const num = i + 1;
-                  const done = visualStep > num;
-                  const active = visualStep === num;
-                  return (
-                    <div key={num} className={`flex items-center gap-3.5 p-3.5 rounded-2xl transition-all duration-300 ${active ? 'bg-white/10 ring-1 ring-white/15' : ''}`}>
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${done ? 'bg-green-400' : active ? 'bg-white' : 'bg-white/10 ring-1 ring-white/15'}`}>
-                        {done
-                          ? <Check size={15} className="text-[#061510]" strokeWidth={3} />
-                          : <span className={`text-xs font-bold ${active ? 'text-[#0c2e1a]' : 'text-white/30'}`}>{num}</span>
-                        }
+          {/* Pasos */}
+          <nav className="flex-1 space-y-1.5">
+            {stepLabels.map((label, i) => {
+              const n = i + 1, done = visualStep > n, active = visualStep === n;
+              return (
+                <div key={n} className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${active ? 'bg-white/[0.09] ring-1 ring-white/10' : ''}`}>
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${done ? 'bg-green-400' : active ? 'bg-white' : 'bg-white/[0.07] ring-1 ring-white/10'}`}>
+                    {done ? <Check size={13} className="text-[#061510]" strokeWidth={3} /> : <span className={`text-[11px] font-bold ${active ? 'text-[#0b271a]' : 'text-white/25'}`}>{n}</span>}
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-[13px] font-semibold truncate ${active ? 'text-white' : done ? 'text-green-300/80' : 'text-white/25'}`}>{label}</p>
+                    <p className={`text-[11px] truncate ${active ? 'text-white/45' : 'text-white/15'}`}>{stepDesc[i]}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </nav>
+
+          <p className="text-white/15 text-[11px] leading-relaxed">Secretaría de Agricultura<br />y Desarrollo Rural</p>
+        </aside>
+      )}
+
+      {/* ── ÁREA DERECHA ── */}
+      <div className="flex-1 flex flex-col min-w-0 z-10">
+
+        {/* Header: back + stepper */}
+        {paso < 99 && (
+          <div className="flex-shrink-0 flex items-center gap-3 px-4 sm:px-6 lg:px-10 py-3.5 border-b border-white/[0.06]">
+            <button onClick={handleBack} className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex-shrink-0">
+              <ChevronLeft size={20} className="text-white/55" />
+            </button>
+
+            {/* Stepper mobile/tablet — oculto en lg (sidebar) */}
+            <div className="flex items-center gap-1 lg:hidden flex-1 justify-center">
+              {stepLabels.map((label, i) => {
+                const n = i + 1, done = visualStep > n, active = visualStep === n;
+                return (
+                  <div key={n} className="flex items-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all ${done ? 'bg-green-400' : active ? 'bg-white' : 'bg-white/10 ring-1 ring-white/20'}`}>
+                        {done ? <Check size={11} className="text-[#061510]" strokeWidth={3} /> : <span className={`text-[10px] font-bold ${active ? 'text-[#0b271a]' : 'text-white/30'}`}>{n}</span>}
                       </div>
-                      <div>
-                        <p className={`text-sm font-semibold leading-tight ${active ? 'text-white' : done ? 'text-green-300' : 'text-white/30'}`}>{label}</p>
-                        <p className={`text-xs mt-0.5 ${active ? 'text-white/50' : 'text-white/20'}`}>
-                          {num === 1 ? 'Verificación en SADER' : num === 2 ? 'Información personal' : num === 3 ? 'Geolocalización de parcela' : 'Contraseña de acceso'}
-                        </p>
-                      </div>
+                      <span className={`text-[8px] sm:text-[9px] font-medium hidden xs:block ${active ? 'text-white/60' : 'text-white/15'}`}>{label}</span>
                     </div>
-                  );
-                })}
-              </div>
+                    {i < 3 && <div className={`w-6 sm:w-10 h-px mx-1 mb-3 ${done ? 'bg-green-400' : 'bg-white/12'}`} />}
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Footer lateral */}
-            <p className="text-white/20 text-xs leading-relaxed">
-              Secretaría de Agricultura<br />y Desarrollo Rural
+            {/* Desktop: texto del paso actual */}
+            <p className="hidden lg:block text-white/35 text-sm flex-1">
+              Paso {visualStep} de 4 &nbsp;—&nbsp; <span className="text-white/65 font-medium">{stepLabels[visualStep - 1]}</span>
             </p>
-          </aside>
+
+            <div className="w-8 flex-shrink-0" />
+          </div>
         )}
 
-        {/* Panel derecho — contenido del formulario */}
-        <div className="flex-1 flex flex-col min-h-[100dvh]">
-
-          {/* Header móvil con back + stepper */}
-          {paso < 99 && (
-            <div className="flex items-center gap-3 px-4 py-3 sm:py-4 lg:px-8 lg:py-5">
-              <button
-                onClick={handleBack}
-                className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors flex-shrink-0"
-              >
-                <ChevronLeft size={22} className="text-white/60" />
-              </button>
-
-              {/* Stepper — solo visible en móvil/tablet (lg oculta porque tiene sidebar) */}
-              <div className="flex-1 flex justify-center lg:justify-start items-center">
-                <div className="flex items-center gap-0 lg:hidden">
-                  {stepLabels.map((label, i) => {
-                    const num = i + 1;
-                    const done = visualStep > num;
-                    const active = visualStep === num;
-                    return (
-                      <div key={num} className="flex items-center">
-                        <div className="flex flex-col items-center">
-                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 ${done ? 'bg-green-400' : active ? 'bg-white' : 'bg-white/10 ring-1 ring-white/20'}`}>
-                            {done
-                              ? <Check size={13} className="text-[#061510]" strokeWidth={3} />
-                              : <span className={`text-[10px] sm:text-xs font-bold ${active ? 'text-[#0c2e1a]' : 'text-white/30'}`}>{num}</span>
-                            }
-                          </div>
-                          <span className={`text-[8px] sm:text-[9px] mt-1 font-medium hidden sm:block ${active ? 'text-white/70' : 'text-white/20'}`}>{label}</span>
-                        </div>
-                        {i < stepLabels.length - 1 && (
-                          <div className={`w-8 sm:w-12 h-0.5 mb-3 sm:mb-4 mx-1 rounded-full transition-all duration-500 ${done ? 'bg-green-400' : 'bg-white/15'}`} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* En desktop solo muestra el paso actual como texto */}
-                <p className="hidden lg:block text-white/40 text-sm font-medium">
-                  Paso {visualStep} de 4 — <span className="text-white/70">{stepLabels[visualStep - 1]}</span>
-                </p>
-              </div>
-
-              <div className="w-9 flex-shrink-0" />
-            </div>
-          )}
-
-          {/* Área de contenido — centrada verticalmente */}
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 lg:px-12 pb-8 pt-2 overflow-y-auto">
-            <div className="w-full max-w-sm sm:max-w-md lg:max-w-xl">
+        {/* Contenido scrollable — my-auto para centrar cuando hay espacio */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="min-h-full flex flex-col items-center px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
+            <div className="w-full max-w-[540px] my-auto">
 
               {/* ── PASO 1: CURP ── */}
               {paso === 1 && (
                 <div className="animate-auth-in">
-                  <div className="text-center mb-6 lg:mb-8">
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-white/10 rounded-2xl lg:rounded-3xl flex items-center justify-center mx-auto mb-4 ring-1 ring-white/20 shadow-xl shadow-black/20">
-                      <UserCheck size={32} className="text-green-300 lg:scale-125" />
+                  <div className="text-center mb-7">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-green-400/20">
+                      <UserCheck size={28} className="text-green-300" />
                     </div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">Nuevo Registro</h1>
-                    <p className="text-white/50 text-sm sm:text-base lg:text-lg mt-2">Verificaremos tu identidad en el padrón SADER</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white">Nuevo Registro</h1>
+                    <p className="text-white/45 text-sm sm:text-base mt-2">Verificaremos tu identidad en el padrón SADER</p>
                   </div>
 
-                  <div className={`${cardCls} p-5 sm:p-7 lg:p-8`}>
-                    <label className={labelCls}>Ingresa tu CURP</label>
+                  <div className={`${card} p-5 sm:p-7`}>
+                    <label className={labelCls}>Tu CURP</label>
                     <input
                       type="text" value={curp}
                       onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                      placeholder="AAAA000000AAAAAA00"
-                      maxLength={18}
+                      placeholder="AAAA000000AAAAAA00" maxLength={18}
                       className={`${inputCls} font-mono uppercase text-center text-xl sm:text-2xl tracking-widest`}
                     />
-                    <div className="flex justify-between items-center mt-2">
-                      <p className="text-xs text-white/35">18 caracteres alfanuméricos</p>
-                      <p className={`text-xs font-mono font-bold transition-colors ${curp.length === 18 ? 'text-green-400' : 'text-white/35'}`}>{curp.length}/18</p>
+                    <div className="flex justify-between mt-1.5">
+                      <span className="text-[11px] text-white/30">18 caracteres</span>
+                      <span className={`text-[11px] font-mono font-semibold ${curp.length === 18 ? 'text-green-400' : 'text-white/30'}`}>{curp.length}/18</span>
                     </div>
-
                     {error && (
-                      <div className="mt-4 p-3.5 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm flex items-start gap-2.5">
-                        <AlertTriangle size={15} className="mt-0.5 flex-shrink-0" /> <span>{error}</span>
+                      <div className="mt-4 p-3 bg-red-500/15 ring-1 ring-red-400/25 rounded-xl text-red-200 text-sm flex gap-2">
+                        <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" /><span>{error}</span>
                       </div>
                     )}
-
-                    <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-5 lg:mt-6 ${btnCls} lg:py-4 lg:text-base`}>
-                      {cargando ? (<><Loader2 size={18} className="animate-spin" /> Consultando padrón SADER…</>) : (<><Search size={18} /> Verificar Identidad</>)}
+                    <button onClick={consultarCURP} disabled={curp.length !== 18 || cargando} className={`mt-5 ${btnCls}`}>
+                      {cargando ? <><Loader2 size={17} className="animate-spin" /> Consultando SADER…</> : <><Search size={17} /> Verificar Identidad</>}
                     </button>
                   </div>
 
-                  <div className="mt-6 text-center">
-                    <button onClick={() => navigate('/login-productor')} className="text-sm font-semibold text-green-300/80 hover:text-green-200 transition-colors">
+                  <p className="text-center mt-5">
+                    <button onClick={() => navigate('/login-productor')} className="text-sm text-green-300/70 hover:text-green-200 transition-colors font-medium">
                       ¿Ya tienes cuenta? Iniciar sesión
                     </button>
-                  </div>
+                  </p>
                 </div>
               )}
 
-              {/* ── PASO 2: FORMULARIO MANUAL ── */}
+              {/* ── PASO 2: MANUAL ── */}
               {paso === 2 && esModoManual && (
                 <div className="animate-auth-in">
-                  <div className="mb-5 lg:mb-7">
-                    <div className="flex items-center gap-3 mb-1">
-                      <div className="w-8 h-8 rounded-xl bg-amber-500/20 ring-1 ring-amber-400/30 flex items-center justify-center flex-shrink-0">
-                        <Pencil size={15} className="text-amber-300" />
-                      </div>
-                      <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Registro manual</h1>
-                    </div>
-                    <p className="text-white/45 text-sm lg:text-base ml-11">Tu CURP no está en el padrón SADER. Completa tus datos.</p>
-                  </div>
+                  {sectionTitle(<Pencil size={16} className="text-amber-300" />, 'Registro manual', 'Tu CURP no está en SADER. Completa tus datos.', 'bg-amber-500/15 ring-1 ring-amber-400/20')}
 
-                  <div className={`${cardCls} p-5 sm:p-6 lg:p-8`}>
-                    {/* CURP — fila completa */}
-                    <div className="mb-5">
+                  <div className={`${card} p-5 sm:p-6`}>
+                    {/* CURP */}
+                    <div className="mb-4 pb-4 border-b border-white/[0.08]">
                       <label className={labelCls}>CURP</label>
                       <input type="text" value={curp}
                         onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                         placeholder="AAAA000000AAAAAA00" maxLength={18}
-                        className={`${inputCls} font-mono uppercase text-center text-lg tracking-widest`} />
-                      <p className={`text-xs font-mono text-right mt-1 ${curp.length === 18 ? 'text-green-400' : 'text-white/25'}`}>{curp.length}/18</p>
+                        className={`${inputCls} font-mono uppercase text-center text-base tracking-widest`} />
+                      <p className={`text-[11px] font-mono text-right mt-1 ${curp.length === 18 ? 'text-green-400' : 'text-white/20'}`}>{curp.length}/18</p>
                     </div>
 
-                    {/* Nombre + Apellido Paterno en grid 2 col en desktop */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
                       <div>
                         <label className={labelCls}>Nombre(s) <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.nombres}
                           onChange={e => setDatosManual(p => ({ ...p, nombres: e.target.value }))}
-                          placeholder="Ej: Juan Carlos" className={inputCls} />
-                        {erroresManual.nombres && <p className="text-red-300 text-xs mt-1">{erroresManual.nombres}</p>}
+                          placeholder="Juan Carlos" className={inputCls} />
+                        {erroresManual.nombres && <p className="text-red-300 text-[11px] mt-1">{erroresManual.nombres}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Apellido Paterno <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.apellidoPaterno}
                           onChange={e => setDatosManual(p => ({ ...p, apellidoPaterno: e.target.value }))}
-                          placeholder="Ej: García" className={inputCls} />
-                        {erroresManual.apellidoPaterno && <p className="text-red-300 text-xs mt-1">{erroresManual.apellidoPaterno}</p>}
+                          placeholder="García" className={inputCls} />
+                        {erroresManual.apellidoPaterno && <p className="text-red-300 text-[11px] mt-1">{erroresManual.apellidoPaterno}</p>}
                       </div>
-                    </div>
-
-                    {/* Apellido Materno + Género */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className={labelCls}>Apellido Materno</label>
                         <input type="text" value={datosManual.apellidoMaterno}
                           onChange={e => setDatosManual(p => ({ ...p, apellidoMaterno: e.target.value }))}
-                          placeholder="Ej: López" className={inputCls} />
+                          placeholder="López" className={inputCls} />
                       </div>
                       <div>
                         <label className={labelCls}>Género</label>
@@ -793,16 +759,12 @@ export default function RegistroNuevoPage() {
                           <option value="F">Femenino</option>
                         </select>
                       </div>
-                    </div>
-
-                    {/* Teléfono + Correo */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className={labelCls}>Teléfono <span className="text-red-400">*</span></label>
                         <input type="tel" inputMode="numeric" value={datosManual.telefono}
                           onChange={e => setDatosManual(p => ({ ...p, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                           placeholder="10 dígitos" maxLength={10} className={inputCls} />
-                        {erroresManual.telefono && <p className="text-red-300 text-xs mt-1">{erroresManual.telefono}</p>}
+                        {erroresManual.telefono && <p className="text-red-300 text-[11px] mt-1">{erroresManual.telefono}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Correo electrónico</label>
@@ -810,10 +772,6 @@ export default function RegistroNuevoPage() {
                           onChange={e => setDatosManual(p => ({ ...p, correo: e.target.value }))}
                           placeholder="correo@ejemplo.com" className={inputCls} />
                       </div>
-                    </div>
-
-                    {/* Estado + Municipio */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
                       <div>
                         <label className={labelCls}>Estado <span className="text-red-400">*</span></label>
                         <select value={estadoId}
@@ -828,87 +786,70 @@ export default function RegistroNuevoPage() {
                           <option value="">Selecciona...</option>
                           {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name || s.state_name}</option>)}
                         </select>
-                        {erroresManual.estadoPadron && <p className="text-red-300 text-xs mt-1">{erroresManual.estadoPadron}</p>}
+                        {erroresManual.estadoPadron && <p className="text-red-300 text-[11px] mt-1">{erroresManual.estadoPadron}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Municipio <span className="text-red-400">*</span></label>
                         <select value={datosManual.municipioPadron}
                           onChange={e => setDatosManual(p => ({ ...p, municipioPadron: e.target.value }))}
                           disabled={!estadoId}
-                          className={`${inputCls} appearance-none [&>option]:text-gray-900 disabled:opacity-40`}>
-                          <option value="">{estadoId ? 'Selecciona...' : 'Primero elige estado'}</option>
+                          className={`${inputCls} appearance-none [&>option]:text-gray-900 disabled:opacity-35`}>
+                          <option value="">{estadoId ? 'Selecciona...' : 'Elige estado primero'}</option>
                           {municipios.map(m => <option key={m.municipality_id} value={m.name || m.municipality_name}>{m.name || m.municipality_name}</option>)}
                         </select>
-                        {erroresManual.municipioPadron && <p className="text-red-300 text-xs mt-1">{erroresManual.municipioPadron}</p>}
+                        {erroresManual.municipioPadron && <p className="text-red-300 text-[11px] mt-1">{erroresManual.municipioPadron}</p>}
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => { if (validarFormularioManual()) setPaso(3); }}
-                      className={`${btnCls} lg:py-4 lg:text-base`}
-                    >
-                      <Check size={18} /> Continuar
+                    <button onClick={() => { if (validarFormularioManual()) setPaso(3); }} className={`mt-5 ${btnCls}`}>
+                      <Check size={17} /> Continuar
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* ── PASO 2: DATOS SADER (identidad verificada) ── */}
+              {/* ── PASO 2: SADER ENCONTRADO ── */}
               {paso === 2 && datosPadron && !esModoManual && (
                 <div className="animate-auth-in">
-                  <div className="mb-5 lg:mb-7">
-                    <div className="flex items-center gap-3 mb-1">
-                      <div className="w-8 h-8 rounded-xl bg-green-500/20 ring-1 ring-green-400/30 flex items-center justify-center flex-shrink-0">
-                        <CheckCircle2 size={16} className="text-green-300" />
-                      </div>
-                      <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Identidad verificada</h1>
-                    </div>
-                    <p className="text-white/45 text-sm lg:text-base ml-11">Encontramos tu registro en el padrón SADER.</p>
-                  </div>
+                  {sectionTitle(<CheckCircle2 size={16} className="text-green-300" />, 'Identidad verificada', 'Encontramos tu registro en el padrón SADER.', 'bg-green-500/15 ring-1 ring-green-400/20')}
 
-                  {/* Tarjeta de identidad */}
-                  <div className={`${cardCls} p-5 sm:p-6 lg:p-7 mb-4`}>
-                    {/* Avatar + nombre */}
-                    <div className="flex items-center gap-4 pb-4 border-b border-white/10 mb-4">
-                      <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-green-500/20 ring-2 ring-green-400/30 flex items-center justify-center flex-shrink-0">
-                        <UserCheck size={26} className="text-green-300" />
+                  <div className={`${card} p-5 sm:p-6`}>
+                    {/* Perfil */}
+                    <div className="flex items-center gap-3.5 pb-4 border-b border-white/[0.08] mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-green-500/15 ring-1 ring-green-400/25 flex items-center justify-center flex-shrink-0">
+                        <UserCheck size={22} className="text-green-300" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white font-bold text-lg lg:text-xl leading-tight truncate">
-                          {datosPadron.nombres} {datosPadron.apellido_paterno}
+                        <p className="text-white font-bold text-base sm:text-lg leading-tight">
+                          {datosPadron.nombres} {datosPadron.apellido_paterno} {datosPadron.apellido_materno}
                         </p>
-                        {datosPadron.apellido_materno && (
-                          <p className="text-white/60 text-sm">{datosPadron.apellido_materno}</p>
-                        )}
-                        <p className="text-green-300/70 text-xs font-mono mt-1">{datosPadron.curp}</p>
+                        <p className="text-green-300/60 text-xs font-mono mt-0.5">{datosPadron.curp}</p>
                       </div>
                     </div>
 
-                    {/* Grid de datos */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
+                    <div className="grid grid-cols-2 gap-2.5 mb-4">
                       {[
-                        { label: 'Fecha de nacimiento', valor: datosPadron.fecha_nacimiento || '—' },
-                        { label: 'Género', valor: datosPadron.genero === 'H' ? 'Masculino' : datosPadron.genero === 'M' ? 'Femenino' : '—' },
-                        { label: 'Estado', valor: datosPadron.estado_padron || '—' },
-                        { label: 'Municipio', valor: datosPadron.municipio_padron || '—' },
-                      ].map(item => (
-                        <div key={item.label} className="bg-white/5 rounded-xl px-3 py-2.5 ring-1 ring-white/8">
-                          <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wide">{item.label}</p>
-                          <p className="text-sm font-medium text-white mt-0.5">{item.valor}</p>
+                        { l: 'Fecha de nac.', v: datosPadron.fecha_nacimiento || '—' },
+                        { l: 'Género', v: datosPadron.genero === 'H' ? 'Masculino' : datosPadron.genero === 'M' ? 'Femenino' : '—' },
+                        { l: 'Estado', v: datosPadron.estado_padron || '—' },
+                        { l: 'Municipio', v: datosPadron.municipio_padron || '—' },
+                      ].map(it => (
+                        <div key={it.l} className="bg-white/[0.05] rounded-xl px-3 py-2.5 ring-1 ring-white/[0.07]">
+                          <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wide">{it.l}</p>
+                          <p className="text-sm font-medium text-white mt-0.5 truncate">{it.v}</p>
                         </div>
                       ))}
                     </div>
 
-                    {/* Teléfono editable */}
-                    <div className="mb-5">
-                      <label className={labelCls}>Teléfono de contacto <span className="text-white/30 normal-case font-normal">(editable)</span></label>
+                    <div className="mb-4">
+                      <label className={labelCls}>Teléfono <span className="text-white/25 normal-case font-normal text-[10px]">— puedes editarlo</span></label>
                       <input type="tel" value={telefonoEditable}
                         onChange={e => setTelefonoEditable(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         placeholder="10 dígitos" maxLength={10} className={inputCls} />
                     </div>
 
-                    <button onClick={() => setPaso(25)} className={`${btnCls} lg:py-4 lg:text-base`}>
-                      <Check size={18} /> Confirmar y Continuar
+                    <button onClick={() => setPaso(25)} className={btnCls}>
+                      <Check size={17} /> Confirmar y Continuar
                     </button>
                   </div>
                 </div>
@@ -917,166 +858,115 @@ export default function RegistroNuevoPage() {
               {/* ── PASO 3: UBICACIÓN UP ── */}
               {paso === 3 && (
                 <div className="animate-auth-in">
-                  <div className="mb-5 lg:mb-7">
-                    <div className="flex items-center gap-3 mb-1">
-                      <div className="w-8 h-8 rounded-xl bg-blue-500/20 ring-1 ring-blue-400/30 flex items-center justify-center flex-shrink-0">
-                        <MapPin size={15} className="text-blue-300" />
-                      </div>
-                      <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
-                        {ups.length === 0 ? 'Ubicación de parcela' : `Parcela ${ups.length + 1}`}
-                      </h1>
+                  {sectionTitle(<MapPin size={15} className="text-sky-300" />, ups.length === 0 ? 'Ubicación de parcela' : `Parcela ${ups.length + 1}`, 'Estado y municipio donde se encuentra tu parcela.', 'bg-sky-500/15 ring-1 ring-sky-400/20')}
+
+                  <div className={`${card} p-5 sm:p-6 space-y-4`}>
+                    <div>
+                      <label className={labelCls}>Nombre de la parcela <span className="text-white/25 font-normal normal-case text-[10px]">— opcional</span></label>
+                      <input type="text" value={upActual.nombre || ''}
+                        onChange={e => setUpActual(prev => ({ ...prev, nombre: e.target.value }))}
+                        placeholder="Ej: Parcela Norte, El Potrero…" className={`${inputCls} mt-0.5`} />
                     </div>
-                    <p className="text-white/45 text-sm lg:text-base ml-11">Indica el estado y municipio donde está tu parcela.</p>
-                  </div>
 
-                  {/* Nombre de la parcela */}
-                  <div className={`${cardCls} p-4 sm:p-5 mb-3`}>
-                    <label className={labelCls}>Nombre de la parcela <span className="text-white/30 normal-case font-normal">(opcional)</span></label>
-                    <input
-                      type="text"
-                      value={upActual.nombre || ''}
-                      onChange={e => setUpActual(prev => ({ ...prev, nombre: e.target.value }))}
-                      placeholder="Ej: Parcela Norte, El Potrero, etc."
-                      className={`${inputCls} mt-1`}
-                    />
-                  </div>
-
-                  {/* ¿Ubicación del padrón? */}
-                  {datosPadron?.estado_padron && ups.length === 0 && parcelaEnPadron === null && (
-                    <div className={`${cardCls} p-5 sm:p-6`}>
-                      <p className="text-white/60 text-sm text-center mb-3">Según SADER, tu domicilio registrado es:</p>
-                      <div className="bg-green-500/15 ring-1 ring-green-400/25 rounded-xl p-4 text-center mb-4">
-                        <p className="text-green-200 font-bold text-base">{datosPadron.municipio_padron}, {datosPadron.estado_padron}</p>
-                      </div>
-                      <p className="text-white/60 text-sm text-center font-medium mb-4">¿Tu parcela está en ese lugar?</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          onClick={() => {
-                            setParcelaEnPadron(true);
-                            setUpActual({ estado: datosPadron.estado_padron || '', municipio: datosPadron.municipio_padron || '' });
-                            setEnDibujo(true); setPaso(4);
-                          }}
-                          className="py-3.5 rounded-xl bg-green-500 hover:bg-green-400 text-white font-semibold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-                        >
-                          <Check size={16} /> Sí, ahí está
-                        </button>
-                        <button
-                          onClick={() => setParcelaEnPadron(false)}
-                          className="py-3.5 rounded-xl bg-white/10 hover:bg-white/15 ring-1 ring-white/20 text-white font-semibold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-                        >
-                          <Search size={16} /> No, otra ubicación
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Selectores de estado/municipio */}
-                  {(parcelaEnPadron === false || ups.length > 0 || !datosPadron?.estado_padron) && (
-                    <div className={`${cardCls} p-5 sm:p-6`}>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className={labelCls}>Estado</label>
-                          <select value={estadoId}
-                            onChange={e => {
-                              const sel = estados.find(s => String(s.state_id) === e.target.value);
-                              setEstadoId(e.target.value);
-                              setUpActual({ estado: sel?.name || sel?.state_name || '', municipio: '' });
-                              setMunicipios([]);
-                              if (e.target.value) cargarMunicipios(e.target.value);
-                            }}
-                            className={`${inputCls} appearance-none [&>option]:text-gray-900`}
-                          >
-                            <option value="">Selecciona...</option>
-                            {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name || s.state_name}</option>)}
-                          </select>
+                    {datosPadron?.estado_padron && ups.length === 0 && parcelaEnPadron === null ? (
+                      <div>
+                        <p className="text-white/50 text-sm mb-2.5">Según SADER, tu domicilio registrado es:</p>
+                        <div className="bg-green-500/10 ring-1 ring-green-400/20 rounded-xl px-4 py-3 mb-3">
+                          <p className="text-green-200 font-semibold">{datosPadron.municipio_padron}, {datosPadron.estado_padron}</p>
                         </div>
-                        <div>
-                          <label className={labelCls}>Municipio</label>
-                          <select value={upActual.municipio || ''}
-                            onChange={e => setUpActual(prev => ({ ...prev, municipio: e.target.value }))}
-                            disabled={!estadoId}
-                            className={`${inputCls} appearance-none [&>option]:text-gray-900 disabled:opacity-40`}
-                          >
-                            <option value="">{estadoId ? 'Selecciona...' : 'Primero elige estado'}</option>
-                            {municipios.map(m => <option key={m.municipality_id} value={m.name || m.municipality_name}>{m.name || m.municipality_name}</option>)}
-                          </select>
+                        <p className="text-white/50 text-sm mb-3">¿Tu parcela está en ese municipio?</p>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <button onClick={() => { setParcelaEnPadron(true); setUpActual({ estado: datosPadron.estado_padron || '', municipio: datosPadron.municipio_padron || '' }); setEnDibujo(true); setPaso(4); }}
+                            className="py-3 rounded-xl bg-green-500 hover:bg-green-400 text-white font-semibold text-sm flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all">
+                            <Check size={15} /> Sí, ahí está
+                          </button>
+                          <button onClick={() => setParcelaEnPadron(false)}
+                            className="py-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] ring-1 ring-white/15 text-white font-semibold text-sm flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all">
+                            <Search size={15} /> No, es otro lugar
+                          </button>
                         </div>
                       </div>
-
-                      {error && <div className="mb-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm"><p>{error}</p></div>}
-
-                      <button
-                        onClick={() => {
-                          if (!upActual.estado || !upActual.municipio) { setError('Selecciona estado y municipio.'); return; }
-                          setError(null); setEnDibujo(true); setPaso(4);
-                        }}
-                        disabled={!upActual.estado || !upActual.municipio}
-                        className={`${btnCls} lg:py-4 lg:text-base`}
-                      >
-                        <Map size={18} /> Ir al Mapa
-                      </button>
-                    </div>
-                  )}
+                    ) : (
+                      <div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-4">
+                          <div>
+                            <label className={labelCls}>Estado</label>
+                            <select value={estadoId}
+                              onChange={e => { const sel = estados.find(s => String(s.state_id) === e.target.value); setEstadoId(e.target.value); setUpActual({ estado: sel?.name || sel?.state_name || '', municipio: '' }); setMunicipios([]); if (e.target.value) cargarMunicipios(e.target.value); }}
+                              className={`${inputCls} appearance-none [&>option]:text-gray-900`}>
+                              <option value="">Selecciona...</option>
+                              {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name || s.state_name}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className={labelCls}>Municipio</label>
+                            <select value={upActual.municipio || ''} disabled={!estadoId}
+                              onChange={e => setUpActual(prev => ({ ...prev, municipio: e.target.value }))}
+                              className={`${inputCls} appearance-none [&>option]:text-gray-900 disabled:opacity-35`}>
+                              <option value="">{estadoId ? 'Selecciona...' : 'Elige estado primero'}</option>
+                              {municipios.map(m => <option key={m.municipality_id} value={m.name || m.municipality_name}>{m.name || m.municipality_name}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        {error && <div className="mb-3 p-3 bg-red-500/15 ring-1 ring-red-400/25 rounded-xl text-red-200 text-sm">{error}</div>}
+                        <button
+                          onClick={() => { if (!upActual.estado || !upActual.municipio) { setError('Selecciona estado y municipio.'); return; } setError(null); setEnDibujo(true); setPaso(4); }}
+                          disabled={!upActual.estado || !upActual.municipio}
+                          className={btnCls}>
+                          <Map size={17} /> Ir al Mapa
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
               {/* ── PASO 5: ¿OTRA UP? ── */}
               {paso === 5 && (
                 <div className="animate-auth-in">
-                  <div className="mb-5 lg:mb-7 text-center">
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 ring-2 ring-green-400/40 shadow-[0_0_30px_rgba(74,222,128,0.15)]">
-                      <CheckCircle2 size={30} className="text-green-300" strokeWidth={2.5} />
+                  <div className="text-center mb-6">
+                    <div className="w-14 h-14 bg-green-500/15 rounded-full flex items-center justify-center mx-auto mb-3 ring-1 ring-green-400/30">
+                      <CheckCircle2 size={26} className="text-green-300" strokeWidth={2.5} />
                     </div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Parcela guardada</h1>
-                    <p className="text-white/50 text-sm mt-1.5">{ups.length} {ups.length === 1 ? 'parcela registrada' : 'parcelas registradas'}</p>
+                    <h1 className="text-2xl font-bold text-white">Parcela guardada</h1>
+                    <p className="text-white/45 text-sm mt-1">{ups.length} {ups.length === 1 ? 'parcela registrada' : 'parcelas registradas'}</p>
                   </div>
 
-                  <div className={`${cardCls} p-5 sm:p-6`}>
-                    <div className="space-y-2.5 mb-6">
+                  <div className={`${card} p-5 sm:p-6`}>
+                    <div className="space-y-2 mb-5">
                       {ups.map((up, i) => (
-                        <div key={i} className="flex items-center gap-3 bg-white/5 rounded-xl p-3.5 ring-1 ring-white/8">
-                          <div className="w-9 h-9 rounded-xl bg-green-500/20 ring-1 ring-green-400/30 flex items-center justify-center text-green-300 font-bold text-sm flex-shrink-0">
-                            {i + 1}
-                          </div>
+                        <div key={i} className="flex items-center gap-3 bg-white/[0.05] rounded-xl p-3 ring-1 ring-white/[0.07]">
+                          <div className="w-8 h-8 rounded-lg bg-green-500/15 ring-1 ring-green-400/25 flex items-center justify-center text-green-300 font-bold text-sm flex-shrink-0">{i + 1}</div>
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold text-white truncate">{up.nombre || nombreAutomaticoUP(i)}</p>
-                            <p className="text-xs text-white/45">{up.municipio}, {up.estado} {up.areaCalc ? `· ${up.areaCalc.toFixed(2)} ha` : ''}</p>
+                            <p className="text-xs text-white/40">{up.municipio}, {up.estado}{up.areaCalc ? ` · ${up.areaCalc.toFixed(2)} ha` : ''}</p>
                           </div>
-                          <Check size={15} className="text-green-400 flex-shrink-0" />
+                          <Check size={14} className="text-green-400 flex-shrink-0" />
                         </div>
                       ))}
                     </div>
 
-                    <p className="text-center text-white/70 font-medium mb-4">¿Tienes otra parcela que registrar?</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <button onClick={() => {
-                        setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setParcelaEnPadron(false); setPaso(3);
-                      }} className="py-3.5 bg-white/10 hover:bg-white/15 ring-1 ring-white/20 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
-                        <Plus size={17} /> Agregar parcela
+                    <p className="text-center text-white/55 text-sm font-medium mb-3.5">¿Tienes otra parcela?</p>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <button onClick={() => { setUpActual({ estado: '', municipio: '' }); setEstadoId(''); setMunicipios([]); setParcelaEnPadron(false); setPaso(3); }}
+                        className="py-3 bg-white/[0.08] hover:bg-white/[0.12] ring-1 ring-white/15 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]">
+                        <Plus size={16} /> Agregar otra
                       </button>
-                      <button onClick={() => setPaso(6)} className={`py-3.5 bg-white hover:bg-white/90 text-[#1A5C38] rounded-xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all`}>
-                        Crear NIP <ChevronLeft size={16} className="rotate-180" />
+                      <button onClick={() => setPaso(6)} className="py-3 bg-white hover:bg-white/90 text-[#0b271a] rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]">
+                        Crear NIP <ChevronLeft size={14} className="rotate-180" />
                       </button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── PASO 6: PIN ── */}
+              {/* ── PASO 6: NIP ── */}
               {paso === 6 && (
                 <div className="animate-auth-in">
-                  <div className="mb-5 lg:mb-7">
-                    <div className="flex items-center gap-3 mb-1">
-                      <div className="w-8 h-8 rounded-xl bg-purple-500/20 ring-1 ring-purple-400/30 flex items-center justify-center flex-shrink-0">
-                        <KeyRound size={15} className="text-purple-300" />
-                      </div>
-                      <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Crea tu NIP</h1>
-                    </div>
-                    <p className="text-white/45 text-sm lg:text-base ml-11">4 dígitos que usarás junto con tu CURP para ingresar.</p>
-                  </div>
+                  {sectionTitle(<KeyRound size={15} className="text-violet-300" />, 'Crea tu NIP', '4 dígitos para acceder junto con tu CURP.', 'bg-violet-500/15 ring-1 ring-violet-400/20')}
 
-                  <div className={`${cardCls} p-5 sm:p-6 lg:p-8`}>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-2">
+                  <div className={`${card} p-5 sm:p-6`}>
+                    <div className="grid grid-cols-2 gap-4 mb-1">
                       <div>
                         <label className={`${labelCls} text-center`}>NIP</label>
                         <input type="password" inputMode="numeric" value={pin}
@@ -1085,28 +975,23 @@ export default function RegistroNuevoPage() {
                           className={`${inputCls} text-center text-3xl tracking-[1em] indent-[1em]`} />
                       </div>
                       <div>
-                        <label className={`${labelCls} text-center`}>Confirmar NIP</label>
+                        <label className={`${labelCls} text-center`}>Confirmar</label>
                         <input type="password" inputMode="numeric" value={confirmPin}
                           onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                           placeholder="••••" maxLength={4}
-                          className={`${inputCls} text-center text-3xl tracking-[1em] indent-[1em] ${confirmPin.length === 4 && pin !== confirmPin ? 'ring-red-400/60' : ''}`} />
+                          className={`${inputCls} text-center text-3xl tracking-[1em] indent-[1em] ${confirmPin.length === 4 && pin !== confirmPin ? 'ring-red-400/50' : ''}`} />
                       </div>
                     </div>
-
                     {confirmPin.length === 4 && pin !== confirmPin && (
-                      <p className="text-red-300 text-xs text-center mb-3 flex items-center justify-center gap-1.5">
-                        <AlertTriangle size={12} /> Los NIPs no coinciden
+                      <p className="text-red-300 text-xs text-center mb-3 flex items-center justify-center gap-1.5 mt-2">
+                        <AlertTriangle size={11} /> Los NIPs no coinciden
                       </p>
                     )}
-
-                    {error && <div className="mt-3 mb-4 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-200 text-sm text-center"><p>{error}</p></div>}
-
-                    <button
-                      onClick={registrar}
+                    {error && <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/25 rounded-xl text-red-200 text-sm text-center mb-1">{error}</div>}
+                    <button onClick={registrar}
                       disabled={pin.length !== 4 || confirmPin.length !== 4 || pin !== confirmPin || cargando}
-                      className={`mt-4 ${btnCls} lg:py-4 lg:text-base`}
-                    >
-                      {cargando ? (<><Loader2 size={18} className="animate-spin" /> Registrando…</>) : (<><CheckCircle2 size={20} /> Finalizar Registro</>)}
+                      className={`mt-4 ${btnCls}`}>
+                      {cargando ? <><Loader2 size={17} className="animate-spin" /> Registrando…</> : <><CheckCircle2 size={18} /> Finalizar Registro</>}
                     </button>
                   </div>
                 </div>
@@ -1114,14 +999,14 @@ export default function RegistroNuevoPage() {
 
               {/* ── PASO 99: ÉXITO ── */}
               {paso === 99 && (
-                <div className="animate-auth-in text-center py-10">
-                  <div className="w-24 h-24 lg:w-28 lg:h-28 bg-green-400 rounded-full flex items-center justify-center mx-auto mb-7 shadow-[0_0_60px_rgba(74,222,128,0.4)]" style={{ animation: 'pfPop 0.5s ease' }}>
-                    <Check size={48} className="text-[#061510]" strokeWidth={3} />
+                <div className="animate-auth-in text-center py-8">
+                  <div className="w-20 h-20 bg-green-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_50px_rgba(74,222,128,0.35)]" style={{ animation: 'pfPop 0.5s ease' }}>
+                    <Check size={40} className="text-[#061510]" strokeWidth={3} />
                   </div>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-3">¡Registro Exitoso!</h2>
-                  <p className="text-green-100/70 mb-10 text-base lg:text-lg">Tu cuenta de productor ha sido creada.</p>
+                  <h2 className="text-3xl font-bold text-white mb-2">¡Registro Exitoso!</h2>
+                  <p className="text-white/50 mb-8 text-base">Tu cuenta de productor ha sido creada.</p>
                   <button onClick={() => navigate('/login-productor')}
-                    className="w-full max-w-xs mx-auto block bg-white hover:bg-white/90 active:scale-[0.98] text-[#1A5C38] py-4 rounded-2xl font-bold text-base lg:text-lg transition-all shadow-xl">
+                    className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#0b271a] py-3.5 rounded-xl font-bold text-base transition-all shadow-lg">
                     Iniciar Sesión
                   </button>
                 </div>
