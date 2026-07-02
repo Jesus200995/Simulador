@@ -357,44 +357,57 @@ export default function MiPerfilPage() {
               <div className="flex gap-3" style={{ width: 'max-content' }}>
                 {ciclos.map((c, i) => {
                   const cropPrincipal = c.crops?.[0];
-                  const typeLabel = c.cycle_type === 'PV' ? 'Prim-Ver' : c.cycle_type === 'OI' ? 'Oto-Inv' : c.cycle_type === 'AN' ? 'Anual' : c.cycle_type;
+                  // Etiquetas legibles sin guiones ni código
+                  const typeLabel = c.cycle_type === 'PV' ? 'Primavera-Verano'
+                    : c.cycle_type === 'OI' ? 'Otoño-Invierno'
+                    : c.cycle_type === 'AN' ? 'Anual'
+                    : c.cycle_type || 'Ciclo';
                   const typeColor = c.cycle_type === 'PV'
-                    ? 'bg-emerald-50 text-emerald-700'
+                    ? { bg: '#e6f7ee', text: '#166534' }
                     : c.cycle_type === 'OI'
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'bg-amber-50 text-amber-700';
+                    ? { bg: '#dbeafe', text: '#1e40af' }
+                    : { bg: '#fef3c7', text: '#92400e' };
+                  // Capitalizar texto de BD (maiz_blanco → Maíz Blanco)
+                  const capitalize = (s: string) =>
+                    s.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                  const destLabel = (s: string) =>
+                    s === 'autoconsumo' ? 'Autoconsumo'
+                    : s === 'venta' ? 'Venta'
+                    : s === 'semilla' ? 'Semilla'
+                    : capitalize(s);
                   return (
                     <button key={c.cycle_id} onClick={() => navigate('/productor/ciclo')}
-                      style={{ animation: `pfFadeUp .35s ${i * 60}ms ease both` }}
-                      className="flex-shrink-0 w-52 bg-[#f8fcfa] rounded-2xl p-4 ring-1 ring-[#1A5C38]/10 text-left active:scale-[0.97] transition-all group/card">
+                      style={{ animation: `pfFadeUp .35s ${i * 60}ms ease both`, border: '1.5px solid #d1e8da', boxShadow: '0 2px 8px rgba(26,92,56,0.08)' }}
+                      className="flex-shrink-0 w-56 bg-white rounded-2xl p-4 text-left active:scale-[0.97] transition-all group/card">
                       <div className="flex items-center justify-between mb-3">
-                        <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${typeColor}`}>
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full leading-none"
+                          style={{ background: typeColor.bg, color: typeColor.text }}>
                           {typeLabel}
                         </span>
-                        <span className="text-[13px] font-black text-slate-700">{c.cycle_year}</span>
+                        <span className="text-[15px] font-black text-slate-700">{c.cycle_year}</span>
                       </div>
                       {cropPrincipal ? (
                         <>
-                          <p className="text-[14px] font-bold text-slate-800 truncate leading-tight">
-                            {cropPrincipal.crop || 'Cultivo'}
+                          <p className="text-[15px] font-bold text-slate-800 leading-tight">
+                            {capitalize(cropPrincipal.crop || 'Cultivo')}
                           </p>
                           {cropPrincipal.variety_other && (
-                            <p className="text-[11.5px] text-slate-400 truncate mt-0.5">{cropPrincipal.variety_other}</p>
+                            <p className="text-[12px] text-slate-400 mt-0.5 truncate">{cropPrincipal.variety_other}</p>
                           )}
                           <div className="mt-3 flex flex-wrap gap-1.5">
                             {cropPrincipal.area_sown_ha != null && (
-                              <span className="text-[11px] font-semibold bg-white text-slate-500 px-2 py-0.5 rounded-lg ring-1 ring-slate-100">
+                              <span className="text-[12px] font-semibold bg-[#eef8f2] text-[#1A5C38] px-2.5 py-1 rounded-xl">
                                 {cropPrincipal.area_sown_ha} ha
                               </span>
                             )}
                             {cropPrincipal.yield_expected != null && (
-                              <span className="text-[11px] font-semibold bg-white text-slate-500 px-2 py-0.5 rounded-lg ring-1 ring-slate-100">
+                              <span className="text-[12px] font-semibold bg-slate-50 text-slate-500 px-2.5 py-1 rounded-xl">
                                 {cropPrincipal.yield_expected} ton/ha
                               </span>
                             )}
                             {cropPrincipal.destination && (
-                              <span className="text-[11px] font-semibold bg-white text-slate-500 px-2 py-0.5 rounded-lg ring-1 ring-slate-100 capitalize">
-                                {cropPrincipal.destination}
+                              <span className="text-[12px] font-semibold bg-slate-50 text-slate-500 px-2.5 py-1 rounded-xl">
+                                {destLabel(cropPrincipal.destination)}
                               </span>
                             )}
                           </div>
