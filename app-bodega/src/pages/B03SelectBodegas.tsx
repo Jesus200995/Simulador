@@ -158,7 +158,7 @@ export default function B03SelectBodegas() {
       h-full + flex flex-col = ocupa exactamente el alto del <main> (que es el scroll container)
       El scroll de página NUNCA ocurre. Solo el recuadro de resultados hace scroll interno.
     */
-    <div className="fixed inset-0 flex flex-col bg-[#eef8f2] overflow-hidden">
+    <div className="fixed inset-0 flex flex-col bg-[#eef8f2] overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
 
       {/* ══ BANNER VERDE — sticky, nunca scrollea, rounded-b-3xl ══ */}
       <div className="flex-shrink-0 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.22)] relative z-10 overflow-hidden">
