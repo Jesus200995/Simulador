@@ -1,4 +1,4 @@
-﻿import { MapContainer, TileLayer, Marker, Circle, Polygon, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Circle, Polygon, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -80,7 +80,7 @@ export default function MapaUP({
             <FitPolygon coords={poligono!} />
             <Polygon
               positions={poligono!.map(([lng, lat]) => [lat, lng] as [number, number])}
-              pathOptions={{ color: '#002f2a', fillColor: '#002f2a', fillOpacity: 0.2, weight: 2 }}
+              pathOptions={{ color: '#1A5C38', fillColor: '#1A5C38', fillOpacity: 0.2, weight: 2 }}
             />
           </>
         ) : (
@@ -91,7 +91,7 @@ export default function MapaUP({
               <Circle
                 center={[lat, lng]}
                 radius={radioKm * 1000}
-                pathOptions={{ color: '#002f2a', fillColor: '#002f2a', fillOpacity: 0.08, weight: 1.5, dashArray: '6 4' }}
+                pathOptions={{ color: '#1A5C38', fillColor: '#1A5C38', fillOpacity: 0.08, weight: 1.5, dashArray: '6 4' }}
               />
             )}
           </>

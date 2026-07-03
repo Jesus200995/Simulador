@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight, MapPin, Warehouse, Circle, List, Map as MapIcon, Search, X } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
@@ -15,14 +15,14 @@ interface Bodega {
 
 const greenDot = L.divIcon({
   className: "",
-  html: '<div style="width:14px;height:14px;background:#002f2a;border-radius:50%;border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.4)"></div>',
+  html: '<div style="width:14px;height:14px;background:#1A5C38;border-radius:50%;border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.4)"></div>',
   iconSize: [14, 14] as [number, number],
   iconAnchor: [7, 7] as [number, number],
 });
 
 const greenDotFocus = L.divIcon({
   className: "",
-  html: '<div style="width:20px;height:20px;background:#002f2a;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(26,92,56,0.4),0 2px 8px rgba(0,0,0,0.4)"></div>',
+  html: '<div style="width:20px;height:20px;background:#1A5C38;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(26,92,56,0.4),0 2px 8px rgba(0,0,0,0.4)"></div>',
   iconSize: [20, 20] as [number, number],
   iconAnchor: [10, 10] as [number, number],
 });
@@ -112,12 +112,12 @@ export default function B05MisBodegas() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const barColor = (p: number) => p < 70 ? "bg-[#002f2a]" : p < 90 ? "bg-amber-400" : "bg-red-500";
+  const barColor = (p: number) => p < 70 ? "bg-[#1A5C38]" : p < 90 ? "bg-amber-400" : "bg-red-500";
 
   return (
     <div className="w-full">
       {/* Banner verde sticky */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-visible">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-visible">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none opacity-60 rounded-b-3xl" />
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-3 pb-4 relative z-10">
 
@@ -138,13 +138,13 @@ export default function B05MisBodegas() {
           <div className="flex items-center w-full bg-white/10 backdrop-blur-sm rounded-2xl p-1 mb-2.5">
             <button
               onClick={() => { setVista("lista"); setQuery(""); setMapFocus(null); }}
-              className={"flex-1 flex items-center justify-center gap-2 py-2 rounded-[14px] text-[13px] font-bold transition-all duration-300 " + (vista === "lista" ? "bg-white text-[#002f2a] shadow-sm" : "text-white/75 hover:text-white hover:bg-white/10")}
+              className={"flex-1 flex items-center justify-center gap-2 py-2 rounded-[14px] text-[13px] font-bold transition-all duration-300 " + (vista === "lista" ? "bg-white text-[#1A5C38] shadow-sm" : "text-white/75 hover:text-white hover:bg-white/10")}
             >
               <List size={14} /> Lista
             </button>
             <button
               onClick={() => { setVista("mapa"); setQuery(""); setMapFocus(null); }}
-              className={"flex-1 flex items-center justify-center gap-2 py-2 rounded-[14px] text-[13px] font-bold transition-all duration-300 " + (vista === "mapa" ? "bg-white text-[#002f2a] shadow-sm" : "text-white/75 hover:text-white hover:bg-white/10")}
+              className={"flex-1 flex items-center justify-center gap-2 py-2 rounded-[14px] text-[13px] font-bold transition-all duration-300 " + (vista === "mapa" ? "bg-white text-[#1A5C38] shadow-sm" : "text-white/75 hover:text-white hover:bg-white/10")}
             >
               <MapIcon size={14} /> Mapa
             </button>
@@ -180,10 +180,10 @@ export default function B05MisBodegas() {
                     <button
                       key={b.id}
                       onMouseDown={e => { e.preventDefault(); selectBodega(b); }}
-                      className={"w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f4fbf7] active:bg-[#e8f5f3] " + (i < suggestions.length - 1 ? "border-b border-gray-50" : "")}
+                      className={"w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f4fbf7] active:bg-[#eef8f2] " + (i < suggestions.length - 1 ? "border-b border-gray-50" : "")}
                     >
-                      <div className={"w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 " + (hasCoords ? "bg-[#002f2a]/10" : "bg-[#e8f5f3]")}>
-                        <MapPin size={14} className={hasCoords ? "text-[#002f2a]" : "text-gray-400"} />
+                      <div className={"w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 " + (hasCoords ? "bg-[#1A5C38]/10" : "bg-[#eef8f2]")}>
+                        <MapPin size={14} className={hasCoords ? "text-[#1A5C38]" : "text-gray-400"} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-semibold text-gray-900 truncate leading-tight">{b.nombre}</p>
@@ -212,7 +212,7 @@ export default function B05MisBodegas() {
 
         {loading && (
           <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-2 border-[#002f2a]/30 border-t-[#002f2a] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
           </div>
         )}
 
@@ -221,7 +221,7 @@ export default function B05MisBodegas() {
           <>
             {filtered.length === 0 && q ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-[#e8f5f3] flex items-center justify-center">
+                <div className="w-14 h-14 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
                   <Search size={24} className="text-gray-300" />
                 </div>
                 <p className="font-semibold text-[15px] text-gray-600">Sin resultados</p>
@@ -252,15 +252,15 @@ export default function B05MisBodegas() {
                           <span className="font-medium">Ocupación {pct}%</span>
                           <span>{formatNum(b.stock_actual || 0)} / {formatNum(b.capacidad_ton || 0)} ton</span>
                         </div>
-                        <div className="bg-[#e8f5f3] rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-[#eef8f2] rounded-full h-1.5 overflow-hidden">
                           <div className={"h-full rounded-full " + barColor(pct) + " transition-all"} style={{ width: Math.min(pct, 100) + "%" }} />
                         </div>
                       </div>
                       <div className="flex gap-2 mt-auto">
-                        <button onClick={() => navigate("/bodegas/" + b.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-[#002f2a]/[0.08] text-[#002f2a] rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
+                        <button onClick={() => navigate("/bodegas/" + b.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A5C38]/[0.08] text-[#1A5C38] rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
                           Detalle <ChevronRight size={13} />
                         </button>
-                        <button onClick={() => navigate("/bodegas/" + b.id + "/semaforo")} className="flex-1 bg-[#e8f5f3] text-gray-700 rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
+                        <button onClick={() => navigate("/bodegas/" + b.id + "/semaforo")} className="flex-1 bg-[#eef8f2] text-gray-700 rounded-xl py-2.5 text-[13px] font-semibold active:opacity-70 transition-opacity">
                           Semáforo
                         </button>
                       </div>
@@ -292,7 +292,7 @@ export default function B05MisBodegas() {
                           <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", flexShrink: 0, background: b.semaforo_compra === "verde" ? "#22c55e" : b.semaforo_compra === "amarillo" ? "#f59e0b" : b.semaforo_compra === "rojo" ? "#ef4444" : "#9ca3af" }} />
                           {sem.label}
                         </p>
-                        <button onClick={() => navigate("/bodegas/" + b.id)} style={{ width: "100%", background: "#002f2a", color: "white", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: "none", cursor: "pointer", marginTop: 8 }}>
+                        <button onClick={() => navigate("/bodegas/" + b.id)} style={{ width: "100%", background: "#1A5C38", color: "white", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: "none", cursor: "pointer", marginTop: 8 }}>
                           Ver detalle
                         </button>
                       </div>
@@ -306,7 +306,7 @@ export default function B05MisBodegas() {
 
         {!loading && bodegas.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="w-16 h-16 rounded-2xl bg-[#e8f5f3] flex items-center justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#eef8f2] flex items-center justify-center">
               <Warehouse size={32} className="text-gray-300" />
             </div>
             <p className="font-semibold text-[16px] text-gray-700">Sin bodegas asociadas</p>
@@ -316,7 +316,7 @@ export default function B05MisBodegas() {
       </div>
 
       {/* FAB */}
-      <button onClick={() => navigate("/bodegas/seleccionar")} className="fixed bottom-24 right-5 w-14 h-14 bg-[#002f2a] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform z-10">
+      <button onClick={() => navigate("/bodegas/seleccionar")} className="fixed bottom-24 right-5 w-14 h-14 bg-[#1A5C38] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform z-10">
         <Plus size={24} />
       </button>
     </div>

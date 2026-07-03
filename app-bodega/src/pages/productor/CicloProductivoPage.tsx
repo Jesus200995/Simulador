@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Wheat, Check, Leaf, MapPin,
@@ -323,7 +323,7 @@ export default function CicloProductivoPage() {
     }
   };
 
-  const inputCls = 'w-full bg-[#e8f5f3]/50 border border-slate-200 rounded-[14px] px-3.5 py-3 text-[14px] font-semibold text-slate-800 placeholder-slate-400 focus:border-[#002f2a] focus:bg-white focus:ring-2 focus:ring-[#002f2a]/10 transition-all outline-none';
+  const inputCls = 'w-full bg-[#eef8f2]/50 border border-slate-200 rounded-[14px] px-3.5 py-3 text-[14px] font-semibold text-slate-800 placeholder-slate-400 focus:border-[#1A5C38] focus:bg-white focus:ring-2 focus:ring-[#1A5C38]/10 transition-all outline-none';
 
   const cycleTypeLabel = (t: string) =>
     t === 'PV' ? 'Primavera-Verano' : t === 'OI' ? 'Otoño-Invierno' : t === 'ANUAL' ? 'Ciclo anual' : t;
@@ -331,8 +331,8 @@ export default function CicloProductivoPage() {
   // ── Loader mientras se consultan los ciclos existentes ──
   if (cargandoCiclos) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-full bg-[#e8f5f3] gap-3">
-        <div className="w-8 h-8 border-[3px] border-[#002f2a]/20 border-t-[#002f2a] rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center w-full h-full bg-[#eef8f2] gap-3">
+        <div className="w-8 h-8 border-[3px] border-[#1A5C38]/20 border-t-[#1A5C38] rounded-full animate-spin" />
         <p className="text-[13px] font-semibold text-slate-400">Cargando tus ciclos…</p>
       </div>
     );
@@ -341,7 +341,7 @@ export default function CicloProductivoPage() {
   // ── Selector de parcela cuando hay más de una UP (#6) ──
   if (todasLasUPs.length > 1 && !upSeleccionadaId) {
     return (
-      <div className="flex flex-col font-sans w-full h-full bg-[#e8f5f3] overflow-hidden">
+      <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Slim header */}
         <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -371,10 +371,10 @@ export default function CicloProductivoPage() {
                       setUpSeleccionadaId(up.up_id);
                       setCargandoCiclos(true);
                     }}
-                    className="w-full bg-transparent rounded-[24px] p-4 text-left flex items-center gap-4 hover:bg-[#e8f5f3] active:scale-[0.98] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 group"
+                    className="w-full bg-transparent rounded-[24px] p-4 text-left flex items-center gap-4 hover:bg-[#eef8f2] active:scale-[0.98] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 group"
                   >
-                    <div className="w-14 h-14 rounded-[20px] bg-[#002f2a]/5 flex items-center justify-center shrink-0 group-hover:bg-[#002f2a]/10 transition-colors">
-                      <Sprout size={24} className="text-[#002f2a]" />
+                    <div className="w-14 h-14 rounded-[20px] bg-[#1A5C38]/5 flex items-center justify-center shrink-0 group-hover:bg-[#1A5C38]/10 transition-colors">
+                      <Sprout size={24} className="text-[#1A5C38]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-slate-800 text-[16px]">{up.up_name || 'Parcela'}</p>
@@ -383,7 +383,7 @@ export default function CicloProductivoPage() {
                         {up.area_ha_calc ? ` · ${Number(up.area_ha_calc)} ha` : ''}
                       </p>
                     </div>
-                    <ChevronRight size={20} className="text-gray-300 shrink-0 group-hover:text-[#002f2a] group-hover:translate-x-1 transition-all" />
+                    <ChevronRight size={20} className="text-gray-300 shrink-0 group-hover:text-[#1A5C38] group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}
               </div>
@@ -397,7 +397,7 @@ export default function CicloProductivoPage() {
   // ── Lista de ciclos existentes + botón para agregar uno nuevo ──
   if (!mostrarFormulario && ciclosExistentes.length > 0) {
     return (
-      <div className="flex flex-col font-sans w-full h-full bg-[#e8f5f3] overflow-hidden">
+      <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
         {/* Slim header */}
         <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -442,8 +442,8 @@ export default function CicloProductivoPage() {
                           {ciclo.tipo_riego && (
                             <p className="text-[12px] text-slate-600 mt-1 flex items-center gap-1 font-medium">
                               {ciclo.tipo_riego === 'riego'
-                                ? (<><Droplets size={13} className="text-[#002f2a]" /> Riego</>)
-                                : (<><CloudRain size={13} className="text-[#002f2a]" /> Temporal</>)}
+                                ? (<><Droplets size={13} className="text-[#1A5C38]" /> Riego</>)
+                                : (<><CloudRain size={13} className="text-[#1A5C38]" /> Temporal</>)}
                             </p>
                           )}
                         </div>
@@ -464,7 +464,7 @@ export default function CicloProductivoPage() {
                           <button
                             type="button"
                             onClick={() => handleAbrirEdicion(ciclo)}
-                            className="text-[12.5px] text-[#002f2a] font-bold flex items-center gap-1.5 active:opacity-60 transition-opacity"
+                            className="text-[12.5px] text-[#1A5C38] font-bold flex items-center gap-1.5 active:opacity-60 transition-opacity"
                           >
                             <Pencil size={14} /> Editar cultivo
                           </button>
@@ -484,9 +484,9 @@ export default function CicloProductivoPage() {
 
               <button
                 onClick={() => { setPaso(1); setError(''); setMostrarFormulario(true); }}
-                className="w-full py-4 border-2 border-dashed border-[#002f2a]/40 bg-[#002f2a]/5 text-[#002f2a] rounded-[24px] font-bold hover:bg-[#002f2a]/10 hover:border-[#002f2a]/60 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+                className="w-full py-4 border-2 border-dashed border-[#1A5C38]/40 bg-[#1A5C38]/5 text-[#1A5C38] rounded-[24px] font-bold hover:bg-[#1A5C38]/10 hover:border-[#1A5C38]/60 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
               >
-                <div className="w-6 h-6 rounded-full bg-[#002f2a] text-white flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-[#1A5C38] text-white flex items-center justify-center">
                   <span className="text-sm font-black leading-none mt-[1px]">+</span>
                 </div>
                 <span className="text-[15px]">Agregar otro ciclo</span>
@@ -606,9 +606,9 @@ export default function CicloProductivoPage() {
                       onClick={() => setFormEdicion((f: any) => ({ ...f, destination: f.destination === d.valor ? '' : d.valor }))}
                       className={`py-2.5 px-3 rounded-[12px] border-2 text-[12px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5
                         ${formEdicion.destination === d.valor
-                          ? 'border-[#002f2a] bg-[#002f2a]/5 text-[#002f2a]'
+                          ? 'border-[#1A5C38] bg-[#1A5C38]/5 text-[#1A5C38]'
                           : 'border-slate-200 text-slate-600'}`}>
-                      <d.icon size={15} className={formEdicion.destination === d.valor ? 'text-[#002f2a]' : 'text-slate-400'} />
+                      <d.icon size={15} className={formEdicion.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-400'} />
                       {d.label}
                     </button>
                   ))}
@@ -625,7 +625,7 @@ export default function CicloProductivoPage() {
 
               {/* Guardar */}
               <button type="button" onClick={handleGuardarEdicion} disabled={guardandoEdicion}
-                className="w-full bg-[#002f2a] hover:bg-[#124227] text-white font-bold text-[15px] py-3.5 rounded-[14px] active:scale-[0.98] transition-all disabled:opacity-60 mt-1 flex items-center justify-center gap-2">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white font-bold text-[15px] py-3.5 rounded-[14px] active:scale-[0.98] transition-all disabled:opacity-60 mt-1 flex items-center justify-center gap-2">
                 {guardandoEdicion ? (<><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando…</>) : 'Guardar cambios'}
               </button>
             </div>
@@ -636,7 +636,7 @@ export default function CicloProductivoPage() {
   }
 
   return (
-    <div className="flex flex-col font-sans w-full h-full bg-[#e8f5f3] overflow-hidden">
+    <div className="flex flex-col font-sans w-full h-full bg-[#eef8f2] overflow-hidden">
       
       {/* Slim header sticky */}
       <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
@@ -671,7 +671,7 @@ export default function CicloProductivoPage() {
 
             {/* Banner de la parcela seleccionada (cuando hay varias UPs) */}
             {todasLasUPs.length > 1 && upSeleccionadaId && (
-              <div className="mb-4 bg-[#002f2a] rounded-[16px] px-4 py-3 flex items-center justify-between shadow-sm">
+              <div className="mb-4 bg-[#1A5C38] rounded-[16px] px-4 py-3 flex items-center justify-between shadow-sm">
                 <div className="min-w-0">
                   <p className="text-[11px] text-emerald-200 font-medium">Registrando ciclo en:</p>
                   <p className="text-sm font-bold text-white flex items-center gap-1.5 truncate">
@@ -727,7 +727,7 @@ export default function CicloProductivoPage() {
                       }}
                       className={`p-3 rounded-[12px] border-2 text-left transition-all active:scale-95
                         ${form.tipo_riego === 'temporal'
-                          ? 'border-[#002f2a] bg-[#002f2a]/5'
+                          ? 'border-[#1A5C38] bg-[#1A5C38]/5'
                           : 'border-slate-200 bg-white'}`}>
                       <p className="font-black text-[13px] text-slate-800 flex items-center gap-1.5"><CloudRain size={14} className="text-slate-500" /> Temporal</p>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Depende de la lluvia</p>
@@ -740,7 +740,7 @@ export default function CicloProductivoPage() {
                       }}
                       className={`p-3 rounded-[12px] border-2 text-left transition-all active:scale-95
                         ${form.tipo_riego === 'riego'
-                          ? 'border-[#002f2a] bg-[#002f2a]/5'
+                          ? 'border-[#1A5C38] bg-[#1A5C38]/5'
                           : 'border-slate-200 bg-white'}`}>
                       <p className="font-black text-[13px] text-slate-800 flex items-center gap-1.5"><Droplets size={14} className="text-blue-400" /> Riego</p>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Agua controlada</p>
@@ -749,23 +749,23 @@ export default function CicloProductivoPage() {
                 </div>
 
                 {/* Fecha de siembra */}
-                <div className="bg-[#e8f5f3]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
+                <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
                   <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
-                    <Calendar size={14} className="text-[#002f2a]" /> ¿Cuándo vas a sembrar?
+                    <Calendar size={14} className="text-[#1A5C38]" /> ¿Cuándo vas a sembrar?
                   </label>
                   <input
                     type="date"
                     value={form.planting_date}
                     onChange={e => handleFechaSiembra(e.target.value)}
-                    className="w-full border border-slate-200 rounded-[10px] px-3 py-2.5 font-bold text-[14px] text-slate-700 focus:outline-none focus:border-[#002f2a] transition-colors"
+                    className="w-full border border-slate-200 rounded-[10px] px-3 py-2.5 font-bold text-[14px] text-slate-700 focus:outline-none focus:border-[#1A5C38] transition-colors"
                   />
                 </div>
 
                 {/* CASO A — Ciclo inferido con certeza alta, pendiente de confirmar */}
                 {cicloInferido && cicloInferido.certeza === 'alta' && !cicloConfirmado && (
-                  <div className="bg-[#E8F5EE] border border-[#002f2a]/30 rounded-[14px] p-4">
-                    <p className="text-[13px] font-bold text-[#002f2a] mb-1">
-                      <CheckCircle2 size={14} className="inline mr-1 text-[#002f2a]" /> Tu ciclo es: {cicloInferido.label}
+                  <div className="bg-[#E8F5EE] border border-[#1A5C38]/30 rounded-[14px] p-4">
+                    <p className="text-[13px] font-bold text-[#1A5C38] mb-1">
+                      <CheckCircle2 size={14} className="inline mr-1 text-[#1A5C38]" /> Tu ciclo es: {cicloInferido.label}
                     </p>
                     <p className="text-[12px] text-slate-600 mb-3">
                       Determinado con base en tu fecha de siembra según el calendario oficial SIAP.
@@ -774,7 +774,7 @@ export default function CicloProductivoPage() {
                       <button
                         type="button"
                         onClick={() => setCicloConfirmado(true)}
-                        className="flex-1 bg-[#002f2a] text-white font-bold text-[13px] py-2.5 rounded-[10px] active:scale-95 transition-all">
+                        className="flex-1 bg-[#1A5C38] text-white font-bold text-[13px] py-2.5 rounded-[10px] active:scale-95 transition-all">
                         Sí, es correcto
                       </button>
                       <button
@@ -792,9 +792,9 @@ export default function CicloProductivoPage() {
 
                 {/* CASO B — Ciclo confirmado */}
                 {cicloConfirmado && cicloInferido && (
-                  <div className="bg-[#E8F5EE] border border-[#002f2a]/30 rounded-[14px] p-3 flex items-center gap-2">
-                    <span className="text-[#002f2a] font-bold text-[13px]">
-                      <CheckCircle2 size={14} className="inline mr-1 text-[#002f2a]" /> Ciclo confirmado: {cicloInferido.label}
+                  <div className="bg-[#E8F5EE] border border-[#1A5C38]/30 rounded-[14px] p-3 flex items-center gap-2">
+                    <span className="text-[#1A5C38] font-bold text-[13px]">
+                      <CheckCircle2 size={14} className="inline mr-1 text-[#1A5C38]" /> Ciclo confirmado: {cicloInferido.label}
                     </span>
                     <button
                       type="button"
@@ -831,7 +831,7 @@ export default function CicloProductivoPage() {
                           }}
                           className={`w-full border-2 rounded-[12px] py-2.5 px-3 text-left transition-all active:scale-[0.98]
                             ${form.cycle_type === c.valor
-                              ? 'border-[#002f2a] bg-[#002f2a]/5'
+                              ? 'border-[#1A5C38] bg-[#1A5C38]/5'
                               : 'border-slate-100 bg-white'}`}>
                           <p className="text-[13px] font-black text-slate-800">{c.label}</p>
                           <p className="text-[11.5px] text-slate-500 mt-0.5">{c.desc}</p>
@@ -863,7 +863,7 @@ export default function CicloProductivoPage() {
                           }}
                           className={`w-full border-2 rounded-[12px] py-2.5 px-3 text-left transition-all active:scale-[0.98]
                             ${form.cycle_type === c.valor
-                              ? 'border-[#002f2a] bg-[#002f2a]/5'
+                              ? 'border-[#1A5C38] bg-[#1A5C38]/5'
                               : 'border-slate-100 bg-white'}`}>
                           <p className="text-[13px] font-black text-slate-800">{c.label}</p>
                           <p className="text-[11.5px] text-slate-500 mt-0.5">{c.desc}</p>
@@ -893,28 +893,28 @@ export default function CicloProductivoPage() {
                   <div className="space-y-2">
                     {['blanco', 'amarillo', 'criollo'].map((t, idx) => (
                       <button key={t} onClick={() => setTipoMaiz(t as any)}
-                        className="w-full rounded-[14px] p-3 border-2 border-slate-100 bg-white hover:border-[#002f2a]/30 hover:bg-emerald-50/30 text-left transition-all duration-200 active:scale-[0.98] group flex justify-between items-center shadow-sm hover:shadow-md">
+                        className="w-full rounded-[14px] p-3 border-2 border-slate-100 bg-white hover:border-[#1A5C38]/30 hover:bg-emerald-50/30 text-left transition-all duration-200 active:scale-[0.98] group flex justify-between items-center shadow-sm hover:shadow-md">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center text-slate-500 group-hover:text-[#002f2a] group-hover:bg-[#002f2a]/10 bg-[#e8f5f3] transition-colors`}>
+                          <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center text-slate-500 group-hover:text-[#1A5C38] group-hover:bg-[#1A5C38]/10 bg-[#eef8f2] transition-colors`}>
                             {idx === 0 ? <Wheat size={16} /> : idx === 1 ? <Sun size={16} /> : <Sprout size={16} />}
                           </div>
-                          <p className="text-[14px] font-black text-slate-800 capitalize group-hover:text-[#002f2a] transition-colors tracking-tight">
+                          <p className="text-[14px] font-black text-slate-800 capitalize group-hover:text-[#1A5C38] transition-colors tracking-tight">
                             Maíz {t}
                           </p>
                         </div>
-                        <ChevronLeft size={16} className="text-slate-300 rotate-180 group-hover:text-[#002f2a] group-hover:translate-x-1 transition-all" strokeWidth={3} />
+                        <ChevronLeft size={16} className="text-slate-300 rotate-180 group-hover:text-[#1A5C38] group-hover:translate-x-1 transition-all" strokeWidth={3} />
                       </button>
                     ))}
                   </div>
                 ) : (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex items-center justify-between mb-3 bg-[#e8f5f3]/80 p-2 rounded-[12px] border border-slate-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-3 bg-[#eef8f2]/80 p-2 rounded-[12px] border border-slate-100 shadow-sm">
                       <p className="font-black text-slate-800 capitalize text-[13px] flex items-center gap-1.5 px-2">
-                        {tipoMaiz === 'blanco' ? <Wheat size={16} className="text-[#002f2a]"/> : tipoMaiz === 'amarillo' ? <Sun size={16} className="text-amber-500"/> : <Sprout size={16} className="text-emerald-500"/>} 
+                        {tipoMaiz === 'blanco' ? <Wheat size={16} className="text-[#1A5C38]"/> : tipoMaiz === 'amarillo' ? <Sun size={16} className="text-amber-500"/> : <Sprout size={16} className="text-emerald-500"/>} 
                         Maíz {tipoMaiz}
                       </p>
                       <button onClick={() => { setTipoMaiz(''); setForm(f => ({...f, variety_id: '', variety_other: ''})); setEsCriollo(false); }} 
-                        className="text-[#002f2a] text-[11.5px] font-bold bg-white border border-slate-200 px-2.5 py-1 rounded-[8px] hover:bg-[#e8f5f3] transition-colors shadow-sm active:scale-95">
+                        className="text-[#1A5C38] text-[11.5px] font-bold bg-white border border-slate-200 px-2.5 py-1 rounded-[8px] hover:bg-[#eef8f2] transition-colors shadow-sm active:scale-95">
                         Cambiar
                       </button>
                     </div>
@@ -928,13 +928,13 @@ export default function CicloProductivoPage() {
                           }}
                           className={`w-full rounded-[12px] p-2.5 border-2 text-left transition-all active:scale-[0.98] flex items-center gap-2.5
                             ${form.variety_id === v.code
-                              ? 'border-[#002f2a] bg-[#002f2a]/5 shadow-sm'
-                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#e8f5f3]'}`}>
+                              ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm'
+                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]'}`}>
                           <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border-2 shrink-0 transition-colors
-                            ${form.variety_id === v.code ? 'bg-[#002f2a] border-[#002f2a]' : 'border-slate-300'}`}>
+                            ${form.variety_id === v.code ? 'bg-[#1A5C38] border-[#1A5C38]' : 'border-slate-300'}`}>
                             {form.variety_id === v.code && <Check size={8} className="text-white" strokeWidth={4} />}
                           </div>
-                          <span className={`text-[12.5px] font-bold ${form.variety_id === v.code ? 'text-[#002f2a]' : 'text-slate-700'}`}>
+                          <span className={`text-[12.5px] font-bold ${form.variety_id === v.code ? 'text-[#1A5C38]' : 'text-slate-700'}`}>
                             {v.label}
                           </span>
                         </button>
@@ -942,7 +942,7 @@ export default function CicloProductivoPage() {
                     </div>
                     
                     {esCriollo && (
-                      <div className="animate-in fade-in slide-in-from-top-2 p-4 bg-[#e8f5f3]/80 rounded-[16px] border border-slate-100 shadow-sm">
+                      <div className="animate-in fade-in slide-in-from-top-2 p-4 bg-[#eef8f2]/80 rounded-[16px] border border-slate-100 shadow-sm">
                         <label className="block text-[13px] font-bold text-slate-800 mb-2">
                           ¿Cómo se llama tu variedad criolla? <span className="text-slate-400 font-medium ml-1">(opcional)</span>
                         </label>
@@ -983,7 +983,7 @@ export default function CicloProductivoPage() {
                 )}
 
                 <div className="space-y-3">
-                  <div className="p-3.5 bg-[#e8f5f3]/80 border border-slate-100 rounded-[14px] shadow-sm">
+                  <div className="p-3.5 bg-[#eef8f2]/80 border border-slate-100 rounded-[14px] shadow-sm">
                     <label className="block text-[13px] font-bold text-slate-800 mb-2 text-center sm:text-left">
                       ¿Hectáreas a sembrar este ciclo?
                     </label>
@@ -1026,7 +1026,7 @@ export default function CicloProductivoPage() {
                     )}
                   </div>
 
-                  <div className="p-3.5 bg-[#e8f5f3]/80 border border-slate-100 rounded-[14px] shadow-sm">
+                  <div className="p-3.5 bg-[#eef8f2]/80 border border-slate-100 rounded-[14px] shadow-sm">
                     <label className="block text-[13px] font-bold text-slate-800 mb-0.5 text-center sm:text-left">
                       Rendimiento esperado
                     </label>
@@ -1044,7 +1044,7 @@ export default function CicloProductivoPage() {
                 </div>
 
                 {form.area_sown_ha && form.yield_expected && (
-                  <div className="bg-gradient-to-br from-[#002f2a] to-[#124227] rounded-[20px] p-5 text-center shadow-[0_6px_20px_rgba(26,92,56,0.3)] animate-in fade-in slide-in-from-bottom-4 relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-[#1A5C38] to-[#124227] rounded-[20px] p-5 text-center shadow-[0_6px_20px_rgba(26,92,56,0.3)] animate-in fade-in slide-in-from-bottom-4 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
                     <p className="text-[11px] text-emerald-200 font-bold uppercase tracking-widest relative z-10">Estimación Total</p>
                     <p className="text-[32px] font-black text-white mt-1 leading-none tracking-tight relative z-10">
@@ -1069,7 +1069,7 @@ export default function CicloProductivoPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="bg-[#e8f5f3]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
+                  <div className="bg-[#eef8f2]/80 rounded-[14px] p-3.5 border border-slate-100 shadow-sm">
                     <label className="text-[13px] font-bold text-slate-800 mb-2 flex items-center gap-2">
                       <Clock size={14} className="text-slate-400"/> ¿Cuándo esperas cosechar? <span className="text-slate-400 font-medium ml-1 text-[11px]">(opcional)</span>
                     </label>
@@ -1089,10 +1089,10 @@ export default function CicloProductivoPage() {
                           onClick={() => setForm(f => ({...f, destination: f.destination === d.valor ? '' : d.valor}))}
                           className={`rounded-[14px] p-3 border-2 text-left transition-all active:scale-95 flex flex-col gap-2 items-center text-center
                             ${form.destination === d.valor
-                              ? 'border-[#002f2a] bg-[#002f2a]/5 shadow-sm'
-                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#e8f5f3]'}`}>
-                          <d.icon size={18} className={form.destination === d.valor ? 'text-[#002f2a]' : 'text-slate-400'} strokeWidth={2} />
-                          <span className={`text-[12px] font-black tracking-tight ${form.destination === d.valor ? 'text-[#002f2a]' : 'text-slate-600'}`}>
+                              ? 'border-[#1A5C38] bg-[#1A5C38]/5 shadow-sm'
+                              : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-[#eef8f2]'}`}>
+                          <d.icon size={18} className={form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-400'} strokeWidth={2} />
+                          <span className={`text-[12px] font-black tracking-tight ${form.destination === d.valor ? 'text-[#1A5C38]' : 'text-slate-600'}`}>
                             {d.label}
                           </span>
                         </button>
@@ -1113,28 +1113,28 @@ export default function CicloProductivoPage() {
             {paso === 1 && (
               <button onClick={() => { setError(''); setPaso(2); }}
                 disabled={!form.cycle_type || !form.planting_date || !cicloConfirmado}
-                className="w-full bg-[#002f2a] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
             )}
             {paso === 2 && (
               <button onClick={() => { setError(''); setPaso(3); }}
                 disabled={!form.variety_id}
-                className="w-full bg-[#002f2a] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
             )}
             {paso === 3 && (
               <button onClick={() => { setError(''); setPaso(4); }}
                 disabled={!form.area_sown_ha || Number(form.area_sown_ha) <= 0 || !!errorSuperficie}
-                className="w-full bg-[#002f2a] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
                 Continuar
               </button>
             )}
             {paso === 4 && (
               <button onClick={guardar}
                 disabled={loading}
-                className="w-full bg-[#002f2a] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)] flex items-center justify-center gap-2">
+                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)] flex items-center justify-center gap-2">
                 {loading ? <><div className="w-4 h-4 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</> : <><Check size={16} /> Finalizar y guardar</>}
               </button>
             )}

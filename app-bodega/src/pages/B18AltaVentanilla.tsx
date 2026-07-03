@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
@@ -31,7 +31,7 @@ export default function B18AltaVentanilla() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#e8f5f3] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0 transition-all';
+  const inputClass = 'w-full bg-[#eef8f2] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 transition-all';
   const labelClass = 'block text-[14px] font-bold text-gray-700 mb-2';
 
   return (
@@ -60,8 +60,8 @@ export default function B18AltaVentanilla() {
                   onClick={() => set('tipo', k)}
                   className={`py-4 rounded-[1rem] text-[15px] font-bold transition-all border-2
                     ${form.tipo === k
-                      ? 'border-[#002f2a] bg-[#002f2a]/5 text-[#002f2a]'
-                      : 'border-transparent bg-[#e8f5f3] text-gray-500 hover:bg-gray-200/50'}`}
+                      ? 'border-[#1A5C38] bg-[#1A5C38]/5 text-[#1A5C38]'
+                      : 'border-transparent bg-[#eef8f2] text-gray-500 hover:bg-gray-200/50'}`}
                 >
                   {l}
                 </button>
@@ -125,7 +125,7 @@ export default function B18AltaVentanilla() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#002f2a] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
+              className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
             >
               {loading ? 'Guardando…' : 'Crear ventanilla'}
             </button>

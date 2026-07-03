@@ -38,7 +38,7 @@ export default function BannerCanvas() {
       vx: rnd(-0.00012, 0.00012),
       vy: rnd(-0.00008, 0.00008),
       ph: Math.random() * Math.PI * 2,
-      hue: rnd(168, 180),           // teal PANTONE 626 C
+      hue: rnd(140, 160),           // verdes un poco más fuertes/saturados
     }));
 
     /* Partículas brillantes pequeñas */
@@ -65,9 +65,9 @@ export default function BannerCanvas() {
         if (o.y < -0.3) o.y = 1.3; if (o.y > 1.3) o.y = -0.3;
         const pulse = 0.75 + 0.25 * Math.sin(t * 0.009 + o.ph);
         const g = ctx.createRadialGradient(o.x * W, o.y * H, 0, o.x * W, o.y * H, o.r * pulse);
-        g.addColorStop(0, `hsla(${o.hue}, 65%, 38%, 0.16)`);
-        g.addColorStop(0.6, `hsla(${o.hue}, 60%, 33%, 0.07)`);
-        g.addColorStop(1, 'hsla(174, 60%, 33%, 0)');
+        g.addColorStop(0, `hsla(${o.hue}, 65%, 45%, 0.16)`);
+        g.addColorStop(0.6, `hsla(${o.hue}, 60%, 40%, 0.07)`);
+        g.addColorStop(1, 'hsla(150, 60%, 40%, 0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
       }
@@ -89,8 +89,8 @@ export default function BannerCanvas() {
         ctx.lineTo(-10, H + 20);
         ctx.closePath();
         const bg = ctx.createLinearGradient(0, baseY - 20, 0, H);
-        bg.addColorStop(0, `hsla(174, 60%, ${32 + i * 4}%, ${0.10 - i * 0.025})`);
-        bg.addColorStop(1, 'hsla(174, 60%, 29%, 0)');
+        bg.addColorStop(0, `hsla(152, 60%, ${38 + i * 4}%, ${0.10 - i * 0.025})`);
+        bg.addColorStop(1, 'hsla(152, 60%, 35%, 0)');
         ctx.fillStyle = bg;
         ctx.fill();
 
@@ -124,7 +124,7 @@ export default function BannerCanvas() {
         if (tw > 0.85) {
           ctx.beginPath();
           ctx.arc(s.x * W, s.y * H, s.r * 2.6, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(109, 189, 175, ${(tw - 0.85) * 0.25})`;
+          ctx.fillStyle = `rgba(160, 255, 200, ${(tw - 0.85) * 0.25})`;
           ctx.fill();
         }
       }

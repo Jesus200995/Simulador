@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Sprout, Wheat, Check } from 'lucide-react';
 
@@ -138,7 +138,7 @@ export default function PropuestaVentaPage() {
             else if (paso === 'datos' || paso === 'sel_ciclo') setPaso(ups.filter(u => (u.ciclos_activos?.length || 0) > 0).length > 1 ? 'sel_up' : 'datos');
             else navigate(-1);
           }}
-          className="p-2 rounded-lg hover:bg-[#e8f5f3]">
+          className="p-2 rounded-lg hover:bg-[#eef8f2]">
           <ChevronLeft size={20} />
         </button>
         <div>
@@ -154,19 +154,19 @@ export default function PropuestaVentaPage() {
       <div className="p-4 max-w-2xl mx-auto">
         {paso === 'cargando' && (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#002f2a]/30 border-t-[#002f2a] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
           </div>
         )}
 
         {paso === 'sin_ciclo' && (
           <div className="text-center py-16">
-            <Sprout size={48} className="text-[#002f2a] mx-auto mb-4" />
+            <Sprout size={48} className="text-[#1A5C38] mx-auto mb-4" />
             <p className="font-semibold text-gray-800 text-lg mb-2">Primero registra tu ciclo</p>
             <p className="text-gray-500 text-sm max-w-xs mx-auto mb-6">
               Para publicar una propuesta de venta necesitas tener un ciclo productivo activo registrado en tu parcela.
             </p>
             <button onClick={() => navigate('/productor/ciclo')}
-              className="bg-[#002f2a] text-white px-6 py-3 rounded-2xl font-semibold">
+              className="bg-[#1A5C38] text-white px-6 py-3 rounded-2xl font-semibold">
               Registrar mi ciclo →
             </button>
           </div>
@@ -177,11 +177,11 @@ export default function PropuestaVentaPage() {
             <p className="text-sm text-gray-600 mb-4">¿De qué parcela es tu maíz?</p>
             {ups.filter(u => (u.ciclos_activos?.length || 0) > 0).map(up => (
               <button key={up.up_id} onClick={() => seleccionarUP(up)}
-                className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#002f2a] hover:bg-green-50 transition-colors flex items-center justify-between">
+                className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#1A5C38] hover:bg-green-50 transition-colors flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-gray-800">{up.up_name}</p>
                   <p className="text-sm text-gray-500 mt-0.5">{up.municipality_name}, {up.state_name}</p>
-                  <p className="text-xs text-[#002f2a] mt-1">
+                  <p className="text-xs text-[#1A5C38] mt-1">
                     {up.ciclos_activos!.length} ciclo{up.ciclos_activos!.length > 1 ? 's' : ''} activo{up.ciclos_activos!.length > 1 ? 's' : ''} · {up.area_ha_calc} ha
                   </p>
                 </div>
@@ -197,10 +197,10 @@ export default function PropuestaVentaPage() {
             {ciclos.map(ciclo => (
               <button key={ciclo.cycle_id}
                 onClick={() => { setCicloSeleccionado(ciclo); setPaso('datos'); }}
-                className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#002f2a] hover:bg-green-50 transition-colors flex items-center justify-between">
+                className="w-full bg-white rounded-2xl border border-gray-200 p-4 text-left hover:border-[#1A5C38] hover:bg-green-50 transition-colors flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-gray-800">{ciclo.cycle_type} {ciclo.cycle_year}</p>
-                  <p className="text-sm text-[#002f2a] mt-0.5 flex items-center gap-1"><Wheat size={14} /> {variedadLegible(ciclo)}</p>
+                  <p className="text-sm text-[#1A5C38] mt-0.5 flex items-center gap-1"><Wheat size={14} /> {variedadLegible(ciclo)}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{ciclo.area_sown_ha} ha sembradas</p>
                 </div>
                 <ChevronRight size={20} className="text-gray-400" />
@@ -216,7 +216,7 @@ export default function PropuestaVentaPage() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Parcela:</span><span className="font-medium text-gray-800">{upSeleccionada.up_name}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Ciclo:</span><span className="font-medium text-gray-800">{cicloSeleccionado.cycle_type} {cicloSeleccionado.cycle_year}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Variedad:</span><span className="font-medium text-[#002f2a] inline-flex items-center gap-1"><Wheat size={14} /> {variedadLegible(cicloSeleccionado)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-600">Variedad:</span><span className="font-medium text-[#1A5C38] inline-flex items-center gap-1"><Wheat size={14} /> {variedadLegible(cicloSeleccionado)}</span></div>
               </div>
             </div>
 
@@ -224,7 +224,7 @@ export default function PropuestaVentaPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">¿Cuántas toneladas ofreces? *</label>
               <input type="number" value={volumen} onChange={e => setVolumen(e.target.value)}
                 placeholder="Ej: 50" min="0.1" step="0.1"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#002f2a]" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               <p className="text-xs text-gray-400 mt-1">Tu ciclo tiene {cicloSeleccionado.area_sown_ha} ha sembradas</p>
             </div>
 
@@ -238,7 +238,7 @@ export default function PropuestaVentaPage() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">$</span>
                 <input type="number" value={precioMinimo} onChange={e => setPrecioMinimo(e.target.value)}
                   placeholder="Ej: 5000" min="0" step="50" inputMode="numeric"
-                  className="w-full border border-gray-200 rounded-xl pl-8 pr-20 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#002f2a]" />
+                  className="w-full border border-gray-200 rounded-xl pl-8 pr-20 py-3 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">MXN/ton</span>
               </div>
               <p className="text-xs text-gray-400 mt-1.5">Las bodegas verán este precio como punto de partida para negociar.</p>
@@ -250,13 +250,13 @@ export default function PropuestaVentaPage() {
                 <label className="block text-xs text-gray-500 mb-1">Desde</label>
                 <input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#002f2a]" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Hasta</label>
                 <input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)}
                   min={fechaDesde || new Date().toISOString().split('T')[0]}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#002f2a]" />
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
               </div>
             </div>
 
@@ -265,7 +265,7 @@ export default function PropuestaVentaPage() {
             )}
 
             <button onClick={enviar} disabled={enviando || !volumen || !fechaDesde || !fechaHasta}
-              className="w-full bg-[#002f2a] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40 flex items-center justify-center gap-2">
+              className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-bold text-lg disabled:opacity-40 flex items-center justify-center gap-2">
               {enviando ? 'Publicando...' : (<><Check size={20} /> Publicar propuesta</>)}
             </button>
           </div>

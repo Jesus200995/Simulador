@@ -97,39 +97,7 @@ body {
 }
 .animate-backdrop-in { animation: backdrop-in 0.18s ease both; }
 
-/* ═══════ SIMAC — Paleta PANTONE Gobierno de México 2026 ═══════ */
-@theme {
-  /* Verde PANTONE 627 C — color fundamental principal */
-  --color-green-50:  #e6f0ef;
-  --color-green-100: #b3d1ce;
-  --color-green-200: #80b2ae;
-  --color-green-300: #4d938d;
-  --color-green-400: #267a6b;
-  --color-green-500: #002f2a;
-  --color-green-600: #1e5b4f;
-  --color-green-700: #195049;
-  --color-green-800: #133f3a;
-  --color-green-900: #001a17;
-  --color-green-950: #000e0c;
-
-  /* Acento dorado PANTONE 1255 C */
-  --color-amber-400: #c9a03a;
-  --color-amber-500: #a57f2c;
-  --color-amber-600: #8a6a22;
-
-  /* Variables semánticas del sistema */
-  --simac-primary:      #002f2a;
-  --simac-primary-dark: #001a17;
-  --simac-primary-hover:#1e5b4f;
-  --simac-gold:         #a57f2c;
-  --simac-gold-light:   #e6d194;
-  --simac-wine:         #9b2247;
-  --simac-wine-dark:    #611232;
-  --simac-gray:         #98989a;
-  --simac-black:        #161a1d;
-}
-
-/* SIMAC title shimmer — teal sweep */
+/* SIMAC title shimmer — subtle green-diamond sweep */
 @keyframes somec-shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -137,16 +105,18 @@ body {
 .somec-shimmer {
   background: linear-gradient(
     90deg,
-    #002f2a 0%,
-    #002f2a 35%,
-    #1e5b4f 48%,
-    #3da794 50%,
-    #1e5b4f 52%,
-    #002f2a 65%,
-    #002f2a 100%
+    #1A5C38 0%,
+    #1A5C38 35%,
+    #5db87a 48%,
+    #7dd49a 50%,
+    #5db87a 52%,
+    #1A5C38 65%,
+    #1A5C38 100%
   );
   background-size: 250% auto;
   -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
@@ -298,14 +268,14 @@ body {
 
 /* Primary (draw) */
 .simac-tool-primary {
-  background: #002f2a;
+  background: #1A5C38;
   color: white !important;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 47, 42, 0.30);
+  box-shadow: 0 2px 8px rgba(26, 92, 56, 0.25);
 }
 
 .simac-tool-primary:hover {
-  background: #1e5b4f !important;
+  background: #15482d !important;
 }
 
 /* Danger (delete) */
@@ -494,7 +464,7 @@ body {
   margin-left: -6px !important;
   margin-top: -6px !important;
   border-radius: 50% !important;
-  border: 2px solid #002f2a !important;
+  border: 2px solid #1A5C38 !important;
   background: white !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 }

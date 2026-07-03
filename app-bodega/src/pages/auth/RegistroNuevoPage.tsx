@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -349,17 +349,17 @@ export default function RegistroNuevoPage() {
   // --- STYLES ---
   const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3.5 text-sm sm:text-base tracking-wide text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all';
   const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1 sm:mb-1.5';
-  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#002f2a] rounded-xl py-3 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
+  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
 
   // --- MAPA (Paso 4) ---
   if (paso === 4 && enDibujo) {
     const puedeTerminar = pointCount >= 3;
     return (
       <div 
-        className="h-[100dvh] flex flex-col overflow-hidden bg-[#000e0c]"
+        className="h-[100dvh] flex flex-col overflow-hidden bg-[#0c2e1a]"
         style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="bg-[#000e0c] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
+        <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
           <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
             <ChevronLeft size={20} />
           </button>
@@ -382,7 +382,7 @@ export default function RegistroNuevoPage() {
             {pendingUP && (
               <Polygon
                 positions={pendingUP.poligono}
-                pathOptions={{ color: '#3da794', fillColor: '#002f2a', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
+                pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
               />
             )}
           </MapContainer>
@@ -402,7 +402,7 @@ export default function RegistroNuevoPage() {
             <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
               {/* Backdrop difuminado en la parte superior */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
-              <div className="relative bg-[#000e0c]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
+              <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
                 {/* Handle */}
                 <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
 
@@ -523,13 +523,13 @@ export default function RegistroNuevoPage() {
                 });
               }}
               disabled={capturandoGPS}
-              className="w-full bg-[#002f2a]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+              className="w-full bg-[#1A5C38]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
             >
               {capturandoGPS
                 ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
                 : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
             </button>
-            {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#002f2a]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
+            {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
             {pointCount > 0 && (
               <div className="flex gap-2">
                 <button onClick={() => dibujarRef.current?.undoVertex()}
@@ -596,7 +596,7 @@ export default function RegistroNuevoPage() {
 
   return (
     <div
-      className="fixed inset-0 flex bg-gradient-to-br from-[#020e0c] via-[#081f1b] to-[#0f2e2a]"
+      className="fixed inset-0 flex bg-gradient-to-br from-[#061510] via-[#0b271a] to-[#142e1d]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Fondo decorativo */}
@@ -626,7 +626,7 @@ export default function RegistroNuevoPage() {
               return (
                 <div key={n} className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${active ? 'bg-white/[0.09] ring-1 ring-white/10' : ''}`}>
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${done ? 'bg-green-400' : active ? 'bg-white' : 'bg-white/[0.07] ring-1 ring-white/10'}`}>
-                    {done ? <Check size={13} className="text-[#020e0c]" strokeWidth={3} /> : <span className={`text-[11px] font-bold ${active ? 'text-[#081f1b]' : 'text-white/25'}`}>{n}</span>}
+                    {done ? <Check size={13} className="text-[#061510]" strokeWidth={3} /> : <span className={`text-[11px] font-bold ${active ? 'text-[#0b271a]' : 'text-white/25'}`}>{n}</span>}
                   </div>
                   <div className="min-w-0">
                     <p className={`text-[13px] font-semibold truncate ${active ? 'text-white' : done ? 'text-green-300/80' : 'text-white/25'}`}>{label}</p>
@@ -659,7 +659,7 @@ export default function RegistroNuevoPage() {
                   <div key={n} className="flex items-center">
                     <div className="flex flex-col items-center gap-1">
                       <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all ${done ? 'bg-green-400' : active ? 'bg-white' : 'bg-white/10 ring-1 ring-white/20'}`}>
-                        {done ? <Check size={11} className="text-[#020e0c]" strokeWidth={3} /> : <span className={`text-[10px] font-bold ${active ? 'text-[#081f1b]' : 'text-white/30'}`}>{n}</span>}
+                        {done ? <Check size={11} className="text-[#061510]" strokeWidth={3} /> : <span className={`text-[10px] font-bold ${active ? 'text-[#0b271a]' : 'text-white/30'}`}>{n}</span>}
                       </div>
                       <span className={`text-[8px] sm:text-[9px] font-medium hidden xs:block ${active ? 'text-white/60' : 'text-white/15'}`}>{label}</span>
                     </div>
@@ -1017,7 +1017,7 @@ export default function RegistroNuevoPage() {
                         className="py-3 bg-white/[0.08] hover:bg-white/[0.12] ring-1 ring-white/15 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]">
                         <Plus size={16} /> Agregar otra
                       </button>
-                      <button onClick={() => setPaso(6)} className="py-3 bg-white hover:bg-white/90 text-[#081f1b] rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]">
+                      <button onClick={() => setPaso(6)} className="py-3 bg-white hover:bg-white/90 text-[#0b271a] rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]">
                         Crear NIP <ChevronLeft size={14} className="rotate-180" />
                       </button>
                     </div>
@@ -1066,12 +1066,12 @@ export default function RegistroNuevoPage() {
               {paso === 99 && (
                 <div className="animate-auth-in text-center py-8">
                   <div className="w-20 h-20 bg-green-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_50px_rgba(74,222,128,0.35)]" style={{ animation: 'pfPop 0.5s ease' }}>
-                    <Check size={40} className="text-[#020e0c]" strokeWidth={3} />
+                    <Check size={40} className="text-[#061510]" strokeWidth={3} />
                   </div>
                   <h2 className="text-3xl font-bold text-white mb-2">¡Registro Exitoso!</h2>
                   <p className="text-white/50 mb-8 text-base">Tu cuenta de productor ha sido creada.</p>
                   <button onClick={() => navigate('/login-productor')}
-                    className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#081f1b] py-3.5 rounded-xl font-bold text-base transition-all shadow-lg">
+                    className="w-full bg-white hover:bg-white/90 active:scale-[0.98] text-[#0b271a] py-3.5 rounded-xl font-bold text-base transition-all shadow-lg">
                     Iniciar Sesión
                   </button>
                 </div>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
@@ -388,12 +388,12 @@ export default function MapaBodegasPage() {
           <div className="space-y-2">
             <div className="bg-emerald-50 rounded-lg p-2.5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-md bg-[#002f2a]/10 flex items-center justify-center flex-shrink-0">
-                  <Wheat size={12} className="text-[#002f2a]" />
+                <div className="w-6 h-6 rounded-md bg-[#1A5C38]/10 flex items-center justify-center flex-shrink-0">
+                  <Wheat size={12} className="text-[#1A5C38]" />
                 </div>
                 <p className="text-[10px] text-gray-600 font-medium">Precio hoy</p>
               </div>
-              <p className="font-black text-[#002f2a] text-[14px]">
+              <p className="font-black text-[#1A5C38] text-[14px]">
                 {b.precio_compra_hoy > 0 ? `$${Number(b.precio_compra_hoy).toLocaleString('es-MX')}` : '-'}
               </p>
             </div>
@@ -424,7 +424,7 @@ export default function MapaBodegasPage() {
           <div className="flex gap-1.5 pt-1 border-t border-gray-100">
             {b.senal_activa && (
               <button onClick={() => handleMeInteresa(b.senal_activa!.id, b.nombre)}
-                className="flex-[1.5] bg-[#002f2a] hover:bg-[#1e5b4f] text-white text-[10px] font-black py-2 rounded-lg flex items-center justify-center gap-1 shadow-sm transition-all">
+                className="flex-[1.5] bg-[#1A5C38] hover:bg-[#15482d] text-white text-[10px] font-black py-2 rounded-lg flex items-center justify-center gap-1 shadow-sm transition-all">
                 <CheckCircle2 size={11} /> Me interesa
               </button>
             )}
@@ -479,10 +479,10 @@ export default function MapaBodegasPage() {
 
   // ── RENDER ────────────────────────────────────
   return (
-    <div className="bg-[#e8f5f3] w-full max-w-2xl mx-auto h-full flex flex-col overflow-hidden">
+    <div className="bg-[#eef8f2] w-full max-w-2xl mx-auto h-full flex flex-col overflow-hidden">
 
       {/* ── HEADER VERDE: título + stats + filtros ── */}
-      <div className="flex-shrink-0 bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] z-20">
+      <div className="flex-shrink-0 bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)] z-20">
         <div className="px-4 sm:px-6 pt-4 pb-4">
 
 
@@ -583,7 +583,7 @@ export default function MapaBodegasPage() {
           {/* Loading overlay */}
           {loadingBodegas && (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-white/90 backdrop-blur-md rounded-full px-4 py-2 shadow-lg flex items-center gap-2 text-[12px] font-semibold text-gray-700">
-              <div className="w-3 h-3 border-2 border-[#002f2a]/30 border-t-[#002f2a] rounded-full animate-spin" />
+              <div className="w-3 h-3 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
               Cargando bodegas...
             </div>
           )}
@@ -619,7 +619,7 @@ export default function MapaBodegasPage() {
                 <p className="text-sm text-gray-500 mt-1">Intenta ampliar el radio de búsqueda</p>
                 {radioKm < 500 && (
                   <button onClick={() => setRadioKm(500)}
-                    className="mt-4 px-4 py-2 bg-[#002f2a] text-white rounded-xl text-sm font-semibold">
+                    className="mt-4 px-4 py-2 bg-[#1A5C38] text-white rounded-xl text-sm font-semibold">
                     Buscar en 500 km
                   </button>
                 )}
@@ -631,7 +631,7 @@ export default function MapaBodegasPage() {
 
       {/* â”€â”€ Toast â”€â”€ */}
       {confirmacionVisible && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[3000] bg-[#002f2a] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 max-w-xs w-full mx-4">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[3000] bg-[#1A5C38] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 max-w-xs w-full mx-4">
           <CheckCircle2 size={22} className="flex-shrink-0" />
           <div>
             <p className="font-black text-[13px]">¡Interés registrado!</p>

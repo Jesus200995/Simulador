@@ -254,7 +254,7 @@ export default function BodegasAdminPage() {
     <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
 
       {/* ── Tab Bar ── */}
-      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl overflow-hidden border border-[#002f2a]/30 border-t-0">
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl overflow-hidden border border-[#1A5C38]/30 border-t-0">
         <div className="flex items-center justify-between gap-1.5 px-2 py-1.5">
           <div className="flex items-center gap-1">
             {[
@@ -266,8 +266,8 @@ export default function BodegasAdminPage() {
               <button key={key} onClick={() => setTabActivo(key as any)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${
                   tabActivo === key
-                    ? 'bg-[#002f2a] text-white shadow-sm'
-                    : 'text-[#002f2a] hover:bg-[#cce8e5] hover:text-[#001a17]'
+                    ? 'bg-[#1A5C38] text-white shadow-sm'
+                    : 'text-[#1A5C38] hover:bg-[#d4efe1] hover:text-[#0e3d24]'
                 }`}>
                 {icon}{label}
                 {badge !== null && badge > 0 && (
@@ -279,7 +279,7 @@ export default function BodegasAdminPage() {
             ))}
           </div>
           <button onClick={cargarBodegas} disabled={loading}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white border border-[#002f2a]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50 flex-shrink-0">
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50 flex-shrink-0">
             <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
@@ -397,23 +397,23 @@ export default function BodegasAdminPage() {
                 placeholder="Buscar bodega o silo..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:border-[#002f2a]/40 focus:bg-white transition-all duration-150"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:border-[#1A5C38]/40 focus:bg-white transition-all duration-150"
               />
             </div>
-            <span className="text-[10px] font-bold text-[#002f2a] bg-[#e6f0ef] border border-[#002f2a]/20 px-2 py-1 rounded-lg flex-shrink-0">
+            <span className="text-[10px] font-bold text-[#1A5C38] bg-[#eef8f2] border border-[#1A5C38]/20 px-2 py-1 rounded-lg flex-shrink-0">
               {filteredList.length}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <select value={estadoFilter} onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-2 text-[11.5px] text-gray-700 outline-none focus:border-[#002f2a]/40 transition-all duration-150">
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-2 text-[11.5px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150">
               <option value="">Estados</option>
               <option value="Sinaloa">Sinaloa</option>
               <option value="Jalisco">Jalisco</option>
               <option value="Guanajuato">Guanajuato</option>
             </select>
             <select value={estatusFilter} onChange={e => setEstatusFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-2 text-[11.5px] text-gray-700 outline-none focus:border-[#002f2a]/40 transition-all duration-150">
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-2 text-[11.5px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150">
               <option value="">Estatus</option>
               <option value="aprobada">Aprobada</option>
               <option value="pendiente">Pendiente</option>
@@ -426,7 +426,7 @@ export default function BodegasAdminPage() {
         <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2">
-              <RefreshCw size={18} className="text-[#002f2a] animate-spin" />
+              <RefreshCw size={18} className="text-[#1A5C38] animate-spin" />
               <p className="text-[11.5px] text-gray-400">Cargando bodegas...</p>
             </div>
           ) : filteredList.length === 0 ? (
@@ -438,7 +438,7 @@ export default function BodegasAdminPage() {
             filteredList.map(b => (
               <div key={b.id} onClick={() => focusBodega(b)}
                 className={`px-3 py-3 cursor-pointer transition-all duration-150 flex items-start gap-3 border-b border-gray-50 last:border-0 ${
-                  selectedBodegaId === b.id ? 'bg-emerald-50/60 border-l-2 border-l-[#002f2a]' : 'hover:bg-gray-50/70'
+                  selectedBodegaId === b.id ? 'bg-emerald-50/60 border-l-2 border-l-[#1A5C38]' : 'hover:bg-gray-50/70'
                 }`}>
                 {/* Avatar coloreado por estatus */}
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm ${
@@ -474,7 +474,7 @@ export default function BodegasAdminPage() {
                       <span className="text-[10.5px] text-gray-500 font-semibold">{b.capacidad_total.toLocaleString()} t</span>
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/bodegas/${b.id}`); }}
-                      className="text-[10px] font-bold text-[#002f2a] bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-2 py-0.5 rounded-lg flex items-center gap-0.5 transition-colors duration-150">
+                      className="text-[10px] font-bold text-[#1A5C38] bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-2 py-0.5 rounded-lg flex items-center gap-0.5 transition-colors duration-150">
                       Ver <Eye size={9} />
                     </button>
                   </div>
@@ -603,7 +603,7 @@ export default function BodegasAdminPage() {
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
                     <button onClick={() => confirmarAprobar(b.id, b.nombre)}
-                      className="flex-1 bg-[#002f2a] hover:bg-[#1e5b4f] text-white font-bold py-2 rounded-xl text-[12px] transition-all duration-150 flex items-center justify-center gap-1.5">
+                      className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white font-bold py-2 rounded-xl text-[12px] transition-all duration-150 flex items-center justify-center gap-1.5">
                       <CheckCircle size={13} /> Aprobar
                     </button>
                     <button onClick={() => confirmarRechazar(b.id, b.nombre)}

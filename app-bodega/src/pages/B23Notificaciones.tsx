@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell, CheckCheck, Signal, Receipt, Store, Megaphone,
@@ -169,7 +169,7 @@ export default function B23Notificaciones() {
     <div className="w-full">
 
       {/* ── Banner sticky verde (mismo estilo que Oferta) ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden">
         {/* Decoración de fondo */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
         <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-white/[0.03] pointer-events-none" />
@@ -277,7 +277,7 @@ export default function B23Notificaciones() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <div className="w-8 h-8 border-2 border-[#002f2a]/30 border-t-[#002f2a] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#1A5C38]/30 border-t-[#1A5C38] rounded-full animate-spin" />
             <p className="text-[13px] text-gray-400 font-medium">Cargando notificaciones…</p>
           </div>
         ) : notifs.length === 0 ? (
@@ -304,10 +304,10 @@ export default function B23Notificaciones() {
                 key={n.id}
                 className={`w-full rounded-[1.5rem] border overflow-hidden transition-all duration-300
                   ${isOpen
-                    ? 'shadow-[0_8px_32px_rgba(0,0,0,0.1)] border-[#002f2a]/25'
+                    ? 'shadow-[0_8px_32px_rgba(0,0,0,0.1)] border-[#1A5C38]/25'
                     : n.leida
                       ? 'border-black/[0.05] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]'
-                      : 'border-[#002f2a]/20 shadow-[0_4px_16px_rgba(26,92,56,0.1)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.15)]'
+                      : 'border-[#1A5C38]/20 shadow-[0_4px_16px_rgba(26,92,56,0.1)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.15)]'
                   }
                   ${n.leida && !isOpen ? 'bg-white' : isOpen ? 'bg-white' : 'bg-emerald-50/40'}
                 `}
@@ -328,7 +328,7 @@ export default function B23Notificaciones() {
                     {/* Fila superior: categoría · tiempo · punto · chevron */}
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className={`text-[10.5px] font-bold uppercase tracking-wider flex-shrink-0 ${n.leida ? 'text-gray-400' : 'text-[#002f2a]'}`}>
+                        <span className={`text-[10.5px] font-bold uppercase tracking-wider flex-shrink-0 ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
                           {cfg.label}
                         </span>
                         <span className="text-gray-300 flex-shrink-0">·</span>
@@ -336,11 +336,11 @@ export default function B23Notificaciones() {
                           {timeAgo(n.created_at)}
                         </span>
                         {!n.leida && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#002f2a] animate-pulse flex-shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#1A5C38] animate-pulse flex-shrink-0" />
                         )}
                       </div>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen ? 'bg-[#002f2a]/10 rotate-180' : 'bg-gray-100'}`}>
-                        <ChevronDown size={13} className={isOpen ? 'text-[#002f2a]' : 'text-gray-400'} />
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
+                        <ChevronDown size={13} className={isOpen ? 'text-[#1A5C38]' : 'text-gray-400'} />
                       </div>
                     </div>
 
@@ -405,7 +405,7 @@ export default function B23Notificaciones() {
                           {tieneRuta && (
                             <button
                               onClick={e => { e.stopPropagation(); irARuta(n); }}
-                              className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-[#002f2a] hover:bg-[#174f30] active:bg-[#133f26] px-4 py-1.5 rounded-xl shadow-sm transition-all duration-200 active:scale-[0.97]"
+                              className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-[#1A5C38] hover:bg-[#174f30] active:bg-[#133f26] px-4 py-1.5 rounded-xl shadow-sm transition-all duration-200 active:scale-[0.97]"
                             >
                               Ver detalle
                               <ArrowRight size={12} />

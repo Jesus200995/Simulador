@@ -1,4 +1,4 @@
-﻿import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { ChevronLeft, Warehouse, Sprout } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -352,7 +352,7 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
   const navigate = useNavigate();
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b]">
+    <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f]">
       {/* Círculos decorativos */}
       <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-white/[0.04] pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/[0.03] pointer-events-none" />
@@ -448,7 +448,7 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
       </div>
 
       {/* Curva inferior suave */}
-      <div className="absolute bottom-0 left-0 right-0 h-6 bg-[#e8f5f3] rounded-t-[24px]" />
+      <div className="absolute bottom-0 left-0 right-0 h-6 bg-[#eef8f2] rounded-t-[24px]" />
 
       <style>{`
         @keyframes phPop     { from { opacity:0; transform:scale(0.75) } to { opacity:1; transform:scale(1) } }

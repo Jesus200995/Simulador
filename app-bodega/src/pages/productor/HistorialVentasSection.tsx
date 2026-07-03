@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Wheat } from 'lucide-react';
 
@@ -49,7 +49,7 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
     return (
       <div className="space-y-3 mt-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-16 bg-[#e8f5f3] rounded-xl animate-pulse" />
+          <div key={i} className="h-16 bg-[#eef8f2] rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -108,7 +108,7 @@ export default function HistorialVentasSection({ token, apiUrl }: Props) {
                 {txn.estado_confirmacion === 'pendiente' && (
                   <button
                     onClick={() => navigate(`/productor/transaccion/${txn.id}/confirmar`)}
-                    className="text-xs text-[#002f2a] underline"
+                    className="text-xs text-[#1A5C38] underline"
                   >
                     Confirmar →
                   </button>

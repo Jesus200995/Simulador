@@ -492,8 +492,8 @@ export default function AvisosPrivacidadAdminPage() {
       <div className="flex flex-col gap-3 h-full">
 
         {/* ── Barra de acción ── */}
-        <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
-          <span className="text-[10px] font-bold text-[#002f2a]/70 uppercase tracking-wide">{total} registros totales</span>
+        <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
+          <span className="text-[10px] font-bold text-[#1A5C38]/70 uppercase tracking-wide">{total} registros totales</span>
         </div>
 
         {/* ── MÉTRICAS ── */}

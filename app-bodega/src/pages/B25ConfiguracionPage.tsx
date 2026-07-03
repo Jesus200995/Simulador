@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Lock, Eye, EyeOff, Bell, BellOff, ChevronRight, Check, Shield
@@ -105,8 +105,8 @@ export default function B25ConfiguracionPage() {
         {/* ── Seguridad ── */}
         <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-xl bg-[#002f2a]/10 flex items-center justify-center">
-              <Shield size={15} className="text-[#002f2a]" />
+            <div className="w-8 h-8 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center">
+              <Shield size={15} className="text-[#1A5C38]" />
             </div>
             <p className="text-[15px] font-bold text-gray-800">Cambiar contraseña</p>
           </div>
@@ -123,7 +123,7 @@ export default function B25ConfiguracionPage() {
                   onChange={e => setPassActual(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full pl-11 pr-10 py-4 bg-[#e8f5f3] border-0 focus:ring-2 focus:ring-[#002f2a]/30 rounded-[1rem] text-[16px] font-medium outline-none transition-all"
+                  className="w-full pl-11 pr-10 py-4 bg-[#eef8f2] border-0 focus:ring-2 focus:ring-[#1A5C38]/30 rounded-[1rem] text-[16px] font-medium outline-none transition-all"
                 />
                 <button type="button" onClick={() => setShowActual(!showActual)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                   {showActual ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -142,7 +142,7 @@ export default function B25ConfiguracionPage() {
                   onChange={e => setPassNueva(e.target.value)}
                   placeholder="Mínimo 6 caracteres"
                   autoComplete="new-password"
-                  className="w-full pl-11 pr-10 py-4 bg-[#e8f5f3] border-0 focus:ring-2 focus:ring-[#002f2a]/30 rounded-[1rem] text-[16px] font-medium outline-none transition-all"
+                  className="w-full pl-11 pr-10 py-4 bg-[#eef8f2] border-0 focus:ring-2 focus:ring-[#1A5C38]/30 rounded-[1rem] text-[16px] font-medium outline-none transition-all"
                 />
                 <button type="button" onClick={() => setShowNueva(!showNueva)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                   {showNueva ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -161,12 +161,12 @@ export default function B25ConfiguracionPage() {
                   onChange={e => setPassConfirm(e.target.value)}
                   placeholder="Repite la nueva contraseña"
                   autoComplete="new-password"
-                  className={`w-full pl-11 pr-4 py-4 bg-[#e8f5f3] border-2 rounded-[1rem] text-[16px] font-medium outline-none transition-all
+                  className={`w-full pl-11 pr-4 py-4 bg-[#eef8f2] border-2 rounded-[1rem] text-[16px] font-medium outline-none transition-all
                     ${passConfirm && passNueva !== passConfirm
                       ? 'border-red-300 bg-red-50 focus:ring-0'
                       : passConfirm && passNueva === passConfirm
                       ? 'border-green-400 bg-green-50 focus:ring-0'
-                      : 'border-transparent focus:border-transparent focus:ring-2 focus:ring-[#002f2a]/30'
+                      : 'border-transparent focus:border-transparent focus:ring-2 focus:ring-[#1A5C38]/30'
                     }`}
                 />
               </div>
@@ -189,7 +189,7 @@ export default function B25ConfiguracionPage() {
               <button
                 onClick={cambiarContrasena}
                 disabled={savingPass}
-                className="w-full flex items-center justify-center gap-2 bg-[#002f2a] hover:bg-[#1e5b4f] text-white py-4 rounded-[1.25rem] text-[17px] font-bold disabled:opacity-60 active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)]"
+                className="w-full flex items-center justify-center gap-2 bg-[#1A5C38] hover:bg-[#15482d] text-white py-4 rounded-[1.25rem] text-[17px] font-bold disabled:opacity-60 active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)]"
               >
                 {savingPass ? <><Spinner /> Guardando...</> : <><Lock size={18} /> Cambiar contraseña</>}
               </button>
@@ -200,8 +200,8 @@ export default function B25ConfiguracionPage() {
         {/* ── Notificaciones ── */}
         <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04]">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-xl bg-[#002f2a]/10 flex items-center justify-center">
-              <Bell size={15} className="text-[#002f2a]" />
+            <div className="w-8 h-8 rounded-xl bg-[#1A5C38]/10 flex items-center justify-center">
+              <Bell size={15} className="text-[#1A5C38]" />
             </div>
             <p className="text-[15px] font-bold text-gray-800">Notificaciones</p>
           </div>
@@ -214,13 +214,13 @@ export default function B25ConfiguracionPage() {
             ].map(({ label, desc, value, set }) => (
               <div
                 key={label}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-[#f4fbf7] active:bg-[#e8f5f3] transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-[#f4fbf7] active:bg-[#eef8f2] transition-colors cursor-pointer"
                 onClick={() => toggleItem(set, value)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[#eef8f2] flex items-center justify-center flex-shrink-0">
                     {value
-                      ? <Bell size={14} className="text-[#002f2a]" />
+                      ? <Bell size={14} className="text-[#1A5C38]" />
                       : <BellOff size={14} className="text-gray-400" />
                     }
                   </div>
@@ -230,7 +230,7 @@ export default function B25ConfiguracionPage() {
                   </div>
                 </div>
                 {/* Toggle switch */}
-                <div className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${value ? 'bg-[#002f2a]' : 'bg-gray-200'}`}>
+                <div className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${value ? 'bg-[#1A5C38]' : 'bg-gray-200'}`}>
                   <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </div>
               </div>
@@ -242,16 +242,16 @@ export default function B25ConfiguracionPage() {
         <div className="bg-white rounded-[1.5rem] shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.04] overflow-hidden transition-transform duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 group/card">
           <button
             onClick={() => navigate('/notificaciones')}
-            className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-[#f4fbf7]/50 active:bg-[#e8f5f3] transition-colors"
+            className="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-[#f4fbf7]/50 active:bg-[#eef8f2] transition-colors"
           >
-            <div className="w-12 h-12 rounded-[1.25rem] bg-[#002f2a]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
-              <Bell size={22} className="text-[#002f2a]" />
+            <div className="w-12 h-12 rounded-[1.25rem] bg-[#1A5C38]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
+              <Bell size={22} className="text-[#1A5C38]" />
             </div>
             <div className="flex-1 transition-transform duration-500 group-hover/card:translate-x-1">
               <p className="text-[16px] font-bold text-gray-900">Ver mis notificaciones</p>
               <p className="text-[13px] text-gray-500 font-medium mt-0.5">Historial completo de alertas</p>
             </div>
-            <ChevronRight size={18} className="text-gray-300 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#002f2a]" />
+            <ChevronRight size={18} className="text-gray-300 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1A5C38]" />
           </button>
         </div>
 

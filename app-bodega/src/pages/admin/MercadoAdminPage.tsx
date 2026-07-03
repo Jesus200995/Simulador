@@ -90,9 +90,9 @@ export default function MercadoAdminPage() {
     <div className="flex flex-col gap-3">
 
       {/* ── Barra de acción ── */}
-      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 px-3 py-1.5 flex justify-end">
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex justify-end">
         <button onClick={cargar} disabled={loading}
-          className="flex items-center gap-1.5 text-[11px] font-bold text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white border border-[#002f2a]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+          className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
           <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> Recargar
         </button>
       </div>
@@ -156,7 +156,7 @@ export default function MercadoAdminPage() {
               return (
                 <CircleMarker key={`d-${d.id}`} center={[d.lat, d.lng]}
                   radius={match ? 10 : 7}
-                  color={match ? '#f59e0b' : '#002f2a'}
+                  color={match ? '#f59e0b' : '#1A5C38'}
                   fillColor="#22c55e" fillOpacity={0.7}
                   weight={match ? 3 : 1.5}
                 >

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Wheat } from 'lucide-react';
 
 interface Disponibilidad {
@@ -54,7 +54,7 @@ export default function MisDisponibilidadesSection({ token, apiUrl, onActualizar
   };
 
   if (cargando) {
-    return <div className="h-20 bg-[#e8f5f3] rounded-xl animate-pulse mt-4" />;
+    return <div className="h-20 bg-[#eef8f2] rounded-xl animate-pulse mt-4" />;
   }
 
   if (disponibilidades.length === 0) return null;

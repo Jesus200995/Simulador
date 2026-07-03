@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout';
 import { api } from '../services/api';
@@ -61,7 +61,7 @@ export default function B21DetalleSolicitud() {
             </p>
             <p className="text-[15px] font-medium text-gray-500">{solicitud.municipio}</p>
             <p className="text-[15px] font-medium text-gray-700">
-              Apoyo: <span className="font-bold text-[#002f2a] bg-[#002f2a]/10 px-2 py-0.5 rounded-lg">{solicitud.nombre_apoyo}</span>
+              Apoyo: <span className="font-bold text-[#1A5C38] bg-[#1A5C38]/10 px-2 py-0.5 rounded-lg">{solicitud.nombre_apoyo}</span>
             </p>
             <p className="text-[12px] text-gray-400">
               {new Date(solicitud.created_at).toLocaleString('es-MX')}
@@ -79,8 +79,8 @@ export default function B21DetalleSolicitud() {
                 onClick={() => setNuevoEstado(e)}
                 className={`px-5 py-2.5 rounded-[1.25rem] text-[14px] font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]
                   ${nuevoEstado === e
-                    ? (flujoColor[e] || 'border-[#002f2a] bg-green-50 text-[#002f2a]') + ' shadow-[0_4px_12px_rgba(0,0,0,0.05)]'
-                    : 'border-transparent bg-[#e8f5f3] text-gray-500 hover:bg-gray-200/60'}`}
+                    ? (flujoColor[e] || 'border-[#1A5C38] bg-green-50 text-[#1A5C38]') + ' shadow-[0_4px_12px_rgba(0,0,0,0.05)]'
+                    : 'border-transparent bg-[#eef8f2] text-gray-500 hover:bg-gray-200/60'}`}
               >
                 {e.charAt(0).toUpperCase() + e.slice(1)}
               </button>
@@ -94,7 +94,7 @@ export default function B21DetalleSolicitud() {
               onChange={e => setNotas(e.target.value)}
               rows={4}
               placeholder="Registro de la gestión realizada…"
-              className="w-full bg-[#e8f5f3] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0 resize-none transition-all"
+              className="w-full bg-[#eef8f2] rounded-[1rem] px-5 py-4 text-[16px] font-medium outline-none focus:ring-2 focus:ring-[#1A5C38]/30 border-0 resize-none transition-all"
             />
           </div>
 
@@ -102,7 +102,7 @@ export default function B21DetalleSolicitud() {
             <button
               onClick={guardar}
               disabled={saving || nuevoEstado === solicitud.estado}
-              className="w-full bg-[#002f2a] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
+              className="w-full bg-[#1A5C38] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
             >
               {saving ? 'Guardando…' : 'Guardar cambio de estado'}
             </button>

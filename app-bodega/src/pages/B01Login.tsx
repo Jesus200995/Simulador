@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
@@ -40,7 +40,7 @@ export default function B01Login() {
     >
       {/* Background */}
       <div className="fixed inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c] via-[#000e0c] to-[#002f2a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
         <div className="absolute bottom-0 inset-x-0 h-32 flex items-end justify-around px-6 opacity-[0.05] pointer-events-none">
           {[0,1,2,3,4,5,6,7,8,9].map(i => (
@@ -65,7 +65,7 @@ export default function B01Login() {
 
           {/* Icon + title */}
           <div className="flex justify-center mb-5">
-            <div className="w-16 h-16 bg-[#002f2a] rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
+            <div className="w-16 h-16 bg-[#1A5C38] rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
               <Building2 size={28} className="text-white" />
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function B01Login() {
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#002f2a] py-4 rounded-2xl text-base font-bold
+              className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] py-4 rounded-2xl text-base font-bold
                          disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-1">
               {loading ? <><Loader2 size={18} className="animate-spin" /> Ingresando…</> : 'Entrar'}
             </button>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell, BellRing, ShieldAlert, CloudRain, ShoppingCart, Receipt, Heart,
@@ -190,7 +190,7 @@ export default function AlertasPage() {
     <div className="w-full">
 
       {/* ── Header con volver ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.2)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.2)]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-3 pb-4">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -233,7 +233,7 @@ export default function AlertasPage() {
       )}
 
       {/* ── Banner sticky verde ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
         <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-white/[0.03] pointer-events-none" />
 
@@ -333,10 +333,10 @@ export default function AlertasPage() {
               style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
               className={`w-full rounded-[1.5rem] border overflow-hidden transition-all duration-300
                 ${isOpen
-                  ? 'shadow-[0_8px_32px_rgba(0,0,0,0.1)] border-[#002f2a]/25'
+                  ? 'shadow-[0_8px_32px_rgba(0,0,0,0.1)] border-[#1A5C38]/25'
                   : n.leida
                     ? 'bg-white border-black/[0.05] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]'
-                    : 'bg-emerald-50/40 border-[#002f2a]/20 shadow-[0_4px_16px_rgba(26,92,56,0.1)]'}
+                    : 'bg-emerald-50/40 border-[#1A5C38]/20 shadow-[0_4px_16px_rgba(26,92,56,0.1)]'}
                 ${isOpen ? 'bg-white' : ''}
               `}
             >
@@ -350,7 +350,7 @@ export default function AlertasPage() {
                   ${isOpen ? cfg.bgDark + ' scale-105' : cfg.bg}`}>
                   <Icon size={18} className={cfg.color} strokeWidth={2.1} />
                   {!n.leida && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#002f2a] ring-2 ring-white animate-pulse" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#1A5C38] ring-2 ring-white animate-pulse" />
                   )}
                 </div>
 
@@ -359,7 +359,7 @@ export default function AlertasPage() {
                   {/* Fila superior: categoría · tiempo · chevron/flecha */}
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className={`text-[10.5px] font-bold uppercase tracking-wider flex-shrink-0 ${n.leida ? 'text-gray-400' : 'text-[#002f2a]'}`}>
+                      <span className={`text-[10.5px] font-bold uppercase tracking-wider flex-shrink-0 ${n.leida ? 'text-gray-400' : 'text-[#1A5C38]'}`}>
                         {cfg.label}
                       </span>
                       <span className="text-gray-300 flex-shrink-0">·</span>
@@ -369,8 +369,8 @@ export default function AlertasPage() {
                     </div>
                     {!esTx ? (
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300
-                        ${isOpen ? 'bg-[#002f2a]/10 rotate-180' : 'bg-gray-100'}`}>
-                        <ChevronDown size={13} className={isOpen ? 'text-[#002f2a]' : 'text-gray-400'} />
+                        ${isOpen ? 'bg-[#1A5C38]/10 rotate-180' : 'bg-gray-100'}`}>
+                        <ChevronDown size={13} className={isOpen ? 'text-[#1A5C38]' : 'text-gray-400'} />
                       </div>
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
@@ -416,7 +416,7 @@ export default function AlertasPage() {
                             </span>
                             <button
                               onClick={() => abrirMapaBodega(n)}
-                              className="flex items-center gap-1 text-[12px] font-bold text-[#002f2a] hover:underline"
+                              className="flex items-center gap-1 text-[12px] font-bold text-[#1A5C38] hover:underline"
                             >
                               <MapPin size={13} /> Ver mapa
                             </button>
@@ -426,7 +426,7 @@ export default function AlertasPage() {
                             <button
                               onClick={() => !enviandoEste && marcarInteres(n)}
                               disabled={enviandoEste}
-                              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-[#002f2a] text-white shadow-[0_4px_14px_rgba(26,92,56,0.3)] hover:bg-[#16512f] active:scale-[0.97] transition-all duration-200 disabled:opacity-60"
+                              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold bg-[#1A5C38] text-white shadow-[0_4px_14px_rgba(26,92,56,0.3)] hover:bg-[#16512f] active:scale-[0.97] transition-all duration-200 disabled:opacity-60"
                             >
                               {enviandoEste
                                 ? <><Loader2 size={14} className="animate-spin" /> Enviando…</>
@@ -434,7 +434,7 @@ export default function AlertasPage() {
                             </button>
                             <button
                               onClick={() => descartarSenal(n)}
-                              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-[#f4fbf7] ring-1 ring-gray-200 hover:bg-[#e8f5f3] active:scale-[0.97] transition-all duration-200"
+                              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold text-gray-500 bg-[#f4fbf7] ring-1 ring-gray-200 hover:bg-[#eef8f2] active:scale-[0.97] transition-all duration-200"
                             >
                               <X size={14} strokeWidth={2.4} /> No me interesa
                             </button>
@@ -491,7 +491,7 @@ export default function AlertasPage() {
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000] w-[calc(100%-2rem)] max-w-xs">
           <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md
-            ${toast.ok ? 'bg-[#002f2a] text-white' : 'bg-red-600 text-white'}`}>
+            ${toast.ok ? 'bg-[#1A5C38] text-white' : 'bg-red-600 text-white'}`}>
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
               {toast.ok ? <Check size={15} strokeWidth={2.8} /> : <ShieldAlert size={15} />}
             </div>

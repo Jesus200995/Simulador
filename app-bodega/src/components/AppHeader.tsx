@@ -1,4 +1,4 @@
-﻿import { Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 const SPRING = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
@@ -59,7 +59,7 @@ export default function AppHeader({ subtitle, initials, notifCount = 0, onBrand,
           <button
             onClick={onBell}
             aria-label="Notificaciones"
-            className="relative w-9 h-9 rounded-full bg-white/55 ring-1 ring-black/[0.05] shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex items-center justify-center text-slate-600 hover:text-[#002f2a] hover:bg-white hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)] active:scale-90 transition-all duration-300"
+            className="relative w-9 h-9 rounded-full bg-white/55 ring-1 ring-black/[0.05] shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex items-center justify-center text-slate-600 hover:text-[#1A5C38] hover:bg-white hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)] active:scale-90 transition-all duration-300"
             style={{ transitionTimingFunction: SPRING }}
           >
             <Bell size={18} strokeWidth={2} />

@@ -194,36 +194,36 @@ export default function AlertasAdminPage() {
     <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
 
       {/* ── Barra de acción + stats toggle ── */}
-      <div className="flex-shrink-0 bg-[#e6f0ef] rounded-b-2xl border border-[#002f2a]/30 border-t-0 overflow-hidden">
+      <div className="flex-shrink-0 bg-[#eef8f2] rounded-b-2xl border border-[#1A5C38]/30 border-t-0 overflow-hidden">
         <div className="px-2 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button onClick={() => setMostrarStats(!mostrarStats)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${mostrarStats ? 'bg-[#002f2a] text-white shadow-sm' : 'text-[#002f2a] hover:bg-[#cce8e5]'}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${mostrarStats ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1]'}`}>
               <BarChart3 size={11} /> Estadísticas
               <ChevronDown size={11} className={`transition-transform duration-150 ${mostrarStats ? 'rotate-180' : ''}`} />
             </button>
           </div>
           <button onClick={cargarAlertas} disabled={loading}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white border border-[#002f2a]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
             <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
         {mostrarStats && (
-          <div className="grid grid-cols-3 gap-0 border-t border-[#002f2a]/10">
-            <div className="px-4 py-2.5 border-r border-[#002f2a]/10">
+          <div className="grid grid-cols-3 gap-0 border-t border-[#1A5C38]/10">
+            <div className="px-4 py-2.5 border-r border-[#1A5C38]/10">
               <p className="text-[9px] font-bold text-red-500 uppercase tracking-wide mb-0.5">Zonas afectadas</p>
               <p className="text-[20px] font-black text-red-600 leading-none">{statsProductoresAfectados}</p>
-              <p className="text-[10px] text-[#002f2a]/50 mt-0.5">estados con alertas activas</p>
+              <p className="text-[10px] text-[#1A5C38]/50 mt-0.5">estados con alertas activas</p>
             </div>
-            <div className="px-4 py-2.5 border-r border-[#002f2a]/10">
+            <div className="px-4 py-2.5 border-r border-[#1A5C38]/10">
               <p className="text-[9px] font-bold text-amber-500 uppercase tracking-wide mb-0.5">Alertas activas</p>
               <p className="text-[20px] font-black text-amber-600 leading-none">{statsActivasHoy}</p>
-              <p className="text-[10px] text-[#002f2a]/50 mt-0.5">incidencias vigentes hoy</p>
+              <p className="text-[10px] text-[#1A5C38]/50 mt-0.5">incidencias vigentes hoy</p>
             </div>
             <div className="px-4 py-2.5">
               <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wide mb-0.5">Atendidas este mes</p>
               <p className="text-[20px] font-black text-emerald-600 leading-none">{statsAtendidasMes}</p>
-              <p className="text-[10px] text-[#002f2a]/50 mt-0.5">resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
+              <p className="text-[10px] text-[#1A5C38]/50 mt-0.5">resueltas en {new Date().toLocaleDateString('es-MX', { month: 'long' })}</p>
             </div>
           </div>
         )}
@@ -245,10 +245,10 @@ export default function AlertasAdminPage() {
                 placeholder="Buscar alertas..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:border-[#002f2a]/40 focus:bg-white transition-all duration-150"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:border-[#1A5C38]/40 focus:bg-white transition-all duration-150"
               />
             </div>
-            <span className="text-[10px] font-bold text-[#002f2a] bg-[#e6f0ef] border border-[#002f2a]/20 px-2 py-1 rounded-lg flex-shrink-0">
+            <span className="text-[10px] font-bold text-[#1A5C38] bg-[#eef8f2] border border-[#1A5C38]/20 px-2 py-1 rounded-lg flex-shrink-0">
               {filteredList.length}
             </span>
           </div>
@@ -257,7 +257,7 @@ export default function AlertasAdminPage() {
             <select
               value={tipoFilter}
               onChange={e => setTipoFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#002f2a]/40 transition-all duration-150"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150"
             >
               <option value="">Tipos</option>
               <option value="fitosanitaria">Fitosanitaria</option>
@@ -269,7 +269,7 @@ export default function AlertasAdminPage() {
             <select
               value={nivelFilter}
               onChange={e => setNivelFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#002f2a]/40 transition-all duration-150"
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150"
             >
               <option value="">Severidad</option>
               <option value="ALTA">Alta</option>
@@ -277,7 +277,7 @@ export default function AlertasAdminPage() {
               <option value="BAJA">Baja</option>
             </select>
             <select value={estadoFilter} onChange={e => setEstadoFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#002f2a]/40 transition-all duration-150">
+              className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 transition-all duration-150">
               <option value="activa">Activas</option>
               <option value="atendida">Atendidas</option>
             </select>
@@ -288,7 +288,7 @@ export default function AlertasAdminPage() {
         <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2">
-              <RefreshCw size={18} className="text-[#002f2a] animate-spin" />
+              <RefreshCw size={18} className="text-[#1A5C38] animate-spin" />
               <p className="text-[11.5px] text-gray-400">Cargando incidencias...</p>
             </div>
           ) : filteredList.length === 0 ? (
@@ -300,7 +300,7 @@ export default function AlertasAdminPage() {
             filteredList.map(a => (
               <div key={a.id} onClick={() => focusAlerta(a)}
                 className={`px-3 py-3 cursor-pointer transition-all duration-150 flex items-start gap-2.5 border-b border-gray-50 last:border-0 ${
-                  selectedAlertaId === a.id ? 'bg-[#e6f0ef]' : 'hover:bg-gray-50'
+                  selectedAlertaId === a.id ? 'bg-[#eef8f2]' : 'hover:bg-gray-50'
                 }`}>
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
                   a.nivel_criticidad === 'ALTA'  ? 'bg-red-50 text-red-500' :
@@ -326,7 +326,7 @@ export default function AlertasAdminPage() {
                     </p>
                     {a.estado === 'activa' && (a.tipo === 'operativa' || a.tipo === 'mercado') && (
                       <button onClick={(e) => { e.stopPropagation(); setResolvingAlerta(a); }}
-                        className="text-[10px] font-bold text-[#002f2a] flex items-center gap-0.5 hover:underline">
+                        className="text-[10px] font-bold text-[#1A5C38] flex items-center gap-0.5 hover:underline">
                         Atender <Check size={9} />
                       </button>
                     )}

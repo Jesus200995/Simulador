@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Bell, X, BellRing, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 const BASE      = import.meta.env.VITE_API_URL || '/api';
@@ -141,7 +141,7 @@ export default function PushPrompt({ rol }: Props) {
               className="rounded-3xl overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.35)]"
               style={{ animation: 'ppSlideIn .3s cubic-bezier(0.34,1.4,0.64,1)' }}
             >
-              <div className="bg-gradient-to-br from-emerald-500 to-[#002f2a] px-8 pt-10 pb-8 flex flex-col items-center text-center">
+              <div className="bg-gradient-to-br from-emerald-500 to-[#1A5C38] px-8 pt-10 pb-8 flex flex-col items-center text-center">
                 {/* Icono animado */}
                 <div
                   className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-5 shadow-xl"
@@ -157,7 +157,7 @@ export default function PushPrompt({ rol }: Props) {
                 </p>
               </div>
               <div className="bg-white px-8 py-5 flex items-center justify-center gap-2.5">
-                <BellRing size={16} className="text-[#002f2a]" />
+                <BellRing size={16} className="text-[#1A5C38]" />
                 <p className="text-[13px] text-slate-500 font-medium">
                   Puedes desactivarlas en cualquier momento desde Alertas
                 </p>
@@ -168,7 +168,7 @@ export default function PushPrompt({ rol }: Props) {
             <div className="rounded-3xl overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.35)]">
 
               {/* Cabecera con gradiente */}
-              <div className="bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] relative overflow-hidden px-7 pt-8 pb-7">
+              <div className="bg-gradient-to-br from-[#1A5C38] via-[#1e6b42] to-[#22733f] relative overflow-hidden px-7 pt-8 pb-7">
                 {/* Círculos decorativos de fondo */}
                 <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
                 <div className="absolute -bottom-10 -left-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
@@ -204,8 +204,8 @@ export default function PushPrompt({ rol }: Props) {
                 <div className="space-y-3 mb-7">
                   {txt.puntos.map((punto) => (
                     <div key={punto} className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-[#e8f5f3] flex items-center justify-center shrink-0">
-                        <ShieldCheck size={13} className="text-[#002f2a]" />
+                      <div className="w-6 h-6 rounded-full bg-[#eef8f2] flex items-center justify-center shrink-0">
+                        <ShieldCheck size={13} className="text-[#1A5C38]" />
                       </div>
                       <p className="text-[13px] text-slate-600 font-medium">{punto}</p>
                     </div>
@@ -217,7 +217,7 @@ export default function PushPrompt({ rol }: Props) {
                   <button
                     onClick={activar}
                     disabled={cargando}
-                    className="w-full flex items-center justify-center gap-2.5 bg-[#002f2a] hover:bg-[#1e5b4f] active:scale-[0.98] text-white font-bold text-[15px] py-4 rounded-2xl transition-all duration-200 disabled:opacity-60 shadow-lg shadow-[#002f2a]/25"
+                    className="w-full flex items-center justify-center gap-2.5 bg-[#1A5C38] hover:bg-[#154d2f] active:scale-[0.98] text-white font-bold text-[15px] py-4 rounded-2xl transition-all duration-200 disabled:opacity-60 shadow-lg shadow-[#1A5C38]/25"
                   >
                     {cargando ? (
                       <><Loader2 size={18} className="animate-spin" /> Activando…</>

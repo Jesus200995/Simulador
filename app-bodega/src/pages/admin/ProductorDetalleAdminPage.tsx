@@ -418,7 +418,7 @@ export default function ProductorDetalleAdminPage() {
               {polygonCoords ? (
                 <Polygon 
                   positions={polygonCoords} 
-                  pathOptions={{ color: '#002f2a', fillColor: '#002f2a', fillOpacity: 0.35, weight: 2 }}
+                  pathOptions={{ color: '#1A5C38', fillColor: '#1A5C38', fillOpacity: 0.35, weight: 2 }}
                 >
                   <Popup>
                     <p className="text-[12px] font-bold">Unidad de Producción de {data.nombre}</p>
@@ -460,7 +460,7 @@ export default function ProductorDetalleAdminPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
               {data.disponibilidades.map(disp => (
-                <tr key={disp.id} className="hover:bg-[#e6f0ef] transition-colors">
+                <tr key={disp.id} className="hover:bg-[#eef8f2] transition-colors">
                   <td className="py-3.5 px-4 font-bold text-gray-900">{disp.tipo_maiz}</td>
                   <td className="py-3.5 px-4 text-gray-500 font-mono text-[12.5px]">{disp.variedad}</td>
                   <td className="py-3.5 px-4 text-emerald-600 font-black text-[14px]">

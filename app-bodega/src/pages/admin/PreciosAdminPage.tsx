@@ -269,7 +269,7 @@ export default function PreciosAdminPage() {
             <p className="text-red-600/70 text-[12px] mt-1">{preciosError}</p>
             <button 
               onClick={cargarTodo}
-              className="mt-4 px-5 py-2.5 bg-[#002f2a] hover:bg-[#1e6b42] text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200"
+              className="mt-4 px-5 py-2.5 bg-[#1A5C38] hover:bg-[#1e6b42] text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200"
             >
               <RefreshCw size={12} className="inline mr-1" /> Reintentar
             </button>
@@ -293,7 +293,7 @@ export default function PreciosAdminPage() {
     <div className="flex flex-col gap-3">
 
       {/* ── BARRA DE ESTADO SUPERIOR (ANCHO COMPLETO) ── */}
-      <div className="bg-[#e6f0ef] border border-[#002f2a]/30 border-t-0 rounded-b-2xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-[#eef8f2] border border-[#1A5C38]/30 border-t-0 rounded-b-2xl px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-3.5 flex-wrap">
           <div className="space-y-0.5">
             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Futuros Chicago (CME ZC=F)</span>
@@ -335,7 +335,7 @@ export default function PreciosAdminPage() {
           <button 
             onClick={handleRefreshManual}
             disabled={refreshLoading}
-            className="flex items-center gap-1 px-3.5 py-2 bg-[#002f2a] hover:bg-[#1e6b42] active:scale-95 text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200 disabled:opacity-40"
+            className="flex items-center gap-1 px-3.5 py-2 bg-[#1A5C38] hover:bg-[#1e6b42] active:scale-95 text-white font-bold text-[12px] rounded-xl shadow-md transition-all duration-200 disabled:opacity-40"
           >
             <RefreshCw size={12} className={refreshLoading ? 'animate-spin' : ''} /> Actualizar CME & TC
           </button>
@@ -425,7 +425,7 @@ export default function PreciosAdminPage() {
                       contentStyle={{ borderRadius: 12, border: 'none', backgroundColor: '#0d131a', color: '#fff', fontSize: 12 }}
                     />
                     <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                    <Line type="monotone" name="Precio Compra" dataKey="precio_compra" stroke="#002f2a" strokeWidth={2} dot={false} connectNulls />
+                    <Line type="monotone" name="Precio Compra" dataKey="precio_compra" stroke="#1A5C38" strokeWidth={2} dot={false} connectNulls />
                     <Line type="monotone" name="Margen Negociación" dataKey="margen_negociacion" stroke="#2563eb" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 4" />
                     <Line type="monotone" name="Precio Venta" dataKey="precio_venta" stroke="#d97706" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="3 3" />
                   </LineChart>
@@ -457,7 +457,7 @@ export default function PreciosAdminPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
                   {bodegasHoy.map((b, idx) => (
-                    <tr key={idx} className="hover:bg-[#e6f0ef]">
+                    <tr key={idx} className="hover:bg-[#eef8f2]">
                       <td className="py-3 font-bold text-gray-900">{b.nombre}</td>
                       <td className="py-3 text-gray-500">{b.municipio}, {b.estado}</td>
                       <td className="py-3 font-black text-gray-900">{fmt(b.precio)}</td>
@@ -486,7 +486,7 @@ export default function PreciosAdminPage() {
               </div>
               <button 
                 onClick={() => setShowFiraModal(true)}
-                className="flex items-center gap-1 text-[11px] text-[#002f2a] font-bold bg-[#002f2a]/5 hover:bg-[#002f2a]/10 px-2.5 py-1 rounded"
+                className="flex items-center gap-1 text-[11px] text-[#1A5C38] font-bold bg-[#1A5C38]/5 hover:bg-[#1A5C38]/10 px-2.5 py-1 rounded"
               >
                 <Upload size={11} /> Cargar CSV
               </button>
@@ -607,7 +607,7 @@ export default function PreciosAdminPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
               {brechas.map((br, idx) => (
-                <tr key={idx} className="hover:bg-[#e6f0ef]">
+                <tr key={idx} className="hover:bg-[#eef8f2]">
                   <td className="py-3 font-bold text-gray-900">{br.estado}</td>
                   <td className="py-3 font-bold">${((preciosHoy?.po ?? 0) + (idx % 2 === 0 ? 50 : -20)).toLocaleString()}</td>
                   <td className="py-3 font-bold">{fmt(preciosHoy?.precio_venta ?? 0)}</td>

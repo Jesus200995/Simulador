@@ -54,9 +54,9 @@ export default function ProduccionAdminPage() {
   return (
     <div className="flex flex-col gap-3">
       {/* ── Barra de acción ── */}
-      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 px-3 py-1.5 flex justify-end">
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex justify-end">
         <button onClick={cargar} disabled={loading}
-          className="flex items-center gap-1.5 text-[11px] font-bold text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white border border-[#002f2a]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+          className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
           <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> Recargar
         </button>
       </div>
@@ -97,7 +97,7 @@ export default function ProduccionAdminPage() {
               <YAxis tick={{ fontSize: 9, fill: '#6b7280' }} />
               <Tooltip contentStyle={{ background: '#0d1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, fontSize: 11 }} labelStyle={{ color: '#e5e7eb' }} />
               <Legend wrapperStyle={{ fontSize: 10 }} />
-              <Bar dataKey="produccion_ton" name="Producción (ton)" fill="#002f2a" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="produccion_ton" name="Producción (ton)" fill="#1A5C38" radius={[3, 3, 0, 0]} />
               <Bar dataKey="area_ha" name="Área (ha)" fill="#2563EB" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -126,7 +126,7 @@ export default function ProduccionAdminPage() {
               {(data?.por_estado ?? []).map((row, i) => {
                 const pct = row.ups > 0 ? Math.round((row.cultivos / row.ups) * 100) : 0;
                 return (
-                  <tr key={i} className="hover:bg-[#e6f0ef] transition-colors">
+                  <tr key={i} className="hover:bg-[#eef8f2] transition-colors">
                     <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-800">{row.estado}</td>
                     <td className="px-4 py-2.5 text-[12px] text-gray-500 text-right">{fmtNum(row.ups)}</td>
                     <td className="px-4 py-2.5 text-[12px] text-gray-500 text-right">{fmtNum(row.cultivos)}</td>

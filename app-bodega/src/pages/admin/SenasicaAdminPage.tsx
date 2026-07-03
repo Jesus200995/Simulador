@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Upload, CheckCircle, AlertCircle, Clock, FileText, RefreshCw,
   Info, Settings2, Bell, Check, X, Loader2, Activity, MapPin,
@@ -159,7 +159,7 @@ function ModalProgreso({ state, onClose }: { state: ModalState; onClose: () => v
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: 'Puntos leídos',   value: resultado.total_puntos?.toLocaleString('es-MX') ?? '—', icon: Activity,    color: 'text-blue-600',    bg: 'bg-blue-50'    },
-                  { label: 'UPs afectadas',    value: resultado.total_ups_afectadas?.toLocaleString('es-MX') ?? '0', icon: Shield, color: 'text-[#002f2a]', bg: 'bg-emerald-50' },
+                  { label: 'UPs afectadas',    value: resultado.total_ups_afectadas?.toLocaleString('es-MX') ?? '0', icon: Shield, color: 'text-[#1A5C38]', bg: 'bg-emerald-50' },
                   { label: 'Notificaciones',   value: resultado.total_notificaciones?.toLocaleString('es-MX') ?? '0', icon: Bell, color: 'text-violet-600', bg: 'bg-violet-50'  },
                 ].map(s => (
                   <div key={s.label} className={`rounded-xl p-3 text-center ${s.bg}`}>
@@ -171,7 +171,7 @@ function ModalProgreso({ state, onClose }: { state: ModalState; onClose: () => v
               </div>
               <button
                 onClick={onClose}
-                className="w-full bg-[#002f2a] hover:bg-[#1e5b4f] text-white font-bold text-[12.5px] py-2.5 rounded-xl transition-colors active:scale-[0.98]"
+                className="w-full bg-[#1A5C38] hover:bg-[#154d2f] text-white font-bold text-[12.5px] py-2.5 rounded-xl transition-colors active:scale-[0.98]"
               >
                 Entendido
               </button>
@@ -343,22 +343,22 @@ export default function SenasicaAdminPage() {
       <ModalProgreso state={modal} onClose={closeModal} />
 
       {/* ── Tab Bar ── */}
-      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 overflow-hidden">
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 overflow-hidden">
         <div className="flex items-center justify-between px-2 py-1.5">
           <div className="flex items-center gap-1">
             {TABS.map(({ key, label, icon: Icon, badge }) => (
               <button key={key} onClick={() => setTab(key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${
-                  tab === key ? 'bg-[#002f2a] text-white shadow-sm' : 'text-[#002f2a] hover:bg-[#cce8e5]'
+                  tab === key ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1]'
                 }`}>
                 <Icon size={11} />{label}
-                {badge ? <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${tab === key ? 'bg-white/20 text-white' : 'bg-[#002f2a]/10 text-[#002f2a]'}`}>{badge}</span> : null}
+                {badge ? <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${tab === key ? 'bg-white/20 text-white' : 'bg-[#1A5C38]/10 text-[#1A5C38]'}`}>{badge}</span> : null}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-1.5">
             <div className={`w-1.5 h-1.5 rounded-full ${procesando ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
-            <span className="text-[10px] font-semibold text-[#002f2a]/60">{procesando ? 'Procesando' : 'Activo'}</span>
+            <span className="text-[10px] font-semibold text-[#1A5C38]/60">{procesando ? 'Procesando' : 'Activo'}</span>
           </div>
         </div>
       </div>
@@ -373,10 +373,10 @@ export default function SenasicaAdminPage() {
 
               {/* Instrucciones */}
               <div className="flex flex-col gap-3">
-                <div className="bg-[#e6f0ef] border border-[#002f2a]/10 rounded-xl p-3.5">
+                <div className="bg-[#eef8f2] border border-[#1A5C38]/10 rounded-xl p-3.5">
                   <div className="flex items-center gap-2 mb-2.5">
-                    <Info size={12} className="text-[#002f2a]" />
-                    <span className="text-[11.5px] font-black text-[#002f2a] tracking-tight">Instrucciones de carga</span>
+                    <Info size={12} className="text-[#1A5C38]" />
+                    <span className="text-[11.5px] font-black text-[#1A5C38] tracking-tight">Instrucciones de carga</span>
                   </div>
                   <div className="space-y-2">
                     {[
@@ -387,8 +387,8 @@ export default function SenasicaAdminPage() {
                       { icon: Zap,       text: 'Sin límite de tamaño — archivos de 300 MB son válidos' },
                     ].map(({ icon: Icon, text }) => (
                       <div key={text} className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-lg bg-[#002f2a]/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <Icon size={10} className="text-[#002f2a]" />
+                        <div className="w-5 h-5 rounded-lg bg-[#1A5C38]/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Icon size={10} className="text-[#1A5C38]" />
                         </div>
                         <p className="text-[11px] text-gray-600 leading-snug">{text}</p>
                       </div>
@@ -404,7 +404,7 @@ export default function SenasicaAdminPage() {
                       { label: 'Notificaciones', value: historial.reduce((s, h) => s + (h.total_notificaciones || 0), 0),   icon: Bell },
                     ].map(s => (
                       <div key={s.label} className="bg-gray-50 border border-gray-100 rounded-xl p-2.5 text-center">
-                        <s.icon size={12} className="text-[#002f2a] mx-auto mb-1" />
+                        <s.icon size={12} className="text-[#1A5C38] mx-auto mb-1" />
                         <p className="text-[16px] font-black text-gray-900">{s.value.toLocaleString('es-MX')}</p>
                         <p className="text-[9.5px] text-gray-400">{s.label}</p>
                       </div>
@@ -421,11 +421,11 @@ export default function SenasicaAdminPage() {
                   onDragLeave={() => setDrag(false)}
                   onDrop={onDrop}
                   className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 p-6 transition-all duration-200 cursor-pointer min-h-[140px]
-                    ${drag   ? 'border-[#002f2a] bg-[#e6f0ef] scale-[1.01]' :
-                      archivo ? 'border-[#002f2a]/50 bg-[#e6f0ef]/30 hover:bg-[#e6f0ef]/50' :
-                                'border-gray-200 hover:border-[#002f2a]/40 hover:bg-gray-50'}`}
+                    ${drag   ? 'border-[#1A5C38] bg-[#eef8f2] scale-[1.01]' :
+                      archivo ? 'border-[#1A5C38]/50 bg-[#eef8f2]/30 hover:bg-[#eef8f2]/50' :
+                                'border-gray-200 hover:border-[#1A5C38]/40 hover:bg-gray-50'}`}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${archivo ? 'bg-[#002f2a] shadow-md' : 'bg-gray-100'}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${archivo ? 'bg-[#1A5C38] shadow-md' : 'bg-gray-100'}`}>
                     <Upload size={18} className={archivo ? 'text-white' : 'text-gray-400'} />
                   </div>
                   <div className="text-center">
@@ -450,7 +450,7 @@ export default function SenasicaAdminPage() {
                 <button
                   onClick={handleSubir}
                   disabled={!archivo}
-                  className="w-full bg-[#002f2a] hover:bg-[#1e5b4f] active:scale-[0.98] text-white font-bold text-[12.5px] py-2.5 rounded-xl transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full bg-[#1A5C38] hover:bg-[#154d2f] active:scale-[0.98] text-white font-bold text-[12.5px] py-2.5 rounded-xl transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Upload size={13} /> Subir y procesar CSV
                 </button>
@@ -463,7 +463,7 @@ export default function SenasicaAdminPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[11px] text-gray-400 font-medium">{historial.length} cargas registradas</p>
-                <button onClick={cargarDatos} className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-[#002f2a] transition-colors">
+                <button onClick={cargarDatos} className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-[#1A5C38] transition-colors">
                   <RefreshCw size={11} className={cargando ? 'animate-spin' : ''} /> Actualizar
                 </button>
               </div>
@@ -507,7 +507,7 @@ export default function SenasicaAdminPage() {
                         { label: 'Notifs', value: c.total_notificaciones, icon: Bell },
                       ].map(s => (
                         <div key={s.label} className="bg-white rounded-lg p-2 border border-gray-100 flex items-center gap-1.5">
-                          <s.icon size={10} className="text-[#002f2a] shrink-0" />
+                          <s.icon size={10} className="text-[#1A5C38] shrink-0" />
                           <div>
                             <p className="font-black text-[13px] text-gray-900 leading-none">{(s.value || 0).toLocaleString('es-MX')}</p>
                             <p className="text-[9px] text-gray-400">{s.label}</p>

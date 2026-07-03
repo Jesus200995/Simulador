@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Check, X, Eye, ShieldAlert, RefreshCw,
@@ -183,7 +183,7 @@ export default function ProductoresAdminPage() {
     <div className="flex flex-col h-[calc(100vh-76px)] overflow-hidden gap-2">
 
       {/* ── Barra verde: tabs arriba / contadores abajo ── */}
-      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 overflow-hidden">
+      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 overflow-hidden">
         {/* Fila 1: pestañas + acciones */}
         <div className="px-2 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -194,49 +194,49 @@ export default function ProductoresAdminPage() {
             ] as const).map(t => (
               <button key={t.key} onClick={() => { setTab(t.key); setPage(1); }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 whitespace-nowrap ${
-                  tab === t.key ? 'bg-[#002f2a] text-white shadow-sm' : 'text-[#002f2a] hover:bg-[#cce8e5] hover:text-[#001a17]'
+                  tab === t.key ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1] hover:text-[#0e3d24]'
                 }`}>
                 <t.icon size={11} />
                 {t.label}
                 {t.cnt > 0 && (
-                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-white/20 text-white' : 'bg-[#002f2a]/10 text-[#002f2a]'}`}>{t.cnt}</span>
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-white/20 text-white' : 'bg-[#1A5C38]/10 text-[#1A5C38]'}`}>{t.cnt}</span>
                 )}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-1">
             <button onClick={() => setMostrarStats(!mostrarStats)}
-              className={`p-1.5 rounded-lg transition-all duration-150 ${mostrarStats ? 'bg-[#002f2a] text-white shadow-sm' : 'text-[#002f2a] hover:bg-[#cce8e5]'}`}>
+              className={`p-1.5 rounded-lg transition-all duration-150 ${mostrarStats ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1]'}`}>
               <BarChart3 size={11} />
             </button>
             <button onClick={descargarExcel} disabled={loading || productores.length === 0}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white text-[11px] font-bold border border-[#002f2a]/20 hover:border-transparent transition disabled:opacity-40">
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white text-[11px] font-bold border border-[#1A5C38]/20 hover:border-transparent transition disabled:opacity-40">
               <Download size={11} /> CSV
             </button>
             <button onClick={cargarProductores}
-              className="p-1.5 rounded-lg text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white border border-[#002f2a]/20 hover:border-transparent transition">
+              className="p-1.5 rounded-lg text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent transition">
               <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
         </div>
 
         {/* Divisor */}
-        <div className="border-t border-[#002f2a]/15 mx-2" />
+        <div className="border-t border-[#1A5C38]/15 mx-2" />
 
         {/* Fila 2: contadores */}
         <div className="px-3 py-1.5 flex items-center gap-3">
           {[
-            { label: 'Total',       val: productores.length, color: 'text-[#002f2a]',  dot: 'bg-[#002f2a]' },
+            { label: 'Total',       val: productores.length, color: 'text-[#1A5C38]',  dot: 'bg-[#1A5C38]' },
             { label: 'Activos',     val: cntActivo,          color: 'text-emerald-700', dot: 'bg-emerald-500' },
             { label: 'Pendientes',  val: cntPendiente,       color: 'text-amber-700',   dot: 'bg-amber-400' },
             { label: 'Suspendidos', val: cntSuspendido,      color: 'text-gray-500',    dot: 'bg-gray-400' },
           ].map(({ label, val, color, dot }, i) => (
             <div key={label} className="flex items-center gap-2">
-              {i > 0 && <div className="w-px h-3 bg-[#002f2a]/15" />}
+              {i > 0 && <div className="w-px h-3 bg-[#1A5C38]/15" />}
               <div className="flex items-center gap-1.5">
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
                 <span className={`text-[12px] font-black ${color}`}>{loading ? '—' : val}</span>
-                <span className="text-[9.5px] text-[#002f2a]/50 font-medium">{label}</span>
+                <span className="text-[9.5px] text-[#1A5C38]/50 font-medium">{label}</span>
               </div>
             </div>
           ))}
@@ -255,15 +255,15 @@ export default function ProductoresAdminPage() {
           const edadPromedio = edades.length > 0 ? Math.round(edades.reduce((s, e) => s + e, 0) / edades.length) : 0;
           const mayores60 = edades.filter(e => e >= 60).length;
           return (
-            <div className="grid grid-cols-4 border-b border-[#002f2a]/10 bg-[#e6f0ef]/40 flex-shrink-0">
+            <div className="grid grid-cols-4 border-b border-[#1A5C38]/10 bg-[#eef8f2]/40 flex-shrink-0">
               {[
                 { label: 'Hombres',       val: hombres,          sub: 'productores' },
                 { label: 'Mujeres',       val: mujeres,          sub: 'productoras' },
                 { label: 'Edad promedio', val: `${edadPromedio}`, sub: `años (${edades.length} con CURP)` },
                 { label: 'Mayores de 60', val: mayores60,        sub: 'adultos mayores' },
               ].map(({ label, val, sub }) => (
-                <div key={label} className="px-4 py-2.5 border-r border-[#002f2a]/10 last:border-0">
-                  <p className="text-[9px] font-bold text-[#002f2a]/50 uppercase tracking-wide">{label}</p>
+                <div key={label} className="px-4 py-2.5 border-r border-[#1A5C38]/10 last:border-0">
+                  <p className="text-[9px] font-bold text-[#1A5C38]/50 uppercase tracking-wide">{label}</p>
                   <p className="text-[18px] font-black text-gray-900 leading-tight">{val}</p>
                   <p className="text-[9.5px] text-gray-400">{sub}</p>
                 </div>
@@ -279,10 +279,10 @@ export default function ProductoresAdminPage() {
               <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input type="text" placeholder="Buscar nombre, CURP o correo..."
                 value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-[11px] text-gray-800 placeholder-gray-400 outline-none focus:border-[#002f2a]/40 focus:bg-white transition" />
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-[11px] text-gray-800 placeholder-gray-400 outline-none focus:border-[#1A5C38]/40 focus:bg-white transition" />
             </div>
             <button onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition ${hayFiltrosActivos ? 'bg-[#002f2a] text-white border-transparent' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition ${hayFiltrosActivos ? 'bg-[#1A5C38] text-white border-transparent' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'}`}>
               <Filter size={11} /> Filtros {hayFiltrosActivos ? '•' : ''}
             </button>
             <span className="text-[10.5px] text-gray-400 font-medium ml-auto whitespace-nowrap">
@@ -292,19 +292,19 @@ export default function ProductoresAdminPage() {
           {mostrarFiltros && (
             <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100">
               <select value={estadoFilter} onChange={e => { setEstadoFilter(e.target.value); setPage(1); }}
-                className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#002f2a]/40 cursor-pointer transition min-w-[130px]">
+                className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 cursor-pointer transition min-w-[130px]">
                 <option value="">Estado (todos)</option>
                 {estadosDisponibles.map(e => <option key={e} value={e}>{e}</option>)}
               </select>
               <select value={tipoFilter} onChange={e => { setTipoFilter(e.target.value); setPage(1); }}
-                className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#002f2a]/40 cursor-pointer transition">
+                className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 cursor-pointer transition">
                 <option value="">Tipo A / B</option>
                 <option value="A">Tipo A</option>
                 <option value="B">Tipo B</option>
               </select>
               {tab === 'todos' && (
                 <select value={estatusFilter} onChange={e => { setEstatusFilter(e.target.value); setPage(1); }}
-                  className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#002f2a]/40 cursor-pointer transition">
+                  className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[11px] text-gray-700 outline-none focus:border-[#1A5C38]/40 cursor-pointer transition">
                   <option value="">Estatus (todos)</option>
                   <option value="activo">Activo</option>
                   <option value="pendiente">Pendiente</option>
@@ -325,7 +325,7 @@ export default function ProductoresAdminPage() {
         {/* Tabla */}
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
-            <RefreshCw size={20} className="text-[#002f2a] animate-spin" />
+            <RefreshCw size={20} className="text-[#1A5C38] animate-spin" />
             <p className="text-[12px] text-gray-400">Cargando productores...</p>
           </div>
         ) : paginatedList.length === 0 ? (
@@ -379,7 +379,7 @@ export default function ProductoresAdminPage() {
                       <td className="py-2 px-3 pr-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => navigate(`/admin/productores/${prod.id}`)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#002f2a] hover:bg-[#e6f0ef] transition" title="Ver detalle">
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#1A5C38] hover:bg-[#eef8f2] transition" title="Ver detalle">
                             <Eye size={12} />
                           </button>
                           {prod.estado_validacion === 'pendiente' && (
@@ -434,7 +434,7 @@ export default function ProductoresAdminPage() {
                 const p = start + i;
                 return (
                   <button key={p} onClick={() => setPage(p)}
-                    className={`w-6 h-6 rounded text-[10.5px] font-bold transition ${p === page ? 'bg-[#002f2a] text-white' : 'text-gray-400 hover:bg-gray-100'}`}>
+                    className={`w-6 h-6 rounded text-[10.5px] font-bold transition ${p === page ? 'bg-[#1A5C38] text-white' : 'text-gray-400 hover:bg-gray-100'}`}>
                     {p}
                   </button>
                 );
@@ -480,7 +480,7 @@ export default function ProductoresAdminPage() {
                 <textarea rows={3}
                   placeholder={modalType === 'rechazar' ? 'Describe el motivo del rechazo...' : 'Nota adicional...'}
                   value={notaInterna} onChange={e => setNotaInterna(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-[12px] text-gray-800 placeholder-gray-400 outline-none focus:border-[#002f2a]/40 resize-none transition" />
+                  className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-[12px] text-gray-800 placeholder-gray-400 outline-none focus:border-[#1A5C38]/40 resize-none transition" />
               </div>
               {actionError && (
                 <div className="flex items-start gap-2 text-[11.5px] text-red-600 bg-red-50 border border-red-100 rounded-xl p-3">
@@ -494,7 +494,7 @@ export default function ProductoresAdminPage() {
                 Cancelar
               </button>
               <button onClick={handleConfirmAction} disabled={actionLoading}
-                className={`px-4 py-2 rounded-xl text-[12px] font-bold text-white transition ${modalType === 'aprobar' || modalType === 'reactivar' ? 'bg-[#002f2a] hover:bg-[#1e5b4f]' : 'bg-red-600 hover:bg-red-700'}`}>
+                className={`px-4 py-2 rounded-xl text-[12px] font-bold text-white transition ${modalType === 'aprobar' || modalType === 'reactivar' ? 'bg-[#1A5C38] hover:bg-[#15482d]' : 'bg-red-600 hover:bg-red-700'}`}>
                 {actionLoading ? 'Aplicando...' : 'Confirmar'}
               </button>
             </div>
