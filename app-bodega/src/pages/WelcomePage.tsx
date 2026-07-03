@@ -101,8 +101,8 @@ function CornCanvas() {
     const maxTicks = 1200;
 
     const colorPalette = [
-      'rgba(74, 222, 128, 0.004)',  // Verde claro suave (green-400)
-      'rgba(34, 197, 94, 0.004)'    // Verde medio suave (green-500)
+      'rgba(61, 167, 148, 0.004)',  // Teal claro (#3da794)
+      'rgba(30, 91, 79, 0.004)'     // Teal principal (#1e5b4f)
     ];
 
     const initPoints = () => {
@@ -194,8 +194,8 @@ export default function WelcomePage() {
     // muestre el fondo blanco del resto de la app
     const prev = document.body.style.background;
     const prevHtml = document.documentElement.style.background;
-    document.body.style.background = '#092213';
-    document.documentElement.style.background = '#092213';
+    document.body.style.background = '#020e0c';
+    document.documentElement.style.background = '#020e0c';
     return () => {
       clearTimeout(t);
       document.body.style.background = prev;
@@ -207,7 +207,7 @@ export default function WelcomePage() {
 
   return (
     <div
-      className="relative flex overflow-hidden bg-[#092213]"
+      className="relative flex overflow-hidden bg-[#020e0c]"
       style={{ position: 'fixed', inset: 0, overscrollBehavior: 'none' }}
     >
       {/* Status bar color band — cubre safe-area-inset-top en iOS */}
@@ -222,14 +222,14 @@ export default function WelcomePage() {
           className="absolute inset-0 w-full h-full object-cover brightness-[0.45] saturate-[0.6]"
         />
         {/* Deep green gradient background (on top to filter the image green) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#05160d]/65 via-[#0b2b18]/70 to-[#124225]/70 mix-blend-color" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#05160d]/25 via-[#0b2b18]/30 to-[#124225]/25" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#010c09]/65 via-[#081f1b]/70 to-[#0d2e2a]/70 mix-blend-color" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#010c09]/25 via-[#081f1b]/30 to-[#0d2e2a]/25" />
         {/* Top vignette */}
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
         {/* Bottom vignette */}
         <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
         {/* Right fade — blends into right panel */}
-        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#092213] to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#020e0c] to-transparent z-10 pointer-events-none" />
 
         {/* Canvas animation */}
         <CornCanvas />
@@ -241,8 +241,8 @@ export default function WelcomePage() {
             className="inline-flex items-center gap-2 bg-white/8 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 w-fit"
             style={{ opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(-10px)', transition: 'opacity 0.5s ease, transform 0.5s ease' }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-bold text-emerald-300/90 tracking-widest uppercase">Plan Nacional Maíz 2026</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3da794] animate-pulse" />
+            <span className="text-[11px] font-bold text-[#6bbdaf]/90 tracking-widest uppercase">Plan Nacional Maíz 2026</span>
           </div>
 
           {/* Bottom text */}
@@ -252,7 +252,7 @@ export default function WelcomePage() {
             >
               <h2 className="text-[38px] xl:text-[46px] font-black text-white leading-tight tracking-tight">
                 El campo mexicano<br />
-                <span className="text-emerald-400">conectado</span> al mercado
+                <span className="text-[#3da794]">conectado</span> al mercado
               </h2>
               <p className="text-white/45 text-[15px] font-medium mt-3 leading-relaxed max-w-md">
                 Sistema de Ordenamiento de la Producción y Comercialización del Maíz Blanco en México.
@@ -273,12 +273,12 @@ export default function WelcomePage() {
             className="absolute inset-0 w-full h-full object-cover brightness-[0.42] saturate-[0.6]"
           />
           {/* Deep green gradient overlay (on top to filter the image green) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#092213]/65 via-[#0b2b18]/70 to-[#144728]/75 mix-blend-color" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#092213]/25 via-[#0b2b18]/30 to-[#144728]/25" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(34,197,94,0.10),transparent)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c]/65 via-[#081f1b]/70 to-[#0f2e2a]/75 mix-blend-color" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c]/25 via-[#081f1b]/30 to-[#0f2e2a]/25" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(30,91,79,0.10),transparent)]" />
           {/* Mobile canvas too */}
           <CornCanvas />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#092213]/70 via-transparent to-[#092213]/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c]/70 via-transparent to-[#020e0c]/80" />
         </div>
 
         {/* Right panel content */}
@@ -300,7 +300,7 @@ export default function WelcomePage() {
             <h1 className="text-[34px] lg:text-[38px] font-black text-white tracking-[-1px] leading-none">
               SIMAC
             </h1>
-            <p className="text-[13px] text-emerald-400/70 font-semibold mt-1.5 tracking-[0.12em] uppercase text-center">
+            <p className="text-[13px] text-[#3da794]/70 font-semibold mt-1.5 tracking-[0.12em] uppercase text-center">
               Plan Nacional Maíz 2026
             </p>
           </div>
@@ -328,26 +328,26 @@ export default function WelcomePage() {
                 transform: visible ? (pressed === 'productor' ? 'scale(0.97)' : 'none') : 'translateY(20px)',
                 transition: 'opacity 0.5s ease 0.12s, transform 0.5s ease 0.12s',
                 background: pressed === 'productor'
-                  ? 'linear-gradient(135deg, rgba(34,197,94,0.55) 0%, rgba(26,92,56,0.35) 100%)'
+                  ? 'linear-gradient(135deg, rgba(30,91,79,0.55) 0%, rgba(0,47,42,0.35) 100%)'
                   : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
               }}
             >
               <div
                 className="relative backdrop-blur-xl rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-150"
-                style={{ background: pressed === 'productor' ? 'rgba(14,40,22,0.92)' : 'rgba(255,255,255,0.05)' }}
+                style={{ background: pressed === 'productor' ? 'rgba(8,31,27,0.92)' : 'rgba(255,255,255,0.05)' }}
               >
                 <div className="flex items-center gap-4 relative">
                   <div
                     className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
-                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#1e5b4f,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
+                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#1e5b4f,#081f1b)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(0,47,42,0.6)' : 'none' }}
                   >
-                    <Wheat size={24} className={pressed === 'productor' ? 'text-emerald-300' : 'text-white/60'} />
+                    <Wheat size={24} className={pressed === 'productor' ? 'text-[#6bbdaf]' : 'text-white/60'} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-[17px] leading-tight">Soy Productor</p>
                     <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión o registrar tu cuenta</p>
                   </div>
-                  <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'productor' ? 'text-emerald-400 translate-x-1' : 'text-white/25'}`} />
+                  <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'productor' ? 'text-[#3da794] translate-x-1' : 'text-white/25'}`} />
                 </div>
               </div>
             </button>
@@ -364,26 +364,26 @@ export default function WelcomePage() {
                 transform: visible ? (pressed === 'bodega' ? 'scale(0.97)' : 'none') : 'translateY(20px)',
                 transition: 'opacity 0.5s ease 0.18s, transform 0.5s ease 0.18s',
                 background: pressed === 'bodega'
-                  ? 'linear-gradient(135deg, rgba(34,197,94,0.55) 0%, rgba(26,92,56,0.35) 100%)'
+                  ? 'linear-gradient(135deg, rgba(30,91,79,0.55) 0%, rgba(0,47,42,0.35) 100%)'
                   : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
               }}
             >
               <div
                 className="relative backdrop-blur-xl rounded-[calc(1rem-1px)] p-5 text-left transition-colors duration-150"
-                style={{ background: pressed === 'bodega' ? 'rgba(14,40,22,0.92)' : 'rgba(255,255,255,0.05)' }}
+                style={{ background: pressed === 'bodega' ? 'rgba(8,31,27,0.92)' : 'rgba(255,255,255,0.05)' }}
               >
                 <div className="flex items-center gap-4 relative">
                   <div
                     className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
-                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#1e5b4f,#0f3821)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(26,92,56,0.6)' : 'none' }}
+                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#1e5b4f,#081f1b)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(0,47,42,0.6)' : 'none' }}
                   >
-                    <Building2 size={24} className={pressed === 'bodega' ? 'text-emerald-300' : 'text-white/60'} />
+                    <Building2 size={24} className={pressed === 'bodega' ? 'text-[#6bbdaf]' : 'text-white/60'} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-[17px] leading-tight">Soy Bodega / Industria</p>
                     <p className="text-white/45 text-[13px] mt-0.5 leading-snug">Iniciar sesión o registrar tu bodega</p>
                   </div>
-                  <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'bodega' ? 'text-emerald-400 translate-x-1' : 'text-white/25'}`} />
+                  <ChevronRight size={18} className={`shrink-0 transition-all duration-150 ${pressed === 'bodega' ? 'text-[#3da794] translate-x-1' : 'text-white/25'}`} />
                 </div>
               </div>
             </button>
@@ -448,8 +448,8 @@ export default function WelcomePage() {
                     onClick={() => navigate(item.to)}
                     className={`w-full flex items-center gap-3.5 p-4 rounded-2xl text-left transition-all active:scale-[0.98] border
                       ${item.accent
-                        ? 'bg-[#1e5b4f] border-[#1e5b4f] shadow-lg shadow-green-900/25 hover:bg-[#155030]'
-                        : 'bg-[#f5fbf7] border-gray-100 hover:bg-[#edf8f2] hover:border-gray-200'}`}
+                        ? 'bg-[#1e5b4f] border-[#1e5b4f] shadow-lg shadow-green-900/25 hover:bg-[#195049]'
+                        : 'bg-[#e8f5f3] border-gray-100 hover:bg-[#d5ece9] hover:border-gray-200'}`}
                   >
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm border border-gray-100'}`}>
                       <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1e5b4f]'} />
