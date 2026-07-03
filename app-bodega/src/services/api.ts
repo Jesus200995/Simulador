@@ -66,6 +66,8 @@ export const api = {
       request(`/bodegas/${id}/semaforo`, { method: 'PATCH', body: JSON.stringify({ semaforo }) }),
     create: (data: Record<string, unknown>) =>
       request('/bodegas', { method: 'POST', body: JSON.stringify(data) }),
+    capacidad: (id: number, capacidad_ton: number) =>
+      request(`/bodegas/${id}/capacidad`, { method: 'PATCH', body: JSON.stringify({ capacidad_ton }) }),
   },
   bodeguero: {
     solicitar: (bodega_id: number) =>

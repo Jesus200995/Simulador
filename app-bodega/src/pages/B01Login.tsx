@@ -124,6 +124,7 @@ export default function B01Login() {
               <UserPlus size={16} /> Crear cuenta nueva
             </button>
 
+            {/* OCULTO C11 — acceso a registro de productor
             <div className="border-t border-white/10 pt-4 text-center">
               <button
                 onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
@@ -132,6 +133,7 @@ export default function B01Login() {
                 <Wheat size={15} /> ¿Eres productor? Ver opciones
               </button>
             </div>
+            */}
           </div>
         </div>
       </div>

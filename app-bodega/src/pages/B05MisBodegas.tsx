@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight, MapPin, Warehouse, Circle, List, Map as MapIcon, Search, X } from "lucide-react";
+import { Plus, ChevronRight, MapPin, Warehouse, Circle, List, Map as MapIcon, Search, X, Pencil } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -52,6 +52,11 @@ export default function B05MisBodegas() {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [mapFocus, setMapFocus] = useState<Bodega | null>(null);
+  const [bodegaEditandoId, setBodegaEditandoId] = useState<number | null>(null);
+  const [nuevaCapacidad, setNuevaCapacidad] = useState<string>('');
+  const [guardandoCapacidad, setGuardandoCapacidad] = useState(false);
+  const [errorCapacidad, setErrorCapacidad] = useState<string | null>(null);
+  const [exitoCapacidad, setExitoCapacidad] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -111,6 +116,31 @@ export default function B05MisBodegas() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  const handleGuardarCapacidad = async () => {
+    if (!bodegaEditandoId || !nuevaCapacidad) return;
+    setGuardandoCapacidad(true);
+    setErrorCapacidad(null);
+    setExitoCapacidad(false);
+    try {
+      await api.bodegas.capacidad(bodegaEditandoId, Number(nuevaCapacidad));
+      setBodegas(prev =>
+        prev.map(b =>
+          b.id === bodegaEditandoId ? { ...b, capacidad_ton: Number(nuevaCapacidad) } : b
+        )
+      );
+      setExitoCapacidad(true);
+      setTimeout(() => {
+        setBodegaEditandoId(null);
+        setNuevaCapacidad('');
+        setExitoCapacidad(false);
+      }, 1500);
+    } catch (err: any) {
+      setErrorCapacidad(err.message || 'No se pudo actualizar la capacidad');
+    } finally {
+      setGuardandoCapacidad(false);
+    }
+  };
 
   const barColor = (p: number) => p < 70 ? "bg-[#1A5C38]" : p < 90 ? "bg-amber-400" : "bg-red-500";
 
@@ -250,7 +280,19 @@ export default function B05MisBodegas() {
                       <div>
                         <div className="flex justify-between text-[11px] text-gray-400 mb-1.5">
                           <span className="font-medium">Ocupación {pct}%</span>
-                          <span>{formatNum(b.stock_actual || 0)} / {formatNum(b.capacidad_ton || 0)} ton</span>
+                          <div className="flex items-center gap-2">
+                            <span>{formatNum(b.stock_actual || 0)} / {formatNum(b.capacidad_ton || 0)} ton</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBodegaEditandoId(b.id);
+                                setNuevaCapacidad(String(b.capacidad_ton ?? ''));
+                                setErrorCapacidad(null);
+                              }}
+                              className="flex items-center gap-0.5 text-[#1A5C38] font-semibold active:opacity-60 transition-opacity">
+                              <Pencil size={10} /> Corregir
+                            </button>
+                          </div>
                         </div>
                         <div className="bg-[#eef8f2] rounded-full h-1.5 overflow-hidden">
                           <div className={"h-full rounded-full " + barColor(pct) + " transition-all"} style={{ width: Math.min(pct, 100) + "%" }} />
@@ -319,6 +361,69 @@ export default function B05MisBodegas() {
       <button onClick={() => navigate("/bodegas/seleccionar")} className="fixed bottom-24 right-5 w-14 h-14 bg-[#1A5C38] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform z-10">
         <Plus size={24} />
       </button>
+
+      {/* Bottom sheet — editar capacidad de bodega */}
+      {bodegaEditandoId && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end">
+          <div className="bg-white w-full rounded-t-[20px] px-5 pt-5 pb-8 space-y-4">
+
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-2" />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-bold text-slate-800 text-[16px]">Corregir capacidad de almacenamiento</h2>
+                <p className="text-[12px] text-slate-500 mt-0.5">Ingresa la capacidad real de tu bodega en toneladas</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setBodegaEditandoId(null); setNuevaCapacidad(''); setErrorCapacidad(null); }}
+                className="text-slate-400 active:opacity-60">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div>
+              <label className="text-[13px] font-bold text-slate-700 mb-1 block">Capacidad total (toneladas)</label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={nuevaCapacidad}
+                onChange={e => setNuevaCapacidad(e.target.value)}
+                placeholder="Ej. 5000"
+                className="w-full border border-slate-200 rounded-[10px] px-3 py-3 text-[16px] font-bold text-slate-700 focus:outline-none focus:border-[#1A5C38] transition-colors"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">Este valor es el límite máximo de almacenamiento de tu bodega.</p>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-[12px] p-3">
+              <p className="text-[12px] text-amber-700 leading-relaxed">
+                ⚠️ La nueva capacidad no puede ser menor al volumen que ya tienes almacenado actualmente.
+              </p>
+            </div>
+
+            {errorCapacidad && (
+              <div className="bg-red-50 border border-red-200 rounded-[12px] p-3">
+                <p className="text-red-600 text-[12px] font-medium">{errorCapacidad}</p>
+              </div>
+            )}
+
+            {exitoCapacidad && (
+              <div className="bg-green-50 border border-green-200 rounded-[12px] p-3">
+                <p className="text-green-700 text-[12px] font-bold">✓ Capacidad actualizada correctamente</p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleGuardarCapacidad}
+              disabled={!nuevaCapacidad || guardandoCapacidad || exitoCapacidad}
+              className="w-full bg-[#1A5C38] text-white font-bold text-[15px] py-4 rounded-[14px] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+              {guardandoCapacidad ? 'Guardando...' : 'Guardar capacidad'}
+            </button>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

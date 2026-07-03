@@ -185,12 +185,14 @@ export default function B02Register() {
             <span className="text-sm font-medium hidden sm:inline">Iniciar sesión</span>
           </button>
           <div className="flex-1" />
+          {/* OCULTO C11 — acceso a registro de productor
           <button
             onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
             className="flex items-center gap-1.5 text-[12px] font-semibold text-green-300/60 hover:text-green-300 transition-colors"
           >
             <Wheat size={13} /> <span className="hidden sm:inline">¿Eres productor?</span>
           </button>
+          */}
         </div>
 
         {/* Contenido scrollable */}
@@ -391,10 +393,12 @@ export default function B02Register() {
                     className="text-sm text-white/40 hover:text-white/70 transition-colors font-medium">
                     ¿Ya tienes cuenta?
                   </button>
+                  {/* OCULTO C11 — segunda instancia acceso a registro de productor
                   <button type="button" onClick={() => navigate('/bienvenida', { state: { menu: 'productor' } })}
                     className="flex items-center gap-1.5 text-sm font-semibold text-green-300/70 hover:text-green-200 transition-colors">
                     <Wheat size={13} /> Soy productor
                   </button>
+                  */}
                 </div>
 
               </form>

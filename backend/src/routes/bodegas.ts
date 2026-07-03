@@ -371,4 +371,63 @@ router.get('/:id/stock-actual', authMiddleware, async (req: AuthRequest, res: Re
   }
 });
 
+// =============================================
+// PATCH /api/bodegas/:id/capacidad
+// Permite al bodeguero corregir la capacidad de almacenamiento de su bodega
+// =============================================
+router.patch('/:id/capacidad', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { capacidad_ton } = req.body;
+    const usuarioId = req.user?.userId;
+
+    if (!capacidad_ton || isNaN(Number(capacidad_ton)) || Number(capacidad_ton) <= 0) {
+      res.status(400).json({ error: 'La capacidad debe ser un número mayor a 0' });
+      return;
+    }
+
+    // Verificar que la bodega pertenece al bodeguero autenticado
+    const check = await pool.query(
+      `SELECT b.id FROM bodegas b
+       JOIN bodeguero_bodegas bb ON bb.bodega_id = b.id
+       WHERE b.id = $1 AND bb.usuario_id = $2`,
+      [id, usuarioId]
+    );
+
+    if (!check.rows.length) {
+      res.status(403).json({ error: 'No tienes permiso para editar esta bodega' });
+      return;
+    }
+
+    // Verificar que la nueva capacidad no sea menor al stock actual
+    const stockRes = await pool.query(
+      `SELECT COALESCE(SUM(volumen_almacenamiento), 0) AS stock_actual
+       FROM inventarios
+       WHERE bodega_id = $1`,
+      [id]
+    );
+    const stockActual = Number(stockRes.rows[0]?.stock_actual ?? 0);
+
+    if (Number(capacidad_ton) < stockActual) {
+      res.status(400).json({
+        error: `La nueva capacidad (${capacidad_ton} ton) no puede ser menor al stock actual (${stockActual} ton)`
+      });
+      return;
+    }
+
+    const result = await pool.query(
+      `UPDATE bodegas
+       SET capacidad_ton = $1
+       WHERE id = $2
+       RETURNING id, nombre, capacidad_ton`,
+      [Number(capacidad_ton), id]
+    );
+
+    res.json({ ok: true, bodega: result.rows[0] });
+  } catch (error) {
+    console.error('Error al actualizar capacidad:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;
