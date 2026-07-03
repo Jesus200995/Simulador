@@ -194,8 +194,8 @@ export default function DashboardProductorPage() {
               <BadgeCheck size={11} className="text-green-300" />
             </div>
             <p className="text-green-200/60 text-[11px] capitalize">{hoy}</p>
-            <div className="ml-auto bg-[#22c55e]/20 border border-[#22c55e]/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+            <div className="ml-auto bg-[#1e5b4f]/20 border border-[#1e5b4f]/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3da794] animate-pulse" />
               <span className="text-[11px] font-bold text-white tracking-wide">{reloj}</span>
               <span className="text-[9px] text-green-200/70 font-medium">MX</span>
             </div>

@@ -21,7 +21,7 @@ export default function PinInput({ value, onChange, error, success, dark }: PinI
   };
 
   const dotBase = 'w-4 h-4 sm:w-[18px] sm:h-[18px] rounded-full ring-2 transition-all duration-200';
-  const filledColor = success ? 'bg-[#34d079] ring-[#34d079]' : error ? 'bg-red-500 ring-red-500' : 'bg-[#1e5b4f] ring-[#1e5b4f]';
+  const filledColor = success ? 'bg-[#3da794] ring-[#3da794]' : error ? 'bg-red-500 ring-red-500' : 'bg-[#1e5b4f] ring-[#1e5b4f]';
   const emptyColor = dark ? 'ring-white/30 bg-transparent' : 'ring-zinc-300 bg-white';
 
   const keyDark = 'bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15 active:bg-white/25';

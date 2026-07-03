@@ -59,7 +59,7 @@ export default function MasPage() {
 
       {/* Info app */}
       <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] px-5 py-5 flex items-center gap-4 transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 group/card">
-        <img src="/icono.png" alt="SIMAC" className="w-12 h-12 flex-shrink-0 rounded-[1.25rem] ring-1 ring-[#4ade80] transition-transform duration-300 group-hover/card:scale-110 shadow-sm" />
+        <img src="/icono.png" alt="SIMAC" className="w-12 h-12 flex-shrink-0 rounded-[1.25rem] ring-1 ring-[#3da794] transition-transform duration-300 group-hover/card:scale-110 shadow-sm" />
         <div className="transition-transform duration-300 group-hover/card:translate-x-1">
           <p className="text-[16px] font-black text-[#1e5b4f] tracking-tight">SIMAC</p>
           <p className="text-[13px] text-gray-500 font-medium mt-0.5">Sistema de Ordenamiento · Maíz Blanco México</p>

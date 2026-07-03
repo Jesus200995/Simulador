@@ -34,7 +34,7 @@ const iconoVerde = L.divIcon({
 });
 const iconoVerdeCheck = L.divIcon({
   className: '',
-  html: '<div style="width:16px;height:16px;background:#0f3520;border-radius:50%;border:2.5px solid #4ade80;box-shadow:0 1px 4px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center"><span style="color:white;font-size:9px;line-height:1">checkmark</span></div>'.replace('checkmark', '&#10003;'),
+  html: '<div style="width:16px;height:16px;background:#002f2a;border-radius:50%;border:2.5px solid #3da794;box-shadow:0 1px 4px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center"><span style="color:white;font-size:9px;line-height:1">checkmark</span></div>'.replace('checkmark', '&#10003;'),
   iconSize: [16, 16] as [number, number], iconAnchor: [8, 8] as [number, number],
 });
 

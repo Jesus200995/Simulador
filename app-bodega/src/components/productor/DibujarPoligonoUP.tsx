@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+﻿import { useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import area from '@turf/area';
@@ -40,8 +40,8 @@ interface Props {
   onPointCountChange?: (count: number) => void;
 }
 
-const GREEN = '#34d079';
-const GREEN_DARK = '#16a34a';
+const GREEN = '#3da794';
+const GREEN_DARK = '#195049';
 
 /**
  * Dibujo de parcela tipo "mira + botón": el usuario navega/hace zoom libremente

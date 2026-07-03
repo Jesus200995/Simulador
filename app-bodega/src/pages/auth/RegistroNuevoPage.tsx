@@ -382,7 +382,7 @@ export default function RegistroNuevoPage() {
             {pendingUP && (
               <Polygon
                 positions={pendingUP.poligono}
-                pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
+                pathOptions={{ color: '#3da794', fillColor: '#1e5b4f', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
               />
             )}
           </MapContainer>
