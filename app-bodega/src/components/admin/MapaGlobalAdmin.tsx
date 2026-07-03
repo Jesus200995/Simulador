@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactElement } from 'react';
+﻿import { useState, useEffect, type ReactElement } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -20,7 +20,7 @@ interface Punto {
 }
 
 const LAYER_CONFIG = {
-  productores: { color: '#1A5C38', label: 'Productores' },
+  productores: { color: '#002f2a', label: 'Productores' },
   bodegas:     { color: '#2563EB', label: 'Bodegas' },
   alertas:     { color: '#DC2626', label: 'Alertas' },
 } as const;
@@ -32,7 +32,7 @@ const LIGHT_COLORS: Record<string, { bg: string; border: string; accent: string;
   productor: {
     bg: 'rgba(26, 92, 56, 0.06)',
     border: 'rgba(26, 92, 56, 0.15)',
-    accent: '#1A5C38',
+    accent: '#002f2a',
     badge: 'rgba(26, 92, 56, 0.12)',
     badgeText: '#15803d',
     expandBg: 'rgba(26, 92, 56, 0.04)',

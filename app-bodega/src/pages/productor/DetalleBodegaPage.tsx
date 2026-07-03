@@ -61,7 +61,7 @@ export default function DetalleBodegaPage() {
 
   return (
     <div className="bg-[#e8f5f3]">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -146,7 +146,7 @@ export default function DetalleBodegaPage() {
                     className={`h-3 rounded-full transition-all ${
                       (stockActual / bodega.capacidad_ton) > 0.9 ? 'bg-red-400'
                       : (stockActual / bodega.capacidad_ton) > 0.7 ? 'bg-amber-400'
-                      : 'bg-[#1e5b4f]'
+                      : 'bg-[#002f2a]'
                     }`}
                     style={{ width: `${Math.min(100, (stockActual / bodega.capacidad_ton) * 100).toFixed(0)}%` }}
                   />
@@ -178,7 +178,7 @@ export default function DetalleBodegaPage() {
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm ring-1 ring-zinc-100">
             <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2"><Package size={18} className="text-gray-500" /> Stock actual</h3>
             {stockActual !== null ? (
-              <p className="text-3xl font-bold text-[#1e5b4f]">
+              <p className="text-3xl font-bold text-[#002f2a]">
                 {stockActual.toLocaleString('es-MX')}
                 <span className="text-base font-normal text-gray-500 ml-2">toneladas</span>
               </p>
@@ -204,7 +204,7 @@ export default function DetalleBodegaPage() {
               {tarifario.map((servicio, i) => (
                 <div key={i} className="flex items-center justify-between py-3">
                   <p className="text-gray-700">{servicio.concepto || servicio.nombre}</p>
-                  <p className="font-semibold text-[#1e5b4f]">
+                  <p className="font-semibold text-[#002f2a]">
                     ${Number(servicio.precio)?.toLocaleString('es-MX')}
                     <span className="text-xs font-normal text-gray-400 ml-1">{servicio.unidad || 'MXN'}</span>
                   </p>
@@ -233,7 +233,7 @@ export default function DetalleBodegaPage() {
 
         {bodega.telefono && (
           <a href={`tel:${bodega.telefono}`}
-            className="flex items-center justify-center gap-2 bg-[#1e5b4f] hover:bg-[#195049] text-white py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
+            className="flex items-center justify-center gap-2 bg-[#002f2a] hover:bg-[#1e5b4f] text-white py-4 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
             <Phone size={18} /> Llamar a la bodega
           </a>
         )}

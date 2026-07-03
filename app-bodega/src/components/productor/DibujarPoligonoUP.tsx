@@ -41,7 +41,7 @@ interface Props {
 }
 
 const GREEN = '#3da794';
-const GREEN_DARK = '#195049';
+const GREEN_DARK = '#1e5b4f';
 
 /**
  * Dibujo de parcela tipo "mira + botón": el usuario navega/hace zoom libremente

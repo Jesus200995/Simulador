@@ -29,7 +29,7 @@ interface Bodega { id: number; nombre: string; municipio: string; estado: string
 
 const iconoVerde = L.divIcon({
   className: '',
-  html: '<div style="width:12px;height:12px;background:#1e5b4f;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>',
+  html: '<div style="width:12px;height:12px;background:#002f2a;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>',
   iconSize: [12, 12] as [number, number], iconAnchor: [6, 6] as [number, number],
 });
 const iconoVerdeCheck = L.divIcon({
@@ -161,7 +161,7 @@ export default function B03SelectBodegas() {
     <div className="fixed inset-0 flex flex-col bg-[#e8f5f3] overflow-hidden">
 
       {/* ══ BANNER VERDE — sticky, nunca scrollea, rounded-b-3xl ══ */}
-      <div className="flex-shrink-0 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.22)] relative z-10 overflow-hidden">
+      <div className="flex-shrink-0 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.22)] relative z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
         <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 pt-3 pb-3.5 relative z-10">
 
@@ -190,13 +190,13 @@ export default function B03SelectBodegas() {
           <div className="flex items-center w-full bg-white/10 backdrop-blur-sm rounded-xl p-0.5 mb-2">
             <button
               onClick={() => setVista('lista')}
-              className={'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[10px] text-[12.5px] font-bold transition-all duration-300 ' + (vista === 'lista' ? 'bg-white text-[#1e5b4f] shadow-sm' : 'text-white/75 hover:text-white hover:bg-white/10')}
+              className={'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[10px] text-[12.5px] font-bold transition-all duration-300 ' + (vista === 'lista' ? 'bg-white text-[#002f2a] shadow-sm' : 'text-white/75 hover:text-white hover:bg-white/10')}
             >
               <List size={13} /> Lista
             </button>
             <button
               onClick={() => setVista('mapa')}
-              className={'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[10px] text-[12.5px] font-bold transition-all duration-300 ' + (vista === 'mapa' ? 'bg-white text-[#1e5b4f] shadow-sm' : 'text-white/75 hover:text-white hover:bg-white/10')}
+              className={'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[10px] text-[12.5px] font-bold transition-all duration-300 ' + (vista === 'mapa' ? 'bg-white text-[#002f2a] shadow-sm' : 'text-white/75 hover:text-white hover:bg-white/10')}
             >
               <MapIcon size={13} /> Mapa
             </button>
@@ -262,18 +262,18 @@ export default function B03SelectBodegas() {
           {(estado || municipio) && (
             <div className="flex flex-wrap items-center gap-1.5 mt-2">
               {estado && (
-                <span className="inline-flex items-center gap-1 bg-white text-[#1e5b4f] text-[11px] font-bold rounded-full pl-2.5 pr-1.5 py-1 shadow-sm">
+                <span className="inline-flex items-center gap-1 bg-white text-[#002f2a] text-[11px] font-bold rounded-full pl-2.5 pr-1.5 py-1 shadow-sm">
                   {estado}
-                  <button onClick={() => { setEstado(''); setMunicipio(''); }} className="w-4 h-4 rounded-full bg-[#1e5b4f]/10 flex items-center justify-center active:bg-[#1e5b4f]/20">
-                    <X size={9} className="text-[#1e5b4f]" />
+                  <button onClick={() => { setEstado(''); setMunicipio(''); }} className="w-4 h-4 rounded-full bg-[#002f2a]/10 flex items-center justify-center active:bg-[#002f2a]/20">
+                    <X size={9} className="text-[#002f2a]" />
                   </button>
                 </span>
               )}
               {municipio && (
-                <span className="inline-flex items-center gap-1 bg-white/90 text-[#1e5b4f] text-[11px] font-bold rounded-full pl-2.5 pr-1.5 py-1 shadow-sm">
+                <span className="inline-flex items-center gap-1 bg-white/90 text-[#002f2a] text-[11px] font-bold rounded-full pl-2.5 pr-1.5 py-1 shadow-sm">
                   {municipio}
-                  <button onClick={() => setMunicipio('')} className="w-4 h-4 rounded-full bg-[#1e5b4f]/10 flex items-center justify-center active:bg-[#1e5b4f]/20">
-                    <X size={9} className="text-[#1e5b4f]" />
+                  <button onClick={() => setMunicipio('')} className="w-4 h-4 rounded-full bg-[#002f2a]/10 flex items-center justify-center active:bg-[#002f2a]/20">
+                    <X size={9} className="text-[#002f2a]" />
                   </button>
                 </span>
               )}
@@ -289,11 +289,11 @@ export default function B03SelectBodegas() {
         {stats && (
           <div className="grid grid-cols-2 gap-2 flex-shrink-0">
             <div className="bg-white rounded-2xl border border-black/[0.04] p-3 flex items-center gap-2.5 shadow-sm">
-              <div className="w-8 h-8 rounded-xl bg-[#1e5b4f]/10 flex items-center justify-center flex-shrink-0">
-                <Warehouse size={15} className="text-[#1e5b4f]" />
+              <div className="w-8 h-8 rounded-xl bg-[#002f2a]/10 flex items-center justify-center flex-shrink-0">
+                <Warehouse size={15} className="text-[#002f2a]" />
               </div>
               <div className="min-w-0">
-                <p className="text-[15px] font-black text-[#1e5b4f] leading-tight">{stats.total_bodegas.toLocaleString('es-MX')}</p>
+                <p className="text-[15px] font-black text-[#002f2a] leading-tight">{stats.total_bodegas.toLocaleString('es-MX')}</p>
                 <p className="text-[10px] text-gray-400 font-medium leading-tight">Bodegas en catálogo</p>
               </div>
             </div>
@@ -311,16 +311,16 @@ export default function B03SelectBodegas() {
 
         {/* Chips seleccionadas — fijas, no en el scroll */}
         {selected.length > 0 && (
-          <div className="flex-shrink-0 bg-[#1e5b4f]/[0.07] border border-[#1e5b4f]/20 rounded-2xl px-3 py-2.5">
+          <div className="flex-shrink-0 bg-[#002f2a]/[0.07] border border-[#002f2a]/20 rounded-2xl px-3 py-2.5">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[11px] font-bold text-[#1e5b4f] uppercase tracking-wide">{selected.length} seleccionada{selected.length !== 1 ? 's' : ''}</p>
+              <p className="text-[11px] font-bold text-[#002f2a] uppercase tracking-wide">{selected.length} seleccionada{selected.length !== 1 ? 's' : ''}</p>
               <button onClick={() => setSelected([])} className="text-[11px] text-gray-400 active:text-red-500 transition-colors">Limpiar</button>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {selected.map(b => (
-                <span key={b.id} className="bg-white border border-[#1e5b4f]/25 text-[#1e5b4f] text-[11px] font-semibold rounded-full px-2.5 py-1 flex items-center gap-1.5">
+                <span key={b.id} className="bg-white border border-[#002f2a]/25 text-[#002f2a] text-[11px] font-semibold rounded-full px-2.5 py-1 flex items-center gap-1.5">
                   {b.nombre.length > 18 ? b.nombre.slice(0, 18) + '…' : b.nombre}
-                  <button onClick={() => toggle(b)} className="text-[#1e5b4f]/50 active:text-red-500"><X size={10} /></button>
+                  <button onClick={() => toggle(b)} className="text-[#002f2a]/50 active:text-red-500"><X size={10} /></button>
                 </span>
               ))}
             </div>
@@ -352,7 +352,7 @@ export default function B03SelectBodegas() {
               {results.map(b => {
                 const isSelected = selected.some(x => x.id === b.id);
                 return (
-                  <div key={b.id} className={'flex items-center gap-3 px-4 py-3.5 transition-colors ' + (isSelected ? 'bg-[#1e5b4f]/[0.04]' : 'hover:bg-[#f4fbf7]/80')}>
+                  <div key={b.id} className={'flex items-center gap-3 px-4 py-3.5 transition-colors ' + (isSelected ? 'bg-[#002f2a]/[0.04]' : 'hover:bg-[#f4fbf7]/80')}>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[14px] text-gray-900 truncate leading-tight">{b.nombre}</p>
                       <p className="text-[12px] text-gray-400 flex items-center gap-1 mt-0.5 truncate">
@@ -363,7 +363,7 @@ export default function B03SelectBodegas() {
                     </div>
                     <button
                       onClick={() => toggle(b)}
-                      className={'w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ' + (isSelected ? 'bg-[#1e5b4f] text-white shadow-md' : 'bg-[#e8f5f3] text-gray-500')}
+                      className={'w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ' + (isSelected ? 'bg-[#002f2a] text-white shadow-md' : 'bg-[#e8f5f3] text-gray-500')}
                     >
                       {isSelected ? <CheckCircle size={16} /> : <Plus size={16} />}
                     </button>
@@ -396,9 +396,9 @@ export default function B03SelectBodegas() {
                           <p style={{ fontSize: 11, color: '#6b7280', margin: '0 0 8px' }}>{b.municipio}, {b.estado}</p>
                           {b.capacidad_ton > 0 && <p style={{ fontSize: 11, color: '#374151', margin: '0 0 4px' }}>Capacidad: {formatNum(b.capacidad_ton)} ton</p>}
                           {selected.some(s => s.id === b.id) ? (
-                            <p style={{ fontSize: 12, color: '#1e5b4f', fontWeight: 600, margin: 0 }}>checkmark Ya agregada</p>
+                            <p style={{ fontSize: 12, color: '#002f2a', fontWeight: 600, margin: 0 }}>checkmark Ya agregada</p>
                           ) : (
-                            <button onClick={() => toggle(b)} style={{ width: '100%', background: '#1e5b4f', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', marginTop: 6 }}>+ Agregar</button>
+                            <button onClick={() => toggle(b)} style={{ width: '100%', background: '#002f2a', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', marginTop: 6 }}>+ Agregar</button>
                           )}
                         </div>
                       </Popup>
@@ -413,18 +413,18 @@ export default function B03SelectBodegas() {
         {/* ══ Solicitar alta — barra SIEMPRE visible (fuera del scroll) ══ */}
         <button
           onClick={() => setMostrarAlta(true)}
-          className="flex-shrink-0 w-full flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-[#1e5b4f]/20 rounded-2xl pl-3 pr-3.5 py-2.5 shadow-sm active:scale-[0.99] hover:border-[#1e5b4f]/40 transition-all"
+          className="flex-shrink-0 w-full flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-[#002f2a]/20 rounded-2xl pl-3 pr-3.5 py-2.5 shadow-sm active:scale-[0.99] hover:border-[#002f2a]/40 transition-all"
         >
           <span className="flex items-center gap-2.5 min-w-0">
-            <span className="w-9 h-9 rounded-xl bg-[#1e5b4f]/10 flex items-center justify-center flex-shrink-0">
-              <Warehouse size={16} className="text-[#1e5b4f]" />
+            <span className="w-9 h-9 rounded-xl bg-[#002f2a]/10 flex items-center justify-center flex-shrink-0">
+              <Warehouse size={16} className="text-[#002f2a]" />
             </span>
             <span className="text-left min-w-0">
               <span className="block text-[12.5px] font-bold text-gray-800 leading-tight truncate">¿No encuentras tu bodega?</span>
-              <span className="block text-[11.5px] text-[#1e5b4f] font-semibold leading-tight">Solicitar alta de bodega nueva</span>
+              <span className="block text-[11.5px] text-[#002f2a] font-semibold leading-tight">Solicitar alta de bodega nueva</span>
             </span>
           </span>
-          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-[#1e5b4f] flex-shrink-0">
+          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-[#002f2a] flex-shrink-0">
             <Plus size={15} className="text-white" />
           </span>
         </button>
@@ -446,7 +446,7 @@ export default function B03SelectBodegas() {
           <button
             onClick={continuar}
             disabled={selected.length === 0 || saving}
-            className="w-full bg-[#1e5b4f] text-white rounded-2xl py-3.5 text-[16px] font-semibold active:opacity-80 transition-opacity disabled:opacity-35 shadow-lg"
+            className="w-full bg-[#002f2a] text-white rounded-2xl py-3.5 text-[16px] font-semibold active:opacity-80 transition-opacity disabled:opacity-35 shadow-lg"
           >
             {saving ? 'Guardando…' : `Asociar ${selected.length} bodega${selected.length !== 1 ? 's' : ''}`}
           </button>
@@ -458,7 +458,7 @@ export default function B03SelectBodegas() {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90dvh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between rounded-t-3xl">
-              <p className="text-[16px] font-bold text-[#1e5b4f]">Solicitar alta de bodega</p>
+              <p className="text-[16px] font-bold text-[#002f2a]">Solicitar alta de bodega</p>
               <button onClick={() => setMostrarAlta(false)} className="w-8 h-8 rounded-full bg-[#e8f5f3] flex items-center justify-center text-gray-500 active:bg-gray-200">
                 <X size={16} />
               </button>
@@ -468,19 +468,19 @@ export default function B03SelectBodegas() {
               {[{ k: 'nombre', label: 'Nombre de la bodega *', type: 'text' }].map(({ k, label, type }) => (
                 <div key={k}>
                   <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
-                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0" />
+                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0" />
                 </div>
               ))}
               <div>
                 <label className="block text-[13px] font-medium text-gray-600 mb-1">Estado *</label>
-                <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0">
+                <select value={altaForm.estado} onChange={e => setAltaForm(f => ({ ...f, estado: e.target.value, municipio: '' }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0">
                   <option value="">Selecciona estado</option>
                   {altaEstados.map((s: any) => <option key={s.state_id} value={s.name}>{s.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-[13px] font-medium text-gray-600 mb-1">Municipio *</label>
-                <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0">
+                <select value={altaForm.municipio} onChange={e => setAltaForm(f => ({ ...f, municipio: e.target.value }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0">
                   <option value="">Selecciona municipio</option>
                   {altaMunicipios.map((m: any) => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
                 </select>
@@ -488,7 +488,7 @@ export default function B03SelectBodegas() {
               {[{ k: 'localidad', label: 'Localidad', type: 'text' }, { k: 'capacidad_ton', label: 'Capacidad total (ton) *', type: 'number' }, { k: 'responsable', label: 'Nombre del responsable *', type: 'text' }, { k: 'telefono', label: 'Teléfono *', type: 'tel' }, { k: 'email', label: 'Correo electrónico', type: 'email' }].map(({ k, label, type }) => (
                 <div key={k}>
                   <label className="block text-[13px] font-medium text-gray-600 mb-1">{label}</label>
-                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0" />
+                  <input type={type} value={(altaForm as any)[k]} onChange={e => setAltaForm(f => ({ ...f, [k]: e.target.value }))} className="w-full bg-[#e8f5f3] rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0" />
                 </div>
               ))}
               <div>
@@ -516,7 +516,7 @@ export default function B03SelectBodegas() {
                   } catch (err: any) { toast(err.message || 'Error al enviar solicitud', 'error'); }
                   finally { setEnviandoAlta(false); }
                 }}
-                className="w-full bg-[#1e5b4f] text-white rounded-2xl py-3.5 text-[14px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
+                className="w-full bg-[#002f2a] text-white rounded-2xl py-3.5 text-[14px] font-semibold active:opacity-80 transition-opacity disabled:opacity-40"
               >
                 {enviandoAlta ? 'Enviando…' : 'Enviar solicitud de alta'}
               </button>

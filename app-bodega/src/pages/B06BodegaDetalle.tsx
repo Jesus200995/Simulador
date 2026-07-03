@@ -54,7 +54,7 @@ export default function B06BodegaDetalle() {
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">
-      <div className="w-8 h-8 border-2 border-[#1e5b4f]/30 border-t-[#1e5b4f] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#002f2a]/30 border-t-[#002f2a] rounded-full animate-spin" />
     </div>
   );
   if (!bodega) return (
@@ -66,7 +66,7 @@ export default function B06BodegaDetalle() {
   return (
     <div className="w-full">
       {/* ── BANNER VERDE con tabs integradas ── */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden" style={{ transform: 'none', animation: 'none' }}>
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] overflow-hidden" style={{ transform: 'none', animation: 'none' }}>
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none opacity-60" />
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-3 pb-4 relative z-10">
 
@@ -93,7 +93,7 @@ export default function B06BodegaDetalle() {
                 onClick={() => setTab(t.key)}
                 className={'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-colors duration-150 ' +
                   (tab === t.key
-                    ? 'bg-white text-[#1e5b4f] shadow-sm'
+                    ? 'bg-white text-[#002f2a] shadow-sm'
                     : 'bg-white/15 text-white/80 hover:bg-white/25 hover:text-white border border-white/10')}
               >
                 {tabIcons[t.key]}
@@ -110,7 +110,7 @@ export default function B06BodegaDetalle() {
           <div className="space-y-4">
           <button
             onClick={() => navigate(`/bodegas/${id}/editar`)}
-            className="flex items-center gap-2 px-5 py-3 bg-[#1e5b4f] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
+            className="flex items-center gap-2 px-5 py-3 bg-[#002f2a] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
           >
             <PenLine size={16} /> Editar datos de contacto
           </button>
@@ -150,13 +150,13 @@ export default function B06BodegaDetalle() {
                 <p className="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest transition-colors group-hover:text-emerald-600/80">Contactos</p>
                 {contactos.map((c: any) => (
                   <div key={c.id} className="px-4 py-3.5 flex items-start gap-3 hover:bg-[#f4fbf7]/50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-[#1e5b4f]/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
-                      <Phone size={14} className="text-[#1e5b4f]" />
+                    <div className="w-8 h-8 rounded-full bg-[#002f2a]/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                      <Phone size={14} className="text-[#002f2a]" />
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-gray-800">{c.nombre}</p>
                       {c.cargo && <p className="text-[12px] text-gray-400 font-medium">{c.cargo}</p>}
-                      {c.telefono && <p className="text-[12px] text-[#1e5b4f] font-bold mt-0.5">{c.telefono}</p>}
+                      {c.telefono && <p className="text-[12px] text-[#002f2a] font-bold mt-0.5">{c.telefono}</p>}
                     </div>
                   </div>
                 ))}
@@ -171,7 +171,7 @@ export default function B06BodegaDetalle() {
           <div className="space-y-4">
             <button
               onClick={() => navigate(`/inventario?bodega_id=${id}`)}
-              className="flex items-center gap-2 px-5 py-3 bg-[#1e5b4f] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
+              className="flex items-center gap-2 px-5 py-3 bg-[#002f2a] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
             >
               <Zap size={16} /> Actualizar inventario
             </button>
@@ -234,7 +234,7 @@ export default function B06BodegaDetalle() {
           <div className="space-y-4">
             <button
               onClick={() => navigate(`/precio-diario?bodega_id=${id}`)}
-              className="flex items-center gap-2 px-5 py-3 bg-[#1e5b4f] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
+              className="flex items-center gap-2 px-5 py-3 bg-[#002f2a] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
             >
               <Zap size={16} /> Publicar precio de hoy
             </button>
@@ -246,14 +246,14 @@ export default function B06BodegaDetalle() {
                     <XAxis dataKey="fecha" tick={{ fontSize: 10 }} tickFormatter={v => v?.slice(5)} />
                     <YAxis tick={{ fontSize: 10 }} width={55} />
                     <Tooltip formatter={(v: any) => [`$${v}`, 'Precio']} />
-                    <Line type="monotone" dataKey="precio" stroke="#1e5b4f" dot={false} strokeWidth={2} />
+                    <Line type="monotone" dataKey="precio" stroke="#002f2a" dot={false} strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
                 <div className="mt-3 divide-y divide-gray-100">
                   {precios.slice(0, 5).map((p: any) => (
                     <div key={p.id} className="flex justify-between items-center py-2.5">
                       <span className="text-[13px] text-gray-400">{p.fecha} · {p.tipo_maiz}</span>
-                      <span className="text-[14px] font-bold text-[#1e5b4f]">${formatNum(p.precio)}/ton</span>
+                      <span className="text-[14px] font-bold text-[#002f2a]">${formatNum(p.precio)}/ton</span>
                     </div>
                   ))}
                 </div>
@@ -272,7 +272,7 @@ export default function B06BodegaDetalle() {
           <div className="space-y-4">
             <button
               onClick={() => navigate(`/senales/nueva?bodega_id=${id}`)}
-              className="flex items-center gap-2 px-5 py-3 bg-[#1e5b4f] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
+              className="flex items-center gap-2 px-5 py-3 bg-[#002f2a] text-white rounded-2xl text-[15px] font-semibold active:opacity-80 transition-opacity"
             >
               <Signal size={16} /> Nueva señal de compra
             </button>
@@ -283,7 +283,7 @@ export default function B06BodegaDetalle() {
               </p>
               <button
                 onClick={() => navigate('/requerimientos')}
-                className="text-[14px] text-[#1e5b4f] font-semibold underline mt-2 active:opacity-70"
+                className="text-[14px] text-[#002f2a] font-semibold underline mt-2 active:opacity-70"
               >
                 Publicar un requerimiento
               </button>

@@ -352,7 +352,7 @@ export default function ProfileHero({ titulo, nombre, initials, back, badges, me
   const navigate = useNavigate();
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b]">
+    <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b]">
       {/* Círculos decorativos */}
       <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-white/[0.04] pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/[0.03] pointer-events-none" />

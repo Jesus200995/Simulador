@@ -38,7 +38,7 @@ function fmtUsd(v: number) {
 }
 
 function Spinner() {
-  return <div className="w-5 h-5 border-2 border-[#1e5b4f]/20 border-t-[#1e5b4f] rounded-full animate-spin" />;
+  return <div className="w-5 h-5 border-2 border-[#002f2a]/20 border-t-[#002f2a] rounded-full animate-spin" />;
 }
 
 export default function B22PreciosMercado() {
@@ -91,7 +91,7 @@ export default function B22PreciosMercado() {
           <button 
             onClick={cargar} 
             disabled={loading}
-            className="flex items-center gap-1.5 text-[12px] text-[#1e5b4f] font-bold bg-[#1e5b4f]/5 hover:bg-[#1e5b4f]/10 px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-200 disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[12px] text-[#002f2a] font-bold bg-[#002f2a]/5 hover:bg-[#002f2a]/10 px-3 py-1.5 rounded-lg active:scale-95 transition-all duration-200 disabled:opacity-40"
           >
             <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Actualizar
           </button>
@@ -194,10 +194,10 @@ export default function B22PreciosMercado() {
           <section className="bg-white/80 backdrop-blur-md rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6 space-y-5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-500 group/card">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-[#1e5b4f] text-white text-[11px] font-bold flex items-center justify-center shadow-sm">2</span>
+                <span className="w-6 h-6 rounded-full bg-[#002f2a] text-white text-[11px] font-bold flex items-center justify-center shadow-sm">2</span>
                 <h2 className="text-[14px] font-bold text-gray-800 tracking-tight">Precio de Compra</h2>
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1e5b4f] bg-[#1e5b4f]/5 px-2 py-0.5 rounded-full">Bodega</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#002f2a] bg-[#002f2a]/5 px-2 py-0.5 rounded-full">Bodega</span>
             </div>
             
             <p className="text-[11px] text-gray-400 leading-relaxed">
@@ -206,21 +206,21 @@ export default function B22PreciosMercado() {
 
             <div className="rounded-[1.25rem] overflow-hidden border border-gray-100 divide-y divide-gray-100 shadow-inner">
               {/* Productor (PO) */}
-              <div className="bg-[#1e5b4f]/5 p-4 flex justify-between items-center transition-colors hover:bg-[#1e5b4f]/10">
+              <div className="bg-[#002f2a]/5 p-4 flex justify-between items-center transition-colors hover:bg-[#002f2a]/10">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
-                    <Wheat size={12} className="text-[#1e5b4f]" />
-                    <span className="text-[10px] font-bold text-[#1e5b4f] uppercase tracking-wider">Gana Productor (PO)</span>
+                    <Wheat size={12} className="text-[#002f2a]" />
+                    <span className="text-[10px] font-bold text-[#002f2a] uppercase tracking-wider">Gana Productor (PO)</span>
                   </div>
-                  <p className="text-[10px] text-[#1e5b4f]/80 leading-snug">Promedio pagado últimos 7 días</p>
+                  <p className="text-[10px] text-[#002f2a]/80 leading-snug">Promedio pagado últimos 7 días</p>
                 </div>
                 <div className="text-right">
                   {loading ? (
                     <Spinner />
                   ) : (
                     <>
-                      <p className="text-[20px] font-black text-[#1e5b4f] leading-none">{fmt(data?.precio_origen_mxn)}</p>
-                      <span className="text-[9px] font-bold text-[#1e5b4f]/80 mt-0.5 inline-block bg-[#1e5b4f]/10 px-1.5 py-0.2 rounded">{data?.pct_productor}%</span>
+                      <p className="text-[20px] font-black text-[#002f2a] leading-none">{fmt(data?.precio_origen_mxn)}</p>
+                      <span className="text-[9px] font-bold text-[#002f2a]/80 mt-0.5 inline-block bg-[#002f2a]/10 px-1.5 py-0.2 rounded">{data?.pct_productor}%</span>
                     </>
                   )}
                 </div>
@@ -384,7 +384,7 @@ export default function B22PreciosMercado() {
                     iconSize={8}
                     wrapperStyle={{ fontSize: 10, paddingTop: 10 }} 
                   />
-                  <Line type="monotone" name="precio_compra" dataKey="precio_compra" stroke="#1e5b4f" strokeWidth={2} dot={false} connectNulls />
+                  <Line type="monotone" name="precio_compra" dataKey="precio_compra" stroke="#002f2a" strokeWidth={2} dot={false} connectNulls />
                   <Line type="monotone" name="margen_negociacion" dataKey="margen_negociacion" stroke="#2563eb" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 4" />
                   <Line type="monotone" name="precio_venta" dataKey="precio_venta" stroke="#d97706" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="3 3" />
                 </LineChart>

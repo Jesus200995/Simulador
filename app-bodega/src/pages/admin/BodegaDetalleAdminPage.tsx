@@ -380,7 +380,7 @@ export default function BodegaDetalleAdminPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-gray-700">
                     {data.transacciones.map(tx => (
-                      <tr key={tx.id} className="hover:bg-[#eef8f2]">
+                      <tr key={tx.id} className="hover:bg-[#e6f0ef]">
                         <td className="py-3 font-bold text-gray-900">{tx.productor_nombre}</td>
                         <td className="py-3 text-gray-500 font-mono text-[11px]">{tx.tipo_maiz}</td>
                         <td className="py-3 text-emerald-600 font-bold">{tx.volumen} t</td>

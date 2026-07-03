@@ -349,17 +349,17 @@ export default function RegistroNuevoPage() {
   // --- STYLES ---
   const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3.5 text-sm sm:text-base tracking-wide text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all';
   const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1 sm:mb-1.5';
-  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1e5b4f] rounded-xl py-3 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
+  const btnCls = 'w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#002f2a] rounded-xl py-3 sm:py-4 text-sm sm:text-base font-bold disabled:opacity-30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2';
 
   // --- MAPA (Paso 4) ---
   if (paso === 4 && enDibujo) {
     const puedeTerminar = pointCount >= 3;
     return (
       <div 
-        className="h-[100dvh] flex flex-col overflow-hidden bg-[#091f1b]"
+        className="h-[100dvh] flex flex-col overflow-hidden bg-[#000e0c]"
         style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="bg-[#091f1b] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
+        <div className="bg-[#000e0c] px-4 py-3 flex items-center gap-3 z-10 shadow-md">
           <button onClick={handleBack} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
             <ChevronLeft size={20} />
           </button>
@@ -382,7 +382,7 @@ export default function RegistroNuevoPage() {
             {pendingUP && (
               <Polygon
                 positions={pendingUP.poligono}
-                pathOptions={{ color: '#3da794', fillColor: '#1e5b4f', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
+                pathOptions={{ color: '#3da794', fillColor: '#002f2a', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
               />
             )}
           </MapContainer>
@@ -402,7 +402,7 @@ export default function RegistroNuevoPage() {
             <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
               {/* Backdrop difuminado en la parte superior */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
-              <div className="relative bg-[#091f1b]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
+              <div className="relative bg-[#000e0c]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
                 {/* Handle */}
                 <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
 
@@ -523,13 +523,13 @@ export default function RegistroNuevoPage() {
                 });
               }}
               disabled={capturandoGPS}
-              className="w-full bg-[#1e5b4f]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+              className="w-full bg-[#002f2a]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
             >
               {capturandoGPS
                 ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
                 : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
             </button>
-            {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1e5b4f]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
+            {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#002f2a]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
             {pointCount > 0 && (
               <div className="flex gap-2">
                 <button onClick={() => dibujarRef.current?.undoVertex()}

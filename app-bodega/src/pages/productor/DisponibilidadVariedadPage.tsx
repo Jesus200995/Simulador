@@ -48,7 +48,7 @@ export default function DisponibilidadVariedadPage() {
 
   return (
     <div className="bg-[#e8f5f3]">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -74,8 +74,8 @@ export default function DisponibilidadVariedadPage() {
               <button key={v.code} onClick={() => seleccionar(v)}
                 className={`w-full bg-white ring-1 rounded-2xl py-4 px-5 text-left transition-all duration-200
                   ${variedadSel?.code === v.code
-                    ? 'ring-2 ring-[#1e5b4f] bg-emerald-50'
-                    : 'ring-zinc-200 hover:ring-zinc-300 active:ring-2 active:ring-[#1e5b4f] active:bg-emerald-50'}`}>
+                    ? 'ring-2 ring-[#002f2a] bg-emerald-50'
+                    : 'ring-zinc-200 hover:ring-zinc-300 active:ring-2 active:ring-[#002f2a] active:bg-emerald-50'}`}>
                 <p className="font-semibold text-zinc-800">{v.label}</p>
               </button>
             ))}
@@ -102,7 +102,7 @@ export default function DisponibilidadVariedadPage() {
                 <button
                   onClick={() => { if (variedadLibre.trim()) navigate('/productor/disponibilidad/volumen'); }}
                   disabled={!variedadLibre.trim()}
-                  className="mt-3 w-full bg-[#1e5b4f] text-white py-3 rounded-xl font-semibold disabled:opacity-40"
+                  className="mt-3 w-full bg-[#002f2a] text-white py-3 rounded-xl font-semibold disabled:opacity-40"
                 >
                   Continuar →
                 </button>

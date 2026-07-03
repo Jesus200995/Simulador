@@ -102,7 +102,7 @@ function CornCanvas() {
 
     const colorPalette = [
       'rgba(61, 167, 148, 0.004)',  // Teal claro (#3da794)
-      'rgba(30, 91, 79, 0.004)'     // Teal principal (#1e5b4f)
+      'rgba(0, 47, 42, 0.004)'     // Teal principal (#002f2a)
     ];
 
     const initPoints = () => {
@@ -194,8 +194,8 @@ export default function WelcomePage() {
     // muestre el fondo blanco del resto de la app
     const prev = document.body.style.background;
     const prevHtml = document.documentElement.style.background;
-    document.body.style.background = '#020e0c';
-    document.documentElement.style.background = '#020e0c';
+    document.body.style.background = '#000a09';
+    document.documentElement.style.background = '#000a09';
     return () => {
       clearTimeout(t);
       document.body.style.background = prev;
@@ -207,11 +207,11 @@ export default function WelcomePage() {
 
   return (
     <div
-      className="relative flex overflow-hidden bg-[#020e0c]"
+      className="relative flex overflow-hidden bg-[#000a09]"
       style={{ position: 'fixed', inset: 0, overscrollBehavior: 'none' }}
     >
       {/* Status bar color band — cubre safe-area-inset-top en iOS */}
-      <div className="fixed top-0 inset-x-0 z-[999] bg-[#1e5b4f]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+      <div className="fixed top-0 inset-x-0 z-[999] bg-[#002f2a]" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
       {/* ── LEFT PANEL — corn illustration (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col overflow-hidden">
@@ -222,14 +222,14 @@ export default function WelcomePage() {
           className="absolute inset-0 w-full h-full object-cover brightness-[0.45] saturate-[0.6]"
         />
         {/* Deep green gradient background (on top to filter the image green) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#010c09]/65 via-[#081f1b]/70 to-[#0d2e2a]/70 mix-blend-color" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#010c09]/25 via-[#081f1b]/30 to-[#0d2e2a]/25" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000806]/65 via-[#001714]/70 to-[#002520]/70 mix-blend-color" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000806]/25 via-[#001714]/30 to-[#002520]/25" />
         {/* Top vignette */}
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
         {/* Bottom vignette */}
         <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
         {/* Right fade — blends into right panel */}
-        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#020e0c] to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#000a09] to-transparent z-10 pointer-events-none" />
 
         {/* Canvas animation */}
         <CornCanvas />
@@ -273,12 +273,12 @@ export default function WelcomePage() {
             className="absolute inset-0 w-full h-full object-cover brightness-[0.42] saturate-[0.6]"
           />
           {/* Deep green gradient overlay (on top to filter the image green) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c]/65 via-[#081f1b]/70 to-[#0f2e2a]/75 mix-blend-color" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c]/25 via-[#081f1b]/30 to-[#0f2e2a]/25" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(30,91,79,0.10),transparent)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#000a09]/65 via-[#001714]/70 to-[#002520]/75 mix-blend-color" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#000a09]/25 via-[#001714]/30 to-[#002520]/25" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(0,47,42,0.10),transparent)]" />
           {/* Mobile canvas too */}
           <CornCanvas />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020e0c]/70 via-transparent to-[#020e0c]/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#000a09]/70 via-transparent to-[#000a09]/80" />
         </div>
 
         {/* Right panel content */}
@@ -328,7 +328,7 @@ export default function WelcomePage() {
                 transform: visible ? (pressed === 'productor' ? 'scale(0.97)' : 'none') : 'translateY(20px)',
                 transition: 'opacity 0.5s ease 0.12s, transform 0.5s ease 0.12s',
                 background: pressed === 'productor'
-                  ? 'linear-gradient(135deg, rgba(30,91,79,0.55) 0%, rgba(0,47,42,0.35) 100%)'
+                  ? 'linear-gradient(135deg, rgba(0,47,42,0.60) 0%, rgba(0,47,42,0.35) 100%)'
                   : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
               }}
             >
@@ -339,7 +339,7 @@ export default function WelcomePage() {
                 <div className="flex items-center gap-4 relative">
                   <div
                     className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
-                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#1e5b4f,#081f1b)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(0,47,42,0.6)' : 'none' }}
+                    style={{ background: pressed === 'productor' ? 'linear-gradient(135deg,#002f2a,#001714)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'productor' ? '0 4px 16px rgba(0,47,42,0.6)' : 'none' }}
                   >
                     <Wheat size={24} className={pressed === 'productor' ? 'text-[#6bbdaf]' : 'text-white/60'} />
                   </div>
@@ -364,7 +364,7 @@ export default function WelcomePage() {
                 transform: visible ? (pressed === 'bodega' ? 'scale(0.97)' : 'none') : 'translateY(20px)',
                 transition: 'opacity 0.5s ease 0.18s, transform 0.5s ease 0.18s',
                 background: pressed === 'bodega'
-                  ? 'linear-gradient(135deg, rgba(30,91,79,0.55) 0%, rgba(0,47,42,0.35) 100%)'
+                  ? 'linear-gradient(135deg, rgba(0,47,42,0.60) 0%, rgba(0,47,42,0.35) 100%)'
                   : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
               }}
             >
@@ -375,7 +375,7 @@ export default function WelcomePage() {
                 <div className="flex items-center gap-4 relative">
                   <div
                     className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150"
-                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#1e5b4f,#081f1b)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(0,47,42,0.6)' : 'none' }}
+                    style={{ background: pressed === 'bodega' ? 'linear-gradient(135deg,#002f2a,#001714)' : 'rgba(255,255,255,0.10)', boxShadow: pressed === 'bodega' ? '0 4px 16px rgba(0,47,42,0.6)' : 'none' }}
                   >
                     <Building2 size={24} className={pressed === 'bodega' ? 'text-[#6bbdaf]' : 'text-white/60'} />
                   </div>
@@ -448,11 +448,11 @@ export default function WelcomePage() {
                     onClick={() => navigate(item.to)}
                     className={`w-full flex items-center gap-3.5 p-4 rounded-2xl text-left transition-all active:scale-[0.98] border
                       ${item.accent
-                        ? 'bg-[#1e5b4f] border-[#1e5b4f] shadow-lg shadow-green-900/25 hover:bg-[#195049]'
+                        ? 'bg-[#002f2a] border-[#002f2a] shadow-lg shadow-green-900/25 hover:bg-[#1e5b4f]'
                         : 'bg-[#e8f5f3] border-gray-100 hover:bg-[#d5ece9] hover:border-gray-200'}`}
                   >
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? 'bg-white/15' : 'bg-white shadow-sm border border-gray-100'}`}>
-                      <Icon size={20} className={item.accent ? 'text-white' : 'text-[#1e5b4f]'} />
+                      <Icon size={20} className={item.accent ? 'text-white' : 'text-[#002f2a]'} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-bold text-[15px] leading-tight ${item.accent ? 'text-white' : 'text-gray-900'}`}>{item.title}</p>

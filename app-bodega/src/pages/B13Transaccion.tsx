@@ -99,7 +99,7 @@ export default function B13Transaccion() {
     } finally { setLoading(false); }
   }
 
-  const inputClass = 'w-full bg-[#e8f5f3] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0';
+  const inputClass = 'w-full bg-[#e8f5f3] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
@@ -132,7 +132,7 @@ export default function B13Transaccion() {
                     className={`${inputClass} pl-10`}
                   />
                   {producerSeleccionado && (
-                    <UserCheck size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1e5b4f]" />
+                    <UserCheck size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#002f2a]" />
                   )}
                 </div>
                 {sugerencias.length > 0 && (
@@ -147,14 +147,14 @@ export default function B13Transaccion() {
                     ))}
                     <button type="button"
                       onClick={activarModoLibre}
-                      className="w-full text-left px-4 py-3 text-[#1e5b4f] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#e8f5f3]">
+                      className="w-full text-left px-4 py-3 text-[#002f2a] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#e8f5f3]">
                       <PenLine size={14} /> + Registrar nombre manualmente
                     </button>
                   </div>
                 )}
                 {busqueda.length >= 3 && sugerencias.length === 0 && !producerSeleccionado && (
                   <button type="button" onClick={activarModoLibre}
-                    className="mt-1.5 text-[13px] text-[#1e5b4f] font-semibold flex items-center gap-1.5">
+                    className="mt-1.5 text-[13px] text-[#002f2a] font-semibold flex items-center gap-1.5">
                     <PenLine size={13} /> + Registrar nombre manualmente
                   </button>
                 )}
@@ -225,7 +225,7 @@ export default function B13Transaccion() {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1e5b4f] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
+          className="w-full bg-[#002f2a] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
           {loading ? 'Registrando…' : 'Registrar transacción'}
         </button>
       </form>

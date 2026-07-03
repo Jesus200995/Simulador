@@ -47,7 +47,7 @@ export default function UpdateToast() {
           to   { opacity: 1; transform: translate(-50%, 0); }
         }
       `}</style>
-      <div className="bg-[#1e5b4f] text-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] pl-3.5 pr-4 py-2.5 flex items-center gap-2.5 whitespace-nowrap">
+      <div className="bg-[#002f2a] text-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] pl-3.5 pr-4 py-2.5 flex items-center gap-2.5 whitespace-nowrap">
         <div className="w-6 h-6 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
           <RefreshCw
             size={13}

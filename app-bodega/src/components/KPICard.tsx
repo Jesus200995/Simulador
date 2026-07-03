@@ -27,7 +27,7 @@ const gradientBg: Record<string, string> = {
 };
 
 const TrendIcon = { up: TrendingUp, down: TrendingDown, neutral: Minus };
-const trendColor = { up: 'text-[#1e5b4f]', down: 'text-red-500', neutral: 'text-gray-400' };
+const trendColor = { up: 'text-[#002f2a]', down: 'text-red-500', neutral: 'text-gray-400' };
 
 export function KPICard({ title, value, subtitle, icon, trend, trendText, color = 'green', onClick }: KPICardProps) {
   const TIcon = trend ? TrendIcon[trend] : null;

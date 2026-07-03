@@ -76,11 +76,11 @@ export function Layout({ children }: { children: ReactNode }) {
               key={path}
               to={path}
               className={`flex-1 flex flex-col items-center justify-center pt-2 pb-2 gap-[3px] transition-colors
-                ${active ? 'text-[#1e5b4f]' : 'text-gray-400'}`}
+                ${active ? 'text-[#002f2a]' : 'text-gray-400'}`}
             >
               <Icon size={23} strokeWidth={active ? 2.4 : 1.7} />
               <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{label}</span>
-              {active && <div className="absolute bottom-0 w-5 h-[2px] bg-[#1e5b4f] rounded-full" style={{ position: 'relative' }} />}
+              {active && <div className="absolute bottom-0 w-5 h-[2px] bg-[#002f2a] rounded-full" style={{ position: 'relative' }} />}
             </Link>
           );
         })}
@@ -103,10 +103,10 @@ export function Layout({ children }: { children: ReactNode }) {
         style={{ boxShadow: '-4px 0 40px rgba(0,0,0,0.18)' }}
       >
         {/* Safe-area spacer — ocupa el status bar sin duplicar el padding global */}
-        <div className="bg-[#0d3d35] flex-shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+        <div className="bg-[#001a17] flex-shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
         {/* Header con info del usuario */}
-        <div className="bg-gradient-to-br from-[#0d3d35] via-[#1e5b4f] to-[#267a6b] px-5 pt-4 pb-5 relative flex-shrink-0">
+        <div className="bg-gradient-to-br from-[#001a17] via-[#002f2a] to-[#267a6b] px-5 pt-4 pb-5 relative flex-shrink-0">
           <button
             onClick={() => setDrawerOpen(false)}
             className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-colors"
@@ -143,7 +143,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <button key={route} onClick={() => { setDrawerOpen(false); navigate(route); }}
               className="w-full flex items-center gap-3 px-3 py-3.5 rounded-2xl text-left active:bg-[#e8f5f3] transition-colors group">
               <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] group-active:bg-[#dcf3e7] flex items-center justify-center flex-shrink-0 transition-colors">
-                <Icon size={19} className="text-[#1e5b4f]" strokeWidth={1.8} />
+                <Icon size={19} className="text-[#002f2a]" strokeWidth={1.8} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-semibold text-gray-800 leading-tight">{label}</p>
@@ -190,7 +190,7 @@ export function PageHeader({
             {back !== undefined && (
               <button
                 onClick={() => typeof back === 'number' ? navigate(back) : navigate(back)}
-                className="flex items-center gap-0.5 text-[#1e5b4f] text-[14px] font-medium mb-1.5 active:opacity-60 transition-opacity"
+                className="flex items-center gap-0.5 text-[#002f2a] text-[14px] font-medium mb-1.5 active:opacity-60 transition-opacity"
               >
                 <ChevronLeft size={18} strokeWidth={2.5} className="-ml-1" />
                 Volver
@@ -221,7 +221,7 @@ export function PageBanner({
 }) {
   const navigate = useNavigate();
   return (
-    <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
+    <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_8px_30px_rgba(26,92,56,0.25)] relative overflow-hidden group/banner">
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none transition-opacity duration-700 opacity-50 group-hover/banner:opacity-100" />
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 pt-4 pb-5 relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/banner:translate-x-1">
         {back !== undefined && (

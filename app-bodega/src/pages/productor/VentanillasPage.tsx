@@ -87,7 +87,7 @@ export default function VentanillasPage() {
 
   return (
     <div className="bg-[#e8f5f3]">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -123,7 +123,7 @@ export default function VentanillasPage() {
             </p>
             <button onClick={() => solicitar(v.id)}
               disabled={solicitando === v.id}
-              className="mt-3 w-full bg-[#1e5b4f] hover:bg-[#195049] text-white py-3 rounded-xl text-sm font-semibold
+              className="mt-3 w-full bg-[#002f2a] hover:bg-[#1e5b4f] text-white py-3 rounded-xl text-sm font-semibold
                          active:scale-[0.98] transition-all duration-200 disabled:opacity-50">
               {solicitando === v.id ? 'Enviando...' : 'Solicitar informacion'}
             </button>

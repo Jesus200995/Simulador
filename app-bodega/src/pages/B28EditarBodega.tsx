@@ -76,42 +76,42 @@ export default function B28EditarBodega() {
           {/* Horario */}
           <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6">
             <label className="flex items-center gap-2 text-[14px] font-bold text-gray-700 mb-3">
-              <Clock size={16} className="text-[#1e5b4f]" /> Horario de atención
+              <Clock size={16} className="text-[#002f2a]" /> Horario de atención
             </label>
             <input
               type="text"
               value={horario}
               onChange={e => setHorario(e.target.value)}
               placeholder="Ej. Lun a Vie 8:00–17:00, Sáb 8:00–13:00"
-              className="w-full bg-[#e8f5f3] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 transition-all"
+              className="w-full bg-[#e8f5f3] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#002f2a]/30 transition-all"
             />
           </div>
 
           {/* Teléfono */}
           <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6">
             <label className="flex items-center gap-2 text-[14px] font-bold text-gray-700 mb-3">
-              <Phone size={16} className="text-[#1e5b4f]" /> Teléfono de contacto
+              <Phone size={16} className="text-[#002f2a]" /> Teléfono de contacto
             </label>
             <input
               type="tel"
               value={telefono}
               onChange={e => setTelefono(e.target.value)}
               placeholder="Ej. 667 123 4567"
-              className="w-full bg-[#e8f5f3] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 transition-all"
+              className="w-full bg-[#e8f5f3] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-[#002f2a]/30 transition-all"
             />
           </div>
 
           {/* Observaciones */}
           <div className="bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-6">
             <label className="flex items-center gap-2 text-[14px] font-bold text-gray-700 mb-3">
-              <FileText size={16} className="text-[#1e5b4f]" /> Observaciones
+              <FileText size={16} className="text-[#002f2a]" /> Observaciones
             </label>
             <textarea
               value={observaciones}
               onChange={e => setObservaciones(e.target.value)}
               placeholder="Información adicional para los productores (servicios, requisitos, etc.)"
               rows={4}
-              className="w-full bg-[#e8f5f3] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium resize-none focus:outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 transition-all"
+              className="w-full bg-[#e8f5f3] border-0 rounded-[1rem] px-5 py-4 text-[16px] font-medium resize-none focus:outline-none focus:ring-2 focus:ring-[#002f2a]/30 transition-all"
             />
           </div>
 
@@ -121,7 +121,7 @@ export default function B28EditarBodega() {
           <button
             onClick={guardar}
             disabled={guardando}
-            className="w-full bg-[#1e5b4f] text-white py-4 rounded-[1.25rem] text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
+            className="w-full bg-[#002f2a] text-white py-4 rounded-[1.25rem] text-[17px] font-bold active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:hover:shadow-none"
           >
             {guardando ? 'Guardando…' : 'Guardar cambios'}
           </button>

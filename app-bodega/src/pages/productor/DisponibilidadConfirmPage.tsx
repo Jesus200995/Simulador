@@ -57,14 +57,14 @@ export default function DisponibilidadConfirmPage() {
   if (sent) {
     return (
       <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 text-center py-12">
-        <CheckCircle size={64} className="text-[#1e5b4f] mb-4" />
+        <CheckCircle size={64} className="text-[#002f2a] mb-4" />
         <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-2">Listo!</h2>
         <p className="text-zinc-500 text-sm sm:text-base mb-6 max-w-sm">
           Las bodegas cercanas a tu zona podran ver que tienes maiz disponible.
           Te notificamos si alguna esta interesada.
         </p>
         <button onClick={() => navigate('/productor')}
-          className="bg-[#1e5b4f] hover:bg-[#195049] text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
+          className="bg-[#002f2a] hover:bg-[#1e5b4f] text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-200 active:scale-[0.98]">
           Volver al inicio
         </button>
       </div>
@@ -73,7 +73,7 @@ export default function DisponibilidadConfirmPage() {
 
   return (
     <div className="bg-[#e8f5f3] flex flex-col">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -127,7 +127,7 @@ export default function DisponibilidadConfirmPage() {
       <div className="px-5 sm:px-8 py-4 border-t border-zinc-200 bg-white/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto">
           <button onClick={enviar} disabled={loading}
-            className="w-full bg-[#1e5b4f] hover:bg-[#195049] text-white py-4 rounded-2xl text-base font-semibold
+            className="w-full bg-[#002f2a] hover:bg-[#1e5b4f] text-white py-4 rounded-2xl text-base font-semibold
                        disabled:opacity-40 active:scale-[0.98] transition-all duration-200">
             {loading ? 'Enviando...' : 'Confirmar y publicar'}
           </button>

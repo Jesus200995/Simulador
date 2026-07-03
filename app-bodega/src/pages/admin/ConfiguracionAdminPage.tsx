@@ -98,18 +98,18 @@ export default function ConfiguracionAdminPage() {
     } catch (e) { setCreateError('Error de conexión'); } finally { setCreatingUser(false); }
   }
 
-  const INPUT = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#1A5C38]/40 focus:bg-white transition-all duration-150';
+  const INPUT = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#002f2a]/40 focus:bg-white transition-all duration-150';
   const LABEL = 'text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mb-1 block';
 
   return (
     <div className="flex flex-col gap-3">
 
       {/* ── Barra de acciones ── */}
-      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[10.5px] text-[#1A5C38]/70 font-medium">
-          <Settings size={11} className="text-[#1A5C38]" />
+      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-[10.5px] text-[#002f2a]/70 font-medium">
+          <Settings size={11} className="text-[#002f2a]" />
           <span>Sistema SIMAC</span>
-          <span className="text-[#1A5C38]/30">·</span>
+          <span className="text-[#002f2a]/30">·</span>
           <span>Parámetros · Usuarios · Catálogos</span>
         </div>
         <button
@@ -117,7 +117,7 @@ export default function ConfiguracionAdminPage() {
           className={`flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
             savedParams
               ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
-              : 'bg-[#d4efe1] border-[#1A5C38]/30 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
+              : 'bg-[#cce8e5] border-[#002f2a]/30 text-[#002f2a] hover:bg-[#002f2a] hover:text-white hover:border-transparent'
           }`}>
           <Save size={10} />
           {savedParams ? 'Guardado ✓' : savingParams ? 'Guardando…' : 'Guardar parámetros'}
@@ -128,7 +128,7 @@ export default function ConfiguracionAdminPage() {
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <Settings size={13} className="text-[#1A5C38]" />
+            <Settings size={13} className="text-[#002f2a]" />
             <h2 className="text-[12.5px] font-bold text-gray-900">Parámetros del Sistema</h2>
           </div>
           <button
@@ -136,7 +136,7 @@ export default function ConfiguracionAdminPage() {
             className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
               savedParams
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
-                : 'bg-[#eef8f2] border-[#1A5C38]/20 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
+                : 'bg-[#e6f0ef] border-[#002f2a]/20 text-[#002f2a] hover:bg-[#002f2a] hover:text-white hover:border-transparent'
             }`}
           >
             <Save size={11} />
@@ -343,7 +343,7 @@ export default function ConfiguracionAdminPage() {
               {createError && <p className="text-[11px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{createError}</p>}
               <div className="flex gap-2 pt-1">
                 <button onClick={() => { setShowModal(false); setCreateError(''); }} className="flex-1 text-[12px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 border border-gray-200 py-2 rounded-xl transition-all duration-150 active:scale-95">Cancelar</button>
-                <button onClick={crearUsuario} disabled={creatingUser} className="flex-1 text-[12px] font-bold text-white bg-[#1A5C38] hover:bg-[#154d2f] py-2 rounded-xl transition-all duration-150 active:scale-95 disabled:opacity-50">
+                <button onClick={crearUsuario} disabled={creatingUser} className="flex-1 text-[12px] font-bold text-white bg-[#002f2a] hover:bg-[#1e5b4f] py-2 rounded-xl transition-all duration-150 active:scale-95 disabled:opacity-50">
                   {creatingUser ? 'Creando...' : 'Crear usuario'}
                 </button>
               </div>

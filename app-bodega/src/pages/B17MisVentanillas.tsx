@@ -36,7 +36,7 @@ export default function B17MisVentanillas() {
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading && (
           <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-2 border-[#1e5b4f]/30 border-t-[#1e5b4f] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#002f2a]/30 border-t-[#002f2a] rounded-full animate-spin" />
           </div>
         )}
 
@@ -48,11 +48,11 @@ export default function B17MisVentanillas() {
               className="w-full bg-white rounded-[1.5rem] border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 text-left active:scale-[0.98] transition-all duration-500 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-black/[0.08] group/card"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-[1.25rem] bg-[#1e5b4f]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
-                  <Building2 size={20} className="text-[#1e5b4f]" />
+                <div className="w-12 h-12 rounded-[1.25rem] bg-[#002f2a]/[0.08] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover/card:scale-110 group-hover/card:-rotate-3">
+                  <Building2 size={20} className="text-[#002f2a]" />
                 </div>
                 <div className="flex-1 min-w-0 transition-transform duration-500 group-hover/card:translate-x-1">
-                  <p className="font-bold text-[15px] text-gray-900 group-hover/card:text-[#1e5b4f] transition-colors leading-snug">{v.bodega_nombre}</p>
+                  <p className="font-bold text-[15px] text-gray-900 group-hover/card:text-[#002f2a] transition-colors leading-snug">{v.bodega_nombre}</p>
                   {v.nombre_ventanilla && (
                     <p className="text-[13px] text-gray-500 font-medium leading-snug mt-0.5">{v.nombre_ventanilla}</p>
                   )}
@@ -67,7 +67,7 @@ export default function B17MisVentanillas() {
                     )}
                   </div>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#1e5b4f]" />
+                <ChevronRight size={18} className="text-gray-300 flex-shrink-0 transition-transform duration-300 group-hover/card:translate-x-1 group-hover/card:text-[#002f2a]" />
               </div>
             </button>
           ))}
@@ -87,7 +87,7 @@ export default function B17MisVentanillas() {
       {/* FAB */}
       <button
         onClick={() => navigate('/ventanillas/nueva')}
-        className="fixed bottom-24 right-5 sm:right-8 lg:right-12 xl:right-20 w-14 h-14 bg-[#1e5b4f] text-white rounded-[1.25rem] shadow-[0_4px_12px_rgba(26,92,56,0.3)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 z-10"
+        className="fixed bottom-24 right-5 sm:right-8 lg:right-12 xl:right-20 w-14 h-14 bg-[#002f2a] text-white rounded-[1.25rem] shadow-[0_4px_12px_rgba(26,92,56,0.3)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 z-10"
       >
         <Plus size={24} />
       </button>

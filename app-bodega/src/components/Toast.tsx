@@ -110,7 +110,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             Cancelar
           </button>
           <button onClick={() => closeDialog(true)}
-            className="flex-1 py-4 text-[16px] font-bold text-[#1e5b4f] active:bg-green-50 transition-colors">
+            className="flex-1 py-4 text-[16px] font-bold text-[#002f2a] active:bg-green-50 transition-colors">
             Confirmar
           </button>
         </div>

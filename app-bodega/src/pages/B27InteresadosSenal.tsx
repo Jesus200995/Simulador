@@ -71,7 +71,7 @@ export default function B27InteresadosSenal() {
                 </div>
                 {prod.telefono && (
                   <a href={`tel:${prod.telefono}`}
-                    className="flex items-center gap-2 bg-[#1e5b4f] text-white px-5 py-3 rounded-[1.25rem] text-[14px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] whitespace-nowrap">
+                    className="flex items-center gap-2 bg-[#002f2a] text-white px-5 py-3 rounded-[1.25rem] text-[14px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] whitespace-nowrap">
                     <Phone size={16} />
                     Llamar
                   </a>

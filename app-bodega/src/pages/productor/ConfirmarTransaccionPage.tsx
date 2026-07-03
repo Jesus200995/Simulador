@@ -45,7 +45,7 @@ export default function ConfirmarTransaccionPage() {
       <div className="max-w-lg mx-auto w-full">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Wheat size={36} className="text-[#1e5b4f]" />
+          <Wheat size={36} className="text-[#002f2a]" />
         </div>
         <h2 className="text-xl font-bold text-gray-800">
           {txn.bodega_nombre} registró una compra
@@ -71,7 +71,7 @@ export default function ConfirmarTransaccionPage() {
       </div>
 
       <button onClick={() => confirmar(true)} disabled={sending}
-        className="w-full bg-[#1e5b4f] hover:bg-[#195049] text-white py-5 rounded-2xl text-lg
+        className="w-full bg-[#002f2a] hover:bg-[#1e5b4f] text-white py-5 rounded-2xl text-lg
                    font-semibold active:scale-[0.98] transition-all duration-200 mb-3 shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
         <Check size={20} /> Si, es correcto
       </button>

@@ -99,7 +99,7 @@ export default function DashboardAdminPage() {
 
   // Skeleton card
   const Skeleton = () => (
-    <div className="animate-pulse bg-[#eef8f2] rounded-2xl h-[120px]" />
+    <div className="animate-pulse bg-[#e6f0ef] rounded-2xl h-[120px]" />
   );
 
   const tipoColor: Record<string, string> = {
@@ -113,12 +113,12 @@ export default function DashboardAdminPage() {
     <div className="flex flex-col gap-3">
 
       {/* ── Barra de acción ── */}
-      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
-        <span className="text-[10px] font-bold text-[#1A5C38]/60 uppercase tracking-wide">
+      <div className="bg-[#e6f0ef] flex-shrink-0 rounded-b-2xl border border-[#002f2a]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
+        <span className="text-[10px] font-bold text-[#002f2a]/60 uppercase tracking-wide">
           {lastUpdate ? `Actualizado ${lastUpdate}` : 'Resumen operativo'}
         </span>
         <button onClick={cargar} disabled={loading}
-          className="flex items-center gap-1.5 text-[11px] font-bold text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
+          className="flex items-center gap-1.5 text-[11px] font-bold text-[#002f2a] bg-[#cce8e5] hover:bg-[#002f2a] hover:text-white border border-[#002f2a]/20 hover:border-transparent px-2.5 py-1.5 rounded-lg active:scale-95 transition-all duration-150 disabled:opacity-50">
           <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> Recargar
         </button>
       </div>
@@ -277,7 +277,7 @@ export default function DashboardAdminPage() {
           {eventos.length === 0 ? (
             <div className="px-5 py-6 text-center text-[12px] text-gray-500">Sin actividad reciente</div>
           ) : eventos.map((ev, idx) => (
-            <div key={idx} className="px-4 py-3 hover:bg-[#eef8f2] transition-colors">
+            <div key={idx} className="px-4 py-3 hover:bg-[#e6f0ef] transition-colors">
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${tipoColor[ev.tipo] || 'text-gray-500 bg-gray-100 border-gray-500/20'}`}>
                   {ev.tipo}
@@ -308,7 +308,7 @@ export default function DashboardAdminPage() {
                   <td colSpan={5} className="px-5 py-8 text-center text-[12px] text-gray-500">Sin actividad reciente registrada</td>
                 </tr>
               ) : eventos.map((ev, idx) => (
-                <tr key={idx} className="hover:bg-[#eef8f2] transition-colors group">
+                <tr key={idx} className="hover:bg-[#e6f0ef] transition-colors group">
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${tipoColor[ev.tipo] || 'text-gray-500 bg-gray-100 border-gray-500/20'}`}>
                       {ev.tipo}

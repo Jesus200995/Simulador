@@ -109,7 +109,7 @@ export default function B10Requerimiento() {
     } catch (err: any) { toast(err.message, 'error'); }
   }
 
-  const inputClass = 'w-full bg-[#e8f5f3] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#1e5b4f]/30 border-0';
+  const inputClass = 'w-full bg-[#e8f5f3] rounded-xl px-4 py-3.5 text-[17px] outline-none focus:ring-2 focus:ring-[#002f2a]/30 border-0';
   const labelClass = 'block text-[15px] font-medium text-gray-600 mb-1.5';
 
   return (
@@ -162,7 +162,7 @@ export default function B10Requerimiento() {
                           }
                         }
                       }}
-                      className="w-5 h-5 accent-[#1e5b4f]"
+                      className="w-5 h-5 accent-[#002f2a]"
                     />
                     <span className="text-sm text-gray-800">{v.label}</span>
                   </label>
@@ -185,7 +185,7 @@ export default function B10Requerimiento() {
                 ))}
 
               {variedadesSeleccionadas.length > 0 && (
-                <p className="text-xs text-[#1e5b4f] mt-2">
+                <p className="text-xs text-[#002f2a] mt-2">
                   {variedadesSeleccionadas.length} variedad{variedadesSeleccionadas.length > 1 ? 'es' : ''} seleccionada{variedadesSeleccionadas.length > 1 ? 's' : ''}
                 </p>
               )}
@@ -239,7 +239,7 @@ export default function B10Requerimiento() {
                 onClick={() => set('radio_km', String(km))}
                 className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                   Number(form.radio_km) === km
-                    ? 'bg-[#1e5b4f] text-white border-[#1e5b4f]'
+                    ? 'bg-[#002f2a] text-white border-[#002f2a]'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-[#f4fbf7]'
                 }`}
               >
@@ -255,7 +255,7 @@ export default function B10Requerimiento() {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1e5b4f] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
+          className="w-full bg-[#002f2a] text-white rounded-[1.25rem] py-4 text-[17px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(26,92,56,0.2)] hover:shadow-[0_8px_24px_rgba(26,92,56,0.3)] disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none">
           {loading ? 'Publicando…' : '+ Nuevo requerimiento de maíz'}
         </button>
       </form>
@@ -276,7 +276,7 @@ export default function B10Requerimiento() {
                   <p className="text-[14px] font-semibold text-gray-800">
                     {TIPOS_MAIZ.find(t => t.code === s.tipo_maiz)?.label || s.tipo_maiz}
                     {s.variedad_code ? ` · ${s.variedad_code}` : ''}
-                    {' '}<span className="text-[#1e5b4f]">${formatNum(s.precio_ofrecido)}/ton</span>
+                    {' '}<span className="text-[#002f2a]">${formatNum(s.precio_ofrecido)}/ton</span>
                   </p>
                   <p className="text-[12px] text-gray-400">{s.bodega_nombre}</p>
                   {(s.vigencia_inicio || s.vigencia_fin) && (
@@ -289,7 +289,7 @@ export default function B10Requerimiento() {
                     disabled={(s.interesados_count ?? 0) === 0}
                     className={`text-[11px] font-medium ${
                       (s.interesados_count ?? 0) > 0
-                        ? 'text-[#1e5b4f] underline'
+                        ? 'text-[#002f2a] underline'
                         : 'text-gray-400 cursor-default'
                     }`}
                   >

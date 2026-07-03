@@ -35,7 +35,7 @@ export default function EstadoSolicitudPage() {
 
   return (
     <div className="bg-[#e8f5f3]">
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#1e5b4f] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-br from-[#002f2a] via-[#267a6b] to-[#2e8c7b] rounded-b-3xl shadow-[0_4px_20px_rgba(26,92,56,0.25)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-5">
           <button onClick={() => navigate(-1)}
             className="flex items-center gap-0.5 text-green-200/80 text-[13px] font-medium mb-1.5 active:opacity-60 transition-opacity">
@@ -78,11 +78,11 @@ export default function EstadoSolicitudPage() {
                     <div key={e} className="flex items-start gap-3">
                       <div className="flex flex-col items-center">
                         {done
-                          ? <CheckCircle size={18} className="text-[#1e5b4f]" />
+                          ? <CheckCircle size={18} className="text-[#002f2a]" />
                           : <Circle size={18} className="text-zinc-300" />
                         }
                         {i < ESTADOS.length - 1 && (
-                          <div className={`w-0.5 h-6 ${i < currentIdx ? 'bg-[#1e5b4f]' : 'bg-zinc-200'}`} />
+                          <div className={`w-0.5 h-6 ${i < currentIdx ? 'bg-[#002f2a]' : 'bg-zinc-200'}`} />
                         )}
                       </div>
                       <p className={`text-sm ${done ? 'text-zinc-800 font-medium' : 'text-zinc-400'}`}>

@@ -296,7 +296,7 @@ export default function B02Register() {
                       <label className={lbl}>Estado <span className="text-red-400">*</span></label>
                       <select value={form.state_id}
                         onChange={e => { set('state_id', e.target.value); set('municipality_id', ''); }}
-                        required className={`${inp} appearance-none [&>option]:bg-[#091f1b] [&>option]:text-white`}>
+                        required className={`${inp} appearance-none [&>option]:bg-[#000e0c] [&>option]:text-white`}>
                         <option value="">Selecciona...</option>
                         {states.map((s: any) => (
                           <option key={s.state_id || s.id} value={s.state_id || s.id}>{s.name || s.nombre}</option>
@@ -308,7 +308,7 @@ export default function B02Register() {
                       <select value={form.municipality_id}
                         onChange={e => set('municipality_id', e.target.value)}
                         required disabled={!form.state_id}
-                        className={`${inp} appearance-none [&>option]:bg-[#091f1b] [&>option]:text-white disabled:opacity-35`}>
+                        className={`${inp} appearance-none [&>option]:bg-[#000e0c] [&>option]:text-white disabled:opacity-35`}>
                         <option value="">{form.state_id ? 'Selecciona...' : 'Elige estado primero'}</option>
                         {municipalities.map((m: any) => (
                           <option key={m.municipality_id || m.id} value={m.municipality_id || m.id}>{m.name || m.nombre}</option>

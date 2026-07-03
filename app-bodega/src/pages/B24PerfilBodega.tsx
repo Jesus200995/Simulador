@@ -25,7 +25,7 @@ interface GeoState  { state_id: string; name: string; }
 interface GeoMuni   { municipality_id: string; name: string; }
 
 function Spinner() {
-  return <div className="w-6 h-6 rounded-full border-[2.5px] border-[#1e5b4f]/20 border-t-[#1e5b4f] animate-spin" />;
+  return <div className="w-6 h-6 rounded-full border-[2.5px] border-[#002f2a]/20 border-t-[#002f2a] animate-spin" />;
 }
 
 /* ─── Modal confirmación ─────────────────────────────────────────── */
@@ -47,7 +47,7 @@ function ConfirmModal({ title, body, warning, onConfirm, onCancel, loading }: {
         </div>
         <div className="px-5 pb-6 pt-4 flex flex-col gap-2.5">
           <button onClick={onConfirm} disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#1e5b4f] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all disabled:opacity-60 shadow-[0_4px_14px_rgba(26,92,56,0.25)]">
+            className="w-full flex items-center justify-center gap-2 bg-[#002f2a] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all disabled:opacity-60 shadow-[0_4px_14px_rgba(26,92,56,0.25)]">
             {loading ? <><Spinner /> Guardando…</> : 'Sí, actualizar'}
           </button>
           <button onClick={onCancel} disabled={loading} className="w-full py-3.5 rounded-2xl text-[14px] font-semibold text-slate-600 bg-slate-100 active:bg-slate-200 transition-colors">Cancelar</button>
@@ -82,7 +82,7 @@ function ModalCURP({ curpActual, onSave, onClose }: { curpActual: string; onSave
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] flex items-center justify-center">
-                <CreditCard size={17} className="text-[#1e5b4f]" />
+                <CreditCard size={17} className="text-[#002f2a]" />
               </div>
               <h2 className="text-[17px] font-black text-slate-900">Actualizar CURP</h2>
             </div>
@@ -93,7 +93,7 @@ function ModalCURP({ curpActual, onSave, onClose }: { curpActual: string; onSave
           <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">CURP (18 caracteres)</label>
           <input value={limpio} onChange={e => { setValor(normalizar(e.target.value)); setError(''); }} maxLength={18}
             placeholder="XEXX000000HXXXXXX0"
-            className={`w-full font-mono text-[16px] tracking-widest border-2 rounded-2xl px-4 py-3.5 outline-none transition-colors ${error ? 'border-red-400 bg-red-50' : valido ? 'border-[#1e5b4f] bg-[#e8f5f3]' : 'border-slate-200 focus:border-[#1e5b4f]'}`} />
+            className={`w-full font-mono text-[16px] tracking-widest border-2 rounded-2xl px-4 py-3.5 outline-none transition-colors ${error ? 'border-red-400 bg-red-50' : valido ? 'border-[#002f2a] bg-[#e8f5f3]' : 'border-slate-200 focus:border-[#002f2a]'}`} />
           <div className="flex items-center justify-between mt-2">
             <span className="text-[11px] text-slate-400">Formato: XEXX000000HXXXXXX0</span>
             <span className={`text-[11px] font-bold ${limpio.length === 18 ? (valido ? 'text-emerald-600' : 'text-red-500') : 'text-slate-400'}`}>{limpio.length}/18{valido ? ' ✓' : ''}</span>
@@ -102,7 +102,7 @@ function ModalCURP({ curpActual, onSave, onClose }: { curpActual: string; onSave
         </div>
         <div className="px-5 pb-6 flex flex-col gap-2.5">
           <button onClick={() => { if (!valido) { setError('CURP inválida. Verifica el formato.'); return; } setConfirm(true); }}
-            className="w-full bg-[#1e5b4f] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.2)]">
+            className="w-full bg-[#002f2a] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all shadow-[0_4px_14px_rgba(26,92,56,0.2)]">
             Continuar
           </button>
           <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[14px] font-semibold text-slate-600 bg-slate-100 active:bg-slate-200 transition-colors">Cancelar</button>
@@ -153,7 +153,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-[#e8f5f3] flex items-center justify-center">
-                <MapPin size={17} className="text-[#1e5b4f]" />
+                <MapPin size={17} className="text-[#002f2a]" />
               </div>
               <h2 className="text-[17px] font-black text-slate-900">Actualizar ubicación</h2>
             </div>
@@ -164,7 +164,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Estado</label>
           {loadE ? <div className="flex justify-center py-4"><Spinner /></div> : (
             <select value={stateId ?? ''} onChange={e => setStateId(e.target.value || null)}
-              className="w-full border-2 border-slate-200 focus:border-[#1e5b4f] rounded-2xl px-4 py-3 text-[14px] outline-none transition-colors bg-white">
+              className="w-full border-2 border-slate-200 focus:border-[#002f2a] rounded-2xl px-4 py-3 text-[14px] outline-none transition-colors bg-white">
               <option value="">— Selecciona un estado —</option>
               {estados.map(e => <option key={e.state_id} value={e.state_id}>{e.name}</option>)}
             </select>
@@ -172,7 +172,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
           <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mt-4 mb-2">Municipio</label>
           {loadM ? <div className="flex justify-center py-4"><Spinner /></div> : (
             <select value={muniId ?? ''} onChange={e => setMuniId(e.target.value || null)} disabled={!stateId || munis.length === 0}
-              className="w-full border-2 border-slate-200 focus:border-[#1e5b4f] rounded-2xl px-4 py-3 text-[14px] outline-none transition-colors bg-white disabled:opacity-50">
+              className="w-full border-2 border-slate-200 focus:border-[#002f2a] rounded-2xl px-4 py-3 text-[14px] outline-none transition-colors bg-white disabled:opacity-50">
               <option value="">{!stateId ? '— Primero selecciona un estado —' : munis.length === 0 ? 'Sin municipios' : '— Selecciona —'}</option>
               {munis.map(m => <option key={m.municipality_id} value={m.municipality_id}>{m.name}</option>)}
             </select>
@@ -180,7 +180,7 @@ function ModalUbicacion({ stateIdActual, muniIdActual, onSave, onClose }: {
         </div>
         <div className="px-5 pb-6 pt-2 flex flex-col gap-2.5 flex-shrink-0">
           <button onClick={() => { if (stateId && muniId) setConfirm(true); }} disabled={!stateId || !muniId}
-            className="w-full bg-[#1e5b4f] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_14px_rgba(26,92,56,0.2)]">
+            className="w-full bg-[#002f2a] text-white py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-all disabled:opacity-40 shadow-[0_4px_14px_rgba(26,92,56,0.2)]">
             Continuar
           </button>
           <button onClick={onClose} className="w-full py-3.5 rounded-2xl text-[14px] font-semibold text-slate-600 bg-slate-100 active:bg-slate-200 transition-colors">Cancelar</button>
@@ -195,14 +195,14 @@ function DataRow({ icon: Icon, label, value, onEdit }: { icon: any; label: strin
   return (
     <div className="flex items-center gap-3 py-3.5">
       <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
-        <Icon size={15} className="text-[#1e5b4f]" />
+        <Icon size={15} className="text-[#002f2a]" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] text-slate-400 font-medium">{label}</p>
         <p className="text-[14px] font-semibold text-slate-800 truncate mt-0.5">{value}</p>
       </div>
       <button onClick={onEdit} className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-all flex-shrink-0">
-        <Edit2 size={13} className="text-[#1e5b4f]" />
+        <Edit2 size={13} className="text-[#002f2a]" />
       </button>
     </div>
   );
@@ -358,9 +358,9 @@ export default function B24PerfilBodega() {
                   <div className="flex gap-2 mt-1" style={{ animation: 'bdPop .22s ease both' }}>
                     <input value={nombre} onChange={e => setNombre(normalizar(e.target.value))} maxLength={80} style={{ textTransform: 'uppercase' }}
                       placeholder="NOMBRE COMPLETO" autoFocus
-                      className="flex-1 bg-[#f4fbf7] border-2 border-[#1e5b4f]/20 focus:border-[#1e5b4f] rounded-xl px-3 py-2.5 text-[14px] tracking-wide outline-none transition-colors" />
+                      className="flex-1 bg-[#f4fbf7] border-2 border-[#002f2a]/20 focus:border-[#002f2a] rounded-xl px-3 py-2.5 text-[14px] tracking-wide outline-none transition-colors" />
                     <button onClick={guardarNombre} disabled={savingNombre || nombre.trim().length < 3}
-                      className="w-11 h-11 rounded-xl bg-[#1e5b4f] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#1e5b4f]/20">
+                      className="w-11 h-11 rounded-xl bg-[#002f2a] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#002f2a]/20">
                       {savingNombre ? <Spinner /> : <Check size={16} className="text-white" />}
                     </button>
                     <button onClick={() => setEditNombre(false)} className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center active:scale-95 transition-transform">
@@ -374,7 +374,7 @@ export default function B24PerfilBodega() {
               <div className="py-3.5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
-                    <Phone size={15} className="text-[#1e5b4f]" />
+                    <Phone size={15} className="text-[#002f2a]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-slate-400 font-medium">Teléfono</p>
@@ -384,7 +384,7 @@ export default function B24PerfilBodega() {
                     {savedTel && <span className="text-[11px] text-emerald-600 font-bold">Guardado ✓</span>}
                     <button onClick={() => { setEditTel(!editTel); setTelefono(perfil?.telefono || ''); }}
                       className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-all">
-                      {editTel ? <X size={14} className="text-slate-400" /> : <Edit2 size={13} className="text-[#1e5b4f]" />}
+                      {editTel ? <X size={14} className="text-slate-400" /> : <Edit2 size={13} className="text-[#002f2a]" />}
                     </button>
                   </div>
                 </div>
@@ -393,9 +393,9 @@ export default function B24PerfilBodega() {
                     <input type="tel" inputMode="numeric" autoFocus value={telefono} maxLength={10}
                       onChange={e => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       placeholder="10 dígitos"
-                      className="flex-1 bg-[#f4fbf7] border-2 border-[#1e5b4f]/20 focus:border-[#1e5b4f] rounded-xl px-3 py-2.5 text-[15px] outline-none transition-colors" />
+                      className="flex-1 bg-[#f4fbf7] border-2 border-[#002f2a]/20 focus:border-[#002f2a] rounded-xl px-3 py-2.5 text-[15px] outline-none transition-colors" />
                     <button onClick={guardarTelefono} disabled={savingTel || telefono.length < 10}
-                      className="w-11 h-11 rounded-xl bg-[#1e5b4f] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#1e5b4f]/20">
+                      className="w-11 h-11 rounded-xl bg-[#002f2a] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all shadow-sm shadow-[#002f2a]/20">
                       {savingTel ? <Spinner /> : <Check size={16} className="text-white" />}
                     </button>
                   </div>
@@ -406,7 +406,7 @@ export default function B24PerfilBodega() {
               <div className="py-3.5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
-                    <CreditCard size={15} className="text-[#1e5b4f]" />
+                    <CreditCard size={15} className="text-[#002f2a]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-slate-400 font-medium">CURP</p>
@@ -415,7 +415,7 @@ export default function B24PerfilBodega() {
                     </p>
                   </div>
                   <button onClick={() => setShowCURP(true)} className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-all flex-shrink-0">
-                    <Edit2 size={13} className="text-[#1e5b4f]" />
+                    <Edit2 size={13} className="text-[#002f2a]" />
                   </button>
                 </div>
               </div>
@@ -424,7 +424,7 @@ export default function B24PerfilBodega() {
               <div className="py-3.5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
-                    <MapPin size={15} className="text-[#1e5b4f]" />
+                    <MapPin size={15} className="text-[#002f2a]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-slate-400 font-medium">Estado / Municipio</p>
@@ -433,7 +433,7 @@ export default function B24PerfilBodega() {
                     </p>
                   </div>
                   <button onClick={() => setShowUbicacion(true)} className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-[#e8f5f3] flex items-center justify-center active:scale-95 transition-all flex-shrink-0">
-                    <Edit2 size={13} className="text-[#1e5b4f]" />
+                    <Edit2 size={13} className="text-[#002f2a]" />
                   </button>
                 </div>
               </div>
@@ -448,7 +448,7 @@ export default function B24PerfilBodega() {
               {fechaReg && (
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
-                    <Calendar size={14} className="text-[#1e5b4f]" />
+                    <Calendar size={14} className="text-[#002f2a]" />
                   </div>
                   <div>
                     <p className="text-[11px] text-slate-400 font-medium">Miembro desde</p>
@@ -458,7 +458,7 @@ export default function B24PerfilBodega() {
               )}
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck size={14} className="text-[#1e5b4f]" />
+                  <ShieldCheck size={14} className="text-[#002f2a]" />
                 </div>
                 <div>
                   <p className="text-[11px] text-slate-400 font-medium">Rol</p>
@@ -473,10 +473,10 @@ export default function B24PerfilBodega() {
             <div style={delay(2)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
               <div className="flex items-center justify-between px-5 pt-4 pb-3">
                 <div className="flex items-center gap-2">
-                  <Warehouse size={15} className="text-[#1e5b4f]" />
+                  <Warehouse size={15} className="text-[#002f2a]" />
                   <p className="text-[13px] font-bold text-slate-700">Mis bodegas <span className="text-slate-400 font-normal text-[11px]">({bodegas.length})</span></p>
                 </div>
-                <button onClick={() => navigate('/mis-bodegas')} className="text-[12px] text-[#1e5b4f] font-bold flex items-center gap-0.5 active:opacity-60 transition-opacity">
+                <button onClick={() => navigate('/mis-bodegas')} className="text-[12px] text-[#002f2a] font-bold flex items-center gap-0.5 active:opacity-60 transition-opacity">
                   Ver todas <ChevronRight size={14} />
                 </button>
               </div>
@@ -486,7 +486,7 @@ export default function B24PerfilBodega() {
                     className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-[#f9fafb] hover:bg-[#e8f5f3] active:scale-[0.98] transition-all text-left"
                     style={{ animation: `bdFadeUp .35s ${i * 60 + 100}ms ease both` }}>
                     <div className="w-10 h-10 rounded-xl bg-white ring-1 ring-black/[0.06] flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <Warehouse size={16} className="text-[#1e5b4f]" />
+                      <Warehouse size={16} className="text-[#002f2a]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-bold text-slate-800 truncate">{b.nombre}</p>
@@ -505,13 +505,13 @@ export default function B24PerfilBodega() {
           <button style={delay(3)} onClick={() => navigate('/configuracion')}
             className="w-full bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] px-5 py-4 flex items-center gap-3.5 text-left active:scale-[0.98] transition-all group">
             <div className="w-10 h-10 rounded-xl bg-[#e8f5f3] flex items-center justify-center flex-shrink-0 group-active:bg-[#d9f0e5] transition-colors">
-              <Settings size={17} className="text-[#1e5b4f]" />
+              <Settings size={17} className="text-[#002f2a]" />
             </div>
             <div className="flex-1">
               <p className="text-[14px] font-bold text-slate-800">Configuración</p>
               <p className="text-[12px] text-slate-400 mt-0.5">Cambiar contraseña y preferencias</p>
             </div>
-            <ChevronRight size={16} className="text-slate-300 group-active:text-[#1e5b4f] transition-colors" />
+            <ChevronRight size={16} className="text-slate-300 group-active:text-[#002f2a] transition-colors" />
           </button>
 
           {/* ── Cerrar sesión ── */}
