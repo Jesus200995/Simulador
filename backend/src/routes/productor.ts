@@ -148,7 +148,7 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
       const producer = await client.query(
         `UPDATE producer
          SET usuario_id = $1, tipo_registro = 'A', estado_validacion = 'activo'
-         WHERE producer_id = $2 RETURNING nombres, apellido_paterno`,
+         WHERE producer_id = $2 RETURNING nombres, apellido_paterno, apellido_materno`,
         [u.rows[0].id, producer_id]
       );
 
@@ -164,14 +164,17 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
         { expiresIn: '30d' }
       );
 
+      const p0 = producer.rows[0];
       res.json({
         token,
         user: {
           id: u.rows[0].id,
           rol: 'productor',
           producer_id,
-          nombres: producer.rows[0]?.nombres,
-          apellido_paterno: producer.rows[0]?.apellido_paterno,
+          nombre_completo: nombreCompleto,
+          nombres: p0?.nombres,
+          apellido_paterno: p0?.apellido_paterno,
+          apellido_materno: p0?.apellido_materno,
         },
       });
     } catch (err) {
@@ -197,8 +200,8 @@ router.post('/auth/login-pin', async (req, res): Promise<void> => {
     }
 
     const { rows } = await pool.query(
-      `SELECT p.producer_id, p.nombres, p.apellido_paterno, p.estado_validacion,
-              u.id AS user_id, u.password_hash, u.rol
+      `SELECT p.producer_id, p.nombres, p.apellido_paterno, p.apellido_materno, p.estado_validacion,
+              u.id AS user_id, u.password_hash, u.rol, u.nombre_completo
        FROM producer p
        JOIN usuarios u ON u.id = p.usuario_id
        WHERE UPPER(p.curp) = UPPER($1) AND u.activo = true`,
@@ -227,14 +230,21 @@ router.post('/auth/login-pin', async (req, res): Promise<void> => {
       { expiresIn: '30d' }
     );
 
+    // nombre_completo preferido desde usuarios (puede incluir ediciones del perfil);
+    // si está vacío (registros muy antiguos) se construye desde el padrón.
+    const nombreCompleto = user.nombre_completo?.trim() ||
+      [user.nombres, user.apellido_paterno, user.apellido_materno].filter(Boolean).join(' ');
+
     res.json({
       token,
       user: {
         id: user.user_id,
         rol: 'productor',
         producer_id: user.producer_id,
+        nombre_completo: nombreCompleto,
         nombres: user.nombres,
         apellido_paterno: user.apellido_paterno,
+        apellido_materno: user.apellido_materno,
         estado_validacion: user.estado_validacion,
       },
     });

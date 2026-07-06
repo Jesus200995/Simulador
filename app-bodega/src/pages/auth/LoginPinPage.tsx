@@ -47,7 +47,12 @@ export default function LoginPinPage() {
         userId: data.user.id,
         email: '',
         rol: 'productor',
-        nombre_completo: `${data.user.nombres ?? ''} ${data.user.apellido_paterno ?? ''}`.trim(),
+        // Usar nombre_completo de usuarios (respeta ediciones de perfil);
+        // fallback a padrón solo si está vacío.
+        nombre_completo: data.user.nombre_completo ||
+          `${data.user.nombres ?? ''} ${data.user.apellido_paterno ?? ''} ${data.user.apellido_materno ?? ''}`.trim(),
+        nombres: data.user.nombres,
+        apellido_paterno: data.user.apellido_paterno,
       });
 
       // Verificar completitud: polígono → ciclo → dashboard
