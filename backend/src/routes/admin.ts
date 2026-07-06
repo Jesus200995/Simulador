@@ -93,7 +93,7 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
 
     if (estado_validacion) { conditions.push(`p.estado_validacion = $${idx++}`); params.push(estado_validacion); }
     if (tipo_registro) { conditions.push(`p.tipo_registro = $${idx++}`); params.push(tipo_registro); }
-    if (estado) { conditions.push(`up.state_name = $${idx++}`); params.push(estado); }
+    if (estado) { conditions.push(`first_up.state_name = $${idx++}`); params.push(estado); }
     // Filtro por rol — busca en tabla usuarios vinculada por curp
     if (rol) { conditions.push(`u.rol = $${idx++}`); params.push(rol); }
     if (q) {
@@ -118,13 +118,19 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
         p.created_at AS fecha_registro,
         p.programas_beneficiario,
         p.nota_admin,
-        up.state_name AS estado_up,
-        up.municipality_name AS municipio_up,
-        up.up_name AS nombre_up,
-        up.area_ha_calc AS superficie_ha,
+        first_up.state_name AS estado_up,
+        first_up.municipality_name AS municipio_up,
+        first_up.up_name AS nombre_up,
+        first_up.area_ha_calc AS superficie_ha,
         u.rol AS rol_sistema
       FROM producer p
-      LEFT JOIN up ON up.producer_id = p.producer_id
+      LEFT JOIN LATERAL (
+        SELECT up_id, state_name, municipality_name, up_name, area_ha_calc
+        FROM up
+        WHERE up.producer_id = p.producer_id
+        ORDER BY up.created_at ASC
+        LIMIT 1
+      ) first_up ON TRUE
       LEFT JOIN usuarios u ON u.curp = p.curp
       ${where}
       ORDER BY p.created_at DESC
