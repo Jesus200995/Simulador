@@ -225,13 +225,13 @@ export default function LoginPinPage() {
               )}
 
               {/* Enlace de recuperación de NIP */}
-              <div className="mt-4 text-center">
+              <div className="mt-5 text-center">
                 <button
                   type="button"
-                  onClick={() => navigate('/recuperar-nip')}
-                  className="text-[13px] text-green-300 underline underline-offset-2 font-medium active:opacity-60 transition-opacity"
+                  onClick={() => navigate('/recuperar-nip', { state: { curp } })}
+                  className="text-[13px] text-green-300 font-semibold hover:text-green-200 transition-colors"
                 >
-                  ¿Olvidaste tu NIP?
+                  ¿Olvidaste tu NIP? <span className="underline underline-offset-2">Recupéralo aquí</span>
                 </button>
               </div>
             </div>

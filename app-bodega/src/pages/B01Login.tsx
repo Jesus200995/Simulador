@@ -87,7 +87,16 @@ export default function B01Login() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/50 uppercase tracking-wide mb-1.5">Contraseña</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-white/50 uppercase tracking-wide">Contraseña</label>
+                <button
+                  type="button"
+                  onClick={() => navigate('/recuperar-password')}
+                  className="text-[12px] text-green-300 hover:text-green-200 font-semibold transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'} value={password}
@@ -114,16 +123,6 @@ export default function B01Login() {
                          disabled:opacity-40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-1">
               {loading ? <><Loader2 size={18} className="animate-spin" /> Ingresando…</> : 'Entrar'}
             </button>
-
-            <div className="text-center pt-1">
-              <button
-                type="button"
-                onClick={() => navigate('/recuperar-password')}
-                className="text-[13px] text-white/50 hover:text-white/70 underline underline-offset-2 transition-colors"
-              >
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
           </form>
 
           {/* Opciones */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, Wheat, Phone, KeyRound, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -8,11 +8,12 @@ type Step = 'curp' | 'telefono' | 'nuevo_nip' | 'exito';
 
 export default function RecuperarNipPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState<Step>('curp');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [curp, setCurp] = useState('');
+  const [curp, setCurp] = useState<string>((location.state as any)?.curp || '');
   const [telefonoEnmascarado, setTelefonoEnmascarado] = useState<string | null>(null);
   const [ultimos4, setUltimos4] = useState('');
   const [challengeToken, setChallengeToken] = useState('');
