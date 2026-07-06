@@ -2,7 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2, ChevronDown, AlertTriangle, Ruler } from 'lucide-react';
+import {
+  ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2,
+  AlertTriangle, Ruler, MapPin, Map, Check, Pencil,
+} from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
@@ -23,7 +26,6 @@ export default function AgregarUPPage() {
   const [estados, setEstados] = useState<{ state_id: string; name: string }[]>([]);
   const [municipios, setMunicipios] = useState<{ municipality_id: string; name: string }[]>([]);
 
-  // Catálogo de estados (mismo endpoint que el registro inicial)
   useEffect(() => {
     fetch(`${BASE}/auth/states`)
       .then(r => r.json())
@@ -31,7 +33,6 @@ export default function AgregarUPPage() {
       .catch(() => {});
   }, []);
 
-  // Municipios filtrados por estado seleccionado
   useEffect(() => {
     if (!estadoId) { setMunicipios([]); return; }
     fetch(`${BASE}/auth/municipalities?state_id=${estadoId}`)
@@ -39,6 +40,7 @@ export default function AgregarUPPage() {
       .then(d => setMunicipios(d.municipalities || (Array.isArray(d) ? d : [])))
       .catch(() => {});
   }, [estadoId]);
+
   const [paso, setPaso] = useState<'info' | 'mapa'>('info');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,19 +53,16 @@ export default function AgregarUPPage() {
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [center, setCenter] = useState<[number, number]>([23.6, -102.5]);
   const [mapReady, setMapReady] = useState(false);
-  
+
   const [pendingUP, setPendingUP] = useState<{
     poligono: [number, number][];
     coords: { lat: number; lng: number };
     area: number;
   } | null>(null);
-  // Parcelas ya guardadas (para mostrarlas en gris mientras se dibuja la nueva)
   const [existentes, setExistentes] = useState<[number, number][][]>([]);
-  // Lógica "difiere área": null = aún no responde, true = coincide, false = difiere
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [areaReal, setAreaReal] = useState('');
 
-  // Cargar polígonos de las parcelas existentes
   useEffect(() => {
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
@@ -93,98 +92,40 @@ export default function AgregarUPPage() {
     }
   }, [paso]);
 
-  // Umbral de traslape permitido: 10% del área de la nueva UP
   const UMBRAL_TRASLAPE = 0.10;
 
-  const validarOverlapLocal = (poly: [number, number][]): {
-    bloqueado: boolean;
-    mensaje: string | null;
-    porcentaje: number;
-  } => {
+  const validarOverlapLocal = (poly: [number, number][]) => {
     if (poly.length < 3) return { bloqueado: false, mensaje: null, porcentaje: 0 };
-
     try {
-      const nueva = turf.polygon([[
-        ...poly.map(([la, ln]) => [ln, la]),
-        [poly[0][1], poly[0][0]]
-      ]]);
+      const nueva = turf.polygon([[...poly.map(([la, ln]) => [ln, la]), [poly[0][1], poly[0][0]]]]);
       const areaNueva = turf.area(nueva);
-
       if (areaNueva <= 0) return { bloqueado: false, mensaje: null, porcentaje: 0 };
-
       for (let i = 0; i < existentes.length; i++) {
         const ex = existentes[i];
         if (!ex || ex.length < 3) continue;
-
-        const exPoly = turf.polygon([[
-          ...ex.map(([la, ln]) => [ln, la]),
-          [ex[0][1], ex[0][0]]
-        ]]);
-
+        const exPoly = turf.polygon([[...ex.map(([la, ln]) => [ln, la]), [ex[0][1], ex[0][0]]]]);
         if (!turf.booleanIntersects(nueva, exPoly)) continue;
-
         const interseccion = turf.intersect(turf.featureCollection([nueva, exPoly]));
-        if (!interseccion) continue; // solo bordes/vértices — sin área real
-
-        const areaInterseccion = turf.area(interseccion);
-        const porcentaje = areaInterseccion / areaNueva;
-
-        if (porcentaje > UMBRAL_TRASLAPE) {
-          const pct = Math.round(porcentaje * 100);
-          return {
-            bloqueado: true,
-            mensaje: `Tu parcela se empalma un ${pct}% con una parcela existente. El máximo permitido es 10%. Edita los puntos para reducir el traslape.`,
-            porcentaje: pct,
-          };
-        }
-
-        if (porcentaje > 0) {
-          const pct = Math.round(porcentaje * 100);
-          return {
-            bloqueado: false,
-            mensaje: `Tu parcela tiene un traslape menor del ${pct}% con una parcela colindante. Esto es aceptable, pero intenta ajustar los bordes si puedes.`,
-            porcentaje: pct,
-          };
-        }
+        if (!interseccion) continue;
+        const pct = Math.round((turf.area(interseccion) / areaNueva) * 100);
+        if (pct / 100 > UMBRAL_TRASLAPE) return { bloqueado: true, mensaje: `Tu parcela se empalma un ${pct}% con una parcela existente. El máximo permitido es 10%.`, porcentaje: pct };
+        if (pct > 0) return { bloqueado: false, mensaje: `Traslape menor del ${pct}% con una parcela colindante. Intenta ajustar los bordes si puedes.`, porcentaje: pct };
       }
-    } catch { /* si turf falla, no bloquear */ }
-
+    } catch { /* no bloquear si falla turf */ }
     return { bloqueado: false, mensaje: null, porcentaje: 0 };
   };
 
   const onUPDibujada = (poly: [number, number][], centro: { lat: number; lng: number }, area: number) => {
-    const resultado = validarOverlapLocal(poly);
-
-    if (resultado.bloqueado) {
-      setErrorOverlap(resultado.mensaje);
-      setAdvertenciaOverlap(null);
-      return;
-    }
-
+    const r = validarOverlapLocal(poly);
+    if (r.bloqueado) { setErrorOverlap(r.mensaje); setAdvertenciaOverlap(null); return; }
     setErrorOverlap(null);
-
-    if (resultado.mensaje) {
-      setAdvertenciaOverlap(resultado.mensaje);
-    } else {
-      setAdvertenciaOverlap(null);
-    }
-
+    setAdvertenciaOverlap(r.mensaje ?? null);
     setPendingUP({ poligono: poly, coords: centro, area });
-    setCoincideArea(null);
-    setAreaReal('');
-  };
-
-  const confirmarUP = () => {
-    if (pendingUP) {
-      guardar(pendingUP.poligono, pendingUP.coords, pendingUP.area);
-    }
+    setCoincideArea(null); setAreaReal('');
   };
 
   const redibujarUP = () => {
-    setPendingUP(null);
-    setPointCount(0);
-    setGpsMsg(null);
-    setErrorOverlap(null);
+    setPendingUP(null); setPointCount(0); setGpsMsg(null); setErrorOverlap(null);
     setTimeout(() => dibujarRef.current?.startEdit?.(), 50);
   };
 
@@ -194,9 +135,8 @@ export default function AgregarUPPage() {
     areaCalc: number | null
   ) => {
     if (!estadoUp || !municipioUp) { setError('Selecciona el estado y municipio de tu parcela.'); return; }
-    if (enviando) return; // prevenir doble-submit
-    setEnviando(true);
-    setError(null);
+    if (enviando) return;
+    setEnviando(true); setError(null);
     try {
       const res = await fetch(`${BASE}/productor/ups`, {
         method: 'POST',
@@ -214,48 +154,347 @@ export default function AgregarUPPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Error al guardar la parcela.');
-        if (res.status === 409) setPaso('mapa');
-        return;
-      }
-      navigate('/productor/perfil', {
-        state: { mensaje: `Parcela "${data.up.up_name}" registrada correctamente` },
-      });
+      if (!res.ok) { setError(data.error || 'Error al guardar la parcela.'); if (res.status === 409) setPaso('mapa'); return; }
+      navigate('/productor/perfil', { state: { mensaje: `Parcela "${data.up.up_name}" registrada correctamente` } });
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
-    } finally {
-      setEnviando(false);
-    }
+    } finally { setEnviando(false); }
   };
 
   const puedeTerminar = pointCount >= 3;
 
-  return (
-    <div className="min-h-screen bg-[#eef8f2]">
-      <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-[1100]">
-        <button onClick={() => paso === 'mapa' ? setPaso('info') : navigate(-1)} className="p-2 rounded-lg hover:bg-[#eef8f2]">
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 className="font-semibold text-gray-900">Agregar parcela</h1>
-          <p className="text-xs text-gray-500">Nueva unidad productiva</p>
+  // ── MAPA (paso === 'mapa') — pantalla completa ──────────────────────────────
+  if (paso === 'mapa') {
+    return (
+      <div
+        className="h-[100dvh] flex flex-col overflow-hidden bg-[#0c2e1a]"
+        style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {/* Header oscuro */}
+        <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md flex-shrink-0">
+          <button
+            onClick={() => setPaso('info')}
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div>
+            <p className="text-[10px] font-bold text-green-300 uppercase tracking-wider">Geolocalización</p>
+            <p className="text-xs text-white/80 mt-0.5">{municipioUp}, {estadoUp}</p>
+          </div>
+        </div>
+
+        <div className="flex-1 relative">
+          <MapContainer
+            ref={mapRef}
+            center={center}
+            zoom={mapReady ? 16 : 5}
+            style={{ height: '100%', width: '100%' }}
+            whenReady={() => setMapReady(true)}
+          >
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="© Esri"
+            />
+            {existentes.map((poly, i) => (
+              <Polygon key={`ex-${i}`} positions={poly}
+                pathOptions={{ color: '#94a3b8', fillColor: '#94a3b8', fillOpacity: 0.18, weight: 2, dashArray: '5 5' }} />
+            ))}
+            <DibujarPoligonoUP
+              ref={dibujarRef}
+              onModeChange={setDrawMode}
+              onPointCountChange={setPointCount}
+              onPoligonoCompleto={onUPDibujada}
+              onPoligonoEliminado={() => {}}
+            />
+            {pendingUP && (
+              <Polygon
+                positions={pendingUP.poligono}
+                pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
+              />
+            )}
+          </MapContainer>
+
+          {/* Buscador — solo cuando no hay pendingUP */}
+          {!pendingUP && (
+            <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+              <NominatimSearch
+                placeholder="Buscar dirección, localidad o coordenadas GPS…"
+                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+              />
+            </div>
+          )}
+
+          {/* Panel de confirmación */}
+          {pendingUP ? (
+            <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
+              <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-green-500/20 flex items-center justify-center ring-1 ring-green-400/30">
+                    <CheckCircle2 size={16} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar esta parcela?</p>
+                    <p className="text-white/50 text-[11px]">Revisa el polígono en el mapa antes de guardar</p>
+                  </div>
+                </div>
+
+                {/* Nombre editable */}
+                <div className="mb-4">
+                  <label className="block text-white/60 text-[11px] font-semibold uppercase tracking-wide mb-1.5">
+                    Nombre de la parcela <span className="normal-case font-normal text-white/30">(opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={nombreUP}
+                    onChange={e => setNombreUP(e.target.value)}
+                    placeholder="Ej: Parcela Norte, El Potrero, etc."
+                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 text-white text-[14px] focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
+                  />
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                    <p className="text-green-300 font-black text-[17px] leading-none">
+                      {pendingUP.area.toLocaleString('es-MX', { maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Hectáreas</p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                    <p className="text-white font-black text-[17px] leading-none">{pendingUP.poligono.length}</p>
+                    <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Vértices</p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
+                    <p className="text-white font-black text-[13px] leading-tight truncate">{municipioUp.split(' ')[0]}</p>
+                    <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Municipio</p>
+                  </div>
+                </div>
+
+                {/* ¿Coincide el área? */}
+                <div className="mb-4">
+                  <p className="text-white/70 text-[12px] font-medium mb-2">¿El área calculada coincide con tu parcela?</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setCoincideArea(true); setAreaReal(''); }}
+                      className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${coincideArea === true ? 'bg-green-500 text-white ring-green-400' : 'bg-white/5 text-white/70 ring-white/15'}`}
+                    >
+                      Sí, coincide
+                    </button>
+                    <button
+                      onClick={() => setCoincideArea(false)}
+                      className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${coincideArea === false ? 'bg-amber-500 text-white ring-amber-400' : 'bg-white/5 text-white/70 ring-white/15'}`}
+                    >
+                      No, difiere
+                    </button>
+                  </div>
+                  {coincideArea === false && (
+                    <div className="mt-2.5">
+                      <label className="block text-white/50 text-[11px] mb-1.5">Superficie real de tu parcela</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={areaReal}
+                          onChange={e => setAreaReal(e.target.value)}
+                          placeholder={String(pendingUP.area)}
+                          min="0.1" step="0.1" inputMode="decimal"
+                          className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 pr-12 text-white text-[16px] font-bold focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-semibold">ha</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {error && (
+                  <div className="mb-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-xs flex gap-2">
+                    <AlertTriangle size={14} className="shrink-0 mt-0.5" />{error}
+                  </div>
+                )}
+
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={redibujarUP}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all"
+                  >
+                    <Undo2 size={16} /> Redibujar
+                  </button>
+                  <button
+                    onClick={() => guardar(pendingUP.poligono, pendingUP.coords, pendingUP.area)}
+                    disabled={enviando || coincideArea === null || (coincideArea === false && !areaReal)}
+                    className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50 disabled:opacity-40"
+                  >
+                    {enviando
+                      ? <><Loader2 size={16} className="animate-spin" /> Guardando…</>
+                      : <><CheckCircle2 size={17} /> Confirmar Parcela</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Controles de dibujo */
+            <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+              {errorOverlap && (
+                <div className="bg-red-500/20 ring-1 ring-red-400/40 backdrop-blur-md rounded-xl p-3">
+                  <p className="text-red-200 text-sm font-bold flex items-center gap-1.5">
+                    <AlertTriangle size={14} className="shrink-0" /> {errorOverlap}
+                  </p>
+                  <button
+                    onClick={() => { setErrorOverlap(null); setAdvertenciaOverlap(null); dibujarRef.current?.startEdit?.(); }}
+                    className="mt-2 text-xs text-red-300 font-bold underline flex items-center gap-1"
+                  >
+                    <Pencil size={11} /> Editar puntos para corregir
+                  </button>
+                </div>
+              )}
+
+              {advertenciaOverlap && !errorOverlap && (
+                <div className="bg-amber-500/20 ring-1 ring-amber-400/40 backdrop-blur-md rounded-xl p-3">
+                  <p className="text-amber-200 text-sm font-bold flex items-center gap-1.5">
+                    <Ruler size={14} className="shrink-0" /> {advertenciaOverlap}
+                  </p>
+                  <button
+                    onClick={() => { setAdvertenciaOverlap(null); dibujarRef.current?.startEdit?.(); }}
+                    className="mt-2 text-xs text-amber-300 font-medium underline"
+                  >
+                    Ajustar bordes de todas formas
+                  </button>
+                </div>
+              )}
+
+              <p className="text-center text-xs text-white bg-black/60 backdrop-blur-md rounded-xl px-4 py-2 font-medium ring-1 ring-white/10">
+                {pointCount === 0
+                  ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
+                  : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
+              </p>
+
+              <button
+                onClick={() => {
+                  setCapturandoGPS(true); setGpsMsg(null);
+                  dibujarRef.current?.addPointGPS((info) => {
+                    setCapturandoGPS(false);
+                    if (!info.ok) setGpsMsg(info.error);
+                    else if (info.accuracy > 30) setGpsMsg(`Punto registrado, señal GPS débil (±${Math.round(info.accuracy)} m).`);
+                    else setGpsMsg(`Punto registrado (±${Math.round(info.accuracy)} m).`);
+                  });
+                }}
+                disabled={capturandoGPS}
+                className="w-full bg-[#1A5C38]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+              >
+                {capturandoGPS
+                  ? <><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>
+                  : <><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>}
+              </button>
+
+              {gpsMsg && (
+                <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">
+                  {gpsMsg}
+                </p>
+              )}
+
+              {pointCount > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => dibujarRef.current?.undoVertex()}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all"
+                  >
+                    <Undo2 size={16} /> Deshacer
+                  </button>
+                  <button
+                    onClick={() => dibujarRef.current?.finishDraw()}
+                    disabled={!puedeTerminar}
+                    className="flex-[1.4] flex items-center justify-center gap-1.5 bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-lg shadow-green-900/50"
+                  >
+                    <CheckCircle2 size={17} /> {puedeTerminar ? `Continuar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
+                  </button>
+                </div>
+              )}
+
+              {drawMode === 'editing' && (
+                <button
+                  onClick={() => dibujarRef.current?.saveEdit()}
+                  className="w-full bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-green-900/50 active:scale-[0.98] transition-all"
+                >
+                  Guardar ajustes
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
+    );
+  }
 
-      {paso === 'info' && (
-        <div className="p-4 space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la parcela (opcional)</label>
-            <input type="text" value={nombreUP} onChange={e => setNombreUP(e.target.value)}
-              placeholder="Ej: Parcela Norte, El Potrero, etc."
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38]" />
+  // ── PASO INFO — diseño verde oscuro igual al registro ───────────────────────
+  const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 sm:py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all appearance-none [&>option]:text-gray-900';
+  const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5';
+
+  return (
+    <div
+      className="fixed inset-0 flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      {/* Decoración de fondo */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.08),transparent)]" />
+      </div>
+
+      {/* Header */}
+      <div className="relative flex-shrink-0 flex items-center px-4 py-3 sm:py-4 border-b border-white/[0.06]">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+        >
+          <ChevronLeft size={20} className="text-white/60" />
+        </button>
+        <div className="flex-1 flex justify-center items-center gap-2">
+          <div className="w-6 h-6 bg-green-400/15 rounded-lg flex items-center justify-center ring-1 ring-green-400/20">
+            <MapPin size={13} className="text-green-300" />
           </div>
+          <span className="text-sm font-semibold text-white/80">Nueva parcela</span>
+        </div>
+        <div className="w-8" />
+      </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
-              <div className="relative">
+      {/* Contenido */}
+      <div className="relative flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center px-4 sm:px-6 py-6">
+          <div className="w-full max-w-[480px] my-auto">
+
+            {/* Título */}
+            <div className="flex items-start gap-3 px-1 mb-6">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/15 ring-1 ring-sky-400/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <MapPin size={16} className="text-sky-300" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">Ubicación de parcela</h1>
+                <p className="text-white/45 text-sm mt-0.5">Estado y municipio donde se encuentra.</p>
+              </div>
+            </div>
+
+            {/* Card principal */}
+            <div className="bg-white/[0.08] backdrop-blur-md ring-1 ring-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+
+              {/* Nombre */}
+              <div>
+                <label className={labelCls}>
+                  Nombre de la parcela <span className="text-white/25 normal-case font-normal text-[10px]">— opcional</span>
+                </label>
+                <input
+                  type="text"
+                  value={nombreUP}
+                  onChange={e => setNombreUP(e.target.value)}
+                  placeholder="Ej: Parcela Norte, El Potrero, etc."
+                  className={inputCls}
+                />
+              </div>
+
+              {/* Estado */}
+              <div>
+                <label className={labelCls}>Estado <span className="text-red-400">*</span></label>
                 <select
                   value={estadoId}
                   onChange={e => {
@@ -265,268 +504,70 @@ export default function AgregarUPPage() {
                     setMunicipios([]);
                     setMunicipioUp('');
                   }}
-                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38]"
+                  className={inputCls}
                 >
                   <option value="">Selecciona tu estado</option>
                   {estados.map(s => <option key={s.state_id} value={s.state_id}>{s.name}</option>)}
                 </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Municipio *</label>
-              <div className="relative">
+
+              {/* Municipio */}
+              <div>
+                <label className={labelCls}>Municipio <span className="text-red-400">*</span></label>
                 <select
                   value={municipioUp}
                   onChange={e => setMunicipioUp(e.target.value)}
                   disabled={!estadoId}
-                  className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1A5C38] disabled:bg-[#f4fbf7] disabled:text-gray-400"
+                  className={`${inputCls} disabled:opacity-35`}
                 >
-                  <option value="">{estadoId ? 'Selecciona tu municipio' : 'Primero elige el estado'}</option>
+                  <option value="">{estadoId ? 'Selecciona tu municipio' : 'Elige estado primero'}</option>
                   {municipios.map(m => <option key={m.municipality_id} value={m.name}>{m.name}</option>)}
                 </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
-            </div>
-          </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4"><p className="text-red-700 text-sm">{error}</p></div>
-          )}
-
-          <button onClick={() => setPaso('mapa')} disabled={!estadoUp || !municipioUp}
-            className="w-full bg-[#1A5C38] text-white py-4 rounded-2xl font-semibold disabled:opacity-40">
-            Continuar → Dibujar en mapa
-          </button>
-          <button onClick={() => guardar(null, null, null)} disabled={!estadoUp || !municipioUp || enviando}
-            className="w-full border border-gray-200 text-gray-600 py-3 rounded-2xl text-sm disabled:opacity-40">
-            {enviando ? 'Guardando…' : 'Guardar sin dibujar (usar municipio como ubicación)'}
-          </button>
-        </div>
-      )}
-
-      {paso === 'mapa' && (
-        <div className="relative" style={{ height: 'calc(100vh - 64px)' }}>
-          <p className="text-xs text-center text-gray-500 py-2 bg-white">REGISTRO INICIAL DE PARCELAS Y PRODUCCIÓN</p>
-
-          <div className="relative" style={{ height: 'calc(100% - 34px)' }}>
-            <MapContainer ref={mapRef} center={center} zoom={mapReady ? 16 : 5} style={{ height: '100%', width: '100%' }}
-              whenReady={() => setMapReady(true)}>
-              <TileLayer
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                attribution="© Esri" />
-              {/* Parcelas ya guardadas — en gris, para ubicarse al agregar otra */}
-              {existentes.map((poly, i) => (
-                <Polygon key={`ex-${i}`} positions={poly}
-                  pathOptions={{ color: '#94a3b8', fillColor: '#94a3b8', fillOpacity: 0.18, weight: 2, dashArray: '5 5' }} />
-              ))}
-              <DibujarPoligonoUP
-                ref={dibujarRef}
-                onModeChange={setDrawMode}
-                onPointCountChange={setPointCount}
-                onPoligonoCompleto={onUPDibujada}
-                onPoligonoEliminado={() => {}}
-              />
-              {/* Polígono visible durante confirmación */}
-              {pendingUP && (
-                <Polygon
-                  positions={pendingUP.poligono}
-                  pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
-                />
-              )}
-            </MapContainer>
-
-            {/* Buscador de dirección/localidad — ocultarlo en confirmación */}
-            {!pendingUP && (
-              <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
-                <NominatimSearch
-                  placeholder="Buscar dirección o localidad…"
-                  onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
-                />
-              </div>
-            )}
-
-            {/* ===== PANEL CONFIRMACIÓN (overlay encima del mapa) ===== */}
-            {pendingUP ? (
-              <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
-                <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
-                  <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-xl bg-green-500/20 flex items-center justify-center ring-1 ring-green-400/30">
-                      <CheckCircle2 size={16} className="text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-bold text-[15px] leading-tight">¿Confirmar esta parcela?</p>
-                      <p className="text-white/50 text-[11px]">Revisa el polígono en el mapa antes de guardar</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-white/70 text-[12px] font-medium mb-1.5">Nombre de la parcela (opcional)</label>
-                    <input
-                      type="text" value={nombreUP} onChange={e => setNombreUP(e.target.value)}
-                      placeholder="Ej: Parcela Norte, El Potrero, etc."
-                      className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 text-white text-[14px] focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
-                      <p className="text-green-300 font-black text-[17px] leading-none">{pendingUP.area.toLocaleString('es-MX', { maximumFractionDigits: 2 })}</p>
-                      <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Hectáreas</p>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
-                      <p className="text-white font-black text-[17px] leading-none">{pendingUP.poligono.length}</p>
-                      <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Vértices</p>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-2.5 text-center ring-1 ring-white/8">
-                      <p className="text-white font-black text-[13px] leading-tight truncate">{municipioUp.split(' ')[0]}</p>
-                      <p className="text-white/40 text-[9px] font-semibold uppercase tracking-wide mt-1">Municipio</p>
-                    </div>
-                  </div>
-
-                  {/* ¿El área calculada coincide? */}
-                  <div className="mb-4">
-                    <p className="text-white/70 text-[12px] font-medium mb-2">¿El área calculada coincide con tu parcela?</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => { setCoincideArea(true); setAreaReal(''); }}
-                        className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
-                          coincideArea === true ? 'bg-green-500 text-white ring-green-400' : 'bg-white/5 text-white/70 ring-white/15'
-                        }`}
-                      >
-                        Sí, coincide
-                      </button>
-                      <button
-                        onClick={() => setCoincideArea(false)}
-                        className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold ring-1 transition-all active:scale-[0.97] ${
-                          coincideArea === false ? 'bg-amber-500 text-white ring-amber-400' : 'bg-white/5 text-white/70 ring-white/15'
-                        }`}
-                      >
-                        No, difiere
-                      </button>
-                    </div>
-                    {coincideArea === false && (
-                      <div className="mt-2.5 animate-fade-in">
-                        <label className="block text-white/50 text-[11px] mb-1">Superficie real de tu parcela</label>
-                        <div className="relative">
-                          <input
-                            type="number" value={areaReal} onChange={e => setAreaReal(e.target.value)}
-                            placeholder={String(pendingUP.area)} min="0.1" step="0.1" inputMode="decimal"
-                            className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 pr-12 text-white text-[16px] font-bold focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
-                          />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-semibold">ha</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2.5">
-                    <button
-                      onClick={redibujarUP}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all"
-                    >
-                      <Undo2 size={16} /> Redibujar
-                    </button>
-                    <button
-                      onClick={confirmarUP}
-                      disabled={enviando || coincideArea === null || (coincideArea === false && !areaReal)}
-                      className="flex-[1.6] flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-400 text-white py-3.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-all shadow-lg shadow-green-900/50 disabled:opacity-40"
-                    >
-                      <CheckCircle2 size={17} /> {enviando ? 'Guardando...' : 'Confirmar Parcela'}
-                    </button>
-                  </div>
+              {error && (
+                <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
+                  <AlertTriangle size={14} className="shrink-0 mt-0.5" />{error}
                 </div>
+              )}
+
+              {/* Botón principal — ir al mapa */}
+              <button
+                onClick={() => { setError(null); setPaso('mapa'); }}
+                disabled={!estadoUp || !municipioUp}
+                className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Map size={16} /> Ir al mapa a dibujar la parcela
+              </button>
+
+              {/* Separador */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-white/25 text-[11px] font-medium">o</span>
+                <div className="flex-1 h-px bg-white/10" />
               </div>
-            ) : (
-              <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
-                {/* Error bloqueante — traslape > 10% */}
-                {errorOverlap && (
-                  <div className="bg-red-50 border border-red-300 rounded-xl p-3 shadow-lg">
-                    <p className="text-red-700 text-sm font-bold flex items-center gap-1.5">
-                      <AlertTriangle size={14} className="shrink-0" /> {errorOverlap}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setErrorOverlap(null);
-                        setAdvertenciaOverlap(null);
-                        dibujarRef.current?.startEdit?.();
-                      }}
-                      className="mt-2 text-xs text-red-600 font-bold underline bg-white/50 px-2 py-1 rounded-md hover:bg-white transition-colors">
-                      Editar puntos para corregir
-                    </button>
-                  </div>
-                )}
 
-                {/* Advertencia informativa — traslape ≤ 10% (no bloquea) */}
-                {advertenciaOverlap && !errorOverlap && (
-                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 shadow-lg">
-                    <p className="text-amber-700 text-sm font-bold flex items-center gap-1.5">
-                      <Ruler size={14} className="shrink-0" /> {advertenciaOverlap}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setAdvertenciaOverlap(null);
-                        dibujarRef.current?.startEdit?.();
-                      }}
-                      className="mt-2 text-xs text-amber-600 font-medium underline bg-white/50 px-2 py-1 rounded-md hover:bg-white transition-colors">
-                      Ajustar bordes de todas formas
-                    </button>
-                  </div>
-                )}
-                <p className="text-center text-xs text-white bg-black/60 backdrop-blur-md rounded-xl px-4 py-2 font-medium ring-1 ring-white/10">
-                  {pointCount === 0
-                    ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
-                    : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
-                </p>
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-700 text-xs">{error}</p></div>
-                )}
+              {/* Guardar sin dibujar */}
+              <button
+                onClick={() => guardar(null, null, null)}
+                disabled={!estadoUp || !municipioUp || enviando}
+                className="w-full bg-white/[0.08] ring-1 ring-white/15 hover:bg-white/[0.12] text-white rounded-xl py-3 text-sm font-medium disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                {enviando
+                  ? <><Loader2 size={14} className="animate-spin" /> Guardando…</>
+                  : <><Check size={14} /> Guardar solo con municipio, sin dibujar</>}
+              </button>
+            </div>
 
-                <button
-                  onClick={() => {
-                    setCapturandoGPS(true); setGpsMsg(null);
-                    dibujarRef.current?.addPointGPS((info) => {
-                      setCapturandoGPS(false);
-                      if (!info.ok) setGpsMsg(info.error);
-                      else if (info.accuracy > 30) setGpsMsg(`Punto registrado, señal GPS débil (±${Math.round(info.accuracy)} m).`);
-                      else setGpsMsg(`Punto registrado (±${Math.round(info.accuracy)} m).`);
-                    });
-                  }}
-                  disabled={capturandoGPS}
-                  className="w-full bg-[#1A5C38]/90 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
-                >
-                  {capturandoGPS
-                    ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
-                    : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
-                </button>
-                {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
+            {/* Nota informativa */}
+            <p className="text-white/25 text-xs text-center mt-5 leading-relaxed px-4">
+              Puedes dibujar el polígono exacto de tu parcela en el mapa satelital,
+              o guardar solo con la ubicación del municipio.
+            </p>
 
-                {pointCount > 0 && (
-                  <div className="flex gap-2">
-                    <button onClick={() => dibujarRef.current?.undoVertex()}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white py-3.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
-                      <Undo2 size={16} /> Deshacer
-                    </button>
-                    <button onClick={() => dibujarRef.current?.finishDraw()} disabled={!puedeTerminar || enviando}
-                      className="flex-[1.4] flex items-center justify-center gap-1.5 bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold disabled:opacity-40 active:scale-[0.98] transition-all shadow-lg shadow-green-900/50">
-                      <CheckCircle2 size={17} /> {puedeTerminar ? `Continuar (${pointCount})` : `Faltan ${Math.max(0, 3 - pointCount)}`}
-                    </button>
-                  </div>
-                )}
-                {drawMode === 'editing' && (
-                  <button onClick={() => dibujarRef.current?.saveEdit()}
-                    className="w-full bg-green-500 text-white py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-green-900/50 active:scale-[0.98] transition-all">
-                    Guardar ajustes
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
