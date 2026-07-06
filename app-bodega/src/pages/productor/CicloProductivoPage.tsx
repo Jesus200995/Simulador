@@ -132,7 +132,7 @@ export default function CicloProductivoPage() {
   const guardar = async () => {
     if (!upId) { setError('No se encontró tu unidad productiva.'); return; }
     // La superficie sembrada no puede superar el área de la parcela
-    if (areaHaCalc && Number(form.area_sown_ha) > Number(areaHaCalc)) {
+    if (areaHaCalc != null && areaHaCalc > 0 && Number(form.area_sown_ha) > Number(areaHaCalc)) {
       setError(
         `La superficie sembrada (${form.area_sown_ha} ha) no puede ser mayor ` +
         `al área de tu parcela (${areaHaCalc} ha). Ajusta el valor antes de continuar.`
@@ -158,7 +158,8 @@ export default function CicloProductivoPage() {
 
       if (!cicloRes.cycle?.cycle_id) { setError(cicloRes.error || 'Error al crear ciclo'); return; }
 
-      const cropRes = await fetch(`${BASE}/cycles/${cicloRes.cycle.cycle_id}/crops`, {
+      const cycleId = cicloRes.cycle.cycle_id;
+      const cropRes = await fetch(`${BASE}/cycles/${cycleId}/crops`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -175,6 +176,11 @@ export default function CicloProductivoPage() {
 
       if (!cropRes.ok) {
         const err = await cropRes.json();
+        // Limpiar ciclo huérfano para evitar duplicados en próximo intento
+        await fetch(`${BASE}/cycles/${cycleId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
         setError(err.error || 'Error al guardar cultivo'); return;
       }
 

@@ -194,6 +194,7 @@ export default function AgregarUPPage() {
     areaCalc: number | null
   ) => {
     if (!estadoUp || !municipioUp) { setError('Selecciona el estado y municipio de tu parcela.'); return; }
+    if (enviando) return; // prevenir doble-submit
     setEnviando(true);
     setError(null);
     try {
@@ -201,7 +202,7 @@ export default function AgregarUPPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          nombre_up: nombreUP || undefined,
+          nombre_up: nombreUP?.trim() || null,
           lat: coords?.lat ?? null,
           lng: coords?.lng ?? null,
           poligono: poligono ?? null,

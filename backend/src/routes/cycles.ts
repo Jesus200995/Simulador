@@ -93,6 +93,7 @@ router.get('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: R
        FROM cycle c
        LEFT JOIN cycle_crop cc ON c.cycle_id = cc.cycle_id
        WHERE c.up_id = $1
+         AND COALESCE(c.estado_ciclo, 'activo') != 'cancelado'
        GROUP BY c.cycle_id, c.up_id, c.cycle_year, c.cycle_type, c.created_at, c.tipo_riego, c.estado_ciclo
        ORDER BY c.cycle_year DESC, c.cycle_type`,
       [up_id]
@@ -102,6 +103,43 @@ router.get('/ups/:up_id/cycles', authMiddleware, async (req: AuthRequest, res: R
   } catch (error) {
     console.error('Error listando ciclos:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// DELETE /api/cycles/:cycle_id - Eliminar ciclo (usado para limpiar ciclos huérfanos)
+// =============================================
+router.delete('/cycles/:cycle_id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const { cycle_id } = req.params;
+    const userId = req.user!.userId;
+
+    // Verificar que el ciclo pertenece al usuario
+    const own = await client.query(
+      `SELECT c.cycle_id FROM cycle c
+       JOIN up u ON u.up_id = c.up_id
+       JOIN producer p ON p.producer_id = u.producer_id
+       WHERE c.cycle_id = $1 AND p.usuario_id = $2
+         AND COALESCE(c.estado_ciclo, 'activo') = 'activo'`,
+      [cycle_id, userId]
+    );
+    if (own.rows.length === 0) {
+      res.status(404).json({ error: 'Ciclo no encontrado o no autorizado' });
+      return;
+    }
+
+    await client.query('BEGIN');
+    await client.query('DELETE FROM cycle_crop WHERE cycle_id = $1', [cycle_id]);
+    await client.query('DELETE FROM cycle WHERE cycle_id = $1', [cycle_id]);
+    await client.query('COMMIT');
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Error eliminando ciclo:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
   }
 });
 

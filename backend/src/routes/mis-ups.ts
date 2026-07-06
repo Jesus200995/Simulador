@@ -29,8 +29,8 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise
         p.curp AS producer_curp,
         p.nombres AS producer_nombres,
         ST_AsGeoJSON(u.geom)::json AS geom_geojson,
-        ST_X(ST_PointOnSurface(u.geom)) AS centroid_lng,
-        ST_Y(ST_PointOnSurface(u.geom)) AS centroid_lat,
+        CASE WHEN u.geom IS NOT NULL THEN ST_X(ST_PointOnSurface(u.geom)) ELSE NULL END AS centroid_lng,
+        CASE WHEN u.geom IS NOT NULL THEN ST_Y(ST_PointOnSurface(u.geom)) ELSE NULL END AS centroid_lat,
         (
           SELECT json_build_object(
             'cycle_id', c.cycle_id,

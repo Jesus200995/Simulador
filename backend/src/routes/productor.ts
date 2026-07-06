@@ -421,7 +421,7 @@ function capAreaHa(v: any): number | null {
 // Lanza Error con .code='UP_OVERLAP' y .up_conflicto si el polígono se intersecta con otra UP del productor.
 async function crearUP(client: any, producerId: number, up: any): Promise<number> {
   const { lat, lng, poligono, area_calc_ha, area_real_ha, coincide_area } = up;
-  const upName = (up.nombre_up && String(up.nombre_up).trim()) || 'Parcela principal';
+  const upName = (up.nombre_up && String(up.nombre_up).trim()) || 'Mi Parcela';
   let estadoFinal = up.estado_up;
   let municipioFinal = up.municipio_up;
   let stateIdFinal: string | null = null;
@@ -1334,7 +1334,18 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
     const postgisActivo = process.env.POSTGIS_ENABLED === 'true';
     const hasCoords = lat != null && lng != null && lat !== 0 && lng !== 0;
     const hasPoligono = poligono && Array.isArray(poligono) && poligono.length >= 3;
-    const upName = nombre_up || `Parcela ${new Date().getFullYear()}`;
+    const upName = (nombre_up && String(nombre_up).trim()) || 'Mi Parcela';
+
+    // Evitar nombre duplicado para este productor
+    const nombreDup = await client.query(
+      `SELECT up_id FROM up WHERE producer_id = $1 AND LOWER(up_name) = LOWER($2) LIMIT 1`,
+      [producer_id, upName]
+    );
+    if (nombreDup.rows.length > 0) {
+      await client.query('ROLLBACK');
+      res.status(409).json({ error: `Ya tienes una parcela con el nombre "${upName}". Usa un nombre diferente.` });
+      return;
+    }
 
     const geojson = hasPoligono ? JSON.stringify({
       type: 'Polygon',
