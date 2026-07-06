@@ -158,24 +158,35 @@ export default function BodegasAdminPage() {
     }
   }
 
-  async function cargarStats() {
-    setStatsLoading(true);
-    try {
-      const r = await fetch(`${BASE}/admin/bodegas/estadisticas`, { headers: HDR() });
-      const data = r.ok ? await r.json() : null;
-      if (data) { setStats(data); return; }
-    } catch {}
-    const cap = bodegas.reduce((s, b) => s + b.capacidad_total, 0);
-    const stk = bodegas.reduce((s, b) => s + (b.stock_actual || 0), 0);
-    setStats({ capacidad_total: cap, stock_total: stk,
-      pct_ocupacion: cap > 0 ? ((stk / cap) * 100).toFixed(1) : 0,
-      con_tarifario: bodegas.filter(b => b.estatus === 'aprobada').length,
-      ventanillas_activas: bodegas.filter(b => b.estatus === 'aprobada').length });
+  function calcularStatsLocal(lista: Bodega[]) {
+    const cap = lista.reduce((s, b) => s + (b.capacidad_total || 0), 0);
+    const stk = lista.reduce((s, b) => s + (b.stock_actual || 0), 0);
+    return {
+      capacidad_total: cap,
+      stock_total: stk,
+      pct_ocupacion: cap > 0 ? ((stk / cap) * 100).toFixed(1) : '0',
+      con_tarifario: lista.filter(b => b.estatus === 'aprobada').length,
+      ventanillas_activas: lista.filter(b => b.estatus === 'aprobada').length,
+      total: lista.length,
+      aprobadas: lista.filter(b => b.estatus === 'aprobada').length,
+      pendientes: lista.filter(b => b.estatus === 'pendiente').length,
+    };
+  }
+
+  function cargarStats() {
+    // Cálculo inmediato desde datos ya en memoria — sin esperar al API
+    setStats(calcularStatsLocal(bodegas));
     setStatsLoading(false);
+
+    // Enriquecimiento opcional en background (tarifarios reales, ventanillas)
+    fetch(`${BASE}/admin/bodegas/estadisticas`, { headers: HDR() })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data && data.capacidad_total != null) setStats((prev: any) => ({ ...prev, ...data })); })
+      .catch(() => {});
   }
 
   useEffect(() => { cargarBodegas(); }, []);
-  useEffect(() => { if (tab === 'estadisticas' && !stats) cargarStats(); }, [tab]);
+  useEffect(() => { if (tab === 'estadisticas') cargarStats(); }, [tab, bodegas]);
 
   /* ─── FILTRADO ─── */
   const filteredList = bodegas.filter(b => {
