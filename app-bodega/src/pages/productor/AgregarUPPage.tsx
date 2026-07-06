@@ -429,7 +429,7 @@ export default function AgregarUPPage() {
   }
 
   // ── PASO INFO — diseño verde oscuro igual al registro ───────────────────────
-  const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 sm:py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all appearance-none [&>option]:text-gray-900';
+  const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all appearance-none [&>option]:text-gray-900';
   const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5';
 
   return (
@@ -437,13 +437,12 @@ export default function AgregarUPPage() {
       className="fixed inset-0 flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      {/* Decoración de fondo */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.08),transparent)]" />
       </div>
 
       {/* Header */}
-      <div className="relative flex-shrink-0 flex items-center px-4 py-3 sm:py-4 border-b border-white/[0.06]">
+      <div className="relative flex-shrink-0 flex items-center px-4 h-12 sm:h-14 border-b border-white/[0.06]">
         <button
           onClick={() => navigate(-1)}
           className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
@@ -460,34 +459,47 @@ export default function AgregarUPPage() {
       </div>
 
       {/* Contenido */}
-      <div className="relative flex-1 overflow-y-auto">
-        <div className="min-h-full flex flex-col items-center px-4 sm:px-6 py-6">
-          <div className="w-full max-w-[480px] my-auto">
+      <div className="relative flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-4 sm:px-6 py-4">
+        <div className="w-full max-w-sm lg:max-w-4xl flex flex-col lg:flex-row lg:items-center lg:gap-16">
 
-            {/* Título */}
-            <div className="flex items-start gap-3 px-1 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-sky-500/15 ring-1 ring-sky-400/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          {/* Left panel — desktop branding */}
+          <div className="hidden lg:flex flex-col items-start flex-1 px-4">
+            <div className="w-14 h-14 bg-[#1A5C38] rounded-[18px] flex items-center justify-center shadow-xl shadow-green-900/40 mb-5">
+              <MapPin size={26} className="text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Nueva parcela</h1>
+            <p className="text-white/50 text-base leading-relaxed">
+              Indica el estado y municipio de tu parcela para continuar al mapa satelital.
+            </p>
+          </div>
+
+          {/* Form panel */}
+          <div className="flex-1 lg:max-w-sm w-full">
+
+            {/* Título — mobile */}
+            <div className="flex lg:hidden items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/15 ring-1 ring-sky-400/20 flex items-center justify-center flex-shrink-0">
                 <MapPin size={16} className="text-sky-300" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">Ubicación de parcela</h1>
-                <p className="text-white/45 text-sm mt-0.5">Estado y municipio donde se encuentra.</p>
+                <h1 className="text-lg font-bold text-white leading-tight">Ubicación de parcela</h1>
+                <p className="text-white/45 text-xs mt-0.5">Estado y municipio donde se encuentra.</p>
               </div>
             </div>
 
             {/* Card principal */}
-            <div className="bg-white/[0.08] backdrop-blur-md ring-1 ring-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+            <div className="bg-white/[0.08] backdrop-blur-md ring-1 ring-white/10 rounded-2xl p-4 sm:p-5 space-y-3">
 
               {/* Nombre */}
               <div>
                 <label className={labelCls}>
-                  Nombre de la parcela <span className="text-white/25 normal-case font-normal text-[10px]">— opcional</span>
+                  Nombre <span className="text-white/25 normal-case font-normal text-[10px]">— opcional</span>
                 </label>
                 <input
                   type="text"
                   value={nombreUP}
                   onChange={e => setNombreUP(e.target.value)}
-                  placeholder="Ej: Parcela Norte, El Potrero, etc."
+                  placeholder="Ej: Parcela Norte, El Potrero…"
                   className={inputCls}
                 />
               </div>
@@ -531,38 +543,33 @@ export default function AgregarUPPage() {
                 </div>
               )}
 
-              {/* Botón principal — ir al mapa */}
               <button
                 onClick={() => { setError(null); setPaso('mapa'); }}
                 disabled={!estadoUp || !municipioUp}
-                className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <Map size={16} /> Ir al mapa a dibujar la parcela
               </button>
 
-              {/* Separador */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-white/10" />
                 <span className="text-white/25 text-[11px] font-medium">o</span>
                 <div className="flex-1 h-px bg-white/10" />
               </div>
 
-              {/* Guardar sin dibujar */}
               <button
                 onClick={() => guardar(null, null, null)}
                 disabled={!estadoUp || !municipioUp || enviando}
-                className="w-full bg-white/[0.08] ring-1 ring-white/15 hover:bg-white/[0.12] text-white rounded-xl py-3 text-sm font-medium disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-white/[0.08] ring-1 ring-white/15 hover:bg-white/[0.12] text-white rounded-xl py-2.5 text-sm font-medium disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {enviando
                   ? <><Loader2 size={14} className="animate-spin" /> Guardando…</>
-                  : <><Check size={14} /> Guardar solo con municipio, sin dibujar</>}
+                  : <><Check size={14} /> Guardar solo con municipio</>}
               </button>
             </div>
 
-            {/* Nota informativa */}
-            <p className="text-white/25 text-xs text-center mt-5 leading-relaxed px-4">
-              Puedes dibujar el polígono exacto de tu parcela en el mapa satelital,
-              o guardar solo con la ubicación del municipio.
+            <p className="text-white/25 text-xs text-center mt-3 leading-relaxed">
+              Puedes dibujar el polígono en el mapa satelital, o guardar solo con municipio.
             </p>
 
           </div>

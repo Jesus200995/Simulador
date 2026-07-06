@@ -88,186 +88,215 @@ export default function RecuperarNipPage() {
 
   return (
     <div
-      className="relative min-h-[100dvh] flex flex-col overflow-hidden"
+      className="fixed inset-0 flex flex-col"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Background */}
-      <div className="fixed inset-0">
+      <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.1),transparent)]" />
       </div>
 
       {/* Header */}
-      {step !== 'exito' && (
-        <div className="relative flex items-center px-4 py-3 sm:py-4">
-          <button onClick={handleBack} className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors">
-            <ChevronLeft size={22} className="text-white/70" />
-          </button>
-          <div className="flex-1 flex justify-center gap-1.5">
-            {[1, 2, 3].map(n => (
-              <div key={n} className={`h-1 rounded-full transition-all duration-300 ${n === stepActual ? 'w-8 bg-white' : n < stepActual ? 'w-8 bg-green-400' : 'w-5 bg-white/25'}`} />
-            ))}
-          </div>
-          <div className="w-9" />
-        </div>
-      )}
+      <div className="relative flex-shrink-0 flex items-center px-4 h-12 sm:h-14">
+        {step !== 'exito' ? (
+          <>
+            <button onClick={handleBack} className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors">
+              <ChevronLeft size={22} className="text-white/70" />
+            </button>
+            <div className="flex-1 flex justify-center gap-1.5">
+              {[1, 2, 3].map(n => (
+                <div key={n} className={`h-1 rounded-full transition-all duration-300 ${n === stepActual ? 'w-8 bg-white' : n < stepActual ? 'w-8 bg-green-400' : 'w-5 bg-white/25'}`} />
+              ))}
+            </div>
+            <div className="w-9" />
+          </>
+        ) : (
+          <div className="flex-1" />
+        )}
+      </div>
 
       {/* Content */}
-      <div className="relative flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-8">
-        <div className="w-full max-w-sm">
+      <div className="relative flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-5 py-4">
+        <div className="w-full max-w-sm lg:max-w-4xl flex flex-col lg:flex-row lg:items-center lg:gap-16">
 
-          {/* Icono */}
+          {/* Left panel — desktop branding */}
           {step !== 'exito' && (
-            <div className="flex justify-center mb-6">
-              <div className="w-14 h-14 bg-[#1A5C38] rounded-[18px] flex items-center justify-center shadow-xl shadow-green-900/40">
-                {step === 'curp' && <Wheat size={24} className="text-white" />}
-                {step === 'telefono' && <Phone size={24} className="text-white" />}
-                {step === 'nuevo_nip' && <KeyRound size={24} className="text-white" />}
+            <div className="hidden lg:flex flex-col items-start flex-1 px-4">
+              <div className="w-14 h-14 bg-[#1A5C38] rounded-[18px] flex items-center justify-center shadow-xl shadow-green-900/40 mb-5">
+                {step === 'curp' && <Wheat size={26} className="text-white" />}
+                {step === 'telefono' && <Phone size={26} className="text-white" />}
+                {step === 'nuevo_nip' && <KeyRound size={26} className="text-white" />}
               </div>
-            </div>
-          )}
-
-          {/* ── PASO 1: CURP ── */}
-          {step === 'curp' && (
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white text-center mb-1.5">Recuperar NIP</h1>
-              <p className="text-white/50 text-sm text-center mb-6">Ingresa tu CURP para continuar</p>
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-5">
-                <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-2">CURP</label>
-                <input
-                  type="text"
-                  value={curp}
-                  onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                  maxLength={18}
-                  placeholder="AAAA000000AAAAAA00"
-                  autoCapitalize="characters"
-                  className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-base font-mono tracking-widest text-white placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
-                />
-                <div className="flex justify-end mt-1"><span className="text-xs text-white/40 font-mono">{curp.length}/18</span></div>
-                {error && (
-                  <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
-                    <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
-                  </div>
-                )}
-                <button
-                  onClick={handleVerificarCurp}
-                  disabled={curp.length !== 18 || loading}
-                  className="mt-4 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Continuar'}
-                </button>
-              </div>
-              <p className="text-white/30 text-xs text-center mt-5">
-                Recuerda que tu CURP está en tu credencial INE o acta de nacimiento.
+              <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
+                {step === 'curp' ? 'Recuperar NIP' : step === 'telefono' ? 'Verifica tu teléfono' : 'Nuevo NIP'}
+              </h1>
+              <p className="text-white/50 text-base leading-relaxed">
+                {step === 'curp' ? 'Ingresa tu CURP para continuar.' : step === 'telefono' ? 'Confirma los últimos dígitos de tu teléfono registrado.' : 'Elige un NIP de 4 dígitos para tu cuenta.'}
               </p>
             </div>
           )}
 
-          {/* ── PASO 2: TELÉFONO ── */}
-          {step === 'telefono' && (
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white text-center mb-1.5">Verifica tu teléfono</h1>
-              <p className="text-white/50 text-sm text-center mb-2">
-                Ingresa los últimos 4 dígitos de tu teléfono registrado
-              </p>
-              {telefonoEnmascarado && (
-                <p className="text-green-300 text-center text-sm font-mono font-bold mb-6">{telefonoEnmascarado}</p>
-              )}
-              {!telefonoEnmascarado && (
-                <p className="text-white/40 text-center text-xs mb-6">No se encontró teléfono registrado. Contacta a soporte.</p>
-              )}
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-5">
-                <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-2">Últimos 4 dígitos</label>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  value={ultimos4}
-                  onChange={e => setUltimos4(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  maxLength={4}
-                  placeholder="1234"
-                  className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xl font-mono tracking-[0.4em] text-white text-center placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
-                />
-                {error && (
-                  <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
-                    <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
+          {/* Form panel */}
+          <div className="flex-1 lg:max-w-sm w-full">
+
+            {/* ── PASO 1: CURP ── */}
+            {step === 'curp' && (
+              <div>
+                <div className="flex lg:hidden justify-center mb-4">
+                  <div className="w-12 h-12 bg-[#1A5C38] rounded-[16px] flex items-center justify-center shadow-xl shadow-green-900/40">
+                    <Wheat size={22} className="text-white" />
                   </div>
+                </div>
+                <h1 className="lg:hidden text-xl font-bold text-white text-center mb-1">Recuperar NIP</h1>
+                <p className="lg:hidden text-white/50 text-sm text-center mb-4">Ingresa tu CURP para continuar</p>
+                <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 sm:p-5">
+                  <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">CURP</label>
+                  <input
+                    type="text"
+                    value={curp}
+                    onChange={e => setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                    maxLength={18}
+                    placeholder="AAAA000000AAAAAA00"
+                    autoCapitalize="characters"
+                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3 text-base font-mono tracking-widest text-white placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+                  />
+                  <div className="flex justify-end mt-1"><span className="text-xs text-white/40 font-mono">{curp.length}/18</span></div>
+                  {error && (
+                    <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
+                      <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleVerificarCurp}
+                    disabled={curp.length !== 18 || loading}
+                    className="mt-4 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Continuar'}
+                  </button>
+                </div>
+                <p className="text-white/30 text-xs text-center mt-4">
+                  Tu CURP está en tu credencial INE o acta de nacimiento.
+                </p>
+              </div>
+            )}
+
+            {/* ── PASO 2: TELÉFONO ── */}
+            {step === 'telefono' && (
+              <div>
+                <div className="flex lg:hidden justify-center mb-4">
+                  <div className="w-12 h-12 bg-[#1A5C38] rounded-[16px] flex items-center justify-center shadow-xl shadow-green-900/40">
+                    <Phone size={22} className="text-white" />
+                  </div>
+                </div>
+                <h1 className="lg:hidden text-xl font-bold text-white text-center mb-1">Verifica tu teléfono</h1>
+                <p className="lg:hidden text-white/50 text-sm text-center mb-1">
+                  Ingresa los últimos 4 dígitos de tu teléfono registrado
+                </p>
+                {telefonoEnmascarado && (
+                  <p className="text-green-300 text-center text-sm font-mono font-bold mb-4">{telefonoEnmascarado}</p>
                 )}
+                {!telefonoEnmascarado && (
+                  <p className="text-white/40 text-center text-xs mb-4">No se encontró teléfono. Contacta a soporte.</p>
+                )}
+                <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 sm:p-5">
+                  <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Últimos 4 dígitos</label>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    value={ultimos4}
+                    onChange={e => setUltimos4(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    maxLength={4}
+                    placeholder="1234"
+                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3 text-xl font-mono tracking-[0.4em] text-white text-center placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+                  />
+                  {error && (
+                    <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
+                      <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleConfirmarTelefono}
+                    disabled={ultimos4.length !== 4 || loading}
+                    className="mt-4 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Confirmar'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── PASO 3: NUEVO NIP ── */}
+            {step === 'nuevo_nip' && (
+              <div>
+                <div className="flex lg:hidden justify-center mb-4">
+                  <div className="w-12 h-12 bg-[#1A5C38] rounded-[16px] flex items-center justify-center shadow-xl shadow-green-900/40">
+                    <KeyRound size={22} className="text-white" />
+                  </div>
+                </div>
+                <h1 className="lg:hidden text-xl font-bold text-white text-center mb-1">Nuevo NIP</h1>
+                <p className="lg:hidden text-white/50 text-sm text-center mb-4">Elige un NIP de 4 dígitos para tu cuenta</p>
+                <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 sm:p-5 space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Nuevo NIP</label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      value={nuevoNip}
+                      onChange={e => setNuevoNip(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      maxLength={4}
+                      placeholder="••••"
+                      className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3 text-xl font-mono tracking-[0.5em] text-white text-center placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Confirmar NIP</label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      value={confirmarNip}
+                      onChange={e => setConfirmarNip(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      maxLength={4}
+                      placeholder="••••"
+                      className={`w-full bg-white/10 ring-1 rounded-xl px-4 py-2.5 sm:py-3 text-xl font-mono tracking-[0.5em] text-white text-center placeholder-white/25 focus:outline-none transition-all ${confirmarNip.length === 4 && confirmarNip !== nuevoNip ? 'ring-red-400/60' : 'ring-white/20 focus:ring-white/40'}`}
+                    />
+                  </div>
+                  {error && (
+                    <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
+                      <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleNuevoNip}
+                    disabled={nuevoNip.length !== 4 || confirmarNip.length !== 4 || loading}
+                    className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? <><Loader2 size={16} className="animate-spin" /> Guardando...</> : 'Guardar nuevo NIP'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── ÉXITO ── */}
+            {step === 'exito' && (
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 bg-green-400/20 rounded-full flex items-center justify-center">
+                    <CheckCircle2 size={34} className="text-green-400" />
+                  </div>
+                </div>
+                <h1 className="text-2xl font-bold text-white mb-2">¡NIP actualizado!</h1>
+                <p className="text-white/60 text-sm mb-6">Ya puedes iniciar sesión con tu nuevo NIP.</p>
                 <button
-                  onClick={handleConfirmarTelefono}
-                  disabled={ultimos4.length !== 4 || loading}
-                  className="mt-4 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  onClick={() => navigate('/login-productor', { state: { curp } })}
+                  className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold active:scale-[0.98] transition-all"
                 >
-                  {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Confirmar'}
+                  Ir al inicio de sesión
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* ── PASO 3: NUEVO NIP ── */}
-          {step === 'nuevo_nip' && (
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white text-center mb-1.5">Nuevo NIP</h1>
-              <p className="text-white/50 text-sm text-center mb-6">Elige un NIP de 4 dígitos para tu cuenta</p>
-              <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-5 space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-2">Nuevo NIP</label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    value={nuevoNip}
-                    onChange={e => setNuevoNip(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    maxLength={4}
-                    placeholder="••••"
-                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3.5 text-xl font-mono tracking-[0.5em] text-white text-center placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-2">Confirmar NIP</label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    value={confirmarNip}
-                    onChange={e => setConfirmarNip(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    maxLength={4}
-                    placeholder="••••"
-                    className={`w-full bg-white/10 ring-1 rounded-xl px-4 py-3.5 text-xl font-mono tracking-[0.5em] text-white text-center placeholder-white/25 focus:outline-none transition-all ${confirmarNip.length === 4 && confirmarNip !== nuevoNip ? 'ring-red-400/60' : 'ring-white/20 focus:ring-white/40'}`}
-                  />
-                </div>
-                {error && (
-                  <div className="p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
-                    <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
-                  </div>
-                )}
-                <button
-                  onClick={handleNuevoNip}
-                  disabled={nuevoNip.length !== 4 || confirmarNip.length !== 4 || loading}
-                  className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3.5 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  {loading ? <><Loader2 size={16} className="animate-spin" /> Guardando...</> : 'Guardar nuevo NIP'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── ÉXITO ── */}
-          {step === 'exito' && (
-            <div className="text-center">
-              <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-green-400/20 rounded-full flex items-center justify-center">
-                  <CheckCircle2 size={44} className="text-green-400" />
-                </div>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">¡NIP actualizado!</h1>
-              <p className="text-white/60 text-sm mb-8">Ya puedes iniciar sesión con tu nuevo NIP.</p>
-              <button
-                onClick={() => navigate('/login-productor', { state: { curp } })}
-                className="w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-4 text-sm font-bold active:scale-[0.98] transition-all"
-              >
-                Ir al inicio de sesión
-              </button>
-            </div>
-          )}
-
+          </div>
         </div>
       </div>
     </div>
