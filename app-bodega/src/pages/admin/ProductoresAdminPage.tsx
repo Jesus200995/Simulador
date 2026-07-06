@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, Check, X, Eye, ShieldAlert, RefreshCw,
   AlertTriangle, BarChart3, ChevronLeft, ChevronRight,
-  Users, UserX, Clock, Download, Filter
+  Users, UserX, Clock, Download, Filter, Trash2
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -72,6 +72,12 @@ export default function ProductoresAdminPage() {
   const [notaInterna, setNotaInterna] = useState('');
   const [actionError, setActionError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState<Productor | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteSuccess, setDeleteSuccess] = useState('');
 
   const [page, setPage] = useState(1);
   const limit = 50;
@@ -157,6 +163,28 @@ export default function ProductoresAdminPage() {
     }
   }
 
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    setDeleteError('');
+    setDeleteLoading(true);
+    try {
+      const r = await fetch(`${BASE}/admin/productores/${deleteTarget.id}`, {
+        method: 'DELETE',
+        headers: HDR(),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `Error ${r.status}`);
+      setProductores(prev => prev.filter(p => p.id !== deleteTarget.id));
+      setDeleteSuccess(`${deleteTarget.nombre} ${deleteTarget.apellidos} fue eliminado del padrón.`);
+      setDeleteTarget(null);
+      setTimeout(() => setDeleteSuccess(''), 4000);
+    } catch (e: any) {
+      setDeleteError(e.message || 'Error al eliminar el productor.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
   const filteredProductores = productores.filter(p => {
     if (tab === 'pendiente'  && p.estado_validacion !== 'pendiente')  return false;
     if (tab === 'suspendido' && p.estado_validacion !== 'suspendido') return false;
@@ -181,6 +209,19 @@ export default function ProductoresAdminPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-76px)] overflow-hidden gap-2">
+
+      {/* Toast de éxito al eliminar */}
+      {deleteSuccess && (
+        <div
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-4 py-3 bg-gray-900 text-white text-[12.5px] font-semibold rounded-2xl shadow-2xl"
+          style={{ animation: 'slideUpFade 0.3s ease' }}
+        >
+          <div className="w-5 h-5 rounded-full bg-emerald-400 flex items-center justify-center flex-shrink-0">
+            <Check size={11} strokeWidth={3} className="text-gray-900" />
+          </div>
+          {deleteSuccess}
+        </div>
+      )}
 
       {/* ── Barra verde: tabs arriba / contadores abajo ── */}
       <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 overflow-hidden">
@@ -406,6 +447,13 @@ export default function ProductoresAdminPage() {
                               Reactivar
                             </button>
                           )}
+                          {/* Botón eliminar */}
+                          <button
+                            onClick={() => { setDeleteTarget(prod); setDeleteError(''); }}
+                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all duration-150"
+                            title="Eliminar productor">
+                            <Trash2 size={12} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -450,7 +498,7 @@ export default function ProductoresAdminPage() {
         )}
       </div>
 
-      {/* Modal acción */}
+      {/* ── Modal acción (aprobar/rechazar/suspender/reactivar) ── */}
       {selectedProd && modalType && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-gray-100 rounded-2xl max-w-[400px] w-full shadow-2xl overflow-hidden">
@@ -501,6 +549,117 @@ export default function ProductoresAdminPage() {
           </div>
         </div>
       )}
+
+      {/* ── Modal eliminar productor — Apple 2026 ── */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          style={{ animation: 'fadeInBackdrop 0.2s ease' }}
+        >
+          {/* Backdrop con blur */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-[6px]"
+            onClick={() => { if (!deleteLoading) { setDeleteTarget(null); setDeleteError(''); } }}
+          />
+
+          {/* Sheet / Card */}
+          <div
+            className="relative bg-white/95 backdrop-blur-xl w-full sm:max-w-[380px] rounded-t-[28px] sm:rounded-[28px] overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.28)]"
+            style={{ animation: 'slideUpSheet 0.28s cubic-bezier(0.34,1.3,0.64,1)' }}
+          >
+            {/* Handle (solo mobile) */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-9 h-1 rounded-full bg-gray-300/80" />
+            </div>
+
+            {/* Ícono destructivo */}
+            <div className="flex flex-col items-center pt-6 pb-2 px-6">
+              <div className="w-16 h-16 rounded-[22px] bg-red-50 flex items-center justify-center mb-4 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
+                <Trash2 size={28} className="text-red-500" strokeWidth={1.8} />
+              </div>
+              <h2 className="text-[18px] font-bold text-gray-900 text-center leading-tight">
+                Eliminar productor
+              </h2>
+              <p className="mt-2 text-[13.5px] text-gray-500 text-center leading-relaxed px-2">
+                Se eliminará permanentemente a{' '}
+                <span className="font-semibold text-gray-800">
+                  {deleteTarget.nombre} {deleteTarget.apellidos}
+                </span>
+                {deleteTarget.curp && (
+                  <span className="block text-[11.5px] font-mono text-gray-400 mt-0.5">
+                    {deleteTarget.curp}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Warning */}
+            <div className="mx-5 mt-3 mb-1 bg-red-50 border border-red-100 rounded-2xl px-4 py-3 flex items-start gap-2.5">
+              <AlertTriangle size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-[12px] text-red-600 leading-relaxed">
+                Se eliminarán también todas sus parcelas, ciclos productivos y registros asociados.
+                <strong className="block mt-0.5">Esta acción no se puede deshacer.</strong>
+              </p>
+            </div>
+
+            {/* Error */}
+            {deleteError && (
+              <div className="mx-5 mt-2 bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5 flex items-center gap-2">
+                <X size={12} className="text-red-500 flex-shrink-0" />
+                <p className="text-[12px] text-red-600">{deleteError}</p>
+              </div>
+            )}
+
+            {/* Botones estilo iOS */}
+            <div className="px-5 pt-4 pb-6 space-y-2.5">
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleteLoading}
+                className="w-full py-3.5 rounded-[16px] text-[15px] font-semibold text-white transition-all duration-150 active:scale-[0.97]"
+                style={{
+                  background: deleteLoading
+                    ? 'linear-gradient(135deg, #f87171, #ef4444)'
+                    : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  boxShadow: deleteLoading ? 'none' : '0 4px 14px rgba(239,68,68,0.35)',
+                }}
+              >
+                {deleteLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="3"/>
+                      <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                    </svg>
+                    Eliminando...
+                  </span>
+                ) : 'Eliminar definitivamente'}
+              </button>
+              <button
+                onClick={() => { setDeleteTarget(null); setDeleteError(''); }}
+                disabled={deleteLoading}
+                className="w-full py-3.5 rounded-[16px] text-[15px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-150 active:scale-[0.97] disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Animaciones */}
+      <style>{`
+        @keyframes fadeInBackdrop {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slideUpSheet {
+          from { opacity: 0; transform: translateY(40px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)    scale(1);    }
+        }
+        @keyframes slideUpFade {
+          from { opacity: 0; transform: translate(-50%, 16px); }
+          to   { opacity: 1; transform: translate(-50%, 0);    }
+        }
+      `}</style>
     </div>
   );
 }

@@ -403,6 +403,78 @@ router.delete('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthReques
 
 
 // =============================================
+// DELETE /api/admin/productores/:producer_id — Eliminar productor completo (cascade)
+// Orden: disponibilidad_productor → cycle_crop → cycle → up → producer → usuario
+// =============================================
+router.delete('/productores/:producer_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const { producer_id } = req.params;
+
+    // Obtener datos del productor + usuario vinculado
+    const prodRow = await client.query(
+      `SELECT p.producer_id, p.usuario_id, p.nombres, p.apellido_paterno, p.apellido_materno
+       FROM producer p WHERE p.producer_id = $1`,
+      [producer_id]
+    );
+    if (prodRow.rows.length === 0) {
+      res.status(404).json({ error: 'Productor no encontrado' });
+      return;
+    }
+    const prod = prodRow.rows[0];
+    const nombreCompleto = [prod.nombres, prod.apellido_paterno, prod.apellido_materno].filter(Boolean).join(' ');
+
+    await client.query('BEGIN');
+
+    // 1. Disponibilidades del productor
+    await client.query(
+      `DELETE FROM disponibilidad_productor
+       WHERE producer_id = $1`,
+      [producer_id]
+    );
+
+    // 2. Cycle_crops de todos los ciclos de las UPs del productor
+    await client.query(
+      `DELETE FROM cycle_crop
+       WHERE cycle_id IN (
+         SELECT c.cycle_id FROM cycle c
+         JOIN up u ON u.up_id = c.up_id
+         WHERE u.producer_id = $1
+       )`,
+      [producer_id]
+    );
+
+    // 3. Ciclos de las UPs del productor
+    await client.query(
+      `DELETE FROM cycle
+       WHERE up_id IN (SELECT up_id FROM up WHERE producer_id = $1)`,
+      [producer_id]
+    );
+
+    // 4. UPs del productor
+    await client.query('DELETE FROM up WHERE producer_id = $1', [producer_id]);
+
+    // 5. Registro de productor
+    await client.query('DELETE FROM producer WHERE producer_id = $1', [producer_id]);
+
+    // 6. Usuario vinculado (si existe)
+    if (prod.usuario_id) {
+      await client.query('DELETE FROM usuarios WHERE id = $1', [prod.usuario_id]);
+    }
+
+    await client.query('COMMIT');
+    res.json({ ok: true, message: `Productor "${nombreCompleto}" eliminado correctamente` });
+  } catch (error: any) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Error al eliminar productor:', error);
+    res.status(500).json({ error: 'Error interno del servidor al eliminar productor' });
+  } finally {
+    client.release();
+  }
+});
+
+
+// =============================================
 // GET /api/admin/usuarios/:id — Detalle de un productor
 // =============================================
 router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
