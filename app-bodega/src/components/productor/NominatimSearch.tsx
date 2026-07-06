@@ -13,10 +13,36 @@ export default function NominatimSearch({ placeholder, onSelect }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  // Detecta "19.4326, -99.1332" / "19.4326 -99.1332" / "19.4326,-99.1332"
+  const REGEX_COORDS = /^(-?\d{1,3}\.?\d*)[,\s]+(-?\d{1,3}\.?\d*)$/;
+
   const buscar = (q: string) => {
     setQuery(q);
     clearTimeout(timerRef.current);
     if (q.length < 3) { setResultados([]); return; }
+
+    // Detectar si es un par de coordenadas GPS
+    const matchCoords = q.trim().match(REGEX_COORDS);
+    if (matchCoords) {
+      const lat = parseFloat(matchCoords[1]);
+      const lng = parseFloat(matchCoords[2]);
+      const latValida = lat >= 14.5 && lat <= 32.7;
+      const lngValida = lng >= -118.4 && lng <= -86.7;
+      if (latValida && lngValida) {
+        setResultados([{
+          lat: String(lat),
+          lon: String(lng),
+          display_name: `📍 Coordenadas: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+        }]);
+      } else {
+        setResultados([{
+          lat: String(lat),
+          lon: String(lng),
+          display_name: `⚠️ Coordenadas fuera del rango de México`,
+        }]);
+      }
+      return;
+    }
 
     timerRef.current = setTimeout(async () => {
       setLoading(true);

@@ -67,6 +67,10 @@ export default function RegistroNuevoPage() {
   // Paso 2
   const [datosPadron, setDatosPadron] = useState<DatosPadron | null>(null);
   const [telefonoEditable, setTelefonoEditable] = useState('');
+  // C14 — estado/municipio editable cuando SADER los devuelve vacíos
+  const [estadoEditable, setEstadoEditable] = useState('');
+  const [municipioEditable, setMunicipioEditable] = useState('');
+  const [municipiosDisponibles, setMunicipiosDisponibles] = useState<{id: string; name: string}[]>([]);
 
   // Pasos 3-5 — UPs
   const [ups, setUps] = useState<UPRegistrada[]>([]);
@@ -179,6 +183,8 @@ export default function RegistroNuevoPage() {
       }
       setDatosPadron(data.datos);
       setTelefonoEditable(data.datos.telefono || '');
+      // C14 — precargar estados si SADER no devuelve estado/municipio
+      if (!data.datos.estado_padron || !data.datos.municipio_padron) cargarEstados();
       setPaso(2);
     } catch {
       setError('Error de conexión. Verifica tu internet e intenta de nuevo.');
@@ -260,6 +266,20 @@ export default function RegistroNuevoPage() {
     return Object.keys(errs).length === 0;
   };
 
+  // C14 — cargar municipios para el selector editable del paso 2
+  const handleEstadoEditableChange = async (estadoId: string) => {
+    setEstadoEditable(estadoId);
+    setMunicipioEditable('');
+    setMunicipiosDisponibles([]);
+    if (!estadoId) return;
+    try {
+      const r = await fetch(`${BASE}/auth/municipalities?state_id=${estadoId}`);
+      const d = await r.json();
+      const lista = Array.isArray(d) ? d : (d.municipalities ?? []);
+      setMunicipiosDisponibles(lista.map((m: any) => ({ id: String(m.municipality_id), name: m.name || m.municipality_name })));
+    } catch { /* si falla, el selector queda vacío */ }
+  };
+
   const registrar = async () => {
     if (pin !== confirmPin) { setError('Los PINs no coinciden.'); return; }
     if (pin.length !== 4) { setError('El PIN debe ser de 4 dígitos.'); return; }
@@ -298,6 +318,9 @@ export default function RegistroNuevoPage() {
         genero: datosPadron?.genero,
         telefono: telefonoEditable,
         correo: datosPadron?.correo,
+        // C14 — usar valor editable si SADER devolvió vacío
+        estado_padron:    datosPadron?.estado_padron || estadoEditable || null,
+        municipio_padron: datosPadron?.municipio_padron || municipioEditable || null,
         pin,
         ups: upsPayload,
       };
@@ -391,7 +414,7 @@ export default function RegistroNuevoPage() {
           {!pendingUP && (
             <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
               <NominatimSearch
-                placeholder="Buscar dirección o localidad…"
+                placeholder="Buscar dirección, localidad o coordenadas GPS…"
                 onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
               />
             </div>
@@ -892,12 +915,11 @@ export default function RegistroNuevoPage() {
                       </div>
                     </div>
 
+                    {/* Fecha y género — siempre de solo lectura */}
                     <div className="grid grid-cols-2 gap-2.5 mb-4">
                       {[
                         { l: 'Fecha de nac.', v: datosPadron.fecha_nacimiento || '—' },
                         { l: 'Género', v: datosPadron.genero === 'H' ? 'Masculino' : datosPadron.genero === 'M' ? 'Femenino' : '—' },
-                        { l: 'Estado', v: datosPadron.estado_padron || '—' },
-                        { l: 'Municipio', v: datosPadron.municipio_padron || '—' },
                       ].map(it => (
                         <div key={it.l} className="bg-white/[0.05] rounded-xl px-3 py-2.5 ring-1 ring-white/[0.07]">
                           <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wide">{it.l}</p>
@@ -906,6 +928,57 @@ export default function RegistroNuevoPage() {
                       ))}
                     </div>
 
+                    {/* Estado — solo lectura si SADER lo tiene; editable si viene vacío */}
+                    {datosPadron.estado_padron ? (
+                      <div className="bg-white/[0.05] rounded-xl px-3 py-2.5 ring-1 ring-white/[0.07] mb-2.5">
+                        <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wide">Estado</p>
+                        <p className="text-sm font-medium text-white mt-0.5">{datosPadron.estado_padron}</p>
+                      </div>
+                    ) : (
+                      <div className="mb-2.5">
+                        <label className={labelCls}>
+                          Estado <span className="text-amber-400 normal-case font-normal text-[10px]">— no disponible en el padrón, selecciona</span>
+                        </label>
+                        <select
+                          value={estadoEditable}
+                          onChange={e => handleEstadoEditableChange(e.target.value)}
+                          className={`${inputCls} appearance-none [&>option]:text-gray-900`}
+                        >
+                          <option value="">Selecciona tu estado</option>
+                          {estados.map(e => (
+                            <option key={e.state_id} value={e.state_id}>{e.name || e.state_name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Municipio — solo lectura si SADER lo tiene; editable si viene vacío */}
+                    {datosPadron.municipio_padron ? (
+                      <div className="bg-white/[0.05] rounded-xl px-3 py-2.5 ring-1 ring-white/[0.07] mb-4">
+                        <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wide">Municipio</p>
+                        <p className="text-sm font-medium text-white mt-0.5">{datosPadron.municipio_padron}</p>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <label className={labelCls}>
+                          Municipio <span className="text-amber-400 normal-case font-normal text-[10px]">— no disponible en el padrón, selecciona</span>
+                        </label>
+                        <select
+                          value={municipioEditable}
+                          onChange={e => setMunicipioEditable(e.target.value)}
+                          disabled={!estadoEditable}
+                          className={`${inputCls} appearance-none [&>option]:text-gray-900 disabled:opacity-35`}
+                        >
+                          <option value="">
+                            {estadoEditable ? 'Selecciona tu municipio' : 'Primero selecciona el estado'}
+                          </option>
+                          {municipiosDisponibles.map(m => (
+                            <option key={m.id} value={m.name}>{m.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
                     <div className="mb-4">
                       <label className={labelCls}>Teléfono <span className="text-white/25 normal-case font-normal text-[10px]">— puedes editarlo</span></label>
                       <input type="tel" value={telefonoEditable}
@@ -913,7 +986,14 @@ export default function RegistroNuevoPage() {
                         placeholder="10 dígitos" maxLength={10} className={inputCls} />
                     </div>
 
-                    <button onClick={() => setPaso(25)} className={btnCls}>
+                    <button
+                      onClick={() => { if (!esModoManual) cargarEstados(); setPaso(25); }}
+                      disabled={
+                        (!datosPadron.estado_padron && !estadoEditable) ||
+                        (!datosPadron.municipio_padron && !municipioEditable)
+                      }
+                      className={`${btnCls} disabled:opacity-30`}
+                    >
                       <Check size={17} /> Confirmar y Continuar
                     </button>
                   </div>

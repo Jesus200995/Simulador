@@ -930,7 +930,13 @@ export default function CicloProductivoPage() {
                         <button key={v.code}
                           onClick={() => {
                             setForm(f => ({...f, variety_id: v.code, variety_other: ''}));
-                            setEsCriollo(v.label.toLowerCase().includes('criollo') || v.code === 'MC_CRIOLLO');
+                            setEsCriollo(
+                              v.code === 'CRIOLLO_LOCAL' ||
+                              v.code === 'OTRA'          ||
+                              v.code === 'OTRA_AMARILLO' ||
+                              v.code === 'OTRA_CRIOLLO'  ||
+                              v.label.toLowerCase().includes('criollo')
+                            );
                           }}
                           className={`w-full rounded-[12px] p-2.5 border-2 text-left transition-all active:scale-[0.98] flex items-center gap-2.5
                             ${form.variety_id === v.code
@@ -950,14 +956,23 @@ export default function CicloProductivoPage() {
                     {esCriollo && (
                       <div className="animate-in fade-in slide-in-from-top-2 p-4 bg-[#eef8f2]/80 rounded-[16px] border border-slate-100 shadow-sm">
                         <label className="block text-[13px] font-bold text-slate-800 mb-2">
-                          ¿Cómo se llama tu variedad criolla? <span className="text-slate-400 font-medium ml-1">(opcional)</span>
+                          {form.variety_id === 'CRIOLLO_LOCAL'
+                            ? <>¿Cómo se llama tu variedad criolla? <span className="text-slate-400 font-medium ml-1">(opcional)</span></>
+                            : '¿Cuál es el nombre de la variedad?'}
                         </label>
                         <input type="text"
                           value={form.variety_other}
                           onChange={e => setForm(f => ({...f, variety_other: e.target.value}))}
-                          placeholder="Ej: Olotillo, Pepitilla..."
+                          placeholder={
+                            form.variety_id === 'CRIOLLO_LOCAL'
+                              ? 'Ej: Olotillo, Pepitilla, Bolita...'
+                              : 'Escribe el nombre de la variedad'
+                          }
                           className={inputCls}
                         />
+                        {form.variety_id !== 'CRIOLLO_LOCAL' && (
+                          <p className="text-[11px] text-slate-400 mt-1">Este campo es obligatorio para continuar.</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1123,13 +1138,25 @@ export default function CicloProductivoPage() {
                 Continuar
               </button>
             )}
-            {paso === 2 && (
-              <button onClick={() => { setError(''); setPaso(3); }}
-                disabled={!form.variety_id}
-                className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
-                Continuar
-              </button>
-            )}
+            {paso === 2 && (() => {
+              const puedeAvanzarPaso2 = () => {
+                if (!form.variety_id) return false;
+                if (
+                  (form.variety_id === 'OTRA' ||
+                   form.variety_id === 'OTRA_AMARILLO' ||
+                   form.variety_id === 'OTRA_CRIOLLO') &&
+                  !form.variety_other.trim()
+                ) return false;
+                return true;
+              };
+              return (
+                <button onClick={() => { setError(''); setPaso(3); }}
+                  disabled={!puedeAvanzarPaso2()}
+                  className="w-full bg-[#1A5C38] hover:bg-[#124227] text-white py-3 rounded-full text-[15px] font-bold disabled:opacity-40 disabled:scale-100 transition-all active:scale-[0.98] shadow-[0_6px_15px_rgba(26,92,56,0.2)]">
+                  Continuar
+                </button>
+              );
+            })()}
             {paso === 3 && (
               <button onClick={() => { setError(''); setPaso(4); }}
                 disabled={!form.area_sown_ha || Number(form.area_sown_ha) <= 0 || !!errorSuperficie}
