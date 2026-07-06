@@ -428,38 +428,41 @@ export default function AgregarUPPage() {
     );
   }
 
-  // ── PASO INFO — diseño verde oscuro igual al registro ───────────────────────
+  // ── PASO INFO — fondo verde oscuro, respeta el AppHeader del layout (h-16 + safe-area) ──
   const inputCls = 'w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all appearance-none [&>option]:text-gray-900';
   const labelCls = 'block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5';
 
   return (
     <div
       className="fixed inset-0 flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
-      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      // Empuja el contenido debajo del AppHeader del LayoutProductor (h-16 = 64px + safe-area)
+      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 64px)' }}
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.08),transparent)]" />
       </div>
 
-      {/* Header */}
-      <div className="relative flex-shrink-0 flex items-center px-4 h-12 sm:h-14 border-b border-white/[0.06]">
+      {/* Mini-header con botón atrás — visible debajo del AppHeader blanco */}
+      <div className="relative flex-shrink-0 flex items-center px-4 h-11 border-b border-white/[0.07]">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 -ml-1 rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+          className="flex items-center gap-1 text-white/70 hover:text-white active:text-white/50 transition-colors"
         >
-          <ChevronLeft size={20} className="text-white/60" />
+          <ChevronLeft size={18} />
+          <span className="text-sm font-semibold">Volver</span>
         </button>
         <div className="flex-1 flex justify-center items-center gap-2">
-          <div className="w-6 h-6 bg-green-400/15 rounded-lg flex items-center justify-center ring-1 ring-green-400/20">
-            <MapPin size={13} className="text-green-300" />
+          <div className="w-5 h-5 bg-green-400/15 rounded-md flex items-center justify-center ring-1 ring-green-400/20">
+            <MapPin size={11} className="text-green-300" />
           </div>
           <span className="text-sm font-semibold text-white/80">Nueva parcela</span>
         </div>
-        <div className="w-8" />
+        <div className="w-16" />
       </div>
 
       {/* Contenido */}
-      <div className="relative flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-4 sm:px-6 py-4">
+      <div className="relative flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-4 sm:px-6 py-4"
+           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)' }}>
         <div className="w-full max-w-sm lg:max-w-4xl flex flex-col lg:flex-row lg:items-center lg:gap-16">
 
           {/* Left panel — desktop branding */}
