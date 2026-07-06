@@ -10,6 +10,9 @@ import B02Register from './pages/B02Register';
 // Productor — onboarding
 import RegistroNuevoPage from './pages/auth/RegistroNuevoPage';
 import LoginPinPage from './pages/auth/LoginPinPage';
+import RecuperarNipPage from './pages/auth/RecuperarNipPage';
+import RecuperarPasswordPage from './pages/auth/RecuperarPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 // Productor — páginas
 import DashboardProductorPage from './pages/productor/DashboardProductorPage';
 import DisponibilidadTipoPage from './pages/productor/DisponibilidadTipoPage';
@@ -240,6 +243,9 @@ export const router = createBrowserRouter([
   // Onboarding productor (sin auth)
   { path: '/registro-nuevo', element: <RegistroNuevoPage /> },
   { path: '/login-productor', element: <LoginPinPage /> },
+  { path: '/recuperar-nip', element: <RecuperarNipPage /> },
+  { path: '/recuperar-password', element: <RecuperarPasswordPage /> },
+  { path: '/reset-password/:token', element: <ResetPasswordPage /> },
 
   // Rutas del productor (requieren auth + rol productor)
   {

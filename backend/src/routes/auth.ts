@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import pool from '../config/database';
 import { RegistroPayload, LoginPayload } from '../types';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { enviarEmailRecuperacion, smtpConfigurado } from '../utils/mailer';
 
 const router = Router();
 
@@ -439,6 +441,137 @@ router.get('/municipalities', async (req: Request, res: Response): Promise<void>
     res.json({ municipalities: result.rows });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener municipios' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// RECUPERACIÓN DE CONTRASEÑA (usuarios bodega/admin)
+// ─────────────────────────────────────────────────────────────────
+
+// POST /api/auth/recuperar-password
+// Paso 1: ingresa email → genera token seguro, envía correo si SMTP configurado
+router.post('/recuperar-password', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: 'Email requerido' });
+      return;
+    }
+    const emailLimpio = email.toLowerCase().trim();
+
+    const { rows } = await pool.query(
+      `SELECT id, nombre_completo, email, rol FROM usuarios WHERE LOWER(email) = $1 AND activo = TRUE`,
+      [emailLimpio]
+    );
+
+    // Respuesta genérica: no revelar si el email existe
+    if (!rows.length) {
+      res.json({ ok: true, smtp: smtpConfigurado() });
+      return;
+    }
+
+    const user = rows[0];
+    // Solo aplica para usuarios no-productores
+    if (user.rol === 'productor') {
+      res.json({ ok: true, smtp: smtpConfigurado() });
+      return;
+    }
+
+    // Generar token seguro
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    await pool.query(
+      `UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3`,
+      [tokenHash, expires, user.id]
+    );
+
+    const appUrl = process.env.APP_URL || 'https://maiz.agricultura.gob.mx';
+    const resetUrl = `${appUrl}/reset-password/${token}`;
+
+    const emailEnviado = await enviarEmailRecuperacion(user.email, user.nombre_completo || 'Usuario', resetUrl);
+
+    res.json({
+      ok: true,
+      smtp: smtpConfigurado(),
+      // Si no hay SMTP, devolver la URL para que el admin la comparta manualmente
+      reset_url: !emailEnviado ? resetUrl : undefined,
+    });
+  } catch (error) {
+    console.error('Error en recuperar-password:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /api/auth/verificar-token-reset/:token
+// Verifica que el token sea válido y no haya expirado
+router.get('/verificar-token-reset/:token', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token } = req.params;
+    if (!token) {
+      res.status(400).json({ valido: false, error: 'Token requerido' });
+      return;
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const { rows } = await pool.query(
+      `SELECT id, nombre_completo, email FROM usuarios
+       WHERE reset_token = $1 AND reset_token_expires > NOW() AND activo = TRUE`,
+      [tokenHash]
+    );
+
+    if (!rows.length) {
+      res.status(410).json({ valido: false, error: 'El enlace es inválido o ya expiró.' });
+      return;
+    }
+
+    res.json({ valido: true, nombre: rows[0].nombre_completo, email: rows[0].email });
+  } catch (error) {
+    console.error('Error en verificar-token-reset:', error);
+    res.status(500).json({ valido: false, error: 'Error interno' });
+  }
+});
+
+// POST /api/auth/nuevo-password
+// Paso final: guarda nueva contraseña con el token verificado
+router.post('/nuevo-password', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      res.status(400).json({ error: 'Datos incompletos' });
+      return;
+    }
+    if (password.length < 8) {
+      res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+      return;
+    }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      res.status(400).json({ error: 'La contraseña debe tener al menos 1 mayúscula y 1 número' });
+      return;
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const { rows } = await pool.query(
+      `SELECT id FROM usuarios WHERE reset_token = $1 AND reset_token_expires > NOW() AND activo = TRUE`,
+      [tokenHash]
+    );
+
+    if (!rows.length) {
+      res.status(410).json({ error: 'El enlace es inválido o ya expiró. Solicita uno nuevo.' });
+      return;
+    }
+
+    const hash = await bcrypt.hash(password, 12);
+    await pool.query(
+      `UPDATE usuarios SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2`,
+      [hash, rows[0].id]
+    );
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error en nuevo-password:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 

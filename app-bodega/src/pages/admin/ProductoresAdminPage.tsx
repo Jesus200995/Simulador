@@ -79,6 +79,12 @@ export default function ProductoresAdminPage() {
   const [deleteError, setDeleteError] = useState('');
   const [deleteSuccess, setDeleteSuccess] = useState('');
 
+  // Reset NIP modal state
+  const [resetNipTarget, setResetNipTarget] = useState<Productor | null>(null);
+  const [resetNipLoading, setResetNipLoading] = useState(false);
+  const [resetNipResult, setResetNipResult] = useState<{ pin: string; nombre: string } | null>(null);
+  const [resetNipError, setResetNipError] = useState('');
+
   const [page, setPage] = useState(1);
   const limit = 50;
 
@@ -447,6 +453,13 @@ export default function ProductoresAdminPage() {
                               Reactivar
                             </button>
                           )}
+                          {/* Botón resetear NIP */}
+                          <button
+                            onClick={() => { setResetNipTarget(prod); setResetNipResult(null); setResetNipError(''); }}
+                            className="text-[9.5px] font-bold px-2 py-1 rounded-lg text-gray-500 hover:text-purple-700 hover:bg-purple-50 border border-gray-100 hover:border-purple-200 transition"
+                            title="Resetear NIP">
+                            🔑 NIP
+                          </button>
                           {/* Botón eliminar */}
                           <button
                             onClick={() => { setDeleteTarget(prod); setDeleteError(''); }}
@@ -640,6 +653,81 @@ export default function ProductoresAdminPage() {
               >
                 Cancelar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal resetear NIP — Apple 2026 ── */}
+      {resetNipTarget && (
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 sm:p-6"
+          style={{ animation: 'fadeInBackdrop .2s ease' }}>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[8px]"
+            onClick={() => { if (!resetNipLoading) { setResetNipTarget(null); setResetNipResult(null); } }} />
+          <div className="relative bg-white w-full max-w-sm rounded-[28px] shadow-[0_40px_100px_rgba(0,0,0,0.35)]"
+            style={{ animation: 'slideUpSheet .28s cubic-bezier(0.34,1.25,0.64,1)' }}>
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1" />
+
+            <div className="px-5 pt-3 pb-2">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-2xl">🔑</div>
+              </div>
+              <h2 className="text-[17px] font-bold text-slate-900 text-center">Resetear NIP</h2>
+              <p className="text-[13px] text-slate-500 text-center mt-1 mb-3 leading-relaxed">
+                Se generará un NIP temporal de 4 dígitos para <strong className="text-slate-700">{resetNipTarget.nombre} {resetNipTarget.apellidos}</strong>.
+                El productor deberá cambiarlo al ingresar.
+              </p>
+
+              {resetNipError && (
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-[12px]">{resetNipError}</div>
+              )}
+
+              {resetNipResult ? (
+                <div className="mb-3 p-4 bg-purple-50 border border-purple-200 rounded-2xl text-center">
+                  <p className="text-[11px] font-semibold text-purple-600 uppercase tracking-wide mb-1">NIP temporal generado</p>
+                  <p className="text-4xl font-black text-purple-800 tracking-[0.3em]">{resetNipResult.pin}</p>
+                  <p className="text-[11px] text-purple-500 mt-2">Comparte este NIP con el productor.<br/>Caduca en el próximo inicio de sesión.</p>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="px-5 pt-2 pb-6 space-y-2.5">
+              {!resetNipResult ? (
+                <>
+                  <button
+                    onClick={async () => {
+                      setResetNipLoading(true); setResetNipError('');
+                      try {
+                        const res = await fetch(`${BASE}/admin/reset-nip/${resetNipTarget.id}`, {
+                          method: 'POST', headers: { ...HDR(), 'Content-Type': 'application/json' }
+                        });
+                        const data = await res.json();
+                        if (!res.ok) { setResetNipError(data.error || 'Error al resetear'); return; }
+                        setResetNipResult({ pin: data.pin_temporal, nombre: data.nombre });
+                      } catch { setResetNipError('Error de conexión'); }
+                      finally { setResetNipLoading(false); }
+                    }}
+                    disabled={resetNipLoading}
+                    className="w-full py-3.5 rounded-[16px] text-[15px] font-semibold text-white bg-purple-600 hover:bg-purple-700 active:scale-[0.97] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {resetNipLoading ? 'Generando...' : 'Generar NIP temporal'}
+                  </button>
+                  <button
+                    onClick={() => { setResetNipTarget(null); setResetNipError(''); }}
+                    disabled={resetNipLoading}
+                    className="w-full py-3.5 rounded-[16px] text-[15px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] transition-all disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => { setResetNipTarget(null); setResetNipResult(null); }}
+                  className="w-full py-3.5 rounded-[16px] text-[15px] font-semibold text-white bg-[#1A5C38] hover:bg-[#15482d] active:scale-[0.97] transition-all"
+                >
+                  Listo
+                </button>
+              )}
             </div>
           </div>
         </div>

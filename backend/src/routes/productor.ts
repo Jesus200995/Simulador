@@ -1603,4 +1603,161 @@ router.delete('/push/cancelar', authMiddleware, async (req: AuthRequest, res: Re
   }
 });
 
+// ─────────────────────────────────────────────────────────────────
+// RECUPERACIÓN DE NIP — 3 pasos sin email ni SMS
+// ─────────────────────────────────────────────────────────────────
+
+// Mapa en memoria para rate limiting simple: ip → { count, resetAt }
+const nipRateMap = new Map<string, { count: number; resetAt: number }>();
+function checkNipRate(ip: string): boolean {
+  const now = Date.now();
+  const entry = nipRateMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    nipRateMap.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 });
+    return true;
+  }
+  if (entry.count >= 5) return false;
+  entry.count++;
+  return true;
+}
+
+// POST /api/productor/auth/recuperar-nip/verificar-curp
+// Paso 1: ingresa CURP → devuelve teléfono enmascarado + challenge_token
+router.post('/auth/recuperar-nip/verificar-curp', async (req, res): Promise<void> => {
+  const ip = req.ip || 'unknown';
+  if (!checkNipRate(ip)) {
+    res.status(429).json({ error: 'Demasiados intentos. Espera 15 minutos.' });
+    return;
+  }
+  try {
+    const { curp } = req.body;
+    if (!curp || curp.length !== 18) {
+      res.status(400).json({ error: 'CURP inválida' });
+      return;
+    }
+
+    const { rows } = await pool.query(
+      `SELECT p.producer_id, p.nombres, p.apellido_paterno,
+              u.id AS usuario_id, u.activo,
+              COALESCE(p.telefono, u.telefono) AS telefono
+       FROM producer p
+       JOIN usuarios u ON u.id = p.usuario_id
+       WHERE UPPER(p.curp) = UPPER($1)`,
+      [curp]
+    );
+
+    // Respuesta genérica: no revelar si la CURP existe o no
+    if (!rows.length || !rows[0].activo) {
+      res.json({ ok: true, telefono_enmascarado: null });
+      return;
+    }
+
+    const user = rows[0];
+    const tel = (user.telefono || '').replace(/\D/g, '');
+    const telEnmascarado = tel.length >= 4
+      ? '●●●●●●' + tel.slice(-4)
+      : null;
+
+    const secret = process.env.JWT_SECRET!;
+    const challengeToken = jwt.sign(
+      { producer_id: user.producer_id, usuario_id: user.usuario_id, action: 'nip_challenge', tel_last4: tel.slice(-4) },
+      secret,
+      { expiresIn: '5m' }
+    );
+
+    res.json({ ok: true, telefono_enmascarado: telEnmascarado, challenge_token: challengeToken });
+  } catch (error) {
+    console.error('Error en verificar-curp:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/productor/auth/recuperar-nip/confirmar-telefono
+// Paso 2: confirma últimos 4 dígitos → devuelve reset_token (15 min)
+router.post('/auth/recuperar-nip/confirmar-telefono', async (req, res): Promise<void> => {
+  const ip = req.ip || 'unknown';
+  if (!checkNipRate(ip)) {
+    res.status(429).json({ error: 'Demasiados intentos. Espera 15 minutos.' });
+    return;
+  }
+  try {
+    const { challenge_token, ultimos4 } = req.body;
+    if (!challenge_token || !ultimos4) {
+      res.status(400).json({ error: 'Datos incompletos' });
+      return;
+    }
+
+    const secret = process.env.JWT_SECRET!;
+    let payload: any;
+    try {
+      payload = jwt.verify(challenge_token, secret);
+    } catch {
+      res.status(400).json({ error: 'Token inválido o expirado. Vuelve a intentar.' });
+      return;
+    }
+
+    if (payload.action !== 'nip_challenge') {
+      res.status(400).json({ error: 'Token inválido' });
+      return;
+    }
+
+    if (payload.tel_last4 !== String(ultimos4).trim()) {
+      res.status(400).json({ error: 'Los últimos 4 dígitos no coinciden' });
+      return;
+    }
+
+    const resetToken = jwt.sign(
+      { producer_id: payload.producer_id, usuario_id: payload.usuario_id, action: 'reset_nip' },
+      secret,
+      { expiresIn: '15m' }
+    );
+
+    res.json({ ok: true, reset_token: resetToken });
+  } catch (error) {
+    console.error('Error en confirmar-telefono:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/productor/auth/recuperar-nip/nuevo-nip
+// Paso 3: guarda nuevo NIP con el reset_token verificado
+router.post('/auth/recuperar-nip/nuevo-nip', async (req, res): Promise<void> => {
+  try {
+    const { reset_token, nuevo_pin } = req.body;
+    if (!reset_token || !nuevo_pin) {
+      res.status(400).json({ error: 'Datos incompletos' });
+      return;
+    }
+    if (!/^\d{4}$/.test(String(nuevo_pin))) {
+      res.status(400).json({ error: 'El NIP debe ser exactamente 4 dígitos' });
+      return;
+    }
+
+    const secret = process.env.JWT_SECRET!;
+    let payload: any;
+    try {
+      payload = jwt.verify(reset_token, secret);
+    } catch {
+      res.status(400).json({ error: 'Token inválido o expirado. Vuelve a intentar desde el inicio.' });
+      return;
+    }
+
+    if (payload.action !== 'reset_nip') {
+      res.status(400).json({ error: 'Token inválido' });
+      return;
+    }
+
+    const hash = await bcrypt.hash(String(nuevo_pin), 12);
+    await pool.query(
+      `UPDATE usuarios SET password_hash = $1, reset_pin_forced = FALSE WHERE id = $2`,
+      [hash, payload.usuario_id]
+    );
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error en nuevo-nip:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

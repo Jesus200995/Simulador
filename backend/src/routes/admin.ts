@@ -1,5 +1,6 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
@@ -785,6 +786,75 @@ router.delete('/bodegas/:id', authMiddleware, soloAdmin, async (req: AuthRequest
     res.status(500).json({ error: 'Error interno del servidor' });
   } finally {
     client.release();
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// RESETS ADMIN
+// ─────────────────────────────────────────────────────────────────
+
+// POST /api/admin/reset-nip/:producer_id
+// El admin genera un PIN temporal de 4 dígitos para un productor
+router.post('/reset-nip/:producer_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { producer_id } = req.params;
+
+    const { rows } = await pool.query(
+      `SELECT u.id, u.nombre_completo FROM producer p JOIN usuarios u ON u.id = p.usuario_id WHERE p.producer_id = $1`,
+      [producer_id]
+    );
+    if (!rows.length) {
+      res.status(404).json({ error: 'Productor no encontrado' });
+      return;
+    }
+
+    // PIN temporal: 4 dígitos aleatorios (1000–9999 para evitar lideres 0)
+    const pinTemporal = String(Math.floor(1000 + Math.random() * 9000));
+    const hash = await bcrypt.hash(pinTemporal, 12);
+
+    await pool.query(
+      `UPDATE usuarios SET password_hash = $1, reset_pin_forced = TRUE WHERE id = $2`,
+      [hash, rows[0].id]
+    );
+
+    res.json({ ok: true, pin_temporal: pinTemporal, nombre: rows[0].nombre_completo });
+  } catch (error) {
+    console.error('Error en reset-nip:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/admin/reset-password/:usuario_id
+// El admin genera un enlace de reset para un usuario de bodega
+router.post('/reset-password/:usuario_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { usuario_id } = req.params;
+
+    const { rows } = await pool.query(
+      `SELECT id, nombre_completo, email FROM usuarios WHERE id = $1 AND activo = TRUE`,
+      [usuario_id]
+    );
+    if (!rows.length) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas para admin
+
+    await pool.query(
+      `UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3`,
+      [tokenHash, expires, rows[0].id]
+    );
+
+    const appUrl = process.env.APP_URL || 'https://maiz.agricultura.gob.mx';
+    const resetUrl = `${appUrl}/reset-password/${token}`;
+
+    res.json({ ok: true, reset_url: resetUrl, nombre: rows[0].nombre_completo, email: rows[0].email });
+  } catch (error) {
+    console.error('Error en reset-password admin:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
