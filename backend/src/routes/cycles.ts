@@ -221,6 +221,7 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
       return;
     }
 
+    // Upsert: si ya existe un cultivo para este ciclo, actualizar en lugar de insertar
     const result = await pool.query(
       `INSERT INTO cycle_crop (
         cycle_id, crop, variety_id, variety_other, area_sown_ha,
@@ -228,15 +229,27 @@ router.post('/cycles/:cycle_id/crops', authMiddleware, async (req: AuthRequest, 
         area_harvested_ha, destination, production_qty, production_unit
        )
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (cycle_id) DO UPDATE SET
+         crop = EXCLUDED.crop,
+         variety_id = EXCLUDED.variety_id,
+         variety_other = EXCLUDED.variety_other,
+         area_sown_ha = EXCLUDED.area_sown_ha,
+         planting_date = EXCLUDED.planting_date,
+         estimated_harvest_date = EXCLUDED.estimated_harvest_date,
+         yield_expected = EXCLUDED.yield_expected,
+         area_harvested_ha = EXCLUDED.area_harvested_ha,
+         destination = EXCLUDED.destination,
+         production_qty = EXCLUDED.production_qty,
+         production_unit = EXCLUDED.production_unit
        RETURNING *`,
       [
         cycle_id, crop, variety_id, variety_other || null, area_sown_ha,
-        planting_date, estimated_harvest_date || null, yield_expected || null,
-        area_harvested_ha || null, destination || null, production_qty || null, production_unit || null
+        planting_date, estimated_harvest_date || null, yieldNum,
+        harvestedNum, destination || null, productionNum, production_unit || null
       ]
     );
 
-    res.status(201).json({ crop: result.rows[0], message: 'Cultivo agregado exitosamente' });
+    res.status(201).json({ crop: result.rows[0], message: 'Cultivo guardado exitosamente' });
   } catch (error) {
     console.error('Error agregando cultivo:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
