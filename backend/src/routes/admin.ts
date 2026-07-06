@@ -703,4 +703,50 @@ router.get('/avisos-privacidad', authMiddleware, soloAdmin, async (req: AuthRequ
   }
 });
 
+// =============================================
+// PATCH /api/admin/bodegas/:id — Edición completa de bodega por admin
+// =============================================
+router.patch('/bodegas/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { nombre, estado, municipio, localidad, direccion, telefono, capacidad_ton, estatus, latitud, longitud } = req.body;
+
+    const sets: string[] = [];
+    const params: any[] = [];
+    let idx = 1;
+
+    if (nombre      !== undefined) { sets.push(`nombre = $${idx++}`);       params.push(nombre); }
+    if (estado      !== undefined) { sets.push(`estado = $${idx++}`);       params.push(estado); }
+    if (municipio   !== undefined) { sets.push(`municipio = $${idx++}`);    params.push(municipio); }
+    if (localidad   !== undefined) { sets.push(`localidad = $${idx++}`);    params.push(localidad); }
+    if (direccion   !== undefined) { sets.push(`direccion = $${idx++}`);    params.push(direccion); }
+    if (telefono    !== undefined) { sets.push(`telefono = $${idx++}`);     params.push(telefono); }
+    if (capacidad_ton !== undefined) { sets.push(`capacidad_ton = $${idx++}`); params.push(Number(capacidad_ton)); }
+    if (estatus     !== undefined) { sets.push(`estatus = $${idx++}`);      params.push(estatus); }
+    if (latitud     !== undefined) { sets.push(`latitud = $${idx++}`);      params.push(Number(latitud)); }
+    if (longitud    !== undefined) { sets.push(`longitud = $${idx++}`);     params.push(Number(longitud)); }
+
+    if (sets.length === 0) {
+      res.status(400).json({ error: 'No hay campos para actualizar' });
+      return;
+    }
+
+    params.push(id);
+    const result = await pool.query(
+      `UPDATE bodegas SET ${sets.join(', ')} WHERE id = $${idx} RETURNING *`,
+      params
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+
+    res.json({ ok: true, bodega: result.rows[0] });
+  } catch (error: any) {
+    console.error('Error al editar bodega (admin):', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;
