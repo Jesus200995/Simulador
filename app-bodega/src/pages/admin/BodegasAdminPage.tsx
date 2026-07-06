@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -818,7 +819,7 @@ export default function BodegasAdminPage() {
       {/* ═══════════════════════════════════════
           MODAL: DETALLE COMPLETO
       ═══════════════════════════════════════ */}
-      {detalleTarget && (
+      {detalleTarget && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           style={{ animation: 'fadeInBackdrop .2s ease' }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[6px]"
@@ -924,12 +925,12 @@ export default function BodegasAdminPage() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* ═══════════════════════════════════════
           MODAL: EDITAR BODEGA — Apple 2026
       ═══════════════════════════════════════ */}
-      {editTarget && (
+      {editTarget && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           style={{ animation: 'fadeInBackdrop .2s ease' }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[6px]"
@@ -1008,12 +1009,12 @@ export default function BodegasAdminPage() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* ═══════════════════════════════════════
           MODAL: APROBAR / RECHAZAR
       ═══════════════════════════════════════ */}
-      {modalAccion && (
+      {modalAccion && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/30 backdrop-blur-sm p-4"
           style={{ animation: 'fadeInBackdrop .18s ease' }}>
           <div className="bg-white border border-gray-100 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden"
@@ -1045,12 +1046,12 @@ export default function BodegasAdminPage() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* ═══════════════════════════════════════
           MODAL: ELIMINAR BODEGA — Apple 2026
       ═══════════════════════════════════════ */}
-      {deleteTarget && (
+      {deleteTarget && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 sm:p-6"
           style={{ animation: 'fadeInBackdrop .2s ease' }}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-[8px]"
@@ -1109,10 +1110,10 @@ export default function BodegasAdminPage() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* ── TOAST ── */}
-      {toast && (
+      {toast && createPortal(
         <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl text-[12.5px] font-semibold ${
           toast.ok ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'
         }`} style={{ animation: 'slideUpFade .3s ease' }}>
@@ -1121,17 +1122,19 @@ export default function BodegasAdminPage() {
             : <X size={14} className="text-white flex-shrink-0" />}
           {toast.msg}
         </div>
-      )}
+      , document.body)}
 
-      {/* Animaciones */}
-      <style>{`
-        @keyframes fadeInBackdrop { from{opacity:0} to{opacity:1} }
-        @keyframes slideUpSheet { from{opacity:0;transform:translateY(40px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes slideUpFade { from{opacity:0;transform:translate(-50%,16px)} to{opacity:1;transform:translate(-50%,0)} }
-        .mapboxgl-popup-content { border-radius:16px!important; padding:14px!important; box-shadow:0 8px 32px rgba(0,0,0,.18)!important; border:1px solid rgba(0,0,0,.06)!important; }
-        .mapboxgl-popup-close-button { font-size:18px; right:10px; top:8px; color:#9CA3AF; }
-        .mapboxgl-popup-close-button:hover { color:#374151; background:none; }
-      `}</style>
+      {/* Animaciones CSS globales — quedan en el <head> del documento */}
+      {createPortal(
+        <style>{`
+          @keyframes fadeInBackdrop { from{opacity:0} to{opacity:1} }
+          @keyframes slideUpSheet { from{opacity:0;transform:translateY(40px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+          @keyframes slideUpFade { from{opacity:0;transform:translate(-50%,16px)} to{opacity:1;transform:translate(-50%,0)} }
+          .mapboxgl-popup-content { border-radius:16px!important; padding:14px!important; box-shadow:0 8px 32px rgba(0,0,0,.18)!important; border:1px solid rgba(0,0,0,.06)!important; }
+          .mapboxgl-popup-close-button { font-size:18px; right:10px; top:8px; color:#9CA3AF; }
+          .mapboxgl-popup-close-button:hover { color:#374151; background:none; }
+        `}</style>
+      , document.head)}
     </div>
   );
 }
