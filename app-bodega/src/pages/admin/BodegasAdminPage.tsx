@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   Search, Eye, ShieldAlert, RefreshCw, Warehouse, BarChart3, X, CheckCircle,
   Weight, Package, Percent, FileText, LayoutGrid, MapPin, Edit3,
-  Phone, Calendar, Building2, Save, Loader2, Table2, Navigation2
+  Phone, Calendar, Building2, Save, Loader2, Table2, Navigation2, Trash2, AlertTriangle
 } from 'lucide-react';
 
 mapboxgl.accessToken = [
@@ -92,6 +92,10 @@ export default function BodegasAdminPage() {
   // Modal aprobar/rechazar
   const [modalAccion, setModalAccion] = useState<{ tipo: 'aprobar' | 'rechazar'; bodega: Bodega } | null>(null);
   const [accionLoading, setAccionLoading] = useState(false);
+
+  // Modal eliminar
+  const [deleteTarget, setDeleteTarget]   = useState<Bodega | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Toast
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
@@ -410,6 +414,28 @@ export default function BodegasAdminPage() {
     }
   }
 
+  /* ─── ELIMINAR BODEGA ─── */
+  async function confirmarEliminar() {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      const r = await fetch(`${BASE}/admin/bodegas/${deleteTarget.id}`, {
+        method: 'DELETE', headers: HDR(),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `Error ${r.status}`);
+      setBodegas(prev => prev.filter(b => b.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      setDetalleTarget(null);
+      showToast(`Bodega "${deleteTarget.nombre}" eliminada`);
+    } catch (e: any) {
+      showToast(e.message || 'Error al eliminar', false);
+      setDeleteLoading(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
   /* ─── APROBAR/RECHAZAR ─── */
   async function procesarAccion() {
     if (!modalAccion) return;
@@ -564,6 +590,10 @@ export default function BodegasAdminPage() {
                             <button onClick={() => abrirEditar(b)}
                               className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar">
                               <Edit3 size={12} />
+                            </button>
+                            <button onClick={() => setDeleteTarget(b)}
+                              className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition" title="Eliminar">
+                              <Trash2 size={12} />
                             </button>
                           </div>
                         </td>
@@ -789,7 +819,7 @@ export default function BodegasAdminPage() {
           MODAL: DETALLE COMPLETO
       ═══════════════════════════════════════ */}
       {detalleTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           style={{ animation: 'fadeInBackdrop .2s ease' }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[6px]"
             onClick={() => setDetalleTarget(null)} />
@@ -875,15 +905,21 @@ export default function BodegasAdminPage() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-6 pt-4 border-t border-gray-100 flex-shrink-0 flex gap-2.5">
-              <button onClick={() => { setDetalleTarget(null); navigate(`/admin/bodegas/${detalleTarget.id}`); }}
-                className="flex-1 py-3 rounded-[14px] text-[14px] font-semibold text-white transition active:scale-[.98]"
-                style={{ background: 'linear-gradient(135deg,#1A5C38,#15482d)', boxShadow:'0 4px 14px rgba(26,92,56,.3)' }}>
-                Abrir ficha completa →
-              </button>
-              <button onClick={() => { setDetalleTarget(null); abrirEditar(detalleTarget); }}
-                className="px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition active:scale-[.98] flex items-center gap-1.5">
-                <Edit3 size={14} /> Editar
+            <div className="px-6 pb-6 pt-4 border-t border-gray-100 flex-shrink-0 flex flex-col gap-2.5">
+              <div className="flex gap-2.5">
+                <button onClick={() => { setDetalleTarget(null); navigate(`/admin/bodegas/${detalleTarget.id}`); }}
+                  className="flex-1 py-3 rounded-[14px] text-[14px] font-semibold text-white transition active:scale-[.98]"
+                  style={{ background: 'linear-gradient(135deg,#1A5C38,#15482d)', boxShadow:'0 4px 14px rgba(26,92,56,.3)' }}>
+                  Abrir ficha completa →
+                </button>
+                <button onClick={() => { setDetalleTarget(null); abrirEditar(detalleTarget); }}
+                  className="px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition active:scale-[.98] flex items-center gap-1.5">
+                  <Edit3 size={14} /> Editar
+                </button>
+              </div>
+              <button onClick={() => setDeleteTarget(detalleTarget)}
+                className="w-full py-3 rounded-[14px] text-[14px] font-semibold text-red-500 bg-red-50 hover:bg-red-100 border border-red-100 transition active:scale-[.98] flex items-center justify-center gap-2">
+                <Trash2 size={14} /> Eliminar bodega
               </button>
             </div>
           </div>
@@ -894,7 +930,7 @@ export default function BodegasAdminPage() {
           MODAL: EDITAR BODEGA — Apple 2026
       ═══════════════════════════════════════ */}
       {editTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           style={{ animation: 'fadeInBackdrop .2s ease' }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[6px]"
             onClick={() => { if (!editLoading) setEditTarget(null); }} />
@@ -1011,9 +1047,73 @@ export default function BodegasAdminPage() {
         </div>
       )}
 
+      {/* ═══════════════════════════════════════
+          MODAL: ELIMINAR BODEGA — Apple 2026
+      ═══════════════════════════════════════ */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 sm:p-6"
+          style={{ animation: 'fadeInBackdrop .2s ease' }}>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[8px]"
+            onClick={() => { if (!deleteLoading) setDeleteTarget(null); }} />
+
+          <div className="relative bg-white w-full max-w-sm rounded-[28px] shadow-[0_40px_100px_rgba(0,0,0,0.35)] overflow-hidden"
+            style={{ animation: 'slideUpSheet .28s cubic-bezier(0.34,1.25,0.64,1)' }}>
+
+            {/* Handle móvil */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-9 h-1 rounded-full bg-gray-200" />
+            </div>
+
+            {/* Icono + título */}
+            <div className="px-6 pt-5 pb-4 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-[22px] bg-red-50 flex items-center justify-center mb-4"
+                style={{ boxShadow: '0 0 0 8px rgba(239,68,68,.08), 0 0 0 16px rgba(239,68,68,.04)' }}>
+                <AlertTriangle size={30} className="text-red-500" />
+              </div>
+              <h3 className="text-[20px] font-black text-gray-900 tracking-tight leading-tight mb-2">
+                Eliminar bodega
+              </h3>
+              <p className="text-[13.5px] text-gray-500 leading-relaxed">
+                Se eliminará permanentemente{' '}
+                <span className="font-bold text-gray-800">"{deleteTarget.nombre}"</span>
+                {' '}y todos sus datos asociados. Esta acción no se puede deshacer.
+              </p>
+            </div>
+
+            {/* Detalle de lo que se borrará */}
+            <div className="mx-6 mb-5 bg-red-50/60 border border-red-100 rounded-2xl px-4 py-3">
+              <p className="text-[10.5px] font-bold text-red-400 uppercase tracking-wide mb-2">Se eliminará todo lo relacionado</p>
+              <div className="grid grid-cols-2 gap-1">
+                {['Inventarios', 'Ventanillas', 'Tarifarios', 'Transacciones', 'Señales de compra', 'Bodegueros asignados'].map(item => (
+                  <div key={item} className="flex items-center gap-1.5">
+                    <div className="w-1 h-1 rounded-full bg-red-400 flex-shrink-0" />
+                    <span className="text-[10.5px] text-red-600">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Botones iOS full-width */}
+            <div className="px-4 pb-6 flex flex-col gap-2.5">
+              <button onClick={confirmarEliminar} disabled={deleteLoading}
+                className="w-full py-4 rounded-[18px] text-[15px] font-black text-white flex items-center justify-center gap-2.5 transition active:scale-[.97] disabled:opacity-60"
+                style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', boxShadow: '0 6px 20px rgba(239,68,68,.4)' }}>
+                {deleteLoading
+                  ? <><Loader2 size={17} className="animate-spin" /> Eliminando...</>
+                  : <><Trash2 size={17} /> Sí, eliminar definitivamente</>}
+              </button>
+              <button onClick={() => setDeleteTarget(null)} disabled={deleteLoading}
+                className="w-full py-4 rounded-[18px] text-[15px] font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition active:scale-[.97] disabled:opacity-50">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── TOAST ── */}
       {toast && (
-        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl text-[12.5px] font-semibold ${
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl text-[12.5px] font-semibold ${
           toast.ok ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'
         }`} style={{ animation: 'slideUpFade .3s ease' }}>
           {toast.ok

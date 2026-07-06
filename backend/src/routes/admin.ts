@@ -749,4 +749,43 @@ router.patch('/bodegas/:id', authMiddleware, soloAdmin, async (req: AuthRequest,
   }
 });
 
+// DELETE /api/admin/bodegas/:id — Eliminar bodega con cascade completo
+router.delete('/bodegas/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Verificar que existe
+    const check = await client.query('SELECT id, nombre FROM bodegas WHERE id = $1', [id]);
+    if (check.rows.length === 0) {
+      await client.query('ROLLBACK');
+      res.status(404).json({ error: 'Bodega no encontrada' });
+      return;
+    }
+    const nombre = check.rows[0].nombre;
+
+    // Cascade manual (sin FK constraints en esta DB)
+    await client.query('DELETE FROM senales_compra       WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM oferta_interes       WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM precios              WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM inventarios          WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM tarifario_servicios  WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM transacciones        WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM infraestructura_contactos WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM ventanillas          WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM bodeguero_bodegas    WHERE bodega_id = $1', [id]);
+    await client.query('DELETE FROM bodegas              WHERE id = $1', [id]);
+
+    await client.query('COMMIT');
+    res.json({ ok: true, message: `Bodega "${nombre}" eliminada correctamente` });
+  } catch (error: any) {
+    await client.query('ROLLBACK');
+    console.error('Error al eliminar bodega (admin):', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;
