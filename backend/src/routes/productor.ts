@@ -1607,28 +1607,10 @@ router.delete('/push/cancelar', authMiddleware, async (req: AuthRequest, res: Re
 // RECUPERACIÓN DE NIP — 3 pasos sin email ni SMS
 // ─────────────────────────────────────────────────────────────────
 
-// Mapa en memoria para rate limiting simple: ip → { count, resetAt }
-const nipRateMap = new Map<string, { count: number; resetAt: number }>();
-function checkNipRate(ip: string): boolean {
-  const now = Date.now();
-  const entry = nipRateMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    nipRateMap.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 });
-    return true;
-  }
-  if (entry.count >= 5) return false;
-  entry.count++;
-  return true;
-}
 
 // POST /api/productor/auth/recuperar-nip/verificar-curp
 // Paso 1: ingresa CURP → devuelve teléfono enmascarado + challenge_token
 router.post('/auth/recuperar-nip/verificar-curp', async (req, res): Promise<void> => {
-  const ip = req.ip || 'unknown';
-  if (!checkNipRate(ip)) {
-    res.status(429).json({ error: 'Demasiados intentos. Espera 15 minutos.' });
-    return;
-  }
   try {
     const { curp } = req.body;
     if (!curp || curp.length !== 18) {
@@ -1675,11 +1657,6 @@ router.post('/auth/recuperar-nip/verificar-curp', async (req, res): Promise<void
 // POST /api/productor/auth/recuperar-nip/confirmar-telefono
 // Paso 2: confirma últimos 4 dígitos → devuelve reset_token (15 min)
 router.post('/auth/recuperar-nip/confirmar-telefono', async (req, res): Promise<void> => {
-  const ip = req.ip || 'unknown';
-  if (!checkNipRate(ip)) {
-    res.status(429).json({ error: 'Demasiados intentos. Espera 15 minutos.' });
-    return;
-  }
   try {
     const { challenge_token, ultimos4 } = req.body;
     if (!challenge_token || !ultimos4) {
