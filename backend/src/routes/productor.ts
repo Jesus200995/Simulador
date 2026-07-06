@@ -1639,7 +1639,7 @@ router.post('/auth/recuperar-nip/verificar-curp', async (req, res): Promise<void
     const { rows } = await pool.query(
       `SELECT p.producer_id, p.nombres, p.apellido_paterno,
               u.id AS usuario_id, u.activo,
-              COALESCE(p.telefono, u.telefono) AS telefono
+              COALESCE(p.phone, u.telefono) AS telefono
        FROM producer p
        JOIN usuarios u ON u.id = p.usuario_id
        WHERE UPPER(p.curp) = UPPER($1)`,

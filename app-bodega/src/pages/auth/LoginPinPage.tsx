@@ -174,8 +174,19 @@ export default function LoginPinPage() {
                 </button>
               </div>
 
+              {/* Recuperar NIP */}
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate('/recuperar-nip', { state: { curp } })}
+                  className="text-[13px] text-green-300 font-semibold hover:text-green-200 transition-colors"
+                >
+                  ¿Olvidaste tu NIP? <span className="underline underline-offset-2">Recupéralo aquí</span>
+                </button>
+              </div>
+
               {/* Otras opciones de productor */}
-              <div className="mt-6 sm:mt-7">
+              <div className="mt-5 sm:mt-6">
                 <p className="text-white/40 text-xs text-center mb-2.5">¿No tienes cuenta todavía?</p>
                 <div className="space-y-2.5">
                   <button onClick={() => navigate('/registro-nuevo')}
