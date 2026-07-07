@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search, Download, Eye, MapPin, Calendar, FileText,
   ShieldCheck, Camera, X, ChevronLeft, ChevronRight, Loader2,
@@ -248,11 +249,22 @@ function FotoAviso({ src, className, size = 24 }: { src: string | null; classNam
 
 /* ─── Lightbox de foto ───────────────────────────────────────────── */
 function FotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-8" onClick={onClose}>
+  // Bloquear scroll del body mientras está abierto
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4 sm:p-8"
+      style={{ zIndex: 99999 }}
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
       <div
-        className="relative z-10 w-full max-w-xs sm:max-w-sm md:max-w-md"
+        className="relative w-full max-w-xs sm:max-w-sm md:max-w-md"
+        style={{ zIndex: 100000 }}
         onClick={e => e.stopPropagation()}
       >
         <img
@@ -268,7 +280,8 @@ function FotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
         </button>
         <p className="text-center text-white/60 text-[11px] font-medium mt-3">Verificación biométrica del titular</p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
