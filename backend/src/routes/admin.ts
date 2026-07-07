@@ -841,6 +841,32 @@ router.get('/productor-nip/:producer_id', authMiddleware, soloAdmin, async (req:
   }
 });
 
+// POST /api/admin/asignar-nip/:producer_id
+// Asigna un NIP nuevo permanente a un productor que no tiene pin_texto (cuenta antigua)
+router.post('/asignar-nip/:producer_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { producer_id } = req.params;
+    const { rows } = await pool.query(
+      `SELECT u.id, u.nombre_completo FROM producer p JOIN usuarios u ON u.id = p.usuario_id WHERE p.producer_id = $1`,
+      [producer_id]
+    );
+    if (!rows.length) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    const pin = String(Math.floor(1000 + Math.random() * 9000));
+    const hash = await bcrypt.hash(pin, 12);
+
+    await pool.query(
+      `UPDATE usuarios SET password_hash = $1, pin_texto = $2 WHERE id = $3`,
+      [hash, pin, rows[0].id]
+    );
+
+    res.json({ ok: true, pin });
+  } catch (error) {
+    console.error('Error en asignar-nip:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // POST /api/admin/reset-password/:usuario_id
 // El admin genera un enlace de reset para un usuario de bodega
 router.post('/reset-password/:usuario_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {

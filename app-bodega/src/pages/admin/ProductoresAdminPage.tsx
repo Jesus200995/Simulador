@@ -109,7 +109,7 @@ function ModalVerProductor({
   }, []);
 
   async function handleVerNip() {
-    if (nipReal !== null) { setNipVisible(v => !v); return; }
+    if (nipReal !== null && nipReal !== '') { setNipVisible(v => !v); return; }
     setNipLoading(true); setNipError('');
     try {
       const res = await fetch(`${BASE}/admin/productor-nip/${prod.id}`, {
@@ -117,7 +117,26 @@ function ModalVerProductor({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al obtener NIP');
-      setNipReal(data.pin ?? '');
+      const pin = data.pin ?? '';
+      setNipReal(pin);
+      if (pin) setNipVisible(true);
+    } catch (e: any) {
+      setNipError(e.message);
+    } finally {
+      setNipLoading(false);
+    }
+  }
+
+  async function handleAsignarNip() {
+    setNipLoading(true); setNipError('');
+    try {
+      const res = await fetch(`${BASE}/admin/asignar-nip/${prod.id}`, {
+        method: 'POST',
+        headers: { ...HDR(), 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al asignar NIP');
+      setNipReal(data.pin);
       setNipVisible(true);
     } catch (e: any) {
       setNipError(e.message);
@@ -245,53 +264,78 @@ function ModalVerProductor({
               <p className="text-[11px] text-red-500 mb-2">{nipError}</p>
             )}
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 flex items-center gap-1">
-                {nipReal && nipVisible ? (
-                  <>
-                    {nipReal.split('').map((d, i) => (
-                      <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-emerald-200 flex items-center justify-center shadow-sm">
-                        <span className="text-[22px] font-black text-emerald-700 tabular-nums">{d}</span>
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {[0,1,2,3].map(i => (
-                      <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-
-              <div className="flex gap-1.5">
-                {nipReal && nipVisible && (
-                  <button
-                    onClick={copiarNip}
-                    className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
-                    title="Copiar NIP"
-                  >
-                    {copiado ? <CheckCheck size={14} className="text-emerald-600" /> : <Copy size={14} className="text-gray-400" />}
-                  </button>
-                )}
+            {/* Estado: aún no cargado */}
+            {nipReal === null && (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 flex items-center gap-1">
+                  {[0,1,2,3].map(i => (
+                    <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center">
+                      <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                    </div>
+                  ))}
+                </div>
                 <button
                   onClick={handleVerNip}
                   disabled={nipLoading}
                   className="h-9 px-3 rounded-xl bg-white border border-gray-200 flex items-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition-colors text-[11px] font-bold text-gray-500 hover:text-emerald-700 disabled:opacity-50"
                 >
-                  {nipLoading
-                    ? <Loader2 size={13} className="animate-spin" />
-                    : nipVisible ? <EyeOff size={13} /> : <Eye size={13} />
-                  }
-                  {nipLoading ? 'Cargando…' : nipReal !== null ? (nipVisible ? 'Ocultar' : 'Mostrar') : 'Ver NIP'}
+                  {nipLoading ? <Loader2 size={13} className="animate-spin" /> : <Eye size={13} />}
+                  {nipLoading ? 'Cargando…' : 'Ver NIP'}
                 </button>
               </div>
-            </div>
+            )}
 
+            {/* Estado: sin pin_texto — cuenta antigua */}
             {nipReal === '' && (
-              <p className="text-[10px] text-gray-400 mt-2 italic">NIP no disponible — cuenta anterior al sistema.</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] text-gray-400 leading-snug">
+                  NIP no recuperable.<br />
+                  <span className="text-gray-300">Asigna uno nuevo para verlo aquí.</span>
+                </p>
+                <button
+                  onClick={handleAsignarNip}
+                  disabled={nipLoading}
+                  className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.97] flex items-center gap-1.5 text-white text-[11px] font-bold transition-all disabled:opacity-50 flex-shrink-0"
+                >
+                  {nipLoading ? <Loader2 size={13} className="animate-spin" /> : <KeyRound size={13} />}
+                  {nipLoading ? 'Asignando…' : 'Asignar NIP'}
+                </button>
+              </div>
+            )}
+
+            {/* Estado: NIP cargado */}
+            {nipReal !== null && nipReal !== '' && (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 flex items-center gap-1">
+                  {nipVisible ? (
+                    nipReal.split('').map((d, i) => (
+                      <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-emerald-200 flex items-center justify-center shadow-sm">
+                        <span className="text-[22px] font-black text-emerald-700 tabular-nums">{d}</span>
+                      </div>
+                    ))
+                  ) : (
+                    [0,1,2,3].map(i => (
+                      <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="flex gap-1.5">
+                  {nipVisible && (
+                    <button onClick={copiarNip} className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-200 transition-colors" title="Copiar NIP">
+                      {copiado ? <CheckCheck size={14} className="text-emerald-600" /> : <Copy size={14} className="text-gray-400" />}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setNipVisible(v => !v)}
+                    className="h-9 px-3 rounded-xl bg-white border border-gray-200 flex items-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition-colors text-[11px] font-bold text-gray-500 hover:text-emerald-700"
+                  >
+                    {nipVisible ? <EyeOff size={13} /> : <Eye size={13} />}
+                    {nipVisible ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
