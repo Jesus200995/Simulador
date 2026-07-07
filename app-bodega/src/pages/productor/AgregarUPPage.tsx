@@ -167,9 +167,9 @@ export default function AgregarUPPage() {
   if (paso === 'mapa') {
     return (
       <div
-        className="fixed inset-0 flex flex-col overflow-hidden bg-[#0c2e1a]"
+        className="fixed left-0 right-0 bottom-0 flex flex-col overflow-hidden bg-[#0c2e1a]"
         style={{
-          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 64px)',
+          top: 'calc(env(safe-area-inset-top, 0px) + 64px)',
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 62px)',
         }}
       >
