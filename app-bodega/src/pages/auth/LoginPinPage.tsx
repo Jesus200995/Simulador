@@ -118,10 +118,38 @@ export default function LoginPinPage() {
 
       {/* Main content */}
       <div className="relative flex-1 flex flex-col items-center justify-center px-5 sm:px-8 pb-8">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm lg:max-w-5xl lg:flex lg:flex-row lg:items-center lg:gap-20">
 
-          {/* Icon */}
-          <div className="flex justify-center mb-6 sm:mb-8">
+          {/* Panel izquierdo — solo desktop */}
+          <div className="hidden lg:flex flex-col flex-1 px-6">
+            <div className="w-20 h-20 bg-[#1A5C38] rounded-[24px] flex items-center justify-center shadow-2xl shadow-green-900/50 mb-8">
+              <Wheat size={36} className="text-white" />
+            </div>
+            <h2 className="text-4xl font-bold text-white leading-tight mb-4 tracking-tight">
+              Acceso para<br />Productores
+            </h2>
+            <p className="text-white/50 text-lg leading-relaxed mb-8">
+              Ingresa tu CURP y tu NIP de 4 dígitos para acceder a tu cuenta en el Sistema SIMAC.
+            </p>
+            <div className="space-y-4">
+              {[
+                { icon: '🌾', text: 'Gestiona tus unidades de producción' },
+                { icon: '📍', text: 'Registra tus parcelas con geolocalización' },
+                { icon: '📊', text: 'Consulta tus ciclos agrícolas' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 text-white/60">
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-sm">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Panel del formulario */}
+          <div className="flex-1 lg:max-w-sm w-full">
+
+          {/* Icon — oculto en desktop (ya está en panel izquierdo) */}
+          <div className="flex justify-center mb-6 sm:mb-8 lg:hidden">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#1A5C38] rounded-[18px] sm:rounded-[20px] flex items-center justify-center shadow-xl shadow-green-900/40">
               {step === 'curp'
                 ? <Wheat size={24} className="text-white sm:hidden" />
@@ -247,6 +275,7 @@ export default function LoginPinPage() {
               </div>
             </div>
           )}
+          </div>{/* fin panel formulario */}
         </div>
       </div>
 
