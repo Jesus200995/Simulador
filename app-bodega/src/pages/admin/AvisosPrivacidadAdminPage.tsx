@@ -614,7 +614,7 @@ export default function AvisosPrivacidadAdminPage() {
     <>
       {seleccionado && <ModalDetalle aviso={seleccionado} onClose={() => setSeleccionado(null)} />}
 
-      <div className="flex flex-col gap-3 h-full">
+      <div className="flex flex-col gap-3 h-full min-w-0 overflow-x-hidden">
 
         {/* ── Barra de acción ── */}
         <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
@@ -630,17 +630,17 @@ export default function AvisosPrivacidadAdminPage() {
         </div>
 
         {/* ── BARRA DE HERRAMIENTAS ── */}
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-3 flex flex-wrap items-center gap-2">
+        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
 
-          {/* Búsqueda */}
-          <div className="flex items-center gap-2 flex-1 min-w-[180px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+          {/* Fila 1: Búsqueda ocupa todo el ancho en mobile */}
+          <div className="flex items-center gap-2 w-full sm:flex-1 sm:min-w-[160px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
             <Search size={14} className="text-gray-400 flex-shrink-0" />
             <input
               type="text"
               value={busqueda}
               onChange={e => onBusqueda(e.target.value)}
               placeholder="Buscar por nombre, CURP…"
-              className="flex-1 text-[13px] text-gray-700 placeholder-gray-400 bg-transparent outline-none"
+              className="flex-1 min-w-0 text-[13px] text-gray-700 placeholder-gray-400 bg-transparent outline-none"
             />
             {cargando
               ? <Loader2 size={13} className="text-emerald-500 animate-spin flex-shrink-0" />
@@ -648,114 +648,116 @@ export default function AvisosPrivacidadAdminPage() {
             }
           </div>
 
-          {/* Filtros */}
-          <div className="relative">
-            <button
-              onClick={() => setFiltrosOpen(o => !o)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all ${
-                hayFiltros
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <Filter size={13} />
-              Filtros
-              {hayFiltros && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center font-black">
-                {[filtros.conFoto, filtros.conGPS, !!filtros.estado, !!filtros.tipo].filter(Boolean).length}
-              </span>}
-            </button>
+          {/* Fila 2 en mobile: controles en una línea */}
+          <div className="flex items-center gap-2 flex-wrap">
 
-            {filtrosOpen && (
-              <div className="absolute top-full mt-1.5 left-0 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 w-64">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">Filtros activos</p>
-                <div className="space-y-2.5">
-                  {/* Tipo */}
-                  <div>
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Tipo de usuario</label>
-                    <div className="flex gap-1.5">
-                      {[
-                        { val: '',           label: 'Todos' },
-                        { val: 'productor',  label: 'Productor' },
-                        { val: 'bodeguero',  label: 'Bodega / Industria' },
-                      ].map(opt => (
-                        <button
-                          key={opt.val}
-                          onClick={() => setFiltros(f => ({ ...f, tipo: opt.val }))}
-                          className={`flex-1 text-[10px] font-bold px-2 py-1.5 rounded-lg border transition-all ${
-                            filtros.tipo === opt.val
-                              ? 'bg-emerald-600 text-white border-emerald-600'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
-                          }`}
-                        >{opt.label}</button>
-                      ))}
+            {/* Filtros */}
+            <div className="relative">
+              <button
+                onClick={() => setFiltrosOpen(o => !o)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all ${
+                  hayFiltros
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Filter size={13} />
+                <span className="hidden xs:inline sm:inline">Filtros</span>
+                {hayFiltros && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center font-black">
+                  {[filtros.conFoto, filtros.conGPS, !!filtros.estado, !!filtros.tipo].filter(Boolean).length}
+                </span>}
+              </button>
+
+              {filtrosOpen && (
+                <div className="absolute top-full mt-1.5 left-0 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 w-64">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">Filtros activos</p>
+                  <div className="space-y-2.5">
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Tipo de usuario</label>
+                      <div className="flex gap-1.5">
+                        {[
+                          { val: '',           label: 'Todos' },
+                          { val: 'productor',  label: 'Productor' },
+                          { val: 'bodeguero',  label: 'Bodega' },
+                        ].map(opt => (
+                          <button
+                            key={opt.val}
+                            onClick={() => setFiltros(f => ({ ...f, tipo: opt.val }))}
+                            className={`flex-1 text-[10px] font-bold px-2 py-1.5 rounded-lg border transition-all ${
+                              filtros.tipo === opt.val
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                            }`}
+                          >{opt.label}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <FiltroCheck label="Solo con foto biométrica" checked={filtros.conFoto} onChange={v => setFiltros(f => ({ ...f, conFoto: v }))} />
+                    <FiltroCheck label="Solo con GPS" checked={filtros.conGPS} onChange={v => setFiltros(f => ({ ...f, conGPS: v }))} />
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Estado de cuenta</label>
+                      <select
+                        value={filtros.estado}
+                        onChange={e => setFiltros(f => ({ ...f, estado: e.target.value }))}
+                        className="w-full text-[12px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-700 outline-none"
+                      >
+                        <option value="">Todos</option>
+                        <option value="activo">Activo</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="inactivo">Inactivo</option>
+                      </select>
                     </div>
                   </div>
-                  <FiltroCheck label="Solo con foto biométrica" checked={filtros.conFoto} onChange={v => setFiltros(f => ({ ...f, conFoto: v }))} />
-                  <FiltroCheck label="Solo con GPS" checked={filtros.conGPS} onChange={v => setFiltros(f => ({ ...f, conGPS: v }))} />
-                  <div>
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1">Estado de cuenta</label>
-                    <select
-                      value={filtros.estado}
-                      onChange={e => setFiltros(f => ({ ...f, estado: e.target.value }))}
-                      className="w-full text-[12px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-700 outline-none"
+                  {hayFiltros && (
+                    <button
+                      onClick={() => setFiltros({ conFoto: false, conGPS: false, estado: '', tipo: '' })}
+                      className="mt-3 text-[11px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
                     >
-                      <option value="">Todos</option>
-                      <option value="activo">Activo</option>
-                      <option value="pendiente">Pendiente</option>
-                      <option value="inactivo">Inactivo</option>
-                    </select>
-                  </div>
+                      <X size={11} /> Limpiar filtros
+                    </button>
+                  )}
                 </div>
-                {hayFiltros && (
-                  <button
-                    onClick={() => setFiltros({ conFoto: false, conGPS: false, estado: '', tipo: '' })}
-                    className="mt-3 text-[11px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
-                  >
-                    <X size={11} /> Limpiar filtros
-                  </button>
-                )}
-              </div>
+              )}
+            </div>
+
+            {/* Vista toggle */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+              <button onClick={() => setVista('tabla')}
+                className={`p-1.5 rounded-lg transition-all ${vista === 'tabla' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+              ><TableProperties size={15} /></button>
+              <button onClick={() => setVista('cards')}
+                className={`p-1.5 rounded-lg transition-all ${vista === 'cards' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+              ><LayoutGrid size={15} /></button>
+            </div>
+
+            {/* Refresh */}
+            <button
+              onClick={() => cargar(busqueda, pagina, sortKey, sortDir)}
+              className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:text-emerald-600 hover:border-emerald-200 transition-colors flex-shrink-0"
+            ><RefreshCw size={14} /></button>
+
+            <div className="hidden sm:block h-6 w-px bg-gray-200" />
+
+            {/* PDF seleccionados */}
+            {seleccion.size > 0 && (
+              <button
+                onClick={descargarPDFsSeleccion}
+                className="flex items-center gap-1.5 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-[12px] font-bold transition-all active:scale-95 shadow-sm shadow-violet-200"
+              >
+                <FileDown size={13} /> <span className="hidden sm:inline">PDF</span> ({seleccion.size})
+              </button>
             )}
-          </div>
 
-          {/* Vista toggle */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+            {/* CSV */}
             <button
-              onClick={() => setVista('tabla')}
-              className={`p-1.5 rounded-lg transition-all ${vista === 'tabla' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
-            ><TableProperties size={15} /></button>
-            <button
-              onClick={() => setVista('cards')}
-              className={`p-1.5 rounded-lg transition-all ${vista === 'cards' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
-            ><LayoutGrid size={15} /></button>
-          </div>
-
-          {/* Refresh */}
-          <button
-            onClick={() => cargar(busqueda, pagina, sortKey, sortDir)}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
-          ><RefreshCw size={14} /></button>
-
-          {/* Separador */}
-          <div className="h-6 w-px bg-gray-200 hidden sm:block" />
-
-          {/* Acciones de descarga */}
-          {seleccion.size > 0 && (
-            <button
-              onClick={descargarPDFsSeleccion}
-              className="flex items-center gap-1.5 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-[12px] font-bold transition-all active:scale-95 shadow-sm shadow-violet-200"
+              onClick={descargarTodosCSV}
+              disabled={descargando}
+              className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-[12px] font-bold transition-all active:scale-95 disabled:opacity-50"
             >
-              <FileDown size={13} /> PDF ({seleccion.size})
+              {descargando ? <Loader2 size={13} className="animate-spin" /> : <ArrowDownToLine size={13} />}
+              CSV
             </button>
-          )}
-          <button
-            onClick={descargarTodosCSV}
-            disabled={descargando}
-            className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-[12px] font-bold transition-all active:scale-95 disabled:opacity-50"
-          >
-            {descargando ? <Loader2 size={13} className="animate-spin" /> : <ArrowDownToLine size={13} />}
-            CSV
-          </button>
+          </div>
         </div>
 
         {/* ── CONTENIDO PRINCIPAL ── */}
@@ -780,7 +782,7 @@ export default function AvisosPrivacidadAdminPage() {
           ) : vista === 'tabla' ? (
             <>
               {/* Header tabla */}
-              <div className="hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50/60 flex-shrink-0">
+              <div className="hidden sm:grid grid-cols-[auto_minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_auto] gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50/60 flex-shrink-0">
                 <div className="flex items-center">
                   <button onClick={toggleTodos} className="text-gray-400 hover:text-emerald-600 transition-colors">
                     {seleccion.size === avisosVis.length && avisosVis.length > 0
@@ -819,42 +821,45 @@ export default function AvisosPrivacidadAdminPage() {
               </div>
             </>
           ) : (
-            /* Vista cards */
-            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
-              {cargando
-                ? Array.from({ length: 6 }).map((_, i) => <SkCard key={i} />)
-                : avisosVis.map(a => (
-                  <Card
-                    key={a.id}
-                    aviso={a}
-                    sel={seleccion.has(a.id)}
-                    onToggleSel={() => toggleSel(a.id)}
-                    onVer={() => setSeleccionado(a)}
-                    onPDF={() => generarPDF(a)}
-                  />
-                ))
-              }
+            /* Vista cards — overflow en wrapper, grid en hijo */
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                {cargando
+                  ? Array.from({ length: 6 }).map((_, i) => <SkCard key={i} />)
+                  : avisosVis.map(a => (
+                    <Card
+                      key={a.id}
+                      aviso={a}
+                      sel={seleccion.has(a.id)}
+                      onToggleSel={() => toggleSel(a.id)}
+                      onVer={() => setSeleccionado(a)}
+                      onPDF={() => generarPDF(a)}
+                    />
+                  ))
+                }
+              </div>
             </div>
           )}
 
           {/* Paginación */}
           {totalPags > 1 && (
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0 bg-white">
-              <p className="text-[11px] text-gray-400 font-medium">
-                {(pagina - 1) * POR_PAG + 1}–{Math.min(pagina * POR_PAG, total)} de <span className="font-bold text-gray-600">{total}</span>
+            <div className="px-3 sm:px-4 py-2.5 border-t border-gray-100 flex items-center justify-between gap-2 flex-shrink-0 bg-white min-w-0">
+              <p className="text-[11px] text-gray-400 font-medium flex-shrink-0">
+                <span className="hidden sm:inline">{(pagina - 1) * POR_PAG + 1}–{Math.min(pagina * POR_PAG, total)} de </span>
+                <span className="font-bold text-gray-600">{total}</span>
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button onClick={() => setPagina(1)} disabled={pagina === 1}
-                  className="px-2.5 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">1</button>
+                  className="hidden sm:flex px-2 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">1</button>
                 <button onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={pagina === 1}
                   className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">
                   <ChevronLeft size={13} /></button>
-                <span className="text-[12px] font-black text-gray-700 px-1">{pagina} / {totalPags}</span>
+                <span className="text-[12px] font-black text-gray-700 px-1 whitespace-nowrap">{pagina} / {totalPags}</span>
                 <button onClick={() => setPagina(p => Math.min(totalPags, p + 1))} disabled={pagina === totalPags}
                   className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">
                   <ChevronRight size={13} /></button>
                 <button onClick={() => setPagina(totalPags)} disabled={pagina === totalPags}
-                  className="px-2.5 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">{totalPags}</button>
+                  className="hidden sm:flex px-2 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors">{totalPags}</button>
               </div>
             </div>
           )}
@@ -929,7 +934,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
 
   return (
     <>
-    <div className={`hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3.5 items-center group transition-colors ${sel ? 'bg-emerald-50/60' : 'hover:bg-gray-50/60'}`}>
+    <div className={`hidden sm:grid grid-cols-[auto_minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_auto] gap-2 px-4 py-3.5 items-center group transition-colors ${sel ? 'bg-emerald-50/60' : 'hover:bg-gray-50/60'}`}>
       {/* Checkbox */}
       <button onClick={onToggleSel} className="text-gray-300 hover:text-emerald-500 transition-colors">
         {sel ? <CheckSquare size={15} className="text-emerald-600" /> : <Square size={15} />}
@@ -1025,7 +1030,7 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
   const pct  = completitud(aviso);
 
   return (
-    <div className={`rounded-2xl border p-4 transition-all cursor-default ${sel ? 'border-emerald-300 bg-emerald-50/40 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'}`}>
+    <div className={`rounded-2xl border p-4 transition-all cursor-default min-w-0 overflow-hidden ${sel ? 'border-emerald-300 bg-emerald-50/40 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'}`}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2.5">
           <button onClick={onToggleSel} className="flex-shrink-0 text-gray-300 hover:text-emerald-500 transition-colors">
