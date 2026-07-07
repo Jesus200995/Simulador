@@ -692,12 +692,32 @@ router.get('/avisos-privacidad', authMiddleware, soloAdmin, async (req: AuthRequ
     else unionSQL = `${sqlProd} UNION ALL ${sqlUser}`;
 
     const dataSQL  = `SELECT * FROM (${unionSQL}) t ORDER BY aviso_privacidad_fecha DESC NULLS LAST LIMIT $2 OFFSET $3`;
-    const countSQL = `SELECT COUNT(*) FROM (${unionSQL}) t`;
+    const statsSQL = `
+      SELECT
+        COUNT(*)                                                          AS total,
+        COUNT(*) FILTER (WHERE aviso_privacidad_foto_url IS NOT NULL)    AS con_foto,
+        COUNT(*) FILTER (WHERE aviso_privacidad_lat IS NOT NULL)         AS con_gps,
+        ROUND(AVG(
+          (CASE WHEN aviso_privacidad_aceptado   THEN 1 ELSE 0 END +
+           CASE WHEN aviso_privacidad_fecha  IS NOT NULL THEN 1 ELSE 0 END +
+           CASE WHEN aviso_privacidad_lat    IS NOT NULL THEN 1 ELSE 0 END +
+           CASE WHEN aviso_privacidad_foto_url IS NOT NULL THEN 1 ELSE 0 END)::numeric / 4 * 100
+        ))                                                                AS completitud_media
+      FROM (${unionSQL}) t`;
 
-    const { rows }      = await pool.query(dataSQL,  [like, limite, offset]);
-    const { rows: tot } = await pool.query(countSQL, [like]);
+    const [{ rows }, { rows: stats }] = await Promise.all([
+      pool.query(dataSQL,  [like, limite, offset]),
+      pool.query(statsSQL, [like]),
+    ]);
 
-    res.json({ avisos: rows, total: parseInt(tot[0].count) });
+    const s = stats[0];
+    res.json({
+      avisos:           rows,
+      total:            parseInt(s.total),
+      con_foto:         parseInt(s.con_foto),
+      con_gps:          parseInt(s.con_gps),
+      completitud_media: parseInt(s.completitud_media ?? '0'),
+    });
   } catch (error) {
     console.error('Error avisos privacidad:', error);
     res.status(500).json({ error: 'Error al obtener avisos de privacidad' });

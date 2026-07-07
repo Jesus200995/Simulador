@@ -504,6 +504,9 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
 export default function AvisosPrivacidadAdminPage() {
   const [avisos,       setAvisos]       = useState<Aviso[]>([]);
   const [total,        setTotal]        = useState(0);
+  const [statsFoto,    setStatsFoto]    = useState(0);
+  const [statsGPS,     setStatsGPS]     = useState(0);
+  const [statsComp,    setStatsComp]    = useState(0);
   const [cargando,     setCargando]     = useState(true);
   const [error,        setError]        = useState<string | null>(null);
   const [busqueda,     setBusqueda]     = useState('');
@@ -530,6 +533,9 @@ export default function AvisosPrivacidadAdminPage() {
       const data = await res.json();
       setAvisos(data.avisos);
       setTotal(data.total);
+      setStatsFoto(data.con_foto ?? 0);
+      setStatsGPS(data.con_gps ?? 0);
+      setStatsComp(data.completitud_media ?? 0);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -599,10 +605,8 @@ export default function AvisosPrivacidadAdminPage() {
     }
   };
 
-  const totalPags    = Math.ceil(total / POR_PAG);
-  const conFotoTotal = avisos.filter(a => a.aviso_privacidad_foto_url).length;
-  const conGPSTotal  = avisos.filter(a => a.aviso_privacidad_lat).length;
-  const hayFiltros   = filtros.conFoto || filtros.conGPS || !!filtros.estado || !!filtros.tipo;
+  const totalPags  = Math.ceil(total / POR_PAG);
+  const hayFiltros = filtros.conFoto || filtros.conGPS || !!filtros.estado || !!filtros.tipo;
 
   return (
     <>
@@ -618,15 +622,9 @@ export default function AvisosPrivacidadAdminPage() {
         {/* ── MÉTRICAS ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Metric icon={<ShieldCheck size={18} />} label="Total aceptados" val={total} color="emerald" />
-          <Metric icon={<Fingerprint size={18} />} label="Con biométrico" val={conFotoTotal} of={avisos.length} color="violet" />
-          <Metric icon={<Globe size={18} />} label="Con GPS" val={conGPSTotal} of={avisos.length} color="blue" />
-          <Metric
-            icon={<CheckCircle2 size={18} />}
-            label="Completitud media"
-            val={avisos.length ? Math.round(avisos.reduce((s, a) => s + completitud(a), 0) / avisos.length) : 0}
-            suffix="%"
-            color="amber"
-          />
+          <Metric icon={<Fingerprint size={18} />} label="Con biométrico" val={statsFoto} of={total} color="violet" />
+          <Metric icon={<Globe size={18} />} label="Con GPS" val={statsGPS} of={total} color="blue" />
+          <Metric icon={<CheckCircle2 size={18} />} label="Completitud media" val={statsComp} suffix="%" color="amber" />
         </div>
 
         {/* ── BARRA DE HERRAMIENTAS ── */}
