@@ -1004,16 +1004,25 @@ router.get('/usuarios-bodega', authMiddleware, soloAdmin, async (req: AuthReques
       SELECT
         u.id, u.nombre_completo, u.email, u.telefono, u.rol,
         u.activo, u.created_at,
-        b.id        AS bodega_id,
-        b.nombre    AS bodega_nombre,
-        b.estado    AS bodega_estado,
-        b.municipio AS bodega_municipio,
-        b.estatus   AS bodega_estatus
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'bodega_id',       b.id,
+              'bodega_nombre',   b.nombre,
+              'bodega_estado',   b.estado,
+              'bodega_municipio',b.municipio,
+              'bodega_estatus',  b.estatus,
+              'asociacion_estatus', bb.estatus
+            ) ORDER BY b.nombre
+          ) FILTER (WHERE b.id IS NOT NULL),
+          '[]'
+        ) AS bodegas
       FROM usuarios u
       LEFT JOIN bodeguero_bodegas bb ON bb.usuario_id = u.id
       LEFT JOIN bodegas b ON b.id = bb.bodega_id
       WHERE u.rol IN ('bodeguero','bodega','industria','admin')
         AND ($1 = '%%' OR u.nombre_completo ILIKE $1 OR u.email ILIKE $1 OR u.telefono ILIKE $1)
+      GROUP BY u.id, u.nombre_completo, u.email, u.telefono, u.rol, u.activo, u.created_at
       ORDER BY u.created_at DESC
     `, [like]);
     res.json({ usuarios: rows, total: rows.length });
