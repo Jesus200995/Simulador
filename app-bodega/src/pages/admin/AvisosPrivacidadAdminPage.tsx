@@ -246,6 +246,72 @@ function FotoAviso({ src, className, size = 24 }: { src: string | null; classNam
   return <img src={src} alt="Verificación" className={className} onError={() => setErr(true)} />;
 }
 
+/* ─── Lightbox de foto ───────────────────────────────────────────── */
+function FotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-8" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+      <div
+        className="relative z-10 w-full max-w-xs sm:max-w-sm md:max-w-md"
+        onClick={e => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt="Verificación biométrica"
+          className="w-full aspect-square object-cover rounded-3xl shadow-2xl"
+        />
+        <button
+          onClick={onClose}
+          className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+        >
+          <X size={16} className="text-gray-700" />
+        </button>
+        <p className="text-center text-white/60 text-[11px] font-medium mt-3">Verificación biométrica del titular</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Miniatura circular con lightbox ───────────────────────────── */
+function FotoThumb({ src, size, thumbSize }: { src: string | null; size: number; thumbSize: string }) {
+  const [open, setOpen] = useState(false);
+  const hasPhoto = !!src;
+  return (
+    <>
+      <button
+        onClick={e => { e.stopPropagation(); if (hasPhoto) setOpen(true); }}
+        className={`${thumbSize} rounded-full overflow-hidden flex-shrink-0 bg-gray-100 border-2 flex items-center justify-center transition-all
+          ${hasPhoto ? 'border-gray-200 cursor-pointer hover:border-emerald-400 hover:scale-105 active:scale-95' : 'border-gray-100 cursor-default'}`}
+      >
+        <FotoAviso src={src} className="w-full h-full object-cover" size={size} />
+      </button>
+      {open && src && <FotoLightbox src={src} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+/* ─── Foto expandida rectangular con lightbox ───────────────────── */
+function FotoExpandida({ src }: { src: string | null }) {
+  const [open, setOpen] = useState(false);
+  if (!src) return null;
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full block cursor-zoom-in group relative overflow-hidden"
+      >
+        <img src={src} alt="Verificación biométrica" className="w-full object-cover max-h-72 group-hover:scale-[1.02] transition-transform duration-300" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-2">
+            <Eye size={18} className="text-white" />
+          </div>
+        </div>
+      </button>
+      {open && <FotoLightbox src={src} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
 /* ─── Modal detalle ──────────────────────────────────────────────── */
 function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void }) {
   const foto   = fotoURL(aviso.aviso_privacidad_foto_url);
@@ -303,9 +369,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
 
           {/* Foto */}
           <div className="flex gap-4">
-            <div className="w-28 h-28 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
-              <FotoAviso src={foto} className="w-full h-full object-cover" size={24} />
-            </div>
+            <FotoThumb src={foto} size={24} thumbSize="w-28 h-28" />
             <div className="flex-1 min-w-0 space-y-2 pt-1">
               <div className="flex flex-wrap gap-1.5">
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${
@@ -347,7 +411,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
                 <Fingerprint size={12} className="text-gray-400" />
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Verificación biométrica del titular</p>
               </div>
-              <FotoAviso src={foto} className="w-full object-cover max-h-72" size={48} />
+              <FotoExpandida src={foto} />
             </div>
           )}
 
@@ -817,9 +881,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
 
       {/* Productor */}
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 flex items-center justify-center">
-          <FotoAviso src={foto} className="w-full h-full object-cover" size={13} />
-        </div>
+        <FotoThumb src={foto} size={13} thumbSize="w-8 h-8" />
         <div className="min-w-0">
           <p className="text-[13px] font-bold text-gray-900 truncate">{nomb}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -886,9 +948,7 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
           <button onClick={onToggleSel} className="flex-shrink-0 text-gray-300 hover:text-emerald-500 transition-colors">
             {sel ? <CheckSquare size={15} className="text-emerald-600" /> : <Square size={15} />}
           </button>
-          <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
-            <FotoAviso src={foto} className="w-full h-full object-cover" size={16} />
-          </div>
+          <FotoThumb src={foto} size={16} thumbSize="w-10 h-10" />
           <div className="min-w-0">
             <p className="text-[13px] font-bold text-gray-900 leading-tight truncate">{nomb}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -959,7 +1019,7 @@ function SkRow() {
     <div className="hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3.5 items-center animate-pulse">
       <div className="w-4 h-4 bg-gray-100 rounded" />
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 bg-gray-100 rounded-xl flex-shrink-0" />
+        <div className="w-8 h-8 bg-gray-100 rounded-full flex-shrink-0" />
         <div className="space-y-1.5 flex-1"><div className="h-3 bg-gray-100 rounded w-3/4" /><div className="h-2 bg-gray-100 rounded w-1/3" /></div>
       </div>
       <div className="h-3 bg-gray-100 rounded w-2/3" />
@@ -975,7 +1035,7 @@ function SkCard() {
   return (
     <div className="rounded-2xl border border-gray-200 p-4 animate-pulse space-y-3">
       <div className="flex gap-2.5">
-        <div className="w-10 h-10 bg-gray-100 rounded-xl flex-shrink-0" />
+        <div className="w-10 h-10 bg-gray-100 rounded-full flex-shrink-0" />
         <div className="flex-1 space-y-1.5"><div className="h-3 bg-gray-100 rounded w-3/4" /><div className="h-2 bg-gray-100 rounded w-1/2" /></div>
       </div>
       <div className="h-2 bg-gray-100 rounded w-2/3" />
