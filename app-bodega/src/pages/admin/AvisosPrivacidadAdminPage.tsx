@@ -1030,39 +1030,41 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
   const pct  = completitud(aviso);
 
   return (
-    <div className={`rounded-2xl border p-4 transition-all cursor-default min-w-0 overflow-hidden ${sel ? 'border-emerald-300 bg-emerald-50/40 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'}`}>
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2.5">
-          <button onClick={onToggleSel} className="flex-shrink-0 text-gray-300 hover:text-emerald-500 transition-colors">
-            {sel ? <CheckSquare size={15} className="text-emerald-600" /> : <Square size={15} />}
-          </button>
-          <FotoThumb src={foto} size={16} thumbSize="w-10 h-10" />
-          <div className="min-w-0">
-            <p className="text-[13px] font-bold text-gray-900 leading-tight truncate">{nomb}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                aviso.tipo === 'productor'
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'bg-blue-50 text-blue-700 border border-blue-200'
-              }`}>{aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}</span>
-              <p className="text-[10px] font-mono text-gray-400">{aviso.curp.slice(0, 10)}…</p>
-            </div>
-          </div>
+    <div className={`rounded-2xl border p-3.5 transition-all cursor-default min-w-0 overflow-hidden ${sel ? 'border-emerald-300 bg-emerald-50/40 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'}`}>
+      {/* Fila 1: checkbox + foto + nombre */}
+      <div className="flex items-start gap-2 mb-2">
+        <button onClick={onToggleSel} className="flex-shrink-0 text-gray-300 hover:text-emerald-500 transition-colors mt-0.5">
+          {sel ? <CheckSquare size={14} className="text-emerald-600" /> : <Square size={14} />}
+        </button>
+        <FotoThumb src={foto} size={15} thumbSize="w-9 h-9" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-bold text-gray-900 leading-snug break-words">{nomb}</p>
+          <p className="text-[9px] font-mono text-gray-400 mt-0.5 truncate">{aviso.curp.slice(0, 14)}…</p>
         </div>
-        <span className={`flex-shrink-0 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+      </div>
+
+      {/* Fila 2: tipo + estado en la misma línea */}
+      <div className="flex items-center gap-1.5 mb-2.5 flex-wrap">
+        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0 ${
+          aviso.tipo === 'productor'
+            ? 'bg-green-50 text-green-700 border-green-200'
+            : 'bg-blue-50 text-blue-700 border-blue-200'
+        }`}>{aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}</span>
+        <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0 ${
           aviso.estado_validacion === 'activo'
             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
             : 'bg-amber-50 text-amber-700 border-amber-200'
         }`}>
-          <span className={`w-1 h-1 rounded-full ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          <span className={`w-1 h-1 rounded-full flex-shrink-0 ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
           {aviso.estado_validacion.charAt(0).toUpperCase() + aviso.estado_validacion.slice(1)}
         </span>
       </div>
 
-      <div className="flex items-center gap-2 text-[10px] text-gray-500 mb-3">
-        <Calendar size={11} />
-        <span>{fmt(aviso.aviso_privacidad_fecha, true)}</span>
-        <span className="ml-auto flex items-center gap-1">
+      {/* Fecha + iconos GPS/foto */}
+      <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-2.5 min-w-0">
+        <Calendar size={10} className="flex-shrink-0" />
+        <span className="truncate">{fmt(aviso.aviso_privacidad_fecha, true)}</span>
+        <span className="ml-auto flex items-center gap-1 flex-shrink-0">
           {aviso.aviso_privacidad_lat && <MapPin size={10} className="text-emerald-500" />}
           {aviso.aviso_privacidad_foto_url && <Camera size={10} className="text-violet-500" />}
         </span>
@@ -1080,11 +1082,11 @@ function Card({ aviso, sel, onToggleSel, onVer, onPDF }: {
       </div>
 
       <div className="flex gap-2">
-        <button onClick={onVer} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-[12px] font-bold border border-gray-200 hover:border-emerald-200 transition-all">
-          <Eye size={13} /> Ver
+        <button onClick={onVer} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-[11px] font-bold border border-gray-200 hover:border-emerald-200 transition-all">
+          <Eye size={12} /> Ver
         </button>
-        <button onClick={onPDF} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-700 text-gray-600 text-[12px] font-bold border border-gray-200 hover:border-blue-200 transition-all">
-          <Download size={13} /> PDF
+        <button onClick={onPDF} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-700 text-gray-600 text-[11px] font-bold border border-gray-200 hover:border-blue-200 transition-all">
+          <Download size={12} /> PDF
         </button>
       </div>
     </div>
