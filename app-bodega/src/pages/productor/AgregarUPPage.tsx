@@ -217,7 +217,10 @@ export default function AgregarUPPage() {
 
           {/* Buscador — solo cuando no hay pendingUP */}
           {!pendingUP && (
-            <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+            <div
+              className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto"
+              onClick={e => e.stopPropagation()}
+            >
               <NominatimSearch
                 placeholder="Buscar dirección, localidad o coordenadas GPS…"
                 onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
@@ -227,7 +230,10 @@ export default function AgregarUPPage() {
 
           {/* Panel de confirmación */}
           {pendingUP ? (
-            <div className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in">
+            <div
+              className="absolute bottom-0 left-0 right-0 z-[1000] animate-auth-in"
+              onClick={e => e.stopPropagation()}
+            >
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
               <div className="relative bg-[#0c2e1a]/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10 px-4 pt-4 pb-6 shadow-2xl">
                 <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
@@ -336,7 +342,10 @@ export default function AgregarUPPage() {
             </div>
           ) : (
             /* Controles de dibujo */
-            <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in">
+            <div
+              className="absolute bottom-4 left-4 right-4 z-[1000] max-w-md mx-auto space-y-2.5 animate-auth-in"
+              onClick={e => e.stopPropagation()}
+            >
               {errorOverlap && (
                 <div className="bg-red-500/20 ring-1 ring-red-400/40 backdrop-blur-md rounded-xl p-3">
                   <p className="text-red-200 text-sm font-bold flex items-center gap-1.5">
@@ -434,9 +443,10 @@ export default function AgregarUPPage() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
-      // Empuja el contenido debajo del AppHeader del LayoutProductor (h-16 = 64px + safe-area)
-      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 64px)' }}
+      className="fixed left-0 right-0 bottom-0 flex flex-col bg-gradient-to-b from-[#061510] via-[#0c2e1a] to-[#1A5C38]"
+      // Empieza justo debajo del AppHeader (h-16=64px + safe-area-inset-top)
+      // Así la barra blanca de SIMAC NO absorbe el color verde del backdrop-blur
+      style={{ top: 'calc(env(safe-area-inset-top, 0px) + 64px)' }}
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_0%,rgba(52,208,121,0.08),transparent)]" />
