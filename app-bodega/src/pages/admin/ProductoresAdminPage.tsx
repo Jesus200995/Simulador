@@ -6,7 +6,7 @@ import {
   AlertTriangle, BarChart3, ChevronLeft, ChevronRight,
   Users, UserX, Clock, Download, Filter, Trash2,
   Phone, Mail, MapPin, Calendar, User, KeyRound, ExternalLink,
-  ShieldCheck, ShieldX, ShieldOff, Loader2, Copy, CheckCheck
+  Loader2, Copy, CheckCheck
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -339,55 +339,14 @@ function ModalVerProductor({
             )}
           </div>
 
-          {/* Acciones */}
-          <div className="pt-1 space-y-2">
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Acciones</p>
-            <div className="grid grid-cols-2 gap-2">
-              {prod.estado_validacion === 'pendiente' && (
-                <>
-                  <button
-                    onClick={() => { onClose(); onAprobar(); }}
-                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.97] text-white text-[13px] font-bold transition-all shadow-sm shadow-emerald-200"
-                  >
-                    <ShieldCheck size={15} /> Aprobar
-                  </button>
-                  <button
-                    onClick={() => { onClose(); onRechazar(); }}
-                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[.97] text-red-600 text-[13px] font-bold transition-all border border-red-200"
-                  >
-                    <ShieldX size={15} /> Rechazar
-                  </button>
-                </>
-              )}
-              {prod.estado_validacion === 'activo' && (
-                <button
-                  onClick={() => { onClose(); onSuspender(); }}
-                  className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-amber-50 hover:bg-amber-100 active:scale-[.97] text-amber-700 text-[13px] font-bold transition-all border border-amber-200"
-                >
-                  <ShieldOff size={15} /> Suspender
-                </button>
-              )}
-              {prod.estado_validacion === 'suspendido' && (
-                <button
-                  onClick={() => { onClose(); onReactivar(); }}
-                  className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-[.97] text-emerald-700 text-[13px] font-bold transition-all border border-emerald-200"
-                >
-                  <ShieldCheck size={15} /> Reactivar
-                </button>
-              )}
-              <button
-                onClick={() => { onClose(); navigate(`/admin/productores/${prod.id}`); }}
-                className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 active:scale-[.97] text-gray-700 text-[13px] font-bold transition-all"
-              >
-                <ExternalLink size={15} /> Ver perfil
-              </button>
-              <button
-                onClick={() => { onClose(); onEliminar(); }}
-                className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[.97] text-red-500 text-[13px] font-bold transition-all border border-red-100"
-              >
-                <Trash2 size={15} /> Eliminar
-              </button>
-            </div>
+          {/* Ver perfil */}
+          <div className="pt-1">
+            <button
+              onClick={() => { onClose(); navigate(`/admin/productores/${prod.id}`); }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 active:scale-[.97] text-gray-700 text-[13px] font-bold transition-all"
+            >
+              <ExternalLink size={15} /> Ver perfil completo
+            </button>
           </div>
         </div>
       </div>

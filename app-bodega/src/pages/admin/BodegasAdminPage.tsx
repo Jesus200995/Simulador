@@ -7,7 +7,7 @@ import {
   Search, Eye, ShieldAlert, RefreshCw, Warehouse, BarChart3, X, CheckCircle,
   Weight, Package, Percent, FileText, LayoutGrid, MapPin, Edit3,
   Phone, Calendar, Building2, Save, Loader2, Table2, Navigation2, Trash2, AlertTriangle,
-  Users, Mail, UserCheck, UserX, Check, ChevronRight
+  Users, Mail
 } from 'lucide-react';
 
 mapboxgl.accessToken = [
@@ -976,6 +976,11 @@ export default function BodegasAdminPage() {
                       title="Ver detalles"
                     ><Eye size={14} /></button>
                     <button
+                      onClick={() => { setEditUsuario({ nombre_completo: u.nombre_completo, email: u.email, telefono: u.telefono, activo: u.activo }); setUsuarioModal(u); setEditUsuErr(''); }}
+                      className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-indigo-50 hover:text-indigo-600 text-gray-400 flex items-center justify-center transition-colors"
+                      title="Editar"
+                    ><Edit3 size={14} /></button>
+                    <button
                       onClick={() => setDeleteUsuario(u)}
                       className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-500 text-gray-400 flex items-center justify-center transition-colors"
                       title="Eliminar"
@@ -1028,103 +1033,46 @@ export default function BodegasAdminPage() {
             {/* Scroll body */}
             <div className="overflow-y-auto flex-1 px-6 pb-6 space-y-3">
 
-              {editUsuario ? (
-                /* ── Modo edición ── */
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Editar información</p>
-                  {[
-                    { label: 'Nombre completo', field: 'nombre_completo', type: 'text' },
-                    { label: 'Correo electrónico', field: 'email', type: 'email' },
-                    { label: 'Teléfono', field: 'telefono', type: 'tel' },
-                  ].map(({ label, field, type }) => (
-                    <div key={field}>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">{label}</label>
-                      <input
-                        type={type}
-                        value={(editUsuario as any)[field] ?? (usuarioModal as any)[field] ?? ''}
-                        onChange={e => setEditUsuario(p => ({ ...p, [field]: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-800 outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition"
-                      />
+              {/* Datos de contacto */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { icon: <Phone size={13} />, label: 'Teléfono', val: usuarioModal.telefono },
+                  { icon: <Mail size={13} />, label: 'Correo', val: usuarioModal.email },
+                  { icon: <Calendar size={13} />, label: 'Registro', val: usuarioModal.created_at ? new Date(usuarioModal.created_at).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' }) : '—' },
+                  { icon: <Users size={13} />, label: 'ID', val: `#${String(usuarioModal.id).padStart(6,'0')}` },
+                ].map(({ icon, label, val }) => (
+                  <div key={label} className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-emerald-500">{icon}</span>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
                     </div>
-                  ))}
-                  {/* Toggle activo */}
-                  <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
-                    <span className="text-[13px] font-semibold text-gray-700">Cuenta activa</span>
-                    <button
-                      onClick={() => setEditUsuario(p => ({ ...p, activo: !(p?.activo ?? usuarioModal.activo) }))}
-                      className={`w-11 h-6 rounded-full transition-all duration-200 flex items-center px-0.5 ${(editUsuario?.activo ?? usuarioModal.activo) ? 'bg-emerald-500 justify-end' : 'bg-gray-300 justify-start'}`}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
-                    </button>
+                    <p className="text-[12px] font-semibold text-gray-800 leading-snug break-all">{val || '—'}</p>
                   </div>
-                  {editUsuErr && <p className="text-[11px] text-red-500 flex items-center gap-1"><AlertTriangle size={11} />{editUsuErr}</p>}
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={() => { setEditUsuario(null); setEditUsuErr(''); }} className="flex-1 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-[13px] font-bold transition-all">Cancelar</button>
-                    <button onClick={guardarUsuario} disabled={editUsuLoad} className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                      {editUsuLoad ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Guardar
-                    </button>
+                ))}
+              </div>
+
+              {/* Bodega asociada */}
+              {usuarioModal.bodega_nombre ? (
+                <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Warehouse size={13} className="text-emerald-500" />
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bodega asociada</p>
                   </div>
+                  <p className="text-[13px] font-bold text-gray-900 leading-snug">{usuarioModal.bodega_nombre}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">{[usuarioModal.bodega_municipio, usuarioModal.bodega_estado].filter(Boolean).join(', ')}</p>
+                  {usuarioModal.bodega_estatus && (
+                    <span className={`mt-1.5 inline-flex text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                      usuarioModal.bodega_estatus === 'aprobada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      usuarioModal.bodega_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-red-50 text-red-600 border-red-200'
+                    }`}>{usuarioModal.bodega_estatus}</span>
+                  )}
                 </div>
               ) : (
-                /* ── Modo vista ── */
-                <>
-                  {/* Datos de contacto */}
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[
-                      { icon: <Phone size={13} />, label: 'Teléfono', val: usuarioModal.telefono },
-                      { icon: <Mail size={13} />, label: 'Correo', val: usuarioModal.email },
-                      { icon: <Calendar size={13} />, label: 'Registro', val: usuarioModal.created_at ? new Date(usuarioModal.created_at).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' }) : '—' },
-                      { icon: <Users size={13} />, label: 'ID', val: `#${String(usuarioModal.id).padStart(6,'0')}` },
-                    ].map(({ icon, label, val }) => (
-                      <div key={label} className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-emerald-500">{icon}</span>
-                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
-                        </div>
-                        <p className="text-[12px] font-semibold text-gray-800 leading-snug break-all">{val || '—'}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Bodega asociada */}
-                  {usuarioModal.bodega_nombre ? (
-                    <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <Warehouse size={13} className="text-emerald-500" />
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bodega asociada</p>
-                      </div>
-                      <p className="text-[13px] font-bold text-gray-900 leading-snug">{usuarioModal.bodega_nombre}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">{[usuarioModal.bodega_municipio, usuarioModal.bodega_estado].filter(Boolean).join(', ')}</p>
-                      {usuarioModal.bodega_estatus && (
-                        <span className={`mt-1.5 inline-flex text-[9px] font-bold px-2 py-0.5 rounded-full border ${
-                          usuarioModal.bodega_estatus === 'aprobada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                          usuarioModal.bodega_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                          'bg-red-50 text-red-600 border-red-200'
-                        }`}>{usuarioModal.bodega_estatus}</span>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 rounded-2xl p-3.5 border border-dashed border-gray-200 flex items-center gap-2">
-                      <Warehouse size={13} className="text-gray-300" />
-                      <p className="text-[12px] text-gray-400 italic">Sin bodega asociada</p>
-                    </div>
-                  )}
-
-                  {/* Acciones */}
-                  <div className="pt-1 space-y-2">
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Acciones</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setEditUsuario({ nombre_completo: usuarioModal.nombre_completo, email: usuarioModal.email, telefono: usuarioModal.telefono, activo: usuarioModal.activo })}
-                        className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.97] text-white text-[13px] font-bold transition-all"
-                      ><Edit3 size={14} /> Editar</button>
-                      <button
-                        onClick={() => setDeleteUsuario(usuarioModal)}
-                        className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[.97] text-red-600 text-[13px] font-bold transition-all border border-red-200"
-                      ><Trash2 size={14} /> Eliminar</button>
-                    </div>
-                  </div>
-                </>
+                <div className="bg-gray-50 rounded-2xl p-3.5 border border-dashed border-gray-200 flex items-center gap-2">
+                  <Warehouse size={13} className="text-gray-300" />
+                  <p className="text-[12px] text-gray-400 italic">Sin bodega asociada</p>
+                </div>
               )}
             </div>
           </div>
@@ -1245,21 +1193,11 @@ export default function BodegasAdminPage() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-6 pt-4 border-t border-gray-100 flex-shrink-0 flex flex-col gap-2.5">
-              <div className="flex gap-2.5">
-                <button onClick={() => { setDetalleTarget(null); navigate(`/admin/bodegas/${detalleTarget.id}`); }}
-                  className="flex-1 py-3 rounded-[14px] text-[14px] font-semibold text-white transition active:scale-[.98]"
-                  style={{ background: 'linear-gradient(135deg,#1A5C38,#15482d)', boxShadow:'0 4px 14px rgba(26,92,56,.3)' }}>
-                  Abrir ficha completa →
-                </button>
-                <button onClick={() => { setDetalleTarget(null); abrirEditar(detalleTarget); }}
-                  className="px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition active:scale-[.98] flex items-center gap-1.5">
-                  <Edit3 size={14} /> Editar
-                </button>
-              </div>
-              <button onClick={() => setDeleteTarget(detalleTarget)}
-                className="w-full py-3 rounded-[14px] text-[14px] font-semibold text-red-500 bg-red-50 hover:bg-red-100 border border-red-100 transition active:scale-[.98] flex items-center justify-center gap-2">
-                <Trash2 size={14} /> Eliminar bodega
+            <div className="px-6 pb-6 pt-4 border-t border-gray-100 flex-shrink-0">
+              <button onClick={() => { setDetalleTarget(null); navigate(`/admin/bodegas/${detalleTarget.id}`); }}
+                className="w-full py-3 rounded-[14px] text-[14px] font-semibold text-white transition active:scale-[.98]"
+                style={{ background: 'linear-gradient(135deg,#1A5C38,#15482d)', boxShadow:'0 4px 14px rgba(26,92,56,.3)' }}>
+                Abrir ficha completa →
               </button>
             </div>
           </div>
