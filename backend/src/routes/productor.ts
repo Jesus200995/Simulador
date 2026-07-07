@@ -1213,6 +1213,49 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
   }
 });
 
+// PATCH /api/productor/perfil/ubicacion
+router.patch('/perfil/ubicacion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const usuarioId = req.user!.userId;
+    const { state_name, municipality_name } = req.body;
+
+    if (!state_name?.trim() || !municipality_name?.trim()) {
+      res.status(400).json({ error: 'Estado y municipio son obligatorios' });
+      return;
+    }
+
+    const producerId = await getProducerId(usuarioId);
+    if (!producerId) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+
+    const result = await pool.query(
+      `UPDATE up
+       SET state_name                = $1,
+           municipality_name         = $2,
+           location_confirmed        = TRUE,
+           domicilio_actualizado_en  = NOW(),
+           domicilio_actualizado_por = 'productor'
+       WHERE up_id = (
+         SELECT up_id FROM up
+         WHERE producer_id = $3
+         ORDER BY created_at DESC
+         LIMIT 1
+       )
+       RETURNING up_id, state_name, municipality_name, domicilio_actualizado_en`,
+      [state_name.trim(), municipality_name.trim(), producerId]
+    );
+
+    if (!result.rows.length) {
+      res.status(404).json({ error: 'No se encontró una parcela asociada al productor' });
+      return;
+    }
+
+    res.json({ ok: true, ubicacion: result.rows[0], mensaje: 'Ubicación actualizada correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar ubicación del productor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // GET /api/productor/perfil
 router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {

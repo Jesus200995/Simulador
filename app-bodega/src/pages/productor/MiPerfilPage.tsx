@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Edit2, MapPin, LogOut, CalendarCheck, ChevronRight,
   Sprout, Trash2, Plus, Phone, Mail, Check, X, Leaf,
-  ClipboardList, Award, CircleDot, Bell,
+  ClipboardList, CircleDot, Bell, Pencil,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import ProfileHero from '../../components/ProfileHero';
@@ -58,6 +58,17 @@ export default function MiPerfilPage() {
   const [savedTel, setSavedTel]     = useState(false);
   const [savedCorreo, setSavedCorreo] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
+
+  // Edición de ubicación (estado/municipio)
+  const [editandoUbicacion, setEditandoUbicacion]           = useState(false);
+  const [estadoEditable, setEstadoEditable]                 = useState('');
+  const [estadoIdEditable, setEstadoIdEditable]             = useState('');
+  const [municipioEditable, setMunicipioEditable]           = useState('');
+  const [municipiosDisponibles, setMunicipiosDisponibles]   = useState<{municipality_id: string, name: string}[]>([]);
+  const [guardandoUbicacion, setGuardandoUbicacion]         = useState(false);
+  const [errorUbicacion, setErrorUbicacion]                 = useState<string | null>(null);
+  const [exitoUbicacion, setExitoUbicacion]                 = useState(false);
+  const [estados, setEstados]                               = useState<{state_id: string, name: string}[]>([]);
 
   const eliminarParcela = async (upId: number) => {
     setEliminando(upId); setDelError('');
@@ -117,6 +128,49 @@ export default function MiPerfilPage() {
 
   const togglePrograma = (clave: string) =>
     setProgramas(prev => prev.includes(clave) ? prev.filter(p => p !== clave) : [...prev, clave]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('simac_token');
+    fetch(`${BASE}/auth/states`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setEstados(d.states ?? d ?? []))
+      .catch(() => {});
+  }, []);
+
+  const handleEstadoChange = async (stateId: string, stateName: string) => {
+    setEstadoIdEditable(stateId);
+    setEstadoEditable(stateName);
+    setMunicipioEditable('');
+    setMunicipiosDisponibles([]);
+    if (!stateId) return;
+    const token = localStorage.getItem('simac_token');
+    try {
+      const res = await fetch(`${BASE}/auth/municipalities?state_id=${stateId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      setMunicipiosDisponibles(data.municipalities ?? data ?? []);
+    } catch { /* ignorar */ }
+  };
+
+  const handleGuardarUbicacion = async () => {
+    if (!estadoEditable || !municipioEditable) return;
+    setGuardandoUbicacion(true);
+    setErrorUbicacion(null);
+    setExitoUbicacion(false);
+    const token = localStorage.getItem('simac_token');
+    try {
+      const res = await fetch(`${BASE}/productor/perfil/ubicacion`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ state_name: estadoEditable, municipality_name: municipioEditable }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErrorUbicacion(data.error || 'No se pudo actualizar la ubicación'); return; }
+      setPerfil(prev => prev ? { ...prev, state_name: estadoEditable, municipality_name: municipioEditable } : prev);
+      setExitoUbicacion(true);
+      setTimeout(() => { setEditandoUbicacion(false); setExitoUbicacion(false); }, 1500);
+    } catch { setErrorUbicacion('Error de conexión. Intenta de nuevo.'); }
+    finally { setGuardandoUbicacion(false); }
+  };
 
   if (loading) return (
     <div className="min-h-screen bg-[#eef8f2] flex items-center justify-center">
@@ -240,6 +294,116 @@ export default function MiPerfilPage() {
                   className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center active:scale-95 transition-transform">
                   <X size={15} className="text-slate-400" />
                 </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Ubicación ── */}
+        <div style={delay(2)} className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04] overflow-hidden">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+            <div className="flex items-center gap-2">
+              <MapPin size={15} className="text-[#1A5C38]" />
+              <p className="text-[13px] font-bold text-slate-700">Ubicación</p>
+            </div>
+            {!editandoUbicacion && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditandoUbicacion(true);
+                  setErrorUbicacion(null);
+                  setEstadoEditable(perfil.state_name ?? '');
+                  setEstadoIdEditable('');
+                  setMunicipioEditable(perfil.municipality_name ?? '');
+                  setMunicipiosDisponibles([]);
+                }}
+                className="w-7 h-7 rounded-xl bg-[#eef8f2] flex items-center justify-center active:scale-95 transition-transform">
+                <Pencil size={13} className="text-[#1A5C38]" />
+              </button>
+            )}
+          </div>
+
+          <div className="px-5 pb-4">
+            {!editandoUbicacion ? (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-slate-50 rounded-[10px] px-3 py-2.5">
+                  <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Estado</p>
+                  <p className="text-[13px] font-bold text-slate-700 mt-0.5">{perfil.state_name || '—'}</p>
+                </div>
+                <div className="bg-slate-50 rounded-[10px] px-3 py-2.5">
+                  <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Municipio</p>
+                  <p className="text-[13px] font-bold text-slate-700 mt-0.5">{perfil.municipality_name || '—'}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3" style={{ animation: 'pfPop .25s ease both' }}>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-500 mb-1 block">Estado *</label>
+                  <select
+                    value={estadoIdEditable}
+                    onChange={e => {
+                      const sel = estados.find(s => s.state_id === e.target.value);
+                      if (sel) handleEstadoChange(sel.state_id, sel.name);
+                    }}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[14px] text-slate-700 bg-white focus:outline-none focus:border-[#1A5C38] transition-colors">
+                    <option value="">Selecciona tu estado</option>
+                    {estados.map(e => (
+                      <option key={e.state_id} value={e.state_id}>{e.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[12px] font-bold text-slate-500 mb-1 block">Municipio *</label>
+                  <select
+                    value={municipioEditable}
+                    onChange={e => setMunicipioEditable(e.target.value)}
+                    disabled={!estadoIdEditable || municipiosDisponibles.length === 0}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[14px] text-slate-700 bg-white focus:outline-none focus:border-[#1A5C38] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                    <option value="">
+                      {estadoIdEditable
+                        ? municipiosDisponibles.length === 0 ? 'Cargando municipios…' : 'Selecciona tu municipio'
+                        : 'Primero selecciona el estado'}
+                    </option>
+                    {municipiosDisponibles.map(m => (
+                      <option key={m.municipality_id} value={m.name}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5">
+                  <p className="text-[11px] text-amber-700 leading-relaxed">
+                    Esta información corresponde a tu municipio de residencia. La ubicación de tus parcelas se gestiona desde el módulo de Unidades Productivas.
+                  </p>
+                </div>
+
+                {errorUbicacion && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-2.5">
+                    <p className="text-red-600 text-[12px] font-medium">{errorUbicacion}</p>
+                  </div>
+                )}
+                {exitoUbicacion && (
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5">
+                    <p className="text-emerald-700 text-[12px] font-bold">✓ Ubicación actualizada correctamente</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setEditandoUbicacion(false); setErrorUbicacion(null); setMunicipiosDisponibles([]); }}
+                    disabled={guardandoUbicacion}
+                    className="flex-1 border border-slate-200 text-slate-600 font-medium text-[13px] py-2.5 rounded-xl active:scale-95 transition-all disabled:opacity-40">
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGuardarUbicacion}
+                    disabled={!estadoEditable || !municipioEditable || guardandoUbicacion || exitoUbicacion}
+                    className="flex-1 bg-[#1A5C38] text-white font-bold text-[13px] py-2.5 rounded-xl active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-[#1A5C38]/20">
+                    {guardandoUbicacion ? 'Guardando…' : 'Guardar'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
