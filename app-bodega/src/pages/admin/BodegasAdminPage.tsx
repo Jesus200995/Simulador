@@ -87,6 +87,35 @@ export default function BodegasAdminPage() {
   const [loading, setLoading]   = useState(true);
   const [tab, setTab]           = useState<'bodegas' | 'lista' | 'estadisticas' | 'pendientes' | 'usuarios'>('bodegas');
 
+  // Solicitudes de asociación bodeguero↔bodega
+  interface SolicitudBodega {
+    id: number; estatus: string; fecha_solicitud: string;
+    usuario_id: number; nombre_completo: string; email: string; telefono: string; rol: string;
+    bodega_id: number; bodega_nombre: string; bodega_estado: string; bodega_municipio: string;
+    bodega_estatus: string; capacidad_ton?: number;
+  }
+  const [solicitudes,     setSolicitudes]     = useState<SolicitudBodega[]>([]);
+  const [solicLoad,       setSolicLoad]       = useState(false);
+  const [solicAccionLoad, setSolicAccionLoad] = useState<number | null>(null);
+
+  async function cargarSolicitudes() {
+    setSolicLoad(true);
+    try {
+      const r = await fetch(`${BASE}/admin/solicitudes-bodega`, { headers: HDR() });
+      if (r.ok) setSolicitudes((await r.json()).solicitudes || []);
+    } finally { setSolicLoad(false); }
+  }
+
+  async function procesarSolicitud(id: number, accion: 'aprobar' | 'rechazar') {
+    setSolicAccionLoad(id);
+    try {
+      await fetch(`${BASE}/admin/solicitudes-bodega/${id}/${accion}`, { method: 'PATCH', headers: HDR() });
+      setSolicitudes(s => s.filter(x => x.id !== id));
+      showToast(accion === 'aprobar' ? 'Solicitud aprobada' : 'Solicitud rechazada', accion === 'aprobar');
+    } catch { showToast('Error al procesar solicitud', false); }
+    finally { setSolicAccionLoad(null); }
+  }
+
   // Usuarios bodega
   const [usuarios,       setUsuarios]       = useState<UsuarioBodega[]>([]);
   const [usuariosLoad,   setUsuariosLoad]   = useState(false);
@@ -266,6 +295,7 @@ export default function BodegasAdminPage() {
   useEffect(() => { cargarBodegas(); }, []);
   useEffect(() => { if (tab === 'estadisticas') cargarStats(); }, [tab, bodegas]);
   useEffect(() => { if (tab === 'usuarios') cargarUsuarios(); }, [tab]);
+  useEffect(() => { if (tab === 'pendientes') cargarSolicitudes(); }, [tab]);
 
   /* ─── FILTRADO ─── */
   const filteredList = bodegas.filter(b => {
@@ -545,6 +575,7 @@ export default function BodegasAdminPage() {
 
   const cntAprob   = bodegas.filter(b => b.estatus === 'aprobada').length;
   const cntPend    = bodegas.filter(b => b.estatus === 'pendiente').length;
+  const cntPendTotal = cntPend + solicitudes.length;
 
   return (
     <div className="flex flex-col h-[calc(100vh-88px)] gap-3 overflow-hidden">
@@ -557,7 +588,7 @@ export default function BodegasAdminPage() {
               { key: 'bodegas',      label: 'Bodegas',       icon: <Table2 size={11} />,      badge: bodegas.length },
               { key: 'lista',        label: 'Lista + Mapa',  icon: <Navigation2 size={11} />, badge: null },
               { key: 'estadisticas', label: 'Estadísticas',  icon: <BarChart3 size={11} />,   badge: null },
-              { key: 'pendientes',   label: 'Por aprobar',   icon: <ShieldAlert size={11} />, badge: cntPend },
+              { key: 'pendientes',   label: 'Por aprobar',   icon: <ShieldAlert size={11} />, badge: cntPendTotal || null },
               { key: 'usuarios',     label: 'Usuarios',      icon: <Users size={11} />,       badge: null },
             ] as const).map(({ key, label, icon, badge }) => (
               <button key={key} onClick={() => setTab(key)}
@@ -857,53 +888,140 @@ export default function BodegasAdminPage() {
           TAB: PENDIENTES
       ═══════════════════════════════════════ */}
       {tab === 'pendientes' && (
-        <div className="flex-1 overflow-y-auto">
-          {bodegas.filter(b => b.estatus === 'pendiente').length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-              <ShieldAlert size={40} className="mb-3 opacity-40" />
-              <p className="text-[13px] font-semibold">No hay bodegas pendientes de aprobación</p>
+        <div className="flex-1 overflow-y-auto space-y-5">
+
+          {/* ── Sección 1: Bodegas nuevas por aprobar ── */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Warehouse size={14} className="text-amber-500" />
+              <h3 className="text-[12px] font-black text-gray-700 uppercase tracking-widest">Bodegas nuevas</h3>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                {bodegas.filter(b => b.estatus === 'pendiente').length}
+              </span>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {bodegas.filter(b => b.estatus === 'pendiente').map(b => (
-                <div key={b.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
-                        <Warehouse size={18} />
+            {bodegas.filter(b => b.estatus === 'pendiente').length === 0 ? (
+              <div className="bg-white border border-dashed border-gray-200 rounded-2xl py-10 flex flex-col items-center text-gray-300">
+                <Warehouse size={28} className="mb-2" />
+                <p className="text-[12px] font-semibold">Sin bodegas pendientes</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {bodegas.filter(b => b.estatus === 'pendiente').map(b => (
+                  <div key={b.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
+                          <Warehouse size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-gray-900 text-[13px] leading-tight line-clamp-2">{b.nombre}</h3>
+                          <p className="text-gray-400 text-[10.5px] flex items-center gap-1 mt-0.5">
+                            <MapPin size={9} /> {b.municipio}, {b.estado}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 text-[13px] leading-tight line-clamp-2">{b.nombre}</h3>
-                        <p className="text-gray-400 text-[10.5px] flex items-center gap-1 mt-0.5">
-                          <MapPin size={9} /> {b.municipio}, {b.estado}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-gray-50 rounded-xl p-2.5">
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Capacidad</p>
+                          <p className="text-[14px] font-black text-gray-900">{b.capacidad_total.toLocaleString()} t</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-xl p-2.5">
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Encargado</p>
+                          <p className="text-[11px] font-semibold text-gray-700 line-clamp-1">{b.encargado_nombre || '—'}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                      <button onClick={() => setModalAccion({ tipo: 'aprobar', bodega: b })}
+                        className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white font-bold py-2 rounded-xl text-[12px] transition flex items-center justify-center gap-1.5">
+                        <CheckCircle size={13} /> Aprobar
+                      </button>
+                      <button onClick={() => setModalAccion({ tipo: 'rechazar', bodega: b })}
+                        className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 font-bold py-2 rounded-xl text-[12px] transition flex items-center justify-center gap-1.5">
+                        <X size={13} /> Rechazar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Sección 2: Solicitudes de asociación usuario↔bodega ── */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Users size={14} className="text-blue-500" />
+              <h3 className="text-[12px] font-black text-gray-700 uppercase tracking-widest">Solicitudes de acceso a bodega</h3>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                {solicitudes.length}
+              </span>
+            </div>
+            {solicLoad ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="bg-white border border-gray-100 rounded-2xl p-4 animate-pulse space-y-2">
+                    <div className="h-3 bg-gray-100 rounded w-2/3" />
+                    <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+                    <div className="h-8 bg-gray-100 rounded-xl mt-3" />
+                  </div>
+                ))}
+              </div>
+            ) : solicitudes.length === 0 ? (
+              <div className="bg-white border border-dashed border-gray-200 rounded-2xl py-10 flex flex-col items-center text-gray-300">
+                <Users size={28} className="mb-2" />
+                <p className="text-[12px] font-semibold">Sin solicitudes pendientes</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {solicitudes.map(s => (
+                  <div key={s.id} className="bg-white border border-blue-100 shadow-sm rounded-2xl p-4 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      {/* Usuario solicitante */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-black text-[12px] flex-shrink-0">
+                          {s.nombre_completo.split(' ').slice(0,2).map((w: string) => w[0]).join('').toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-gray-900 text-[13px] truncate">{s.nombre_completo}</p>
+                          <p className="text-[10px] text-gray-400 truncate">{s.email}</p>
+                        </div>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex-shrink-0 capitalize">{s.rol}</span>
+                      </div>
+                      {/* Bodega solicitada */}
+                      <div className="bg-gray-50 rounded-xl p-2.5 border border-gray-100">
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Solicita acceso a</p>
+                        <p className="text-[12px] font-bold text-gray-900 leading-snug">{s.bodega_nombre}</p>
+                        <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-0.5">
+                          <MapPin size={8} /> {s.bodega_municipio}, {s.bodega_estado}
+                          {s.capacidad_ton ? ` · ${Number(s.capacidad_ton).toLocaleString()} t` : ''}
                         </p>
                       </div>
+                      <p className="text-[9px] text-gray-400">
+                        Solicitado: {new Date(s.fecha_solicitud).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' })}
+                      </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-gray-50 rounded-xl p-2.5">
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Capacidad</p>
-                        <p className="text-[14px] font-black text-gray-900">{b.capacidad_total.toLocaleString()} t</p>
-                      </div>
-                      <div className="bg-gray-50 rounded-xl p-2.5">
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">Encargado</p>
-                        <p className="text-[11px] font-semibold text-gray-700 line-clamp-1">{b.encargado_nombre || '—'}</p>
-                      </div>
+                    <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                      <button
+                        onClick={() => procesarSolicitud(s.id, 'aprobar')}
+                        disabled={solicAccionLoad === s.id}
+                        className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white font-bold py-2 rounded-xl text-[12px] transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                      >
+                        {solicAccionLoad === s.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={13} />} Aprobar
+                      </button>
+                      <button
+                        onClick={() => procesarSolicitud(s.id, 'rechazar')}
+                        disabled={solicAccionLoad === s.id}
+                        className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 font-bold py-2 rounded-xl text-[12px] transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                      >
+                        <X size={13} /> Rechazar
+                      </button>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-                    <button onClick={() => setModalAccion({ tipo: 'aprobar', bodega: b })}
-                      className="flex-1 bg-[#1A5C38] hover:bg-[#15482d] text-white font-bold py-2 rounded-xl text-[12px] transition flex items-center justify-center gap-1.5">
-                      <CheckCircle size={13} /> Aprobar
-                    </button>
-                    <button onClick={() => setModalAccion({ tipo: 'rechazar', bodega: b })}
-                      className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 font-bold py-2 rounded-xl text-[12px] transition flex items-center justify-center gap-1.5">
-                      <X size={13} /> Rechazar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
       )}
 

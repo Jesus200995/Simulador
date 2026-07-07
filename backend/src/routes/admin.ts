@@ -275,6 +275,68 @@ router.get('/bodegas-pendientes', authMiddleware, soloAdmin, async (_req: AuthRe
 });
 
 // =============================================
+// GET /api/admin/solicitudes-bodega
+// Solicitudes de asociación bodeguero↔bodega pendientes de aprobación
+// =============================================
+router.get('/solicitudes-bodega', authMiddleware, soloAdmin, async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        bb.id, bb.estatus, bb.fecha_solicitud,
+        u.id          AS usuario_id,
+        u.nombre_completo, u.email, u.telefono, u.rol,
+        b.id          AS bodega_id,
+        b.nombre      AS bodega_nombre,
+        b.estado      AS bodega_estado,
+        b.municipio   AS bodega_municipio,
+        b.estatus     AS bodega_estatus,
+        b.capacidad_ton
+      FROM bodeguero_bodegas bb
+      JOIN usuarios u ON u.id = bb.usuario_id
+      JOIN bodegas  b ON b.id = bb.bodega_id
+      WHERE bb.estatus = 'pendiente'
+      ORDER BY bb.fecha_solicitud DESC
+    `);
+    res.json({ solicitudes: rows, total: rows.length });
+  } catch (error) {
+    console.error('Error solicitudes-bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// PATCH /api/admin/solicitudes-bodega/:id/aprobar
+router.patch('/solicitudes-bodega/:id/aprobar', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    await pool.query(
+      `UPDATE bodeguero_bodegas
+       SET estatus = 'aprobada', fecha_aprobacion = NOW(), aprobado_por = $2
+       WHERE id = $1`,
+      [id, req.user!.userId]
+    );
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error aprobar solicitud:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// PATCH /api/admin/solicitudes-bodega/:id/rechazar
+router.patch('/solicitudes-bodega/:id/rechazar', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    await pool.query(
+      `UPDATE bodeguero_bodegas SET estatus = 'rechazada' WHERE id = $1`,
+      [id]
+    );
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error rechazar solicitud:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
 // POST /api/admin/crear-usuario
 // =============================================
 router.post('/crear-usuario', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
