@@ -1636,8 +1636,8 @@ router.post('/auth/recuperar-nip/verificar-curp', async (req, res): Promise<void
 
     const user = rows[0];
     const tel = (user.telefono || '').replace(/\D/g, '');
-    const telEnmascarado = tel.length >= 4
-      ? '●●●●●●' + tel.slice(-4)
+    const telEnmascarado = tel.length >= 2
+      ? '●● ●●●● ●●' + tel.slice(-2)
       : null;
 
     const secret = process.env.JWT_SECRET!;

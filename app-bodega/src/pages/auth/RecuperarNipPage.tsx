@@ -50,15 +50,16 @@ export default function RecuperarNipPage() {
     finally { setLoading(false); }
   };
 
-  // Paso 2: confirmar últimos 4 dígitos
+  // Paso 2: confirmar teléfono completo (extraemos últimos 4 para el backend)
   const handleConfirmarTelefono = async () => {
-    if (ultimos4.length !== 4) return;
+    const digits = ultimos4.replace(/\D/g, '');
+    if (digits.length !== 10) return;
     setLoading(true); setError('');
     try {
       const res = await fetch(`${BASE}/productor/auth/recuperar-nip/confirmar-telefono`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challenge_token: challengeToken, ultimos4 }),
+        body: JSON.stringify({ challenge_token: challengeToken, ultimos4: digits.slice(-4) }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Los dígitos no coinciden'); return; }
@@ -132,7 +133,7 @@ export default function RecuperarNipPage() {
                 {step === 'curp' ? 'Recuperar NIP' : step === 'telefono' ? 'Verifica tu identidad' : 'Nuevo NIP'}
               </h1>
               <p className="text-white/50 text-base leading-relaxed">
-                {step === 'curp' ? 'Ingresa tu CURP para continuar.' : step === 'telefono' ? 'Ingresa los últimos 4 dígitos del número de teléfono con el que creaste tu cuenta.' : 'Elige un NIP de 4 dígitos para tu cuenta.'}
+                {step === 'curp' ? 'Ingresa tu CURP para continuar.' : step === 'telefono' ? 'Confirma el número de teléfono con el que creaste tu cuenta.' : 'Elige un NIP de 4 dígitos para tu cuenta.'}
               </p>
             </div>
           )}
@@ -191,7 +192,7 @@ export default function RecuperarNipPage() {
                 </div>
                 <h1 className="lg:hidden text-xl font-bold text-white text-center mb-1">Verifica tu identidad</h1>
                 <p className="lg:hidden text-white/50 text-sm text-center mb-4">
-                  Ingresa los últimos 4 dígitos del número de teléfono con el que creaste tu cuenta
+                  Confirma el número de teléfono con el que creaste tu cuenta
                 </p>
 
                 {!telefonoEnmascarado && (
@@ -201,22 +202,35 @@ export default function RecuperarNipPage() {
                   </div>
                 )}
 
+                {telefonoEnmascarado && (
+                  <div className="flex items-center gap-2.5 bg-white/8 ring-1 ring-white/15 rounded-xl px-3.5 py-2.5 mb-4">
+                    <Phone size={14} className="text-green-300 shrink-0" />
+                    <p className="text-white/70 text-sm">
+                      Número registrado:{' '}
+                      <span className="font-mono font-bold text-white">{telefonoEnmascarado}</span>
+                    </p>
+                  </div>
+                )}
+
                 <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 sm:p-5">
                   <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">
-                    Últimos 4 dígitos de tu teléfono
+                    Número de teléfono (10 dígitos)
                   </label>
                   <input
                     type="tel"
                     inputMode="numeric"
                     value={ultimos4}
-                    onChange={e => setUltimos4(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    maxLength={4}
-                    placeholder="• • • •"
-                    autoComplete="off"
-                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 text-2xl font-mono tracking-[0.5em] text-white text-center placeholder-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+                    onChange={e => {
+                      const raw = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setUltimos4(raw);
+                    }}
+                    maxLength={10}
+                    placeholder="55 1234 5678"
+                    autoComplete="tel"
+                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 text-lg font-mono tracking-widest text-white text-center placeholder-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
                   />
                   <p className="mt-2 text-white/35 text-xs text-center">
-                    Ejemplo: si tu número es 55 1234 <span className="text-white/60 font-semibold">5678</span>, ingresa <span className="text-white/60 font-semibold">5678</span>
+                    Ingresa el número completo tal como lo registraste
                   </p>
                   {error && (
                     <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
@@ -225,7 +239,7 @@ export default function RecuperarNipPage() {
                   )}
                   <button
                     onClick={handleConfirmarTelefono}
-                    disabled={ultimos4.length !== 4 || loading}
+                    disabled={ultimos4.replace(/\D/g, '').length !== 10 || loading}
                     className="mt-4 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                   >
                     {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Verificar'}
