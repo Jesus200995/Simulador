@@ -928,6 +928,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
   const hasGPS = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng;
 
   return (
+    <>
     <div className={`hidden sm:grid grid-cols-[auto_2fr_1.4fr_0.8fr_0.8fr_0.8fr_auto] gap-2 px-4 py-3.5 items-center group transition-colors ${sel ? 'bg-emerald-50/60' : 'hover:bg-gray-50/60'}`}>
       {/* Checkbox */}
       <button onClick={onToggleSel} className="text-gray-300 hover:text-emerald-500 transition-colors">
@@ -1012,6 +1013,7 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
         <ChevronRight size={14} className="text-gray-300" />
       </div>
     </div>
+    </>
   );
 }
 
