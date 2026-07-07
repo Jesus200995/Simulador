@@ -504,6 +504,7 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
 export default function AvisosPrivacidadAdminPage() {
   const [avisos,       setAvisos]       = useState<Aviso[]>([]);
   const [total,        setTotal]        = useState(0);
+  const [totalGlobal,  setTotalGlobal]  = useState(0);
   const [statsFoto,    setStatsFoto]    = useState(0);
   const [statsGPS,     setStatsGPS]     = useState(0);
   const [statsComp,    setStatsComp]    = useState(0);
@@ -533,6 +534,7 @@ export default function AvisosPrivacidadAdminPage() {
       const data = await res.json();
       setAvisos(data.avisos);
       setTotal(data.total);
+      setTotalGlobal(data.total_global ?? data.total);
       setStatsFoto(data.con_foto ?? 0);
       setStatsGPS(data.con_gps ?? 0);
       setStatsComp(data.completitud_media ?? 0);
@@ -621,9 +623,9 @@ export default function AvisosPrivacidadAdminPage() {
 
         {/* ── MÉTRICAS ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Metric icon={<ShieldCheck size={18} />} label="Total aceptados" val={total} color="emerald" />
-          <Metric icon={<Fingerprint size={18} />} label="Con biométrico" val={statsFoto} of={total} color="violet" />
-          <Metric icon={<Globe size={18} />} label="Con GPS" val={statsGPS} of={total} color="blue" />
+          <Metric icon={<ShieldCheck size={18} />} label="Total aceptados" val={totalGlobal} color="emerald" />
+          <Metric icon={<Fingerprint size={18} />} label="Con biométrico" val={statsFoto} of={totalGlobal} color="violet" />
+          <Metric icon={<Globe size={18} />} label="Con GPS" val={statsGPS} of={totalGlobal} color="blue" />
           <Metric icon={<CheckCircle2 size={18} />} label="Completitud media" val={statsComp} suffix="%" color="amber" />
         </div>
 

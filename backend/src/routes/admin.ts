@@ -691,8 +691,14 @@ router.get('/avisos-privacidad', authMiddleware, soloAdmin, async (req: AuthRequ
     else if (tipo === 'usuario') unionSQL = sqlUser;
     else unionSQL = `${sqlProd} UNION ALL ${sqlUser}`;
 
-    const dataSQL  = `SELECT * FROM (${unionSQL}) t ORDER BY aviso_privacidad_fecha DESC NULLS LAST LIMIT $2 OFFSET $3`;
-    const statsSQL = `
+    // SQL sin filtro de búsqueda — para totales globales siempre fijos
+    const sqlProdAll = sqlProd.replace('AND (p.curp ILIKE $1 OR p.nombres ILIKE $1 OR p.apellido_paterno ILIKE $1 OR p.apellido_materno ILIKE $1)', '');
+    const sqlUserAll = sqlUser.replace('AND (u.curp ILIKE $1 OR u.nombre_completo ILIKE $1 OR u.telefono ILIKE $1)', '');
+    const unionAll   = tipo === 'productor' ? sqlProdAll : tipo === 'usuario' ? sqlUserAll : `${sqlProdAll} UNION ALL ${sqlUserAll}`;
+
+    const dataSQL    = `SELECT * FROM (${unionSQL}) t ORDER BY aviso_privacidad_fecha DESC NULLS LAST LIMIT $2 OFFSET $3`;
+    const countSQL   = `SELECT COUNT(*) FROM (${unionSQL}) t`;
+    const globalSQL  = `
       SELECT
         COUNT(*)                                                          AS total,
         COUNT(*) FILTER (WHERE aviso_privacidad_foto_url IS NOT NULL)    AS con_foto,
@@ -703,20 +709,22 @@ router.get('/avisos-privacidad', authMiddleware, soloAdmin, async (req: AuthRequ
            CASE WHEN aviso_privacidad_lat    IS NOT NULL THEN 1 ELSE 0 END +
            CASE WHEN aviso_privacidad_foto_url IS NOT NULL THEN 1 ELSE 0 END)::numeric / 4 * 100
         ))                                                                AS completitud_media
-      FROM (${unionSQL}) t`;
+      FROM (${unionAll}) t`;
 
-    const [{ rows }, { rows: stats }] = await Promise.all([
-      pool.query(dataSQL,  [like, limite, offset]),
-      pool.query(statsSQL, [like]),
+    const [{ rows }, { rows: cnt }, { rows: glob }] = await Promise.all([
+      pool.query(dataSQL,   [like, limite, offset]),
+      pool.query(countSQL,  [like]),
+      pool.query(globalSQL, []),
     ]);
 
-    const s = stats[0];
+    const g = glob[0];
     res.json({
-      avisos:           rows,
-      total:            parseInt(s.total),
-      con_foto:         parseInt(s.con_foto),
-      con_gps:          parseInt(s.con_gps),
-      completitud_media: parseInt(s.completitud_media ?? '0'),
+      avisos:            rows,
+      total:             parseInt(cnt[0].count),
+      total_global:      parseInt(g.total),
+      con_foto:          parseInt(g.con_foto),
+      con_gps:           parseInt(g.con_gps),
+      completitud_media: parseInt(g.completitud_media ?? '0'),
     });
   } catch (error) {
     console.error('Error avisos privacidad:', error);
