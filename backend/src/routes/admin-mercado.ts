@@ -24,32 +24,33 @@ router.get('/mercado/mapa', authMiddleware, async (req: AuthRequest, res: Respon
       pool.query(`
         SELECT
           d.id,
-          COALESCE(ST_Y(u.centroid), u.lat) AS lat,
-          COALESCE(ST_X(u.centroid), u.lng) AS lng,
-          u.municipality_name AS municipio,
-          u.state_name AS estado,
+          ST_Y(u.centroid)       AS lat,
+          ST_X(u.centroid)       AS lng,
+          u.municipality_name    AS municipio,
+          u.state_name           AS estado,
           COALESCE(d.tipo_maiz, 'maiz_blanco') AS tipo_maiz,
           d.variedad_code,
-          COALESCE(d.volumen_estimado_ton, d.volumen_ton, 0) AS volumen_estimado_ton,
+          COALESCE(d.volumen_estimado_ton, 0)  AS volumen_estimado_ton,
           d.fecha_disponible,
+          d.precio_minimo_ton,
           p.nombres || ' ' || p.apellido_paterno AS nombre_productor
         FROM disponibilidad_productor d
         JOIN up u ON d.up_id = u.up_id
         JOIN producer p ON p.producer_id = u.producer_id
-        WHERE COALESCE(d.activa, d.activo, true) = true
+        WHERE d.activa = true
           AND (d.fecha_vencimiento IS NULL OR d.fecha_vencimiento > NOW())
-          AND (u.centroid IS NOT NULL OR (u.lat IS NOT NULL AND u.lng IS NOT NULL))
+          AND u.centroid IS NOT NULL
         ORDER BY d.created_at DESC
         LIMIT 1000
-      `).catch(() => ({ rows: [] })),
+      `),
       pool.query(`
         SELECT
           s.id,
-          b.latitud AS lat,
-          b.longitud AS lon,
+          b.latitud              AS lat,
+          b.longitud             AS lon,
           b.municipio,
           b.estado,
-          b.nombre AS nombre_bodega,
+          b.nombre               AS nombre_bodega,
           s.tipo_maiz,
           s.variedad_code,
           s.volumen_ton,
@@ -62,17 +63,16 @@ router.get('/mercado/mapa', authMiddleware, async (req: AuthRequest, res: Respon
           AND b.latitud IS NOT NULL AND b.longitud IS NOT NULL
         ORDER BY s.created_at DESC
         LIMIT 500
-      `).catch(() => ({ rows: [] })),
+      `),
       pool.query(`
         SELECT
-          COALESCE((SELECT SUM(COALESCE(volumen_estimado_ton, volumen_ton, 0))
-                    FROM disponibilidad_productor
-                    WHERE COALESCE(activa, activo, true) = true), 0)::numeric(12,2) AS ofertadas,
+          COALESCE((SELECT SUM(COALESCE(volumen_estimado_ton, 0))
+                    FROM disponibilidad_productor WHERE activa = true), 0)::numeric(12,2) AS ofertadas,
           COALESCE((SELECT SUM(volumen_ton) FROM senales_compra WHERE activa = true), 0)::numeric(12,2) AS demandadas,
           COALESCE((SELECT AVG(precio_ofrecido) FROM senales_compra WHERE activa = true AND precio_ofrecido > 0), 0)::numeric(10,2) AS precio_promedio,
-          COALESCE((SELECT COUNT(DISTINCT up_id) FROM disponibilidad_productor WHERE COALESCE(activa, activo, true) = true), 0)::int AS productores_con_disponibilidad,
+          COALESCE((SELECT COUNT(DISTINCT producer_id) FROM disponibilidad_productor WHERE activa = true), 0)::int AS productores_con_disponibilidad,
           COALESCE((SELECT COUNT(DISTINCT bodega_id) FROM senales_compra WHERE activa = true), 0)::int AS bodegas_buscando
-      `).catch(() => ({ rows: [{ ofertadas: 0, demandadas: 0, precio_promedio: 0, productores_con_disponibilidad: 0, bodegas_buscando: 0 }] })),
+      `),
     ]);
 
     const kpi = kpis.rows[0] || {};
