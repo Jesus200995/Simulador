@@ -6,7 +6,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   Search, Eye, ShieldAlert, RefreshCw, Warehouse, BarChart3, X, CheckCircle,
   Weight, Package, Percent, FileText, LayoutGrid, MapPin, Edit3,
-  Phone, Calendar, Building2, Save, Loader2, Table2, Navigation2, Trash2, AlertTriangle
+  Phone, Calendar, Building2, Save, Loader2, Table2, Navigation2, Trash2, AlertTriangle,
+  Users, Mail, UserCheck, UserX, Check, ChevronRight
 } from 'lucide-react';
 
 mapboxgl.accessToken = [
@@ -57,12 +58,46 @@ function fmtDate(d?: string) {
   catch { return d; }
 }
 
+interface UsuarioBodega {
+  id: number;
+  nombre_completo: string;
+  email: string;
+  telefono: string;
+  rol: string;
+  activo: boolean;
+  curp?: string;
+  created_at: string;
+  aviso_privacidad_aceptado?: boolean;
+  aviso_privacidad_fecha?: string;
+  bodega_id?: number;
+  bodega_nombre?: string;
+  bodega_estado?: string;
+  bodega_municipio?: string;
+  bodega_localidad?: string;
+  bodega_direccion?: string;
+  capacidad_ton?: number;
+  bodega_estatus?: string;
+  bodega_telefono?: string;
+}
+
 export default function BodegasAdminPage() {
   const navigate = useNavigate();
 
   const [bodegas, setBodegas]   = useState<Bodega[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [tab, setTab]           = useState<'bodegas' | 'lista' | 'estadisticas' | 'pendientes'>('bodegas');
+  const [tab, setTab]           = useState<'bodegas' | 'lista' | 'estadisticas' | 'pendientes' | 'usuarios'>('bodegas');
+
+  // Usuarios bodega
+  const [usuarios,       setUsuarios]       = useState<UsuarioBodega[]>([]);
+  const [usuariosLoad,   setUsuariosLoad]   = useState(false);
+  const [usuarioSearch,  setUsuarioSearch]  = useState('');
+  const [usuarioModal,   setUsuarioModal]   = useState<UsuarioBodega | null>(null);
+  const [editUsuario,    setEditUsuario]    = useState<Partial<UsuarioBodega> | null>(null);
+  const [editUsuLoad,    setEditUsuLoad]    = useState(false);
+  const [editUsuErr,     setEditUsuErr]     = useState('');
+  const [deleteUsuario,  setDeleteUsuario]  = useState<UsuarioBodega | null>(null);
+  const [deleteUsuLoad,  setDeleteUsuLoad]  = useState(false);
+  const debUsuRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [stats, setStats]       = useState<any>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
@@ -185,8 +220,52 @@ export default function BodegasAdminPage() {
       .catch(() => {});
   }
 
+  async function cargarUsuarios(q = '') {
+    setUsuariosLoad(true);
+    try {
+      const r = await fetch(`${BASE}/admin/usuarios-bodega?q=${encodeURIComponent(q)}`, { headers: HDR() });
+      const d = await r.json();
+      setUsuarios(d.usuarios || []);
+    } catch { setUsuarios([]); }
+    finally { setUsuariosLoad(false); }
+  }
+
+  async function guardarUsuario() {
+    if (!usuarioModal || !editUsuario) return;
+    setEditUsuLoad(true); setEditUsuErr('');
+    try {
+      const r = await fetch(`${BASE}/admin/usuarios-bodega/${usuarioModal.id}`, {
+        method: 'PATCH',
+        headers: { ...HDR(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(editUsuario),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Error al guardar');
+      showToast('Usuario actualizado');
+      setEditUsuario(null);
+      cargarUsuarios(usuarioSearch);
+      setUsuarioModal(prev => prev ? { ...prev, ...editUsuario } : null);
+    } catch (e: any) { setEditUsuErr(e.message); }
+    finally { setEditUsuLoad(false); }
+  }
+
+  async function eliminarUsuario() {
+    if (!deleteUsuario) return;
+    setDeleteUsuLoad(true);
+    try {
+      const r = await fetch(`${BASE}/admin/usuarios-bodega/${deleteUsuario.id}`, { method: 'DELETE', headers: HDR() });
+      if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+      showToast('Usuario eliminado');
+      setDeleteUsuario(null);
+      setUsuarioModal(null);
+      cargarUsuarios(usuarioSearch);
+    } catch (e: any) { showToast(e.message, false); }
+    finally { setDeleteUsuLoad(false); }
+  }
+
   useEffect(() => { cargarBodegas(); }, []);
   useEffect(() => { if (tab === 'estadisticas') cargarStats(); }, [tab, bodegas]);
+  useEffect(() => { if (tab === 'usuarios') cargarUsuarios(); }, [tab]);
 
   /* ─── FILTRADO ─── */
   const filteredList = bodegas.filter(b => {
@@ -479,6 +558,7 @@ export default function BodegasAdminPage() {
               { key: 'lista',        label: 'Lista + Mapa',  icon: <Navigation2 size={11} />, badge: null },
               { key: 'estadisticas', label: 'Estadísticas',  icon: <BarChart3 size={11} />,   badge: null },
               { key: 'pendientes',   label: 'Por aprobar',   icon: <ShieldAlert size={11} />, badge: cntPend },
+              { key: 'usuarios',     label: 'Usuarios',      icon: <Users size={11} />,       badge: null },
             ] as const).map(({ key, label, icon, badge }) => (
               <button key={key} onClick={() => setTab(key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${
@@ -825,6 +905,254 @@ export default function BodegasAdminPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* ═══════════════════════════════════════
+          TAB: USUARIOS BODEGA
+      ═══════════════════════════════════════ */}
+      {tab === 'usuarios' && (
+        <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-0">
+
+          {/* Barra búsqueda */}
+          <div className="px-3 py-2.5 border-b border-gray-100 flex-shrink-0 flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+              <Search size={13} className="text-gray-400 flex-shrink-0" />
+              <input
+                value={usuarioSearch}
+                onChange={e => {
+                  setUsuarioSearch(e.target.value);
+                  if (debUsuRef.current) clearTimeout(debUsuRef.current);
+                  debUsuRef.current = setTimeout(() => cargarUsuarios(e.target.value), 300);
+                }}
+                placeholder="Buscar por nombre, correo o teléfono…"
+                className="flex-1 text-[13px] text-gray-700 placeholder-gray-400 bg-transparent outline-none"
+              />
+              {usuarioSearch && <button onClick={() => { setUsuarioSearch(''); cargarUsuarios(''); }}><X size={12} className="text-gray-400" /></button>}
+            </div>
+            <span className="text-[11px] text-gray-400 font-medium flex-shrink-0">{usuarios.length} usuarios</span>
+          </div>
+
+          {/* Lista */}
+          <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+            {usuariosLoad ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="px-4 py-4 flex items-center gap-3 animate-pulse">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-100 rounded w-1/2" />
+                    <div className="h-2.5 bg-gray-100 rounded w-1/3" />
+                  </div>
+                </div>
+              ))
+            ) : usuarios.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                <Users size={40} className="mb-3 opacity-30" />
+                <p className="text-[13px] font-semibold">No hay usuarios registrados</p>
+              </div>
+            ) : usuarios.map(u => {
+              const initials = u.nombre_completo.split(' ').slice(0, 2).map(s => s[0]).join('').toUpperCase();
+              return (
+                <div key={u.id} className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50/60 transition-colors group">
+                  {/* Avatar */}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-[13px] flex-shrink-0 ${u.activo ? 'bg-gradient-to-br from-emerald-500 to-emerald-700' : 'bg-gradient-to-br from-gray-400 to-gray-500'}`}>
+                    {initials}
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-[13px] font-bold text-gray-900 truncate">{u.nombre_completo}</p>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0 ${u.activo ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                        {u.activo ? 'Activo' : 'Inactivo'}
+                      </span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200 flex-shrink-0 capitalize">{u.rol}</span>
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-0.5 truncate">{u.email}{u.bodega_nombre ? ` · ${u.bodega_nombre}` : ''}</p>
+                  </div>
+                  {/* Acciones */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => { setUsuarioModal(u); setEditUsuario(null); setEditUsuErr(''); }}
+                      className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-emerald-600 text-gray-400 flex items-center justify-center transition-colors"
+                      title="Ver detalles"
+                    ><Eye size={14} /></button>
+                    <button
+                      onClick={() => setDeleteUsuario(u)}
+                      className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-500 text-gray-400 flex items-center justify-center transition-colors"
+                      title="Eliminar"
+                    ><Trash2 size={14} /></button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL USUARIO BODEGA ── */}
+      {usuarioModal && createPortal(
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-6" style={{ zIndex: 9999 }} onClick={() => { setUsuarioModal(null); setEditUsuario(null); }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-2xl" />
+          <div
+            className="relative w-full sm:max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-[2rem] shadow-2xl max-h-[95dvh] sm:max-h-[88vh] flex flex-col overflow-hidden"
+            style={{ boxShadow: '0 40px 80px -10px rgba(0,0,0,0.45)', animation: 'slideUpSheet .28s cubic-bezier(.34,1.25,.64,1)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle mobile */}
+            <div className="sm:hidden flex justify-center pt-3 flex-shrink-0"><div className="w-9 h-1 rounded-full bg-gray-200" /></div>
+
+            {/* Hero header */}
+            <div className="px-6 pt-5 pb-4 flex items-start gap-4 flex-shrink-0">
+              {/* Avatar */}
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-lg ${usuarioModal.activo ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-emerald-900/20' : 'bg-gradient-to-br from-gray-400 to-gray-500'}`}>
+                {usuarioModal.nombre_completo.split(' ').slice(0,2).map(s=>s[0]).join('').toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0 pt-1">
+                <p className="text-[17px] font-extrabold text-gray-900 leading-tight">{usuarioModal.nombre_completo}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5 truncate">{usuarioModal.email}</p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${usuarioModal.activo ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${usuarioModal.activo ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                    {usuarioModal.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200 capitalize">{usuarioModal.rol}</span>
+                  {usuarioModal.aviso_privacidad_aceptado && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-violet-50 text-violet-700 border-violet-200">Aviso ✓</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <button onClick={() => { setUsuarioModal(null); setEditUsuario(null); }} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"><X size={14} className="text-gray-500" /></button>
+              </div>
+            </div>
+
+            {/* Scroll body */}
+            <div className="overflow-y-auto flex-1 px-6 pb-6 space-y-3">
+
+              {editUsuario ? (
+                /* ── Modo edición ── */
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Editar información</p>
+                  {[
+                    { label: 'Nombre completo', field: 'nombre_completo', type: 'text' },
+                    { label: 'Correo electrónico', field: 'email', type: 'email' },
+                    { label: 'Teléfono', field: 'telefono', type: 'tel' },
+                  ].map(({ label, field, type }) => (
+                    <div key={field}>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">{label}</label>
+                      <input
+                        type={type}
+                        value={(editUsuario as any)[field] ?? (usuarioModal as any)[field] ?? ''}
+                        onChange={e => setEditUsuario(p => ({ ...p, [field]: e.target.value }))}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-800 outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition"
+                      />
+                    </div>
+                  ))}
+                  {/* Toggle activo */}
+                  <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+                    <span className="text-[13px] font-semibold text-gray-700">Cuenta activa</span>
+                    <button
+                      onClick={() => setEditUsuario(p => ({ ...p, activo: !(p?.activo ?? usuarioModal.activo) }))}
+                      className={`w-11 h-6 rounded-full transition-all duration-200 flex items-center px-0.5 ${(editUsuario?.activo ?? usuarioModal.activo) ? 'bg-emerald-500 justify-end' : 'bg-gray-300 justify-start'}`}
+                    >
+                      <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
+                    </button>
+                  </div>
+                  {editUsuErr && <p className="text-[11px] text-red-500 flex items-center gap-1"><AlertTriangle size={11} />{editUsuErr}</p>}
+                  <div className="flex gap-2 pt-1">
+                    <button onClick={() => { setEditUsuario(null); setEditUsuErr(''); }} className="flex-1 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-[13px] font-bold transition-all">Cancelar</button>
+                    <button onClick={guardarUsuario} disabled={editUsuLoad} className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                      {editUsuLoad ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Guardar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* ── Modo vista ── */
+                <>
+                  {/* Datos de contacto */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {[
+                      { icon: <Phone size={13} />, label: 'Teléfono', val: usuarioModal.telefono },
+                      { icon: <Mail size={13} />, label: 'Correo', val: usuarioModal.email },
+                      { icon: <Calendar size={13} />, label: 'Registro', val: usuarioModal.created_at ? new Date(usuarioModal.created_at).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' }) : '—' },
+                      { icon: <Users size={13} />, label: 'ID', val: `#${String(usuarioModal.id).padStart(6,'0')}` },
+                    ].map(({ icon, label, val }) => (
+                      <div key={label} className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-emerald-500">{icon}</span>
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+                        </div>
+                        <p className="text-[12px] font-semibold text-gray-800 leading-snug break-all">{val || '—'}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bodega asociada */}
+                  {usuarioModal.bodega_nombre ? (
+                    <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Warehouse size={13} className="text-emerald-500" />
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bodega asociada</p>
+                      </div>
+                      <p className="text-[13px] font-bold text-gray-900 leading-snug">{usuarioModal.bodega_nombre}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{[usuarioModal.bodega_municipio, usuarioModal.bodega_estado].filter(Boolean).join(', ')}</p>
+                      {usuarioModal.bodega_estatus && (
+                        <span className={`mt-1.5 inline-flex text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                          usuarioModal.bodega_estatus === 'aprobada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                          usuarioModal.bodega_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                          'bg-red-50 text-red-600 border-red-200'
+                        }`}>{usuarioModal.bodega_estatus}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 rounded-2xl p-3.5 border border-dashed border-gray-200 flex items-center gap-2">
+                      <Warehouse size={13} className="text-gray-300" />
+                      <p className="text-[12px] text-gray-400 italic">Sin bodega asociada</p>
+                    </div>
+                  )}
+
+                  {/* Acciones */}
+                  <div className="pt-1 space-y-2">
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Acciones</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setEditUsuario({ nombre_completo: usuarioModal.nombre_completo, email: usuarioModal.email, telefono: usuarioModal.telefono, activo: usuarioModal.activo })}
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.97] text-white text-[13px] font-bold transition-all"
+                      ><Edit3 size={14} /> Editar</button>
+                      <button
+                        onClick={() => setDeleteUsuario(usuarioModal)}
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[.97] text-red-600 text-[13px] font-bold transition-all border border-red-200"
+                      ><Trash2 size={14} /> Eliminar</button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── MODAL CONFIRMAR ELIMINAR USUARIO ── */}
+      {deleteUsuario && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-6" style={{ zIndex: 10000 }} onClick={() => setDeleteUsuario(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" />
+          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4" onClick={e => e.stopPropagation()} style={{ animation: 'slideUpSheet .22s cubic-bezier(.34,1.25,.64,1)' }}>
+            <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+              <Trash2 size={24} className="text-red-500" />
+            </div>
+            <div className="text-center">
+              <p className="font-black text-gray-900 text-[16px]">¿Eliminar usuario?</p>
+              <p className="text-[13px] text-gray-500 mt-1">Se eliminará <span className="font-bold text-gray-700">{deleteUsuario.nombre_completo}</span> permanentemente. Esta acción no se puede deshacer.</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteUsuario(null)} className="flex-1 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-[13px] transition-all">Cancelar</button>
+              <button onClick={eliminarUsuario} disabled={deleteUsuLoad} className="flex-1 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-[13px] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                {deleteUsuLoad ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Eliminar
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* ═══════════════════════════════════════

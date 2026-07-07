@@ -929,4 +929,103 @@ router.post('/reset-password/:usuario_id', authMiddleware, soloAdmin, async (req
   }
 });
 
+// ─────────────────────────────────────────────────────────────────
+// USUARIOS BODEGA
+// ─────────────────────────────────────────────────────────────────
+
+// GET /api/admin/usuarios-bodega
+router.get('/usuarios-bodega', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const q    = (req.query.q as string) || '';
+    const like = `%${q.trim()}%`;
+    const { rows } = await pool.query(`
+      SELECT
+        u.id, u.nombre_completo, u.email, u.telefono, u.rol,
+        u.activo, u.created_at,
+        b.id      AS bodega_id,
+        b.nombre  AS bodega_nombre,
+        b.estado  AS bodega_estado,
+        b.municipio AS bodega_municipio,
+        b.estatus AS bodega_estatus
+      FROM usuarios u
+      LEFT JOIN bodegas b ON b.usuario_id = u.id
+      WHERE u.rol IN ('bodeguero','bodega','industria')
+        AND ($1 = '%%' OR u.nombre_completo ILIKE $1 OR u.email ILIKE $1 OR u.telefono ILIKE $1)
+      ORDER BY u.created_at DESC
+    `, [like]);
+    res.json({ usuarios: rows, total: rows.length });
+  } catch (error) {
+    console.error('Error usuarios-bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /api/admin/usuarios-bodega/:id
+router.get('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { rows } = await pool.query(`
+      SELECT
+        u.id, u.nombre_completo, u.email, u.telefono, u.rol, u.activo, u.curp, u.created_at,
+        u.aviso_privacidad_aceptado, u.aviso_privacidad_fecha,
+        b.id AS bodega_id, b.nombre AS bodega_nombre,
+        b.estado AS bodega_estado, b.municipio AS bodega_municipio,
+        b.localidad AS bodega_localidad, b.direccion AS bodega_direccion,
+        b.capacidad_ton, b.estatus AS bodega_estatus,
+        b.telefono AS bodega_telefono
+      FROM usuarios u
+      LEFT JOIN bodegas b ON b.usuario_id = u.id
+      WHERE u.id = $1
+    `, [id]);
+    if (!rows.length) { res.status(404).json({ error: 'Usuario no encontrado' }); return; }
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error usuario-bodega detalle:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// PATCH /api/admin/usuarios-bodega/:id
+router.patch('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { nombre_completo, email, telefono, activo } = req.body;
+    const sets: string[] = [];
+    const vals: any[]   = [];
+    let   idx = 1;
+    if (nombre_completo !== undefined) { sets.push(`nombre_completo=$${idx++}`); vals.push(nombre_completo); }
+    if (email           !== undefined) { sets.push(`email=$${idx++}`);           vals.push(email); }
+    if (telefono        !== undefined) { sets.push(`telefono=$${idx++}`);         vals.push(telefono); }
+    if (activo          !== undefined) { sets.push(`activo=$${idx++}`);           vals.push(activo); }
+    if (!sets.length) { res.status(400).json({ error: 'Sin campos para actualizar' }); return; }
+    sets.push(`updated_at=NOW()`);
+    vals.push(id);
+    await pool.query(`UPDATE usuarios SET ${sets.join(', ')} WHERE id=$${idx}`, vals);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error patch usuario-bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// DELETE /api/admin/usuarios-bodega/:id
+router.delete('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    await client.query('BEGIN');
+    // Desasignar bodega si existe
+    await client.query(`UPDATE bodegas SET usuario_id = NULL WHERE usuario_id = $1`, [id]);
+    await client.query(`DELETE FROM usuarios WHERE id = $1`, [id]);
+    await client.query('COMMIT');
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error delete usuario-bodega:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;
