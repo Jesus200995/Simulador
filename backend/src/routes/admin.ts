@@ -942,14 +942,15 @@ router.get('/usuarios-bodega', authMiddleware, soloAdmin, async (req: AuthReques
       SELECT
         u.id, u.nombre_completo, u.email, u.telefono, u.rol,
         u.activo, u.created_at,
-        b.id      AS bodega_id,
-        b.nombre  AS bodega_nombre,
-        b.estado  AS bodega_estado,
+        b.id        AS bodega_id,
+        b.nombre    AS bodega_nombre,
+        b.estado    AS bodega_estado,
         b.municipio AS bodega_municipio,
-        b.estatus AS bodega_estatus
+        b.estatus   AS bodega_estatus
       FROM usuarios u
-      LEFT JOIN bodegas b ON b.usuario_id = u.id
-      WHERE u.rol IN ('bodeguero','bodega','industria')
+      LEFT JOIN bodeguero_bodegas bb ON bb.usuario_id = u.id
+      LEFT JOIN bodegas b ON b.id = bb.bodega_id
+      WHERE u.rol IN ('bodeguero','bodega','industria','admin')
         AND ($1 = '%%' OR u.nombre_completo ILIKE $1 OR u.email ILIKE $1 OR u.telefono ILIKE $1)
       ORDER BY u.created_at DESC
     `, [like]);
@@ -974,7 +975,8 @@ router.get('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: AuthRe
         b.capacidad_ton, b.estatus AS bodega_estatus,
         b.telefono AS bodega_telefono
       FROM usuarios u
-      LEFT JOIN bodegas b ON b.usuario_id = u.id
+      LEFT JOIN bodeguero_bodegas bb ON bb.usuario_id = u.id
+      LEFT JOIN bodegas b ON b.id = bb.bodega_id
       WHERE u.id = $1
     `, [id]);
     if (!rows.length) { res.status(404).json({ error: 'Usuario no encontrado' }); return; }
@@ -1015,7 +1017,7 @@ router.delete('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: Aut
     const { id } = req.params;
     await client.query('BEGIN');
     // Desasignar bodega si existe
-    await client.query(`UPDATE bodegas SET usuario_id = NULL WHERE usuario_id = $1`, [id]);
+    await client.query(`DELETE FROM bodeguero_bodegas WHERE usuario_id = $1`, [id]);
     await client.query(`DELETE FROM usuarios WHERE id = $1`, [id]);
     await client.query('COMMIT');
     res.json({ ok: true });
