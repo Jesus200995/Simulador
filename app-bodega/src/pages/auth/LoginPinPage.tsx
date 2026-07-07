@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Wheat, AlertCircle, Loader2, UserPlus, KeyRound, Building2, ChevronRight } from 'lucide-react';
+import { ChevronLeft, Wheat, AlertCircle, Loader2, UserPlus, KeyRound, Building2, ChevronRight, LayoutDashboard, MapPin, BarChart3 } from 'lucide-react';
 import PinInput from '../../components/productor/PinInput';
 import { useAuthStore } from '../../store/auth';
 
@@ -133,12 +133,12 @@ export default function LoginPinPage() {
             </p>
             <div className="space-y-4">
               {[
-                { icon: '🌾', text: 'Gestiona tus unidades de producción' },
-                { icon: '📍', text: 'Registra tus parcelas con geolocalización' },
-                { icon: '📊', text: 'Consulta tus ciclos agrícolas' },
+                { icon: <LayoutDashboard size={18} />, text: 'Gestiona tus unidades de producción' },
+                { icon: <MapPin size={18} />, text: 'Registra tus parcelas con geolocalización' },
+                { icon: <BarChart3 size={18} />, text: 'Consulta tus ciclos agrícolas' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-white/60">
-                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-green-400/70">{item.icon}</span>
                   <span className="text-sm">{item.text}</span>
                 </div>
               ))}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
-import { Eye, EyeOff, Building2, ChevronLeft, AlertCircle, Loader2, UserPlus, Wheat } from 'lucide-react';
+import { Eye, EyeOff, Building2, ChevronLeft, AlertCircle, Loader2, UserPlus, Wheat, PackageCheck, BarChart3, LayoutDashboard } from 'lucide-react';
 
 export default function B01Login() {
   const [email, setEmail] = useState('');
@@ -76,12 +76,12 @@ export default function B01Login() {
             </p>
             <div className="space-y-4">
               {[
-                { icon: '🏭', text: 'Administra tu bodega o industria' },
-                { icon: '📦', text: 'Registra recepciones y entregas' },
-                { icon: '📈', text: 'Consulta reportes y estadísticas' },
+                { icon: <LayoutDashboard size={18} />, text: 'Administra tu bodega o industria' },
+                { icon: <PackageCheck size={18} />, text: 'Registra recepciones y entregas' },
+                { icon: <BarChart3 size={18} />, text: 'Consulta reportes y estadísticas' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-white/60">
-                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-green-400/70">{item.icon}</span>
                   <span className="text-sm">{item.text}</span>
                 </div>
               ))}
