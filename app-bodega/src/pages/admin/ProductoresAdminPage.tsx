@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Check, X, Eye, ShieldAlert, RefreshCw,
+  Search, Check, X, Eye, EyeOff, ShieldAlert, RefreshCw,
   AlertTriangle, BarChart3, ChevronLeft, ChevronRight,
-  Users, UserX, Clock, Download, Filter, Trash2
+  Users, UserX, Clock, Download, Filter, Trash2,
+  Phone, Mail, MapPin, Calendar, User, KeyRound, ExternalLink,
+  ShieldCheck, ShieldX, ShieldOff, Loader2, Copy, CheckCheck
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -53,6 +56,306 @@ const STATUS_CFG = {
   suspendido:{ label: 'Suspendido',color: 'text-gray-600 bg-gray-100 border-gray-200' },
 };
 
+/* ─── helpers visuales ───────────────────────────────────────────── */
+function Initials({ nombre, apellidos }: { nombre: string; apellidos: string }) {
+  const letters = ((nombre[0] || '') + (apellidos[0] || '')).toUpperCase();
+  return (
+    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-900/20 flex-shrink-0">
+      <span className="text-white font-black text-2xl tracking-tight">{letters}</span>
+    </div>
+  );
+}
+
+function InfoTile({ icon, label, value, mono = false }: {
+  icon: React.ReactNode; label: string; value: string; mono?: boolean;
+}) {
+  return (
+    <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+      <div className="flex items-center gap-1.5 mb-1">
+        <span className="text-emerald-500">{icon}</span>
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+      </div>
+      <p className={`text-[13px] font-semibold text-gray-800 leading-snug ${mono ? 'font-mono' : ''}`}>{value || '—'}</p>
+    </div>
+  );
+}
+
+/* ─── Modal Ver Productor — Apple 2026 ──────────────────────────── */
+function ModalVerProductor({
+  prod, onClose,
+  onAprobar, onRechazar, onSuspender, onReactivar, onEliminar,
+}: {
+  prod: Productor;
+  onClose: () => void;
+  onAprobar: () => void; onRechazar: () => void;
+  onSuspender: () => void; onReactivar: () => void;
+  onEliminar: () => void;
+}) {
+  const navigate = useNavigate();
+  const [nipVisible, setNipVisible]   = useState(false);
+  const [nipTemporal, setNipTemporal] = useState<string | null>(null);
+  const [nipLoading, setNipLoading]   = useState(false);
+  const [nipError, setNipError]       = useState('');
+  const [copiado, setCopiado]         = useState(false);
+
+  const genero = calcularGeneroDesadeCurp(prod.curp);
+  const edad   = calcularEdadDesdeCurp(prod.curp);
+  const cap    = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const cfg    = STATUS_CFG[prod.estado_validacion];
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  async function handleVerNip() {
+    if (nipTemporal) { setNipVisible(v => !v); return; }
+    setNipLoading(true); setNipError('');
+    try {
+      const res = await fetch(`${BASE}/admin/reset-nip/${prod.id}`, {
+        method: 'POST',
+        headers: { ...HDR(), 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al obtener NIP');
+      setNipTemporal(data.pin_temporal);
+      setNipVisible(true);
+    } catch (e: any) {
+      setNipError(e.message);
+    } finally {
+      setNipLoading(false);
+    }
+  }
+
+  function copiarNip() {
+    if (!nipTemporal) return;
+    navigator.clipboard.writeText(nipTemporal).then(() => {
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    });
+  }
+
+  return createPortal(
+    <div
+      className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-6"
+      style={{ zIndex: 9999 }}
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-2xl" />
+
+      {/* Sheet */}
+      <div
+        className="relative w-full sm:max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-[2rem] shadow-2xl max-h-[95dvh] sm:max-h-[90vh] flex flex-col overflow-hidden"
+        style={{ boxShadow: '0 40px 80px -10px rgba(0,0,0,0.45)', animation: 'slideUpSheet .28s cubic-bezier(.34,1.25,.64,1)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Handle mobile */}
+        <div className="sm:hidden flex justify-center pt-3 flex-shrink-0">
+          <div className="w-9 h-1 rounded-full bg-gray-200" />
+        </div>
+
+        {/* Header hero */}
+        <div className="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4">
+          <Initials nombre={prod.nombre} apellidos={prod.apellidos} />
+          <div className="flex-1 min-w-0 pt-1">
+            <p className="text-[18px] font-extrabold text-gray-900 leading-tight">
+              {prod.nombre} {prod.apellidos}
+            </p>
+            <p className="font-mono text-[10px] text-gray-400 mt-0.5 truncate">{prod.curp || 'Sin CURP'}</p>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${cfg.color}`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+                {cfg.label}
+              </span>
+              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+                prod.tipo_productor === 'B' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-gray-50 text-gray-500 border-gray-200'
+              }`}>Tipo {prod.tipo_productor}</span>
+              {genero && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                  {genero === 'H' ? 'Hombre' : 'Mujer'}
+                  {edad ? ` · ${edad} años` : ''}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Botones top-right */}
+          <div className="flex flex-col gap-1.5 flex-shrink-0">
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+            >
+              <X size={14} className="text-gray-500" />
+            </button>
+            <button
+              onClick={() => { onClose(); navigate(`/admin/productores/${prod.id}`); }}
+              className="w-8 h-8 rounded-full bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center transition-colors"
+              title="Ver perfil completo"
+            >
+              <ExternalLink size={13} className="text-emerald-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Scroll body */}
+        <div className="overflow-y-auto flex-1 px-6 pb-6 space-y-3">
+
+          {/* Grid de info */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <InfoTile icon={<Phone size={13} />} label="Teléfono" value={prod.telefono} />
+            <InfoTile icon={<Mail size={13} />}  label="Correo"   value={prod.email} />
+            <InfoTile
+              icon={<Calendar size={13} />}
+              label="Registro"
+              value={prod.created_at ? new Date(prod.created_at).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' }) : '—'}
+            />
+            <InfoTile icon={<User size={13} />} label="ID" value={`#${String(prod.id).padStart(6,'0')}`} mono />
+          </div>
+
+          {/* Ubicación UP */}
+          {(prod.up_estado || prod.up_municipio) ? (
+            <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-emerald-500"><MapPin size={13} /></span>
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Ubicación UP</p>
+              </div>
+              <p className="text-[13px] font-semibold text-gray-800">
+                {[prod.up_municipio, prod.up_estado].filter(Boolean).join(', ')}
+              </p>
+              {prod.up_cultivo && (
+                <p className="text-[11px] text-gray-400 mt-0.5">{prod.up_cultivo}</p>
+              )}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-2xl p-3.5 border border-dashed border-gray-200">
+              <div className="flex items-center gap-2">
+                <MapPin size={13} className="text-gray-300" />
+                <p className="text-[12px] text-gray-400 italic">Sin ubicación UP registrada</p>
+              </div>
+            </div>
+          )}
+
+          {/* NIP de acceso */}
+          <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-emerald-500"><KeyRound size={13} /></span>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">NIP de acceso</p>
+            </div>
+
+            {nipError && (
+              <p className="text-[11px] text-red-500 mb-2">{nipError}</p>
+            )}
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 flex items-center gap-1">
+                {nipTemporal && nipVisible ? (
+                  <>
+                    {nipTemporal.split('').map((d, i) => (
+                      <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-emerald-200 flex items-center justify-center shadow-sm">
+                        <span className="text-[22px] font-black text-emerald-700 tabular-nums">{d}</span>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {[0,1,2,3].map(i => (
+                      <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+
+              <div className="flex gap-1.5">
+                {nipTemporal && nipVisible && (
+                  <button
+                    onClick={copiarNip}
+                    className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
+                    title="Copiar NIP"
+                  >
+                    {copiado ? <CheckCheck size={14} className="text-emerald-600" /> : <Copy size={14} className="text-gray-400" />}
+                  </button>
+                )}
+                <button
+                  onClick={handleVerNip}
+                  disabled={nipLoading}
+                  className="h-9 px-3 rounded-xl bg-white border border-gray-200 flex items-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition-colors text-[11px] font-bold text-gray-500 hover:text-emerald-700 disabled:opacity-50"
+                >
+                  {nipLoading
+                    ? <Loader2 size={13} className="animate-spin" />
+                    : nipVisible ? <EyeOff size={13} /> : <Eye size={13} />
+                  }
+                  {nipLoading ? 'Generando…' : nipTemporal ? (nipVisible ? 'Ocultar' : 'Mostrar') : 'Ver NIP'}
+                </button>
+              </div>
+            </div>
+
+            {nipTemporal && (
+              <p className="text-[10px] text-amber-600 mt-2 flex items-center gap-1">
+                <AlertTriangle size={10} className="flex-shrink-0" />
+                NIP temporal generado — pídele al productor que lo cambie al ingresar.
+              </p>
+            )}
+          </div>
+
+          {/* Acciones */}
+          <div className="pt-1 space-y-2">
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Acciones</p>
+            <div className="grid grid-cols-2 gap-2">
+              {prod.estado_validacion === 'pendiente' && (
+                <>
+                  <button
+                    onClick={() => { onClose(); onAprobar(); }}
+                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.97] text-white text-[13px] font-bold transition-all shadow-sm shadow-emerald-200"
+                  >
+                    <ShieldCheck size={15} /> Aprobar
+                  </button>
+                  <button
+                    onClick={() => { onClose(); onRechazar(); }}
+                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[.97] text-red-600 text-[13px] font-bold transition-all border border-red-200"
+                  >
+                    <ShieldX size={15} /> Rechazar
+                  </button>
+                </>
+              )}
+              {prod.estado_validacion === 'activo' && (
+                <button
+                  onClick={() => { onClose(); onSuspender(); }}
+                  className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-amber-50 hover:bg-amber-100 active:scale-[.97] text-amber-700 text-[13px] font-bold transition-all border border-amber-200"
+                >
+                  <ShieldOff size={15} /> Suspender
+                </button>
+              )}
+              {prod.estado_validacion === 'suspendido' && (
+                <button
+                  onClick={() => { onClose(); onReactivar(); }}
+                  className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-[.97] text-emerald-700 text-[13px] font-bold transition-all border border-emerald-200"
+                >
+                  <ShieldCheck size={15} /> Reactivar
+                </button>
+              )}
+              <button
+                onClick={() => { onClose(); navigate(`/admin/productores/${prod.id}`); }}
+                className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 active:scale-[.97] text-gray-700 text-[13px] font-bold transition-all"
+              >
+                <ExternalLink size={15} /> Ver perfil
+              </button>
+              <button
+                onClick={() => { onClose(); onEliminar(); }}
+                className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[.97] text-red-500 text-[13px] font-bold transition-all border border-red-100"
+              >
+                <Trash2 size={15} /> Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export default function ProductoresAdminPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<'todos' | 'pendiente' | 'suspendido'>('todos');
@@ -66,6 +369,8 @@ export default function ProductoresAdminPage() {
   const [tipoFilter, setTipoFilter] = useState('');
   const [estatusFilter, setEstatusFilter] = useState('');
   const [estadosDisponibles, setEstadosDisponibles] = useState<string[]>([]);
+
+  const [verProductor, setVerProductor] = useState<Productor | null>(null);
 
   const [selectedProd, setSelectedProd] = useState<Productor | null>(null);
   const [modalType, setModalType] = useState<'aprobar' | 'rechazar' | 'suspender' | 'reactivar' | null>(null);
@@ -215,6 +520,19 @@ export default function ProductoresAdminPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-76px)] overflow-hidden gap-2">
+
+      {/* Modal ver productor */}
+      {verProductor && (
+        <ModalVerProductor
+          prod={verProductor}
+          onClose={() => setVerProductor(null)}
+          onAprobar={() => { setSelectedProd(verProductor); setModalType('aprobar'); }}
+          onRechazar={() => { setSelectedProd(verProductor); setModalType('rechazar'); }}
+          onSuspender={() => { setSelectedProd(verProductor); setModalType('suspender'); }}
+          onReactivar={() => { setSelectedProd(verProductor); setModalType('reactivar'); }}
+          onEliminar={() => { setDeleteTarget(verProductor); setDeleteError(''); }}
+        />
+      )}
 
       {/* Toast de éxito al eliminar */}
       {deleteSuccess && (
@@ -425,9 +743,12 @@ export default function ProductoresAdminPage() {
                       </td>
                       <td className="py-2 px-3 pr-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => navigate(`/admin/productores/${prod.id}`)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#1A5C38] hover:bg-[#eef8f2] transition" title="Ver detalle">
-                            <Eye size={12} />
+                          <button
+                            onClick={() => setVerProductor(prod)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#eef8f2] text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white text-[10px] font-bold border border-[#1A5C38]/20 hover:border-transparent transition"
+                            title="Ver productor"
+                          >
+                            <Eye size={11} /> Ver
                           </button>
                           {prod.estado_validacion === 'pendiente' && (
                             <>
