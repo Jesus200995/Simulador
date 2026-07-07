@@ -129,10 +129,10 @@ export default function RecuperarNipPage() {
                 {step === 'nuevo_nip' && <KeyRound size={26} className="text-white" />}
               </div>
               <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                {step === 'curp' ? 'Recuperar NIP' : step === 'telefono' ? 'Verifica tu teléfono' : 'Nuevo NIP'}
+                {step === 'curp' ? 'Recuperar NIP' : step === 'telefono' ? 'Verifica tu identidad' : 'Nuevo NIP'}
               </h1>
               <p className="text-white/50 text-base leading-relaxed">
-                {step === 'curp' ? 'Ingresa tu CURP para continuar.' : step === 'telefono' ? 'Confirma los últimos dígitos de tu teléfono registrado.' : 'Elige un NIP de 4 dígitos para tu cuenta.'}
+                {step === 'curp' ? 'Ingresa tu CURP para continuar.' : step === 'telefono' ? 'Ingresa los últimos 4 dígitos del número de teléfono con el que creaste tu cuenta.' : 'Elige un NIP de 4 dígitos para tu cuenta.'}
               </p>
             </div>
           )}
@@ -189,27 +189,35 @@ export default function RecuperarNipPage() {
                     <Phone size={22} className="text-white" />
                   </div>
                 </div>
-                <h1 className="lg:hidden text-xl font-bold text-white text-center mb-1">Verifica tu teléfono</h1>
-                <p className="lg:hidden text-white/50 text-sm text-center mb-1">
-                  Ingresa los últimos 4 dígitos de tu teléfono registrado
+                <h1 className="lg:hidden text-xl font-bold text-white text-center mb-1">Verifica tu identidad</h1>
+                <p className="lg:hidden text-white/50 text-sm text-center mb-4">
+                  Ingresa los últimos 4 dígitos del número de teléfono con el que creaste tu cuenta
                 </p>
-                {telefonoEnmascarado && (
-                  <p className="text-green-300 text-center text-sm font-mono font-bold mb-4">{telefonoEnmascarado}</p>
-                )}
+
                 {!telefonoEnmascarado && (
-                  <p className="text-white/40 text-center text-xs mb-4">No se encontró teléfono. Contacta a soporte.</p>
+                  <div className="flex items-center gap-2 bg-amber-500/15 ring-1 ring-amber-400/30 rounded-xl px-3 py-2.5 mb-4">
+                    <AlertCircle size={14} className="text-amber-300 shrink-0" />
+                    <p className="text-amber-200 text-xs">No se encontró teléfono registrado. Contacta a soporte.</p>
+                  </div>
                 )}
+
                 <div className="bg-white/10 backdrop-blur-md ring-1 ring-white/15 rounded-2xl p-4 sm:p-5">
-                  <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Últimos 4 dígitos</label>
+                  <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">
+                    Últimos 4 dígitos de tu teléfono
+                  </label>
                   <input
                     type="tel"
                     inputMode="numeric"
                     value={ultimos4}
                     onChange={e => setUltimos4(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     maxLength={4}
-                    placeholder="1234"
-                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 sm:py-3 text-xl font-mono tracking-[0.4em] text-white text-center placeholder-white/25 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+                    placeholder="• • • •"
+                    autoComplete="off"
+                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-3 text-2xl font-mono tracking-[0.5em] text-white text-center placeholder-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
                   />
+                  <p className="mt-2 text-white/35 text-xs text-center">
+                    Ejemplo: si tu número es 55 1234 <span className="text-white/60 font-semibold">5678</span>, ingresa <span className="text-white/60 font-semibold">5678</span>
+                  </p>
                   {error && (
                     <div className="mt-3 p-3 bg-red-500/15 ring-1 ring-red-400/30 rounded-xl text-red-300 text-sm flex gap-2">
                       <AlertCircle size={15} className="shrink-0 mt-0.5" />{error}
@@ -220,9 +228,12 @@ export default function RecuperarNipPage() {
                     disabled={ultimos4.length !== 4 || loading}
                     className="mt-4 w-full bg-white hover:bg-white/90 active:bg-white/80 text-[#1A5C38] rounded-xl py-3 text-sm font-bold disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                   >
-                    {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Confirmar'}
+                    {loading ? <><Loader2 size={16} className="animate-spin" /> Verificando...</> : 'Verificar'}
                   </button>
                 </div>
+                <p className="text-white/25 text-xs text-center mt-3">
+                  ¿No recuerdas tu número? Contacta al administrador del sistema.
+                </p>
               </div>
             )}
 
