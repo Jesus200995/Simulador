@@ -341,12 +341,27 @@ function InfoCard({ icon, label, value, mono = false, link = false }: {
 }
 
 /* ─── Modal detalle — estilo Apple 2026 ─────────────────────────── */
+function edadDesdeCurp(curp: string): number | null {
+  if (!curp || curp.length < 10) return null;
+  const yy = parseInt(curp.substring(4, 6), 10);
+  const mm = parseInt(curp.substring(6, 8), 10) - 1;
+  const dd = parseInt(curp.substring(8, 10), 10);
+  if (isNaN(yy) || isNaN(mm) || isNaN(dd)) return null;
+  const siglo = yy <= 30 ? 2000 : 1900;
+  const nac = new Date(siglo + yy, mm, dd);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  if (hoy.getMonth() < nac.getMonth() || (hoy.getMonth() === nac.getMonth() && hoy.getDate() < nac.getDate())) edad--;
+  return edad >= 0 && edad < 130 ? edad : null;
+}
+
 function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void }) {
   const foto   = fotoURL(aviso.aviso_privacidad_foto_url);
   const nomb   = nombre(aviso);
   const coords = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng;
   const pct    = completitud(aviso);
   const cap    = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const edad   = edadDesdeCurp(aviso.curp);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -443,6 +458,11 @@ function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void })
             <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full border ${
               aviso.tipo === 'productor' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'
             }`}>{cap(aviso.tipo)}</span>
+            {edad !== null && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full bg-gray-50 text-gray-600 border border-gray-200">
+                {edad} años
+              </span>
+            )}
             {foto && (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
                 <Fingerprint size={11} /> Biométrico
