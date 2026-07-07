@@ -92,11 +92,11 @@ function ModalVerProductor({
   onEliminar: () => void;
 }) {
   const navigate = useNavigate();
-  const [nipVisible, setNipVisible]   = useState(false);
-  const [nipTemporal, setNipTemporal] = useState<string | null>(null);
-  const [nipLoading, setNipLoading]   = useState(false);
-  const [nipError, setNipError]       = useState('');
-  const [copiado, setCopiado]         = useState(false);
+  const [nipVisible, setNipVisible] = useState(false);
+  const [nipReal, setNipReal]       = useState<string | null>(null);
+  const [nipLoading, setNipLoading] = useState(false);
+  const [nipError, setNipError]     = useState('');
+  const [copiado, setCopiado]       = useState(false);
 
   const genero = calcularGeneroDesadeCurp(prod.curp);
   const edad   = calcularEdadDesdeCurp(prod.curp);
@@ -109,16 +109,15 @@ function ModalVerProductor({
   }, []);
 
   async function handleVerNip() {
-    if (nipTemporal) { setNipVisible(v => !v); return; }
+    if (nipReal !== null) { setNipVisible(v => !v); return; }
     setNipLoading(true); setNipError('');
     try {
-      const res = await fetch(`${BASE}/admin/reset-nip/${prod.id}`, {
-        method: 'POST',
-        headers: { ...HDR(), 'Content-Type': 'application/json' },
+      const res = await fetch(`${BASE}/admin/productor-nip/${prod.id}`, {
+        headers: HDR(),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al obtener NIP');
-      setNipTemporal(data.pin_temporal);
+      setNipReal(data.pin ?? '');
       setNipVisible(true);
     } catch (e: any) {
       setNipError(e.message);
@@ -128,8 +127,8 @@ function ModalVerProductor({
   }
 
   function copiarNip() {
-    if (!nipTemporal) return;
-    navigator.clipboard.writeText(nipTemporal).then(() => {
+    if (!nipReal) return;
+    navigator.clipboard.writeText(nipReal).then(() => {
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
     });
@@ -248,9 +247,9 @@ function ModalVerProductor({
 
             <div className="flex items-center gap-3">
               <div className="flex-1 flex items-center gap-1">
-                {nipTemporal && nipVisible ? (
+                {nipReal && nipVisible ? (
                   <>
-                    {nipTemporal.split('').map((d, i) => (
+                    {nipReal.split('').map((d, i) => (
                       <div key={i} className="w-9 h-11 rounded-xl bg-white border-2 border-emerald-200 flex items-center justify-center shadow-sm">
                         <span className="text-[22px] font-black text-emerald-700 tabular-nums">{d}</span>
                       </div>
@@ -268,7 +267,7 @@ function ModalVerProductor({
               </div>
 
               <div className="flex gap-1.5">
-                {nipTemporal && nipVisible && (
+                {nipReal && nipVisible && (
                   <button
                     onClick={copiarNip}
                     className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
@@ -286,16 +285,13 @@ function ModalVerProductor({
                     ? <Loader2 size={13} className="animate-spin" />
                     : nipVisible ? <EyeOff size={13} /> : <Eye size={13} />
                   }
-                  {nipLoading ? 'Generando…' : nipTemporal ? (nipVisible ? 'Ocultar' : 'Mostrar') : 'Ver NIP'}
+                  {nipLoading ? 'Cargando…' : nipReal !== null ? (nipVisible ? 'Ocultar' : 'Mostrar') : 'Ver NIP'}
                 </button>
               </div>
             </div>
 
-            {nipTemporal && (
-              <p className="text-[10px] text-amber-600 mt-2 flex items-center gap-1">
-                <AlertTriangle size={10} className="flex-shrink-0" />
-                NIP temporal generado — pídele al productor que lo cambie al ingresar.
-              </p>
+            {nipReal === '' && (
+              <p className="text-[10px] text-gray-400 mt-2 italic">NIP no disponible — cuenta anterior al sistema.</p>
             )}
           </div>
 

@@ -813,13 +813,30 @@ router.post('/reset-nip/:producer_id', authMiddleware, soloAdmin, async (req: Au
     const hash = await bcrypt.hash(pinTemporal, 12);
 
     await pool.query(
-      `UPDATE usuarios SET password_hash = $1, reset_pin_forced = TRUE WHERE id = $2`,
-      [hash, rows[0].id]
+      `UPDATE usuarios SET password_hash = $1, pin_texto = $2, reset_pin_forced = TRUE WHERE id = $3`,
+      [hash, pinTemporal, rows[0].id]
     );
 
     res.json({ ok: true, pin_temporal: pinTemporal, nombre: rows[0].nombre_completo });
   } catch (error) {
     console.error('Error en reset-nip:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /api/admin/productor-nip/:producer_id
+// El admin consulta el NIP actual del productor (almacenado en texto plano)
+router.get('/productor-nip/:producer_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { producer_id } = req.params;
+    const { rows } = await pool.query(
+      `SELECT u.pin_texto FROM producer p JOIN usuarios u ON u.id = p.usuario_id WHERE p.producer_id = $1`,
+      [producer_id]
+    );
+    if (!rows.length) { res.status(404).json({ error: 'Productor no encontrado' }); return; }
+    res.json({ pin: rows[0].pin_texto ?? null });
+  } catch (error) {
+    console.error('Error en productor-nip:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

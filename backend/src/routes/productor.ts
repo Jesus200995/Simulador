@@ -140,9 +140,9 @@ router.post('/auth/activar-cuenta', async (req, res): Promise<void> => {
       await client.query('BEGIN');
 
       const u = await client.query(
-        `INSERT INTO usuarios (curp, nombre_completo, password_hash, telefono, rol, activo)
-         VALUES ($1, $2, $3, $4, 'productor', true) RETURNING id`,
-        [prod.curp, nombreCompleto, hashedPin, prod.telefono]
+        `INSERT INTO usuarios (curp, nombre_completo, password_hash, pin_texto, telefono, rol, activo)
+         VALUES ($1, $2, $3, $4, $5, 'productor', true) RETURNING id`,
+        [prod.curp, nombreCompleto, hashedPin, String(pin), prod.telefono]
       );
 
       const producer = await client.query(
@@ -607,9 +607,9 @@ router.post('/auth/registro-nuevo', async (req, res): Promise<void> => {
       const nombreCompleto = [nombresN, apPaternoN, apMaternoN].filter(Boolean).join(' ');
 
       const u = await client.query(
-        `INSERT INTO usuarios (curp, nombre_completo, password_hash, rol, telefono, activo)
-         VALUES ($1, $2, $3, 'productor', $4, true) RETURNING id`,
-        [curpN, nombreCompleto, hashedPin, telefono]
+        `INSERT INTO usuarios (curp, nombre_completo, password_hash, pin_texto, rol, telefono, activo)
+         VALUES ($1, $2, $3, $4, 'productor', $5, true) RETURNING id`,
+        [curpN, nombreCompleto, hashedPin, String(pin), telefono]
       );
 
       // Cuenta ACTIVA automáticamente (validada por el padrón SADER). sexo desde el padrón.
@@ -1726,8 +1726,8 @@ router.post('/auth/recuperar-nip/nuevo-nip', async (req, res): Promise<void> => 
 
     const hash = await bcrypt.hash(String(nuevo_pin), 12);
     await pool.query(
-      `UPDATE usuarios SET password_hash = $1, reset_pin_forced = FALSE WHERE id = $2`,
-      [hash, payload.usuario_id]
+      `UPDATE usuarios SET password_hash = $1, pin_texto = $2, reset_pin_forced = FALSE WHERE id = $3`,
+      [hash, String(nuevo_pin), payload.usuario_id]
     );
 
     res.json({ ok: true });
