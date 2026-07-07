@@ -39,6 +39,8 @@ export default function CicloProductivoPage() {
 
   const [upId, setUpId] = useState<number | null>(null);
   const [areaHaCalc, setAreaHaCalc] = useState<number | null>(null);
+  const [areaHaReal, setAreaHaReal] = useState<number | null>(null);
+  const [coincideAreaUp, setCoincideAreaUp] = useState<boolean | null>(null);
   const [errorSuperficie, setErrorSuperficie] = useState<string | null>(null);
   const [todasLasUPs, setTodasLasUPs] = useState<any[]>([]);
   const [upSeleccionadaId, setUpSeleccionadaId] = useState<number | null>(null);
@@ -88,6 +90,8 @@ export default function CicloProductivoPage() {
           // Una sola parcela — seleccionar automáticamente
           setUpId(ups[0].up_id);
           setAreaHaCalc(ups[0].area_ha_calc ? Number(ups[0].area_ha_calc) : null);
+          setAreaHaReal(ups[0].area_ha_real ? Number(ups[0].area_ha_real) : null);
+          setCoincideAreaUp(ups[0].coincide_area ?? null);
           setUpSeleccionadaId(ups[0].up_id);
         } else if (ups.length === 0) {
           // Sin UP — mostrar el formulario directamente
@@ -129,13 +133,18 @@ export default function CicloProductivoPage() {
       }).catch(() => {});
   }, [tipoMaiz]);
 
+  // Área efectiva: si el productor declaró que difiere y tiene área real, usar área real; si no, usar calculada
+  const areaMaxima = (coincideAreaUp === false && areaHaReal && areaHaReal > 0)
+    ? areaHaReal
+    : areaHaCalc;
+
   const guardar = async () => {
     if (!upId) { setError('No se encontró tu unidad productiva.'); return; }
-    // La superficie sembrada no puede superar el área de la parcela
-    if (areaHaCalc != null && areaHaCalc > 0 && Number(form.area_sown_ha) > Number(areaHaCalc)) {
+    // La superficie sembrada no puede superar el área efectiva de la parcela
+    if (areaMaxima != null && areaMaxima > 0 && Number(form.area_sown_ha) > areaMaxima) {
       setError(
         `La superficie sembrada (${form.area_sown_ha} ha) no puede ser mayor ` +
-        `al área de tu parcela (${areaHaCalc} ha). Ajusta el valor antes de continuar.`
+        `al área de tu parcela (${areaMaxima} ha). Ajusta el valor antes de continuar.`
       );
       return;
     }
@@ -241,9 +250,9 @@ export default function CicloProductivoPage() {
   // C9 — Guardar la edición del cultivo (PATCH /cycle-crops/:id)
   const handleGuardarEdicion = async () => {
     if (!cicloEditando?.cycle_crop_id) return;
-    // Validar superficie contra el área de la parcela
-    if (areaHaCalc && Number(formEdicion.area_sown_ha) > Number(areaHaCalc)) {
-      setErrorEdicion(`La superficie sembrada no puede ser mayor al área de tu parcela (${areaHaCalc} ha).`);
+    // Validar superficie contra el área efectiva de la parcela
+    if (areaMaxima && Number(formEdicion.area_sown_ha) > areaMaxima) {
+      setErrorEdicion(`La superficie sembrada no puede ser mayor al área de tu parcela (${areaMaxima} ha).`);
       return;
     }
     if (formEdicion.yield_expected) {
@@ -374,6 +383,8 @@ export default function CicloProductivoPage() {
                     onClick={() => {
                       setUpId(up.up_id);
                       setAreaHaCalc(up.area_ha_calc ? Number(up.area_ha_calc) : null);
+                      setAreaHaReal(up.area_ha_real ? Number(up.area_ha_real) : null);
+                      setCoincideAreaUp(up.coincide_area ?? null);
                       setUpSeleccionadaId(up.up_id);
                       setCargandoCiclos(true);
                     }}
@@ -1009,11 +1020,11 @@ export default function CicloProductivoPage() {
                       ¿Hectáreas a sembrar este ciclo?
                     </label>
                     <div className="flex items-center gap-2">
-                      <input type="number" min="0.1" step="0.1" max={areaHaCalc ?? 9999}
+                      <input type="number" min="0.1" step="0.1" max={areaMaxima ?? 9999}
                         value={form.area_sown_ha}
                         onChange={e => {
                           const val = parseFloat(e.target.value);
-                          const max = areaHaCalc ? parseFloat(String(areaHaCalc)) : null;
+                          const max = areaMaxima ?? null;
                           if (e.target.value !== '' && max && val > max) {
                             setErrorSuperficie(`La superficie sembrada (${val} ha) no puede ser mayor al área de tu parcela (${max} ha).`);
                           } else if (e.target.value !== '' && val <= 0) {
@@ -1023,7 +1034,7 @@ export default function CicloProductivoPage() {
                           }
                           setForm(f => ({...f, area_sown_ha: e.target.value}));
                         }}
-                        placeholder={areaHaCalc ? String(areaHaCalc) : 'Ej: 5.5'}
+                        placeholder={areaMaxima ? String(areaMaxima) : 'Ej: 5.5'}
                         className={`${inputCls} text-[18px] font-black text-center flex-1 py-2.5 shadow-inner ${errorSuperficie ? 'border-red-400 ring-1 ring-red-300 bg-red-50' : ''}`}
                       />
                       <span className="text-slate-400 font-bold text-[13px] px-2">ha</span>
@@ -1034,15 +1045,15 @@ export default function CicloProductivoPage() {
                         <p className="text-red-700 text-[12px] font-medium">{errorSuperficie}</p>
                       </div>
                     )}
-                    {areaHaCalc && (
+                    {areaMaxima && (
                       <p className={`text-[11.5px] mt-1.5 text-center font-medium ${errorSuperficie ? 'text-red-500' : 'text-slate-400'}`}>
-                        Área máxima: {areaHaCalc} ha
+                        Área máxima: {areaMaxima} ha{coincideAreaUp === false && areaHaReal ? ' (área declarada)' : ''}
                       </p>
                     )}
-                    {areaHaCalc && !form.area_sown_ha && (
-                      <button onClick={() => setForm(f => ({...f, area_sown_ha: String(areaHaCalc)}))}
+                    {areaMaxima && !form.area_sown_ha && (
+                      <button onClick={() => setForm(f => ({...f, area_sown_ha: String(areaMaxima)}))}
                         className="mt-2.5 w-full text-blue-700 text-[12.5px] font-bold border border-blue-200 bg-white py-2 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
-                        Usar el total ({areaHaCalc} ha)
+                        Usar el total ({areaMaxima} ha)
                       </button>
                     )}
                   </div>
