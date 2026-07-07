@@ -1294,7 +1294,7 @@ export default function BodegasAdminPage() {
                               b.asociacion_estatus === 'aprobada' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                               b.asociacion_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                               'bg-red-50 text-red-600 border-red-200'}`}>
-                              {b.asociacion_estatus === 'aprobada' ? 'Acceso autorizado' : b.asociacion_estatus === 'pendiente' ? 'Solicitud pendiente' : 'Acceso denegado'}
+                              {b.asociacion_estatus === 'aprobada' ? 'Vinculado a bodega' : b.asociacion_estatus === 'pendiente' ? 'Solicita operar esta bodega' : 'Solicitud rechazada'}
                             </span>
                           </div>
                         </div>
