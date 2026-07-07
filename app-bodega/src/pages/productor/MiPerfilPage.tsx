@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Edit2, MapPin, LogOut, CalendarCheck, ChevronRight,
   Sprout, Trash2, Plus, Phone, Mail, Check, X, Leaf,
-  ClipboardList, CircleDot, Bell, Pencil,
+  ClipboardList, Award, CircleDot, Bell, Pencil,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import ProfileHero from '../../components/ProfileHero';
