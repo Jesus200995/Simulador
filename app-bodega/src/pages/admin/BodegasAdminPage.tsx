@@ -1061,15 +1061,11 @@ export default function BodegasAdminPage() {
                       <p className="text-[14px] font-black text-gray-900 leading-tight">{solicModal.bodega_nombre}</p>
                       <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5"><MapPin size={9}/>{solicModal.bodega_municipio}, {solicModal.bodega_estado}</p>
                     </div>
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${
-                      solicModal.bodega_estatus === 'aprobada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                      solicModal.bodega_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                      'bg-red-50 text-red-600 border-red-200'}`}>{solicModal.bodega_estatus}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { label: 'Capacidad', val: solicModal.capacidad_ton ? `${Number(solicModal.capacidad_ton).toLocaleString()} t` : '—' },
-                      { label: 'Estatus bodega', val: solicModal.bodega_estatus },
+                      { label: 'Solicitud', val: 'Acceso pendiente' },
                     ].map(({ label, val }) => (
                       <div key={label} className="bg-white rounded-xl p-2.5 border border-gray-200">
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
