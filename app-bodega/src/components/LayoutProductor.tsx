@@ -48,8 +48,8 @@ export function LayoutProductor({ children }: { children: ReactNode }) {
 
   function handleLogout() {
     logout();
-    navigate('/login-productor');
     setDrawerOpen(false);
+    window.location.href = '/login-productor';
   }
 
   const nombres = user?.nombres || user?.nombre_completo || '';

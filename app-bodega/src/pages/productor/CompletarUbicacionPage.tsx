@@ -7,6 +7,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 
@@ -208,7 +209,10 @@ export default function CompletarUbicacionPage() {
 
         {/* Buscador — arriba centrado */}
         {dibujando && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-md z-[1000]">
+          <div
+            className="absolute top-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-md z-[1000]"
+            onClick={e => e.stopPropagation()}
+          >
             <NominatimSearch
               placeholder="Buscar ejido, localidad..."
               onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
@@ -236,6 +240,13 @@ export default function CompletarUbicacionPage() {
                 ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
                 : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
             </p>
+            <div onClick={e => e.stopPropagation()}>
+              <CoordenadasGPSInput
+                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 16); }}
+                theme="dark"
+                className="w-full justify-center rounded-xl px-4 py-3"
+              />
+            </div>
             <button
               onClick={() => {
                 setCapturandoGPS(true); setGpsMsg(null);

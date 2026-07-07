@@ -9,6 +9,7 @@ import {
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
 import * as turf from '@turf/turf';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -225,7 +226,7 @@ export default function AgregarUPPage() {
               onClick={e => e.stopPropagation()}
             >
               <NominatimSearch
-                placeholder="Buscar dirección, localidad o coordenadas GPS…"
+                placeholder="Buscar dirección o localidad…"
                 onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
               />
             </div>
@@ -382,6 +383,14 @@ export default function AgregarUPPage() {
                   ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
                   : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
               </p>
+
+              <div onClick={e => e.stopPropagation()}>
+                <CoordenadasGPSInput
+                  onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 16); }}
+                  theme="dark"
+                  className="w-full justify-center rounded-xl px-4 py-3"
+                />
+              </div>
 
               <button
                 onClick={() => {

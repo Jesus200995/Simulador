@@ -18,10 +18,16 @@ function getToken(): string | null {
 }
 
 function handle401(): void {
-  // Clear all auth state and redirect to login
+  let loginPath = '/login';
+  try {
+    const persisted = JSON.parse(localStorage.getItem('simac-auth') || '{}');
+    const rol = persisted?.state?.user?.rol as string | undefined;
+    if (rol === 'productor') loginPath = '/login-productor';
+    else if (rol === 'admin' || rol === 'responsable') loginPath = '/admin/login';
+  } catch { /* ignore */ }
   localStorage.removeItem('simac_token');
   localStorage.removeItem('simac-auth');
-  window.location.href = '/login';
+  window.location.href = loginPath;
 }
 
 async function request<T = any>(path: string, opts: RequestInit = {}): Promise<T> {

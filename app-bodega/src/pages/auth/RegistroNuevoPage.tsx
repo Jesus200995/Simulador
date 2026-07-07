@@ -8,6 +8,7 @@ import {
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
+import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
 import * as turf from '@turf/turf';
 import AvisoPrivacidadStep, { type AvisoData } from './AvisoPrivacidadStep';
 
@@ -412,9 +413,12 @@ export default function RegistroNuevoPage() {
 
           {/* Buscador de dirección/localidad — ocultarlo en confirmación */}
           {!pendingUP && (
-            <div className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto">
+            <div
+              className="absolute top-3 left-3 right-3 z-[1000] max-w-md mx-auto"
+              onClick={e => e.stopPropagation()}
+            >
               <NominatimSearch
-                placeholder="Buscar dirección, localidad o coordenadas GPS…"
+                placeholder="Buscar dirección o localidad…"
                 onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
               />
             </div>
@@ -535,6 +539,13 @@ export default function RegistroNuevoPage() {
                 ? 'Toca el mapa en cada esquina de tu parcela para marcarla.'
                 : 'Toca la siguiente esquina. Cuando termines, pulsa Finalizar.'}
             </p>
+            <div onClick={e => e.stopPropagation()}>
+              <CoordenadasGPSInput
+                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 16); }}
+                theme="dark"
+                className="w-full justify-center rounded-xl px-4 py-3"
+              />
+            </div>
             <button
               onClick={() => {
                 setCapturandoGPS(true); setGpsMsg(null);

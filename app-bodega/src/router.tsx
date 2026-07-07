@@ -94,7 +94,7 @@ function GuestOnly({ children }: { children: React.ReactNode }) {
 
 function RequireProductor({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/login-productor" replace />;
   if (user?.rol !== 'productor') return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }

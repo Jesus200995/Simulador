@@ -518,7 +518,7 @@ export default function MiPerfilPage() {
         </div>
 
         {/* ── Cerrar sesión ── */}
-        <button style={delay(6)} onClick={() => { logout(); navigate('/login-productor'); }}
+        <button style={delay(6)} onClick={() => { logout(); window.location.href = '/login-productor'; }}
           className="w-full flex items-center justify-center gap-2 py-4 text-red-500 font-semibold text-[14px] active:opacity-70 transition-opacity">
           <LogOut size={16} /> Cerrar sesión
         </button>
