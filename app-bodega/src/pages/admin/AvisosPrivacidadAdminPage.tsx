@@ -325,136 +325,178 @@ function FotoExpandida({ src }: { src: string | null }) {
   );
 }
 
-/* ─── Modal detalle ──────────────────────────────────────────────── */
+/* ─── InfoCard para modal ────────────────────────────────────────── */
+function InfoCard({ icon, label, value, mono = false, link = false }: {
+  icon: React.ReactNode; label: string; value: string; mono?: boolean; link?: boolean;
+}) {
+  return (
+    <div className={`bg-gray-50/80 rounded-2xl p-3.5 border border-gray-100 transition-colors ${link ? 'hover:border-emerald-200 hover:bg-emerald-50/50 cursor-pointer' : ''}`}>
+      <div className="flex items-center gap-1.5 mb-1">
+        {icon}
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+      </div>
+      <p className={`text-[13px] font-semibold leading-snug ${link ? 'text-blue-600' : 'text-gray-800'} ${mono ? 'font-mono' : ''}`}>{value}</p>
+    </div>
+  );
+}
+
+/* ─── Modal detalle — estilo Apple 2026 ─────────────────────────── */
 function ModalDetalle({ aviso, onClose }: { aviso: Aviso; onClose: () => void }) {
   const foto   = fotoURL(aviso.aviso_privacidad_foto_url);
   const nomb   = nombre(aviso);
   const coords = aviso.aviso_privacidad_lat && aviso.aviso_privacidad_lng;
   const pct    = completitud(aviso);
+  const cap    = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-gray-950/70 backdrop-blur-xl" />
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-6"
+      style={{ zIndex: 9999 }}
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-2xl" />
+
+      {/* Sheet */}
       <div
-        className="relative bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col"
+        className="relative w-full sm:max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-[2rem] shadow-2xl max-h-[95dvh] sm:max-h-[88vh] flex flex-col overflow-hidden"
+        style={{ boxShadow: '0 40px 80px -10px rgba(0,0,0,0.5)' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-sm shadow-emerald-200">
-              <ShieldCheck size={17} className="text-white" />
-            </div>
-            <div>
-              <p className="text-[14px] font-extrabold text-gray-900 leading-none">{nomb}</p>
-              <p className="text-[10px] font-mono text-gray-400 mt-0.5">{aviso.curp}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => generarPDF(aviso)}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-[12px] font-bold transition-all shadow-sm shadow-emerald-200"
-            >
-              <FileDown size={13} /> PDF
-            </button>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
-              <X size={15} className="text-gray-500" />
-            </button>
-          </div>
+        {/* Pull handle — mobile */}
+        <div className="sm:hidden flex justify-center pt-3 pb-0 flex-shrink-0">
+          <div className="w-9 h-1 rounded-full bg-gray-200" />
         </div>
 
-        {/* Scroll body */}
-        <div className="overflow-y-auto flex-1 p-5 space-y-4">
-
-          {/* Barra de completitud */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Completitud del registro</p>
-              <span className={`text-[11px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>{pct}%</span>
+        {/* Hero con foto */}
+        {foto ? (
+          <div className="relative flex-shrink-0 h-52 sm:h-60 overflow-hidden">
+            <img src={foto} alt="Biométrico" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+            {/* Botón cerrar */}
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/35 backdrop-blur-sm flex items-center justify-center hover:bg-black/55 active:scale-95 transition-all"
+            >
+              <X size={14} className="text-white" />
+            </button>
+            {/* Botón PDF */}
+            <button
+              onClick={() => generarPDF(aviso)}
+              className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm hover:bg-white/35 active:scale-95 text-white rounded-full text-[11px] font-bold transition-all border border-white/25"
+            >
+              <FileDown size={11} /> PDF
+            </button>
+            {/* Nombre sobre la foto */}
+            <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+              <p className="text-white font-extrabold text-[17px] leading-tight drop-shadow-sm">{nomb}</p>
+              <p className="text-white/65 font-mono text-[10px] mt-0.5 tracking-wide">{aviso.curp}</p>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          </div>
+        ) : (
+          /* Sin foto — header clásico */
+          <div className="flex items-center justify-between px-5 pt-5 pb-4 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <Camera size={20} className="text-gray-300" />
+              </div>
+              <div>
+                <p className="font-extrabold text-gray-900 text-[15px] leading-tight">{nomb}</p>
+                <p className="font-mono text-gray-400 text-[10px] mt-0.5">{aviso.curp}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => generarPDF(aviso)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-[12px] font-bold transition-all"
+              >
+                <FileDown size={12} /> PDF
+              </button>
+              <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
+                <X size={14} className="text-gray-500" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Cuerpo scrollable */}
+        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-3">
+
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2">
+            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full border ${
+              aviso.estado_validacion === 'activo'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-amber-50 text-amber-700 border-amber-200'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${aviso.estado_validacion === 'activo' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              {cap(aviso.estado_validacion)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              v{aviso.aviso_privacidad_version || '1.0'}
+            </span>
+            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full border ${
+              aviso.tipo === 'productor' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+            }`}>{cap(aviso.tipo)}</span>
+            {foto && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
+                <Fingerprint size={11} /> Biométrico
+              </span>
+            )}
+          </div>
+
+          {/* Barra completitud */}
+          <div className="bg-gray-50 rounded-2xl px-4 py-3.5 border border-gray-100">
+            <div className="flex justify-between mb-2">
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Completitud del registro</p>
+              <span className={`text-[12px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>{pct}%</span>
+            </div>
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-emerald-500' : pct >= 75 ? 'bg-amber-400' : 'bg-red-400'}`}
+                className={`h-full rounded-full transition-all duration-700 ${pct === 100 ? 'bg-emerald-500' : pct >= 75 ? 'bg-amber-400' : 'bg-red-400'}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
           </div>
 
-          {/* Foto */}
-          <div className="flex gap-4">
-            <FotoThumb src={foto} size={24} thumbSize="w-28 h-28" />
-            <div className="flex-1 min-w-0 space-y-2 pt-1">
-              <div className="flex flex-wrap gap-1.5">
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${
-                  aviso.estado_validacion === 'activo'
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                }`}><CheckCircle2 size={10} /> {aviso.estado_validacion.charAt(0).toUpperCase() + aviso.estado_validacion.slice(1)}</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                  v{aviso.aviso_privacidad_version || '1.0'}
-                </span>
-                {foto && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200"><Fingerprint size={10} /> Biométrico</span>}
-              </div>
-              <DetailRow icon={<Phone size={12} />} label="Teléfono" val={aviso.telefono || '—'} />
-              <DetailRow icon={<Hash size={12} />} label="Folio" val={`#${String(aviso.id).padStart(6,'0')} · ${aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}`} mono />
+          {/* Info grid */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <InfoCard icon={<Phone size={13} className="text-emerald-500" />} label="Teléfono" value={aviso.telefono || '—'} />
+            <InfoCard icon={<Hash size={13} className="text-emerald-500" />} label="Folio" value={`#${String(aviso.id).padStart(6,'0')}`} mono />
+            <div className="col-span-2">
+              <InfoCard icon={<Calendar size={13} className="text-emerald-500" />} label="Fecha y hora de aceptación" value={fmt(aviso.aviso_privacidad_fecha)} />
+            </div>
+            <div className="col-span-2">
+              {coords ? (
+                <a
+                  href={`https://maps.google.com/?q=${aviso.aviso_privacidad_lat},${aviso.aviso_privacidad_lng}`}
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  <InfoCard icon={<MapPin size={13} className="text-emerald-500" />} label="Coordenadas GPS — toca para ver en mapa" value={`${aviso.aviso_privacidad_lat!.toFixed(6)}, ${aviso.aviso_privacidad_lng!.toFixed(6)}`} mono link />
+                </a>
+              ) : (
+                <InfoCard icon={<MapPin size={13} className="text-gray-300" />} label="Coordenadas GPS" value="No disponible" />
+              )}
             </div>
           </div>
-
-          {/* Datos de aceptación */}
-          <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100">
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-wide">Datos de la Aceptación</p>
-            <DetailRow icon={<Calendar size={13} className="text-emerald-500" />} label="Fecha y hora" val={fmt(aviso.aviso_privacidad_fecha)} />
-            <DetailRow
-              icon={<MapPin size={13} className="text-emerald-500" />}
-              label="Coordenadas GPS"
-              val={coords
-                ? `${aviso.aviso_privacidad_lat!.toFixed(6)}, ${aviso.aviso_privacidad_lng!.toFixed(6)}`
-                : 'No disponible'}
-              mono={!!coords}
-              link={coords
-                ? `https://maps.google.com/?q=${aviso.aviso_privacidad_lat},${aviso.aviso_privacidad_lng}`
-                : undefined}
-            />
-          </div>
-
-          {/* Foto expandida */}
-          {foto && (
-            <div className="rounded-2xl overflow-hidden border border-gray-100">
-              <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
-                <Fingerprint size={12} className="text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Verificación biométrica del titular</p>
-              </div>
-              <FotoExpandida src={foto} />
-            </div>
-          )}
 
           {/* Nota legal */}
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
             <p className="text-[10px] text-emerald-700 leading-relaxed">
-              Registro con validez legal conforme a la LFPDPPP. Aceptación registrada con marca de tiempo,
-              GPS y verificación biométrica. Folio <strong>#{String(aviso.id).padStart(6,'0')}</strong> · {aviso.tipo.charAt(0).toUpperCase() + aviso.tipo.slice(1)}.
+              Registro con validez legal conforme a la <strong>LFPDPPP</strong>. Aceptación registrada con marca de tiempo, GPS y verificación biométrica. Folio <strong>#{String(aviso.id).padStart(6,'0')}</strong> · {cap(aviso.tipo)}.
             </p>
           </div>
+
+          <div className="h-1" />
         </div>
       </div>
-    </div>
-  );
-}
-
-function DetailRow({ icon, label, val, mono = false, link }: {
-  icon: React.ReactNode; label: string; val: string; mono?: boolean; link?: string;
-}) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="mt-0.5 flex-shrink-0 text-gray-400">{icon}</div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{label}</p>
-        {link
-          ? <a href={link} target="_blank" rel="noopener noreferrer" className={`text-[12px] font-semibold text-blue-600 hover:underline mt-0.5 block ${mono ? 'font-mono' : ''}`}>{val}</a>
-          : <p className={`text-[12px] font-semibold text-gray-800 mt-0.5 ${mono ? 'font-mono' : ''}`}>{val}</p>
-        }
-      </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -939,9 +981,35 @@ function FilaTabla({ aviso, sel, onToggleSel, onVer, onPDF }: {
       </div>
 
       {/* Acciones */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1">
         <Btn icon={<Eye size={13} />} title="Ver detalle" onClick={onVer} color="emerald" />
         <Btn icon={<Download size={13} />} title="PDF" onClick={onPDF} color="blue" />
+      </div>
+    </div>
+
+    {/* Fila mobile */}
+    <div
+      className="sm:hidden flex items-center gap-3 px-4 py-3.5 active:bg-gray-50 transition-colors cursor-pointer"
+      onClick={onVer}
+    >
+      <FotoThumb src={foto} size={14} thumbSize="w-10 h-10" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-bold text-gray-900 truncate">{nomb}</p>
+        <p className="text-[10px] text-gray-400 mt-0.5 truncate">{aviso.telefono || aviso.curp.slice(0, 12) + '…'}</p>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className={`text-[9px] font-bold px-2 py-1 rounded-full border ${
+          aviso.estado_validacion === 'activo'
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : 'bg-amber-50 text-amber-700 border-amber-200'
+        }`}>{aviso.estado_validacion === 'activo' ? 'Activo' : 'Pendiente'}</span>
+        <button
+          onClick={e => { e.stopPropagation(); onPDF(); }}
+          className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-400 flex items-center justify-center transition-colors"
+        >
+          <Download size={13} />
+        </button>
+        <ChevronRight size={14} className="text-gray-300" />
       </div>
     </div>
   );
