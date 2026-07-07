@@ -163,15 +163,18 @@ export default function AgregarUPPage() {
 
   const puedeTerminar = pointCount >= 3;
 
-  // ── MAPA (paso === 'mapa') — pantalla completa ──────────────────────────────
+  // ── MAPA (paso === 'mapa') — pantalla completa, respeta AppHeader (64px) y bottom nav (62px) ──
   if (paso === 'mapa') {
     return (
       <div
-        className="h-[100dvh] flex flex-col overflow-hidden bg-[#0c2e1a]"
-        style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="fixed inset-0 flex flex-col overflow-hidden bg-[#0c2e1a]"
+        style={{
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 64px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 62px)',
+        }}
       >
         {/* Header oscuro */}
-        <div className="bg-[#0c2e1a] px-4 py-3 flex items-center gap-3 z-10 shadow-md flex-shrink-0">
+        <div className="bg-[#0c2e1a] px-4 py-2.5 flex items-center gap-3 z-10 shadow-md flex-shrink-0">
           <button
             onClick={() => setPaso('info')}
             className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
@@ -184,7 +187,7 @@ export default function AgregarUPPage() {
           </div>
         </div>
 
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-h-0">
           <MapContainer
             ref={mapRef}
             center={center}
