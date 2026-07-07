@@ -1283,20 +1283,12 @@ export default function BodegasAdminPage() {
                             <p className="text-[12px] font-bold text-gray-900 leading-snug">{b.bodega_nombre}</p>
                             <p className="text-[10px] text-gray-400 mt-0.5">{[b.bodega_municipio, b.bodega_estado].filter(Boolean).join(', ')}</p>
                           </div>
-                          <div className="flex flex-col gap-1 items-end flex-shrink-0">
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
-                              b.bodega_estatus === 'aprobada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                              b.bodega_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-red-50 text-red-600 border-red-200'}`}>
-                              Bodega: {b.bodega_estatus === 'aprobada' ? 'Activa' : b.bodega_estatus === 'pendiente' ? 'En revisión' : 'Inactiva'}
-                            </span>
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
-                              b.asociacion_estatus === 'aprobada' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                              b.asociacion_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-red-50 text-red-600 border-red-200'}`}>
-                              {b.asociacion_estatus === 'aprobada' ? 'Vinculado a bodega' : b.asociacion_estatus === 'pendiente' ? 'Solicita operar esta bodega' : 'Solicitud rechazada'}
-                            </span>
-                          </div>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 self-start mt-0.5 ${
+                            b.asociacion_estatus === 'aprobada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            b.asociacion_estatus === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            'bg-red-50 text-red-600 border-red-200'}`}>
+                            {b.asociacion_estatus === 'aprobada' ? '✓ Acceso aprobado' : b.asociacion_estatus === 'pendiente' ? 'Acceso pendiente' : 'Acceso rechazado'}
+                          </span>
                         </div>
                       </div>
                     ))}
