@@ -36,7 +36,7 @@ interface CropInfo {
   planting_date: string | null; estimated_harvest_date: string | null;
   destination: string | null;
 }
-interface Ciclo { cycle_id: number; cycle_year: number; cycle_type: string; crops: CropInfo[]; }
+interface Ciclo { cycle_id: number; cycle_year: number; cycle_type: string; crops: CropInfo[]; up_name?: string; }
 
 export default function MiPerfilPage() {
   const navigate   = useNavigate();
@@ -92,12 +92,21 @@ export default function MiPerfilPage() {
 
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => {
+      .then(async d => {
         const ups = d.ups ?? (Array.isArray(d) ? d : []);
         setParcelas(ups);
-        if (!ups[0]) return;
-        return fetch(`${BASE}/ups/${ups[0].up_id}/cycles`, { headers: { Authorization: `Bearer ${token}` } })
-          .then(r => r.json()).then(d => setCiclos(d.cycles ?? d));
+        if (!ups.length) { setCiclos([]); return; }
+        // Cargar ciclos de TODAS las parcelas en paralelo
+        const resultados = await Promise.all(
+          ups.map((up: any) =>
+            fetch(`${BASE}/ups/${up.up_id}/cycles`, { headers: { Authorization: `Bearer ${token}` } })
+              .then(r => r.json())
+              .then(d => (d.cycles ?? []).map((c: any) => ({ ...c, up_name: up.up_name || 'Parcela' })))
+              .catch(() => [])
+          )
+        );
+        const todosCiclos = resultados.flat().sort((a, b) => b.cycle_year - a.cycle_year || b.cycle_id - a.cycle_id);
+        setCiclos(todosCiclos);
       }).catch(() => setCiclos([]));
 
     fetch(`${BASE}/alertas/notificaciones/mis`, { headers: { Authorization: `Bearer ${token}` } })
@@ -490,7 +499,7 @@ export default function MiPerfilPage() {
             <div className="flex items-center gap-2">
               <CalendarCheck size={15} className="text-[#1A5C38]" />
               <p className="text-[13px] font-bold text-slate-700">
-                Ciclo productivo
+                Ciclos productivos
                 {ciclos && ciclos.length > 0 && (
                   <span className="ml-1.5 text-[11px] text-slate-400 font-normal">({ciclos.length})</span>
                 )}
@@ -543,13 +552,18 @@ export default function MiPerfilPage() {
                     <button key={c.cycle_id} onClick={() => navigate('/productor/ciclo')}
                       style={{ animation: `pfFadeUp .35s ${i * 60}ms ease both`, border: '1.5px solid #d1e8da', boxShadow: '0 2px 8px rgba(26,92,56,0.08)' }}
                       className="flex-shrink-0 w-56 bg-white rounded-2xl p-4 text-left active:scale-[0.97] transition-all group/card">
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-[11px] font-bold px-2.5 py-1 rounded-full leading-none"
                           style={{ background: typeColor.bg, color: typeColor.text }}>
                           {typeLabel}
                         </span>
                         <span className="text-[15px] font-black text-slate-700">{c.cycle_year}</span>
                       </div>
+                      {c.up_name && parcelas.length > 1 && (
+                        <p className="text-[10px] text-slate-400 font-semibold truncate mb-2 flex items-center gap-1">
+                          <Sprout size={9} className="text-[#1A5C38]/50 flex-shrink-0" />{c.up_name}
+                        </p>
+                      )}
                       {cropPrincipal ? (
                         <>
                           <p className="text-[15px] font-bold text-slate-800 leading-tight">
