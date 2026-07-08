@@ -63,6 +63,7 @@ export default function AgregarUPPage() {
   const [existentes, setExistentes] = useState<[number, number][][]>([]);
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [areaReal, setAreaReal] = useState('');
+  const [parcelaGuardada, setParcelaGuardada] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${BASE}/mis-ups`, { headers: { Authorization: `Bearer ${token}` } })
@@ -156,13 +157,59 @@ export default function AgregarUPPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Error al guardar la parcela.'); if (res.status === 409) setPaso('mapa'); return; }
-      navigate('/productor/perfil', { state: { mensaje: `Parcela "${data.up.up_name}" registrada correctamente` } });
+      setParcelaGuardada(data.up?.up_name || nombreUP?.trim() || 'Tu parcela');
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally { setEnviando(false); }
   };
 
   const puedeTerminar = pointCount >= 3;
+
+  // ── Modal de éxito ──
+  if (parcelaGuardada !== null) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center"
+           style={{ top: 'calc(env(safe-area-inset-top, 0px) + 64px)' }}>
+        {/* Fondo difuminado */}
+        <div className="absolute inset-0 bg-[#0c2e1a]/80 backdrop-blur-md" />
+        {/* Card */}
+        <div className="relative bg-white rounded-3xl mx-5 w-full max-w-sm shadow-2xl overflow-hidden"
+             style={{ animation: 'pfPop .35s cubic-bezier(.34,1.56,.64,1) both' }}>
+          <style>{`@keyframes pfPop { from { opacity:0; transform:scale(0.88) } to { opacity:1; transform:scale(1) } }`}</style>
+
+          {/* Banda verde superior */}
+          <div className="bg-gradient-to-br from-[#1A5C38] to-[#22783f] px-6 pt-8 pb-10 flex flex-col items-center gap-3">
+            <div className="w-16 h-16 rounded-full bg-white/15 ring-4 ring-white/30 flex items-center justify-center">
+              <CheckCircle2 size={34} className="text-white" />
+            </div>
+            <p className="text-white font-black text-[20px] text-center leading-tight mt-1">
+              ¡Parcela registrada!
+            </p>
+            <p className="text-white/70 text-[13px] text-center">Tu parcela ha sido guardada correctamente</p>
+          </div>
+
+          {/* Nombre */}
+          <div className="px-6 py-5 flex flex-col items-center gap-4">
+            <div className="w-full bg-[#eef8f2] rounded-2xl px-4 py-3.5 text-center">
+              <p className="text-[10px] font-bold text-[#1A5C38]/60 uppercase tracking-widest mb-0.5">Nombre de la parcela</p>
+              <p className="text-[17px] font-black text-[#1A5C38]">{parcelaGuardada}</p>
+            </div>
+
+            <button
+              onClick={() => navigate('/productor/perfil')}
+              className="w-full bg-[#1A5C38] text-white font-bold text-[14px] py-3.5 rounded-2xl active:scale-[0.98] transition-all shadow-lg shadow-[#1A5C38]/25">
+              Ver mi perfil
+            </button>
+            <button
+              onClick={() => { setParcelaGuardada(null); setPaso('info'); setPendingUP(null); setNombreUP(''); setCoincideArea(null); setAreaReal(''); }}
+              className="w-full text-slate-500 font-medium text-[13px] py-2 active:opacity-60 transition-opacity">
+              Agregar otra parcela
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ── MAPA (paso === 'mapa') — pantalla completa, respeta AppHeader (64px) y bottom nav (62px) ──
   if (paso === 'mapa') {
@@ -252,19 +299,13 @@ export default function AgregarUPPage() {
                   </div>
                 </div>
 
-                {/* Nombre editable */}
-                <div className="mb-4">
-                  <label className="block text-white/60 text-[11px] font-semibold uppercase tracking-wide mb-1.5">
-                    Nombre de la parcela <span className="normal-case font-normal text-white/30">(opcional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={nombreUP}
-                    onChange={e => setNombreUP(e.target.value)}
-                    placeholder="Ej: Parcela Norte, El Potrero, etc."
-                    className="w-full bg-white/10 ring-1 ring-white/20 rounded-xl px-4 py-2.5 text-white text-[14px] focus:ring-2 focus:ring-green-400/50 focus:outline-none placeholder-white/30"
-                  />
-                </div>
+                {/* Nombre de la parcela (solo lectura, viene del paso 1) */}
+                {nombreUP?.trim() && (
+                  <div className="mb-3 bg-white/5 rounded-xl px-3 py-2 ring-1 ring-white/10 flex items-center gap-2">
+                    <span className="text-white/40 text-[10px] font-semibold uppercase tracking-wide">Parcela</span>
+                    <span className="text-white text-[13px] font-bold flex-1 truncate">{nombreUP.trim()}</span>
+                  </div>
+                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 mb-4">
