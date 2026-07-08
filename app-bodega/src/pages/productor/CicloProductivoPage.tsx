@@ -195,14 +195,14 @@ export default function CicloProductivoPage() {
 
       localStorage.removeItem('ciclo_pendiente');
       localStorage.setItem('ciclo_completado', '1');
-      navigate('/productor', { state: { mensaje: 'Ciclo productivo guardado con éxito' } });
+      navigate('/productor/perfil', { state: { mensaje: 'Ciclo productivo guardado con éxito' } });
     } catch { setError('Error de conexión al servidor. Revisa tu internet e intenta de nuevo.');
     } finally { setLoading(false); }
   };
 
   const saltar = () => {
     localStorage.setItem('ciclo_pendiente', '1');
-    navigate('/productor');
+    navigate(-1);
   };
 
   // C8 — Cancelar ciclo (estado_ciclo = 'cancelado'). No borra el registro.
@@ -360,7 +360,7 @@ export default function CicloProductivoPage() {
         {/* Slim header */}
         <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-            <button onClick={() => navigate('/productor')}
+            <button onClick={() => navigate(-1)}
               className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 text-white hover:bg-white/25 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
@@ -418,7 +418,7 @@ export default function CicloProductivoPage() {
         {/* Slim header */}
         <div className="shrink-0 z-20 w-full backdrop-blur-md border-b border-white/10" style={{ background: 'linear-gradient(135deg, rgba(20,72,44,0.88) 0%, rgba(26,92,56,0.82) 60%, rgba(34,115,63,0.76) 100%)' }}>
           <div className="max-w-xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-            <button onClick={() => navigate('/productor')}
+            <button onClick={() => navigate(-1)}
               className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 text-white hover:bg-white/25 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
@@ -662,7 +662,7 @@ export default function CicloProductivoPage() {
             <button onClick={() => {
                 if (paso > 1) { setPaso(paso - 1); return; }
                 if (ciclosExistentes.length > 0) setMostrarFormulario(false);
-                else navigate('/productor');
+                else navigate(-1);
               }}
               className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 text-white hover:bg-white/25 transition-all active:scale-95">
               <ChevronLeft size={20} strokeWidth={2.5} />
