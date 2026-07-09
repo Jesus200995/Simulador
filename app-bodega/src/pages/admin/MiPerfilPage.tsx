@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   User, Mail, Lock, Eye, EyeOff, CheckCircle2,
   AlertTriangle, Loader2, ShieldCheck, ChevronDown,
-  LogOut,
+  LogOut, Clock, CalendarDays,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 
@@ -253,23 +253,32 @@ export default function MiPerfilPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-4 flex gap-4 pt-4 border-t border-gray-100">
-            <div>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
-              <p className="text-[12px] font-bold text-gray-700 mt-0.5">
-                {perfil?.ultimo_login
-                  ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
-                  : 'Primer acceso'}
-              </p>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <Clock size={13} className="text-gray-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
+                <p className="text-[12px] font-bold text-gray-700 mt-0.5 truncate">
+                  {perfil?.ultimo_login
+                    ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
+                    : 'Primer acceso'}
+                </p>
+              </div>
             </div>
-            <div className="w-px bg-gray-100" />
-            <div>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
-              <p className="text-[12px] font-bold text-gray-700 mt-0.5">
-                {perfil?.created_at
-                  ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' })
-                  : '—'}
-              </p>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <CalendarDays size={13} className="text-gray-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
+                <p className="text-[12px] font-bold text-gray-700 mt-0.5 truncate">
+                  {perfil?.created_at
+                    ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' })
+                    : '—'}
+                </p>
+              </div>
             </div>
           </div>
         </div>

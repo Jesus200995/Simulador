@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ShieldCheck, Plus, Pencil, Trash2, X,
   Copy, Download, CheckCircle2, AlertTriangle, ChevronDown,
   Loader2, RefreshCw, UserPlus, KeySquare,
-  TriangleAlert, Sparkles,
+  TriangleAlert, Sparkles, LayoutDashboard, Users, Warehouse,
+  TrendingUp, Sprout, BarChart3, Leaf,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -19,15 +21,15 @@ interface Permiso { vista: string; sub_accion: string; habilitado: boolean; }
 interface CredencialesNuevas { email: string; password_temporal: string; nombre_completo: string; rol: string; estado_asignado: string | null; }
 
 const VISTAS_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
-  dashboard:           { label: 'Dashboard',        icon: <span className="text-blue-500">◈</span> },
-  productores:         { label: 'Productores',       icon: <span className="text-emerald-500">◈</span> },
-  bodegas:             { label: 'Bodegas',           icon: <span className="text-amber-500">◈</span> },
-  alertas:             { label: 'Alertas',           icon: <span className="text-red-500">◈</span> },
-  precios:             { label: 'Precios',           icon: <span className="text-violet-500">◈</span> },
-  produccion:          { label: 'Producción',        icon: <span className="text-green-600">◈</span> },
-  mercado:             { label: 'Mercado',           icon: <span className="text-cyan-500">◈</span> },
-  senasica:            { label: 'SENASICA',          icon: <span className="text-lime-600">◈</span> },
-  'avisos-privacidad': { label: 'Avisos Privacidad', icon: <span className="text-slate-500">◈</span> },
+  dashboard:           { label: 'Dashboard',        icon: <LayoutDashboard size={14} className="text-blue-500" /> },
+  productores:         { label: 'Productores',       icon: <Users size={14} className="text-emerald-500" /> },
+  bodegas:             { label: 'Bodegas',           icon: <Warehouse size={14} className="text-amber-500" /> },
+  alertas:             { label: 'Alertas',           icon: <AlertTriangle size={14} className="text-red-500" /> },
+  precios:             { label: 'Precios',           icon: <TrendingUp size={14} className="text-violet-500" /> },
+  produccion:          { label: 'Producción',        icon: <Sprout size={14} className="text-green-600" /> },
+  mercado:             { label: 'Mercado',           icon: <BarChart3 size={14} className="text-cyan-500" /> },
+  senasica:            { label: 'SENASICA',          icon: <Leaf size={14} className="text-lime-600" /> },
+  'avisos-privacidad': { label: 'Avisos Privacidad', icon: <ShieldCheck size={14} className="text-slate-500" /> },
 };
 
 const ACCION_LABELS: Record<string, string> = {
@@ -114,8 +116,8 @@ function ModalOverlay({ open, onClose, children, maxW = 'max-w-lg', noPad = fals
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal>
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-gray-950/55 backdrop-blur-[18px]"
@@ -124,7 +126,7 @@ function ModalOverlay({ open, onClose, children, maxW = 'max-w-lg', noPad = fals
       />
       {/* Sheet */}
       <div ref={ref}
-        className={`relative w-full ${maxW} bg-white rounded-[28px] shadow-[0_32px_72px_rgba(0,0,0,0.22),0_0_0_1px_rgba(0,0,0,0.06)] flex flex-col max-h-[90vh] overflow-hidden`}
+        className={`relative w-full ${maxW} bg-white rounded-[24px] sm:rounded-[28px] shadow-[0_32px_72px_rgba(0,0,0,0.22),0_0_0_1px_rgba(0,0,0,0.06)] flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden`}
         style={{ animation: `modalIn 220ms ${SPRING} both` }}>
         {!noPad && children}
         {noPad && children}
@@ -133,7 +135,8 @@ function ModalOverlay({ open, onClose, children, maxW = 'max-w-lg', noPad = fals
         @keyframes fadein{from{opacity:0}to{opacity:1}}
         @keyframes modalIn{from{opacity:0;transform:scale(.93) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -226,20 +229,20 @@ function ModalCredenciales({ creds, onClose }: { creds: CredencialesNuevas; onCl
   return (
     <ModalOverlay open onClose={onClose} maxW="max-w-sm" noPad>
       {/* Top strip */}
-      <div className="bg-gradient-to-br from-[#0e5c33] to-[#1a7a44] px-6 pt-6 pb-5">
-        <div className="flex items-start justify-between mb-4">
-          <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-            <Sparkles size={18} className="text-white" />
+      <div className="bg-gradient-to-br from-[#0e5c33] to-[#1a7a44] px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5">
+        <div className="flex items-start justify-between mb-3.5 sm:mb-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+            <Sparkles size={17} className="text-white" />
           </div>
           <button onClick={onClose} className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all">
             <X size={13} className="text-white/80" />
           </button>
         </div>
-        <p className="text-white text-[15px] font-black leading-tight">Usuario creado</p>
-        <p className="text-white/60 text-[11.5px] mt-0.5">Guarda estas credenciales ahora</p>
+        <p className="text-white text-[14px] sm:text-[15px] font-black leading-tight">Usuario creado</p>
+        <p className="text-white/60 text-[11px] sm:text-[11.5px] mt-0.5">Guarda estas credenciales ahora</p>
       </div>
 
-      <div className="px-5 py-5 flex flex-col gap-3.5">
+      <div className="px-4 sm:px-5 py-4 sm:py-5 flex flex-col gap-3.5">
         {/* Warning */}
         <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl px-3.5 py-3">
           <TriangleAlert size={14} className="text-amber-500 shrink-0 mt-0.5" />
@@ -476,9 +479,12 @@ export default function PermisosAdminPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
-                  {['Usuario','Rol','Estado','Último acceso','Cuenta',''].map(h => (
-                    <th key={h} className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 first:rounded-tl-2xl last:rounded-tr-2xl">{h}</th>
-                  ))}
+                  <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tl-2xl">Usuario</th>
+                  <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Rol</th>
+                  <th className="hidden md:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Estado</th>
+                  <th className="hidden lg:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Último acceso</th>
+                  <th className="hidden sm:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Cuenta</th>
+                  <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tr-2xl"></th>
                 </tr>
               </thead>
               <tbody>
@@ -494,17 +500,17 @@ export default function PermisosAdminPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3.5"><RolChip rol={u.rol} etiqueta={u.rol_etiqueta ?? u.rol} /></td>
-                    <td className="px-5 py-3.5">
+                    <td className="hidden md:table-cell px-5 py-3.5">
                       {u.estado_asignado
                         ? <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{u.estado_asignado}</span>
                         : <span className="text-[11px] text-gray-400">Nacional</span>}
                     </td>
-                    <td className="px-5 py-3.5 text-[12px] text-gray-500">
+                    <td className="hidden lg:table-cell px-5 py-3.5 text-[12px] text-gray-500">
                       {u.ultimo_login
                         ? new Date(u.ultimo_login).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
                         : <span className="text-amber-500 font-semibold text-[11px]">Nunca</span>}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="hidden sm:table-cell px-5 py-3.5">
                       {u.debe_cambiar_pass
                         ? <span className="text-[10.5px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pass pendiente</span>
                         : <span className="text-[10.5px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Activo</span>}
@@ -532,22 +538,22 @@ export default function PermisosAdminPage() {
       {/* ═══ MODAL CREAR ════════════════════════════════════════════════ */}
       <ModalOverlay open={modalCrear} onClose={() => setModalCrear(false)} maxW="max-w-2xl" noPad>
         {/* Header verde */}
-        <div className="bg-gradient-to-br from-[#0e5c33] to-[#1a7a44] px-6 pt-6 pb-5 shrink-0">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-              <UserPlus size={18} className="text-white" />
+        <div className="bg-gradient-to-br from-[#0e5c33] to-[#1a7a44] px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5 shrink-0">
+          <div className="flex items-start justify-between mb-3.5 sm:mb-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+              <UserPlus size={17} className="text-white" />
             </div>
             <button onClick={() => setModalCrear(false)}
               className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-90">
               <X size={13} className="text-white/80" />
             </button>
           </div>
-          <p className="text-white text-[15px] font-black">Nuevo usuario del panel</p>
-          <p className="text-white/60 text-[11.5px] mt-0.5">Contraseña temporal auto-generada · Email como identificador</p>
+          <p className="text-white text-[14px] sm:text-[15px] font-black">Nuevo usuario del panel</p>
+          <p className="text-white/60 text-[11px] sm:text-[11.5px] mt-0.5">Contraseña temporal auto-generada · Email como identificador</p>
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto px-6 py-5 flex flex-col gap-4">
+        <div className="overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className={lCls}>Nombre completo *</label>
@@ -597,11 +603,11 @@ export default function PermisosAdminPage() {
             </div>
           )}
 
-          <div className="flex justify-end gap-2.5 pt-1">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-1">
             <button onClick={() => setModalCrear(false)}
               className="px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">Cancelar</button>
             <button onClick={crearUsuario} disabled={creando}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a3d22] transition-all active:scale-95 shadow-sm disabled:opacity-50">
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a3d22] transition-all active:scale-95 shadow-sm disabled:opacity-50">
               {creando ? <><Loader2 size={13} className="animate-spin" />Creando…</> : <><Plus size={13} />Crear usuario</>}
             </button>
           </div>
@@ -610,21 +616,21 @@ export default function PermisosAdminPage() {
 
       {/* ═══ MODAL EDITAR ═══════════════════════════════════════════════ */}
       <ModalOverlay open={modalEditar} onClose={() => setModalEditar(false)} maxW="max-w-2xl" noPad>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 px-6 pt-6 pb-5 shrink-0">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center">
-              <KeySquare size={18} className="text-white" />
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5 shrink-0">
+          <div className="flex items-start justify-between mb-3.5 sm:mb-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/15 flex items-center justify-center">
+              <KeySquare size={17} className="text-white" />
             </div>
             <button onClick={() => setModalEditar(false)}
               className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-90">
               <X size={13} className="text-white/80" />
             </button>
           </div>
-          <p className="text-white text-[15px] font-black">{usuEdit?.nombre_completo}</p>
-          <p className="text-white/50 text-[11.5px] mt-0.5">Los permisos se aplican en tiempo real — sin recargar</p>
+          <p className="text-white text-[14px] sm:text-[15px] font-black truncate">{usuEdit?.nombre_completo}</p>
+          <p className="text-white/50 text-[11px] sm:text-[11.5px] mt-0.5">Los permisos se aplican en tiempo real — sin recargar</p>
         </div>
 
-        <div className="overflow-y-auto px-6 py-5 flex flex-col gap-4">
+        <div className="overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className={lCls}>Nombre completo</label>
@@ -680,11 +686,11 @@ export default function PermisosAdminPage() {
             </div>
           )}
 
-          <div className="flex justify-end gap-2.5 pt-1">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-1">
             <button onClick={() => setModalEditar(false)}
               className="px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">Cerrar</button>
             <button onClick={guardarEditar} disabled={guardando}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-gray-800 hover:bg-gray-900 transition-all active:scale-95 shadow-sm disabled:opacity-50">
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-gray-800 hover:bg-gray-900 transition-all active:scale-95 shadow-sm disabled:opacity-50">
               {guardando ? <><Loader2 size={13} className="animate-spin" />Guardando…</> : <><CheckCircle2 size={13} />Guardar cambios</>}
             </button>
           </div>
@@ -693,25 +699,25 @@ export default function PermisosAdminPage() {
 
       {/* ═══ MODAL ELIMINAR ═════════════════════════════════════════════ */}
       <ModalOverlay open={modalDel} onClose={() => setModalDel(false)} maxW="max-w-sm" noPad>
-        <div className="bg-gradient-to-br from-red-600 to-red-700 px-6 pt-6 pb-5">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-              <Trash2 size={18} className="text-white" />
+        <div className="bg-gradient-to-br from-red-600 to-red-700 px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5">
+          <div className="flex items-start justify-between mb-3.5 sm:mb-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+              <Trash2 size={17} className="text-white" />
             </div>
             <button onClick={() => setModalDel(false)}
               className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-90">
               <X size={13} className="text-white/80" />
             </button>
           </div>
-          <p className="text-white text-[15px] font-black">Eliminar usuario</p>
-          <p className="text-white/60 text-[11.5px] mt-0.5">Esta acción no se puede deshacer</p>
+          <p className="text-white text-[14px] sm:text-[15px] font-black">Eliminar usuario</p>
+          <p className="text-white/60 text-[11px] sm:text-[11.5px] mt-0.5">Esta acción no se puede deshacer</p>
         </div>
 
-        <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-4">
           <p className="text-[13px] text-gray-700 leading-relaxed">
             <strong className="text-gray-900">{usuDel?.nombre_completo}</strong> perderá acceso inmediato al panel y todos sus permisos serán eliminados.
           </p>
-          <div className="flex gap-2.5">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
             <button onClick={() => setModalDel(false)}
               className="flex-1 py-3 rounded-2xl text-[13px] font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">Cancelar</button>
             <button onClick={eliminar} disabled={deleting}
