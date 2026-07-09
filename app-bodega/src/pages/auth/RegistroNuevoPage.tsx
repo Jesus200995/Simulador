@@ -851,12 +851,17 @@ export default function RegistroNuevoPage() {
                       <p className={`text-[11px] font-mono text-right mt-1 ${curp.length === 18 ? 'text-green-400' : 'text-white/20'}`}>{curp.length}/18</p>
                     </div>
 
+                    {datosDeRenapo && (
+                      <div className="flex items-center gap-2.5 bg-emerald-950/60 border border-emerald-500/40 rounded-xl px-4 py-2.5 mb-4">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                          <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                        <p className="text-emerald-300 text-xs font-medium">CURP verificada correctamente en RENAPO. Nombre y apellidos confirmados.</p>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
                       <div>
-                        <label className={labelCls}>
-                          Nombre(s) <span className="text-red-400">*</span>
-                          {datosDeRenapo && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>RENAPO</span>}
-                        </label>
+                        <label className={labelCls}>Nombre(s) <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.nombres}
                           onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, nombres: e.target.value }))}
                           readOnly={datosDeRenapo}
@@ -865,10 +870,7 @@ export default function RegistroNuevoPage() {
                         {erroresManual.nombres && <p className="text-red-300 text-[11px] mt-1">{erroresManual.nombres}</p>}
                       </div>
                       <div>
-                        <label className={labelCls}>
-                          Apellido Paterno <span className="text-red-400">*</span>
-                          {datosDeRenapo && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>RENAPO</span>}
-                        </label>
+                        <label className={labelCls}>Apellido Paterno <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.apellidoPaterno}
                           onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, apellidoPaterno: e.target.value }))}
                           readOnly={datosDeRenapo}
@@ -877,10 +879,7 @@ export default function RegistroNuevoPage() {
                         {erroresManual.apellidoPaterno && <p className="text-red-300 text-[11px] mt-1">{erroresManual.apellidoPaterno}</p>}
                       </div>
                       <div>
-                        <label className={labelCls}>
-                          Apellido Materno <span className="text-red-400">*</span>
-                          {datosDeRenapo && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>RENAPO</span>}
-                        </label>
+                        <label className={labelCls}>Apellido Materno <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.apellidoMaterno}
                           onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, apellidoMaterno: e.target.value }))}
                           readOnly={datosDeRenapo}
