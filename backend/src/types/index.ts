@@ -30,9 +30,11 @@ export interface LoginPayload {
 }
 
 export interface JwtPayload {
-  userId: number;
-  email: string;
-  rol: string;
+  userId:            number;
+  email:             string;
+  rol:               string;
+  estado_asignado?:  string | null;
+  debe_cambiar_pass?:boolean;
 }
 
 export interface Bodega {

@@ -2,13 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface User {
-  userId: number;
-  email: string;
-  rol: string;
-  nombre_completo?: string;
-  nombres?: string;
-  apellido_paterno?: string;
-  producer_id?: number;
+  userId:             number;
+  email:              string;
+  rol:                string;
+  nombre_completo?:   string;
+  nombres?:           string;
+  apellido_paterno?:  string;
+  producer_id?:       number;
+  estado_asignado?:   string | null;
+  debe_cambiar_pass?: boolean;
+  es_panel_usuario?:  boolean;
+  redirect_post_login?:string;
 }
 
 interface AuthState {

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
+import { usePermisosSSE } from '../../hooks/usePermisosSSE';
 import {
   LayoutDashboard, Users, Warehouse, AlertTriangle,
   TrendingUp, LogOut, Menu, X, ShieldCheck, ChevronRight,
-  Sprout, BarChart3, Settings, Leaf
+  Sprout, BarChart3, Settings, Leaf, KeyRound
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -26,6 +27,7 @@ const MENU: SidebarItem[] = [
   { label: 'SENASICA',     subtitle: 'Carga de alertas fitosanitarias y notificación a productores',  path: '/admin/senasica',       icon: Leaf },
   { label: 'Configuración',subtitle: 'Preferencias, roles de usuario y ajustes del sistema',         path: '/admin/configuracion',  icon: Settings },
   { label: 'Avisos Privacidad', subtitle: 'Constancias de aceptación con verificación biométrica y GPS', path: '/admin/avisos-privacidad', icon: ShieldCheck },
+  { label: 'Permisos',          subtitle: 'Usuarios del panel, roles y control de acceso por vista', path: '/admin/permisos',          icon: KeyRound },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -33,6 +35,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Conectar SSE de permisos para este usuario del panel
+  usePermisosSSE(user?.userId, user?.rol === 'admin');
 
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 

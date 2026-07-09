@@ -210,23 +210,37 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     const secret = process.env.JWT_SECRET;
     if (!secret) throw new Error('FATAL: JWT_SECRET no está definida en las variables de entorno.');
     const token = jwt.sign(
-      { userId: usuario.id, email: usuario.email, rol: usuario.rol },
+      {
+        userId:           usuario.id,
+        email:            usuario.email,
+        rol:              usuario.rol,
+        estado_asignado:  usuario.estado_asignado  ?? null,
+        debe_cambiar_pass:!!usuario.debe_cambiar_pass,
+      },
       secret,
       { expiresIn: '8h' }
     );
+
+    // Actualizar último login para usuarios del panel
+    if (usuario.es_panel_usuario) {
+      pool.query('UPDATE usuarios SET ultimo_login=NOW() WHERE id=$1', [usuario.id]).catch(() => {});
+    }
 
     res.json({
       message: 'Inicio de sesión exitoso',
       token,
       usuario: {
-        id: usuario.id,
-        email: usuario.email,
-        curp: usuario.curp,
-        nombre_completo: usuario.nombre_completo,
-        telefono: usuario.telefono,
-        rol: usuario.rol,
-        state_id: usuario.state_id,
-        municipality_id: usuario.municipality_id,
+        id:                usuario.id,
+        email:             usuario.email,
+        curp:              usuario.curp,
+        nombre_completo:   usuario.nombre_completo,
+        telefono:          usuario.telefono,
+        rol:               usuario.rol,
+        state_id:          usuario.state_id,
+        municipality_id:   usuario.municipality_id,
+        estado_asignado:   usuario.estado_asignado  ?? null,
+        debe_cambiar_pass: !!usuario.debe_cambiar_pass,
+        es_panel_usuario:  !!usuario.es_panel_usuario,
       },
     });
   } catch (error) {
@@ -401,11 +415,11 @@ router.post('/cambiar-password', authMiddleware, async (req: AuthRequest, res: R
 
     const newHash = await bcrypt.hash(password_nuevo, 12);
     await pool.query(
-      'UPDATE usuarios SET password_hash = $1 WHERE id = $2',
+      'UPDATE usuarios SET password_hash=$1, debe_cambiar_pass=FALSE WHERE id=$2',
       [newHash, req.user!.userId]
     );
 
-    res.json({ mensaje: 'Contraseña actualizada correctamente' });
+    res.json({ mensaje: 'Contraseña actualizada correctamente', debe_cambiar_pass: false });
   } catch (error) {
     console.error('Error al cambiar contraseña:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
