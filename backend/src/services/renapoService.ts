@@ -28,23 +28,17 @@ export const consultarCURPEnRENAPO = async (curp: string): Promise<RenapoResult>
     return { encontrado: false, error: 'Servicio no configurado', codigo: 'SIN_CONFIG' };
   }
 
-  if (!RENAPO_SESSION) {
-    console.error('[RENAPO] RENAPO_SESSION no configurada en .env — puede estar expirada');
-    return { encontrado: false, error: 'Sesión RENAPO no disponible', codigo: 'SIN_SESSION' };
-  }
-
   try {
+    const headers: Record<string, string> = {
+      'X-API-KEY':    RENAPO_API_KEY,
+      'Content-Type': 'application/json',
+    };
+    if (RENAPO_SESSION) headers['Cookie'] = `suri_session=${RENAPO_SESSION}`;
+
     const response = await axios.post(
       `${RENAPO_URL}?curp=${encodeURIComponent(curp)}`,
       {},
-      {
-        headers: {
-          'X-API-KEY':    RENAPO_API_KEY,
-          'Cookie':       `suri_session=${RENAPO_SESSION}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      }
+      { headers, timeout: 10000 }
     );
 
     const data = response.data;
