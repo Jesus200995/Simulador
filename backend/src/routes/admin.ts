@@ -1082,16 +1082,40 @@ router.patch('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: Auth
 });
 
 // DELETE /api/admin/usuarios-bodega/:id
+// Cascade: bodegas del usuario (y sus hijos) → bodeguero_bodegas → usuario
 router.delete('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
   const client = await pool.connect();
   try {
     const { id } = req.params;
     await client.query('BEGIN');
-    // Desasignar bodega si existe
-    await client.query(`DELETE FROM bodeguero_bodegas WHERE usuario_id = $1`, [id]);
-    await client.query(`DELETE FROM usuarios WHERE id = $1`, [id]);
+
+    // Bodegas creadas por este usuario
+    const bodegasRes = await client.query(
+      `SELECT id FROM bodegas WHERE creado_por = $1`,
+      [id]
+    );
+    const bodegaIds = bodegasRes.rows.map((r: any) => r.id);
+
+    // Cascade manual por cada bodega
+    for (const bodegaId of bodegaIds) {
+      await client.query('DELETE FROM senales_compra       WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM oferta_interes       WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM precios              WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM inventarios          WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM tarifario_servicios  WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM transacciones        WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM infraestructura_contactos WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM ventanillas          WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM bodeguero_bodegas    WHERE bodega_id = $1', [bodegaId]);
+      await client.query('DELETE FROM bodegas              WHERE id = $1', [bodegaId]);
+    }
+
+    // Desasignar cualquier bodega ajena a la que esté asignado este usuario
+    await client.query('DELETE FROM bodeguero_bodegas WHERE usuario_id = $1', [id]);
+    await client.query('DELETE FROM usuarios           WHERE id = $1', [id]);
+
     await client.query('COMMIT');
-    res.json({ ok: true });
+    res.json({ ok: true, bodegasEliminadas: bodegaIds.length });
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error delete usuario-bodega:', error);
