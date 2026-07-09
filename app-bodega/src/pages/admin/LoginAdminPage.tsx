@@ -252,19 +252,6 @@ export default function LoginAdminPage() {
                   </span>
                 </button>
 
-                {/* Divider */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-white/8" />
-                  <span className="text-[11px] text-white/20 font-medium">o</span>
-                  <div className="flex-1 h-px bg-white/8" />
-                </div>
-
-                {/* Register link */}
-                <Link to="/admin/registro"
-                  className="w-full flex items-center justify-center gap-2 border border-white/10 hover:border-emerald-500/40 rounded-2xl py-3.5 text-[13px] font-semibold text-white/45 hover:text-emerald-300 hover:bg-emerald-500/5 transition-all duration-200">
-                  Crear cuenta administrativa
-                </Link>
-
                 {/* Back */}
                 <p className="text-center">
                   <Link to="/login" className="text-[12px] text-white/20 hover:text-white/45 transition-colors">
