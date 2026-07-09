@@ -358,6 +358,15 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
         return;
       }
 
+      // CURP de persona fallecida — bloquear registro
+      if (renapo.encontrado && renapo.fallecido) {
+        res.status(403).json({
+          error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
+          codigo: 'CURP_FALLECIDO'
+        });
+        return;
+      }
+
       const datosRenapo = renapo.encontrado && renapo.datos ? {
         nombres:      renapo.datos.nombres,
         apellido_pat: renapo.datos.apellidoPat,
@@ -430,6 +439,14 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
         res.status(404).json({
           error: 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.',
           codigo: 'CURP_NO_VALIDA_RENAPO'
+        });
+        return;
+      }
+
+      if (renapo.encontrado && renapo.fallecido) {
+        res.status(403).json({
+          error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
+          codigo: 'CURP_FALLECIDO'
         });
         return;
       }

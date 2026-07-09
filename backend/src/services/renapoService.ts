@@ -7,6 +7,7 @@ const RENAPO_SESSION = process.env.RENAPO_SESSION || '';
 
 export interface RenapoResult {
   encontrado:   boolean;
+  fallecido?:   boolean;
   datos?: {
     curp:         string;
     nombres:      string;
@@ -16,7 +17,8 @@ export interface RenapoResult {
     fechaNac:     string;
     entidadNac:   string;
     claveEntidad: string;
-    historica:    boolean;
+    statusRenapo: string;
+    definicion:   string;
   };
   error?:  string;
   codigo?: string;
@@ -47,8 +49,14 @@ export const consultarCURPEnRENAPO = async (curp: string): Promise<RenapoResult>
       return { encontrado: false, error: 'CURP no encontrada', codigo: 'NO_ENCONTRADA' };
     }
 
+    // BD = Baja por Defunción, statusPersonaRenapo 2 = fallecido
+    const esFallecido =
+      data.statusRenapo === 'BD' ||
+      data.statusPersonaRenapo === 2;
+
     return {
-      encontrado: true,
+      encontrado:  true,
+      fallecido:   esFallecido,
       datos: {
         curp:         data.values.curp,
         nombres:      data.values.nombre,
@@ -58,7 +66,8 @@ export const consultarCURPEnRENAPO = async (curp: string): Promise<RenapoResult>
         fechaNac:     data.values.fechaNac,
         entidadNac:   data.values.entidadNac,
         claveEntidad: data.values.claveEntidad,
-        historica:    data.values.historica,
+        statusRenapo: data.statusRenapo,
+        definicion:   data.definicionStatusRenapo || '',
       }
     };
 

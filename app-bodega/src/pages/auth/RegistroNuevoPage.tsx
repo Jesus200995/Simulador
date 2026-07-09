@@ -169,9 +169,14 @@ export default function RegistroNuevoPage() {
           setErrorNombres(data.nombres || null);
           return;
         }
-        // CURP no existe en RENAPO — bloquear con mensaje claro
+        // CURP no existe en RENAPO — bloquear
         if (data.codigo === 'CURP_NO_VALIDA_RENAPO') {
           setError('Esta CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.');
+          return;
+        }
+        // CURP de persona fallecida — bloquear
+        if (data.codigo === 'CURP_FALLECIDO') {
+          setError('La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.');
           return;
         }
         // CURP no encontrada, inactiva o padrón no disponible → registro manual
