@@ -141,6 +141,7 @@ export default function RegistroNuevoPage() {
     municipioPadron: '',
   });
   const [erroresManual, setErroresManual] = useState<Record<string, string>>({});
+  const [datosDeRenapo, setDatosDeRenapo] = useState(false);
 
   const validarCURP = (c: string) =>
     /^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[A-Z0-9][0-9]$/.test(c.toUpperCase().trim());
@@ -196,6 +197,7 @@ export default function RegistroNuevoPage() {
               genero:           data.datos_renapo.sexo === 'HOMBRE' ? 'H'
                               : data.datos_renapo.sexo === 'MUJER'  ? 'M' : '',
             }));
+            setDatosDeRenapo(true);
           }
           navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`);
           return;
@@ -848,26 +850,38 @@ export default function RegistroNuevoPage() {
                       <p className={`text-[11px] font-mono text-right mt-1 ${curp.length === 18 ? 'text-green-400' : 'text-white/20'}`}>{curp.length}/18</p>
                     </div>
 
+                    {datosDeRenapo && (
+                      <div className="flex items-center gap-2 bg-emerald-900/30 border border-emerald-500/30 rounded-xl px-3 py-2 mb-1">
+                        <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <p className="text-emerald-300 text-[11px]">Nombre y apellidos verificados por RENAPO — no son editables</p>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
                       <div>
                         <label className={labelCls}>Nombre(s) <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.nombres}
-                          onChange={e => setDatosManual(p => ({ ...p, nombres: e.target.value }))}
-                          placeholder="Juan Carlos" className={inputCls} />
+                          onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, nombres: e.target.value }))}
+                          readOnly={datosDeRenapo}
+                          placeholder="Juan Carlos"
+                          className={`${inputCls} ${datosDeRenapo ? 'opacity-70 cursor-not-allowed select-none' : ''}`} />
                         {erroresManual.nombres && <p className="text-red-300 text-[11px] mt-1">{erroresManual.nombres}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Apellido Paterno <span className="text-red-400">*</span></label>
                         <input type="text" value={datosManual.apellidoPaterno}
-                          onChange={e => setDatosManual(p => ({ ...p, apellidoPaterno: e.target.value }))}
-                          placeholder="García" className={inputCls} />
+                          onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, apellidoPaterno: e.target.value }))}
+                          readOnly={datosDeRenapo}
+                          placeholder="García"
+                          className={`${inputCls} ${datosDeRenapo ? 'opacity-70 cursor-not-allowed select-none' : ''}`} />
                         {erroresManual.apellidoPaterno && <p className="text-red-300 text-[11px] mt-1">{erroresManual.apellidoPaterno}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Apellido Materno</label>
                         <input type="text" value={datosManual.apellidoMaterno}
-                          onChange={e => setDatosManual(p => ({ ...p, apellidoMaterno: e.target.value }))}
-                          placeholder="López" className={inputCls} />
+                          onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, apellidoMaterno: e.target.value }))}
+                          readOnly={datosDeRenapo}
+                          placeholder="López"
+                          className={`${inputCls} ${datosDeRenapo ? 'opacity-70 cursor-not-allowed select-none' : ''}`} />
                       </div>
                       <div>
                         <label className={labelCls}>Género</label>
