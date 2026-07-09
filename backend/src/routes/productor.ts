@@ -9,6 +9,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { notificar } from '../utils/notificacion';
 import { reverseGeocode } from '../utils/geocode';
 import { consultarPersonaPorCURP } from '../services/saderService';
+import { consultarCURPEnRENAPO } from '../services/renapoService';
 
 // Directorio de almacenamiento para verificaciones biométricas
 const UPLOAD_DIR = process.env.NODE_ENV === 'production'
@@ -285,8 +286,9 @@ router.get('/geo/reverse', async (req, res): Promise<void> => {
 router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
   const { curp } = req.body;
 
-  if (!curp || curp.trim().length !== 18) {
-    res.status(400).json({ error: 'CURP inválida. Debe tener exactamente 18 caracteres.' });
+  const CURP_RE = /^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[A-Z0-9][0-9]$/;
+  if (!curp || !CURP_RE.test(curp.toUpperCase().trim())) {
+    res.status(400).json({ error: 'CURP inválida. Verifica el formato (18 caracteres).' });
     return;
   }
   const curpN = curp.toUpperCase().trim();
@@ -345,9 +347,34 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     const datos = await saderPromise;
 
     if (!datos) {
+      // SIGAP no lo tiene — verificar en RENAPO antes de abrir formulario manual
+      const renapo = await consultarCURPEnRENAPO(curpN);
+
+      if (!renapo.encontrado && renapo.codigo === 'NO_EN_RENAPO') {
+        res.status(404).json({
+          error: 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.',
+          codigo: 'CURP_NO_VALIDA_RENAPO'
+        });
+        return;
+      }
+
+      const datosRenapo = renapo.encontrado && renapo.datos ? {
+        nombres:      renapo.datos.nombres,
+        apellido_pat: renapo.datos.apellidoPat,
+        apellido_mat: renapo.datos.apellidoMat,
+        sexo:         renapo.datos.sexo,
+        fecha_nac:    renapo.datos.fechaNac,
+        entidad_nac:  renapo.datos.entidadNac,
+      } : null;
+
+      if (!renapo.encontrado) {
+        console.warn(`[RENAPO] Servicio no disponible (${renapo.codigo}) — abriendo formulario manual sin datos`);
+      }
+
       res.status(404).json({
-        error: 'Tu CURP no está en el padrón de SADER. Contacta a tu técnico territorial.',
-        codigo: 'NO_EN_PADRON'
+        error: 'Tu CURP no está en el padrón de SADER. Puedes completar tu registro manualmente.',
+        codigo: 'NO_EN_PADRON',
+        datos_renapo: datosRenapo,
       });
       return;
     }
@@ -378,43 +405,62 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     });
   } catch (error: any) {
     console.error('[SADER] Error:', error.message, error.code, error.response?.status);
-    // SADER_API_URL no configurada en .env — mensaje singular/plural, ambos capturados
-    if (error.message?.includes('no configurada') || error.message?.includes('SADER_API_URL')) {
-      res.status(503).json({
-        error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
-        codigo: 'SADER_NO_DISPONIBLE'
-      });
-      return;
-    }
-    // Red/timeout/conexión rechazada
-    if (
-      error.response?.status === 503 ||
+    // SADER no disponible — consultar RENAPO como fallback antes de abrir formulario manual
+    const esSaderNoDisponible =
+      error.message?.includes('no configurada') ||
+      error.message?.includes('SADER_API_URL') ||
       error.response?.status >= 500 ||
       error.code === 'ECONNREFUSED' ||
       error.code === 'ETIMEDOUT' ||
       error.code === 'ECONNABORTED' ||
-      error.code === 'ENOTFOUND'
-    ) {
+      error.code === 'ENOTFOUND' ||
+      error.response?.status === 401 ||
+      error.response?.status === 403;
+
+    if (esSaderNoDisponible) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error('[SADER] Error de autenticación — verificar SADER_API_KEY en .env');
+      } else {
+        console.error('[SADER] Servicio no disponible:', error.message);
+      }
+
+      const renapo = await consultarCURPEnRENAPO(curpN);
+
+      if (!renapo.encontrado && renapo.codigo === 'NO_EN_RENAPO') {
+        res.status(404).json({
+          error: 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.',
+          codigo: 'CURP_NO_VALIDA_RENAPO'
+        });
+        return;
+      }
+
+      const datosRenapo = renapo.encontrado && renapo.datos ? {
+        nombres:      renapo.datos.nombres,
+        apellido_pat: renapo.datos.apellidoPat,
+        apellido_mat: renapo.datos.apellidoMat,
+        sexo:         renapo.datos.sexo,
+        fecha_nac:    renapo.datos.fechaNac,
+        entidad_nac:  renapo.datos.entidadNac,
+      } : null;
+
+      if (!renapo.encontrado) {
+        console.warn(`[RENAPO] Servicio no disponible (${renapo.codigo}) — abriendo formulario manual sin datos`);
+      }
+
       res.status(503).json({
         error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
-        codigo: 'SADER_NO_DISPONIBLE'
+        codigo: 'SADER_NO_DISPONIBLE',
+        datos_renapo: datosRenapo,
       });
       return;
     }
-    // API key inválida / no autorizado
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      console.error('[SADER] Error de autenticación — verificar SADER_API_KEY en .env');
-      res.status(503).json({
-        error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
-        codigo: 'SADER_NO_DISPONIBLE'
-      });
-      return;
-    }
-    // Cualquier otro error inesperado — tratarlo igual, no bloquear al usuario
+
+    // Cualquier otro error inesperado
     console.error('[SADER] Error inesperado al consultar padrón:', error);
     res.status(503).json({
       error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
-      codigo: 'SADER_NO_DISPONIBLE'
+      codigo: 'SADER_NO_DISPONIBLE',
+      datos_renapo: null,
     });
   }
 });

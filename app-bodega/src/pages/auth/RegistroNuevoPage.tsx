@@ -143,7 +143,7 @@ export default function RegistroNuevoPage() {
   const [erroresManual, setErroresManual] = useState<Record<string, string>>({});
 
   const validarCURP = (c: string) =>
-    /^[A-Z]{4}[0-9]{6}[A-Z0-9]{6}[0-9]{2}$/.test(c.toUpperCase().trim());
+    /^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[A-Z0-9][0-9]$/.test(c.toUpperCase().trim());
 
   const consultarCURP = async () => {
     if (!validarCURP(curp)) {
@@ -169,6 +169,11 @@ export default function RegistroNuevoPage() {
           setErrorNombres(data.nombres || null);
           return;
         }
+        // CURP no existe en RENAPO — bloquear con mensaje claro
+        if (data.codigo === 'CURP_NO_VALIDA_RENAPO') {
+          setError('Esta CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.');
+          return;
+        }
         // CURP no encontrada, inactiva o padrón no disponible → registro manual
         if (
           data.codigo === 'NO_EN_PADRON' ||
@@ -176,6 +181,17 @@ export default function RegistroNuevoPage() {
           data.codigo === 'SADER_NO_DISPONIBLE' ||
           res.status === 503
         ) {
+          // Pre-llenar con datos de RENAPO si vienen (nombres y apellidos, no estado/municipio)
+          if (data.datos_renapo) {
+            setDatosManual(d => ({
+              ...d,
+              nombres:          data.datos_renapo.nombres      || '',
+              apellidoPaterno:  data.datos_renapo.apellido_pat || '',
+              apellidoMaterno:  data.datos_renapo.apellido_mat || '',
+              genero:           data.datos_renapo.sexo === 'HOMBRE' ? 'H'
+                              : data.datos_renapo.sexo === 'MUJER'  ? 'M' : '',
+            }));
+          }
           navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`);
           return;
         }
