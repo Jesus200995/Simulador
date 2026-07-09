@@ -179,10 +179,10 @@ export default function RegistroNuevoPage() {
           setError('La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.');
           return;
         }
-        // CURP no encontrada, inactiva o padrón no disponible → registro manual
+        // CURP no encontrada o padrón no disponible → registro manual
+        // INACTIVO_PADRON NO abre formulario manual — muestra error "contacta técnico"
         if (
           data.codigo === 'NO_EN_PADRON' ||
-          data.codigo === 'INACTIVO_PADRON' ||
           data.codigo === 'SADER_NO_DISPONIBLE' ||
           res.status === 503
         ) {

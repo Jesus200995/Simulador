@@ -389,6 +389,15 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     }
 
     if (!datos.activo_renapo || !datos.activo_padron) {
+      // Consultar RENAPO para saber si la inactividad es por fallecimiento
+      const renapoInactivo = await consultarCURPEnRENAPO(curpN);
+      if (renapoInactivo.encontrado && renapoInactivo.fallecido) {
+        res.status(403).json({
+          error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
+          codigo: 'CURP_FALLECIDO'
+        });
+        return;
+      }
       res.status(403).json({
         error: 'Tu registro en el padrón no está activo. Contacta a tu técnico territorial.',
         codigo: 'INACTIVO_PADRON'
