@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ShieldCheck, Plus, Pencil, Trash2, X,
   Copy, Download, CheckCircle2, AlertTriangle, ChevronDown,
-  ChevronRight, Loader2, RefreshCw, UserPlus, KeySquare,
+  Loader2, RefreshCw, UserPlus, KeySquare,
   TriangleAlert, Sparkles,
 } from 'lucide-react';
 

@@ -128,8 +128,8 @@ export default function MiPerfilPage() {
   const [savingPass,  setSavingPass]  = useState(false);
   const [msgPass,     setMsgPass]     = useState<{ t: 'ok' | 'err'; m: string } | null>(null);
 
-  const timerInfo = useRef<ReturnType<typeof setTimeout>>();
-  const timerPass = useRef<ReturnType<typeof setTimeout>>();
+  const timerInfo = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timerPass = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   /* Cargar perfil */
   useEffect(() => {
