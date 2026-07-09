@@ -303,27 +303,6 @@ function FotoThumb({ src, size, thumbSize }: { src: string | null; size: number;
   );
 }
 
-/* ─── Foto expandida rectangular con lightbox ───────────────────── */
-function FotoExpandida({ src }: { src: string | null }) {
-  const [open, setOpen] = useState(false);
-  if (!src) return null;
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="w-full block cursor-zoom-in group relative overflow-hidden"
-      >
-        <img src={src} alt="Verificación biométrica" className="w-full object-cover max-h-72 group-hover:scale-[1.02] transition-transform duration-300" />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-2">
-            <Eye size={18} className="text-white" />
-          </div>
-        </div>
-      </button>
-      {open && <FotoLightbox src={src} onClose={() => setOpen(false)} />}
-    </>
-  );
-}
 
 /* ─── InfoCard para modal ────────────────────────────────────────── */
 function InfoCard({ icon, label, value, mono = false, link = false }: {

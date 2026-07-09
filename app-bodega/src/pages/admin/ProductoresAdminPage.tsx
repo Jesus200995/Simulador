@@ -83,7 +83,6 @@ function InfoTile({ icon, label, value, mono = false }: {
 /* ─── Modal Ver Productor — Apple 2026 ──────────────────────────── */
 function ModalVerProductor({
   prod, onClose,
-  onAprobar, onRechazar, onSuspender, onReactivar, onEliminar,
 }: {
   prod: Productor;
   onClose: () => void;
@@ -100,7 +99,7 @@ function ModalVerProductor({
 
   const genero = calcularGeneroDesadeCurp(prod.curp);
   const edad   = calcularEdadDesdeCurp(prod.curp);
-  const cap    = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
   const cfg    = STATUS_CFG[prod.estado_validacion];
 
   useEffect(() => {
@@ -356,7 +355,6 @@ function ModalVerProductor({
 }
 
 export default function ProductoresAdminPage() {
-  const navigate = useNavigate();
   const [tab, setTab] = useState<'todos' | 'pendiente' | 'suspendido'>('todos');
   const [productores, setProductores] = useState<Productor[]>([]);
   const [loading, setLoading] = useState(true);

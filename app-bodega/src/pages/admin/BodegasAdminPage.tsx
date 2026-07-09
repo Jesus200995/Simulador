@@ -137,9 +137,8 @@ export default function BodegasAdminPage() {
   const [usuariosLoad,   setUsuariosLoad]   = useState(false);
   const [usuarioSearch,  setUsuarioSearch]  = useState('');
   const [usuarioModal,   setUsuarioModal]   = useState<UsuarioBodega | null>(null);
-  const [editUsuario,    setEditUsuario]    = useState<Partial<UsuarioBodega> | null>(null);
-  const [editUsuLoad,    setEditUsuLoad]    = useState(false);
-  const [editUsuErr,     setEditUsuErr]     = useState('');
+  const [, setEditUsuario]    = useState<Partial<UsuarioBodega> | null>(null);
+  const [, setEditUsuErr]     = useState('');
   const [deleteUsuario,  setDeleteUsuario]  = useState<UsuarioBodega | null>(null);
   const [deleteUsuLoad,  setDeleteUsuLoad]  = useState(false);
   const debUsuRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -275,24 +274,6 @@ export default function BodegasAdminPage() {
     finally { setUsuariosLoad(false); }
   }
 
-  async function guardarUsuario() {
-    if (!usuarioModal || !editUsuario) return;
-    setEditUsuLoad(true); setEditUsuErr('');
-    try {
-      const r = await fetch(`${BASE}/admin/usuarios-bodega/${usuarioModal.id}`, {
-        method: 'PATCH',
-        headers: { ...HDR(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(editUsuario),
-      });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || 'Error al guardar');
-      showToast('Usuario actualizado');
-      setEditUsuario(null);
-      cargarUsuarios(usuarioSearch);
-      setUsuarioModal(prev => prev ? { ...prev, ...editUsuario } : null);
-    } catch (e: any) { setEditUsuErr(e.message); }
-    finally { setEditUsuLoad(false); }
-  }
 
   async function eliminarUsuario() {
     if (!deleteUsuario) return;
