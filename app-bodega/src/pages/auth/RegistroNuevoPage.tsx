@@ -170,35 +170,33 @@ export default function RegistroNuevoPage() {
           setErrorNombres(data.nombres || null);
           return;
         }
-        // CURP no existe en RENAPO — bloquear
+        // Bloqueos explícitos
         if (data.codigo === 'CURP_NO_VALIDA_RENAPO') {
           setError('Esta CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.');
           return;
         }
-        // CURP de persona fallecida — bloquear
         if (data.codigo === 'CURP_FALLECIDO') {
           setError('La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.');
           return;
         }
-        // CURP no encontrada o padrón no disponible → registro manual
-        // INACTIVO_PADRON NO abre formulario manual — muestra error "contacta técnico"
+        if (data.codigo === 'VERIFICACION_NO_DISPONIBLE') {
+          setError('No es posible verificar tu identidad en este momento. Intenta más tarde.');
+          return;
+        }
+        // CURP no en padrón SADER pero RENAPO confirmó que existe y está viva → formulario manual
         if (
-          data.codigo === 'NO_EN_PADRON' ||
-          data.codigo === 'SADER_NO_DISPONIBLE' ||
-          res.status === 503
+          (data.codigo === 'NO_EN_PADRON' || data.codigo === 'SADER_NO_DISPONIBLE') &&
+          data.datos_renapo
         ) {
-          // Pre-llenar con datos de RENAPO si vienen (nombres y apellidos, no estado/municipio)
-          if (data.datos_renapo) {
-            setDatosManual(d => ({
-              ...d,
-              nombres:          data.datos_renapo.nombres      || '',
-              apellidoPaterno:  data.datos_renapo.apellido_pat || '',
-              apellidoMaterno:  data.datos_renapo.apellido_mat || '',
-              genero:           data.datos_renapo.sexo === 'HOMBRE' ? 'H'
-                              : data.datos_renapo.sexo === 'MUJER'  ? 'M' : '',
-            }));
-            setDatosDeRenapo(true);
-          }
+          setDatosManual(d => ({
+            ...d,
+            nombres:         data.datos_renapo.nombres      || '',
+            apellidoPaterno: data.datos_renapo.apellido_pat || '',
+            apellidoMaterno: data.datos_renapo.apellido_mat || '',
+            genero:          data.datos_renapo.sexo === 'HOMBRE' ? 'H'
+                           : data.datos_renapo.sexo === 'MUJER'  ? 'M' : '',
+          }));
+          setDatosDeRenapo(true);
           navigate(`/registro-nuevo?modo=manual&curp=${curp.toUpperCase().trim()}`);
           return;
         }

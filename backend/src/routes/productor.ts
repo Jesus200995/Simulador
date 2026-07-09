@@ -347,19 +347,24 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     const datos = await saderPromise;
 
     if (!datos) {
-      // SIGAP no lo tiene — verificar en RENAPO antes de abrir formulario manual
+      // SIGAP no lo tiene — RENAPO debe confirmar que la persona existe y está viva
       const renapo = await consultarCURPEnRENAPO(curpN);
 
-      if (!renapo.encontrado && renapo.codigo === 'NO_EN_RENAPO') {
+      // RENAPO no disponible por cualquier razón → bloquear (no se puede verificar identidad)
+      if (!renapo.encontrado) {
+        const esPorNoExistir = renapo.codigo === 'NO_EN_RENAPO';
+        console.warn(`[RENAPO] Bloqueando registro — código: ${renapo.codigo}`);
         res.status(404).json({
-          error: 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.',
-          codigo: 'CURP_NO_VALIDA_RENAPO'
+          error: esPorNoExistir
+            ? 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.'
+            : 'No es posible verificar tu identidad en este momento. Intenta más tarde.',
+          codigo: esPorNoExistir ? 'CURP_NO_VALIDA_RENAPO' : 'VERIFICACION_NO_DISPONIBLE'
         });
         return;
       }
 
-      // CURP de persona fallecida — bloquear registro
-      if (renapo.encontrado && renapo.fallecido) {
+      // CURP de persona fallecida → bloquear
+      if (renapo.fallecido) {
         res.status(403).json({
           error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
           codigo: 'CURP_FALLECIDO'
@@ -367,23 +372,18 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
         return;
       }
 
-      const datosRenapo = renapo.encontrado && renapo.datos ? {
-        nombres:      renapo.datos.nombres,
-        apellido_pat: renapo.datos.apellidoPat,
-        apellido_mat: renapo.datos.apellidoMat,
-        sexo:         renapo.datos.sexo,
-        fecha_nac:    renapo.datos.fechaNac,
-        entidad_nac:  renapo.datos.entidadNac,
-      } : null;
-
-      if (!renapo.encontrado) {
-        console.warn(`[RENAPO] Servicio no disponible (${renapo.codigo}) — abriendo formulario manual sin datos`);
-      }
-
+      // RENAPO confirma que es persona viva y válida → abrir formulario manual con datos
       res.status(404).json({
         error: 'Tu CURP no está en el padrón de SADER. Puedes completar tu registro manualmente.',
         codigo: 'NO_EN_PADRON',
-        datos_renapo: datosRenapo,
+        datos_renapo: {
+          nombres:      renapo.datos!.nombres,
+          apellido_pat: renapo.datos!.apellidoPat,
+          apellido_mat: renapo.datos!.apellidoMat,
+          sexo:         renapo.datos!.sexo,
+          fecha_nac:    renapo.datos!.fechaNac,
+          entidad_nac:  renapo.datos!.entidadNac,
+        },
       });
       return;
     }
@@ -444,15 +444,21 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
 
       const renapo = await consultarCURPEnRENAPO(curpN);
 
-      if (!renapo.encontrado && renapo.codigo === 'NO_EN_RENAPO') {
+      // RENAPO no disponible por cualquier razón → bloquear
+      if (!renapo.encontrado) {
+        const esPorNoExistir = renapo.codigo === 'NO_EN_RENAPO';
+        console.warn(`[RENAPO] Bloqueando registro (SADER caído) — código RENAPO: ${renapo.codigo}`);
         res.status(404).json({
-          error: 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.',
-          codigo: 'CURP_NO_VALIDA_RENAPO'
+          error: esPorNoExistir
+            ? 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.'
+            : 'No es posible verificar tu identidad en este momento. Intenta más tarde.',
+          codigo: esPorNoExistir ? 'CURP_NO_VALIDA_RENAPO' : 'VERIFICACION_NO_DISPONIBLE'
         });
         return;
       }
 
-      if (renapo.encontrado && renapo.fallecido) {
+      // Persona fallecida → bloquear
+      if (renapo.fallecido) {
         res.status(403).json({
           error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
           codigo: 'CURP_FALLECIDO'
@@ -460,23 +466,18 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
         return;
       }
 
-      const datosRenapo = renapo.encontrado && renapo.datos ? {
-        nombres:      renapo.datos.nombres,
-        apellido_pat: renapo.datos.apellidoPat,
-        apellido_mat: renapo.datos.apellidoMat,
-        sexo:         renapo.datos.sexo,
-        fecha_nac:    renapo.datos.fechaNac,
-        entidad_nac:  renapo.datos.entidadNac,
-      } : null;
-
-      if (!renapo.encontrado) {
-        console.warn(`[RENAPO] Servicio no disponible (${renapo.codigo}) — abriendo formulario manual sin datos`);
-      }
-
+      // RENAPO confirma persona viva → abrir formulario manual con datos
       res.status(503).json({
-        error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
+        error: 'El servicio de padrón no está disponible. Puedes completar tu registro manualmente.',
         codigo: 'SADER_NO_DISPONIBLE',
-        datos_renapo: datosRenapo,
+        datos_renapo: {
+          nombres:      renapo.datos!.nombres,
+          apellido_pat: renapo.datos!.apellidoPat,
+          apellido_mat: renapo.datos!.apellidoMat,
+          sexo:         renapo.datos!.sexo,
+          fecha_nac:    renapo.datos!.fechaNac,
+          entidad_nac:  renapo.datos!.entidadNac,
+        },
       });
       return;
     }
