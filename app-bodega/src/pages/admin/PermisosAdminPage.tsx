@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  ShieldCheck, Plus, Pencil, Trash2, X, Eye, EyeOff,
+  ShieldCheck, Plus, Pencil, Trash2, X,
   Copy, Download, CheckCircle2, AlertTriangle, ChevronDown,
   ChevronRight, Loader2, RefreshCw,
 } from 'lucide-react';

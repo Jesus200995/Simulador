@@ -55,7 +55,7 @@ export default function CambiarPasswordPage() {
     }
   }
 
-  const inputCls = (show: boolean) =>
+  const inputCls = (_show: boolean) =>
     'w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#1A5C38]/50 focus:ring-2 focus:ring-[#1A5C38]/10 transition-all pr-10';
 
   const ToggleEye = ({ show, onToggle }: { show: boolean; onToggle: () => void }) => (
