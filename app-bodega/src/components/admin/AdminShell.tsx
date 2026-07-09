@@ -5,7 +5,7 @@ import { usePermisosSSE } from '../../hooks/usePermisosSSE';
 import {
   LayoutDashboard, Users, Warehouse, AlertTriangle,
   TrendingUp, LogOut, Menu, X, ShieldCheck, ChevronRight,
-  Sprout, BarChart3, Settings, Leaf, KeyRound
+  Sprout, BarChart3, Settings, Leaf, KeyRound, CircleUserRound,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -28,6 +28,7 @@ const MENU: SidebarItem[] = [
   { label: 'Configuración',subtitle: 'Preferencias, roles de usuario y ajustes del sistema',         path: '/admin/configuracion',  icon: Settings },
   { label: 'Avisos Privacidad', subtitle: 'Constancias de aceptación con verificación biométrica y GPS', path: '/admin/avisos-privacidad', icon: ShieldCheck },
   { label: 'Permisos',          subtitle: 'Usuarios del panel, roles y control de acceso por vista', path: '/admin/permisos',          icon: KeyRound },
+  { label: 'Mi Perfil',         subtitle: 'Edita tu información, email y contraseña de acceso',      path: '/admin/perfil',            icon: CircleUserRound },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -274,12 +275,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </div>
             </div>
 
-            <div className="relative group/avatar cursor-pointer ml-1">
+            <button onClick={() => navigate('/admin/perfil')}
+              className="relative group/avatar cursor-pointer ml-1 active:scale-90 transition-transform">
               <div className="absolute inset-0 bg-emerald-400 rounded-full blur-[8px] opacity-40 group-hover/avatar:opacity-75 group-hover/avatar:blur-[12px] transition-all duration-300" />
               <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-black text-[12px] flex-shrink-0 ring-2 ring-[#03150a] group-hover/avatar:scale-105 transition-transform duration-300 ease-out shadow-lg">
                 {initials()}
               </div>
-            </div>
+            </button>
           </div>
         </header>
 

@@ -78,6 +78,7 @@ import AvisosPrivacidadAdminPage from './pages/admin/AvisosPrivacidadAdminPage';
 import SenasicaAdminPage from './pages/admin/SenasicaAdminPage';
 import PermisosAdminPage from './pages/admin/PermisosAdminPage';
 import CambiarPasswordPage from './pages/admin/CambiarPasswordPage';
+import MiPerfilPage from './pages/admin/MiPerfilPage';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -297,6 +298,7 @@ export const router = createBrowserRouter([
       { path: 'senasica', element: <SenasicaAdminPage /> },
       { path: 'permisos', element: <PermisosAdminPage /> },
       { path: 'cambiar-password', element: <CambiarPasswordPage /> },
+      { path: 'perfil', element: <MiPerfilPage /> },
     ],
   },
 

@@ -255,7 +255,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(
-      'SELECT id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id, created_at FROM usuarios WHERE id = $1',
+      'SELECT id, email, curp, nombre_completo, telefono, rol, estado_asignado, ultimo_login, state_id, municipality_id, created_at FROM usuarios WHERE id = $1',
       [req.user!.userId]
     );
 
@@ -277,10 +277,28 @@ router.get('/perfil', authMiddleware, async (req: AuthRequest, res: Response): P
 // =============================================
 router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { nombre_completo, telefono, curp, state_id, municipality_id } = req.body;
+    const { nombre_completo, email, telefono, curp, state_id, municipality_id } = req.body;
     const updates: string[] = [];
     const vals: any[] = [];
     let idx = 1;
+
+    if (email !== undefined) {
+      const emailLimpio = email.toLowerCase().trim();
+      if (!validarEmail(emailLimpio)) {
+        res.status(400).json({ error: 'Formato de email inválido' });
+        return;
+      }
+      const emailExistente = await pool.query(
+        'SELECT id FROM usuarios WHERE LOWER(email) = $1 AND id != $2',
+        [emailLimpio, req.user!.userId]
+      );
+      if (emailExistente.rows.length > 0) {
+        res.status(409).json({ error: 'Este email ya está registrado por otro usuario' });
+        return;
+      }
+      updates.push(`email = $${idx++}`);
+      vals.push(emailLimpio);
+    }
 
     if (nombre_completo !== undefined) {
       if (typeof nombre_completo !== 'string' || nombre_completo.trim().length < 3) {
@@ -370,7 +388,7 @@ router.patch('/perfil', authMiddleware, async (req: AuthRequest, res: Response):
     vals.push(req.user!.userId);
     const result = await pool.query(
       `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${idx}
-       RETURNING id, email, curp, nombre_completo, telefono, rol, state_id, municipality_id`,
+       RETURNING id, email, curp, nombre_completo, telefono, rol, estado_asignado, state_id, municipality_id`,
       vals
     );
 
