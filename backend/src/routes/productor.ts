@@ -422,72 +422,18 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
       }
     });
   } catch (error: any) {
-    console.error('[SADER] Error:', error.message, error.code, error.response?.status);
-    // SADER no disponible — consultar RENAPO como fallback antes de abrir formulario manual
-    const esSaderNoDisponible =
-      error.message?.includes('no configurada') ||
-      error.message?.includes('SADER_API_URL') ||
-      error.response?.status >= 500 ||
-      error.code === 'ECONNREFUSED' ||
-      error.code === 'ETIMEDOUT' ||
-      error.code === 'ECONNABORTED' ||
-      error.code === 'ENOTFOUND' ||
-      error.response?.status === 401 ||
-      error.response?.status === 403;
-
-    if (esSaderNoDisponible) {
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        console.error('[SADER] Error de autenticación — verificar SADER_API_KEY en .env');
-      } else {
-        console.error('[SADER] Servicio no disponible:', error.message);
-      }
-
-      const renapo = await consultarCURPEnRENAPO(curpN);
-
-      // RENAPO no disponible por cualquier razón → bloquear
-      if (!renapo.encontrado) {
-        const esPorNoExistir = renapo.codigo === 'NO_EN_RENAPO';
-        console.warn(`[RENAPO] Bloqueando registro (SADER caído) — código RENAPO: ${renapo.codigo}`);
-        res.status(404).json({
-          error: esPorNoExistir
-            ? 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.'
-            : 'No es posible verificar tu identidad en este momento. Intenta más tarde.',
-          codigo: esPorNoExistir ? 'CURP_NO_VALIDA_RENAPO' : 'VERIFICACION_NO_DISPONIBLE'
-        });
-        return;
-      }
-
-      // Persona fallecida → bloquear
-      if (renapo.fallecido) {
-        res.status(403).json({
-          error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
-          codigo: 'CURP_FALLECIDO'
-        });
-        return;
-      }
-
-      // RENAPO confirma persona viva → abrir formulario manual con datos
-      res.status(503).json({
-        error: 'El servicio de padrón no está disponible. Puedes completar tu registro manualmente.',
-        codigo: 'SADER_NO_DISPONIBLE',
-        datos_renapo: {
-          nombres:      renapo.datos!.nombres,
-          apellido_pat: renapo.datos!.apellidoPat,
-          apellido_mat: renapo.datos!.apellidoMat,
-          sexo:         renapo.datos!.sexo,
-          fecha_nac:    renapo.datos!.fechaNac,
-          entidad_nac:  renapo.datos!.entidadNac,
-        },
-      });
-      return;
+    // SADER lanzó un error (caído, timeout, auth, etc.)
+    // NO consultamos RENAPO aquí — SADER debe responderse primero
+    // RENAPO solo aplica cuando SADER dice explícitamente "no encontrado"
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.error('[SADER] Error de autenticación — verificar SADER_API_KEY en .env');
+    } else {
+      console.error('[SADER] Servicio no disponible:', error.message, error.code);
     }
 
-    // Cualquier otro error inesperado
-    console.error('[SADER] Error inesperado al consultar padrón:', error);
     res.status(503).json({
-      error: 'El servicio de padrón no está disponible. Puedes continuar con registro manual.',
+      error: 'El servicio de verificación no está disponible en este momento. Intenta más tarde.',
       codigo: 'SADER_NO_DISPONIBLE',
-      datos_renapo: null,
     });
   }
 });
