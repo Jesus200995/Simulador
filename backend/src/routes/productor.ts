@@ -422,18 +422,42 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
       }
     });
   } catch (error: any) {
-    // SADER lanzó un error (caído, timeout, auth, etc.)
-    // NO consultamos RENAPO aquí — SADER debe responderse primero
-    // RENAPO solo aplica cuando SADER dice explícitamente "no encontrado"
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      console.error('[SADER] Error de autenticación — verificar SADER_API_KEY en .env');
-    } else {
-      console.error('[SADER] Servicio no disponible:', error.message, error.code);
+    // SADER lanzó error (timeout, caído, auth) → verificar identidad con RENAPO
+    console.warn('[SADER] No disponible, verificando con RENAPO:', error.message);
+
+    const renapo = await consultarCURPEnRENAPO(curpN);
+
+    if (!renapo.encontrado) {
+      const esPorNoExistir = renapo.codigo === 'NO_EN_RENAPO';
+      res.status(404).json({
+        error: esPorNoExistir
+          ? 'Tu CURP no existe en el Registro Nacional de Población. Verifica que la escribiste correctamente.'
+          : 'No es posible verificar tu identidad en este momento. Intenta más tarde.',
+        codigo: esPorNoExistir ? 'CURP_NO_VALIDA_RENAPO' : 'VERIFICACION_NO_DISPONIBLE'
+      });
+      return;
     }
 
-    res.status(503).json({
-      error: 'El servicio de verificación no está disponible en este momento. Intenta más tarde.',
-      codigo: 'SADER_NO_DISPONIBLE',
+    if (renapo.fallecido) {
+      res.status(403).json({
+        error: 'La CURP ingresada corresponde a una persona fallecida. No es posible crear una cuenta.',
+        codigo: 'CURP_FALLECIDO'
+      });
+      return;
+    }
+
+    // RENAPO confirma persona viva → formulario manual
+    res.status(404).json({
+      error: 'Tu CURP no está en el padrón de SADER. Puedes completar tu registro manualmente.',
+      codigo: 'NO_EN_PADRON',
+      datos_renapo: {
+        nombres:      renapo.datos!.nombres,
+        apellido_pat: renapo.datos!.apellidoPat,
+        apellido_mat: renapo.datos!.apellidoMat,
+        sexo:         renapo.datos!.sexo,
+        fecha_nac:    renapo.datos!.fechaNac,
+        entidad_nac:  renapo.datos!.entidadNac,
+      },
     });
   }
 });

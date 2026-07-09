@@ -51,7 +51,7 @@ export async function consultarPersonaPorCURP(
           'Content-Type': 'application/json',
           ...(SADER_API_KEY ? { 'X-API-KEY': SADER_API_KEY } : {}),
         },
-        timeout: 8000
+        timeout: 4000
       }
     );
 
