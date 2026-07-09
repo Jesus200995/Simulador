@@ -281,7 +281,10 @@ export default function RegistroNuevoPage() {
     const errs: Record<string, string> = {};
     if (!datosManual.nombres.trim()) errs.nombres = 'Requerido';
     if (!datosManual.apellidoPaterno.trim()) errs.apellidoPaterno = 'Requerido';
+    if (!datosManual.apellidoMaterno.trim()) errs.apellidoMaterno = 'Requerido';
+    if (!datosManual.genero) errs.genero = 'Selecciona tu género';
     if (!datosManual.telefono || datosManual.telefono.length < 10) errs.telefono = 'Teléfono de 10 dígitos requerido';
+    if (!datosManual.correo.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datosManual.correo)) errs.correo = 'Correo electrónico válido requerido';
     if (!datosManual.estadoPadron) errs.estadoPadron = 'Selecciona tu estado';
     if (!datosManual.municipioPadron) errs.municipioPadron = 'Selecciona tu municipio';
     setErroresManual(errs);
@@ -848,15 +851,12 @@ export default function RegistroNuevoPage() {
                       <p className={`text-[11px] font-mono text-right mt-1 ${curp.length === 18 ? 'text-green-400' : 'text-white/20'}`}>{curp.length}/18</p>
                     </div>
 
-                    {datosDeRenapo && (
-                      <div className="flex items-center gap-2 bg-emerald-900/30 border border-emerald-500/30 rounded-xl px-3 py-2 mb-1">
-                        <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                        <p className="text-emerald-300 text-[11px]">Nombre y apellidos verificados por RENAPO — no son editables</p>
-                      </div>
-                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
                       <div>
-                        <label className={labelCls}>Nombre(s) <span className="text-red-400">*</span></label>
+                        <label className={labelCls}>
+                          Nombre(s) <span className="text-red-400">*</span>
+                          {datosDeRenapo && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>RENAPO</span>}
+                        </label>
                         <input type="text" value={datosManual.nombres}
                           onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, nombres: e.target.value }))}
                           readOnly={datosDeRenapo}
@@ -865,7 +865,10 @@ export default function RegistroNuevoPage() {
                         {erroresManual.nombres && <p className="text-red-300 text-[11px] mt-1">{erroresManual.nombres}</p>}
                       </div>
                       <div>
-                        <label className={labelCls}>Apellido Paterno <span className="text-red-400">*</span></label>
+                        <label className={labelCls}>
+                          Apellido Paterno <span className="text-red-400">*</span>
+                          {datosDeRenapo && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>RENAPO</span>}
+                        </label>
                         <input type="text" value={datosManual.apellidoPaterno}
                           onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, apellidoPaterno: e.target.value }))}
                           readOnly={datosDeRenapo}
@@ -874,15 +877,19 @@ export default function RegistroNuevoPage() {
                         {erroresManual.apellidoPaterno && <p className="text-red-300 text-[11px] mt-1">{erroresManual.apellidoPaterno}</p>}
                       </div>
                       <div>
-                        <label className={labelCls}>Apellido Materno</label>
+                        <label className={labelCls}>
+                          Apellido Materno <span className="text-red-400">*</span>
+                          {datosDeRenapo && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>RENAPO</span>}
+                        </label>
                         <input type="text" value={datosManual.apellidoMaterno}
                           onChange={e => !datosDeRenapo && setDatosManual(p => ({ ...p, apellidoMaterno: e.target.value }))}
                           readOnly={datosDeRenapo}
                           placeholder="López"
                           className={`${inputCls} ${datosDeRenapo ? 'opacity-70 cursor-not-allowed select-none' : ''}`} />
+                        {erroresManual.apellidoMaterno && <p className="text-red-300 text-[11px] mt-1">{erroresManual.apellidoMaterno}</p>}
                       </div>
                       <div>
-                        <label className={labelCls}>Género</label>
+                        <label className={labelCls}>Género <span className="text-red-400">*</span></label>
                         <select value={datosManual.genero}
                           onChange={e => setDatosManual(p => ({ ...p, genero: e.target.value }))}
                           className={`${inputCls} appearance-none [&>option]:text-gray-900`}>
@@ -890,6 +897,7 @@ export default function RegistroNuevoPage() {
                           <option value="M">Masculino</option>
                           <option value="F">Femenino</option>
                         </select>
+                        {erroresManual.genero && <p className="text-red-300 text-[11px] mt-1">{erroresManual.genero}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Teléfono <span className="text-red-400">*</span></label>
@@ -899,10 +907,11 @@ export default function RegistroNuevoPage() {
                         {erroresManual.telefono && <p className="text-red-300 text-[11px] mt-1">{erroresManual.telefono}</p>}
                       </div>
                       <div>
-                        <label className={labelCls}>Correo electrónico</label>
+                        <label className={labelCls}>Correo electrónico <span className="text-red-400">*</span></label>
                         <input type="email" value={datosManual.correo}
                           onChange={e => setDatosManual(p => ({ ...p, correo: e.target.value }))}
                           placeholder="correo@ejemplo.com" className={inputCls} />
+                        {erroresManual.correo && <p className="text-red-300 text-[11px] mt-1">{erroresManual.correo}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Estado <span className="text-red-400">*</span></label>
