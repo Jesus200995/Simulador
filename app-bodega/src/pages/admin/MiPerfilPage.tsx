@@ -40,6 +40,20 @@ function Avatar({ nombre, size = 72, rol }: { nombre: string; size?: number; rol
   );
 }
 
+function StatItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <div className="w-7 h-7 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">{label}</p>
+        <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 function RolLabel({ rol }: { rol: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     admin:  { label: 'Administrador',     cls: 'bg-[#0e5c33] text-white' },
@@ -215,89 +229,96 @@ export default function MiPerfilPage() {
   const nombre_display = perfil?.nombre_completo || user?.nombre_completo || 'Usuario';
 
   return (
-    <div className="max-w-6xl mx-auto pb-6">
+    <div className="max-w-6xl mx-auto pt-3 sm:pt-4 pb-6">
       <div className="flex flex-col lg:flex-row gap-3.5 lg:gap-5 lg:items-start">
 
         {/* ── Columna izquierda: tarjeta hero de perfil (sticky en desktop) ── */}
         <div className="lg:w-[320px] lg:shrink-0 lg:sticky lg:top-4">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            {/* Banda superior */}
-            <div className="h-16 lg:h-24 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
-              <div className="absolute inset-0 opacity-20"
-                style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
-            </div>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-visible">
 
-            <div className="px-4 sm:px-6 lg:px-5 pb-4 sm:pb-5">
-              {/* Avatar + nombre + logout */}
-              <div className="flex flex-col lg:items-center gap-3 lg:text-center">
-                <div className="flex flex-row lg:flex-col items-end lg:items-center gap-3 -mt-8 lg:-mt-12">
-                  <div className="ring-4 ring-white rounded-[28px] shrink-0">
-                    <Avatar nombre={nombre_display} size={64} rol={rolLabel} />
-                  </div>
-                  <div className="min-w-0 pb-0.5 lg:hidden flex-1">
-                    <p className="text-[15px] font-black text-gray-900 leading-tight truncate">{nombre_display}</p>
-                    <p className="text-[11.5px] text-gray-500 truncate">{perfil?.email ?? user?.email}</p>
+            {/* ═══ Layout MÓVIL/TABLET (< lg) ═══ */}
+            <div className="lg:hidden rounded-2xl overflow-hidden">
+              <div className="h-16 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
+                <div className="absolute inset-0 opacity-20"
+                  style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
+              </div>
+              <div className="px-4 sm:px-6 pb-4 sm:pb-5">
+                <div className="flex items-end justify-between gap-3 -mt-7">
+                  <div className="flex items-end gap-3 min-w-0">
+                    <div className="ring-4 ring-white rounded-[20px] shrink-0">
+                      <Avatar nombre={nombre_display} size={56} rol={rolLabel} />
+                    </div>
+                    <div className="min-w-0 pb-0.5">
+                      <p className="text-[15px] font-black text-gray-900 leading-tight truncate">{nombre_display}</p>
+                      <p className="text-[11.5px] text-gray-500 truncate">{perfil?.email ?? user?.email}</p>
+                    </div>
                   </div>
                   <button onClick={handleLogout}
-                    className="lg:hidden flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl transition-all active:scale-95 shrink-0">
-                    <LogOut size={12} /> Cerrar sesión
+                    className="flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl transition-all active:scale-95 shrink-0">
+                    <LogOut size={12} /> <span className="hidden sm:inline">Cerrar sesión</span>
                   </button>
                 </div>
 
-                {/* Nombre/email centrados en desktop */}
-                <div className="hidden lg:block">
-                  <p className="text-[16px] font-black text-gray-900 leading-tight">{nombre_display}</p>
-                  <p className="text-[12px] text-gray-500 mt-0.5 break-all">{perfil?.email ?? user?.email}</p>
+                <div className="flex items-center gap-1.5 flex-wrap mt-3">
+                  <RolLabel rol={rolLabel} />
+                  {perfil?.estado_asignado && (
+                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
+                  )}
+                  {rolLabel === 'admin' && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-[#0e5c33]/70 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                      <ShieldCheck size={9} /> Acceso total
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3.5 border-t border-gray-100">
+                  <StatItem icon={<Clock size={12} className="text-gray-400" />} label="Último acceso"
+                    value={perfil?.ultimo_login ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }) : 'Primer acceso'} />
+                  <StatItem icon={<CalendarDays size={12} className="text-gray-400" />} label="Miembro desde"
+                    value={perfil?.created_at ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' }) : '—'} />
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center gap-1.5 flex-wrap mt-3 lg:justify-center">
-                <RolLabel rol={rolLabel} />
-                {perfil?.estado_asignado && (
-                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
-                )}
-                {rolLabel === 'admin' && (
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-[#0e5c33]/70 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
-                    <ShieldCheck size={9} /> Acceso total
-                  </span>
-                )}
+            {/* ═══ Layout DESKTOP (lg+): avatar centrado sobre la banda ═══ */}
+            <div className="hidden lg:block">
+              <div className="h-20 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] rounded-t-2xl relative overflow-hidden">
+                <div className="absolute inset-0 opacity-20"
+                  style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
               </div>
-
-              {/* Stats */}
-              <div className="mt-3.5 grid grid-cols-1 gap-2.5 pt-3.5 border-t border-gray-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                    <Clock size={12} className="text-gray-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
-                    <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
-                      {perfil?.ultimo_login
-                        ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
-                        : 'Primer acceso'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                    <CalendarDays size={12} className="text-gray-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
-                    <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
-                      {perfil?.created_at
-                        ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' })
-                        : '—'}
-                    </p>
-                  </div>
+              <div className="flex justify-center -mt-10">
+                <div className="ring-[5px] ring-white rounded-[26px] shrink-0">
+                  <Avatar nombre={nombre_display} size={80} rol={rolLabel} />
                 </div>
               </div>
+              <div className="px-5 pb-5 pt-3 text-center">
+                <p className="text-[16px] font-black text-gray-900 leading-tight">{nombre_display}</p>
+                <p className="text-[12px] text-gray-500 mt-0.5 break-all">{perfil?.email ?? user?.email}</p>
 
-              {/* Cerrar sesión — solo desktop, dentro de la tarjeta */}
-              <button onClick={handleLogout}
-                className="hidden lg:flex w-full items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl transition-all active:scale-95 mt-4">
-                <LogOut size={12} /> Cerrar sesión
-              </button>
+                <div className="flex items-center gap-1.5 flex-wrap justify-center mt-3">
+                  <RolLabel rol={rolLabel} />
+                  {perfil?.estado_asignado && (
+                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
+                  )}
+                  {rolLabel === 'admin' && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-[#0e5c33]/70 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                      <ShieldCheck size={9} /> Acceso total
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-4 flex flex-col gap-2.5 pt-3.5 border-t border-gray-100 text-left">
+                  <StatItem icon={<Clock size={12} className="text-gray-400" />} label="Último acceso"
+                    value={perfil?.ultimo_login ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }) : 'Primer acceso'} />
+                  <StatItem icon={<CalendarDays size={12} className="text-gray-400" />} label="Miembro desde"
+                    value={perfil?.created_at ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' }) : '—'} />
+                </div>
+
+                <button onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl transition-all active:scale-95 mt-4">
+                  <LogOut size={12} /> Cerrar sesión
+                </button>
+              </div>
             </div>
           </div>
 
