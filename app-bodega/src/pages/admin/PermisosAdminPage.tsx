@@ -571,80 +571,84 @@ export default function PermisosAdminPage() {
 
   /* ── RENDER ─────────────────────────────────────────────────────── */
   return (
-    <div className="flex flex-col gap-3.5 sm:gap-4 pt-3 sm:pt-4">
+    <div className="h-[calc(100vh-88px)] flex flex-col gap-2.5 pt-3 sm:pt-4 overflow-hidden">
 
-      {/* Barra superior */}
-      <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#0e5c33]/10 flex items-center justify-center shrink-0">
-            <ShieldCheck size={15} className="text-[#0e5c33]" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[13px] font-black text-gray-900 leading-none">Permisos Administrativos</p>
-            <p className="text-[10.5px] text-gray-400 mt-0.5">{usuarios.length} usuario{usuarios.length !== 1 ? 's' : ''} del panel</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button onClick={cargar} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95 shrink-0">
-            <RefreshCw size={13} className={`text-gray-500 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button onClick={() => { setErrCrear(''); setModalCrear(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#0e5c33] hover:bg-[#0a3d22] active:scale-[0.97] text-white text-[12px] font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm hover:shadow-md">
-            <UserPlus size={13} /> Nuevo usuario
-          </button>
-        </div>
-      </div>
+      {/* ── Panel superior: header + contadores + buscador, todo en una tarjeta verde suave ── */}
+      <div className="bg-gradient-to-br from-emerald-50 to-emerald-50/30 border border-emerald-100 rounded-2xl p-3 sm:p-3.5 flex flex-col gap-2.5 shrink-0">
 
-      {/* Contadores por rol */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        {[
-          { key: 'todos',       label: 'Todos',              count: usuarios.length,               color: 'text-gray-700 bg-gray-100' },
-          { key: 'admin',       label: 'Administradores',    count: conteoRoles['admin'] ?? 0,       color: 'text-[#0e5c33] bg-[#0e5c33]/10' },
-          { key: 'responsable', label: 'Responsables',       count: conteoRoles['responsable'] ?? 0, color: 'text-blue-700 bg-blue-100' },
-          { key: 'user',        label: 'Usuarios operativos',count: conteoRoles['user'] ?? 0,        color: 'text-violet-700 bg-violet-100' },
-        ].map(({ key, label, count, color }) => (
-          <button key={key} onClick={() => setFiltroRol(key)}
-            className={`flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-3 text-left transition-all active:scale-[0.97] ${
-              filtroRol === key ? 'border-[#0e5c33]/40 ring-2 ring-[#0e5c33]/15 bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">{label}</p>
-              <p className="text-[19px] font-black text-gray-900 mt-0.5">{count}</p>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#0e5c33]/10 flex items-center justify-center shrink-0">
+              <ShieldCheck size={15} className="text-[#0e5c33]" />
             </div>
-            <span className={`text-[9px] font-black px-1.5 py-1 rounded-full shrink-0 ${color}`}><ShieldCheck size={11} /></span>
-          </button>
-        ))}
-      </div>
-
-      {/* Buscador + filtro de rol */}
-      <div className="bg-white border border-gray-200 rounded-2xl px-3.5 py-3 flex flex-col sm:flex-row gap-2.5 shadow-sm">
-        <div className="relative flex-1">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-            placeholder="Buscar por nombre o email…"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-[12.5px] text-gray-800 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/40 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all"
-          />
+            <div className="min-w-0">
+              <p className="text-[13px] font-black text-gray-900 leading-none">Permisos Administrativos</p>
+              <p className="text-[10.5px] text-gray-500 mt-0.5">{usuarios.length} usuario{usuarios.length !== 1 ? 's' : ''} del panel</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={cargar} className="w-8 h-8 rounded-xl bg-white border border-emerald-100 hover:bg-emerald-50 flex items-center justify-center transition-all active:scale-95 shrink-0">
+              <RefreshCw size={13} className={`text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+            <button onClick={() => { setErrCrear(''); setModalCrear(true); }}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#0e5c33] hover:bg-[#0a3d22] active:scale-[0.97] text-white text-[12px] font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm hover:shadow-md">
+              <UserPlus size={13} /> Nuevo usuario
+            </button>
+          </div>
         </div>
-        <select value={filtroRol} onChange={e => setFiltroRol(e.target.value)}
-          className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-gray-700 focus:outline-none focus:bg-white focus:border-[#0e5c33]/40 transition-all sm:w-52">
-          <option value="todos">Todos los roles</option>
-          <option value="admin">Administradores</option>
-          <option value="responsable">Responsables</option>
-          <option value="user">Usuarios operativos</option>
-        </select>
+
+        {/* Contadores por rol */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { key: 'todos',       label: 'Todos',              count: usuarios.length,               color: 'text-gray-700 bg-gray-100' },
+            { key: 'admin',       label: 'Administradores',    count: conteoRoles['admin'] ?? 0,       color: 'text-[#0e5c33] bg-[#0e5c33]/10' },
+            { key: 'responsable', label: 'Responsables',       count: conteoRoles['responsable'] ?? 0, color: 'text-blue-700 bg-blue-100' },
+            { key: 'user',        label: 'Usuarios operativos',count: conteoRoles['user'] ?? 0,        color: 'text-violet-700 bg-violet-100' },
+          ].map(({ key, label, count, color }) => (
+            <button key={key} onClick={() => setFiltroRol(key)}
+              className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-all active:scale-[0.97] ${
+                filtroRol === key ? 'border-[#0e5c33]/40 ring-2 ring-[#0e5c33]/15 bg-white shadow-sm' : 'border-emerald-100/70 bg-white/70 hover:bg-white hover:border-emerald-200'
+              }`}>
+              <div className="min-w-0">
+                <p className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wide truncate">{label}</p>
+                <p className="text-[17px] font-black text-gray-900 leading-tight">{count}</p>
+              </div>
+              <span className={`text-[9px] font-black p-1 rounded-full shrink-0 ${color}`}><ShieldCheck size={11} /></span>
+            </button>
+          ))}
+        </div>
+
+        {/* Buscador + filtro de rol */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+              placeholder="Buscar por nombre o email…"
+              className="w-full bg-white border border-emerald-100/70 rounded-xl pl-8 pr-3 py-2 text-[12px] text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#0e5c33]/40 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all"
+            />
+          </div>
+          <select value={filtroRol} onChange={e => setFiltroRol(e.target.value)}
+            className="bg-white border border-emerald-100/70 rounded-xl px-3 py-2 text-[11.5px] font-semibold text-gray-700 focus:outline-none focus:border-[#0e5c33]/40 transition-all sm:w-48">
+            <option value="todos">Todos los roles</option>
+            <option value="admin">Administradores</option>
+            <option value="responsable">Responsables</option>
+            <option value="user">Usuarios operativos</option>
+          </select>
+        </div>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+      {/* ── Tabla: ocupa el resto del alto disponible, scroll solo interno ── */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm flex-1 min-h-0 flex flex-col overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 gap-2.5 text-gray-400">
             <Loader2 size={16} className="animate-spin" />
             <span className="text-[13px]">Cargando usuarios…</span>
           </div>
         ) : usuariosFiltrados.length === 0 ? (
-          <div className="flex flex-col items-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center flex-1 text-gray-400">
             <ShieldCheck size={36} className="mb-3 opacity-20" />
             <p className="text-[13.5px] font-bold">
               {usuarios.length === 0 ? 'Sin usuarios del panel' : 'Sin resultados para tu búsqueda'}
@@ -655,22 +659,22 @@ export default function PermisosAdminPage() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <div className="flex-1 min-h-0 overflow-auto">
               <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/60">
-                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tl-2xl">Usuario</th>
-                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Rol</th>
-                    <th className="hidden md:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Estado</th>
-                    <th className="hidden lg:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Último acceso</th>
-                    <th className="hidden sm:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Cuenta</th>
-                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tr-2xl"></th>
+                <thead className="sticky top-0 z-10">
+                  <tr className="border-b border-gray-100 bg-gray-50">
+                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-2.5">Usuario</th>
+                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-2.5">Rol</th>
+                    <th className="hidden md:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-2.5">Estado</th>
+                    <th className="hidden lg:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-2.5">Último acceso</th>
+                    <th className="hidden sm:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-2.5">Cuenta</th>
+                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-2.5"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {usuariosPagina.map((u, i) => (
                     <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50/70 transition-colors ${i === usuariosPagina.length - 1 ? 'border-b-0' : ''}`}>
-                      <td className="px-5 py-3.5">
+                      <td className="px-5 py-2.5">
                         <div className="flex items-center gap-3">
                           <Avatar nombre={u.nombre_completo} size={34} rol={u.rol} />
                           <div className="min-w-0">
@@ -679,23 +683,23 @@ export default function PermisosAdminPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5"><RolChip rol={u.rol} etiqueta={u.rol_etiqueta ?? u.rol} /></td>
-                      <td className="hidden md:table-cell px-5 py-3.5">
+                      <td className="px-5 py-2.5"><RolChip rol={u.rol} etiqueta={u.rol_etiqueta ?? u.rol} /></td>
+                      <td className="hidden md:table-cell px-5 py-2.5">
                         {u.estado_asignado
                           ? <div className="flex flex-wrap gap-1">{u.estado_asignado.split(',').map((e: string) => <span key={e} className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{e.trim()}</span>)}</div>
                           : <span className="text-[11px] text-gray-400">Nacional</span>}
                       </td>
-                      <td className="hidden lg:table-cell px-5 py-3.5 text-[12px] text-gray-500">
+                      <td className="hidden lg:table-cell px-5 py-2.5 text-[12px] text-gray-500">
                         {u.ultimo_login
                           ? new Date(u.ultimo_login).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
                           : <span className="text-amber-500 font-semibold text-[11px]">Nunca</span>}
                       </td>
-                      <td className="hidden sm:table-cell px-5 py-3.5">
+                      <td className="hidden sm:table-cell px-5 py-2.5">
                         {u.debe_cambiar_pass
                           ? <span className="text-[10.5px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pass pendiente</span>
                           : <span className="text-[10.5px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Activo</span>}
                       </td>
-                      <td className="px-5 py-3.5">
+                      <td className="px-5 py-2.5">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => abrirEditar(u)}
                             className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-[#0e5c33] text-gray-500 flex items-center justify-center transition-all active:scale-90 group">
