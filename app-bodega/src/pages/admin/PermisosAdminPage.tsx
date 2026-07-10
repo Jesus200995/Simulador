@@ -56,19 +56,30 @@ const ESTADOS_MX = [
   'VERACRUZ','YUCATAN','ZACATECAS',
 ];
 
-/* ─── Toggle switch ──────────────────────────────────────────────────── */
+/* ─── Toggle switch iOS-style ────────────────────────────────────────── */
 function Toggle({ on, onChange, disabled = false, size = 'md' }: {
   on: boolean; onChange: () => void; disabled?: boolean; size?: 'sm' | 'md';
 }) {
-  const w = size === 'sm' ? 'w-8 h-[18px]' : 'w-10 h-[22px]';
-  const k = size === 'sm' ? 'w-[13px] h-[13px]' : 'w-[17px] h-[17px]';
-  const tx = on ? (size === 'sm' ? 'translate-x-[14px]' : 'translate-x-[18px]') : 'translate-x-[2px]';
+  const track = size === 'sm'
+    ? 'w-9 h-5 rounded-full'
+    : 'w-12 h-7 rounded-full';
+  const thumb = size === 'sm'
+    ? `w-[14px] h-[14px] top-[3px] ${on ? 'translate-x-[18px]' : 'translate-x-[3px]'}`
+    : `w-[20px] h-[20px] top-[3.5px] ${on ? 'translate-x-[23px]' : 'translate-x-[3.5px]'}`;
   return (
-    <button type="button" onClick={onChange} disabled={disabled}
-      className={`${w} relative rounded-full transition-all duration-200 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e5c33]/50 ${
-        on ? 'bg-[#0e5c33] shadow-[0_2px_8px_rgba(14,92,51,0.45)]' : 'bg-gray-200'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}>
-      <span className={`absolute top-[2.5px] ${k} bg-white rounded-full shadow-sm transition-all duration-200 ${tx}`} />
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={onChange}
+      disabled={disabled}
+      className={`${track} relative shrink-0 transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#0e5c33]/60
+        ${on
+          ? 'bg-[#0e5c33] shadow-[0_2px_10px_rgba(14,92,51,0.40)]'
+          : 'bg-gray-200/90 dark:bg-gray-600'}
+        ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
+    >
+      <span className={`absolute bg-white rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.22)] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] ${thumb}`} />
     </button>
   );
 }
@@ -196,8 +207,6 @@ function ModalOverlay({ open, onClose, children, maxW = 'max-w-lg', noPad = fals
 function ArbolPermisos({ permisos, onChange, disabled = false }: {
   permisos: Permiso[]; onChange: (p: Permiso[]) => void; disabled?: boolean;
 }) {
-  const [open, setOpen] = useState<Record<string, boolean>>({});
-
   const getH = (v: string, a: string) => permisos.find(p => p.vista === v && p.sub_accion === a)?.habilitado ?? false;
   const vistaOn = (v: string) => getH(v, 'ver');
 
@@ -206,7 +215,6 @@ function ArbolPermisos({ permisos, onChange, disabled = false }: {
     const on = vistaOn(v);
     const next = permisos.filter(p => p.vista !== v);
     acciones.forEach(a => next.push({ vista: v, sub_accion: a, habilitado: !on }));
-    if (!on) setOpen(o => ({ ...o, [v]: true }));
     onChange(next);
   }
 
@@ -218,40 +226,53 @@ function ArbolPermisos({ permisos, onChange, disabled = false }: {
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       {Object.entries(VISTAS_LABELS).map(([vista, { label, icon }]) => {
         const acciones = VISTAS_ACCIONES[vista] ?? [];
         const on = vistaOn(vista);
-        const expanded = open[vista] ?? on;
-        const soloVer = acciones.length === 1;
+        const subAcciones = acciones.filter(a => a !== 'ver');
 
         return (
           <div key={vista}
-            className={`border rounded-2xl overflow-hidden transition-all duration-200 ${on ? 'border-[#0e5c33]/25 bg-emerald-50/40' : 'border-gray-150 bg-gray-50/60'}`}>
-            <div className="flex items-center gap-2.5 px-3.5 py-2.5">
-              <button type="button" onClick={() => !soloVer && setOpen(o => ({ ...o, [vista]: !expanded }))}
-                disabled={soloVer || disabled || !on}
-                className="flex items-center gap-2 flex-1 min-w-0 text-left">
-                <span className="text-[13px]">{icon}</span>
-                <span className={`text-[12.5px] font-bold truncate ${on ? 'text-gray-800' : 'text-gray-500'}`}>{label}</span>
-                {!soloVer && on && (
-                  <span className={`ml-auto text-gray-400 transition-transform duration-200 ${expanded ? '' : '-rotate-90'}`}>
-                    <ChevronDown size={13} />
-                  </span>
-                )}
-              </button>
-              <Toggle on={on} onChange={() => toggleVista(vista)} disabled={disabled} size="sm" />
+            className={`rounded-2xl border transition-all duration-250 overflow-hidden
+              ${on
+                ? 'border-[#0e5c33]/20 bg-gradient-to-r from-emerald-50/70 to-white shadow-[0_1px_6px_rgba(14,92,51,0.08)]'
+                : 'border-gray-200/80 bg-gray-50/50'}`}>
+
+            {/* Fila principal */}
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200
+                ${on ? 'bg-[#0e5c33]/10' : 'bg-gray-100'}`}>
+                <span className={`transition-all duration-200 ${on ? 'opacity-100' : 'opacity-40'}`}>{icon}</span>
+              </div>
+              <span className={`text-[13px] font-bold flex-1 transition-colors duration-200 ${on ? 'text-gray-900' : 'text-gray-400'}`}>
+                {label}
+              </span>
+              <Toggle on={on} onChange={() => !disabled && toggleVista(vista)} disabled={disabled} size="md" />
             </div>
 
-            {on && !soloVer && expanded && (
-              <div className="border-t border-[#0e5c33]/10 px-3.5 pb-2.5 pt-2 flex flex-col gap-2">
-                {acciones.filter(a => a !== 'ver').map(accion => (
-                  <div key={accion} className="flex items-center justify-between pl-5 relative">
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-px bg-gray-300" />
-                    <span className="text-[11.5px] text-gray-600 font-medium">{ACCION_LABELS[accion] ?? accion}</span>
-                    <Toggle on={getH(vista, accion)} onChange={() => toggleAccion(vista, accion)} disabled={disabled} size="sm" />
-                  </div>
-                ))}
+            {/* Sub-acciones: chips horizontales */}
+            {on && subAcciones.length > 0 && (
+              <div className="px-4 pb-3 flex flex-wrap gap-2">
+                {subAcciones.map(accion => {
+                  const activa = getH(vista, accion);
+                  return (
+                    <button
+                      key={accion}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => toggleAccion(vista, accion)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-bold border transition-all duration-200 active:scale-95
+                        ${activa
+                          ? 'bg-[#0e5c33] border-[#0e5c33] text-white shadow-[0_2px_8px_rgba(14,92,51,0.28)]'
+                          : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600'
+                        } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activa ? 'bg-white/80' : 'bg-gray-300'}`} />
+                      {ACCION_LABELS[accion] ?? accion}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -588,186 +609,246 @@ export default function PermisosAdminPage() {
       </div>
 
       {/* ═══ MODAL CREAR ════════════════════════════════════════════════ */}
-      <ModalOverlay open={modalCrear} onClose={() => setModalCrear(false)} maxW="max-w-2xl" noPad>
-        {/* Header verde */}
-        <div className="bg-gradient-to-br from-[#0e5c33] to-[#1a7a44] px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5 shrink-0">
-          <div className="flex items-start justify-between mb-3.5 sm:mb-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-              <UserPlus size={17} className="text-white" />
+      <ModalOverlay open={modalCrear} onClose={() => setModalCrear(false)} maxW="max-w-3xl" noPad>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#0c4f2c] via-[#0e5c33] to-[#15753f] px-6 pt-6 pb-5 shrink-0 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.06]" style={{backgroundImage:'radial-gradient(circle at 80% 50%, white 0%, transparent 60%)'}} />
+          <div className="relative flex items-start justify-between">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <UserPlus size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white text-[15px] font-black tracking-tight">Nuevo usuario</p>
+                <p className="text-white/55 text-[11.5px] mt-0.5 font-medium">Contraseña temporal generada automáticamente</p>
+              </div>
             </div>
             <button onClick={() => setModalCrear(false)}
-              className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-90">
-              <X size={13} className="text-white/80" />
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90 mt-0.5">
+              <X size={14} className="text-white/70" />
             </button>
           </div>
-          <p className="text-white text-[14px] sm:text-[15px] font-black">Nuevo usuario del panel</p>
-          <p className="text-white/60 text-[11px] sm:text-[11.5px] mt-0.5">Contraseña temporal auto-generada · Email como identificador</p>
         </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className={lCls}>Nombre completo *</label>
-              <input className={iCls} placeholder="María García López"
-                value={fCrear.nombre_completo} onChange={e => setFCrear(p => ({ ...p, nombre_completo: e.target.value }))} />
+        {/* Body: 2 columnas en ≥640px */}
+        <div className="flex flex-col sm:flex-row min-h-0 overflow-hidden">
+          {/* Columna izquierda — datos del usuario */}
+          <div className="sm:w-[280px] sm:min-w-[280px] border-b sm:border-b-0 sm:border-r border-gray-100 px-5 py-5 flex flex-col gap-4 overflow-y-auto">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
+
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className={lCls}>Nombre completo *</label>
+                <input className={iCls} placeholder="María García López"
+                  value={fCrear.nombre_completo} onChange={e => setFCrear(p => ({ ...p, nombre_completo: e.target.value }))} />
+              </div>
+              <div>
+                <label className={lCls}>Email institucional *</label>
+                <input type="email" className={iCls} placeholder="m.garcia@simac.mx"
+                  value={fCrear.email} onChange={e => setFCrear(p => ({ ...p, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className={lCls}>Rol *</label>
+                <select className={iCls} value={fCrear.rol}
+                  onChange={e => setFCrear(p => ({ ...p, rol: e.target.value, estado_asignado: '' }))}>
+                  {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
+                </select>
+              </div>
+              {rolDe(fCrear.rol)?.aplica_filtro_estado && (
+                <div>
+                  <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
+                  <EstadoMultiSelect value={fCrear.estado_asignado}
+                    onChange={v => setFCrear(p => ({ ...p, estado_asignado: v }))} />
+                </div>
+              )}
             </div>
-            <div>
-              <label className={lCls}>Email institucional *</label>
-              <input type="email" className={iCls} placeholder="m.garcia@simac.mx"
-                value={fCrear.email} onChange={e => setFCrear(p => ({ ...p, email: e.target.value }))} />
-            </div>
-            <div>
-              <label className={lCls}>Rol *</label>
-              <select className={iCls} value={fCrear.rol}
-                onChange={e => setFCrear(p => ({ ...p, rol: e.target.value, estado_asignado: '' }))}>
-                {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
-              </select>
-            </div>
-            {rolDe(fCrear.rol)?.aplica_filtro_estado && (
-              <div className="sm:col-span-2">
-                <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
-                <EstadoMultiSelect value={fCrear.estado_asignado}
-                  onChange={v => setFCrear(p => ({ ...p, estado_asignado: v }))} />
+
+            {errCrear && (
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3 mt-auto">
+                <AlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[12px] text-red-600">{errCrear}</p>
               </div>
             )}
           </div>
 
-          {!rolDe(fCrear.rol)?.permisos_totales ? (
-            <div>
-              <p className={lCls}>Permisos por vista</p>
-              <ArbolPermisos permisos={pCrear} onChange={setPCrear} />
+          {/* Columna derecha — permisos */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="overflow-y-auto flex-1 px-5 py-5">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] mb-3">Permisos por vista</p>
+              {!rolDe(fCrear.rol)?.permisos_totales ? (
+                <ArbolPermisos permisos={pCrear} onChange={setPCrear} />
+              ) : (
+                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={16} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-bold text-emerald-800">Acceso total</p>
+                    <p className="text-[11.5px] text-emerald-600 mt-0.5">No requiere configurar permisos individuales.</p>
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
-              <ShieldCheck size={16} className="text-emerald-600 shrink-0" />
-              <p className="text-[12.5px] text-emerald-800 font-semibold">Acceso total al sistema — no requiere configurar permisos individuales.</p>
-            </div>
-          )}
 
-          {errCrear && (
-            <div className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3">
-              <AlertTriangle size={13} className="text-red-500 shrink-0" />
-              <p className="text-[12px] text-red-600">{errCrear}</p>
+            {/* Footer sticky */}
+            <div className="border-t border-gray-100 px-5 py-4 flex justify-end gap-2.5 shrink-0 bg-white/80 backdrop-blur-sm">
+              <button onClick={() => setModalCrear(false)}
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+                Cancelar
+              </button>
+              <button onClick={crearUsuario} disabled={creando}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a4227] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
+                {creando ? <><Loader2 size={13} className="animate-spin" />Creando…</> : <><Plus size={13} />Crear usuario</>}
+              </button>
             </div>
-          )}
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-1">
-            <button onClick={() => setModalCrear(false)}
-              className="px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">Cancelar</button>
-            <button onClick={crearUsuario} disabled={creando}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a3d22] transition-all active:scale-95 shadow-sm disabled:opacity-50">
-              {creando ? <><Loader2 size={13} className="animate-spin" />Creando…</> : <><Plus size={13} />Crear usuario</>}
-            </button>
           </div>
         </div>
       </ModalOverlay>
 
       {/* ═══ MODAL EDITAR ═══════════════════════════════════════════════ */}
-      <ModalOverlay open={modalEditar} onClose={() => setModalEditar(false)} maxW="max-w-2xl" noPad>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5 shrink-0">
-          <div className="flex items-start justify-between mb-3.5 sm:mb-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/15 flex items-center justify-center">
-              <KeySquare size={17} className="text-white" />
+      <ModalOverlay open={modalEditar} onClose={() => setModalEditar(false)} maxW="max-w-3xl" noPad>
+        {/* Header con avatar del usuario */}
+        <div className="bg-gradient-to-r from-[#1a1f2e] via-[#1e2438] to-[#141824] px-6 pt-6 pb-5 shrink-0 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.05]" style={{backgroundImage:'radial-gradient(circle at 85% 40%, #4f9cf9 0%, transparent 55%)'}} />
+          <div className="relative flex items-start justify-between">
+            <div className="flex items-center gap-3.5">
+              {usuEdit && <Avatar nombre={usuEdit.nombre_completo} size={44} rol={usuEdit.rol} />}
+              <div>
+                <p className="text-white text-[15px] font-black tracking-tight truncate max-w-[220px] sm:max-w-none">{usuEdit?.nombre_completo}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  {usuEdit && <RolChip rol={usuEdit.rol} etiqueta={usuEdit.rol_etiqueta ?? usuEdit.rol} />}
+                  <span className="text-white/40 text-[11px]">·</span>
+                  <span className="text-white/45 text-[11px] font-medium">Cambios en tiempo real</span>
+                </div>
+              </div>
             </div>
             <button onClick={() => setModalEditar(false)}
-              className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-90">
-              <X size={13} className="text-white/80" />
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90 mt-0.5">
+              <X size={14} className="text-white/70" />
             </button>
           </div>
-          <p className="text-white text-[14px] sm:text-[15px] font-black truncate">{usuEdit?.nombre_completo}</p>
-          <p className="text-white/50 text-[11px] sm:text-[11.5px] mt-0.5">Los permisos se aplican en tiempo real — sin recargar</p>
         </div>
 
-        <div className="overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className={lCls}>Nombre completo</label>
-              <input className={iCls} value={fEditar.nombre_completo}
-                onChange={e => setFEditar(p => ({ ...p, nombre_completo: e.target.value }))} />
+        {/* Body: 2 columnas en ≥640px */}
+        <div className="flex flex-col sm:flex-row min-h-0 overflow-hidden">
+          {/* Columna izquierda */}
+          <div className="sm:w-[280px] sm:min-w-[280px] border-b sm:border-b-0 sm:border-r border-gray-100 px-5 py-5 flex flex-col gap-4 overflow-y-auto">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
+
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className={lCls}>Nombre completo</label>
+                <input className={iCls} value={fEditar.nombre_completo}
+                  onChange={e => setFEditar(p => ({ ...p, nombre_completo: e.target.value }))} />
+              </div>
+              <div>
+                <label className={lCls}>Email</label>
+                <input type="email" className={iCls} value={fEditar.email}
+                  onChange={e => setFEditar(p => ({ ...p, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className={lCls}>Rol</label>
+                <select className={iCls} value={fEditar.rol}
+                  onChange={e => setFEditar(p => ({ ...p, rol: e.target.value }))}>
+                  {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
+                </select>
+              </div>
+              {rolDe(fEditar.rol)?.aplica_filtro_estado && (
+                <div>
+                  <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
+                  <EstadoMultiSelect value={fEditar.estado_asignado}
+                    onChange={v => setFEditar(p => ({ ...p, estado_asignado: v }))} />
+                </div>
+              )}
             </div>
-            <div>
-              <label className={lCls}>Email</label>
-              <input type="email" className={iCls} value={fEditar.email}
-                onChange={e => setFEditar(p => ({ ...p, email: e.target.value }))} />
-            </div>
-            <div>
-              <label className={lCls}>Rol</label>
-              <select className={iCls} value={fEditar.rol}
-                onChange={e => setFEditar(p => ({ ...p, rol: e.target.value }))}>
-                {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
-              </select>
-            </div>
-            {rolDe(fEditar.rol)?.aplica_filtro_estado && (
-              <div className="sm:col-span-2">
-                <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
-                <EstadoMultiSelect value={fEditar.estado_asignado}
-                  onChange={v => setFEditar(p => ({ ...p, estado_asignado: v }))} />
+
+            {/* Feedback */}
+            {errEdit && (
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3">
+                <AlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[12px] text-red-600">{errEdit}</p>
+              </div>
+            )}
+            {savedOk && (
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-3.5 py-3">
+                <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                <p className="text-[12px] text-emerald-700 font-bold">Guardado ✓</p>
               </div>
             )}
           </div>
 
-          {!rolDe(fEditar.rol)?.permisos_totales ? (
-            <div>
-              <p className={lCls}>Permisos por vista</p>
-              <ArbolPermisos permisos={pEditar} onChange={setPEditar} />
+          {/* Columna derecha — permisos */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="overflow-y-auto flex-1 px-5 py-5">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] mb-3">Permisos por vista</p>
+              {!rolDe(fEditar.rol)?.permisos_totales ? (
+                <ArbolPermisos permisos={pEditar} onChange={setPEditar} />
+              ) : (
+                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={16} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-bold text-emerald-800">Acceso total</p>
+                    <p className="text-[11.5px] text-emerald-600 mt-0.5">No requiere permisos individuales.</p>
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
-              <ShieldCheck size={16} className="text-emerald-600 shrink-0" />
-              <p className="text-[12.5px] text-emerald-800 font-semibold">Acceso total al sistema.</p>
-            </div>
-          )}
 
-          {errEdit && (
-            <div className="flex items-center gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3">
-              <AlertTriangle size={13} className="text-red-500 shrink-0" />
-              <p className="text-[12px] text-red-600">{errEdit}</p>
+            {/* Footer sticky */}
+            <div className="border-t border-gray-100 px-5 py-4 flex justify-end gap-2.5 shrink-0 bg-white/80 backdrop-blur-sm">
+              <button onClick={() => setModalEditar(false)}
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+                Cerrar
+              </button>
+              <button onClick={guardarEditar} disabled={guardando}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#1a1f2e] hover:bg-[#252c42] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
+                {guardando
+                  ? <><Loader2 size={13} className="animate-spin" />Guardando…</>
+                  : <><CheckCircle2 size={13} />Guardar cambios</>}
+              </button>
             </div>
-          )}
-          {savedOk && (
-            <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl px-3.5 py-3">
-              <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-              <p className="text-[12px] text-emerald-700 font-semibold">Cambios guardados y enviados en tiempo real ✓</p>
-            </div>
-          )}
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-1">
-            <button onClick={() => setModalEditar(false)}
-              className="px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">Cerrar</button>
-            <button onClick={guardarEditar} disabled={guardando}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-gray-800 hover:bg-gray-900 transition-all active:scale-95 shadow-sm disabled:opacity-50">
-              {guardando ? <><Loader2 size={13} className="animate-spin" />Guardando…</> : <><CheckCircle2 size={13} />Guardar cambios</>}
-            </button>
           </div>
         </div>
       </ModalOverlay>
 
       {/* ═══ MODAL ELIMINAR ═════════════════════════════════════════════ */}
       <ModalOverlay open={modalDel} onClose={() => setModalDel(false)} maxW="max-w-sm" noPad>
-        <div className="bg-gradient-to-br from-red-600 to-red-700 px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5">
-          <div className="flex items-start justify-between mb-3.5 sm:mb-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-              <Trash2 size={17} className="text-white" />
+        {/* Header */}
+        <div className="bg-gradient-to-br from-red-500 to-rose-600 px-6 pt-6 pb-5 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.07]" style={{backgroundImage:'radial-gradient(circle at 70% 30%, white 0%, transparent 55%)'}} />
+          <div className="relative flex items-start justify-between">
+            <div className="w-11 h-11 rounded-2xl bg-white/20 border border-white/20 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+              <Trash2 size={18} className="text-white" />
             </div>
             <button onClick={() => setModalDel(false)}
-              className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-90">
-              <X size={13} className="text-white/80" />
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90">
+              <X size={14} className="text-white/70" />
             </button>
           </div>
-          <p className="text-white text-[14px] sm:text-[15px] font-black">Eliminar usuario</p>
-          <p className="text-white/60 text-[11px] sm:text-[11.5px] mt-0.5">Esta acción no se puede deshacer</p>
+          <p className="text-white text-[15px] font-black tracking-tight mt-4">Eliminar usuario</p>
+          <p className="text-white/55 text-[11.5px] mt-0.5 font-medium">Esta acción no se puede deshacer</p>
         </div>
 
-        <div className="px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-4">
-          <p className="text-[13px] text-gray-700 leading-relaxed">
-            <strong className="text-gray-900">{usuDel?.nombre_completo}</strong> perderá acceso inmediato al panel y todos sus permisos serán eliminados.
+        <div className="px-6 py-5 flex flex-col gap-5">
+          <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl p-3.5">
+            {usuDel && <Avatar nombre={usuDel.nombre_completo} size={36} rol={usuDel.rol} />}
+            <div className="min-w-0">
+              <p className="text-[13px] font-bold text-gray-900 truncate">{usuDel?.nombre_completo}</p>
+              <p className="text-[11.5px] text-gray-500 truncate">{usuDel?.email}</p>
+            </div>
+          </div>
+          <p className="text-[13px] text-gray-600 leading-relaxed">
+            Perderá acceso inmediato al panel y <strong className="text-gray-800">todos sus permisos serán eliminados</strong>.
           </p>
-          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+          <div className="flex gap-2.5">
             <button onClick={() => setModalDel(false)}
-              className="flex-1 py-3 rounded-2xl text-[13px] font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">Cancelar</button>
+              className="flex-1 py-3 rounded-2xl text-[13px] font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+              Cancelar
+            </button>
             <button onClick={eliminar} disabled={deleting}
-              className="flex-1 py-3 rounded-2xl text-[13px] font-bold text-white bg-red-600 hover:bg-red-700 transition-all active:scale-95 shadow-sm disabled:opacity-50 flex items-center justify-center gap-2">
+              className="flex-1 py-3 rounded-2xl text-[13px] font-bold text-white bg-red-600 hover:bg-red-700 transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center gap-2">
               {deleting ? <><Loader2 size={13} className="animate-spin" />Eliminando…</> : <><Trash2 size={13} />Sí, eliminar</>}
             </button>
           </div>
