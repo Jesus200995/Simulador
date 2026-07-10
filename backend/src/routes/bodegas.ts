@@ -32,7 +32,11 @@ router.get('/catalogos', authMiddleware, async (_req: AuthRequest, res: Response
 // =============================================
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { region_id, estado, municipio, q, lat, lng, radio_km, tipo_maiz } = req.query;
+    let { region_id, municipio, q, lat, lng, radio_km, tipo_maiz } = req.query;
+    // OREF: forzar filtro de estado al estado asignado
+    const estadoForzado = (req.user?.rol === 'user' && req.user?.es_panel_usuario)
+      ? req.user.estado_asignado ?? null : null;
+    const estado = estadoForzado ?? (req.query.estado as string | undefined);
 
     const conditions: string[] = [];
     const params: any[] = [];

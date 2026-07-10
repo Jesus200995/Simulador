@@ -15,6 +15,18 @@ function soloAdmin(req: AuthRequest, res: Response, next: Function): void {
   next();
 }
 
+/** Devuelve true si el usuario puede acceder al panel (admin, responsable o OREF) */
+function esPanelAdmin(u: AuthRequest['user']): boolean {
+  return u?.rol === 'admin' || u?.rol === 'responsable' ||
+    (u?.rol === 'user' && u?.es_panel_usuario === true);
+}
+
+/** Retorna el estado a filtrar (solo OREF) o null (admin/responsable = sin filtro) */
+function getEstadoFiltro(u: AuthRequest['user']): string | null {
+  if (u?.rol === 'admin' || u?.rol === 'responsable') return null;
+  return u?.estado_asignado ?? null;
+}
+
 // =============================================
 // POST /api/admin/registro-admin
 // Registro de nuevo admin con código de acceso corporativo
@@ -82,20 +94,20 @@ router.post('/registro-admin', async (req: any, res: Response): Promise<void> =>
 // Devuelve todos los productores con su estado_validacion, UP y datos del productor
 // =============================================
 router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
-    res.status(403).json({ error: 'Acceso denegado' });
-    return;
-  }
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
     const { estado_validacion, estado, q, tipo_registro, rol } = req.query;
     const conditions: string[] = [];
     const params: any[] = [];
     let idx = 1;
 
+    // Forzar filtro de estado para usuarios OREF
+    const estadoForzado = getEstadoFiltro(req.user);
+    const estadoEfectivo = estadoForzado ?? (estado as string | undefined);
+    if (estadoEfectivo) { conditions.push(`UPPER(first_up.state_name) = UPPER($${idx++})`); params.push(estadoEfectivo); }
+
     if (estado_validacion) { conditions.push(`p.estado_validacion = $${idx++}`); params.push(estado_validacion); }
     if (tipo_registro) { conditions.push(`p.tipo_registro = $${idx++}`); params.push(tipo_registro); }
-    if (estado) { conditions.push(`first_up.state_name = $${idx++}`); params.push(estado); }
-    // Filtro por rol — busca en tabla usuarios vinculada por curp
     if (rol) { conditions.push(`u.rol = $${idx++}`); params.push(rol); }
     if (q) {
       conditions.push(`(p.nombres ILIKE $${idx} OR p.apellido_paterno ILIKE $${idx} OR p.curp ILIKE $${idx})`);
@@ -256,17 +268,21 @@ router.patch('/usuarios/:id/estatus', authMiddleware, async (req: AuthRequest, r
 // =============================================
 // GET /api/admin/bodegas-pendientes
 // =============================================
-router.get('/bodegas-pendientes', authMiddleware, soloAdmin, async (_req: AuthRequest, res: Response): Promise<void> => {
+router.get('/bodegas-pendientes', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
+    const estado = getEstadoFiltro(req.user);
+    const params = estado ? [estado] : [];
+    const whereEstado = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
     const result = await pool.query(`
       SELECT b.*, r.nombre as region_nombre,
              u.nombre_completo as creado_por_nombre
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
       LEFT JOIN usuarios u ON b.creado_por = u.id
-      WHERE b.estatus = 'pendiente'
+      WHERE b.estatus = 'pendiente' ${whereEstado}
       ORDER BY b.fecha_creacion DESC
-    `);
+    `, params);
     res.json({ bodegas: result.rows });
   } catch (error) {
     console.error('Error al obtener bodegas pendientes:', error);
@@ -278,8 +294,12 @@ router.get('/bodegas-pendientes', authMiddleware, soloAdmin, async (_req: AuthRe
 // GET /api/admin/solicitudes-bodega
 // Solicitudes de asociación bodeguero↔bodega pendientes de aprobación
 // =============================================
-router.get('/solicitudes-bodega', authMiddleware, soloAdmin, async (_req: AuthRequest, res: Response): Promise<void> => {
+router.get('/solicitudes-bodega', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
+    const estado = getEstadoFiltro(req.user);
+    const params = estado ? [estado] : [];
+    const whereEstado = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
     const { rows } = await pool.query(`
       SELECT
         bb.id, bb.estatus, bb.fecha_solicitud,
@@ -294,9 +314,9 @@ router.get('/solicitudes-bodega', authMiddleware, soloAdmin, async (_req: AuthRe
       FROM bodeguero_bodegas bb
       JOIN usuarios u ON u.id = bb.usuario_id
       JOIN bodegas  b ON b.id = bb.bodega_id
-      WHERE bb.estatus = 'pendiente'
+      WHERE bb.estatus = 'pendiente' ${whereEstado}
       ORDER BY bb.fecha_solicitud DESC
-    `);
+    `, params);
     res.json({ solicitudes: rows, total: rows.length });
   } catch (error) {
     console.error('Error solicitudes-bodega:', error);
@@ -547,10 +567,7 @@ router.delete('/productores/:producer_id', authMiddleware, soloAdmin, async (req
 // GET /api/admin/usuarios/:id — Detalle de un productor
 // =============================================
 router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
-    res.status(403).json({ error: 'Acceso denegado' });
-    return;
-  }
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
     const { id } = req.params;
     const result = await pool.query(`
@@ -675,8 +692,12 @@ router.get('/ventanillas/resumen', authMiddleware, async (req: AuthRequest, res:
 // =============================================
 // GET /api/admin/bodegas/estadisticas
 // =============================================
-router.get('/bodegas/estadisticas', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/bodegas/estadisticas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
+    const estado = getEstadoFiltro(req.user);
+    const params = estado ? [estado] : [];
+    const whereEstado = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
     const result = await pool.query(`
       SELECT
         COALESCE(SUM(b.capacidad_ton), 0) AS capacidad_total,
@@ -690,8 +711,8 @@ router.get('/bodegas/estadisticas', authMiddleware, soloAdmin, async (req: AuthR
       ) i ON true
       LEFT JOIN tarifario_servicios ts ON ts.bodega_id = b.id AND ts.activo = true
       LEFT JOIN ventanillas v ON v.bodega_id = b.id AND v.estatus = 'activa'
-      WHERE b.activo = true
-    `);
+      WHERE b.activo = true ${whereEstado}
+    `, params);
     res.json(result.rows[0] || {});
   } catch (error) {
     console.error('Error estadísticas bodegas:', error);
