@@ -27,8 +27,8 @@ function generarPassTemporal(): string {
 // Mapa de vistas disponibles y sus acciones permitidas
 const VISTAS_PERMISOS: Record<string, string[]> = {
   resumen:            ['ver'],
-  productores:        ['ver', 'editar', 'eliminar', 'exportar'],
-  bodegas:            ['ver', 'crear', 'editar', 'eliminar', 'exportar'],
+  productores:        ['ver', 'ver_detalle', 'editar', 'eliminar', 'exportar'],
+  bodegas:            ['ver', 'ver_detalle', 'crear', 'editar', 'eliminar', 'exportar'],
   alertas:            ['ver', 'crear', 'eliminar'],
   precios:            ['ver', 'editar'],
   produccion:         ['ver', 'editar', 'exportar'],

@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Inbox, Coins,
   Check, X, AlertTriangle, RefreshCw, Layers, ClipboardList
@@ -53,7 +53,9 @@ export default function BodegaDetalleAdminPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   // Aprobar/rechazar bodega es exclusivo de admin/responsable (el backend lo exige igual)
-  const permisosTotal = usePermisosStore(s => s.permisosTotal);
+  const permisosTotal   = usePermisosStore(s => s.permisosTotal);
+  const puedo           = usePermisosStore(s => s.puedo);
+  const puedeVerDetalle = permisosTotal || puedo('bodegas', 'ver_detalle');
   const [data, setData] = useState<BodegaDetalle | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -190,6 +192,9 @@ export default function BodegaDetalleAdminPage() {
       return diff > sesentaDias;
     });
   };
+
+  // Defensa en profundidad: acceso directo por URL sin permiso de ver_detalle
+  if (!puedeVerDetalle) return <Navigate to="/admin/bodegas" replace />;
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-20 gap-2">

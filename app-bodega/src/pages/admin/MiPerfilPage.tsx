@@ -90,16 +90,16 @@ function Section({ title, icon, children, defaultOpen = true }: {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
       <button type="button" onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50/60 transition-colors">
+        className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4 hover:bg-gray-50/60 transition-colors">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl bg-[#0e5c33]/10 flex items-center justify-center text-[#0e5c33]">
+          <div className="w-7 h-7 rounded-xl bg-[#0e5c33]/10 flex items-center justify-center text-[#0e5c33] shrink-0">
             {icon}
           </div>
-          <span className="text-[13px] font-black text-gray-900">{title}</span>
+          <span className="text-[12.5px] font-black text-gray-900">{title}</span>
         </div>
-        <ChevronDown size={15} className={`text-gray-400 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
+        <ChevronDown size={15} className={`text-gray-400 transition-transform duration-200 shrink-0 ${open ? '' : '-rotate-90'}`} />
       </button>
-      {open && <div className="px-5 pb-5 pt-1 border-t border-gray-100">{children}</div>}
+      {open && <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 border-t border-gray-100">{children}</div>}
     </div>
   );
 }
@@ -215,35 +215,44 @@ export default function MiPerfilPage() {
   const nombre_display = perfil?.nombre_completo || user?.nombre_completo || 'Usuario';
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-3.5 sm:gap-4 max-w-2xl mx-auto pb-6">
 
       {/* ── Tarjeta hero de perfil ────────────────────────────────────── */}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         {/* Banda superior */}
-        <div className="h-20 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
+        <div className="h-16 sm:h-20 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
           <div className="absolute inset-0 opacity-20"
-            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '24px 24px' }} />
+            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
         </div>
 
-        <div className="px-6 pb-5">
-          {/* Avatar sobre la banda */}
-          <div className="-mt-9 mb-3 flex items-end justify-between">
-            <div className="ring-4 ring-white rounded-[calc(72px*0.28+4px)]">
-              <Avatar nombre={nombre_display} size={72} rol={rolLabel} />
+        <div className="px-4 sm:px-6 pb-4 sm:pb-5">
+          {/* Avatar + nombre + logout — se apilan en móvil, en línea en desktop */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div className="-mt-8 sm:-mt-9 flex items-end gap-3">
+              <div className="ring-4 ring-white rounded-[22px] shrink-0">
+                <Avatar nombre={nombre_display} size={64} rol={rolLabel} />
+              </div>
+              <div className="min-w-0 pb-0.5 sm:hidden">
+                <p className="text-[15px] font-black text-gray-900 leading-tight truncate">{nombre_display}</p>
+                <p className="text-[11.5px] text-gray-500 truncate">{perfil?.email ?? user?.email}</p>
+              </div>
             </div>
             <button onClick={handleLogout}
-              className="flex items-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-1.5 rounded-xl transition-all active:scale-95 mb-1">
+              className="flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 sm:py-1.5 rounded-xl transition-all active:scale-95 shrink-0">
               <LogOut size={12} /> Cerrar sesión
             </button>
           </div>
 
-          <p className="text-[17px] font-black text-gray-900 leading-tight">{nombre_display}</p>
-          <p className="text-[12.5px] text-gray-500 mt-0.5">{perfil?.email ?? user?.email}</p>
+          {/* Nombre/email en desktop */}
+          <div className="hidden sm:block mt-3">
+            <p className="text-[16px] font-black text-gray-900 leading-tight">{nombre_display}</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">{perfil?.email ?? user?.email}</p>
+          </div>
 
-          <div className="flex items-center gap-2 mt-2.5">
+          <div className="flex items-center gap-1.5 flex-wrap mt-3">
             <RolLabel rol={rolLabel} />
             {perfil?.estado_asignado && (
-              <span className="text-[10.5px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
+              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
             )}
             {rolLabel === 'admin' && (
               <span className="flex items-center gap-1 text-[10px] font-bold text-[#0e5c33]/70 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
@@ -253,14 +262,14 @@ export default function MiPerfilPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-gray-100">
+          <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 pt-3.5 border-t border-gray-100">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                <Clock size={13} className="text-gray-400" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <Clock size={12} className="text-gray-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
-                <p className="text-[12px] font-bold text-gray-700 mt-0.5 truncate">
+                <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
+                <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
                   {perfil?.ultimo_login
                     ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
                     : 'Primer acceso'}
@@ -268,12 +277,12 @@ export default function MiPerfilPage() {
               </div>
             </div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                <CalendarDays size={13} className="text-gray-400" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <CalendarDays size={12} className="text-gray-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
-                <p className="text-[12px] font-bold text-gray-700 mt-0.5 truncate">
+                <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
+                <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
                   {perfil?.created_at
                     ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' })
                     : '—'}

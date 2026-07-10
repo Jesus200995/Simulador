@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
 import {
   ArrowLeft, Users, Mail, Phone, Calendar, MapPin, Sprout,
@@ -48,7 +48,8 @@ export default function ProductorDetalleAdminPage() {
   const navigate = useNavigate();
   const puedo         = usePermisosStore(s => s.puedo);
   const permisosTotal = usePermisosStore(s => s.permisosTotal);
-  const puedeEditar   = permisosTotal || puedo('productores', 'editar');
+  const puedeEditar     = permisosTotal || puedo('productores', 'editar');
+  const puedeVerDetalle = permisosTotal || puedo('productores', 'ver_detalle');
   const [data, setData] = useState<ProductorDetalle | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -219,6 +220,9 @@ export default function ProductorDetalleAdminPage() {
       setActionLoading(false);
     }
   }
+
+  // Defensa en profundidad: acceso directo por URL sin permiso de ver_detalle
+  if (!puedeVerDetalle) return <Navigate to="/admin/productores" replace />;
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">

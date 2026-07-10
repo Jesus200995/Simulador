@@ -99,8 +99,9 @@ export default function BodegasAdminPage() {
   const permisosTotal = usePermisosStore(s => s.permisosTotal); // true solo para admin/responsable
   const puedeCrear    = permisosTotal || puedo('bodegas', 'crear');
   const puedeEditar   = permisosTotal || puedo('bodegas', 'editar');
-  const puedeEliminar = permisosTotal || puedo('bodegas', 'eliminar');
-  const puedeExportar = permisosTotal || puedo('bodegas', 'exportar');
+  const puedeEliminar   = permisosTotal || puedo('bodegas', 'eliminar');
+  const puedeExportar   = permisosTotal || puedo('bodegas', 'exportar');
+  const puedeVerDetalle = permisosTotal || puedo('bodegas', 'ver_detalle');
   // "Por aprobar" y "Usuarios" son acciones/datos exclusivos de admin y responsable —
   // un OREF (rol=user) jamás debe verlas, sin importar sus permisos de vista.
   const soloAdminVeTabsGestion = permisosTotal;
@@ -720,10 +721,12 @@ export default function BodegasAdminPage() {
                         </td>
                         <td className="py-2 px-3 pr-4 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => abrirDetalle(b)}
-                              className="p-1.5 rounded-lg text-gray-400 hover:text-[#1A5C38] hover:bg-[#eef8f2] transition" title="Ver detalle">
-                              <Eye size={12} />
-                            </button>
+                            {puedeVerDetalle && (
+                              <button onClick={() => abrirDetalle(b)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-[#1A5C38] hover:bg-[#eef8f2] transition" title="Ver detalle">
+                                <Eye size={12} />
+                              </button>
+                            )}
                             {puedeEditar && (
                               <button onClick={() => abrirEditar(b)}
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar">
@@ -940,10 +943,12 @@ export default function BodegasAdminPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <button onClick={() => abrirDetalle(b)}
-                      className="h-8 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-bold transition flex items-center gap-1">
-                      <Eye size={12} /> Ver
-                    </button>
+                    {puedeVerDetalle && (
+                      <button onClick={() => abrirDetalle(b)}
+                        className="h-8 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-bold transition flex items-center gap-1">
+                        <Eye size={12} /> Ver
+                      </button>
+                    )}
                     <button onClick={() => setModalAccion({ tipo: 'aprobar', bodega: b })}
                       className="h-8 px-3 rounded-xl bg-[#1A5C38] hover:bg-[#15482d] text-white text-[11px] font-bold transition flex items-center gap-1">
                       <CheckCircle size={12} /> Aprobar

@@ -33,13 +33,13 @@ const VISTAS_LABELS: Record<string, { label: string; icon: React.ReactNode }> = 
 };
 
 const ACCION_LABELS: Record<string, string> = {
-  ver: 'Ver', crear: 'Crear', editar: 'Editar', eliminar: 'Eliminar', exportar: 'Exportar',
+  ver: 'Ver', ver_detalle: 'Ver detalle', crear: 'Crear', editar: 'Editar', eliminar: 'Eliminar', exportar: 'Exportar',
 };
 
 const VISTAS_ACCIONES: Record<string, string[]> = {
   resumen:             ['ver'],
-  productores:         ['ver', 'editar', 'eliminar', 'exportar'],
-  bodegas:             ['ver', 'crear', 'editar', 'eliminar', 'exportar'],
+  productores:         ['ver', 'ver_detalle', 'editar', 'eliminar', 'exportar'],
+  bodegas:             ['ver', 'ver_detalle', 'crear', 'editar', 'eliminar', 'exportar'],
   alertas:             ['ver', 'crear', 'eliminar'],
   precios:             ['ver', 'editar'],
   produccion:          ['ver', 'editar', 'exportar'],

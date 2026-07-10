@@ -361,9 +361,10 @@ function ModalVerProductor({
 
 export default function ProductoresAdminPage() {
   const { puedo, permisosTotal } = usePermisosStore();
-  const puedeEditar   = permisosTotal || puedo('productores', 'editar');
-  const puedeEliminar = permisosTotal || puedo('productores', 'eliminar');
-  const puedeExportar = permisosTotal || puedo('productores', 'exportar');
+  const puedeEditar     = permisosTotal || puedo('productores', 'editar');
+  const puedeEliminar   = permisosTotal || puedo('productores', 'eliminar');
+  const puedeExportar   = permisosTotal || puedo('productores', 'exportar');
+  const puedeVerDetalle = permisosTotal || puedo('productores', 'ver_detalle');
 
   const [tab, setTab] = useState<'todos' | 'pendiente' | 'suspendido'>('todos');
   const [productores, setProductores] = useState<Productor[]>([]);
@@ -752,13 +753,15 @@ export default function ProductoresAdminPage() {
                       </td>
                       <td className="py-2 px-3 pr-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => setVerProductor(prod)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#eef8f2] text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white text-[10px] font-bold border border-[#1A5C38]/20 hover:border-transparent transition"
-                            title="Ver productor"
-                          >
-                            <Eye size={11} /> Ver
-                          </button>
+                          {puedeVerDetalle && (
+                            <button
+                              onClick={() => setVerProductor(prod)}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#eef8f2] text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white text-[10px] font-bold border border-[#1A5C38]/20 hover:border-transparent transition"
+                              title="Ver productor"
+                            >
+                              <Eye size={11} /> Ver
+                            </button>
+                          )}
                           {puedeEditar && prod.estado_validacion === 'pendiente' && (
                             <>
                               <button onClick={() => { setSelectedProd(prod); setModalType('aprobar'); }}
