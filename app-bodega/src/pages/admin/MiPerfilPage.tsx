@@ -215,198 +215,217 @@ export default function MiPerfilPage() {
   const nombre_display = perfil?.nombre_completo || user?.nombre_completo || 'Usuario';
 
   return (
-    <div className="flex flex-col gap-3.5 sm:gap-4 max-w-2xl mx-auto pb-6">
+    <div className="max-w-6xl mx-auto pb-6">
+      <div className="flex flex-col lg:flex-row gap-3.5 lg:gap-5 lg:items-start">
 
-      {/* ── Tarjeta hero de perfil ────────────────────────────────────── */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-        {/* Banda superior */}
-        <div className="h-16 sm:h-20 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
-          <div className="absolute inset-0 opacity-20"
-            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
-        </div>
-
-        <div className="px-4 sm:px-6 pb-4 sm:pb-5">
-          {/* Avatar + nombre + logout — se apilan en móvil, en línea en desktop */}
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div className="-mt-8 sm:-mt-9 flex items-end gap-3">
-              <div className="ring-4 ring-white rounded-[22px] shrink-0">
-                <Avatar nombre={nombre_display} size={64} rol={rolLabel} />
-              </div>
-              <div className="min-w-0 pb-0.5 sm:hidden">
-                <p className="text-[15px] font-black text-gray-900 leading-tight truncate">{nombre_display}</p>
-                <p className="text-[11.5px] text-gray-500 truncate">{perfil?.email ?? user?.email}</p>
-              </div>
+        {/* ── Columna izquierda: tarjeta hero de perfil (sticky en desktop) ── */}
+        <div className="lg:w-[320px] lg:shrink-0 lg:sticky lg:top-4">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            {/* Banda superior */}
+            <div className="h-16 lg:h-24 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
+              <div className="absolute inset-0 opacity-20"
+                style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
             </div>
-            <button onClick={handleLogout}
-              className="flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 sm:py-1.5 rounded-xl transition-all active:scale-95 shrink-0">
-              <LogOut size={12} /> Cerrar sesión
-            </button>
-          </div>
 
-          {/* Nombre/email en desktop */}
-          <div className="hidden sm:block mt-3">
-            <p className="text-[16px] font-black text-gray-900 leading-tight">{nombre_display}</p>
-            <p className="text-[12px] text-gray-500 mt-0.5">{perfil?.email ?? user?.email}</p>
-          </div>
+            <div className="px-4 sm:px-6 lg:px-5 pb-4 sm:pb-5">
+              {/* Avatar + nombre + logout */}
+              <div className="flex flex-col lg:items-center gap-3 lg:text-center">
+                <div className="flex flex-row lg:flex-col items-end lg:items-center gap-3 -mt-8 lg:-mt-12">
+                  <div className="ring-4 ring-white rounded-[28px] shrink-0">
+                    <Avatar nombre={nombre_display} size={64} rol={rolLabel} />
+                  </div>
+                  <div className="min-w-0 pb-0.5 lg:hidden flex-1">
+                    <p className="text-[15px] font-black text-gray-900 leading-tight truncate">{nombre_display}</p>
+                    <p className="text-[11.5px] text-gray-500 truncate">{perfil?.email ?? user?.email}</p>
+                  </div>
+                  <button onClick={handleLogout}
+                    className="lg:hidden flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl transition-all active:scale-95 shrink-0">
+                    <LogOut size={12} /> Cerrar sesión
+                  </button>
+                </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap mt-3">
-            <RolLabel rol={rolLabel} />
-            {perfil?.estado_asignado && (
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
-            )}
-            {rolLabel === 'admin' && (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-[#0e5c33]/70 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
-                <ShieldCheck size={9} /> Acceso total
-              </span>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 pt-3.5 border-t border-gray-100">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                <Clock size={12} className="text-gray-400" />
+                {/* Nombre/email centrados en desktop */}
+                <div className="hidden lg:block">
+                  <p className="text-[16px] font-black text-gray-900 leading-tight">{nombre_display}</p>
+                  <p className="text-[12px] text-gray-500 mt-0.5 break-all">{perfil?.email ?? user?.email}</p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
-                <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
-                  {perfil?.ultimo_login
-                    ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
-                    : 'Primer acceso'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                <CalendarDays size={12} className="text-gray-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
-                <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
-                  {perfil?.created_at
-                    ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' })
-                    : '—'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ── Sección: Información personal ────────────────────────────── */}
-      <Section title="Información personal" icon={<User size={14} />}>
-        <form onSubmit={guardarInfo} className="flex flex-col gap-3.5 mt-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className={lCls}>Nombre completo</label>
-              <input className={iCls} value={nombre} onChange={e => setNombre(e.target.value)}
-                placeholder="Tu nombre completo" />
-            </div>
-            <div>
-              <label className={lCls}>Email</label>
-              <input type="email" className={iCls} value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="tu@email.com" />
-            </div>
-          </div>
-
-          {/* Campos de solo lectura */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className={lCls}>Rol <span className="normal-case font-normal text-gray-300">(no editable)</span></label>
-              <div className={`${iCls} bg-gray-100 text-gray-500 cursor-not-allowed flex items-center gap-2`}>
-                <ShieldCheck size={13} className="text-gray-400 shrink-0" />
+              <div className="flex items-center gap-1.5 flex-wrap mt-3 lg:justify-center">
                 <RolLabel rol={rolLabel} />
+                {perfil?.estado_asignado && (
+                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">{perfil.estado_asignado}</span>
+                )}
+                {rolLabel === 'admin' && (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-[#0e5c33]/70 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                    <ShieldCheck size={9} /> Acceso total
+                  </span>
+                )}
               </div>
-            </div>
-            {perfil?.estado_asignado && (
-              <div>
-                <label className={lCls}>Estado asignado <span className="normal-case font-normal text-gray-300">(no editable)</span></label>
-                <input className={`${iCls} bg-gray-100 text-gray-500 cursor-not-allowed`}
-                  value={perfil.estado_asignado} disabled />
+
+              {/* Stats */}
+              <div className="mt-3.5 grid grid-cols-1 gap-2.5 pt-3.5 border-t border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                    <Clock size={12} className="text-gray-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Último acceso</p>
+                    <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
+                      {perfil?.ultimo_login
+                        ? new Date(perfil.ultimo_login).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
+                        : 'Primer acceso'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                    <CalendarDays size={12} className="text-gray-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9.5px] text-gray-400 font-bold uppercase tracking-wider">Miembro desde</p>
+                    <p className="text-[11.5px] font-bold text-gray-700 mt-0.5 truncate">
+                      {perfil?.created_at
+                        ? new Date(perfil.created_at).toLocaleDateString('es-MX', { dateStyle: 'long' })
+                        : '—'}
+                    </p>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
 
-          {msgInfo && <Toast msg={msgInfo.m} type={msgInfo.t} />}
-
-          <div className="flex justify-end">
-            <button type="submit" disabled={savingInfo}
-              className="flex items-center gap-2 bg-[#0e5c33] hover:bg-[#0a3d22] active:scale-95 disabled:opacity-50 text-white text-[12.5px] font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">
-              {savingInfo ? <><Loader2 size={13} className="animate-spin" />Guardando…</> : <><CheckCircle2 size={13} />Guardar cambios</>}
-            </button>
-          </div>
-        </form>
-      </Section>
-
-      {/* ── Sección: Seguridad ────────────────────────────────────────── */}
-      <Section title="Seguridad" icon={<Lock size={14} />} defaultOpen={false}>
-        <form onSubmit={cambiarPass} className="flex flex-col gap-3.5 mt-3">
-          <div>
-            <label className={lCls}>Contraseña actual</label>
-            <div className="relative">
-              <input type={showA ? 'text' : 'password'} className={`${iCls} pr-11`}
-                value={passActual} onChange={e => setPassActual(e.target.value)}
-                placeholder="••••••••" autoComplete="current-password" />
-              <button type="button" onClick={() => setShowA(v => !v)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                {showA ? <EyeOff size={15} /> : <Eye size={15} />}
+              {/* Cerrar sesión — solo desktop, dentro de la tarjeta */}
+              <button onClick={handleLogout}
+                className="hidden lg:flex w-full items-center justify-center gap-1.5 text-[11.5px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl transition-all active:scale-95 mt-4">
+                <LogOut size={12} /> Cerrar sesión
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className={lCls}>Nueva contraseña</label>
-              <div className="relative">
-                <input type={showN ? 'text' : 'password'} className={`${iCls} pr-11`}
-                  value={passNueva} onChange={e => setPassNueva(e.target.value)}
-                  placeholder="Mínimo 8 caracteres" autoComplete="new-password" />
-                <button type="button" onClick={() => setShowN(v => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  {showN ? <EyeOff size={15} /> : <Eye size={15} />}
+          {/* Nota email — solo desktop, bajo la tarjeta */}
+          <div className="hidden lg:flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 mt-3.5">
+            <Mail size={13} className="text-blue-500 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-blue-700 leading-relaxed">Tu email es tu identificador en el sistema. Al cambiarlo deberás usar el nuevo para iniciar sesión.</p>
+          </div>
+        </div>
+
+        {/* ── Columna derecha: formularios ─────────────────────────────── */}
+        <div className="flex-1 min-w-0 flex flex-col gap-3.5 lg:gap-4">
+
+          {/* ── Sección: Información personal ────────────────────────── */}
+          <Section title="Información personal" icon={<User size={14} />}>
+            <form onSubmit={guardarInfo} className="flex flex-col gap-3.5 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className={lCls}>Nombre completo</label>
+                  <input className={iCls} value={nombre} onChange={e => setNombre(e.target.value)}
+                    placeholder="Tu nombre completo" />
+                </div>
+                <div>
+                  <label className={lCls}>Email</label>
+                  <input type="email" className={iCls} value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="tu@email.com" />
+                </div>
+              </div>
+
+              {/* Campos de solo lectura */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className={lCls}>Rol <span className="normal-case font-normal text-gray-300">(no editable)</span></label>
+                  <div className={`${iCls} bg-gray-100 text-gray-500 cursor-not-allowed flex items-center gap-2`}>
+                    <ShieldCheck size={13} className="text-gray-400 shrink-0" />
+                    <RolLabel rol={rolLabel} />
+                  </div>
+                </div>
+                {perfil?.estado_asignado && (
+                  <div>
+                    <label className={lCls}>Estado asignado <span className="normal-case font-normal text-gray-300">(no editable)</span></label>
+                    <input className={`${iCls} bg-gray-100 text-gray-500 cursor-not-allowed`}
+                      value={perfil.estado_asignado} disabled />
+                  </div>
+                )}
+              </div>
+
+              {msgInfo && <Toast msg={msgInfo.m} type={msgInfo.t} />}
+
+              <div className="flex justify-end">
+                <button type="submit" disabled={savingInfo}
+                  className="flex items-center gap-2 bg-[#0e5c33] hover:bg-[#0a3d22] active:scale-95 disabled:opacity-50 text-white text-[12.5px] font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                  {savingInfo ? <><Loader2 size={13} className="animate-spin" />Guardando…</> : <><CheckCircle2 size={13} />Guardar cambios</>}
                 </button>
               </div>
-              <PassStrength pass={passNueva} />
-            </div>
-            <div>
-              <label className={lCls}>Confirmar contraseña</label>
-              <div className="relative">
-                <input type={showC ? 'text' : 'password'} className={`${iCls} pr-11`}
-                  value={passConfirm} onChange={e => setPassConfirm(e.target.value)}
-                  placeholder="Repite la contraseña" autoComplete="new-password" />
-                <button type="button" onClick={() => setShowC(v => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  {showC ? <EyeOff size={15} /> : <Eye size={15} />}
+            </form>
+          </Section>
+
+          {/* ── Sección: Seguridad ────────────────────────────────────── */}
+          <Section title="Seguridad" icon={<Lock size={14} />} defaultOpen={false}>
+            <form onSubmit={cambiarPass} className="flex flex-col gap-3.5 mt-3">
+              <div className="sm:max-w-[calc(50%-7px)]">
+                <label className={lCls}>Contraseña actual</label>
+                <div className="relative">
+                  <input type={showA ? 'text' : 'password'} className={`${iCls} pr-11`}
+                    value={passActual} onChange={e => setPassActual(e.target.value)}
+                    placeholder="••••••••" autoComplete="current-password" />
+                  <button type="button" onClick={() => setShowA(v => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showA ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className={lCls}>Nueva contraseña</label>
+                  <div className="relative">
+                    <input type={showN ? 'text' : 'password'} className={`${iCls} pr-11`}
+                      value={passNueva} onChange={e => setPassNueva(e.target.value)}
+                      placeholder="Mínimo 8 caracteres" autoComplete="new-password" />
+                    <button type="button" onClick={() => setShowN(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      {showN ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  <PassStrength pass={passNueva} />
+                </div>
+                <div>
+                  <label className={lCls}>Confirmar contraseña</label>
+                  <div className="relative">
+                    <input type={showC ? 'text' : 'password'} className={`${iCls} pr-11`}
+                      value={passConfirm} onChange={e => setPassConfirm(e.target.value)}
+                      placeholder="Repite la contraseña" autoComplete="new-password" />
+                    <button type="button" onClick={() => setShowC(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      {showC ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  {passConfirm && passNueva !== passConfirm && (
+                    <p className="text-[11px] text-red-500 mt-1.5 font-semibold">Las contraseñas no coinciden</p>
+                  )}
+                  {passConfirm && passNueva === passConfirm && passNueva.length >= 8 && (
+                    <p className="text-[11px] text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
+                      <CheckCircle2 size={11} /> Coinciden
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {msgPass && <Toast msg={msgPass.m} type={msgPass.t} />}
+
+              <div className="flex justify-end">
+                <button type="submit" disabled={savingPass}
+                  className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 active:scale-95 disabled:opacity-50 text-white text-[12.5px] font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                  {savingPass ? <><Loader2 size={13} className="animate-spin" />Actualizando…</> : <><Lock size={13} />Cambiar contraseña</>}
                 </button>
               </div>
-              {passConfirm && passNueva !== passConfirm && (
-                <p className="text-[11px] text-red-500 mt-1.5 font-semibold">Las contraseñas no coinciden</p>
-              )}
-              {passConfirm && passNueva === passConfirm && passNueva.length >= 8 && (
-                <p className="text-[11px] text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
-                  <CheckCircle2 size={11} /> Coinciden
-                </p>
-              )}
-            </div>
+            </form>
+          </Section>
+
+          {/* Nota email — solo móvil/tablet, bajo las secciones */}
+          <div className="flex lg:hidden items-center gap-2.5 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
+            <Mail size={14} className="text-blue-500 shrink-0" />
+            <p className="text-[11.5px] text-blue-700">Tu email es tu identificador en el sistema. Al cambiarlo deberás usar el nuevo para iniciar sesión.</p>
           </div>
-
-          {msgPass && <Toast msg={msgPass.m} type={msgPass.t} />}
-
-          <div className="flex justify-end">
-            <button type="submit" disabled={savingPass}
-              className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 active:scale-95 disabled:opacity-50 text-white text-[12.5px] font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm">
-              {savingPass ? <><Loader2 size={13} className="animate-spin" />Actualizando…</> : <><Lock size={13} />Cambiar contraseña</>}
-            </button>
-          </div>
-        </form>
-      </Section>
-
-      {/* ── Zona de email como ID informativo ─────────────────────────── */}
-      <div className="flex items-center gap-2.5 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
-        <Mail size={14} className="text-blue-500 shrink-0" />
-        <p className="text-[11.5px] text-blue-700">Tu email es tu identificador en el sistema. Al cambiarlo deberás usar el nuevo para iniciar sesión.</p>
+        </div>
       </div>
-
     </div>
   );
 }
