@@ -22,7 +22,7 @@ interface SidebarItem {
 }
 
 const MENU: SidebarItem[] = [
-  { label: 'Resumen',           subtitle: 'Métricas, estadísticas y vista general del sistema',               path: '/admin',                   icon: LayoutDashboard, exact: true },
+  { label: 'Resumen',           subtitle: 'Métricas, estadísticas y vista general del sistema',               path: '/admin',                   icon: LayoutDashboard, exact: true, vista: 'resumen' },
   { label: 'Productores',       subtitle: 'Administración y gestión integral de agricultores registrados',    path: '/admin/productores',       icon: Users,           vista: 'productores' },
   { label: 'Bodegas',           subtitle: 'Supervisión y control detallado de centros de acopio',             path: '/admin/bodegas',           icon: Warehouse,       vista: 'bodegas' },
   { label: 'Alertas',           subtitle: 'Centro de notificaciones y avisos en tiempo real',                 path: '/admin/alertas',           icon: AlertTriangle,   vista: 'alertas' },

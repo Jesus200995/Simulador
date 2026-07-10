@@ -211,11 +211,12 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     if (!secret) throw new Error('FATAL: JWT_SECRET no está definida en las variables de entorno.');
     const token = jwt.sign(
       {
-        userId:           usuario.id,
-        email:            usuario.email,
-        rol:              usuario.rol,
-        estado_asignado:  usuario.estado_asignado  ?? null,
-        debe_cambiar_pass:!!usuario.debe_cambiar_pass,
+        userId:            usuario.id,
+        email:             usuario.email,
+        rol:               usuario.rol,
+        estado_asignado:   usuario.estado_asignado  ?? null,
+        debe_cambiar_pass: !!usuario.debe_cambiar_pass,
+        es_panel_usuario:  !!usuario.es_panel_usuario,
       },
       secret,
       { expiresIn: '8h' }

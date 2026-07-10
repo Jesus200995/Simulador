@@ -299,7 +299,7 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: <RequireAdmin><AdminShell><Outlet /></AdminShell></RequireAdmin>,
     children: [
-      { index: true, element: <DashboardAdminPage /> },
+      { index: true, element: <RequireVista vista="resumen"><DashboardAdminPage /></RequireVista> },
       { path: 'productores',    element: <RequireVista vista="productores"><ProductoresAdminPage /></RequireVista> },
       { path: 'productores/:id',element: <RequireVista vista="productores"><ProductorDetalleAdminPage /></RequireVista> },
       { path: 'bodegas',        element: <RequireVista vista="bodegas"><BodegasAdminPage /></RequireVista> },

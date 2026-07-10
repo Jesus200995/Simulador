@@ -27,7 +27,8 @@ export function usePermisosSSE(userId: number | undefined, rolTienePermisosTotal
       .catch(() => {});
 
     // Abrir SSE para actualizaciones en tiempo real
-    const url = `${BASE}/admin/permisos/stream`;
+    // EventSource no soporta headers → pasamos token como query param
+    const url = `${BASE}/admin/permisos/stream?token=${encodeURIComponent(token)}`;
     const es  = new EventSource(url, { withCredentials: false });
     esRef.current = es;
 

@@ -591,12 +591,15 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
 // GET /api/admin/actividad-reciente
 // =============================================
 router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (req.user?.rol !== 'admin' && req.user?.rol !== 'responsable') {
-    res.status(403).json({ error: 'Acceso denegado' });
-    return;
-  }
+  const u = req.user!;
+  const esPanelAdmin = u.rol === 'admin' || u.rol === 'responsable' ||
+    (u.rol === 'user' && u.es_panel_usuario === true);
+  if (!esPanelAdmin) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
-    // Combinamos eventos de diferentes tablas
+    const estado = (u.rol === 'admin' || u.rol === 'responsable') ? null : (u.estado_asignado ?? null);
+    const ep = estado ? [estado] : [];
+    const whereEstadoP = estado ? `WHERE UPPER(p.state_name) = UPPER($1)` : '';
+
     const productoresR = pool.query(`
       SELECT
         'validacion' AS tipo,
@@ -605,9 +608,10 @@ router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: 
         p.created_at AS fecha,
         CONCAT('/admin/productores/', p.producer_id) AS link
       FROM producer p
+      ${whereEstadoP}
       ORDER BY p.created_at DESC
       LIMIT 10
-    `);
+    `, ep);
 
     const alertasR = pool.query(`
       SELECT
@@ -617,9 +621,10 @@ router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: 
         a.fecha_alerta AS fecha,
         '/admin/alertas' AS link
       FROM alertas a
+      ${estado ? `JOIN up u2 ON u2.up_id = a.up_id AND UPPER(u2.state_name) = UPPER($1)` : ''}
       ORDER BY a.fecha_alerta DESC
       LIMIT 10
-    `).catch(() => ({ rows: [] as any[] }));
+    `, ep).catch(() => ({ rows: [] as any[] }));
 
     const [prod, alert] = await Promise.all([productoresR, alertasR]);
     const eventos = [...prod.rows, ...(alert as any).rows]

@@ -24,7 +24,7 @@ function generarPassTemporal(): string {
 
 // Mapa de vistas disponibles y sus acciones permitidas
 const VISTAS_PERMISOS: Record<string, string[]> = {
-  dashboard:          ['ver'],
+  resumen:            ['ver'],
   productores:        ['ver', 'editar', 'eliminar', 'exportar'],
   bodegas:            ['ver', 'crear', 'editar', 'eliminar', 'exportar'],
   alertas:            ['ver', 'crear', 'eliminar'],
@@ -74,7 +74,28 @@ function emitirPermisos(usuarioId: number, permisos: any[]) {
 }
 
 // GET /api/admin/permisos/stream — usuario se suscribe al iniciar sesión
-router.get('/stream', authMiddleware, (req: AuthRequest, res: Response) => {
+// EventSource no soporta headers → acepta token como ?token= query param
+import jwt from 'jsonwebtoken';
+import { JwtPayload } from '../types';
+
+router.get('/stream', (req: AuthRequest, res: Response) => {
+  // Autenticar via header Bearer O ?token= query param (EventSource no soporta headers)
+  let token: string | undefined;
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (typeof req.query.token === 'string') {
+    token = req.query.token;
+  }
+  if (!token) { res.status(401).json({ error: 'Token requerido' }); return; }
+  try {
+    const secret = process.env.JWT_SECRET!;
+    const decoded = jwt.verify(token, secret) as JwtPayload;
+    req.user = decoded;
+  } catch {
+    res.status(401).json({ error: 'Token inválido o expirado' }); return;
+  }
+
   const userId = req.user!.userId;
 
   res.setHeader('Content-Type', 'text/event-stream');

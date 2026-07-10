@@ -4,24 +4,38 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-function adminOnly(req: AuthRequest, res: Response): boolean {
-  if (req.user!.rol !== 'admin' && req.user!.rol !== 'responsable') {
-    res.status(403).json({ error: 'Acceso restringido a administradores' });
-    return false;
-  }
-  return true;
+/** Permite admin, responsable y usuarios OREF del panel */
+function esPanelAdmin(req: AuthRequest, res: Response): boolean {
+  const u = req.user!;
+  const ok = u.rol === 'admin' || u.rol === 'responsable' ||
+    (u.rol === 'user' && u.es_panel_usuario === true);
+  if (!ok) { res.status(403).json({ error: 'Acceso restringido al panel administrativo' }); }
+  return ok;
+}
+
+/** Retorna el estado a filtrar (OREF) o null (admin/responsable = todos los estados) */
+function getEstado(req: AuthRequest): string | null {
+  const u = req.user!;
+  if (u.rol === 'admin' || u.rol === 'responsable') return null;
+  return u.estado_asignado ?? null;
 }
 
 // GET /api/dashboard/admin/resumen — KPIs principales
 router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
+    const estado = getEstado(req);
+    const estadoParam = estado ? [estado] : [];
+    const estadoWhereP = estado ? `AND UPPER(p.state_name) = UPPER($1)` : '';
+    const estadoWhereB = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
+    const estadoWhereBs = estado ? `AND UPPER(estado) = UPPER($1)` : '';
+
     const [productoresActivos, productoresPendientes, bodegasActivas, bodegasPendientes,
            disponibilidades, requerimientos, transacciones7d] = await Promise.all([
-      pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'activo'`),
-      pool.query(`SELECT COUNT(*)::int AS total FROM producer WHERE estado_validacion = 'pendiente'`),
-      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'aprobada'`),
-      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas WHERE estatus = 'pendiente'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM producer p WHERE p.estado_validacion = 'activo' ${estadoWhereP}`, estadoParam),
+      pool.query(`SELECT COUNT(*)::int AS total FROM producer p WHERE p.estado_validacion = 'pendiente' ${estadoWhereP}`, estadoParam),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas b WHERE b.estatus = 'aprobada' ${estadoWhereB}`, estadoParam),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas b WHERE b.estatus = 'pendiente' ${estadoWhereB}`, estadoParam),
       pool.query(`SELECT COALESCE(SUM(COALESCE(volumen_estimado_ton, volumen_ton, 0)), 0)::numeric(12,2) AS total_ton FROM disponibilidad_productor WHERE COALESCE(activa, activo, true) = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
       pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM senales_compra WHERE activa = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
       pool.query(`SELECT COUNT(*)::int AS total FROM transacciones WHERE created_at >= NOW() - INTERVAL '7 days'`).catch(() => ({ rows: [{ total: 0 }] })),
@@ -44,7 +58,7 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
 
 // GET /api/dashboard/admin/produccion — Producción por estado, ciclo, cultivo
 router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
     const [porEstado, porCiclo, porAnio, sinCiclo, totalesGlobales] = await Promise.all([
       pool.query(`
@@ -127,7 +141,7 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
 
 // GET /api/dashboard/admin/infraestructura — Bodegas, capacidad, inventario
 router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
     const [porEstado, capacidadTotal, inventarioActual, topBodegas] = await Promise.all([
       pool.query(`
@@ -192,7 +206,7 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
 
 // GET /api/dashboard/admin/precios — Comparación de 3 tipos de precio
 router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
     const [promedios, recientes, tendencia] = await Promise.all([
       pool.query(`
@@ -248,29 +262,37 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
 
 // GET /api/dashboard/admin/alertas — Alertas por severidad, estado, tipo
 router.get('/alertas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
+    const estado = getEstado(req);
+    const ep = estado ? [estado] : [];
+    // Join con up para filtrar por estado cuando el usuario es OREF
+    const joinUp = estado ? `JOIN up u2 ON u2.up_id = a.up_id AND UPPER(u2.state_name) = UPPER($1)` : `LEFT JOIN up u2 ON u2.up_id = a.up_id`;
+
     const [porNivel, porEstado, porTipo, recientes, tendencia] = await Promise.all([
       pool.query(`
-        SELECT nivel_alerta, COUNT(*)::int AS total
-        FROM alertas
-        GROUP BY nivel_alerta
-        ORDER BY CASE nivel_alerta WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 WHEN 'medio' THEN 3 WHEN 'bajo' THEN 4 ELSE 5 END
-      `),
+        SELECT a.nivel_alerta, COUNT(*)::int AS total
+        FROM alertas a
+        ${joinUp}
+        GROUP BY a.nivel_alerta
+        ORDER BY CASE a.nivel_alerta WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 WHEN 'medio' THEN 3 WHEN 'bajo' THEN 4 ELSE 5 END
+      `, ep),
       pool.query(`
-        SELECT estado_alerta, COUNT(*)::int AS total
-        FROM alertas
-        GROUP BY estado_alerta
+        SELECT a.estado_alerta, COUNT(*)::int AS total
+        FROM alertas a
+        ${joinUp}
+        GROUP BY a.estado_alerta
         ORDER BY total DESC
-      `),
+      `, ep),
       pool.query(`
-        SELECT tipo_alerta, COUNT(*)::int AS total, nivel_alerta
-        FROM alertas
-        WHERE estado_alerta = 'pendiente'
-        GROUP BY tipo_alerta, nivel_alerta
+        SELECT a.tipo_alerta, COUNT(*)::int AS total, a.nivel_alerta
+        FROM alertas a
+        ${joinUp}
+        WHERE a.estado_alerta = 'pendiente'
+        GROUP BY a.tipo_alerta, a.nivel_alerta
         ORDER BY total DESC
         LIMIT 10
-      `),
+      `, ep),
       pool.query(`
         SELECT
           a.id, a.tipo_alerta, a.nivel_alerta, a.estado_alerta, a.fecha_alerta,
@@ -279,22 +301,23 @@ router.get('/alertas', authMiddleware, async (req: AuthRequest, res: Response): 
         FROM alertas a
         LEFT JOIN producer p ON p.producer_id = a.producer_id
         LEFT JOIN up u ON u.up_id = a.up_id
-        WHERE a.estado_alerta = 'pendiente'
+        ${estado ? `WHERE a.estado_alerta = 'pendiente' AND UPPER(u.state_name) = UPPER($1)` : `WHERE a.estado_alerta = 'pendiente'`}
         ORDER BY
           CASE a.nivel_alerta WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 WHEN 'medio' THEN 3 ELSE 4 END,
           a.fecha_alerta DESC
         LIMIT 10
-      `),
+      `, ep),
       pool.query(`
         SELECT
-          DATE_TRUNC('day', fecha_alerta)::date AS dia,
+          DATE_TRUNC('day', a.fecha_alerta)::date AS dia,
           COUNT(*)::int AS total,
-          COUNT(CASE WHEN nivel_alerta IN ('alto','critico') THEN 1 END)::int AS criticas
-        FROM alertas
-        WHERE fecha_alerta >= NOW() - INTERVAL '30 days'
+          COUNT(CASE WHEN a.nivel_alerta IN ('alto','critico') THEN 1 END)::int AS criticas
+        FROM alertas a
+        ${joinUp}
+        WHERE a.fecha_alerta >= NOW() - INTERVAL '30 days'
         GROUP BY dia
         ORDER BY dia
-      `),
+      `, ep),
     ]);
 
     const cr = porNivel.rows.find((r: any) => ['critico','alto','alta'].includes(String(r.nivel_alerta).toLowerCase()));
@@ -317,7 +340,7 @@ router.get('/alertas', authMiddleware, async (req: AuthRequest, res: Response): 
 
 // GET /api/dashboard/admin/operacion — Supervisores, calidad de datos, actividad
 router.get('/operacion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
     const [supervisores, calidadDatos, visitasRecientes, productoresRol, registrosRecientes] = await Promise.all([
       pool.query(`
@@ -401,7 +424,7 @@ router.get('/operacion', authMiddleware, async (req: AuthRequest, res: Response)
 
 // GET /api/dashboard/admin/mapa — Datos geográficos para el mapa
 router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!adminOnly(req, res)) return;
+  if (!esPanelAdmin(req, res)) return;
   try {
     const [upsGeo, bodegasGeo, porEstado, alertasGeo] = await Promise.all([
       pool.query(`
