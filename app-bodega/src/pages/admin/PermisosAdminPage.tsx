@@ -60,12 +60,10 @@ const ESTADOS_MX = [
 function Toggle({ on, onChange, disabled = false, size = 'md' }: {
   on: boolean; onChange: () => void; disabled?: boolean; size?: 'sm' | 'md';
 }) {
-  const track = size === 'sm'
-    ? 'w-9 h-5 rounded-full'
-    : 'w-12 h-7 rounded-full';
-  const thumb = size === 'sm'
-    ? `w-[14px] h-[14px] top-[3px] ${on ? 'translate-x-[18px]' : 'translate-x-[3px]'}`
-    : `w-[20px] h-[20px] top-[3.5px] ${on ? 'translate-x-[23px]' : 'translate-x-[3.5px]'}`;
+  const dims = size === 'sm'
+    ? { w: 34, h: 20, thumb: 14, pad: 3 }
+    : { w: 44, h: 26, thumb: 20, pad: 3 };
+  const travel = dims.w - dims.thumb - dims.pad * 2;
   return (
     <button
       type="button"
@@ -73,13 +71,21 @@ function Toggle({ on, onChange, disabled = false, size = 'md' }: {
       aria-checked={on}
       onClick={onChange}
       disabled={disabled}
-      className={`${track} relative shrink-0 transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#0e5c33]/60
+      style={{ width: dims.w, height: dims.h, padding: dims.pad }}
+      className={`relative shrink-0 rounded-full inline-flex items-center transition-colors duration-300 ease-[cubic-bezier(.4,0,.2,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#0e5c33]/60
         ${on
           ? 'bg-[#0e5c33] shadow-[0_2px_10px_rgba(14,92,51,0.40)]'
-          : 'bg-gray-200/90 dark:bg-gray-600'}
+          : 'bg-gray-200'}
         ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
     >
-      <span className={`absolute bg-white rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.22)] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] ${thumb}`} />
+      <span
+        style={{
+          width: dims.thumb,
+          height: dims.thumb,
+          transform: `translateX(${on ? travel : 0}px)`,
+        }}
+        className="bg-white rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.25)] transition-transform duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
+      />
     </button>
   );
 }
@@ -93,47 +99,73 @@ function EstadoMultiSelect({ value, onChange }: {
   value: string;            // "" = todos, "GUANAJUATO" o "GUANAJUATO,JALISCO"
   onChange: (v: string) => void;
 }) {
+  const [busqueda, setBusqueda] = useState('');
   const selected = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
   const todos = selected.length === 0;
+  const filtrados = ESTADOS_MX.filter(e => e.includes(busqueda.trim().toUpperCase()));
 
   function toggleEstado(e: string) {
-    if (selected.includes(e)) {
-      const next = selected.filter(s => s !== e);
-      onChange(next.join(','));
-    } else {
-      onChange([...selected, e].join(','));
-    }
+    if (selected.includes(e)) onChange(selected.filter(s => s !== e).join(','));
+    else onChange([...selected, e].join(','));
   }
 
   return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
+      {/* Chips seleccionados */}
+      {!todos && (
+        <div className="flex flex-wrap gap-1.5 px-3.5 pt-3 pb-2 border-b border-gray-100">
+          {selected.map(e => (
+            <button key={e} type="button" onClick={() => toggleEstado(e)}
+              className="flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#0e5c33] text-white text-[10.5px] font-bold transition-all hover:bg-[#0a4227] active:scale-95">
+              {e}
+              <X size={10} className="opacity-70" />
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Fila "Todos" */}
-      <button type="button"
-        onClick={() => onChange('')}
-        className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[12.5px] font-bold transition-all ${todos ? 'bg-[#0e5c33] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}>
-        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${todos ? 'border-white bg-white' : 'border-gray-400'}`}>
-          {todos && <span className="w-2 h-2 rounded-sm bg-[#0e5c33]" />}
+      <button type="button" onClick={() => onChange('')}
+        className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] font-bold transition-all border-b border-gray-100
+          ${todos ? 'bg-emerald-50 text-[#0e5c33]' : 'text-gray-500 hover:bg-gray-50'}`}>
+        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${todos ? 'border-[#0e5c33] bg-[#0e5c33]' : 'border-gray-300'}`}>
+          {todos && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
         </span>
         Todos los estados (sin filtro)
       </button>
-      <div className="border-t border-gray-200 max-h-48 overflow-y-auto grid grid-cols-2 gap-0">
-        {ESTADOS_MX.map(e => {
+
+      {/* Buscador */}
+      <div className="px-3 pt-2.5 pb-2">
+        <input
+          value={busqueda}
+          onChange={e => setBusqueda(e.target.value)}
+          placeholder="Buscar estado…"
+          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-700 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/40 transition-all"
+        />
+      </div>
+
+      {/* Lista — una columna, sin corte de texto */}
+      <div className="max-h-44 overflow-y-auto px-1.5 pb-2 flex flex-col gap-0.5">
+        {filtrados.length === 0 ? (
+          <p className="text-[11px] text-gray-400 text-center py-3">Sin coincidencias</p>
+        ) : filtrados.map(e => {
           const checked = selected.includes(e);
           return (
-            <button key={e} type="button"
-              onClick={() => toggleEstado(e)}
-              className={`flex items-center gap-2 px-3 py-2 text-[11px] font-semibold text-left transition-all ${checked ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-50'}`}>
+            <button key={e} type="button" onClick={() => toggleEstado(e)}
+              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[11.5px] font-semibold text-left transition-all whitespace-nowrap
+                ${checked ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-50'}`}>
               <span className={`w-3.5 h-3.5 rounded border-2 shrink-0 flex items-center justify-center ${checked ? 'border-[#0e5c33] bg-[#0e5c33]' : 'border-gray-300'}`}>
                 {checked && <span className="w-1.5 h-1.5 rounded-sm bg-white" />}
               </span>
-              {e}
+              <span className="truncate">{e}</span>
             </button>
           );
         })}
       </div>
+
       {!todos && (
-        <div className="border-t border-gray-200 px-3 py-1.5 bg-emerald-50">
-          <p className="text-[10px] text-emerald-700 font-semibold">{selected.length} estado{selected.length !== 1 ? 's' : ''} seleccionado{selected.length !== 1 ? 's' : ''}</p>
+        <div className="border-t border-gray-100 px-3.5 py-1.5 bg-gray-50">
+          <p className="text-[10px] text-gray-500 font-semibold">{selected.length} estado{selected.length !== 1 ? 's' : ''} seleccionado{selected.length !== 1 ? 's' : ''}</p>
         </div>
       )}
     </div>
@@ -630,51 +662,48 @@ export default function PermisosAdminPage() {
           </div>
         </div>
 
-        {/* Body: 2 columnas en ≥640px */}
-        <div className="flex flex-col sm:flex-row min-h-0 overflow-hidden">
-          {/* Columna izquierda — datos del usuario */}
-          <div className="sm:w-[280px] sm:min-w-[280px] border-b sm:border-b-0 sm:border-r border-gray-100 px-5 py-5 flex flex-col gap-4 overflow-y-auto">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
+        {/* Body — una sola columna, secciones apiladas */}
+        <div className="flex flex-col min-h-0 overflow-hidden">
+          <div className="overflow-y-auto flex-1 px-5 sm:px-6 py-5 flex flex-col gap-5">
 
-            <div className="flex flex-col gap-3">
-              <div>
-                <label className={lCls}>Nombre completo *</label>
-                <input className={iCls} placeholder="María García López"
-                  value={fCrear.nombre_completo} onChange={e => setFCrear(p => ({ ...p, nombre_completo: e.target.value }))} />
-              </div>
-              <div>
-                <label className={lCls}>Email institucional *</label>
-                <input type="email" className={iCls} placeholder="m.garcia@simac.mx"
-                  value={fCrear.email} onChange={e => setFCrear(p => ({ ...p, email: e.target.value }))} />
-              </div>
-              <div>
-                <label className={lCls}>Rol *</label>
-                <select className={iCls} value={fCrear.rol}
-                  onChange={e => setFCrear(p => ({ ...p, rol: e.target.value, estado_asignado: '' }))}>
-                  {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
-                </select>
-              </div>
-              {rolDe(fCrear.rol)?.aplica_filtro_estado && (
+            {/* Sección: datos del usuario */}
+            <section className="flex flex-col gap-3">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
-                  <EstadoMultiSelect value={fCrear.estado_asignado}
-                    onChange={v => setFCrear(p => ({ ...p, estado_asignado: v }))} />
+                  <label className={lCls}>Nombre completo *</label>
+                  <input className={iCls} placeholder="María García López"
+                    value={fCrear.nombre_completo} onChange={e => setFCrear(p => ({ ...p, nombre_completo: e.target.value }))} />
                 </div>
-              )}
-            </div>
-
-            {errCrear && (
-              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3 mt-auto">
-                <AlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />
-                <p className="text-[12px] text-red-600">{errCrear}</p>
+                <div>
+                  <label className={lCls}>Email institucional *</label>
+                  <input type="email" className={iCls} placeholder="m.garcia@simac.mx"
+                    value={fCrear.email} onChange={e => setFCrear(p => ({ ...p, email: e.target.value }))} />
+                </div>
+                <div className={rolDe(fCrear.rol)?.aplica_filtro_estado ? '' : 'sm:col-span-2'}>
+                  <label className={lCls}>Rol *</label>
+                  <select className={iCls} value={fCrear.rol}
+                    onChange={e => setFCrear(p => ({ ...p, rol: e.target.value, estado_asignado: '' }))}>
+                    {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
+                  </select>
+                </div>
               </div>
-            )}
-          </div>
+            </section>
 
-          {/* Columna derecha — permisos */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <div className="overflow-y-auto flex-1 px-5 py-5">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] mb-3">Permisos por vista</p>
+            {/* Sección: estados (si aplica) */}
+            {rolDe(fCrear.rol)?.aplica_filtro_estado && (
+              <section className="flex flex-col gap-2">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">
+                  Estados asignados <span className="text-gray-400 font-normal normal-case">— vacío = todos</span>
+                </p>
+                <EstadoMultiSelect value={fCrear.estado_asignado}
+                  onChange={v => setFCrear(p => ({ ...p, estado_asignado: v }))} />
+              </section>
+            )}
+
+            {/* Sección: permisos */}
+            <section className="flex flex-col gap-2">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Permisos por vista</p>
               {!rolDe(fCrear.rol)?.permisos_totales ? (
                 <ArbolPermisos permisos={pCrear} onChange={setPCrear} />
               ) : (
@@ -688,19 +717,26 @@ export default function PermisosAdminPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* Footer sticky */}
-            <div className="border-t border-gray-100 px-5 py-4 flex justify-end gap-2.5 shrink-0 bg-white/80 backdrop-blur-sm">
-              <button onClick={() => setModalCrear(false)}
-                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
-                Cancelar
-              </button>
-              <button onClick={crearUsuario} disabled={creando}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a4227] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
-                {creando ? <><Loader2 size={13} className="animate-spin" />Creando…</> : <><Plus size={13} />Crear usuario</>}
-              </button>
-            </div>
+            {errCrear && (
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3">
+                <AlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[12px] text-red-600">{errCrear}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer sticky */}
+          <div className="border-t border-gray-100 px-5 sm:px-6 py-4 flex justify-end gap-2.5 shrink-0 bg-white/90 backdrop-blur-sm">
+            <button onClick={() => setModalCrear(false)}
+              className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+              Cancelar
+            </button>
+            <button onClick={crearUsuario} disabled={creando}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a4227] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
+              {creando ? <><Loader2 size={13} className="animate-spin" />Creando…</> : <><Plus size={13} />Crear usuario</>}
+            </button>
           </div>
         </div>
       </ModalOverlay>
@@ -729,38 +765,62 @@ export default function PermisosAdminPage() {
           </div>
         </div>
 
-        {/* Body: 2 columnas en ≥640px */}
-        <div className="flex flex-col sm:flex-row min-h-0 overflow-hidden">
-          {/* Columna izquierda */}
-          <div className="sm:w-[280px] sm:min-w-[280px] border-b sm:border-b-0 sm:border-r border-gray-100 px-5 py-5 flex flex-col gap-4 overflow-y-auto">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
+        {/* Body — una sola columna, secciones apiladas */}
+        <div className="flex flex-col min-h-0 overflow-hidden">
+          <div className="overflow-y-auto flex-1 px-5 sm:px-6 py-5 flex flex-col gap-5">
 
-            <div className="flex flex-col gap-3">
-              <div>
-                <label className={lCls}>Nombre completo</label>
-                <input className={iCls} value={fEditar.nombre_completo}
-                  onChange={e => setFEditar(p => ({ ...p, nombre_completo: e.target.value }))} />
-              </div>
-              <div>
-                <label className={lCls}>Email</label>
-                <input type="email" className={iCls} value={fEditar.email}
-                  onChange={e => setFEditar(p => ({ ...p, email: e.target.value }))} />
-              </div>
-              <div>
-                <label className={lCls}>Rol</label>
-                <select className={iCls} value={fEditar.rol}
-                  onChange={e => setFEditar(p => ({ ...p, rol: e.target.value }))}>
-                  {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
-                </select>
-              </div>
-              {rolDe(fEditar.rol)?.aplica_filtro_estado && (
+            {/* Sección: datos del usuario */}
+            <section className="flex flex-col gap-3">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
-                  <EstadoMultiSelect value={fEditar.estado_asignado}
-                    onChange={v => setFEditar(p => ({ ...p, estado_asignado: v }))} />
+                  <label className={lCls}>Nombre completo</label>
+                  <input className={iCls} value={fEditar.nombre_completo}
+                    onChange={e => setFEditar(p => ({ ...p, nombre_completo: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={lCls}>Email</label>
+                  <input type="email" className={iCls} value={fEditar.email}
+                    onChange={e => setFEditar(p => ({ ...p, email: e.target.value }))} />
+                </div>
+                <div className={rolDe(fEditar.rol)?.aplica_filtro_estado ? '' : 'sm:col-span-2'}>
+                  <label className={lCls}>Rol</label>
+                  <select className={iCls} value={fEditar.rol}
+                    onChange={e => setFEditar(p => ({ ...p, rol: e.target.value }))}>
+                    {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            {/* Sección: estados (si aplica) */}
+            {rolDe(fEditar.rol)?.aplica_filtro_estado && (
+              <section className="flex flex-col gap-2">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">
+                  Estados asignados <span className="text-gray-400 font-normal normal-case">— vacío = todos</span>
+                </p>
+                <EstadoMultiSelect value={fEditar.estado_asignado}
+                  onChange={v => setFEditar(p => ({ ...p, estado_asignado: v }))} />
+              </section>
+            )}
+
+            {/* Sección: permisos */}
+            <section className="flex flex-col gap-2">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Permisos por vista</p>
+              {!rolDe(fEditar.rol)?.permisos_totales ? (
+                <ArbolPermisos permisos={pEditar} onChange={setPEditar} />
+              ) : (
+                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={16} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-bold text-emerald-800">Acceso total</p>
+                    <p className="text-[11.5px] text-emerald-600 mt-0.5">No requiere permisos individuales.</p>
+                  </div>
                 </div>
               )}
-            </div>
+            </section>
 
             {/* Feedback */}
             {errEdit && (
@@ -777,38 +837,18 @@ export default function PermisosAdminPage() {
             )}
           </div>
 
-          {/* Columna derecha — permisos */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <div className="overflow-y-auto flex-1 px-5 py-5">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] mb-3">Permisos por vista</p>
-              {!rolDe(fEditar.rol)?.permisos_totales ? (
-                <ArbolPermisos permisos={pEditar} onChange={setPEditar} />
-              ) : (
-                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                    <ShieldCheck size={16} className="text-emerald-600" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-bold text-emerald-800">Acceso total</p>
-                    <p className="text-[11.5px] text-emerald-600 mt-0.5">No requiere permisos individuales.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer sticky */}
-            <div className="border-t border-gray-100 px-5 py-4 flex justify-end gap-2.5 shrink-0 bg-white/80 backdrop-blur-sm">
-              <button onClick={() => setModalEditar(false)}
-                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
-                Cerrar
-              </button>
-              <button onClick={guardarEditar} disabled={guardando}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#1a1f2e] hover:bg-[#252c42] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
-                {guardando
-                  ? <><Loader2 size={13} className="animate-spin" />Guardando…</>
-                  : <><CheckCircle2 size={13} />Guardar cambios</>}
-              </button>
-            </div>
+          {/* Footer sticky */}
+          <div className="border-t border-gray-100 px-5 sm:px-6 py-4 flex justify-end gap-2.5 shrink-0 bg-white/90 backdrop-blur-sm">
+            <button onClick={() => setModalEditar(false)}
+              className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+              Cerrar
+            </button>
+            <button onClick={guardarEditar} disabled={guardando}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#1a1f2e] hover:bg-[#252c42] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
+              {guardando
+                ? <><Loader2 size={13} className="animate-spin" />Guardando…</>
+                : <><CheckCircle2 size={13} />Guardar cambios</>}
+            </button>
           </div>
         </div>
       </ModalOverlay>
