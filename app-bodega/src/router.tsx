@@ -85,11 +85,16 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+function isAdminPanelUser(user: any) {
+  return user?.rol === 'admin' || user?.rol === 'responsable' ||
+    (user?.rol === 'user' && user?.es_panel_usuario === true);
+}
+
 function GuestOnly({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (isAuthenticated) {
     if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
-    if (user?.rol === 'admin' || user?.rol === 'responsable') return <Navigate to="/admin" replace />;
+    if (isAdminPanelUser(user)) return <Navigate to="/admin" replace />;
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
@@ -116,9 +121,7 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
-  if (user?.rol !== 'admin' && user?.rol !== 'responsable') {
-    return <Navigate to="/login" replace />;
-  }
+  if (!isAdminPanelUser(user)) return <Navigate to="/admin/login" replace />;
   return <>{children}</>;
 }
 
@@ -126,7 +129,7 @@ function SmartRedirect() {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/bienvenida" replace />;
   if (user?.rol === 'productor') return <Navigate to="/productor" replace />;
-  if (user?.rol === 'admin' || user?.rol === 'responsable') return <Navigate to="/admin" replace />;
+  if (isAdminPanelUser(user)) return <Navigate to="/admin" replace />;
   return <Navigate to="/dashboard" replace />;
 }
 
