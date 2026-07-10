@@ -75,7 +75,11 @@ export default function LoginAdminPage() {
     try {
       const res = await api.auth.login(email, password);
       const u = res.usuario || res.user;
-      if (u?.rol !== 'admin' && u?.rol !== 'responsable')
+      const puedeEntrar =
+        u?.rol === 'admin' ||
+        u?.rol === 'responsable' ||
+        (u?.rol === 'user' && u?.es_panel_usuario === true);
+      if (!puedeEntrar)
         throw new Error('No tienes permisos para acceder al panel administrativo');
       setAuth(res.token, { ...u, userId: u?.id ?? u?.userId });
       navigate('/admin');
