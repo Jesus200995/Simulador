@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { usePermisosStore } from './store/permisos';
 import { Layout } from './components/Layout';
 import { LayoutProductor } from './components/LayoutProductor';
 import { useAuthStore } from './store/auth';
@@ -122,6 +123,17 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
   if (!isAdminPanelUser(user)) return <Navigate to="/admin/login" replace />;
+  return <>{children}</>;
+}
+
+/** Bloquea acceso a rutas admin si el usuario OREF no tiene permiso de ver esa vista. */
+function RequireVista({ vista, soloAdmin, children }: { vista?: string; soloAdmin?: boolean; children: React.ReactNode }) {
+  const { user } = useAuthStore();
+  const { puedeVerVista, permisosTotal } = usePermisosStore();
+  const esAdminOResponsable = user?.rol === 'admin' || user?.rol === 'responsable';
+
+  if (soloAdmin && !esAdminOResponsable) return <Navigate to="/admin" replace />;
+  if (vista && !permisosTotal && !puedeVerVista(vista)) return <Navigate to="/admin" replace />;
   return <>{children}</>;
 }
 
@@ -288,20 +300,20 @@ export const router = createBrowserRouter([
     element: <RequireAdmin><AdminShell><Outlet /></AdminShell></RequireAdmin>,
     children: [
       { index: true, element: <DashboardAdminPage /> },
-      { path: 'productores', element: <ProductoresAdminPage /> },
-      { path: 'productores/:id', element: <ProductorDetalleAdminPage /> },
-      { path: 'bodegas', element: <BodegasAdminPage /> },
-      { path: 'bodegas/:id', element: <BodegaDetalleAdminPage /> },
-      { path: 'alertas', element: <AlertasAdminPage /> },
-      { path: 'precios', element: <PreciosAdminPage /> },
-      { path: 'produccion', element: <ProduccionAdminPage /> },
-      { path: 'mercado', element: <MercadoAdminPage /> },
-      { path: 'configuracion', element: <ConfiguracionAdminPage /> },
-      { path: 'avisos-privacidad', element: <AvisosPrivacidadAdminPage /> },
-      { path: 'senasica', element: <SenasicaAdminPage /> },
-      { path: 'permisos', element: <PermisosAdminPage /> },
+      { path: 'productores',    element: <RequireVista vista="productores"><ProductoresAdminPage /></RequireVista> },
+      { path: 'productores/:id',element: <RequireVista vista="productores"><ProductorDetalleAdminPage /></RequireVista> },
+      { path: 'bodegas',        element: <RequireVista vista="bodegas"><BodegasAdminPage /></RequireVista> },
+      { path: 'bodegas/:id',    element: <RequireVista vista="bodegas"><BodegaDetalleAdminPage /></RequireVista> },
+      { path: 'alertas',        element: <RequireVista vista="alertas"><AlertasAdminPage /></RequireVista> },
+      { path: 'precios',        element: <RequireVista vista="precios"><PreciosAdminPage /></RequireVista> },
+      { path: 'produccion',     element: <RequireVista vista="produccion"><ProduccionAdminPage /></RequireVista> },
+      { path: 'mercado',        element: <RequireVista vista="mercado"><MercadoAdminPage /></RequireVista> },
+      { path: 'configuracion',  element: <RequireVista soloAdmin><ConfiguracionAdminPage /></RequireVista> },
+      { path: 'avisos-privacidad', element: <RequireVista vista="avisos-privacidad"><AvisosPrivacidadAdminPage /></RequireVista> },
+      { path: 'senasica',       element: <RequireVista vista="senasica"><SenasicaAdminPage /></RequireVista> },
+      { path: 'permisos',       element: <RequireVista soloAdmin><PermisosAdminPage /></RequireVista> },
       { path: 'cambiar-password', element: <CambiarPasswordPage /> },
-      { path: 'perfil', element: <MiPerfilAdminPage /> },
+      { path: 'perfil',         element: <MiPerfilAdminPage /> },
     ],
   },
 

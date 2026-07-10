@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import { usePermisosSSE } from '../../hooks/usePermisosSSE';
+import { usePermisosStore } from '../../store/permisos';
 import {
   LayoutDashboard, Users, Warehouse, AlertTriangle,
   TrendingUp, LogOut, Menu, X, ShieldCheck, ChevronRight,
@@ -14,21 +15,25 @@ interface SidebarItem {
   path: string;
   icon: any;
   exact?: boolean;
+  /** Vista en admin_permisos. undefined = siempre visible. */
+  vista?: string;
+  /** Solo visible para admin/responsable, nunca para OREF. */
+  soloAdmin?: boolean;
 }
 
 const MENU: SidebarItem[] = [
-  { label: 'Resumen',      subtitle: 'Métricas, estadísticas y vista general del sistema',   path: '/admin',                icon: LayoutDashboard, exact: true },
-  { label: 'Productores',  subtitle: 'Administración y gestión integral de agricultores registrados',     path: '/admin/productores',    icon: Users },
-  { label: 'Bodegas',      subtitle: 'Supervisión y control detallado de centros de acopio',path: '/admin/bodegas',        icon: Warehouse },
-  { label: 'Alertas',      subtitle: 'Centro de notificaciones y avisos en tiempo real',     path: '/admin/alertas',        icon: AlertTriangle },
-  { label: 'Precios',      subtitle: 'Monitoreo de cotizaciones y variaciones del mercado',     path: '/admin/precios',        icon: TrendingUp },
-  { label: 'Producción',   subtitle: 'Registro, seguimiento y estimación de cosechas activas',        path: '/admin/produccion',     icon: Sprout },
-  { label: 'Mercado',      subtitle: 'Análisis estadístico y proyecciones comerciales a futuro',          path: '/admin/mercado',        icon: BarChart3 },
-  { label: 'SENASICA',     subtitle: 'Carga de alertas fitosanitarias y notificación a productores',  path: '/admin/senasica',       icon: Leaf },
-  { label: 'Configuración',subtitle: 'Preferencias, roles de usuario y ajustes del sistema',         path: '/admin/configuracion',  icon: Settings },
-  { label: 'Avisos Privacidad', subtitle: 'Constancias de aceptación con verificación biométrica y GPS', path: '/admin/avisos-privacidad', icon: ShieldCheck },
-  { label: 'Permisos',          subtitle: 'Usuarios del panel, roles y control de acceso por vista', path: '/admin/permisos',          icon: KeyRound },
-  { label: 'Mi Perfil',         subtitle: 'Edita tu información, email y contraseña de acceso',      path: '/admin/perfil',            icon: CircleUserRound },
+  { label: 'Resumen',           subtitle: 'Métricas, estadísticas y vista general del sistema',               path: '/admin',                   icon: LayoutDashboard, exact: true },
+  { label: 'Productores',       subtitle: 'Administración y gestión integral de agricultores registrados',    path: '/admin/productores',       icon: Users,           vista: 'productores' },
+  { label: 'Bodegas',           subtitle: 'Supervisión y control detallado de centros de acopio',             path: '/admin/bodegas',           icon: Warehouse,       vista: 'bodegas' },
+  { label: 'Alertas',           subtitle: 'Centro de notificaciones y avisos en tiempo real',                 path: '/admin/alertas',           icon: AlertTriangle,   vista: 'alertas' },
+  { label: 'Precios',           subtitle: 'Monitoreo de cotizaciones y variaciones del mercado',              path: '/admin/precios',           icon: TrendingUp,      vista: 'precios' },
+  { label: 'Producción',        subtitle: 'Registro, seguimiento y estimación de cosechas activas',           path: '/admin/produccion',        icon: Sprout,          vista: 'produccion' },
+  { label: 'Mercado',           subtitle: 'Análisis estadístico y proyecciones comerciales a futuro',         path: '/admin/mercado',           icon: BarChart3,       vista: 'mercado' },
+  { label: 'SENASICA',          subtitle: 'Carga de alertas fitosanitarias y notificación a productores',     path: '/admin/senasica',          icon: Leaf,            vista: 'senasica' },
+  { label: 'Configuración',     subtitle: 'Preferencias, roles de usuario y ajustes del sistema',             path: '/admin/configuracion',     icon: Settings,        soloAdmin: true },
+  { label: 'Avisos Privacidad', subtitle: 'Constancias de aceptación con verificación biométrica y GPS',      path: '/admin/avisos-privacidad', icon: ShieldCheck,     vista: 'avisos-privacidad' },
+  { label: 'Permisos',          subtitle: 'Usuarios del panel, roles y control de acceso por vista',          path: '/admin/permisos',          icon: KeyRound,        soloAdmin: true },
+  { label: 'Mi Perfil',         subtitle: 'Edita tu información, email y contraseña de acceso',               path: '/admin/perfil',            icon: CircleUserRound },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -37,8 +42,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Conectar SSE de permisos para este usuario del panel
-  usePermisosSSE(user?.userId, user?.rol === 'admin');
+  const { puedeVerVista, permisosTotal } = usePermisosStore();
+  const esAdminOResponsable = user?.rol === 'admin' || user?.rol === 'responsable';
+
+  // admin y responsable tienen permisos totales; OREF carga sus permisos individuales
+  usePermisosSSE(user?.userId, esAdminOResponsable);
 
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 
@@ -135,9 +143,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     </div>
   );
 
+  function puedeVerItem(item: SidebarItem): boolean {
+    // Ítems sin restricción: siempre visible
+    if (!item.vista && !item.soloAdmin) return true;
+    // Ítems exclusivos de admin/responsable
+    if (item.soloAdmin) return esAdminOResponsable;
+    // Ítems con vista: respetar permisosTotal o permiso individual
+    if (permisosTotal) return true;
+    return puedeVerVista(item.vista!);
+  }
+
   const NavItems = ({ mobile }: { mobile?: boolean }) => (
     <>
-      {MENU.map(item => (
+      {MENU.filter(puedeVerItem).map(item => (
         <NavLink key={item.path} to={item.path} end={item.exact} className={navCls}>
           {({ isActive }) => (
             <>
@@ -293,7 +311,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
         {/* Mobile bottom nav */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-gray-200/70 flex items-center justify-around px-1 py-1.5 safe-area-bottom flex-shrink-0">
-          {MENU.slice(0, 5).map(item => {
+          {MENU.filter(puedeVerItem).slice(0, 5).map(item => {
             const isActive = item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
             return (
               <NavLink key={item.path} to={item.path} end={item.exact}
