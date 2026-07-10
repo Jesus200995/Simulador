@@ -238,9 +238,12 @@ export default function MiPerfilPage() {
 
             {/* ═══ Layout MÓVIL/TABLET (< lg) ═══ */}
             <div className="lg:hidden rounded-2xl overflow-hidden">
-              <div className="h-16 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] relative">
-                <div className="absolute inset-0 opacity-20"
-                  style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
+              <div className="h-16 relative overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #0a3d22 0%, #0e5c33 35%, #1a7a44 65%, #0e5c33 100%)' }}>
+                <div className="absolute -top-6 -left-4 w-24 h-24 rounded-full bg-emerald-300/25 blur-2xl" />
+                <div className="absolute -bottom-8 right-4 w-28 h-28 rounded-full bg-emerald-200/20 blur-2xl" />
+                <div className="absolute inset-0 opacity-[0.12]"
+                  style={{ backgroundImage: 'radial-gradient(circle,white 1px,transparent 1px)', backgroundSize: '18px 18px' }} />
               </div>
               <div className="px-4 sm:px-6 pb-4 sm:pb-5">
                 <div className="flex items-end justify-between gap-3 -mt-7">
@@ -282,12 +285,18 @@ export default function MiPerfilPage() {
 
             {/* ═══ Layout DESKTOP (lg+): avatar centrado sobre la banda ═══ */}
             <div className="hidden lg:block">
-              <div className="h-20 bg-gradient-to-r from-[#0e5c33] via-[#1a7a44] to-[#0e5c33] rounded-t-2xl relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20"
-                  style={{ backgroundImage: 'radial-gradient(circle at 20% 50%,white 1px,transparent 1px),radial-gradient(circle at 80% 50%,white 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
+              <div className="h-24 rounded-t-2xl relative overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #0a3d22 0%, #0e5c33 35%, #1a7a44 65%, #0e5c33 100%)' }}>
+                {/* Blobs de luz difusa — fondo "fluido" */}
+                <div className="absolute -top-8 -left-6 w-32 h-32 rounded-full bg-emerald-300/25 blur-2xl" />
+                <div className="absolute -bottom-10 right-6 w-40 h-40 rounded-full bg-emerald-200/20 blur-3xl" />
+                <div className="absolute top-2 right-1/3 w-20 h-20 rounded-full bg-white/10 blur-2xl" />
+                {/* Patrón de puntos sutil */}
+                <div className="absolute inset-0 opacity-[0.12]"
+                  style={{ backgroundImage: 'radial-gradient(circle,white 1px,transparent 1px)', backgroundSize: '18px 18px' }} />
               </div>
-              <div className="flex justify-center -mt-10">
-                <div className="ring-[5px] ring-white rounded-[26px] shrink-0">
+              <div className="relative flex justify-center" style={{ marginTop: -40 }}>
+                <div className="relative z-10 ring-[5px] ring-white rounded-[26px] shrink-0">
                   <Avatar nombre={nombre_display} size={80} rol={rolLabel} />
                 </div>
               </div>
