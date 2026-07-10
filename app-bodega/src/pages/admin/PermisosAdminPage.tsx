@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ShieldCheck, Plus, Pencil, Trash2, X,
   Copy, Download, CheckCircle2, AlertTriangle, ChevronDown,
   Loader2, RefreshCw, UserPlus, KeySquare,
   TriangleAlert, Sparkles, LayoutDashboard, Users, Warehouse,
-  TrendingUp, Sprout, BarChart3, Leaf,
+  TrendingUp, Sprout, BarChart3, Leaf, Search, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -426,7 +426,34 @@ export default function PermisosAdminPage() {
   const [usuDel,   setUsuDel]     = useState<UsuarioPanel | null>(null);
   const [deleting, setDeleting]   = useState(false);
 
+  /* Búsqueda / filtro / paginación */
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroRol, setFiltroRol] = useState<string>('todos');
+  const [page, setPage] = useState(1);
+  const porPagina = 10;
+
   const rolDe = (clave: string) => roles.find(r => r.clave === clave);
+
+  const conteoRoles = useMemo(() => {
+    const c: Record<string, number> = {};
+    usuarios.forEach(u => { c[u.rol] = (c[u.rol] ?? 0) + 1; });
+    return c;
+  }, [usuarios]);
+
+  const usuariosFiltrados = useMemo(() => {
+    const q = busqueda.trim().toLowerCase();
+    return usuarios.filter(u => {
+      const coincideTexto = !q || u.nombre_completo.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+      const coincideRol = filtroRol === 'todos' || u.rol === filtroRol;
+      return coincideTexto && coincideRol;
+    });
+  }, [usuarios, busqueda, filtroRol]);
+
+  useEffect(() => { setPage(1); }, [busqueda, filtroRol]);
+
+  const totalPaginas = Math.max(1, Math.ceil(usuariosFiltrados.length / porPagina));
+  const paginaSegura = Math.min(page, totalPaginas);
+  const usuariosPagina = usuariosFiltrados.slice((paginaSegura - 1) * porPagina, paginaSegura * porPagina);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -544,28 +571,69 @@ export default function PermisosAdminPage() {
 
   /* ── RENDER ─────────────────────────────────────────────────────── */
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3.5 sm:gap-4 pt-3 sm:pt-4">
 
       {/* Barra superior */}
-      <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center justify-between shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#0e5c33]/10 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-[#0e5c33]/10 flex items-center justify-center shrink-0">
             <ShieldCheck size={15} className="text-[#0e5c33]" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[13px] font-black text-gray-900 leading-none">Permisos Administrativos</p>
             <p className="text-[10.5px] text-gray-400 mt-0.5">{usuarios.length} usuario{usuarios.length !== 1 ? 's' : ''} del panel</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={cargar} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95">
+        <div className="flex items-center gap-2 shrink-0">
+          <button onClick={cargar} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95 shrink-0">
             <RefreshCw size={13} className={`text-gray-500 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button onClick={() => { setErrCrear(''); setModalCrear(true); }}
-            className="flex items-center gap-2 bg-[#0e5c33] hover:bg-[#0a3d22] active:scale-[0.97] text-white text-[12px] font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm hover:shadow-md">
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#0e5c33] hover:bg-[#0a3d22] active:scale-[0.97] text-white text-[12px] font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm hover:shadow-md">
             <UserPlus size={13} /> Nuevo usuario
           </button>
         </div>
+      </div>
+
+      {/* Contadores por rol */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {[
+          { key: 'todos',       label: 'Todos',              count: usuarios.length,               color: 'text-gray-700 bg-gray-100' },
+          { key: 'admin',       label: 'Administradores',    count: conteoRoles['admin'] ?? 0,       color: 'text-[#0e5c33] bg-[#0e5c33]/10' },
+          { key: 'responsable', label: 'Responsables',       count: conteoRoles['responsable'] ?? 0, color: 'text-blue-700 bg-blue-100' },
+          { key: 'user',        label: 'Usuarios operativos',count: conteoRoles['user'] ?? 0,        color: 'text-violet-700 bg-violet-100' },
+        ].map(({ key, label, count, color }) => (
+          <button key={key} onClick={() => setFiltroRol(key)}
+            className={`flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-3 text-left transition-all active:scale-[0.97] ${
+              filtroRol === key ? 'border-[#0e5c33]/40 ring-2 ring-[#0e5c33]/15 bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">{label}</p>
+              <p className="text-[19px] font-black text-gray-900 mt-0.5">{count}</p>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-1 rounded-full shrink-0 ${color}`}><ShieldCheck size={11} /></span>
+          </button>
+        ))}
+      </div>
+
+      {/* Buscador + filtro de rol */}
+      <div className="bg-white border border-gray-200 rounded-2xl px-3.5 py-3 flex flex-col sm:flex-row gap-2.5 shadow-sm">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre o email…"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-[12.5px] text-gray-800 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/40 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all"
+          />
+        </div>
+        <select value={filtroRol} onChange={e => setFiltroRol(e.target.value)}
+          className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-gray-700 focus:outline-none focus:bg-white focus:border-[#0e5c33]/40 transition-all sm:w-52">
+          <option value="todos">Todos los roles</option>
+          <option value="admin">Administradores</option>
+          <option value="responsable">Responsables</option>
+          <option value="user">Usuarios operativos</option>
+        </select>
       </div>
 
       {/* Tabla */}
@@ -575,70 +643,94 @@ export default function PermisosAdminPage() {
             <Loader2 size={16} className="animate-spin" />
             <span className="text-[13px]">Cargando usuarios…</span>
           </div>
-        ) : usuarios.length === 0 ? (
+        ) : usuariosFiltrados.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-gray-400">
             <ShieldCheck size={36} className="mb-3 opacity-20" />
-            <p className="text-[13.5px] font-bold">Sin usuarios del panel</p>
-            <p className="text-[12px] mt-1">Crea el primero con el botón de arriba</p>
+            <p className="text-[13.5px] font-bold">
+              {usuarios.length === 0 ? 'Sin usuarios del panel' : 'Sin resultados para tu búsqueda'}
+            </p>
+            <p className="text-[12px] mt-1">
+              {usuarios.length === 0 ? 'Crea el primero con el botón de arriba' : 'Prueba con otro nombre, email o filtro'}
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tl-2xl">Usuario</th>
-                  <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Rol</th>
-                  <th className="hidden md:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Estado</th>
-                  <th className="hidden lg:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Último acceso</th>
-                  <th className="hidden sm:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Cuenta</th>
-                  <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tr-2xl"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuarios.map((u, i) => (
-                  <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50/70 transition-colors ${i === usuarios.length - 1 ? 'border-b-0' : ''}`}>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <Avatar nombre={u.nombre_completo} size={34} rol={u.rol} />
-                        <div>
-                          <p className="text-[12.5px] font-bold text-gray-900 leading-none">{u.nombre_completo}</p>
-                          <p className="text-[11px] text-gray-400 mt-0.5">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5"><RolChip rol={u.rol} etiqueta={u.rol_etiqueta ?? u.rol} /></td>
-                    <td className="hidden md:table-cell px-5 py-3.5">
-                      {u.estado_asignado
-                        ? <div className="flex flex-wrap gap-1">{u.estado_asignado.split(',').map((e: string) => <span key={e} className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{e.trim()}</span>)}</div>
-                        : <span className="text-[11px] text-gray-400">Nacional</span>}
-                    </td>
-                    <td className="hidden lg:table-cell px-5 py-3.5 text-[12px] text-gray-500">
-                      {u.ultimo_login
-                        ? new Date(u.ultimo_login).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
-                        : <span className="text-amber-500 font-semibold text-[11px]">Nunca</span>}
-                    </td>
-                    <td className="hidden sm:table-cell px-5 py-3.5">
-                      {u.debe_cambiar_pass
-                        ? <span className="text-[10.5px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pass pendiente</span>
-                        : <span className="text-[10.5px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Activo</span>}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => abrirEditar(u)}
-                          className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-[#0e5c33] text-gray-500 flex items-center justify-center transition-all active:scale-90 group">
-                          <Pencil size={13} />
-                        </button>
-                        <button onClick={() => { setUsuDel(u); setModalDel(true); }}
-                          className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-500 flex items-center justify-center transition-all active:scale-90">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60">
+                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tl-2xl">Usuario</th>
+                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Rol</th>
+                    <th className="hidden md:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Estado</th>
+                    <th className="hidden lg:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Último acceso</th>
+                    <th className="hidden sm:table-cell text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3">Cuenta</th>
+                    <th className="text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.08em] px-5 py-3 rounded-tr-2xl"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {usuariosPagina.map((u, i) => (
+                    <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50/70 transition-colors ${i === usuariosPagina.length - 1 ? 'border-b-0' : ''}`}>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <Avatar nombre={u.nombre_completo} size={34} rol={u.rol} />
+                          <div className="min-w-0">
+                            <p className="text-[12.5px] font-bold text-gray-900 leading-none truncate">{u.nombre_completo}</p>
+                            <p className="text-[11px] text-gray-400 mt-0.5 truncate">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5"><RolChip rol={u.rol} etiqueta={u.rol_etiqueta ?? u.rol} /></td>
+                      <td className="hidden md:table-cell px-5 py-3.5">
+                        {u.estado_asignado
+                          ? <div className="flex flex-wrap gap-1">{u.estado_asignado.split(',').map((e: string) => <span key={e} className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{e.trim()}</span>)}</div>
+                          : <span className="text-[11px] text-gray-400">Nacional</span>}
+                      </td>
+                      <td className="hidden lg:table-cell px-5 py-3.5 text-[12px] text-gray-500">
+                        {u.ultimo_login
+                          ? new Date(u.ultimo_login).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                          : <span className="text-amber-500 font-semibold text-[11px]">Nunca</span>}
+                      </td>
+                      <td className="hidden sm:table-cell px-5 py-3.5">
+                        {u.debe_cambiar_pass
+                          ? <span className="text-[10.5px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pass pendiente</span>
+                          : <span className="text-[10.5px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Activo</span>}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => abrirEditar(u)}
+                            className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-[#0e5c33] text-gray-500 flex items-center justify-center transition-all active:scale-90 group">
+                            <Pencil size={13} />
+                          </button>
+                          <button onClick={() => { setUsuDel(u); setModalDel(true); }}
+                            className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-500 flex items-center justify-center transition-all active:scale-90">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginación */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 px-5 py-3 border-t border-gray-100 bg-gray-50/40">
+              <p className="text-[11.5px] text-gray-500 order-2 sm:order-1">
+                Mostrando <span className="font-bold text-gray-700">{(paginaSegura - 1) * porPagina + 1}–{Math.min(paginaSegura * porPagina, usuariosFiltrados.length)}</span> de <span className="font-bold text-gray-700">{usuariosFiltrados.length}</span>
+              </p>
+              <div className="flex items-center gap-1.5 order-1 sm:order-2">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={paginaSegura <= 1}
+                  className="w-8 h-8 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all">
+                  <ChevronLeft size={14} className="text-gray-500" />
+                </button>
+                <span className="text-[12px] font-bold text-gray-600 px-2 min-w-[70px] text-center">{paginaSegura} / {totalPaginas}</span>
+                <button onClick={() => setPage(p => Math.min(totalPaginas, p + 1))} disabled={paginaSegura >= totalPaginas}
+                  className="w-8 h-8 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all">
+                  <ChevronRight size={14} className="text-gray-500" />
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
