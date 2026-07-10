@@ -9,6 +9,7 @@ import {
   Phone, Calendar, Building2, Save, Loader2, Table2, Navigation2, Trash2, AlertTriangle,
   Users, Mail
 } from 'lucide-react';
+import { usePermisosStore } from '../../store/permisos';
 
 mapboxgl.accessToken = [
   'pk.eyJ1IjoibWFyaWVsMDgi',
@@ -94,9 +95,25 @@ interface UsuarioBodega {
 export default function BodegasAdminPage() {
   const navigate = useNavigate();
 
+  const puedo         = usePermisosStore(s => s.puedo);
+  const permisosTotal = usePermisosStore(s => s.permisosTotal); // true solo para admin/responsable
+  const puedeCrear    = permisosTotal || puedo('bodegas', 'crear');
+  const puedeEditar   = permisosTotal || puedo('bodegas', 'editar');
+  const puedeEliminar = permisosTotal || puedo('bodegas', 'eliminar');
+  const puedeExportar = permisosTotal || puedo('bodegas', 'exportar');
+  // "Por aprobar" y "Usuarios" son acciones/datos exclusivos de admin y responsable —
+  // un OREF (rol=user) jamás debe verlas, sin importar sus permisos de vista.
+  const soloAdminVeTabsGestion = permisosTotal;
+
   const [bodegas, setBodegas]   = useState<Bodega[]>([]);
   const [loading, setLoading]   = useState(true);
   const [tab, setTab]           = useState<'bodegas' | 'lista' | 'estadisticas' | 'pendientes' | 'usuarios'>('bodegas');
+
+  // Defensa en profundidad: si el tab activo es exclusivo de admin y el usuario
+  // no tiene permisos totales, regresarlo a la vista general.
+  useEffect(() => {
+    if ((tab === 'pendientes' || tab === 'usuarios') && !soloAdminVeTabsGestion) setTab('bodegas');
+  }, [tab, soloAdminVeTabsGestion]);
 
   // Solicitudes de asociación bodeguero↔bodega
   interface SolicitudBodega {
@@ -582,12 +599,12 @@ export default function BodegasAdminPage() {
         <div className="flex items-center justify-between gap-1.5 px-2 py-1.5">
           <div className="flex items-center gap-1 flex-wrap">
             {([
-              { key: 'bodegas',      label: 'Bodegas',       icon: <Table2 size={11} />,      badge: bodegas.length },
-              { key: 'lista',        label: 'Lista + Mapa',  icon: <Navigation2 size={11} />, badge: null },
-              { key: 'estadisticas', label: 'Estadísticas',  icon: <BarChart3 size={11} />,   badge: null },
-              { key: 'pendientes',   label: 'Por aprobar',   icon: <ShieldAlert size={11} />, badge: cntPendTotal || null },
-              { key: 'usuarios',     label: 'Usuarios',      icon: <Users size={11} />,       badge: null },
-            ] as const).map(({ key, label, icon, badge }) => (
+              { key: 'bodegas',      label: 'Bodegas',       icon: <Table2 size={11} />,      badge: bodegas.length,     soloAdmin: false },
+              { key: 'lista',        label: 'Lista + Mapa',  icon: <Navigation2 size={11} />, badge: null,               soloAdmin: false },
+              { key: 'estadisticas', label: 'Estadísticas',  icon: <BarChart3 size={11} />,   badge: null,               soloAdmin: false },
+              { key: 'pendientes',   label: 'Por aprobar',   icon: <ShieldAlert size={11} />, badge: cntPendTotal || null, soloAdmin: true },
+              { key: 'usuarios',     label: 'Usuarios',      icon: <Users size={11} />,       badge: null,               soloAdmin: true },
+            ] as const).filter(t => !t.soloAdmin || soloAdminVeTabsGestion).map(({ key, label, icon, badge }) => (
               <button key={key} onClick={() => setTab(key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-150 ${
                   tab === key ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1]'
@@ -707,14 +724,18 @@ export default function BodegasAdminPage() {
                               className="p-1.5 rounded-lg text-gray-400 hover:text-[#1A5C38] hover:bg-[#eef8f2] transition" title="Ver detalle">
                               <Eye size={12} />
                             </button>
-                            <button onClick={() => abrirEditar(b)}
-                              className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar">
-                              <Edit3 size={12} />
-                            </button>
-                            <button onClick={() => setDeleteTarget(b)}
-                              className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition" title="Eliminar">
-                              <Trash2 size={12} />
-                            </button>
+                            {puedeEditar && (
+                              <button onClick={() => abrirEditar(b)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar">
+                                <Edit3 size={12} />
+                              </button>
+                            )}
+                            {puedeEliminar && (
+                              <button onClick={() => setDeleteTarget(b)}
+                                className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition" title="Eliminar">
+                                <Trash2 size={12} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

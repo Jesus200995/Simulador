@@ -1,9 +1,10 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Phone, MapPin, Inbox, Coins, 
-  Check, X, AlertTriangle, RefreshCw, Layers, ClipboardList 
+import {
+  ArrowLeft, Phone, MapPin, Inbox, Coins,
+  Check, X, AlertTriangle, RefreshCw, Layers, ClipboardList
 } from 'lucide-react';
+import { usePermisosStore } from '../../store/permisos';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -51,6 +52,8 @@ interface BodegaDetalle {
 export default function BodegaDetalleAdminPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  // Aprobar/rechazar bodega es exclusivo de admin/responsable (el backend lo exige igual)
+  const permisosTotal = usePermisosStore(s => s.permisosTotal);
   const [data, setData] = useState<BodegaDetalle | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -230,15 +233,15 @@ export default function BodegaDetalleAdminPage() {
             </span>
           </div>
 
-          {data.estatus === 'pendiente' && (
+          {permisosTotal && data.estatus === 'pendiente' && (
             <>
-              <button 
+              <button
                 onClick={() => setModalType('aprobar')}
                 className="flex items-center gap-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-[12.5px] rounded-xl shadow-md transition-all"
               >
                 <Check size={14} /> Aprobar Silo
               </button>
-              <button 
+              <button
                 onClick={() => setModalType('rechazar')}
                 className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold text-[12.5px] rounded-xl shadow-md transition-all"
               >

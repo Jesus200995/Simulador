@@ -1,11 +1,12 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
-import { 
-  ArrowLeft, Users, Mail, Phone, Calendar, MapPin, Sprout, 
-  Check, X, AlertTriangle, RefreshCw 
+import {
+  ArrowLeft, Users, Mail, Phone, Calendar, MapPin, Sprout,
+  Check, X, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import { usePermisosStore } from '../../store/permisos';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -45,6 +46,9 @@ interface ProductorDetalle {
 export default function ProductorDetalleAdminPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const puedo         = usePermisosStore(s => s.puedo);
+  const permisosTotal = usePermisosStore(s => s.permisosTotal);
+  const puedeEditar   = permisosTotal || puedo('productores', 'editar');
   const [data, setData] = useState<ProductorDetalle | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -279,15 +283,15 @@ export default function ProductorDetalleAdminPage() {
             </span>
           </div>
 
-          {data.estado_validacion === 'pendiente' && (
+          {puedeEditar && data.estado_validacion === 'pendiente' && (
             <>
-              <button 
+              <button
                 onClick={() => setModalType('aprobar')}
                 className="flex items-center gap-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-[12.5px] rounded-xl shadow-md transition-all"
               >
                 <Check size={14} /> Aprobar
               </button>
-              <button 
+              <button
                 onClick={() => setModalType('rechazar')}
                 className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold text-[12.5px] rounded-xl shadow-md transition-all"
               >
@@ -296,8 +300,8 @@ export default function ProductorDetalleAdminPage() {
             </>
           )}
 
-          {data.estado_validacion === 'activo' && (
-            <button 
+          {puedeEditar && data.estado_validacion === 'activo' && (
+            <button
               onClick={() => setModalType('suspender')}
               className="px-4 py-2 bg-red-50 border border-red-100 hover:bg-red-100 text-red-600 text-gray-500 font-bold text-[12.5px] rounded-xl border border-white/5 transition-all"
             >
@@ -305,8 +309,8 @@ export default function ProductorDetalleAdminPage() {
             </button>
           )}
 
-          {data.estado_validacion === 'suspendido' && (
-            <button 
+          {puedeEditar && data.estado_validacion === 'suspendido' && (
+            <button
               onClick={() => setModalType('reactivar')}
               className="px-4 py-2 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 text-emerald-700 text-gray-500 font-bold text-[12.5px] rounded-xl border border-white/5 transition-all"
             >

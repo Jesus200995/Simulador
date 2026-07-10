@@ -126,14 +126,27 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Orden de vistas del panel admin — usado para hallar la primera disponible para un OREF. */
+const ORDEN_VISTAS = ['resumen', 'productores', 'bodegas', 'alertas', 'precios', 'produccion', 'mercado', 'senasica', 'avisos-privacidad'];
+
+function rutaDeVista(vista: string): string {
+  return vista === 'resumen' ? '/admin' : `/admin/${vista}`;
+}
+
 /** Bloquea acceso a rutas admin si el usuario OREF no tiene permiso de ver esa vista. */
 function RequireVista({ vista, soloAdmin, children }: { vista?: string; soloAdmin?: boolean; children: React.ReactNode }) {
   const { user } = useAuthStore();
   const { puedeVerVista, permisosTotal } = usePermisosStore();
   const esAdminOResponsable = user?.rol === 'admin' || user?.rol === 'responsable';
 
-  if (soloAdmin && !esAdminOResponsable) return <Navigate to="/admin" replace />;
-  if (vista && !permisosTotal && !puedeVerVista(vista)) return <Navigate to="/admin" replace />;
+  if (soloAdmin && !esAdminOResponsable) {
+    const primera = permisosTotal ? 'resumen' : ORDEN_VISTAS.find(v => puedeVerVista(v));
+    return <Navigate to={primera ? rutaDeVista(primera) : '/admin/perfil'} replace />;
+  }
+  if (vista && !permisosTotal && !puedeVerVista(vista)) {
+    const primera = ORDEN_VISTAS.find(v => v !== vista && puedeVerVista(v));
+    return <Navigate to={primera ? rutaDeVista(primera) : '/admin/perfil'} replace />;
+  }
   return <>{children}</>;
 }
 

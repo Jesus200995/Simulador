@@ -8,6 +8,7 @@ import {
   Phone, Mail, MapPin, Calendar, User, KeyRound, ExternalLink,
   Loader2, Copy, CheckCheck
 } from 'lucide-react';
+import { usePermisosStore } from '../../store/permisos';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -91,6 +92,8 @@ function ModalVerProductor({
   onEliminar: () => void;
 }) {
   const navigate = useNavigate();
+  const { puedo, permisosTotal } = usePermisosStore();
+  const puedeEditar = permisosTotal || puedo('productores', 'editar');
   const [nipVisible, setNipVisible] = useState(false);
   const [nipReal, setNipReal]       = useState<string | null>(null);
   const [nipLoading, setNipLoading] = useState(false);
@@ -252,7 +255,8 @@ function ModalVerProductor({
             </div>
           )}
 
-          {/* NIP de acceso */}
+          {/* NIP de acceso — dato sensible, requiere permiso de editar */}
+          {puedeEditar && (
           <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-100">
             <div className="flex items-center gap-1.5 mb-2">
               <span className="text-emerald-500"><KeyRound size={13} /></span>
@@ -337,6 +341,7 @@ function ModalVerProductor({
               </div>
             )}
           </div>
+          )}
 
           {/* Ver perfil */}
           <div className="pt-1">
@@ -355,6 +360,11 @@ function ModalVerProductor({
 }
 
 export default function ProductoresAdminPage() {
+  const { puedo, permisosTotal } = usePermisosStore();
+  const puedeEditar   = permisosTotal || puedo('productores', 'editar');
+  const puedeEliminar = permisosTotal || puedo('productores', 'eliminar');
+  const puedeExportar = permisosTotal || puedo('productores', 'exportar');
+
   const [tab, setTab] = useState<'todos' | 'pendiente' | 'suspendido'>('todos');
   const [productores, setProductores] = useState<Productor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -571,10 +581,12 @@ export default function ProductoresAdminPage() {
               className={`p-1.5 rounded-lg transition-all duration-150 ${mostrarStats ? 'bg-[#1A5C38] text-white shadow-sm' : 'text-[#1A5C38] hover:bg-[#d4efe1]'}`}>
               <BarChart3 size={11} />
             </button>
-            <button onClick={descargarExcel} disabled={loading || productores.length === 0}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white text-[11px] font-bold border border-[#1A5C38]/20 hover:border-transparent transition disabled:opacity-40">
-              <Download size={11} /> CSV
-            </button>
+            {puedeExportar && (
+              <button onClick={descargarExcel} disabled={loading || productores.length === 0}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white text-[11px] font-bold border border-[#1A5C38]/20 hover:border-transparent transition disabled:opacity-40">
+                <Download size={11} /> CSV
+              </button>
+            )}
             <button onClick={cargarProductores}
               className="p-1.5 rounded-lg text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent transition">
               <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
@@ -747,7 +759,7 @@ export default function ProductoresAdminPage() {
                           >
                             <Eye size={11} /> Ver
                           </button>
-                          {prod.estado_validacion === 'pendiente' && (
+                          {puedeEditar && prod.estado_validacion === 'pendiente' && (
                             <>
                               <button onClick={() => { setSelectedProd(prod); setModalType('aprobar'); }}
                                 className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition" title="Aprobar">
@@ -759,32 +771,36 @@ export default function ProductoresAdminPage() {
                               </button>
                             </>
                           )}
-                          {prod.estado_validacion === 'activo' && (
+                          {puedeEditar && prod.estado_validacion === 'activo' && (
                             <button onClick={() => { setSelectedProd(prod); setModalType('suspender'); }}
                               className="text-[9.5px] font-bold px-2 py-1 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 border border-gray-100 hover:border-red-200 transition">
                               Suspender
                             </button>
                           )}
-                          {prod.estado_validacion === 'suspendido' && (
+                          {puedeEditar && prod.estado_validacion === 'suspendido' && (
                             <button onClick={() => { setSelectedProd(prod); setModalType('reactivar'); }}
                               className="text-[9.5px] font-bold px-2 py-1 rounded-lg text-gray-500 hover:text-emerald-700 hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 transition">
                               Reactivar
                             </button>
                           )}
-                          {/* Botón resetear NIP */}
-                          <button
-                            onClick={() => { setResetNipTarget(prod); setResetNipResult(null); setResetNipError(''); }}
-                            className="text-[9.5px] font-bold px-2 py-1 rounded-lg text-gray-500 hover:text-purple-700 hover:bg-purple-50 border border-gray-100 hover:border-purple-200 transition"
-                            title="Resetear NIP">
-                            🔑 NIP
-                          </button>
+                          {/* Botón resetear NIP — dato sensible, requiere editar */}
+                          {puedeEditar && (
+                            <button
+                              onClick={() => { setResetNipTarget(prod); setResetNipResult(null); setResetNipError(''); }}
+                              className="text-[9.5px] font-bold px-2 py-1 rounded-lg text-gray-500 hover:text-purple-700 hover:bg-purple-50 border border-gray-100 hover:border-purple-200 transition"
+                              title="Resetear NIP">
+                              🔑 NIP
+                            </button>
+                          )}
                           {/* Botón eliminar */}
-                          <button
-                            onClick={() => { setDeleteTarget(prod); setDeleteError(''); }}
-                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all duration-150"
-                            title="Eliminar productor">
-                            <Trash2 size={12} />
-                          </button>
+                          {puedeEliminar && (
+                            <button
+                              onClick={() => { setDeleteTarget(prod); setDeleteError(''); }}
+                              className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all duration-150"
+                              title="Eliminar productor">
+                              <Trash2 size={12} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
