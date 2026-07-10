@@ -20,22 +20,30 @@ function getEstado(req: AuthRequest): string | null {
   return u.estado_asignado ?? null;
 }
 
+/** Genera cláusula WHERE para filtrado multi-estado (soporta "GTO,JAL" separado por comas) */
+function estadoWhere(estado: string | null, col: string, nextIdx: number): { sql: string; params: string[]; nextIdx: number } {
+  if (!estado) return { sql: '', params: [], nextIdx };
+  return {
+    sql: `AND UPPER(${col}) = ANY(SELECT UPPER(unnest(string_to_array($${nextIdx}, ','))))`,
+    params: [estado],
+    nextIdx: nextIdx + 1,
+  };
+}
+
 // GET /api/dashboard/admin/resumen — KPIs principales
 router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req, res)) return;
   try {
     const estado = getEstado(req);
-    const estadoParam = estado ? [estado] : [];
-    const estadoWhereP = estado ? `AND UPPER(p.state_name) = UPPER($1)` : '';
-    const estadoWhereB = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
-    const estadoWhereBs = estado ? `AND UPPER(estado) = UPPER($1)` : '';
+    const wP = estadoWhere(estado, 'p.state_name', 1);
+    const wB = estadoWhere(estado, 'b.estado', 1);
 
     const [productoresActivos, productoresPendientes, bodegasActivas, bodegasPendientes,
            disponibilidades, requerimientos, transacciones7d] = await Promise.all([
-      pool.query(`SELECT COUNT(*)::int AS total FROM producer p WHERE p.estado_validacion = 'activo' ${estadoWhereP}`, estadoParam),
-      pool.query(`SELECT COUNT(*)::int AS total FROM producer p WHERE p.estado_validacion = 'pendiente' ${estadoWhereP}`, estadoParam),
-      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas b WHERE b.estatus = 'aprobada' ${estadoWhereB}`, estadoParam),
-      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas b WHERE b.estatus = 'pendiente' ${estadoWhereB}`, estadoParam),
+      pool.query(`SELECT COUNT(*)::int AS total FROM producer p WHERE p.estado_validacion = 'activo' ${wP.sql}`, wP.params),
+      pool.query(`SELECT COUNT(*)::int AS total FROM producer p WHERE p.estado_validacion = 'pendiente' ${wP.sql}`, wP.params),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas b WHERE b.estatus = 'aprobada' ${wB.sql}`, wB.params),
+      pool.query(`SELECT COUNT(*)::int AS total FROM bodegas b WHERE b.estatus = 'pendiente' ${wB.sql}`, wB.params),
       pool.query(`SELECT COALESCE(SUM(COALESCE(volumen_estimado_ton, volumen_ton, 0)), 0)::numeric(12,2) AS total_ton FROM disponibilidad_productor WHERE COALESCE(activa, activo, true) = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
       pool.query(`SELECT COALESCE(SUM(volumen_ton), 0)::numeric(12,2) AS total_ton FROM senales_compra WHERE activa = true`).catch(() => ({ rows: [{ total_ton: 0 }] })),
       pool.query(`SELECT COUNT(*)::int AS total FROM transacciones WHERE created_at >= NOW() - INTERVAL '7 days'`).catch(() => ({ rows: [{ total: 0 }] })),
@@ -60,6 +68,8 @@ router.get('/resumen', authMiddleware, async (req: AuthRequest, res: Response): 
 router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req, res)) return;
   try {
+    const estado = getEstado(req);
+    const wU = estadoWhere(estado, 'u.state_name', 1);
     const [porEstado, porCiclo, porAnio, sinCiclo, totalesGlobales] = await Promise.all([
       pool.query(`
         SELECT
@@ -72,11 +82,11 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
         LEFT JOIN cycle c ON c.up_id = u.up_id
         LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
         LEFT JOIN estimacion_cosecha ec ON ec.up_id = u.up_id AND ec.ciclo_id = c.cycle_id
-        WHERE u.state_name IS NOT NULL
+        WHERE u.state_name IS NOT NULL ${wU.sql}
         GROUP BY u.state_name
         ORDER BY area_ha DESC
         LIMIT 20
-      `),
+      `, wU.params),
       pool.query(`
         SELECT
           c.cycle_type,
@@ -85,11 +95,13 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
           COUNT(DISTINCT cc.cycle_crop_id)::int AS cultivos,
           COALESCE(SUM(cc.area_sown_ha), 0)::numeric(10,2) AS area_ha
         FROM cycle c
+        JOIN up u ON u.up_id = c.up_id
         LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
+        WHERE true ${wU.sql}
         GROUP BY c.cycle_type, c.cycle_year
         ORDER BY c.cycle_year DESC, c.cycle_type
         LIMIT 20
-      `),
+      `, wU.params),
       pool.query(`
         SELECT
           c.cycle_year,
@@ -99,16 +111,17 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
         FROM cycle c
         JOIN up u ON u.up_id = c.up_id
         LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
+        WHERE true ${wU.sql}
         GROUP BY c.cycle_year
         ORDER BY c.cycle_year DESC
         LIMIT 6
-      `),
+      `, wU.params),
       pool.query(`
         SELECT COUNT(*)::int AS ups_sin_ciclo
         FROM up u
         WHERE NOT EXISTS (SELECT 1 FROM cycle c WHERE c.up_id = u.up_id)
-      `),
-      // Totales globales: superficie total de predios, superficie sembrada, produccion esperada
+        ${wU.sql}
+      `, wU.params),
       pool.query(`
         SELECT
           COALESCE(SUM(u.area_ha_calc), 0)::numeric(12,2) AS superficie_total_ha,
@@ -118,7 +131,8 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
         FROM up u
         LEFT JOIN cycle c ON c.up_id = u.up_id
         LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
-      `),
+        WHERE true ${wU.sql}
+      `, wU.params),
     ]);
 
     const tot = totalesGlobales.rows[0];
@@ -143,6 +157,9 @@ router.get('/produccion', authMiddleware, async (req: AuthRequest, res: Response
 router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req, res)) return;
   try {
+    const estado = getEstado(req);
+    const wB = estadoWhere(estado, 'estado', 1);
+    const wBb = estadoWhere(estado, 'b.estado', 1);
     const [porEstado, capacidadTotal, inventarioActual, topBodegas] = await Promise.all([
       pool.query(`
         SELECT
@@ -150,16 +167,18 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
           COUNT(*)::int AS total_bodegas,
           COALESCE(SUM(capacidad_ton), 0)::numeric(12,2) AS capacidad_ton
         FROM bodegas
+        WHERE true ${wB.sql}
         GROUP BY estado
         ORDER BY capacidad_ton DESC
         LIMIT 20
-      `),
+      `, wB.params),
       pool.query(`
         SELECT
           COUNT(*)::int AS bodegas_aprobadas,
           COALESCE(SUM(capacidad_ton), 0)::numeric(12,2) AS capacidad_total_ton
         FROM bodegas
-      `),
+        WHERE true ${wB.sql}
+      `, wB.params),
       pool.query(`
         SELECT COALESCE(SUM(i.volumen_almacenamiento), 0)::numeric(12,2) AS stock_actual_ton
         FROM inventarios i
@@ -169,7 +188,8 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
           GROUP BY bodega_id
         ) latest ON latest.bodega_id = i.bodega_id AND latest.max_fecha = i.fecha
         JOIN bodegas b ON b.id = i.bodega_id
-      `),
+        WHERE true ${wBb.sql}
+      `, wBb.params),
       pool.query(`
         SELECT
           b.nombre,
@@ -181,9 +201,10 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
              WHERE i.bodega_id = b.id ORDER BY i.fecha DESC LIMIT 1), 0
           )::numeric(10,2) AS stock_actual
         FROM bodegas b
+        WHERE true ${wBb.sql}
         ORDER BY b.capacidad_ton DESC
         LIMIT 10
-      `),
+      `, wBb.params),
     ]);
 
     const cap = parseFloat(capacidadTotal.rows[0].capacidad_total_ton) || 0;
@@ -208,6 +229,8 @@ router.get('/infraestructura', authMiddleware, async (req: AuthRequest, res: Res
 router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req, res)) return;
   try {
+    const estado = getEstado(req);
+    const wPr = estadoWhere(estado, 'estado', 1);
     const [promedios, recientes, tendencia] = await Promise.all([
       pool.query(`
         SELECT
@@ -221,9 +244,10 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
         FROM precios
         WHERE fecha >= NOW() - INTERVAL '30 days'
           AND tipo_precio IN ('observado', 'bodega', 'mercado_internacional')
+          ${wPr.sql}
         GROUP BY tipo_precio, tipo_maiz
         ORDER BY tipo_precio, tipo_maiz
-      `),
+      `, wPr.params),
       pool.query(`
         SELECT DISTINCT ON (tipo_precio)
           tipo_precio,
@@ -234,8 +258,9 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
           municipio
         FROM precios
         WHERE tipo_precio IN ('observado', 'bodega', 'mercado_internacional')
+          ${wPr.sql}
         ORDER BY tipo_precio, fecha DESC
-      `),
+      `, wPr.params),
       pool.query(`
         SELECT
           DATE_TRUNC('week', fecha)::date AS semana,
@@ -244,9 +269,10 @@ router.get('/precios', authMiddleware, async (req: AuthRequest, res: Response): 
         FROM precios
         WHERE fecha >= NOW() - INTERVAL '90 days'
           AND tipo_precio IN ('observado', 'bodega', 'mercado_internacional')
+          ${wPr.sql}
         GROUP BY semana, tipo_precio
         ORDER BY semana, tipo_precio
-      `),
+      `, wPr.params),
     ]);
 
     res.json({
@@ -426,6 +452,9 @@ router.get('/operacion', authMiddleware, async (req: AuthRequest, res: Response)
 router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req, res)) return;
   try {
+    const estado = getEstado(req);
+    const wU = estadoWhere(estado, 'u.state_name', 1);
+    const wB = estadoWhere(estado, 'b.estado', 1);
     const [upsGeo, bodegasGeo, porEstado, alertasGeo] = await Promise.all([
       pool.query(`
         SELECT
@@ -436,10 +465,10 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
           COUNT(CASE WHEN a.nivel_alerta IN ('critico','alto') THEN 1 END)::int AS alertas_criticas
         FROM up u
         LEFT JOIN alertas a ON a.up_id = u.up_id AND a.estado_alerta = 'pendiente'
-        WHERE u.centroid IS NOT NULL
+        WHERE u.centroid IS NOT NULL ${wU.sql}
         GROUP BY u.up_id, u.up_name, u.state_name, u.municipality_name, u.area_ha_calc, u.centroid
         LIMIT 2000
-      `),
+      `, wU.params),
       pool.query(`
         SELECT
           b.id, b.nombre, b.estado, b.municipio,
@@ -456,9 +485,9 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
             ) / b.capacidad_ton) * 100)::int
             ELSE 0 END AS ocupacion_pct
         FROM bodegas b
-        WHERE b.latitud IS NOT NULL AND b.longitud IS NOT NULL
+        WHERE b.latitud IS NOT NULL AND b.longitud IS NOT NULL ${wB.sql}
         LIMIT 1000
-      `),
+      `, wB.params),
       pool.query(`
         SELECT
           u.state_name AS estado,
@@ -470,10 +499,10 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
         JOIN producer p ON p.producer_id = u.producer_id
         LEFT JOIN cycle c ON c.up_id = u.up_id
         LEFT JOIN estimacion_cosecha ec ON ec.up_id = u.up_id AND ec.ciclo_id = c.cycle_id
-        WHERE u.state_name IS NOT NULL
+        WHERE u.state_name IS NOT NULL ${wU.sql}
         GROUP BY u.state_name
         ORDER BY produccion_ton DESC
-      `),
+      `, wU.params),
       pool.query(`
         SELECT
           a.id, a.tipo_alerta, a.nivel_alerta, a.estado_alerta,
@@ -481,10 +510,10 @@ router.get('/mapa', authMiddleware, async (req: AuthRequest, res: Response): Pro
           ST_X(u.centroid) AS lng, ST_Y(u.centroid) AS lat
         FROM alertas a
         JOIN up u ON u.up_id = a.up_id AND u.centroid IS NOT NULL
-        WHERE a.estado_alerta = 'pendiente'
+        WHERE a.estado_alerta = 'pendiente' ${wU.sql}
         ORDER BY CASE a.nivel_alerta WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 WHEN 'medio' THEN 3 ELSE 4 END
         LIMIT 300
-      `),
+      `, wU.params),
     ]);
 
     res.json({

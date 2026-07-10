@@ -1,7 +1,9 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { JwtPayload } from '../types';
 
 const router = Router();
 
@@ -75,9 +77,6 @@ function emitirPermisos(usuarioId: number, permisos: any[]) {
 
 // GET /api/admin/permisos/stream — usuario se suscribe al iniciar sesión
 // EventSource no soporta headers → acepta token como ?token= query param
-import jwt from 'jsonwebtoken';
-import { JwtPayload } from '../types';
-
 router.get('/stream', (req: AuthRequest, res: Response) => {
   // Autenticar via header Bearer O ?token= query param (EventSource no soporta headers)
   let token: string | undefined;

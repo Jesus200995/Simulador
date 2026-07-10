@@ -21,10 +21,30 @@ function esPanelAdmin(u: AuthRequest['user']): boolean {
     (u?.rol === 'user' && u?.es_panel_usuario === true);
 }
 
-/** Retorna el estado a filtrar (solo OREF) o null (admin/responsable = sin filtro) */
+/** Retorna el valor de estado_asignado (puede ser "EST1,EST2" o null) para OREF;
+ *  null significa sin filtro (admin/responsable ven todo). */
 function getEstadoFiltro(u: AuthRequest['user']): string | null {
   if (u?.rol === 'admin' || u?.rol === 'responsable') return null;
-  return u?.estado_asignado ?? null;
+  const v = u?.estado_asignado;
+  return v && v.trim() ? v.trim() : null;
+}
+
+/** Construye la cláusula SQL y params para filtrar por estado(s).
+ *  estadoVal puede ser "EST1" o "EST1,EST2" — usa ANY(string_to_array).
+ *  startIdx: índice del primer parámetro ($N).
+ *  colExpr: expresión SQL de la columna, ej: "UPPER(b.estado)".
+ */
+function estadoWhereClause(
+  estadoVal: string | null,
+  startIdx: number,
+  colExpr = 'UPPER(estado)'
+): { sql: string; params: string[]; nextIdx: number } {
+  if (!estadoVal) return { sql: '', params: [], nextIdx: startIdx };
+  return {
+    sql: `AND ${colExpr} = ANY(SELECT UPPER(unnest(string_to_array($${startIdx}, ','))))`,
+    params: [estadoVal],
+    nextIdx: startIdx + 1,
+  };
 }
 
 // =============================================
@@ -101,10 +121,13 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
     const params: any[] = [];
     let idx = 1;
 
-    // Forzar filtro de estado para usuarios OREF
+    // Forzar filtro de estado para usuarios OREF (puede ser multi-estado)
     const estadoForzado = getEstadoFiltro(req.user);
-    const estadoEfectivo = estadoForzado ?? (estado as string | undefined);
-    if (estadoEfectivo) { conditions.push(`UPPER(first_up.state_name) = UPPER($${idx++})`); params.push(estadoEfectivo); }
+    const estadoEfectivo = estadoForzado ?? (estado as string | undefined) ?? null;
+    if (estadoEfectivo) {
+      conditions.push(`UPPER(first_up.state_name) = ANY(SELECT UPPER(unnest(string_to_array($${idx++}, ','))))`);
+      params.push(estadoEfectivo);
+    }
 
     if (estado_validacion) { conditions.push(`p.estado_validacion = $${idx++}`); params.push(estado_validacion); }
     if (tipo_registro) { conditions.push(`p.tipo_registro = $${idx++}`); params.push(tipo_registro); }
@@ -271,16 +294,14 @@ router.patch('/usuarios/:id/estatus', authMiddleware, async (req: AuthRequest, r
 router.get('/bodegas-pendientes', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
-    const estado = getEstadoFiltro(req.user);
-    const params = estado ? [estado] : [];
-    const whereEstado = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
+    const { sql: wSql, params } = estadoWhereClause(getEstadoFiltro(req.user), 1, 'UPPER(b.estado)');
     const result = await pool.query(`
       SELECT b.*, r.nombre as region_nombre,
              u.nombre_completo as creado_por_nombre
       FROM bodegas b
       LEFT JOIN regiones r ON b.region_id = r.id
       LEFT JOIN usuarios u ON b.creado_por = u.id
-      WHERE b.estatus = 'pendiente' ${whereEstado}
+      WHERE b.estatus = 'pendiente' ${wSql}
       ORDER BY b.fecha_creacion DESC
     `, params);
     res.json({ bodegas: result.rows });
@@ -297,9 +318,7 @@ router.get('/bodegas-pendientes', authMiddleware, async (req: AuthRequest, res: 
 router.get('/solicitudes-bodega', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
-    const estado = getEstadoFiltro(req.user);
-    const params = estado ? [estado] : [];
-    const whereEstado = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
+    const { sql: wSql, params } = estadoWhereClause(getEstadoFiltro(req.user), 1, 'UPPER(b.estado)');
     const { rows } = await pool.query(`
       SELECT
         bb.id, bb.estatus, bb.fecha_solicitud,
@@ -314,7 +333,7 @@ router.get('/solicitudes-bodega', authMiddleware, async (req: AuthRequest, res: 
       FROM bodeguero_bodegas bb
       JOIN usuarios u ON u.id = bb.usuario_id
       JOIN bodegas  b ON b.id = bb.bodega_id
-      WHERE bb.estatus = 'pendiente' ${whereEstado}
+      WHERE bb.estatus = 'pendiente' ${wSql}
       ORDER BY bb.fecha_solicitud DESC
     `, params);
     res.json({ solicitudes: rows, total: rows.length });
@@ -695,9 +714,7 @@ router.get('/ventanillas/resumen', authMiddleware, async (req: AuthRequest, res:
 router.get('/bodegas/estadisticas', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
   try {
-    const estado = getEstadoFiltro(req.user);
-    const params = estado ? [estado] : [];
-    const whereEstado = estado ? `AND UPPER(b.estado) = UPPER($1)` : '';
+    const { sql: wSql, params } = estadoWhereClause(getEstadoFiltro(req.user), 1, 'UPPER(b.estado)');
     const result = await pool.query(`
       SELECT
         COALESCE(SUM(b.capacidad_ton), 0) AS capacidad_total,
@@ -711,7 +728,7 @@ router.get('/bodegas/estadisticas', authMiddleware, async (req: AuthRequest, res
       ) i ON true
       LEFT JOIN tarifario_servicios ts ON ts.bodega_id = b.id AND ts.activo = true
       LEFT JOIN ventanillas v ON v.bodega_id = b.id AND v.estatus = 'activa'
-      WHERE b.activo = true ${whereEstado}
+      WHERE b.activo = true ${wSql}
     `, params);
     res.json(result.rows[0] || {});
   } catch (error) {

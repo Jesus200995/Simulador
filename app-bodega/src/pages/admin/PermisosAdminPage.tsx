@@ -21,7 +21,7 @@ interface Permiso { vista: string; sub_accion: string; habilitado: boolean; }
 interface CredencialesNuevas { email: string; password_temporal: string; nombre_completo: string; rol: string; estado_asignado: string | null; }
 
 const VISTAS_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
-  dashboard:           { label: 'Dashboard',        icon: <LayoutDashboard size={14} className="text-blue-500" /> },
+  resumen:             { label: 'Resumen',           icon: <LayoutDashboard size={14} className="text-blue-500" /> },
   productores:         { label: 'Productores',       icon: <Users size={14} className="text-emerald-500" /> },
   bodegas:             { label: 'Bodegas',           icon: <Warehouse size={14} className="text-amber-500" /> },
   alertas:             { label: 'Alertas',           icon: <AlertTriangle size={14} className="text-red-500" /> },
@@ -37,7 +37,7 @@ const ACCION_LABELS: Record<string, string> = {
 };
 
 const VISTAS_ACCIONES: Record<string, string[]> = {
-  dashboard:           ['ver'],
+  resumen:             ['ver'],
   productores:         ['ver', 'editar', 'eliminar', 'exportar'],
   bodegas:             ['ver', 'crear', 'editar', 'eliminar', 'exportar'],
   alertas:             ['ver', 'crear', 'eliminar'],
@@ -76,6 +76,58 @@ function Toggle({ on, onChange, disabled = false, size = 'md' }: {
 /* ─── Input / Select base ────────────────────────────────────────────── */
 const iCls = 'w-full bg-gray-50/80 border border-gray-200 rounded-2xl px-4 py-3 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/50 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all duration-200';
 const lCls = 'text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] mb-1.5 block';
+
+/* ─── Multi-selector de estados ──────────────────────────────────────── */
+function EstadoMultiSelect({ value, onChange }: {
+  value: string;            // "" = todos, "GUANAJUATO" o "GUANAJUATO,JALISCO"
+  onChange: (v: string) => void;
+}) {
+  const selected = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const todos = selected.length === 0;
+
+  function toggleEstado(e: string) {
+    if (selected.includes(e)) {
+      const next = selected.filter(s => s !== e);
+      onChange(next.join(','));
+    } else {
+      onChange([...selected, e].join(','));
+    }
+  }
+
+  return (
+    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+      {/* Fila "Todos" */}
+      <button type="button"
+        onClick={() => onChange('')}
+        className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[12.5px] font-bold transition-all ${todos ? 'bg-[#0e5c33] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}>
+        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${todos ? 'border-white bg-white' : 'border-gray-400'}`}>
+          {todos && <span className="w-2 h-2 rounded-sm bg-[#0e5c33]" />}
+        </span>
+        Todos los estados (sin filtro)
+      </button>
+      <div className="border-t border-gray-200 max-h-48 overflow-y-auto grid grid-cols-2 gap-0">
+        {ESTADOS_MX.map(e => {
+          const checked = selected.includes(e);
+          return (
+            <button key={e} type="button"
+              onClick={() => toggleEstado(e)}
+              className={`flex items-center gap-2 px-3 py-2 text-[11px] font-semibold text-left transition-all ${checked ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-50'}`}>
+              <span className={`w-3.5 h-3.5 rounded border-2 shrink-0 flex items-center justify-center ${checked ? 'border-[#0e5c33] bg-[#0e5c33]' : 'border-gray-300'}`}>
+                {checked && <span className="w-1.5 h-1.5 rounded-sm bg-white" />}
+              </span>
+              {e}
+            </button>
+          );
+        })}
+      </div>
+      {!todos && (
+        <div className="border-t border-gray-200 px-3 py-1.5 bg-emerald-50">
+          <p className="text-[10px] text-emerald-700 font-semibold">{selected.length} estado{selected.length !== 1 ? 's' : ''} seleccionado{selected.length !== 1 ? 's' : ''}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─── Avatar ─────────────────────────────────────────────────────────── */
 function Avatar({ nombre, size = 32, rol }: { nombre: string; size?: number; rol?: string }) {
@@ -376,7 +428,7 @@ export default function PermisosAdminPage() {
     setErrCrear('');
     if (!fCrear.nombre_completo.trim() || !fCrear.email.trim()) { setErrCrear('Nombre y email son obligatorios'); return; }
     const r = rolDe(fCrear.rol);
-    if (r?.aplica_filtro_estado && !fCrear.estado_asignado) { setErrCrear('Selecciona el estado asignado'); return; }
+    // estado_asignado vacío = "Todos" (null) — es válido
     setCreando(true);
     try {
       const resp = await fetch(`${BASE}/admin/permisos/usuarios`, {
@@ -385,7 +437,7 @@ export default function PermisosAdminPage() {
           nombre_completo: fCrear.nombre_completo.trim(),
           email: fCrear.email.trim().toLowerCase(),
           rol: fCrear.rol,
-          estado_asignado: r?.aplica_filtro_estado ? fCrear.estado_asignado : null,
+          estado_asignado: r?.aplica_filtro_estado ? (fCrear.estado_asignado || null) : null,
           permisos: r?.permisos_totales ? [] : pCrear,
         }),
       });
@@ -502,7 +554,7 @@ export default function PermisosAdminPage() {
                     <td className="px-5 py-3.5"><RolChip rol={u.rol} etiqueta={u.rol_etiqueta ?? u.rol} /></td>
                     <td className="hidden md:table-cell px-5 py-3.5">
                       {u.estado_asignado
-                        ? <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{u.estado_asignado}</span>
+                        ? <div className="flex flex-wrap gap-1">{u.estado_asignado.split(',').map((e: string) => <span key={e} className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{e.trim()}</span>)}</div>
                         : <span className="text-[11px] text-gray-400">Nacional</span>}
                     </td>
                     <td className="hidden lg:table-cell px-5 py-3.5 text-[12px] text-gray-500">
@@ -573,13 +625,10 @@ export default function PermisosAdminPage() {
               </select>
             </div>
             {rolDe(fCrear.rol)?.aplica_filtro_estado && (
-              <div>
-                <label className={lCls}>Estado asignado *</label>
-                <select className={iCls} value={fCrear.estado_asignado}
-                  onChange={e => setFCrear(p => ({ ...p, estado_asignado: e.target.value }))}>
-                  <option value="">Selecciona un estado…</option>
-                  {ESTADOS_MX.map(e => <option key={e} value={e}>{e}</option>)}
-                </select>
+              <div className="sm:col-span-2">
+                <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
+                <EstadoMultiSelect value={fCrear.estado_asignado}
+                  onChange={v => setFCrear(p => ({ ...p, estado_asignado: v }))} />
               </div>
             )}
           </div>
@@ -650,13 +699,10 @@ export default function PermisosAdminPage() {
               </select>
             </div>
             {rolDe(fEditar.rol)?.aplica_filtro_estado && (
-              <div>
-                <label className={lCls}>Estado asignado</label>
-                <select className={iCls} value={fEditar.estado_asignado}
-                  onChange={e => setFEditar(p => ({ ...p, estado_asignado: e.target.value }))}>
-                  <option value="">Sin estado específico</option>
-                  {ESTADOS_MX.map(e => <option key={e} value={e}>{e}</option>)}
-                </select>
+              <div className="sm:col-span-2">
+                <label className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">(vacío = todos)</span></label>
+                <EstadoMultiSelect value={fEditar.estado_asignado}
+                  onChange={v => setFEditar(p => ({ ...p, estado_asignado: v }))} />
               </div>
             )}
           </div>
