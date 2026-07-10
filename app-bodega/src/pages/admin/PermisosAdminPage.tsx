@@ -91,8 +91,8 @@ function Toggle({ on, onChange, disabled = false, size = 'md' }: {
 }
 
 /* ─── Input / Select base ────────────────────────────────────────────── */
-const iCls = 'w-full bg-gray-50/80 border border-gray-200 rounded-2xl px-4 py-3 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/50 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all duration-200';
-const lCls = 'text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] mb-1.5 block';
+const iCls = 'w-full bg-gray-50/80 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/50 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all duration-200';
+const lCls = 'text-[9px] font-black text-gray-400 uppercase tracking-[0.1em] mb-1 block';
 
 /* ─── Multi-selector de estados ──────────────────────────────────────── */
 function EstadoMultiSelect({ value, onChange }: {
@@ -246,7 +246,10 @@ function ArbolPermisos({ permisos, onChange, disabled = false }: {
     const acciones = VISTAS_ACCIONES[v] ?? [];
     const on = vistaOn(v);
     const next = permisos.filter(p => p.vista !== v);
-    acciones.forEach(a => next.push({ vista: v, sub_accion: a, habilitado: !on }));
+    // Al activar la vista, solo "ver" se enciende — los sub-permisos quedan
+    // apagados hasta que el administrador los active manualmente.
+    // Al desactivar la vista, todo se apaga.
+    acciones.forEach(a => next.push({ vista: v, sub_accion: a, habilitado: a === 'ver' ? !on : false }));
     onChange(next);
   }
 
@@ -258,7 +261,7 @@ function ArbolPermisos({ permisos, onChange, disabled = false }: {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
       {Object.entries(VISTAS_LABELS).map(([vista, { label, icon }]) => {
         const acciones = VISTAS_ACCIONES[vista] ?? [];
         const on = vistaOn(vista);
@@ -266,26 +269,26 @@ function ArbolPermisos({ permisos, onChange, disabled = false }: {
 
         return (
           <div key={vista}
-            className={`rounded-2xl border transition-all duration-250 overflow-hidden
+            className={`rounded-xl border transition-all duration-200 overflow-hidden
               ${on
-                ? 'border-[#0e5c33]/20 bg-gradient-to-r from-emerald-50/70 to-white shadow-[0_1px_6px_rgba(14,92,51,0.08)]'
+                ? 'border-[#0e5c33]/20 bg-emerald-50/50'
                 : 'border-gray-200/80 bg-gray-50/50'}`}>
 
             {/* Fila principal */}
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200
+            <div className="flex items-center gap-2 px-3 py-2">
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200
                 ${on ? 'bg-[#0e5c33]/10' : 'bg-gray-100'}`}>
-                <span className={`transition-all duration-200 ${on ? 'opacity-100' : 'opacity-40'}`}>{icon}</span>
+                <span className={`transition-all duration-200 scale-[0.85] ${on ? 'opacity-100' : 'opacity-40'}`}>{icon}</span>
               </div>
-              <span className={`text-[13px] font-bold flex-1 transition-colors duration-200 ${on ? 'text-gray-900' : 'text-gray-400'}`}>
+              <span className={`text-[11.5px] font-bold flex-1 truncate transition-colors duration-200 ${on ? 'text-gray-900' : 'text-gray-400'}`}>
                 {label}
               </span>
-              <Toggle on={on} onChange={() => !disabled && toggleVista(vista)} disabled={disabled} size="md" />
+              <Toggle on={on} onChange={() => !disabled && toggleVista(vista)} disabled={disabled} size="sm" />
             </div>
 
-            {/* Sub-acciones: chips horizontales */}
+            {/* Sub-acciones: chips horizontales, apagadas por defecto */}
             {on && subAcciones.length > 0 && (
-              <div className="px-4 pb-3 flex flex-wrap gap-2">
+              <div className="px-3 pb-2 flex flex-wrap gap-1.5">
                 {subAcciones.map(accion => {
                   const activa = getH(vista, accion);
                   return (
@@ -294,13 +297,13 @@ function ArbolPermisos({ permisos, onChange, disabled = false }: {
                       type="button"
                       disabled={disabled}
                       onClick={() => toggleAccion(vista, accion)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-bold border transition-all duration-200 active:scale-95
+                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold border transition-all duration-200 active:scale-95
                         ${activa
-                          ? 'bg-[#0e5c33] border-[#0e5c33] text-white shadow-[0_2px_8px_rgba(14,92,51,0.28)]'
+                          ? 'bg-[#0e5c33] border-[#0e5c33] text-white shadow-[0_1px_5px_rgba(14,92,51,0.28)]'
                           : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600'
                         } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activa ? 'bg-white/80' : 'bg-gray-300'}`} />
+                      <span className={`w-1 h-1 rounded-full shrink-0 ${activa ? 'bg-white/80' : 'bg-gray-300'}`} />
                       {ACCION_LABELS[accion] ?? accion}
                     </button>
                   );
@@ -440,15 +443,14 @@ export default function PermisosAdminPage() {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  /* Pre-carga permisos default al cambiar rol en crear */
+  /* Al cambiar rol en crear: todos los permisos inician apagados —
+     el administrador decide manualmente qué vistas y sub-acciones habilitar. */
   useEffect(() => {
     const r = rolDe(fCrear.rol);
     if (!r || r.permisos_totales) { setPCrear([]); return; }
     const def: Permiso[] = [];
-    const vd = r.vistas_default ?? {};
     Object.entries(VISTAS_ACCIONES).forEach(([v, acciones]) => {
-      const h = vd[v] ?? [];
-      acciones.forEach(a => def.push({ vista: v, sub_accion: a, habilitado: h.includes(a) }));
+      acciones.forEach(a => def.push({ vista: v, sub_accion: a, habilitado: false }));
     });
     setPCrear(def);
   }, [fCrear.rol, roles]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -643,33 +645,33 @@ export default function PermisosAdminPage() {
       {/* ═══ MODAL CREAR ════════════════════════════════════════════════ */}
       <ModalOverlay open={modalCrear} onClose={() => setModalCrear(false)} maxW="max-w-3xl" noPad>
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#0c4f2c] via-[#0e5c33] to-[#15753f] px-6 pt-6 pb-5 shrink-0 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#0c4f2c] via-[#0e5c33] to-[#15753f] px-5 pt-5 pb-4 shrink-0 relative overflow-hidden">
           <div className="absolute inset-0 opacity-[0.06]" style={{backgroundImage:'radial-gradient(circle at 80% 50%, white 0%, transparent 60%)'}} />
           <div className="relative flex items-start justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-                <UserPlus size={18} className="text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <UserPlus size={15} className="text-white" />
               </div>
               <div>
-                <p className="text-white text-[15px] font-black tracking-tight">Nuevo usuario</p>
-                <p className="text-white/55 text-[11.5px] mt-0.5 font-medium">Contraseña temporal generada automáticamente</p>
+                <p className="text-white text-[13px] font-black tracking-tight">Nuevo usuario</p>
+                <p className="text-white/55 text-[10.5px] mt-0.5 font-medium">Contraseña temporal generada automáticamente</p>
               </div>
             </div>
             <button onClick={() => setModalCrear(false)}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90 mt-0.5">
-              <X size={14} className="text-white/70" />
+              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90 mt-0.5">
+              <X size={12} className="text-white/70" />
             </button>
           </div>
         </div>
 
         {/* Body — una sola columna, secciones apiladas */}
         <div className="flex flex-col min-h-0 overflow-hidden">
-          <div className="overflow-y-auto flex-1 px-5 sm:px-6 py-5 flex flex-col gap-5">
+          <div className="overflow-y-auto flex-1 px-4 sm:px-5 py-4 flex flex-col gap-4">
 
             {/* Sección: datos del usuario */}
-            <section className="flex flex-col gap-3">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <section className="flex flex-col gap-2.5">
+              <p className={lCls}>Datos del usuario</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className={lCls}>Nombre completo *</label>
                   <input className={iCls} placeholder="María García López"
@@ -692,50 +694,48 @@ export default function PermisosAdminPage() {
 
             {/* Sección: estados (si aplica) */}
             {rolDe(fCrear.rol)?.aplica_filtro_estado && (
-              <section className="flex flex-col gap-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">
-                  Estados asignados <span className="text-gray-400 font-normal normal-case">— vacío = todos</span>
-                </p>
+              <section className="flex flex-col gap-1.5">
+                <p className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">— vacío = todos</span></p>
                 <EstadoMultiSelect value={fCrear.estado_asignado}
                   onChange={v => setFCrear(p => ({ ...p, estado_asignado: v }))} />
               </section>
             )}
 
             {/* Sección: permisos */}
-            <section className="flex flex-col gap-2">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Permisos por vista</p>
+            <section className="flex flex-col gap-1.5">
+              <p className={lCls}>Permisos por vista <span className="text-gray-400 font-normal normal-case">— sub-acciones inician apagadas</span></p>
               {!rolDe(fCrear.rol)?.permisos_totales ? (
                 <ArbolPermisos permisos={pCrear} onChange={setPCrear} />
               ) : (
-                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                    <ShieldCheck size={16} className="text-emerald-600" />
+                <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={14} className="text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-bold text-emerald-800">Acceso total</p>
-                    <p className="text-[11.5px] text-emerald-600 mt-0.5">No requiere configurar permisos individuales.</p>
+                    <p className="text-[12px] font-bold text-emerald-800">Acceso total</p>
+                    <p className="text-[10.5px] text-emerald-600 mt-0.5">No requiere configurar permisos individuales.</p>
                   </div>
                 </div>
               )}
             </section>
 
             {errCrear && (
-              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3">
-                <AlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />
-                <p className="text-[12px] text-red-600">{errCrear}</p>
+              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                <AlertTriangle size={12} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-red-600">{errCrear}</p>
               </div>
             )}
           </div>
 
           {/* Footer sticky */}
-          <div className="border-t border-gray-100 px-5 sm:px-6 py-4 flex justify-end gap-2.5 shrink-0 bg-white/90 backdrop-blur-sm">
+          <div className="border-t border-gray-100 px-4 sm:px-5 py-3 flex justify-end gap-2 shrink-0 bg-white/90 backdrop-blur-sm">
             <button onClick={() => setModalCrear(false)}
-              className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+              className="px-4 py-2 rounded-xl text-[12px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
               Cancelar
             </button>
             <button onClick={crearUsuario} disabled={creando}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a4227] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
-              {creando ? <><Loader2 size={13} className="animate-spin" />Creando…</> : <><Plus size={13} />Crear usuario</>}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-white bg-[#0e5c33] hover:bg-[#0a4227] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
+              {creando ? <><Loader2 size={12} className="animate-spin" />Creando…</> : <><Plus size={12} />Crear usuario</>}
             </button>
           </div>
         </div>
@@ -744,35 +744,35 @@ export default function PermisosAdminPage() {
       {/* ═══ MODAL EDITAR ═══════════════════════════════════════════════ */}
       <ModalOverlay open={modalEditar} onClose={() => setModalEditar(false)} maxW="max-w-3xl" noPad>
         {/* Header con avatar del usuario */}
-        <div className="bg-gradient-to-r from-[#1a1f2e] via-[#1e2438] to-[#141824] px-6 pt-6 pb-5 shrink-0 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#1a1f2e] via-[#1e2438] to-[#141824] px-5 pt-5 pb-4 shrink-0 relative overflow-hidden">
           <div className="absolute inset-0 opacity-[0.05]" style={{backgroundImage:'radial-gradient(circle at 85% 40%, #4f9cf9 0%, transparent 55%)'}} />
           <div className="relative flex items-start justify-between">
-            <div className="flex items-center gap-3.5">
-              {usuEdit && <Avatar nombre={usuEdit.nombre_completo} size={44} rol={usuEdit.rol} />}
+            <div className="flex items-center gap-3">
+              {usuEdit && <Avatar nombre={usuEdit.nombre_completo} size={38} rol={usuEdit.rol} />}
               <div>
-                <p className="text-white text-[15px] font-black tracking-tight truncate max-w-[220px] sm:max-w-none">{usuEdit?.nombre_completo}</p>
-                <div className="flex items-center gap-2 mt-1">
+                <p className="text-white text-[13px] font-black tracking-tight truncate max-w-[220px] sm:max-w-none">{usuEdit?.nombre_completo}</p>
+                <div className="flex items-center gap-2 mt-0.5">
                   {usuEdit && <RolChip rol={usuEdit.rol} etiqueta={usuEdit.rol_etiqueta ?? usuEdit.rol} />}
-                  <span className="text-white/40 text-[11px]">·</span>
-                  <span className="text-white/45 text-[11px] font-medium">Cambios en tiempo real</span>
+                  <span className="text-white/40 text-[10px]">·</span>
+                  <span className="text-white/45 text-[10px] font-medium">Cambios en tiempo real</span>
                 </div>
               </div>
             </div>
             <button onClick={() => setModalEditar(false)}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90 mt-0.5">
-              <X size={14} className="text-white/70" />
+              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all active:scale-90 mt-0.5">
+              <X size={12} className="text-white/70" />
             </button>
           </div>
         </div>
 
         {/* Body — una sola columna, secciones apiladas */}
         <div className="flex flex-col min-h-0 overflow-hidden">
-          <div className="overflow-y-auto flex-1 px-5 sm:px-6 py-5 flex flex-col gap-5">
+          <div className="overflow-y-auto flex-1 px-4 sm:px-5 py-4 flex flex-col gap-4">
 
             {/* Sección: datos del usuario */}
-            <section className="flex flex-col gap-3">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Datos del usuario</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <section className="flex flex-col gap-2.5">
+              <p className={lCls}>Datos del usuario</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className={lCls}>Nombre completo</label>
                   <input className={iCls} value={fEditar.nombre_completo}
@@ -795,28 +795,26 @@ export default function PermisosAdminPage() {
 
             {/* Sección: estados (si aplica) */}
             {rolDe(fEditar.rol)?.aplica_filtro_estado && (
-              <section className="flex flex-col gap-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">
-                  Estados asignados <span className="text-gray-400 font-normal normal-case">— vacío = todos</span>
-                </p>
+              <section className="flex flex-col gap-1.5">
+                <p className={lCls}>Estados asignados <span className="text-gray-400 font-normal normal-case">— vacío = todos</span></p>
                 <EstadoMultiSelect value={fEditar.estado_asignado}
                   onChange={v => setFEditar(p => ({ ...p, estado_asignado: v }))} />
               </section>
             )}
 
             {/* Sección: permisos */}
-            <section className="flex flex-col gap-2">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Permisos por vista</p>
+            <section className="flex flex-col gap-1.5">
+              <p className={lCls}>Permisos por vista</p>
               {!rolDe(fEditar.rol)?.permisos_totales ? (
                 <ArbolPermisos permisos={pEditar} onChange={setPEditar} />
               ) : (
-                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                    <ShieldCheck size={16} className="text-emerald-600" />
+                <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={14} className="text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-bold text-emerald-800">Acceso total</p>
-                    <p className="text-[11.5px] text-emerald-600 mt-0.5">No requiere permisos individuales.</p>
+                    <p className="text-[12px] font-bold text-emerald-800">Acceso total</p>
+                    <p className="text-[10.5px] text-emerald-600 mt-0.5">No requiere permisos individuales.</p>
                   </div>
                 </div>
               )}
@@ -824,30 +822,30 @@ export default function PermisosAdminPage() {
 
             {/* Feedback */}
             {errEdit && (
-              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-3.5 py-3">
-                <AlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />
-                <p className="text-[12px] text-red-600">{errEdit}</p>
+              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                <AlertTriangle size={12} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-red-600">{errEdit}</p>
               </div>
             )}
             {savedOk && (
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-3.5 py-3">
-                <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                <p className="text-[12px] text-emerald-700 font-bold">Guardado ✓</p>
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5">
+                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                <p className="text-[11px] text-emerald-700 font-bold">Guardado ✓</p>
               </div>
             )}
           </div>
 
           {/* Footer sticky */}
-          <div className="border-t border-gray-100 px-5 sm:px-6 py-4 flex justify-end gap-2.5 shrink-0 bg-white/90 backdrop-blur-sm">
+          <div className="border-t border-gray-100 px-4 sm:px-5 py-3 flex justify-end gap-2 shrink-0 bg-white/90 backdrop-blur-sm">
             <button onClick={() => setModalEditar(false)}
-              className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
+              className="px-4 py-2 rounded-xl text-[12px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95">
               Cerrar
             </button>
             <button onClick={guardarEditar} disabled={guardando}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#1a1f2e] hover:bg-[#252c42] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-white bg-[#1a1f2e] hover:bg-[#252c42] transition-all active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50">
               {guardando
-                ? <><Loader2 size={13} className="animate-spin" />Guardando…</>
-                : <><CheckCircle2 size={13} />Guardar cambios</>}
+                ? <><Loader2 size={12} className="animate-spin" />Guardando…</>
+                : <><CheckCircle2 size={12} />Guardar cambios</>}
             </button>
           </div>
         </div>
