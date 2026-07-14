@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import { usePermisosSSE } from '../../hooks/usePermisosSSE';
 import { usePermisosStore } from '../../store/permisos';

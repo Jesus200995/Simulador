@@ -97,10 +97,8 @@ export default function BodegasAdminPage() {
 
   const puedo         = usePermisosStore(s => s.puedo);
   const permisosTotal = usePermisosStore(s => s.permisosTotal); // true solo para admin/responsable
-  const puedeCrear    = permisosTotal || puedo('bodegas', 'crear');
   const puedeEditar   = permisosTotal || puedo('bodegas', 'editar');
   const puedeEliminar   = permisosTotal || puedo('bodegas', 'eliminar');
-  const puedeExportar   = permisosTotal || puedo('bodegas', 'exportar');
   const puedeVerDetalle = permisosTotal || puedo('bodegas', 'ver_detalle');
   // "Por aprobar" y "Usuarios" son acciones/datos exclusivos de admin y responsable —
   // un OREF (rol=user) jamás debe verlas, sin importar sus permisos de vista.

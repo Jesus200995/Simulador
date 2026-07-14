@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ShieldCheck, Plus, Pencil, Trash2, X,
-  Copy, Download, CheckCircle2, AlertTriangle, ChevronDown,
-  Loader2, RefreshCw, UserPlus, KeySquare,
+  Copy, Download, CheckCircle2, AlertTriangle,
+  Loader2, RefreshCw, UserPlus,
   TriangleAlert, Sparkles, LayoutDashboard, Users, Warehouse,
   TrendingUp, Sprout, BarChart3, Leaf, Search, ChevronLeft, ChevronRight,
 } from 'lucide-react';
