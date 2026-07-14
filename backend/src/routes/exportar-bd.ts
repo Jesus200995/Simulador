@@ -70,7 +70,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
         id, nombre, clave, estado, municipio, localidad,
         region_id, ddr, cader, ejido,
         capacidad_toneladas, latitud, longitud,
-        direccion, codigo_postal, created_at
+        direccion, codigo_postal
       FROM bodegas
       ORDER BY estado, nombre
     `);
@@ -88,7 +88,6 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'latitud',              header: 'Latitud',      width: 12 },
       { key: 'longitud',             header: 'Longitud',     width: 12 },
       { key: 'direccion',            header: 'Dirección',    width: 35 },
-      { key: 'created_at',           header: 'Registro',     width: 20 },
     ]);
 
     // ── 3. Transacciones ─────────────────────────────────────────────────
@@ -127,7 +126,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
         i.id, b.nombre AS bodega,
         i.tipo_maiz, i.ciclo, i.origen,
         i.volumen_almacenamiento, i.volumen_problemas,
-        i.fecha, i.fecha_registro
+        i.fecha, i.fecha_registro AS registro
       FROM inventarios i
       LEFT JOIN bodegas b ON b.id = i.bodega_id
       ORDER BY b.nombre, i.fecha DESC
@@ -141,12 +140,12 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'volumen_almacenamiento',header: 'Vol. (ton)',      width: 14 },
       { key: 'volumen_problemas',     header: 'Vol. Problemas', width: 15 },
       { key: 'fecha',                 header: 'Fecha',          width: 14 },
-      { key: 'fecha_registro',        header: 'Registro',       width: 20 },
+      { key: 'registro',              header: 'Registro',       width: 20 },
     ]);
 
     // ── 5. Precios Maíz ──────────────────────────────────────────────────
     const { rows: precios } = await pool.query(`
-      SELECT id, tipo, precio, unidad, tendencia, fecha_actualizacion
+      SELECT id, tipo, precio, unidad, tendencia, fecha_actualizacion AS fecha
       FROM precios_maiz
       ORDER BY fecha_actualizacion DESC
       LIMIT 5000
@@ -157,7 +156,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'precio',             header: 'Precio MXN',   width: 14 },
       { key: 'unidad',             header: 'Unidad',       width: 12 },
       { key: 'tendencia',          header: 'Tendencia',    width: 14 },
-      { key: 'fecha_actualizacion',header: 'Fecha',        width: 14 },
+      { key: 'fecha',              header: 'Fecha',        width: 14 },
     ]);
 
     // ── 6. Alertas ───────────────────────────────────────────────────────
