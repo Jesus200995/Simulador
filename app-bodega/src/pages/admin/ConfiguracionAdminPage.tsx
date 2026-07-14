@@ -1,5 +1,6 @@
-﻿import { useState, useEffect } from 'react';
-import { Settings, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle } from 'lucide-react';
+﻿import { useState, useEffect, useRef } from 'react';
+import { Settings, Save, Users, Plus, X, Eye, EyeOff, List, CheckCircle, Download, Database, FileSpreadsheet, CheckCircle2, AlertCircle } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -13,8 +14,219 @@ interface Usuario { id: number; nombre_completo: string; email: string; rol: str
 interface NuevoUsuario { nombre_completo: string; email: string; password: string; rol: string; }
 interface Concepto { id: number; nombre: string; estatus: string; }
 
+// ── Modal exportar BD ────────────────────────────────────────────────────────
+type ExportState = 'idle' | 'loading' | 'done' | 'error';
+
+function ModalExportarBD({ onClose }: { onClose: () => void }) {
+  const [estado, setEstado] = useState<ExportState>('idle');
+  const [progreso, setProgreso] = useState(0);
+  const [errorMsg, setErrorMsg] = useState('');
+  const rafRef = useRef<number | undefined>(undefined);
+  const startRef = useRef<number>(0);
+
+  const DURACION = 7000; // ms estimados de generación
+
+  function animarProgreso(hasta: number, desde?: number) {
+    const inicio = desde ?? progreso;
+    startRef.current = performance.now();
+    function tick(now: number) {
+      const elapsed = now - startRef.current;
+      const t = Math.min(elapsed / DURACION, 1);
+      // ease-out cuártico
+      const ease = 1 - Math.pow(1 - t, 4);
+      const val = inicio + (hasta - inicio) * ease;
+      setProgreso(val);
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+  }
+
+  function cancelarAnim() {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }
+
+  async function descargar() {
+    setEstado('loading');
+    setProgreso(0);
+    setErrorMsg('');
+    animarProgreso(88); // llega al 88% durante la espera
+
+    try {
+      const token = localStorage.getItem('simac_token');
+      const res = await fetch(`${BASE}/admin/exportar-bd`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Error al generar el archivo');
+      }
+
+      cancelarAnim();
+      setProgreso(100);
+      setEstado('done');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fecha = new Date().toISOString().slice(0, 10);
+      a.download = `SIMAC_BD_${fecha}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      cancelarAnim();
+      setProgreso(0);
+      setEstado('error');
+      setErrorMsg(err.message || 'Error de conexión');
+    }
+  }
+
+  useEffect(() => () => cancelarAnim(), []);
+
+  const HOJAS = [
+    'Productores', 'Bodegas', 'Transacciones', 'Inventarios',
+    'Precios Maíz', 'Alertas', 'Disponibilidad', 'Señales Compra',
+    'Usuarios Productores', 'Seguimiento',
+  ];
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-6">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-gray-950/50 backdrop-blur-[14px]"
+        style={{ animation: 'fadein 180ms ease both' }}
+        onClick={estado === 'loading' ? undefined : onClose}
+      />
+
+      {/* Panel */}
+      <div
+        className="relative w-full sm:max-w-md bg-white rounded-t-[28px] sm:rounded-[28px] shadow-[0_32px_80px_rgba(0,0,0,0.22)] overflow-hidden"
+        style={{ animation: 'modalUp 240ms cubic-bezier(0.32,1.6,0.56,1) both' }}
+      >
+        {/* Header verde */}
+        <div className="bg-gradient-to-br from-[#0e5c33] to-[#1a7a44] px-5 py-5">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center">
+                <Database size={18} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-black text-white leading-tight">Exportar Base de Datos</h3>
+                <p className="text-[11px] text-white/60 mt-0.5">10 hojas · Formato Excel (.xlsx)</p>
+              </div>
+            </div>
+            {estado !== 'loading' && (
+              <button onClick={onClose} className="text-white/50 hover:text-white transition-colors mt-0.5">
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="px-5 pt-4 pb-5 space-y-4">
+
+          {/* Lista de hojas incluidas */}
+          {estado === 'idle' && (
+            <div>
+              <p className="text-[10.5px] font-bold text-gray-400 uppercase tracking-wide mb-2">Contenido del archivo</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {HOJAS.map(h => (
+                  <div key={h} className="flex items-center gap-1.5 text-[11px] text-gray-600">
+                    <FileSpreadsheet size={10} className="text-[#1A5C38] flex-shrink-0" />
+                    {h}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-gray-400 mt-3 leading-relaxed">
+                No incluye avisos de privacidad ni datos de usuarios administradores.
+              </p>
+            </div>
+          )}
+
+          {/* Barra de progreso */}
+          {estado === 'loading' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] font-semibold text-gray-700">Generando archivo…</p>
+                <span className="text-[11px] font-bold text-[#1A5C38]">{Math.round(progreso)}%</span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#1A5C38] to-[#34d399] transition-none"
+                  style={{ width: `${progreso}%` }}
+                />
+              </div>
+              <p className="text-[10.5px] text-gray-400 text-center">
+                Consultando tablas y construyendo el Excel…
+              </p>
+            </div>
+          )}
+
+          {/* Éxito */}
+          {estado === 'done' && (
+            <div className="flex flex-col items-center gap-2 py-2">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
+                <CheckCircle2 size={24} className="text-emerald-500" />
+              </div>
+              <p className="text-[13px] font-bold text-gray-800">¡Descarga lista!</p>
+              <p className="text-[11px] text-gray-400 text-center">El archivo se guardó en tu carpeta de descargas.</p>
+            </div>
+          )}
+
+          {/* Error */}
+          {estado === 'error' && (
+            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl p-3.5">
+              <AlertCircle size={15} className="text-red-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-[12px] font-bold text-red-700">Error al generar el archivo</p>
+                <p className="text-[11px] text-red-500 mt-0.5">{errorMsg}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className="flex gap-2.5 pt-1">
+            {estado !== 'loading' && (
+              <button
+                onClick={onClose}
+                className="flex-1 text-[12px] font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 py-2.5 rounded-2xl transition-all duration-150 active:scale-95"
+              >
+                {estado === 'done' ? 'Cerrar' : 'Cancelar'}
+              </button>
+            )}
+            {(estado === 'idle' || estado === 'error') && (
+              <button
+                onClick={descargar}
+                className="flex-1 flex items-center justify-center gap-2 text-[12px] font-bold text-white bg-gradient-to-br from-[#1A5C38] to-[#227a4a] hover:from-[#154d2f] hover:to-[#1a6038] py-2.5 rounded-2xl transition-all duration-150 active:scale-95 shadow-[0_4px_16px_rgba(26,92,56,0.3)]"
+              >
+                <Download size={13} />
+                {estado === 'error' ? 'Reintentar' : 'Descargar Excel'}
+              </button>
+            )}
+            {estado === 'loading' && (
+              <div className="flex-1 flex items-center justify-center gap-2 text-[12px] font-bold text-white bg-[#1A5C38]/70 py-2.5 rounded-2xl cursor-not-allowed">
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                Generando…
+              </div>
+            )}
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes fadein { from { opacity:0 } to { opacity:1 } }
+          @keyframes modalUp { from { opacity:0; transform:translateY(24px) scale(.97) } to { opacity:1; transform:none } }
+        `}</style>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export default function ConfiguracionAdminPage() {
+  const [showExportModal, setShowExportModal] = useState(false);
   const [params, setParams]         = useState<Parametros | null>(null);
+
   const [editParams, setEditParams] = useState<Partial<Parametros>>({});
   const [savingParams, setSavingParams] = useState(false);
   const [savedParams, setSavedParams]   = useState(false);
@@ -110,18 +322,27 @@ export default function ConfiguracionAdminPage() {
           <Settings size={11} className="text-[#1A5C38]" />
           <span>Sistema SIMAC</span>
           <span className="text-[#1A5C38]/30">·</span>
-          <span>Parámetros · Usuarios · Catálogos</span>
+          <span className="hidden sm:inline">Parámetros · Usuarios · Catálogos</span>
         </div>
-        <button
-          onClick={guardarParams} disabled={savingParams}
-          className={`flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
-            savedParams
-              ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
-              : 'bg-[#d4efe1] border-[#1A5C38]/30 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
-          }`}>
-          <Save size={10} />
-          {savedParams ? 'Guardado ✓' : savingParams ? 'Guardando…' : 'Guardar parámetros'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 bg-white border-[#1A5C38]/20 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent">
+            <Download size={10} />
+            <span className="hidden sm:inline">Exportar BD</span>
+            <span className="sm:hidden">Excel</span>
+          </button>
+          <button
+            onClick={guardarParams} disabled={savingParams}
+            className={`flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
+              savedParams
+                ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
+                : 'bg-[#d4efe1] border-[#1A5C38]/30 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
+            }`}>
+            <Save size={10} />
+            {savedParams ? 'Guardado ✓' : savingParams ? 'Guardando…' : 'Guardar parámetros'}
+          </button>
+        </div>
       </div>
 
       {/* Parámetros */}
@@ -300,6 +521,9 @@ export default function ConfiguracionAdminPage() {
           </div>
         </div>
       )}
+
+      {/* Modal exportar BD */}
+      {showExportModal && <ModalExportarBD onClose={() => setShowExportModal(false)} />}
 
       {/* Modal usuario */}
       {showModal && (
