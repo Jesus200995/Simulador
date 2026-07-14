@@ -314,184 +314,240 @@ export default function ConfiguracionAdminPage() {
   const LABEL = 'text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mb-1 block';
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4 pb-6">
 
-      {/* ── Barra de acciones ── */}
-      <div className="bg-[#eef8f2] flex-shrink-0 rounded-b-2xl border border-[#1A5C38]/30 border-t-0 px-3 py-1.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[10.5px] text-[#1A5C38]/70 font-medium">
-          <Settings size={11} className="text-[#1A5C38]" />
-          <span>Sistema SIMAC</span>
-          <span className="text-[#1A5C38]/30">·</span>
-          <span className="hidden sm:inline">Parámetros · Usuarios · Catálogos</span>
-        </div>
-        <div className="flex items-center gap-2">
+      {/* ── Fila de tarjetas de acción rápida ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+        {/* Tarjeta: Exportar BD */}
+        <div className="bg-gradient-to-br from-[#0d5530] to-[#1a7a44] rounded-2xl p-4 flex flex-col gap-3 shadow-[0_4px_24px_rgba(13,85,48,0.25)] relative overflow-hidden">
+          <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/5" />
+          <div className="absolute -bottom-6 -left-4 w-20 h-20 rounded-full bg-white/5" />
+          <div className="flex items-center gap-2.5 relative">
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <Database size={16} className="text-white" />
+            </div>
+            <div>
+              <p className="text-[12.5px] font-black text-white leading-tight">Exportar Base de Datos</p>
+              <p className="text-[10px] text-white/55 mt-0.5">10 tablas · Formato Excel</p>
+            </div>
+          </div>
           <button
             onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 bg-white border-[#1A5C38]/20 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent">
-            <Download size={10} />
-            <span className="hidden sm:inline">Exportar BD</span>
-            <span className="sm:hidden">Excel</span>
-          </button>
-          <button
-            onClick={guardarParams} disabled={savingParams}
-            className={`flex items-center gap-1.5 text-[10.5px] font-bold px-3 py-1 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
-              savedParams
-                ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
-                : 'bg-[#d4efe1] border-[#1A5C38]/30 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
-            }`}>
-            <Save size={10} />
-            {savedParams ? 'Guardado ✓' : savingParams ? 'Guardando…' : 'Guardar parámetros'}
-          </button>
-        </div>
-      </div>
-
-      {/* Parámetros */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <Settings size={13} className="text-[#1A5C38]" />
-            <h2 className="text-[12.5px] font-bold text-gray-900">Parámetros del Sistema</h2>
-          </div>
-          <button
-            onClick={guardarParams} disabled={savingParams}
-            className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
-              savedParams
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
-                : 'bg-[#eef8f2] border-[#1A5C38]/20 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
-            }`}
+            className="relative flex items-center justify-center gap-2 text-[11.5px] font-bold text-[#0d5530] bg-white hover:bg-white/90 py-2 rounded-xl transition-all duration-150 active:scale-95 shadow-sm"
           >
-            <Save size={11} />
-            {savedParams ? 'Guardado' : savingParams ? 'Guardando...' : 'Guardar'}
+            <Download size={12} />
+            Descargar Excel
           </button>
         </div>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {[
-            { key: 'margen_pct'             as keyof Parametros, label: 'Umbral brecha crítica (%)',       hint: 'Porcentaje sobre PO+S' },
-            { key: 'ventana_dias'           as keyof Parametros, label: 'Ventana promedio PO (días)',       hint: 'Días para cálculo promedio' },
-            { key: 'servicios_default'      as keyof Parametros, label: 'Servicios bodega por defecto',    hint: 'MXN/ton' },
-            { key: 'flete_default'          as keyof Parametros, label: 'Flete por defecto',               hint: 'MXN/ton' },
-            { key: 'costo_fira'             as keyof Parametros, label: 'Costo FIRA por defecto',          hint: 'MXN/ton' },
-            { key: 'precio_garantia_sader'  as keyof Parametros, label: 'Precio garantía SADER',           hint: 'MXN/ton' },
-          ].map(({ key, label, hint }) => (
-            <div key={key} className="space-y-1">
-              <label className={LABEL}>{label}</label>
-              <input
-                type="number" step="0.01" className={INPUT}
-                value={editParams[key] ?? params?.[key] ?? ''}
-                onChange={e => setEditParams(p => ({ ...p, [key]: parseFloat(e.target.value) }))}
-              />
-              <p className="text-[9px] text-gray-400">{hint}</p>
+
+        {/* Tarjeta: Nuevo Administrador */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+              <Users size={16} className="text-blue-600" />
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Admins */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <Users size={13} className="text-blue-600" />
-            <h2 className="text-[12.5px] font-bold text-gray-900">Gestión de Administradores</h2>
-          </div>
-          <button onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white border border-blue-200 hover:border-transparent px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95">
-            <Plus size={11} /> Nuevo usuario
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-gray-400 text-[9.5px] uppercase tracking-wide font-bold bg-gray-50/60">
-                <th className="px-4 py-2.5">Nombre</th>
-                <th className="px-4 py-2.5">Email</th>
-                <th className="px-4 py-2.5">Rol</th>
-                <th className="px-4 py-2.5 text-center">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loadingAdmins ? (
-                [1,2,3].map(i => (
-                  <tr key={i}><td colSpan={4} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
-                ))
-              ) : admins.length === 0 ? (
-                <tr><td colSpan={4} className="px-4 py-6 text-center text-[12px] text-gray-400">Sin administradores registrados</td></tr>
-              ) : admins.map((u, i) => (
-                <tr key={i} className="hover:bg-gray-50/60 transition-all duration-150">
-                  <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-800">{u.nombre_completo}</td>
-                  <td className="px-4 py-2.5 text-[11.5px] text-gray-500">{u.email}</td>
-                  <td className="px-4 py-2.5">
-                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5 uppercase">
-                      {u.rol.charAt(0).toUpperCase() + u.rol.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-center">
-                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${u.activo ? 'text-emerald-600 bg-emerald-50 border border-emerald-200' : 'text-red-600 bg-red-50 border border-red-200'}`}>
-                      {u.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Catálogos */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <List size={13} className="text-amber-600" />
             <div>
-              <h2 className="text-[12.5px] font-bold text-gray-900">Catálogos del sistema</h2>
-              <p className="text-[10px] text-gray-400">Conceptos de servicio de bodega</p>
+              <p className="text-[12.5px] font-black text-gray-900 leading-tight">Administradores</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{loadingAdmins ? '…' : `${admins.length} usuario${admins.length !== 1 ? 's' : ''} registrado${admins.length !== 1 ? 's' : ''}`}</p>
             </div>
           </div>
-          <button onClick={() => setShowConceptoModal(true)}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-amber-600 bg-amber-50 hover:bg-amber-600 hover:text-white border border-amber-200 hover:border-transparent px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95">
-            <Plus size={11} /> Nuevo concepto
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center justify-center gap-2 text-[11.5px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white border border-blue-200 hover:border-transparent py-2 rounded-xl transition-all duration-150 active:scale-95"
+          >
+            <Plus size={12} />
+            Nuevo usuario
           </button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-gray-400 text-[9.5px] uppercase tracking-wide font-bold bg-gray-50/60">
-                <th className="px-4 py-2.5">Nombre</th>
-                <th className="px-4 py-2.5 text-center">Estatus</th>
-                <th className="px-4 py-2.5 text-center">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loadingConceptos ? (
-                [1,2,3].map(i => (
-                  <tr key={i}><td colSpan={3} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
-                ))
-              ) : conceptos.length === 0 ? (
-                <tr><td colSpan={3} className="px-4 py-6 text-center text-[12px] text-gray-400">Sin conceptos registrados</td></tr>
-              ) : conceptos.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50/60 transition-all duration-150">
-                  <td className="px-4 py-2.5 text-[12px] font-semibold text-gray-800">{c.nombre}</td>
-                  <td className="px-4 py-2.5 text-center">
-                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
-                      c.estatus === 'aprobado'
-                        ? 'text-emerald-600 bg-emerald-50 border border-emerald-200'
-                        : 'text-amber-600 bg-amber-50 border border-amber-200'
-                    }`}>{c.estatus}</span>
-                  </td>
-                  <td className="px-4 py-2.5 text-center">
-                    <button onClick={() => toggleAprobar(c.id)}
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all duration-150 active:scale-95 ${
-                        c.estatus === 'aprobado'
-                          ? 'text-gray-500 bg-gray-50 border-gray-200 hover:bg-white'
-                          : 'text-emerald-600 bg-emerald-50 border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-transparent'
-                      }`}>
-                      <CheckCircle size={10} />
-                      {c.estatus === 'aprobado' ? 'Revocar' : 'Aprobar'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        {/* Tarjeta: Nuevo Concepto */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
+              <List size={16} className="text-amber-600" />
+            </div>
+            <div>
+              <p className="text-[12.5px] font-black text-gray-900 leading-tight">Catálogos</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{loadingConceptos ? '…' : `${conceptos.length} concepto${conceptos.length !== 1 ? 's' : ''} de servicio`}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowConceptoModal(true)}
+            className="flex items-center justify-center gap-2 text-[11.5px] font-bold text-amber-600 bg-amber-50 hover:bg-amber-600 hover:text-white border border-amber-200 hover:border-transparent py-2 rounded-xl transition-all duration-150 active:scale-95"
+          >
+            <Plus size={12} />
+            Nuevo concepto
+          </button>
+        </div>
+      </div>
+
+      {/* ── Grid principal 2 columnas ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Parámetros del sistema */}
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#eef8f2] flex items-center justify-center">
+                <Settings size={12} className="text-[#1A5C38]" />
+              </div>
+              <div>
+                <h2 className="text-[12.5px] font-bold text-gray-900">Parámetros del Sistema</h2>
+                <p className="text-[9.5px] text-gray-400">Señales de compra y precios</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+            {[
+              { key: 'margen_pct'             as keyof Parametros, label: 'Umbral brecha crítica (%)',    hint: 'Porcentaje sobre PO+S' },
+              { key: 'ventana_dias'           as keyof Parametros, label: 'Ventana promedio PO (días)',    hint: 'Días para cálculo promedio' },
+              { key: 'servicios_default'      as keyof Parametros, label: 'Servicios bodega defecto',     hint: 'MXN/ton' },
+              { key: 'flete_default'          as keyof Parametros, label: 'Flete por defecto',            hint: 'MXN/ton' },
+              { key: 'costo_fira'             as keyof Parametros, label: 'Costo FIRA por defecto',       hint: 'MXN/ton' },
+              { key: 'precio_garantia_sader'  as keyof Parametros, label: 'Precio garantía SADER',        hint: 'MXN/ton' },
+            ].map(({ key, label, hint }) => (
+              <div key={key} className="space-y-1">
+                <label className={LABEL}>{label}</label>
+                <input
+                  type="number" step="0.01" className={INPUT}
+                  value={editParams[key] ?? params?.[key] ?? ''}
+                  onChange={e => setEditParams(p => ({ ...p, [key]: parseFloat(e.target.value) }))}
+                />
+                <p className="text-[9px] text-gray-400">{hint}</p>
+              </div>
+            ))}
+          </div>
+          <div className="px-4 pb-4">
+            <button
+              onClick={guardarParams} disabled={savingParams}
+              className={`w-full flex items-center justify-center gap-2 text-[11.5px] font-bold py-2.5 rounded-xl border transition-all duration-150 active:scale-95 disabled:opacity-50 ${
+                savedParams
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                  : 'bg-[#eef8f2] border-[#1A5C38]/20 text-[#1A5C38] hover:bg-[#1A5C38] hover:text-white hover:border-transparent'
+              }`}
+            >
+              <Save size={12} />
+              {savedParams ? 'Guardado ✓' : savingParams ? 'Guardando…' : 'Guardar parámetros'}
+            </button>
+          </div>
+        </div>
+
+        {/* Columna derecha: Admins + Catálogos */}
+        <div className="flex flex-col gap-4">
+
+          {/* Administradores */}
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Users size={12} className="text-blue-600" />
+                </div>
+                <h2 className="text-[12.5px] font-bold text-gray-900">Administradores</h2>
+              </div>
+              <button onClick={() => setShowModal(true)}
+                className="flex items-center gap-1.5 text-[10.5px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white border border-blue-200 hover:border-transparent px-2.5 py-1.5 rounded-lg transition-all duration-150 active:scale-95">
+                <Plus size={10} /> Nuevo
+              </button>
+            </div>
+            <div className="overflow-x-auto max-h-[220px] overflow-y-auto">
+              <table className="w-full text-left">
+                <thead className="sticky top-0 z-10">
+                  <tr className="text-gray-400 text-[9.5px] uppercase tracking-wide font-bold bg-gray-50/90 backdrop-blur-sm">
+                    <th className="px-4 py-2.5">Nombre</th>
+                    <th className="px-4 py-2.5 hidden sm:table-cell">Email</th>
+                    <th className="px-4 py-2.5 text-center">Rol</th>
+                    <th className="px-4 py-2.5 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {loadingAdmins ? (
+                    [1,2,3].map(i => (
+                      <tr key={i}><td colSpan={4} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                    ))
+                  ) : admins.length === 0 ? (
+                    <tr><td colSpan={4} className="px-4 py-6 text-center text-[12px] text-gray-400">Sin administradores registrados</td></tr>
+                  ) : admins.map((u, i) => (
+                    <tr key={i} className="hover:bg-gray-50/60 transition-all duration-150">
+                      <td className="px-4 py-2.5 text-[11.5px] font-semibold text-gray-800">{u.nombre_completo}</td>
+                      <td className="px-4 py-2.5 text-[11px] text-gray-500 hidden sm:table-cell">{u.email}</td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span className="text-[9.5px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5 uppercase">
+                          {u.rol.charAt(0).toUpperCase() + u.rol.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={`text-[9.5px] font-bold rounded-full px-2 py-0.5 ${u.activo ? 'text-emerald-600 bg-emerald-50 border border-emerald-200' : 'text-red-600 bg-red-50 border border-red-200'}`}>
+                          {u.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Catálogos */}
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden flex-1">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <List size={12} className="text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-[12.5px] font-bold text-gray-900">Catálogos</h2>
+                  <p className="text-[9.5px] text-gray-400">Conceptos de servicio de bodega</p>
+                </div>
+              </div>
+              <button onClick={() => setShowConceptoModal(true)}
+                className="flex items-center gap-1.5 text-[10.5px] font-bold text-amber-600 bg-amber-50 hover:bg-amber-600 hover:text-white border border-amber-200 hover:border-transparent px-2.5 py-1.5 rounded-lg transition-all duration-150 active:scale-95">
+                <Plus size={10} /> Nuevo
+              </button>
+            </div>
+            <div className="overflow-x-auto max-h-[260px] overflow-y-auto">
+              <table className="w-full text-left">
+                <thead className="sticky top-0 z-10">
+                  <tr className="text-gray-400 text-[9.5px] uppercase tracking-wide font-bold bg-gray-50/90 backdrop-blur-sm">
+                    <th className="px-4 py-2.5">Nombre</th>
+                    <th className="px-4 py-2.5 text-center">Estatus</th>
+                    <th className="px-4 py-2.5 text-center">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {loadingConceptos ? (
+                    [1,2,3].map(i => (
+                      <tr key={i}><td colSpan={3} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                    ))
+                  ) : conceptos.length === 0 ? (
+                    <tr><td colSpan={3} className="px-4 py-6 text-center text-[12px] text-gray-400">Sin conceptos registrados</td></tr>
+                  ) : conceptos.map((c) => (
+                    <tr key={c.id} className="hover:bg-gray-50/60 transition-all duration-150">
+                      <td className="px-4 py-2.5 text-[11.5px] font-semibold text-gray-800">{c.nombre}</td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={`text-[9.5px] font-bold rounded-full px-2 py-0.5 ${
+                          c.estatus === 'aprobado'
+                            ? 'text-emerald-600 bg-emerald-50 border border-emerald-200'
+                            : 'text-amber-600 bg-amber-50 border border-amber-200'
+                        }`}>{c.estatus}</span>
+                      </td>
+                      <td className="px-4 py-2.5 text-center">
+                        <button onClick={() => toggleAprobar(c.id)}
+                          className={`inline-flex items-center gap-1 text-[9.5px] font-bold px-2.5 py-1 rounded-lg border transition-all duration-150 active:scale-95 ${
+                            c.estatus === 'aprobado'
+                              ? 'text-gray-500 bg-gray-50 border-gray-200 hover:bg-white'
+                              : 'text-emerald-600 bg-emerald-50 border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-transparent'
+                          }`}>
+                          <CheckCircle size={9} />
+                          {c.estatus === 'aprobado' ? 'Revocar' : 'Aprobar'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
