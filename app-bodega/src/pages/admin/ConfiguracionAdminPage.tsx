@@ -314,7 +314,7 @@ export default function ConfiguracionAdminPage() {
   const LABEL = 'text-[9.5px] font-bold text-gray-400 uppercase tracking-wide mb-1 block';
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="flex flex-col gap-4 pt-4 pb-6">
 
       {/* ── Fila de tarjetas de acción rápida ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
