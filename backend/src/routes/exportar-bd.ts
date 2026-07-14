@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
 import ExcelJS from 'exceljs';
 import pool from '../config/database';
-import { authenticateToken } from '../middleware/auth';
+import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
 // Solo admins y responsables pueden exportar
-router.get('/', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+router.get('/', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const user = (req as any).user;
   if (user?.rol !== 'admin' && user?.rol !== 'responsable') {
     res.status(403).json({ error: 'Acceso denegado' });
