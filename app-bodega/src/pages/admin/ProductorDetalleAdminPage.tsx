@@ -122,15 +122,15 @@ export default function ProductorDetalleAdminPage() {
 
       setData({
         id: parseInt(id || '0'),
-        nombre: u.nombre || 'Francisco',
-        apellidos: u.apellidos || 'Javier Leyva',
-        curp: u.curp || 'LEYF650412HDFLLS02',
-        email: u.email || 'fco.leyva@gmail.com',
-        telefono: u.telefono || '6671234567',
+        nombre: u.nombres || u.nombre || '',
+        apellidos: [u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ') || u.apellidos || '',
+        curp: u.curp || '',
+        email: u.correo || u.correo_electronico || u.email || '',
+        telefono: u.telefono || '',
         rol: u.rol,
         estado_validacion: u.estado_validacion || 'pendiente',
-        created_at: u.created_at || new Date().toISOString(),
-        tipo_productor: u.tipo_productor || (u.curp ? 'B' : 'A'),
+        created_at: u.fecha_registro || u.created_at || new Date().toISOString(),
+        tipo_productor: u.tipo_registro || u.tipo_productor || 'B',
         up: upData || {
           estado: 'Sinaloa',
           municipio: 'Guasave',
