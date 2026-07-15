@@ -602,14 +602,25 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
         p.tipo_registro,
         p.created_at AS fecha_registro,
         p.programas_beneficiario,
+        up.up_id,
         up.state_name AS estado_up,
         up.municipality_name AS municipio_up,
         up.up_name AS nombre_up,
         up.area_ha_calc AS superficie_ha,
         ST_Y(up.centroid::geometry) AS lat,
-        ST_X(up.centroid::geometry) AS lng
+        ST_X(up.centroid::geometry) AS lng,
+        up.posible_traslape_producer_id,
+        up.traslape_revisado,
+        pt.nombres AS traslape_productor_nombre,
+        pt.apellido_paterno AS traslape_productor_apellido
       FROM producer p
-      LEFT JOIN up ON up.producer_id = p.producer_id
+      LEFT JOIN LATERAL (
+        SELECT up_id, state_name, municipality_name, up_name, area_ha_calc, centroid,
+               posible_traslape_producer_id, traslape_revisado
+        FROM up WHERE up.producer_id = p.producer_id
+        ORDER BY created_at ASC LIMIT 1
+      ) up ON TRUE
+      LEFT JOIN producer pt ON pt.producer_id = up.posible_traslape_producer_id
       WHERE p.producer_id = $1
     `, [id]);
     if (result.rows.length === 0) {
@@ -619,6 +630,24 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
     res.json({ productor: result.rows[0] });
   } catch (error) {
     console.error('Error al obtener productor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// PATCH /api/admin/ups/:up_id/marcar-traslape-revisado
+// =============================================
+router.patch('/ups/:up_id/marcar-traslape-revisado', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
+  try {
+    const { up_id } = req.params;
+    await pool.query(
+      `UPDATE up SET traslape_revisado = true WHERE up_id = $1`,
+      [up_id]
+    );
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error marcando traslape revisado:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

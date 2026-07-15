@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   ChevronLeft, Undo2, CheckCircle2, Footprints, Loader2,
-  AlertTriangle, Ruler, MapPin, Map, Check, Pencil,
+  AlertTriangle, Ruler, MapPin, Map, Check, Pencil, Route,
 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
@@ -50,6 +50,7 @@ export default function AgregarUPPage() {
 
   const [drawMode, setDrawMode] = useState<DrawMode>('idle');
   const [pointCount, setPointCount] = useState(0);
+  const [mostrarCaminos, setMostrarCaminos] = useState(false);
   const [capturandoGPS, setCapturandoGPS] = useState(false);
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [center, setCenter] = useState<[number, number]>([23.6, -102.5]);
@@ -247,6 +248,16 @@ export default function AgregarUPPage() {
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               attribution="© Esri"
             />
+            <TileLayer
+              url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+              opacity={0.6}
+            />
+            {mostrarCaminos && (
+              <TileLayer
+                url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
+                opacity={0.8}
+              />
+            )}
             {existentes.map((poly, i) => (
               <Polygon key={`ex-${i}`} positions={poly}
                 pathOptions={{ color: '#94a3b8', fillColor: '#94a3b8', fillOpacity: 0.18, weight: 2, dashArray: '5 5' }} />
@@ -278,6 +289,19 @@ export default function AgregarUPPage() {
               />
             </div>
           )}
+
+          {/* Toggle caminos — esquina superior derecha */}
+          <button
+            onClick={e => { e.stopPropagation(); setMostrarCaminos(v => !v); }}
+            title={mostrarCaminos ? 'Ocultar caminos' : 'Mostrar caminos'}
+            className={`absolute top-3 right-3 z-[1001] w-9 h-9 flex items-center justify-center rounded-xl shadow-lg transition-all active:scale-95 ${
+              mostrarCaminos
+                ? 'bg-green-500 text-white ring-2 ring-green-300/60'
+                : 'bg-black/60 backdrop-blur-md text-white/70 ring-1 ring-white/20 hover:bg-black/80'
+            }`}
+          >
+            <Route size={17} />
+          </button>
 
           {/* Panel de confirmación */}
           {pendingUP ? (

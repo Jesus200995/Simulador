@@ -3,7 +3,7 @@ import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
 import {
   ArrowLeft, Users, Mail, Phone, Calendar, MapPin, Sprout,
-  Check, X, AlertTriangle, RefreshCw
+  Check, X, AlertTriangle, RefreshCw, ShieldCheck
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { usePermisosStore } from '../../store/permisos';
@@ -52,6 +52,13 @@ export default function ProductorDetalleAdminPage() {
   const puedeVerDetalle = permisosTotal || puedo('productores', 'ver_detalle');
   const [data, setData] = useState<ProductorDetalle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [traslapeInfo, setTraslapeInfo] = useState<{
+    up_id: number | null;
+    producer_id: number | null;
+    revisado: boolean;
+    nombre: string;
+  } | null>(null);
+  const [marcandoTraslape, setMarcandoTraslape] = useState(false);
 
   // Modales de acción
   const [modalType, setModalType] = useState<'aprobar' | 'rechazar' | 'suspender' | 'reactivar' | null>(null);
@@ -118,6 +125,17 @@ export default function ProductorDetalleAdminPage() {
         }
       } catch (eDisp) {
         console.error('Error al cargar disponibilidades:', eDisp);
+      }
+
+      if (u.posible_traslape_producer_id) {
+        setTraslapeInfo({
+          up_id: u.up_id ?? null,
+          producer_id: u.posible_traslape_producer_id,
+          revisado: u.traslape_revisado || false,
+          nombre: [u.traslape_productor_nombre, u.traslape_productor_apellido].filter(Boolean).join(' ') || 'otro productor',
+        });
+      } else {
+        setTraslapeInfo(null);
       }
 
       setData({
@@ -413,6 +431,45 @@ export default function ProductorDetalleAdminPage() {
               </div>
             ) : (
               <p className="text-[12px] text-gray-500">Sin datos de Unidad de Producción (UP) vinculados.</p>
+            )}
+
+            {/* Badge de posible traslape */}
+            {traslapeInfo && !traslapeInfo.revisado && (
+              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3.5">
+                <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12.5px] font-bold text-amber-800">Posible traslape con otro productor</p>
+                  <p className="text-[11.5px] text-amber-700 mt-0.5">
+                    Esta parcela se superpone en más del 10% con una parcela de <strong>{traslapeInfo.nombre}</strong>.
+                    Puede ser una situación ejidal o familiar normal — confirma antes de actuar.
+                  </p>
+                </div>
+                <button
+                  disabled={marcandoTraslape}
+                  onClick={async () => {
+                    if (!traslapeInfo.up_id) return;
+                    setMarcandoTraslape(true);
+                    try {
+                      await fetch(`${BASE}/admin/ups/${traslapeInfo.up_id}/marcar-traslape-revisado`, {
+                        method: 'PATCH',
+                        headers: HDR(),
+                      });
+                      setTraslapeInfo(t => t ? { ...t, revisado: true } : null);
+                    } finally {
+                      setMarcandoTraslape(false);
+                    }
+                  }}
+                  className="shrink-0 flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <ShieldCheck size={13} /> Marcar revisado
+                </button>
+              </div>
+            )}
+            {traslapeInfo?.revisado && (
+              <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3.5 py-2.5">
+                <ShieldCheck size={14} className="text-green-600 shrink-0" />
+                <p className="text-[12px] text-green-800 font-medium">Traslape ya revisado por el equipo.</p>
+              </div>
             )}
           </div>
 

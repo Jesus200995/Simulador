@@ -519,6 +519,23 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
     }
   }
 
+  // Overlap con UPs de OTROS productores (no bloqueante — se guarda con bandera para revisión admin)
+  let traslapeProducerId: number | null = null;
+  if (hasPoligono && postgisActivo) {
+    const ovCruz = await client.query(
+      `SELECT traslape_producer_id FROM (
+         SELECT u.producer_id AS traslape_producer_id,
+           ST_Area(ST_Intersection(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))::geography)
+           / NULLIF(ST_Area(ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326)::geography), 0) AS pct
+         FROM up u
+         WHERE u.producer_id != $1 AND u.geom IS NOT NULL
+           AND ST_Overlaps(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
+       ) t WHERE t.pct > 0.10 LIMIT 1`,
+      [producerId, geojson]
+    );
+    if (ovCruz.rows.length > 0) traslapeProducerId = ovCruz.rows[0].traslape_producer_id;
+  }
+
   let upId: number;
   if (hasCoords) {
     const useGeom = hasPoligono && postgisActivo;
@@ -586,6 +603,14 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
       [stateIdFinal, municipalityIdFinal, upId]
     );
   }
+
+  if (traslapeProducerId !== null) {
+    await client.query(
+      `UPDATE up SET posible_traslape_producer_id = $1, traslape_revisado = false WHERE up_id = $2`,
+      [traslapeProducerId, upId]
+    );
+  }
+
   return upId;
 }
 
@@ -1470,6 +1495,23 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
       }
     }
 
+    // Overlap con UPs de OTROS productores (no bloqueante — bandera para revisión admin)
+    let traslapeProducerId2: number | null = null;
+    if (hasPoligono && postgisActivo) {
+      const ovCruz = await client.query(
+        `SELECT traslape_producer_id FROM (
+           SELECT u.producer_id AS traslape_producer_id,
+             ST_Area(ST_Intersection(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))::geography)
+             / NULLIF(ST_Area(ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326)::geography), 0) AS pct
+           FROM up u
+           WHERE u.producer_id != $1 AND u.geom IS NOT NULL
+             AND ST_Overlaps(u.geom, ST_SetSRID(ST_GeomFromGeoJSON($2::text), 4326))
+         ) t WHERE t.pct > 0.10 LIMIT 1`,
+        [producer_id, geojson]
+      );
+      if (ovCruz.rows.length > 0) traslapeProducerId2 = ovCruz.rows[0].traslape_producer_id;
+    }
+
     let upResult;
     if (hasCoords) {
       const useGeom = hasPoligono && postgisActivo;
@@ -1527,6 +1569,13 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
          RETURNING up_id, up_name`,
         [producer_id, estado_up, municipio_up, centroidVal, upName,
          area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
+      );
+    }
+
+    if (traslapeProducerId2 !== null) {
+      await client.query(
+        `UPDATE up SET posible_traslape_producer_id = $1, traslape_revisado = false WHERE up_id = $2`,
+        [traslapeProducerId2, upResult.rows[0].up_id]
       );
     }
 

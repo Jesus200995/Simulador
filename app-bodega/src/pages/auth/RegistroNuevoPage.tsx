@@ -419,6 +419,7 @@ export default function RegistroNuevoPage() {
         <div className="flex-1 relative">
           <MapContainer ref={mapRef} center={center} zoom={mapReady ? 16 : 5} style={{ height: '100%', width: '100%' }} whenReady={() => setMapReady(true)}>
             <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="© Esri" />
+            <TileLayer url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}" opacity={0.6} />
             <DibujarPoligonoUP
               ref={dibujarRef}
               onModeChange={setDrawMode}
