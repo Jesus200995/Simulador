@@ -480,7 +480,7 @@ export default function AgregarUPPage() {
               >
                 {capturandoGPS
                   ? <><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>
-                  : <><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>}
+                  : <><Footprints size={16} /> Estoy en este punto — registrar GPS</>}
               </button>
 
               {gpsMsg && (

@@ -265,7 +265,7 @@ export default function CompletarUbicacionPage() {
             >
               {capturandoGPS
                 ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
-                : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
+                : (<><Footprints size={16} /> Estoy en este punto — registrar GPS</>)}
             </button>
             {gpsMsg && (
               <p className="text-center text-[11px] text-white/70 bg-white/5 rounded-lg px-3 py-2">{gpsMsg}</p>

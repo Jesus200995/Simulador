@@ -588,7 +588,7 @@ export default function RegistroNuevoPage() {
             >
               {capturandoGPS
                 ? (<><Loader2 size={16} className="animate-spin" /> Obteniendo ubicación…</>)
-                : (<><Footprints size={16} /> Estoy en la esquina — usar mi GPS</>)}
+                : (<><Footprints size={16} /> Estoy en este punto — registrar GPS</>)}
             </button>
             {gpsMsg && <p className="text-center text-[11px] text-green-200 bg-[#1A5C38]/80 backdrop-blur-md rounded-xl px-3 py-1.5 ring-1 ring-green-400/30">{gpsMsg}</p>}
             {pointCount > 0 && (
