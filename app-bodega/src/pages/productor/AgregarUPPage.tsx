@@ -7,6 +7,7 @@ import {
   AlertTriangle, Ruler, MapPin, Map, Check, Pencil, Route,
 } from 'lucide-react';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
+import ParcelasExistentesLayer from '../../components/productor/ParcelasExistentesLayer';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
 import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
@@ -62,6 +63,7 @@ export default function AgregarUPPage() {
     area: number;
   } | null>(null);
   const [existentes, setExistentes] = useState<[number, number][][]>([]);
+  const [existentesIds, setExistentesIds] = useState<number[]>([]);
   const [coincideArea, setCoincideArea] = useState<boolean | null>(null);
   const [areaReal, setAreaReal] = useState('');
   const [parcelaGuardada, setParcelaGuardada] = useState<string | null>(null);
@@ -72,7 +74,9 @@ export default function AgregarUPPage() {
       .then(d => {
         const ups = d.ups || (Array.isArray(d) ? d : []);
         const polys: [number, number][][] = [];
+        const ids: number[] = [];
         for (const u of ups) {
+          if (u.up_id) ids.push(u.up_id);
           const g = u.geom_geojson;
           if (!g?.coordinates) continue;
           const ring = g.type === 'MultiPolygon' ? g.coordinates[0]?.[0] : g.coordinates[0];
@@ -80,6 +84,7 @@ export default function AgregarUPPage() {
           polys.push((ring as [number, number][]).map(([ln, la]) => [la, ln] as [number, number]));
         }
         setExistentes(polys);
+        setExistentesIds(ids);
         if (polys.length && polys[0][0]) setCenter(polys[0][0]);
       })
       .catch(() => {});
@@ -258,6 +263,9 @@ export default function AgregarUPPage() {
                 opacity={0.8}
               />
             )}
+            {/* Parcelas de OTROS productores — gris tenue */}
+            <ParcelasExistentesLayer excluirUpIds={existentesIds} />
+            {/* Parcelas propias ya existentes — gris con borde punteado más visible */}
             {existentes.map((poly, i) => (
               <Polygon key={`ex-${i}`} positions={poly}
                 pathOptions={{ color: '#94a3b8', fillColor: '#94a3b8', fillOpacity: 0.18, weight: 2, dashArray: '5 5' }} />

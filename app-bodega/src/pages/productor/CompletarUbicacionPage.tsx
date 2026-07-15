@@ -10,6 +10,7 @@ import NominatimSearch from '../../components/productor/NominatimSearch';
 import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
+import ParcelasExistentesLayer from '../../components/productor/ParcelasExistentesLayer';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -183,6 +184,7 @@ export default function CompletarUbicacionPage() {
               url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
               opacity={0.6}
             />
+            <ParcelasExistentesLayer excluirUpIds={upId ? [parseInt(upId)] : []} />
             <DibujarPoligonoUP
               ref={dibujarRef}
               poligonoInicial={poligonoInicial ?? undefined}

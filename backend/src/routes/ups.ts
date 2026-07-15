@@ -114,6 +114,25 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
 });
 
 // =============================================
+// GET /api/ups/geometrias — todas las geometrías (sin PII, público)
+// Usado por el mapa de dibujo para mostrar parcelas existentes en gris
+// =============================================
+router.get('/geometrias', async (_req, res: Response): Promise<void> => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT up_id, ST_AsGeoJSON(geom)::json AS geom_geojson
+       FROM up
+       WHERE geom IS NOT NULL
+       ORDER BY up_id`
+    );
+    res.json({ ups: rows });
+  } catch (error) {
+    console.error('Error listando geometrías de UPs:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
 // GET /api/ups?curp=... - Listar UPs del productor
 // =============================================
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
