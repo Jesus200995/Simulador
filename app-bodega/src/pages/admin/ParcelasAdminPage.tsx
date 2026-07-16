@@ -460,9 +460,8 @@ export default function ParcelasAdminPage() {
 
             {/* Polígonos */}
             {filtradas.map(p => {
-              const pos    = parsePoly(p.geom_geojson);
-              const color  = colorPorEstado.get(p.state_name || '') || '#2563eb';
-              const nombre = [p.nombres, p.apellido_paterno, p.apellido_materno].filter(Boolean).join(' ');
+              const pos   = parsePoly(p.geom_geojson);
+              const color = colorPorEstado.get(p.state_name || '') || '#2563eb';
               if (!pos) return null;
               return (
                 <Polygon
