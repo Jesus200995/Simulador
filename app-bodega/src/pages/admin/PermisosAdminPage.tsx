@@ -5,7 +5,7 @@ import {
   Copy, Download, CheckCircle2, AlertTriangle,
   Loader2, RefreshCw, UserPlus,
   TriangleAlert, Sparkles, LayoutDashboard, Users, Warehouse,
-  TrendingUp, Sprout, BarChart3, Leaf, Search, ChevronLeft, ChevronRight,
+  TrendingUp, Sprout, BarChart3, Leaf, Search, ChevronLeft, ChevronRight, Layers,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -23,6 +23,7 @@ interface CredencialesNuevas { email: string; password_temporal: string; nombre_
 const VISTAS_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
   resumen:             { label: 'Resumen',           icon: <LayoutDashboard size={14} className="text-blue-500" /> },
   productores:         { label: 'Productores',       icon: <Users size={14} className="text-emerald-500" /> },
+  parcelas:            { label: 'Parcelas',          icon: <Layers size={14} className="text-blue-600" /> },
   bodegas:             { label: 'Bodegas',           icon: <Warehouse size={14} className="text-amber-500" /> },
   alertas:             { label: 'Alertas',           icon: <AlertTriangle size={14} className="text-red-500" /> },
   precios:             { label: 'Precios',           icon: <TrendingUp size={14} className="text-violet-500" /> },
@@ -39,6 +40,7 @@ const ACCION_LABELS: Record<string, string> = {
 const VISTAS_ACCIONES: Record<string, string[]> = {
   resumen:             ['ver'],
   productores:         ['ver', 'ver_detalle', 'editar', 'eliminar', 'exportar'],
+  parcelas:            ['ver', 'eliminar'],
   bodegas:             ['ver', 'ver_detalle', 'crear', 'editar', 'eliminar', 'exportar'],
   alertas:             ['ver', 'crear', 'eliminar'],
   precios:             ['ver', 'editar'],

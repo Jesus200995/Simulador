@@ -1309,6 +1309,7 @@ router.get('/parcelas', authMiddleware, async (req: any, res: Response): Promise
         p.apellido_paterno,
         p.apellido_materno,
         p.curp,
+        p.correo,
         p.estado_validacion,
         ciclo.ciclo_activo,
         ciclo.cultivo_principal
@@ -1331,6 +1332,36 @@ router.get('/parcelas', authMiddleware, async (req: any, res: Response): Promise
   } catch (error) {
     console.error('Error parcelas:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// DELETE /api/admin/parcelas/:up_id — Eliminar una UP individual
+router.delete('/parcelas/:up_id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const { up_id } = req.params;
+
+    const check = await client.query('SELECT up_id, up_name FROM up WHERE up_id = $1', [up_id]);
+    if (check.rows.length === 0) {
+      res.status(404).json({ error: 'Parcela no encontrada' });
+      return;
+    }
+    const upName = check.rows[0].up_name || `UP-${up_id}`;
+
+    await client.query('BEGIN');
+    await client.query(`DELETE FROM cycle_crop WHERE cycle_id IN (SELECT cycle_id FROM cycle WHERE up_id = $1)`, [up_id]);
+    await client.query(`DELETE FROM cycle WHERE up_id = $1`, [up_id]);
+    await client.query(`DELETE FROM disponibilidad_productor WHERE up_id = $1`, [up_id]);
+    await client.query(`DELETE FROM up WHERE up_id = $1`, [up_id]);
+    await client.query('COMMIT');
+
+    res.json({ ok: true, message: `Parcela "${upName}" eliminada correctamente` });
+  } catch (error: any) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Error al eliminar parcela:', error);
+    res.status(500).json({ error: 'Error interno del servidor al eliminar parcela' });
+  } finally {
+    client.release();
   }
 });
 
