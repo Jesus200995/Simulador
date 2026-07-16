@@ -11,6 +11,7 @@ import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput'
 import DibujarPoligonoUP from '../../components/productor/DibujarPoligonoUP';
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import ParcelasExistentesLayer from '../../components/productor/ParcelasExistentesLayer';
+import SearchPinMarker from '../../components/productor/SearchPinMarker';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -40,6 +41,7 @@ export default function CompletarUbicacionPage() {
   const [detectandoGeo, setDetectandoGeo] = useState(false);
   const [capturandoGPS, setCapturandoGPS] = useState(false);
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
+  const [searchPin, setSearchPin] = useState<[number, number] | null>(null);
 
   // Detecta estado/municipio EXACTOS según dónde quedó marcada la parcela
   const detectarUbicacion = async (lat: number, lng: number) => {
@@ -204,8 +206,10 @@ export default function CompletarUbicacionPage() {
                 setGeoDetectado(null);
               }}
               onModeChange={setDrawMode}
-              onPointCountChange={setPointCount}
+              onPointCountChange={n => { setPointCount(n); if (n > 0) setSearchPin(null); }}
             />
+            {/* Pin de búsqueda — desaparece al empezar a dibujar */}
+            {searchPin && !poligono && <SearchPinMarker position={searchPin} />}
           </MapContainer>
         )}
 
@@ -217,7 +221,10 @@ export default function CompletarUbicacionPage() {
           >
             <NominatimSearch
               placeholder="Buscar ejido, localidad..."
-              onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+              onSelect={(lat, lng) => {
+                mapRef.current?.flyTo([lat, lng], 17);
+                setSearchPin([lat, lng]);
+              }}
             />
           </div>
         )}
@@ -244,7 +251,7 @@ export default function CompletarUbicacionPage() {
             </p>
             <div onClick={e => e.stopPropagation()}>
               <CoordenadasGPSInput
-                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 16); }}
+                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 17); setSearchPin([lat, lng]); }}
                 theme="dark"
                 className="w-full justify-center rounded-xl px-4 py-3"
               />

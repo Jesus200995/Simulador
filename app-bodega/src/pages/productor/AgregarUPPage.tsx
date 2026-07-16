@@ -11,6 +11,7 @@ import ParcelasExistentesLayer from '../../components/productor/ParcelasExistent
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
 import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
+import SearchPinMarker from '../../components/productor/SearchPinMarker';
 import * as turf from '@turf/turf';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -56,6 +57,7 @@ export default function AgregarUPPage() {
   const [gpsMsg, setGpsMsg] = useState<string | null>(null);
   const [center, setCenter] = useState<[number, number]>([23.6, -102.5]);
   const [mapReady, setMapReady] = useState(false);
+  const [searchPin, setSearchPin] = useState<[number, number] | null>(null);
 
   const [pendingUP, setPendingUP] = useState<{
     poligono: [number, number][];
@@ -133,7 +135,7 @@ export default function AgregarUPPage() {
   };
 
   const redibujarUP = () => {
-    setPendingUP(null); setPointCount(0); setGpsMsg(null); setErrorOverlap(null);
+    setPendingUP(null); setPointCount(0); setGpsMsg(null); setErrorOverlap(null); setSearchPin(null);
     setTimeout(() => dibujarRef.current?.startEdit?.(), 50);
   };
 
@@ -273,8 +275,8 @@ export default function AgregarUPPage() {
             <DibujarPoligonoUP
               ref={dibujarRef}
               onModeChange={setDrawMode}
-              onPointCountChange={setPointCount}
-              onPoligonoCompleto={onUPDibujada}
+              onPointCountChange={n => { setPointCount(n); if (n > 0) setSearchPin(null); }}
+              onPoligonoCompleto={(poly, centro, area) => { setSearchPin(null); onUPDibujada(poly, centro, area); }}
               onPoligonoEliminado={() => {}}
             />
             {pendingUP && (
@@ -283,6 +285,8 @@ export default function AgregarUPPage() {
                 pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
               />
             )}
+            {/* Pin de búsqueda — desaparece al empezar a dibujar */}
+            {searchPin && !pendingUP && <SearchPinMarker position={searchPin} />}
           </MapContainer>
 
           {/* Buscador — solo cuando no hay pendingUP */}
@@ -293,7 +297,10 @@ export default function AgregarUPPage() {
             >
               <NominatimSearch
                 placeholder="Buscar dirección o localidad…"
-                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+                onSelect={(lat, lng) => {
+                  mapRef.current?.flyTo([lat, lng], 17);
+                  setSearchPin([lat, lng]);
+                }}
               />
             </div>
           )}
@@ -459,7 +466,7 @@ export default function AgregarUPPage() {
 
               <div onClick={e => e.stopPropagation()}>
                 <CoordenadasGPSInput
-                  onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 16); }}
+                  onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 17); setSearchPin([lat, lng]); }}
                   theme="dark"
                   className="w-full justify-center rounded-xl px-4 py-3"
                 />
