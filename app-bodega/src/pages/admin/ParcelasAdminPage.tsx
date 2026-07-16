@@ -236,7 +236,7 @@ export default function ParcelasAdminPage() {
   const [eliminando, setEliminando]             = useState(false);
   const [toast, setToast]                       = useState<{ msg: string; tipo: 'ok' | 'err' } | null>(null);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastTimer = useRef<number | null>(null);
 
   function showToast(msg: string, tipo: 'ok' | 'err') {
     setToast({ msg, tipo });
