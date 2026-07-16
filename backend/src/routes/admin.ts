@@ -170,7 +170,6 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
       LEFT JOIN usuarios u ON u.curp = p.curp
       ${where}
       ORDER BY p.created_at DESC
-      LIMIT 500
     `, params);
     res.json({ usuarios: result.rows, productores: result.rows });
   } catch (error) {
@@ -611,6 +610,9 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
         ST_X(up.centroid::geometry) AS lng,
         up.posible_traslape_producer_id,
         up.traslape_revisado,
+        ciclo.ciclo_activo,
+        ciclo.cultivo_principal,
+        ciclo.variedad,
         pt.nombres AS traslape_productor_nombre,
         pt.apellido_paterno AS traslape_productor_apellido
       FROM producer p
@@ -620,6 +622,18 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
         FROM up WHERE up.producer_id = p.producer_id
         ORDER BY created_at ASC LIMIT 1
       ) up ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT
+          CONCAT(c.cycle_type, ' ', c.cycle_year) AS ciclo_activo,
+          COALESCE(cc.tipo_maiz, 'Maíz') AS cultivo_principal,
+          COALESCE(cv.label, cc.variety_id, '') AS variedad
+        FROM cycle c
+        LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
+        LEFT JOIN cat_crop_variety cv ON cv.code = cc.variety_id AND cv.is_active = TRUE
+        WHERE c.up_id = up.up_id
+        ORDER BY c.cycle_year DESC, c.cycle_id DESC
+        LIMIT 1
+      ) ciclo ON TRUE
       LEFT JOIN producer pt ON pt.producer_id = up.posible_traslape_producer_id
       WHERE p.producer_id = $1
     `, [id]);
@@ -630,6 +644,39 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
     res.json({ productor: result.rows[0] });
   } catch (error) {
     console.error('Error al obtener productor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// GET /api/admin/productor-disponibilidades/:producer_id
+// =============================================
+router.get('/productor-disponibilidades/:producer_id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!esPanelAdmin(req.user)) { res.status(403).json({ error: 'Acceso denegado' }); return; }
+  try {
+    const { producer_id } = req.params;
+    const result = await pool.query(
+      `SELECT
+         dp.id,
+         dp.producer_id,
+         dp.up_id,
+         dp.activa,
+         dp.created_at,
+         COALESCE(dp.volumen_estimado_ton, 0)::numeric AS volumen_toneladas,
+         COALESCE(dp.tipo_maiz, 'Maíz Blanco') AS tipo_maiz,
+         COALESCE(cv.label, dp.variedad_code, dp.variedad_libre, '') AS variedad,
+         u.state_name AS estado,
+         u.municipality_name AS municipio
+       FROM disponibilidad_productor dp
+       LEFT JOIN up u ON u.up_id = dp.up_id
+       LEFT JOIN cat_crop_variety cv ON cv.code = dp.variedad_code AND cv.is_active = TRUE
+       WHERE dp.producer_id = $1
+       ORDER BY dp.created_at DESC`,
+      [producer_id]
+    );
+    res.json({ disponibilidades: result.rows });
+  } catch (error) {
+    console.error('Error al obtener disponibilidades del productor:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

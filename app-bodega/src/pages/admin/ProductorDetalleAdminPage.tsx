@@ -69,64 +69,23 @@ export default function ProductorDetalleAdminPage() {
   async function cargarDetalle() {
     setLoading(true);
     try {
-      // 1. Cargar datos del productor desde el nuevo endpoint
+      // 1. Productor + UP + ciclo en una sola llamada
       const resU = await fetch(`${BASE}/admin/usuarios/${id}`, { headers: HDR() });
-      if (!resU.ok) throw new Error(`Error al cargar usuario: ${resU.status}`);
+      if (!resU.ok) throw new Error(`Error ${resU.status}`);
       const userRes = await resU.json();
-      // El endpoint devuelve { productor: {...} }
       const u = userRes.productor || userRes.usuario || userRes;
 
-      // 2. Cargar UPs de este productor
-      let upData = null;
+      // 2. Disponibilidades del productor via endpoint admin
+      let dispList: any[] = [];
       try {
-        const resUp = await fetch(`${BASE}/producers/${id}/ups`, { headers: HDR() });
-        if (resUp.ok) {
-          const ups = await resUp.json();
-          if (ups && ups.length > 0) {
-            const firstUp = ups[0];
-            
-            // Si tiene geometría
-            let geom = null;
-            let lat = 24.8083;
-            let lng = -107.3941;
-            if (firstUp.geom) {
-              geom = typeof firstUp.geom === 'string' ? JSON.parse(firstUp.geom) : firstUp.geom;
-            }
-            if (firstUp.latitud && firstUp.longitud) {
-              lat = parseFloat(firstUp.latitud);
-              lng = parseFloat(firstUp.longitud);
-            }
-
-            upData = {
-              estado: firstUp.estado || 'Sinaloa',
-              municipio: firstUp.municipio || 'Guasave',
-              superficie_hectareas: parseFloat(firstUp.superficie_hectareas || '10'),
-              cultivo_principal: firstUp.cultivo_principal || 'Maíz Blanco',
-              variedad: firstUp.variedad || 'H-377',
-              ciclo_activo: firstUp.ciclo_activo || 'OI 2026',
-              geom,
-              latitud: lat,
-              longitud: lng
-            };
-          }
-        }
-      } catch (eUp) {
-        console.error('Error al cargar UP del productor:', eUp);
-      }
-
-      // 3. Cargar disponibilidades
-      let dispList = [];
-      try {
-        const resDisp = await fetch(`${BASE}/productor/disponibilidad`, { headers: HDR() });
+        const resDisp = await fetch(`${BASE}/admin/productor-disponibilidades/${id}`, { headers: HDR() });
         if (resDisp.ok) {
           const disp = await resDisp.json();
-          // Filtrar por este productor si el endpoint devuelve todo
-          dispList = (disp.disponibilidades || disp || []).filter((d: any) => d.producer_id === parseInt(id || ''));
+          dispList = disp.disponibilidades || [];
         }
-      } catch (eDisp) {
-        console.error('Error al cargar disponibilidades:', eDisp);
-      }
+      } catch { /* si no hay, se muestra vacío */ }
 
+      // Traslape
       if (u.posible_traslape_producer_id) {
         setTraslapeInfo({
           up_id: u.up_id ?? null,
@@ -137,6 +96,19 @@ export default function ProductorDetalleAdminPage() {
       } else {
         setTraslapeInfo(null);
       }
+
+      // Construir upData desde la respuesta del endpoint (ya viene lat/lng del centroide PostGIS)
+      const tieneUP = !!(u.estado_up || u.municipio_up || u.superficie_ha);
+      const upData = tieneUP ? {
+        estado: u.estado_up || '',
+        municipio: u.municipio_up || '',
+        superficie_hectareas: parseFloat(u.superficie_ha) || 0,
+        cultivo_principal: u.cultivo_principal || '—',
+        variedad: u.variedad || '—',
+        ciclo_activo: u.ciclo_activo || '—',
+        latitud: u.lat ? parseFloat(u.lat) : undefined,
+        longitud: u.lng ? parseFloat(u.lng) : undefined,
+      } : null;
 
       setData({
         id: parseInt(id || '0'),
@@ -149,50 +121,12 @@ export default function ProductorDetalleAdminPage() {
         estado_validacion: u.estado_validacion || 'pendiente',
         created_at: u.fecha_registro || u.created_at || new Date().toISOString(),
         tipo_productor: u.tipo_registro || u.tipo_productor || 'B',
-        up: upData || {
-          estado: 'Sinaloa',
-          municipio: 'Guasave',
-          superficie_hectareas: 12.5,
-          cultivo_principal: 'Maíz Blanco',
-          variedad: 'H-377 Pioneer',
-          ciclo_activo: 'OI 2025/2026',
-          latitud: 25.5746,
-          longitud: -108.4682
-        },
-        disponibilidades: dispList.length > 0 ? dispList : [
-          { id: 1, tipo_maiz: 'Maíz Blanco', variedad: 'H-377', volumen_toneladas: 45, created_at: new Date().toISOString(), activa: true }
-        ]
+        up: upData,
+        disponibilidades: dispList,
       });
 
     } catch (e) {
       console.error('Error al cargar detalle de productor:', e);
-      
-      // Maqueta fallback
-      setData({
-        id: parseInt(id || '101'),
-        nombre: 'Francisco',
-        apellidos: 'Javier Leyva',
-        curp: 'LEYF650412HDFLLS02',
-        email: 'fco.leyva@gmail.com',
-        telefono: '667 123 4567',
-        rol: 'productor',
-        estado_validacion: 'pendiente',
-        created_at: '2026-05-28T14:32:00.000Z',
-        tipo_productor: 'B',
-        up: {
-          estado: 'Sinaloa',
-          municipio: 'Guasave',
-          superficie_hectareas: 12.5,
-          cultivo_principal: 'Maíz Blanco',
-          variedad: 'H-377 Pioneer',
-          ciclo_activo: 'OI 2025/2026',
-          latitud: 25.5746,
-          longitud: -108.4682
-        },
-        disponibilidades: [
-          { id: 1, tipo_maiz: 'Maíz Blanco', variedad: 'H-377', volumen_toneladas: 45, created_at: '2026-05-28T14:35:00.000Z', activa: true }
-        ]
-      });
     } finally {
       setLoading(false);
     }
@@ -512,6 +446,9 @@ export default function ProductorDetalleAdminPage() {
           <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Cosecha Declarada Disponible</h3>
         </div>
 
+        {data.disponibilidades.length === 0 ? (
+          <p className="text-[12.5px] text-gray-400 italic">Este productor no tiene cosecha declarada disponible.</p>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px] divide-y divide-gray-100">
             <thead>
@@ -546,6 +483,7 @@ export default function ProductorDetalleAdminPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* Modales de Confirmación */}
