@@ -113,8 +113,22 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
         u.up_name, u.state_name AS estado, u.municipality_name AS municipio,
         p.nombres || ' ' || p.apellido_paterno AS productor,
         c.cycle_year AS anio, c.cycle_type AS tipo,
-        c.hectareas_sembradas, c.fecha_siembra,
-        c.variedad_nombre, c.tipo_riego, c.estado_ciclo,
+        COALESCE(c.hectareas_sembradas::text,
+          (SELECT ROUND(SUM(cc2.area_sown_ha)::numeric, 4)::text FROM cycle_crop cc2 WHERE cc2.cycle_id = c.cycle_id)
+        ) AS hectareas_sembradas,
+        c.fecha_siembra,
+        COALESCE(NULLIF(c.variedad_nombre,''),
+          (SELECT STRING_AGG(DISTINCT COALESCE(cv2.label, cc2.variety_id), ', ')
+           FROM cycle_crop cc2
+           LEFT JOIN cat_crop_variety cv2 ON cv2.code = cc2.variety_id
+           WHERE cc2.cycle_id = c.cycle_id)
+        ) AS variedad_nombre,
+        (SELECT STRING_AGG(DISTINCT COALESCE(cv2.tipo_maiz, ''), ', ')
+         FROM cycle_crop cc2
+         LEFT JOIN cat_crop_variety cv2 ON cv2.code = cc2.variety_id
+         WHERE cc2.cycle_id = c.cycle_id AND COALESCE(cv2.tipo_maiz,'') <> ''
+        ) AS tipo_maiz,
+        c.tipo_riego, c.estado_ciclo,
         c.fecha_cosecha_real, c.produccion_real_ton,
         c.observaciones_cosecha, c.declarado_por_productor, c.created_at
       FROM cycle c
@@ -131,9 +145,10 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'municipio',             header: 'Municipio',        width: 20 },
       { key: 'anio',                  header: 'Año',              width: 8  },
       { key: 'tipo',                  header: 'Tipo Ciclo',       width: 12 },
-      { key: 'hectareas_sembradas',   header: 'Hect. Sembradas',  width: 15 },
+      { key: 'hectareas_sembradas',   header: 'Sup. Sembrada (ha)', width: 16 },
       { key: 'fecha_siembra',         header: 'F. Siembra',       width: 14 },
-      { key: 'variedad_nombre',       header: 'Variedad',         width: 20 },
+      { key: 'variedad_nombre',       header: 'Variedad(es)',     width: 28 },
+      { key: 'tipo_maiz',             header: 'Tipo Maíz',        width: 14 },
       { key: 'tipo_riego',            header: 'Riego',            width: 12 },
       { key: 'estado_ciclo',          header: 'Estado Ciclo',     width: 14 },
       { key: 'fecha_cosecha_real',    header: 'F. Cosecha',       width: 14 },
@@ -149,15 +164,19 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
         cc.cycle_crop_id, cc.cycle_id, c.up_id,
         u.up_name, u.state_name AS estado,
         p.nombres || ' ' || p.apellido_paterno AS productor,
+        cc.variety_id AS variedad_code,
+        COALESCE(cv.label, cc.variety_other, cc.variety_id) AS variedad_nombre,
+        COALESCE(cv.tipo_maiz, cc.tipo_maiz) AS tipo_maiz,
         cc.area_sown_ha, cc.area_harvested_ha, cc.destination,
         cc.production_qty, cc.production_unit,
         cc.planting_date, cc.estimated_harvest_date,
-        cc.yield_expected, cc.tipo_maiz, cc.ventana_venta,
+        cc.yield_expected, cc.ventana_venta,
         cc.disponible_para_venta, cc.fecha_disponibilidad, cc.created_at
       FROM cycle_crop cc
       LEFT JOIN cycle c ON c.cycle_id = cc.cycle_id
       LEFT JOIN up u ON u.up_id = c.up_id
       LEFT JOIN producer p ON p.producer_id = u.producer_id
+      LEFT JOIN cat_crop_variety cv ON cv.code = cc.variety_id
       ORDER BY cc.cycle_crop_id DESC
     `);
     addSheet('Cultivos Ciclo', cycleCrop, [
@@ -167,6 +186,8 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'up_name',              header: 'UP',               width: 20 },
       { key: 'estado',               header: 'Estado',           width: 18 },
       { key: 'productor',            header: 'Productor',        width: 28 },
+      { key: 'variedad_code',        header: 'Cód. Variedad',    width: 14 },
+      { key: 'variedad_nombre',      header: 'Variedad',         width: 28 },
       { key: 'tipo_maiz',            header: 'Tipo Maíz',        width: 14 },
       { key: 'area_sown_ha',         header: 'Sup. Sembrada (ha)', width: 16 },
       { key: 'area_harvested_ha',    header: 'Sup. Cosech. (ha)', width: 16 },
@@ -175,7 +196,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'production_unit',      header: 'Unidad',           width: 10 },
       { key: 'planting_date',        header: 'F. Siembra',       width: 14 },
       { key: 'estimated_harvest_date', header: 'F. Est. Cosecha', width: 15 },
-      { key: 'yield_expected',       header: 'Rendim. Esp.',     width: 14 },
+      { key: 'yield_expected',       header: 'Rendim. Esp. (t/ha)', width: 16 },
       { key: 'ventana_venta',        header: 'Ventana Venta',    width: 14 },
       { key: 'disponible_para_venta',header: 'Disp. Venta',      width: 13 },
       { key: 'fecha_disponibilidad', header: 'F. Disponib.',     width: 14 },
@@ -425,12 +446,15 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       SELECT
         d.id, d.producer_id, d.up_id,
         p.nombres || ' ' || p.apellido_paterno AS productor,
-        d.tipo_maiz, d.variedad_code, d.variedad_libre,
+        d.tipo_maiz, d.variedad_code,
+        COALESCE(cv.label, d.variedad_libre, d.variedad_code) AS variedad_nombre,
+        d.variedad_libre,
         d.volumen_estimado_ton, d.precio_minimo_ton,
         d.ventana_venta, d.fecha_disponible, d.fecha_vencimiento,
         d.activa, d.created_at
       FROM disponibilidad_productor d
       LEFT JOIN producer p ON p.producer_id = d.producer_id
+      LEFT JOIN cat_crop_variety cv ON cv.code = d.variedad_code
       ORDER BY d.created_at DESC
     `);
     addSheet('Disponibilidad', disponibilidad, [
@@ -439,7 +463,8 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
       { key: 'up_id',                header: 'ID UP',         width: 10 },
       { key: 'productor',            header: 'Productor',     width: 30 },
       { key: 'tipo_maiz',            header: 'Tipo Maíz',     width: 14 },
-      { key: 'variedad_code',        header: 'Variedad',      width: 16 },
+      { key: 'variedad_code',        header: 'Cód. Variedad', width: 14 },
+      { key: 'variedad_nombre',      header: 'Variedad',      width: 28 },
       { key: 'variedad_libre',       header: 'Var. Libre',    width: 16 },
       { key: 'volumen_estimado_ton', header: 'Vol. (ton)',     width: 12 },
       { key: 'precio_minimo_ton',    header: 'Precio Mín.',   width: 12 },
