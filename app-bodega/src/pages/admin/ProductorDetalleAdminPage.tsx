@@ -35,6 +35,11 @@ interface ProductorDetalle {
   } | null;
   ups: {
     up_id: number;
+    up_name: string | null;
+    state_name: string | null;
+    municipality_name: string | null;
+    area_ha_calc: number | null;
+    created_at: string | null;
     geom_geojson: any;
     centroid_lat: number;
     centroid_lng: number;
@@ -225,11 +230,20 @@ export default function ProductorDetalleAdminPage() {
     if (!ring || ring.length < 3) return null;
     return {
       up_id: u.up_id,
+      up_name: u.up_name,
+      state_name: u.state_name,
+      municipality_name: u.municipality_name,
+      area_ha_calc: u.area_ha_calc,
+      created_at: u.created_at,
       pos: ring.map(([ln, la]: number[]) => [la, ln] as [number, number]),
       lat: u.centroid_lat,
       lng: u.centroid_lng,
     };
-  }).filter(Boolean) as { up_id: number; pos: [number, number][]; lat: number; lng: number }[];
+  }).filter(Boolean) as {
+    up_id: number; up_name: string | null; state_name: string | null;
+    municipality_name: string | null; area_ha_calc: number | null;
+    created_at: string | null; pos: [number, number][]; lat: number; lng: number;
+  }[];
 
   return (
     <div className="flex flex-col gap-3">
@@ -465,8 +479,40 @@ export default function ProductorDetalleAdminPage() {
               )}
               {upsParseadas.map(up => (
                 <Marker key={`flag-${up.up_id}`} position={[up.lat, up.lng]} icon={blueFlag}>
-                  <Popup>
-                    <p className="text-[12px] font-bold">Centro de parcela #{up.up_id}</p>
+                  <Popup minWidth={220} maxWidth={280}>
+                    <div style={{ fontFamily: 'system-ui, sans-serif', padding: '2px 0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />
+                        <span style={{ fontWeight: 800, fontSize: 13, color: '#111827' }}>
+                          {up.up_name || `Parcela #${up.up_id}`}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: 11 }}>
+                        <div>
+                          <div style={{ color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', fontSize: 9, letterSpacing: '0.05em', marginBottom: 1 }}>Superficie</div>
+                          <div style={{ color: '#111827', fontWeight: 700, fontSize: 13 }}>
+                            {up.area_ha_calc != null ? `${Number(up.area_ha_calc).toFixed(2)} ha` : '—'}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', fontSize: 9, letterSpacing: '0.05em', marginBottom: 1 }}>Parcela ID</div>
+                          <div style={{ color: '#2563eb', fontWeight: 700, fontSize: 12, fontFamily: 'monospace' }}>#{up.up_id}</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', fontSize: 9, letterSpacing: '0.05em', marginBottom: 1 }}>Municipio</div>
+                          <div style={{ color: '#374151', fontWeight: 600 }}>{up.municipality_name || '—'}</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', fontSize: 9, letterSpacing: '0.05em', marginBottom: 1 }}>Estado</div>
+                          <div style={{ color: '#374151', fontWeight: 600 }}>{up.state_name || '—'}</div>
+                        </div>
+                      </div>
+                      {up.created_at && (
+                        <div style={{ marginTop: 8, paddingTop: 7, borderTop: '1px solid #f3f4f6', fontSize: 10, color: '#9ca3af' }}>
+                          Registrada el {new Date(up.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                      )}
+                    </div>
                   </Popup>
                 </Marker>
               ))}

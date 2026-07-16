@@ -619,6 +619,11 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
           SELECT JSON_AGG(
             JSON_BUILD_OBJECT(
               'up_id', u.up_id,
+              'up_name', u.up_name,
+              'state_name', u.state_name,
+              'municipality_name', u.municipality_name,
+              'area_ha_calc', u.area_ha_calc,
+              'created_at', u.created_at,
               'geom_geojson', ST_AsGeoJSON(u.geom)::json,
               'centroid_lat', ST_Y(u.centroid::geometry),
               'centroid_lng', ST_X(u.centroid::geometry)
