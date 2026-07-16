@@ -28,6 +28,7 @@ function generarPassTemporal(): string {
 const VISTAS_PERMISOS: Record<string, string[]> = {
   resumen:            ['ver'],
   productores:        ['ver', 'ver_detalle', 'editar', 'eliminar', 'exportar'],
+  parcelas:           ['ver', 'eliminar'],
   bodegas:            ['ver', 'ver_detalle', 'crear', 'editar', 'eliminar', 'exportar'],
   alertas:            ['ver', 'crear', 'eliminar'],
   precios:            ['ver', 'editar'],
@@ -144,12 +145,12 @@ router.get('/usuarios', authMiddleware, soloAdmin, async (_req: AuthRequest, res
   try {
     const r = await pool.query(
       `SELECT u.id, u.nombre_completo, u.email, u.rol, u.activo,
-              u.estado_asignado, u.debe_cambiar_pass, u.ultimo_login, u.created_at,
+              u.estado_asignado, u.debe_cambiar_pass, u.ultimo_login, u.creado_en AS created_at,
               rp.etiqueta AS rol_etiqueta, rp.permisos_totales, rp.aplica_filtro_estado
        FROM usuarios u
        LEFT JOIN roles_panel rp ON rp.clave = u.rol
        WHERE u.es_panel_usuario = TRUE
-       ORDER BY u.created_at DESC`
+       ORDER BY u.creado_en DESC`
     );
     res.json({ usuarios: r.rows });
   } catch (e) {
@@ -161,7 +162,7 @@ router.get('/usuarios', authMiddleware, soloAdmin, async (_req: AuthRequest, res
 // POST /api/admin/permisos/usuarios — crear usuario con pass temporal
 router.post('/usuarios', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { nombre_completo, email, rol, estado_asignado, permisos } = req.body;
+    const { nombre_completo, email, rol, estado_asignado, permisos, password } = req.body;
 
     if (!nombre_completo?.trim() || !email?.trim() || !rol?.trim()) {
       res.status(400).json({ error: 'Nombre, email y rol son obligatorios' });
@@ -185,17 +186,21 @@ router.post('/usuarios', authMiddleware, soloAdmin, async (req: AuthRequest, res
       return;
     }
 
-    const passTemp = generarPassTemporal();
-    const hash     = await bcrypt.hash(passTemp, 12);
+    // Usar contraseña proporcionada o generar temporal
+    const passUsada = password?.trim() ? password.trim() : generarPassTemporal();
+    const hash      = await bcrypt.hash(passUsada, 12);
 
+    // debe_cambiar_pass = true solo si se generó automáticamente (no si el admin puso una)
+    const debecambiar = !password?.trim();
     const result = await pool.query(
       `INSERT INTO usuarios
          (email, nombre_completo, password_hash, rol, activo,
           es_panel_usuario, estado_asignado, debe_cambiar_pass)
-       VALUES ($1, $2, $3, $4, true, true, $5, true)
+       VALUES ($1, $2, $3, $4, true, true, $5, $6)
        RETURNING id, email, nombre_completo, rol, estado_asignado, creado_en`,
       [emailLower, nombre_completo.trim(), hash, rol,
-       rolData.aplica_filtro_estado ? (estado_asignado ?? null) : null]
+       rolData.aplica_filtro_estado ? (estado_asignado ?? null) : null,
+       debecambiar]
     );
 
     const usuarioId = result.rows[0].id;
@@ -209,7 +214,8 @@ router.post('/usuarios', authMiddleware, soloAdmin, async (req: AuthRequest, res
 
     res.status(201).json({
       usuario:           result.rows[0],
-      password_temporal: passTemp,   // solo se devuelve UNA vez
+      password_temporal: passUsada,   // solo se devuelve UNA vez
+      fue_generada:      debecambiar, // true = auto-generada, false = la puso el admin
     });
   } catch (e: any) {
     console.error('Error al crear usuario panel:', e);
@@ -225,7 +231,7 @@ router.post('/usuarios', authMiddleware, soloAdmin, async (req: AuthRequest, res
 router.patch('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { nombre_completo, email, rol, estado_asignado } = req.body;
+    const { nombre_completo, email, rol, estado_asignado, nueva_password } = req.body;
 
     const sets: string[] = [];
     const vals: any[]   = [];
@@ -235,6 +241,13 @@ router.patch('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthRequest
     if (email)           { sets.push(`email=$${n++}`);           vals.push(email.toLowerCase().trim()); }
     if (rol)             { sets.push(`rol=$${n++}`);             vals.push(rol); }
     if (estado_asignado !== undefined) { sets.push(`estado_asignado=$${n++}`); vals.push(estado_asignado || null); }
+    if (nueva_password?.trim()) {
+      const nuevoHash = await bcrypt.hash(nueva_password.trim(), 12);
+      sets.push(`password_hash=$${n++}`);
+      vals.push(nuevoHash);
+      sets.push(`debe_cambiar_pass=$${n++}`);
+      vals.push(false);
+    }
 
     if (sets.length === 0) { res.status(400).json({ error: 'Nada que actualizar' }); return; }
 

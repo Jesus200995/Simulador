@@ -6,6 +6,7 @@ import {
   Loader2, RefreshCw, UserPlus,
   TriangleAlert, Sparkles, LayoutDashboard, Users, Warehouse,
   TrendingUp, Sprout, BarChart3, Leaf, Search, ChevronLeft, ChevronRight, Layers,
+  Eye, EyeOff, KeyRound,
 } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -95,6 +96,32 @@ function Toggle({ on, onChange, disabled = false, size = 'md' }: {
 /* ─── Input / Select base ────────────────────────────────────────────── */
 const iCls = 'w-full bg-gray-50/80 border border-gray-200 rounded-xl px-3 py-2 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#0e5c33]/50 focus:ring-2 focus:ring-[#0e5c33]/10 transition-all duration-200';
 const lCls = 'text-[9px] font-black text-gray-400 uppercase tracking-[0.1em] mb-1 block';
+
+/* ─── Password Input ─────────────────────────────────────────────────────── */
+function PasswordInput({ label, value, onChange, placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div>
+      <label className={lCls}>{label}</label>
+      <div className="relative">
+        <input
+          type={show ? 'text' : 'password'}
+          className={iCls + ' pr-9'}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete="new-password"
+        />
+        <button type="button" onClick={() => setShow(s => !s)}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+          {show ? <EyeOff size={13} /> : <Eye size={13} />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /* ─── Multi-selector de estados ──────────────────────────────────────── */
 function EstadoMultiSelect({ value, onChange }: {
@@ -408,7 +435,7 @@ export default function PermisosAdminPage() {
 
   /* Crear */
   const [modalCrear, setModalCrear] = useState(false);
-  const [fCrear,  setFCrear]  = useState({ nombre_completo: '', email: '', rol: 'user', estado_asignado: '' });
+  const [fCrear,  setFCrear]  = useState({ nombre_completo: '', email: '', rol: 'user', estado_asignado: '', password: '', password2: '' });
   const [pCrear,  setPCrear]  = useState<Permiso[]>([]);
   const [creando, setCreando] = useState(false);
   const [errCrear, setErrCrear] = useState('');
@@ -417,7 +444,7 @@ export default function PermisosAdminPage() {
   /* Editar */
   const [modalEditar, setModalEditar]   = useState(false);
   const [usuEdit,     setUsuEdit]       = useState<UsuarioPanel | null>(null);
-  const [fEditar,  setFEditar]  = useState({ nombre_completo: '', email: '', rol: 'user', estado_asignado: '' });
+  const [fEditar,  setFEditar]  = useState({ nombre_completo: '', email: '', rol: 'user', estado_asignado: '', nueva_password: '', nueva_password2: '' });
   const [pEditar,  setPEditar]  = useState<Permiso[]>([]);
   const [guardando, setGuardando] = useState(false);
   const [errEdit,  setErrEdit]  = useState('');
@@ -487,7 +514,7 @@ export default function PermisosAdminPage() {
   /* Abrir editar */
   async function abrirEditar(u: UsuarioPanel) {
     setUsuEdit(u);
-    setFEditar({ nombre_completo: u.nombre_completo, email: u.email, rol: u.rol, estado_asignado: u.estado_asignado ?? '' });
+    setFEditar({ nombre_completo: u.nombre_completo, email: u.email, rol: u.rol, estado_asignado: u.estado_asignado ?? '', nueva_password: '', nueva_password2: '' });
     setErrEdit(''); setSavedOk(false);
     try {
       const r = await fetch(`${BASE}/admin/permisos/${u.id}`, { headers: HDR() });
@@ -511,8 +538,12 @@ export default function PermisosAdminPage() {
   async function crearUsuario() {
     setErrCrear('');
     if (!fCrear.nombre_completo.trim() || !fCrear.email.trim()) { setErrCrear('Nombre y email son obligatorios'); return; }
+    // Si puso contraseña, validar que coincidan
+    if (fCrear.password.trim()) {
+      if (fCrear.password.length < 6) { setErrCrear('La contraseña debe tener al menos 6 caracteres'); return; }
+      if (fCrear.password !== fCrear.password2) { setErrCrear('Las contraseñas no coinciden'); return; }
+    }
     const r = rolDe(fCrear.rol);
-    // estado_asignado vacío = "Todos" (null) — es válido
     setCreando(true);
     try {
       const resp = await fetch(`${BASE}/admin/permisos/usuarios`, {
@@ -521,6 +552,7 @@ export default function PermisosAdminPage() {
           nombre_completo: fCrear.nombre_completo.trim(),
           email: fCrear.email.trim().toLowerCase(),
           rol: fCrear.rol,
+          password: fCrear.password.trim() || undefined,
           estado_asignado: r?.aplica_filtro_estado ? (fCrear.estado_asignado || null) : null,
           permisos: r?.permisos_totales ? [] : pCrear,
         }),
@@ -528,7 +560,7 @@ export default function PermisosAdminPage() {
       const d = await resp.json();
       if (!resp.ok) { setErrCrear(d.error || 'Error al crear usuario'); return; }
       setModalCrear(false);
-      setFCrear({ nombre_completo: '', email: '', rol: 'user', estado_asignado: '' });
+      setFCrear({ nombre_completo: '', email: '', rol: 'user', estado_asignado: '', password: '', password2: '' });
       setCreds({ email: d.usuario.email, password_temporal: d.password_temporal, nombre_completo: d.usuario.nombre_completo, rol: d.usuario.rol, estado_asignado: d.usuario.estado_asignado ?? null });
       cargar();
     } catch { setErrCrear('Error de conexión'); } finally { setCreando(false); }
@@ -537,6 +569,10 @@ export default function PermisosAdminPage() {
   /* Guardar editar */
   async function guardarEditar() {
     if (!usuEdit) return;
+    if (fEditar.nueva_password.trim()) {
+      if (fEditar.nueva_password.length < 6) { setErrEdit('La contraseña debe tener al menos 6 caracteres'); return; }
+      if (fEditar.nueva_password !== fEditar.nueva_password2) { setErrEdit('Las contraseñas no coinciden'); return; }
+    }
     setGuardando(true); setErrEdit(''); setSavedOk(false);
     try {
       await fetch(`${BASE}/admin/permisos/usuarios/${usuEdit.id}`, {
@@ -546,6 +582,7 @@ export default function PermisosAdminPage() {
           email: fEditar.email.trim().toLowerCase(),
           rol: fEditar.rol,
           estado_asignado: rolDe(fEditar.rol)?.aplica_filtro_estado ? fEditar.estado_asignado : null,
+          nueva_password: fEditar.nueva_password.trim() || undefined,
         }),
       });
       const r2 = rolDe(fEditar.rol);
@@ -790,6 +827,25 @@ export default function PermisosAdminPage() {
               </div>
             </section>
 
+            {/* Sección: contraseña */}
+            <section className="flex flex-col gap-2.5">
+              <div className="flex items-center gap-2">
+                <KeyRound size={11} className="text-gray-400" />
+                <p className={lCls + ' mb-0'}>Contraseña <span className="text-gray-400 font-normal normal-case">— vacío = se genera automáticamente</span></p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <PasswordInput label="Contraseña" value={fCrear.password}
+                  onChange={v => setFCrear(p => ({ ...p, password: v }))} placeholder="Mínimo 6 caracteres" />
+                <PasswordInput label="Confirmar contraseña" value={fCrear.password2}
+                  onChange={v => setFCrear(p => ({ ...p, password2: v }))} placeholder="Repetir contraseña" />
+              </div>
+              {!fCrear.password.trim() && (
+                <p className="text-[10.5px] text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  Se generará una contraseña temporal que el usuario deberá cambiar en su primer acceso.
+                </p>
+              )}
+            </section>
+
             {/* Sección: estados (si aplica) */}
             {rolDe(fCrear.rol)?.aplica_filtro_estado && (
               <section className="flex flex-col gap-1.5">
@@ -888,6 +944,20 @@ export default function PermisosAdminPage() {
                     {roles.map(r => <option key={r.clave} value={r.clave}>{r.etiqueta}</option>)}
                   </select>
                 </div>
+              </div>
+            </section>
+
+            {/* Sección: cambiar contraseña (editar) */}
+            <section className="flex flex-col gap-2.5">
+              <div className="flex items-center gap-2">
+                <KeyRound size={11} className="text-gray-400" />
+                <p className={lCls + ' mb-0'}>Nueva contraseña <span className="text-gray-400 font-normal normal-case">— vacío = no cambiar</span></p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <PasswordInput label="Nueva contraseña" value={fEditar.nueva_password}
+                  onChange={v => setFEditar(p => ({ ...p, nueva_password: v }))} placeholder="Dejar vacío para no cambiar" />
+                <PasswordInput label="Confirmar contraseña" value={fEditar.nueva_password2}
+                  onChange={v => setFEditar(p => ({ ...p, nueva_password2: v }))} placeholder="Repetir nueva contraseña" />
               </div>
             </section>
 
