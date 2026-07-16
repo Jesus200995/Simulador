@@ -145,12 +145,12 @@ router.get('/usuarios', authMiddleware, soloAdmin, async (_req: AuthRequest, res
   try {
     const r = await pool.query(
       `SELECT u.id, u.nombre_completo, u.email, u.rol, u.activo,
-              u.estado_asignado, u.debe_cambiar_pass, u.ultimo_login, u.creado_en AS created_at,
+              u.estado_asignado, u.debe_cambiar_pass, u.ultimo_login, u.created_at,
               rp.etiqueta AS rol_etiqueta, rp.permisos_totales, rp.aplica_filtro_estado
        FROM usuarios u
        LEFT JOIN roles_panel rp ON rp.clave = u.rol
        WHERE u.es_panel_usuario = TRUE
-       ORDER BY u.creado_en DESC`
+       ORDER BY u.created_at DESC`
     );
     res.json({ usuarios: r.rows });
   } catch (e) {
@@ -197,7 +197,7 @@ router.post('/usuarios', authMiddleware, soloAdmin, async (req: AuthRequest, res
          (email, nombre_completo, password_hash, rol, activo,
           es_panel_usuario, estado_asignado, debe_cambiar_pass)
        VALUES ($1, $2, $3, $4, true, true, $5, $6)
-       RETURNING id, email, nombre_completo, rol, estado_asignado, creado_en`,
+       RETURNING id, email, nombre_completo, rol, estado_asignado, created_at`,
       [emailLower, nombre_completo.trim(), hash, rol,
        rolData.aplica_filtro_estado ? (estado_asignado ?? null) : null,
        debecambiar]
