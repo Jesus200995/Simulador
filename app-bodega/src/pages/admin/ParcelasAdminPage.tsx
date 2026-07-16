@@ -48,18 +48,24 @@ function parsePoly(geom: any): [number, number][] | null {
   return ring.map(([ln, la]: number[]) => [la, ln]);
 }
 
-// Banderita: palito + rectángulo de bandera arriba + bolita de color con borde blanco abajo
+// SVG: banderita triangular + palito corto + bolita blanca en la base
 function makeFlag(color: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="26" viewBox="0 0 22 26" style="overflow:visible;display:block">
+    <!-- Capa blanca (contorno) -->
+    <line x1="5" y1="0" x2="5" y2="22" stroke="white" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="5,0 20,6 5,12" fill="white" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="5" cy="22" r="5.5" fill="white"/>
+    <!-- Capa de color -->
+    <line x1="5" y1="0" x2="5" y2="22" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+    <polygon points="5,0 19,6 5,12" fill="${color}"/>
+    <circle cx="5" cy="22" r="3.5" fill="${color}"/>
+  </svg>`;
   return L.divIcon({
-    html: `<div style="position:relative;width:22px;height:34px">
-      <div style="position:absolute;left:3px;top:0;width:2px;height:30px;background:${color};border-radius:1px;box-shadow:0 1px 2px rgba(0,0,0,0.2)"></div>
-      <div style="position:absolute;left:5px;top:1px;width:13px;height:9px;background:${color};border-radius:0 3px 3px 0;box-shadow:1px 1px 3px rgba(0,0,0,0.2)"></div>
-      <div style="position:absolute;left:-1px;top:26px;width:9px;height:9px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.45)"></div>
-    </div>`,
+    html: svg,
     className: '',
-    iconSize: [22, 35],
-    iconAnchor: [3, 35],
-    popupAnchor: [8, -35],
+    iconSize: [22, 26],
+    iconAnchor: [5, 26],   // punta = base de la bolita
+    popupAnchor: [2, -28], // popup aparece arriba de la banderita
   });
 }
 
@@ -389,12 +395,15 @@ export default function ParcelasAdminPage() {
                             activo ? 'border-blue-300 bg-blue-50' : 'border-transparent hover:border-gray-200 hover:bg-gray-50'
                           }`}
                         >
-                          {/* Banderita miniatura en la leyenda */}
-                          <div style={{ position: 'relative', width: 16, height: 22, flexShrink: 0 }}>
-                            <div style={{ position: 'absolute', left: 2, top: 0, width: 2, height: 19, background: color, borderRadius: 1 }} />
-                            <div style={{ position: 'absolute', left: 4, top: 1, width: 9, height: 6, background: color, borderRadius: '0 2px 2px 0' }} />
-                            <div style={{ position: 'absolute', left: 0, top: 16, width: 6, height: 6, borderRadius: '50%', background: color, border: '1.5px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.35)' }} />
-                          </div>
+                          {/* Banderita miniatura SVG en la leyenda */}
+                          <svg width="14" height="17" viewBox="0 0 22 26" style={{ flexShrink: 0, overflow: 'visible' }}>
+                            <line x1="5" y1="0" x2="5" y2="22" stroke="white" strokeWidth="5" strokeLinecap="round"/>
+                            <polygon points="5,0 20,6 5,12" fill="white" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+                            <circle cx="5" cy="22" r="5" fill="white"/>
+                            <line x1="5" y1="0" x2="5" y2="22" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
+                            <polygon points="5,0 19,6 5,12" fill={color}/>
+                            <circle cx="5" cy="22" r="3.5" fill={color}/>
+                          </svg>
                           <div className="flex-1 min-w-0">
                             <div className="text-[11px] font-bold text-gray-800 truncate">{estado}</div>
                             <div className="text-[9.5px] text-gray-400">{fmtHa(ha)} ha</div>
@@ -461,11 +470,7 @@ export default function ParcelasAdminPage() {
                   positions={pos}
                   pathOptions={{ color, fillColor: color, fillOpacity: 0.28, weight: 2, opacity: 0.9 }}
                   eventHandlers={{ click: () => setFlyTarget([p.centroid_lat, p.centroid_lng]) }}
-                >
-                  <Popup minWidth={230} maxWidth={300}>
-                    <PopupContent p={p} nombre={nombre} color={color} />
-                  </Popup>
-                </Polygon>
+                />
               );
             })}
 
