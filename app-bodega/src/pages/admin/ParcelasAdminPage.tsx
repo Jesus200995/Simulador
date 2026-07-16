@@ -152,7 +152,7 @@ export default function ParcelasAdminPage() {
   }, [filtroEstado, municipiosMapa]);
 
   const totalHa = useMemo(() =>
-    filtradas.reduce((s, p) => s + (p.area_ha_calc || 0), 0), [filtradas]);
+    filtradas.reduce((s, p) => s + (parseFloat(String(p.area_ha_calc ?? 0)) || 0), 0), [filtradas]);
 
   const productoresUnicos = useMemo(() =>
     new Set(filtradas.map(p => p.producer_id)).size, [filtradas]);
@@ -334,7 +334,7 @@ export default function ParcelasAdminPage() {
                   <div className="space-y-2">
                     {[...colorPorEstado.entries()].map(([estado, color]) => {
                       const count = filtradas.filter(p => p.state_name === estado).length;
-                      const ha    = filtradas.filter(p => p.state_name === estado).reduce((s, p) => s + (p.area_ha_calc || 0), 0);
+                      const ha    = filtradas.filter(p => p.state_name === estado).reduce((s, p) => s + (parseFloat(String(p.area_ha_calc ?? 0)) || 0), 0);
                       return (
                         <button
                           key={estado}
