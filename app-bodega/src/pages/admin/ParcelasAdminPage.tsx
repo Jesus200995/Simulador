@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Search, SlidersHorizontal, X, ChevronDown, MapPin, Layers, RefreshCw } from 'lucide-react';
@@ -48,18 +48,28 @@ function parsePoly(geom: any): [number, number][] | null {
   return ring.map(([ln, la]: number[]) => [la, ln]);
 }
 
-// Pin moderno: palito vertical + bolita de color en la punta inferior con borde blanco
-function makePin(color: string) {
+// Banderita: palito + rectángulo de bandera arriba + bolita de color con borde blanco abajo
+function makeFlag(color: string) {
   return L.divIcon({
-    html: `<div style="position:relative;width:20px;height:34px;display:flex;flex-direction:column;align-items:center;gap:0">
-      <div style="width:2.5px;height:22px;background:${color};border-radius:2px 2px 0 0;box-shadow:0 1px 3px rgba(0,0,0,0.25)"></div>
-      <div style="width:13px;height:13px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.45);flex-shrink:0"></div>
+    html: `<div style="position:relative;width:22px;height:34px">
+      <div style="position:absolute;left:3px;top:0;width:2px;height:30px;background:${color};border-radius:1px;box-shadow:0 1px 2px rgba(0,0,0,0.2)"></div>
+      <div style="position:absolute;left:5px;top:1px;width:13px;height:9px;background:${color};border-radius:0 3px 3px 0;box-shadow:1px 1px 3px rgba(0,0,0,0.2)"></div>
+      <div style="position:absolute;left:-1px;top:26px;width:9px;height:9px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.45)"></div>
     </div>`,
     className: '',
-    iconSize: [20, 35],
-    iconAnchor: [10, 35],
-    popupAnchor: [0, -36],
+    iconSize: [22, 35],
+    iconAnchor: [3, 35],
+    popupAnchor: [8, -35],
   });
+}
+
+// Controlador de vuelo: responde cuando cambia flyTarget
+function FlyToController({ target }: { target: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (target) map.flyTo(target, 15, { animate: true, duration: 1.0 });
+  }, [target]);
+  return null;
 }
 
 // Formato compacto para hectáreas grandes
@@ -151,6 +161,7 @@ export default function ParcelasAdminPage() {
   const [filtroMunicipio, setFiltroMunicipio] = useState('');
   const [filtroNombre,    setFiltroNombre]    = useState('');
   const [panelOpen,       setPanelOpen]       = useState(true);
+  const [flyTarget,       setFlyTarget]       = useState<[number, number] | null>(null);
 
   const colorPorEstado = useMemo(() => {
     const map = new Map<string, string>();
@@ -378,10 +389,11 @@ export default function ParcelasAdminPage() {
                             activo ? 'border-blue-300 bg-blue-50' : 'border-transparent hover:border-gray-200 hover:bg-gray-50'
                           }`}
                         >
-                          {/* Pin miniatura en la leyenda */}
-                          <div style={{ position: 'relative', width: 14, height: 22, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <div style={{ width: 2, height: 13, background: color, borderRadius: '2px 2px 0 0' }} />
-                            <div style={{ width: 9, height: 9, borderRadius: '50%', background: color, border: '2px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.35)', flexShrink: 0 }} />
+                          {/* Banderita miniatura en la leyenda */}
+                          <div style={{ position: 'relative', width: 16, height: 22, flexShrink: 0 }}>
+                            <div style={{ position: 'absolute', left: 2, top: 0, width: 2, height: 19, background: color, borderRadius: 1 }} />
+                            <div style={{ position: 'absolute', left: 4, top: 1, width: 9, height: 6, background: color, borderRadius: '0 2px 2px 0' }} />
+                            <div style={{ position: 'absolute', left: 0, top: 16, width: 6, height: 6, borderRadius: '50%', background: color, border: '1.5px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.35)' }} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-[11px] font-bold text-gray-800 truncate">{estado}</div>
@@ -425,6 +437,8 @@ export default function ParcelasAdminPage() {
             style={{ height: '100%', width: '100%' }}
             zoomControl
           >
+            <FlyToController target={flyTarget} />
+
             <TileLayer
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               attribution="ESRI"
@@ -437,8 +451,8 @@ export default function ParcelasAdminPage() {
 
             {/* Polígonos */}
             {filtradas.map(p => {
-              const pos   = parsePoly(p.geom_geojson);
-              const color = colorPorEstado.get(p.state_name || '') || '#2563eb';
+              const pos    = parsePoly(p.geom_geojson);
+              const color  = colorPorEstado.get(p.state_name || '') || '#2563eb';
               const nombre = [p.nombres, p.apellido_paterno, p.apellido_materno].filter(Boolean).join(' ');
               if (!pos) return null;
               return (
@@ -446,6 +460,7 @@ export default function ParcelasAdminPage() {
                   key={`poly-${p.up_id}`}
                   positions={pos}
                   pathOptions={{ color, fillColor: color, fillOpacity: 0.28, weight: 2, opacity: 0.9 }}
+                  eventHandlers={{ click: () => setFlyTarget([p.centroid_lat, p.centroid_lng]) }}
                 >
                   <Popup minWidth={230} maxWidth={300}>
                     <PopupContent p={p} nombre={nombre} color={color} />
@@ -454,16 +469,17 @@ export default function ParcelasAdminPage() {
               );
             })}
 
-            {/* Pins */}
+            {/* Banderitas */}
             {filtradas.map(p => {
               if (!parsePoly(p.geom_geojson)) return null;
               const color  = colorPorEstado.get(p.state_name || '') || '#2563eb';
               const nombre = [p.nombres, p.apellido_paterno, p.apellido_materno].filter(Boolean).join(' ');
               return (
                 <Marker
-                  key={`pin-${p.up_id}`}
+                  key={`flag-${p.up_id}`}
                   position={[p.centroid_lat, p.centroid_lng]}
-                  icon={makePin(color)}
+                  icon={makeFlag(color)}
+                  eventHandlers={{ click: () => setFlyTarget([p.centroid_lat, p.centroid_lng]) }}
                 >
                   <Popup minWidth={230} maxWidth={300}>
                     <PopupContent p={p} nombre={nombre} color={color} />
