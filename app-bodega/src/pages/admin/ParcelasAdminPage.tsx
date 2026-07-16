@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   Search, SlidersHorizontal, X, ChevronDown, MapPin, Layers, RefreshCw,
-  Map, List, Trash2, AlertTriangle, CheckCircle2,
+  Map as MapIcon, List, Trash2, AlertTriangle, CheckCircle2,
 } from 'lucide-react';
 
 const LEAFLET_TEXT_SELECT_STYLE = `
@@ -373,7 +373,7 @@ export default function ParcelasAdminPage() {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Map size={13} /> <span className="hidden sm:inline">Mapa</span>
+              <MapIcon size={13} /> <span className="hidden sm:inline">Mapa</span>
             </button>
             <button
               onClick={() => setActiveTab('lista')}
