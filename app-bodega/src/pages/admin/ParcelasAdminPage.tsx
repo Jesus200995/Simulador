@@ -6,7 +6,6 @@ import {
   Search, SlidersHorizontal, X, ChevronDown,
   MapPin, Layers, RefreshCw,
 } from 'lucide-react';
-import { usePermisosStore } from '../../store/permisos';
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const HDR  = () => ({ Authorization: `Bearer ${localStorage.getItem('simac_token')}` });
@@ -114,8 +113,6 @@ function PopupContent({ p, nombre, color }: { p: Parcela; nombre: string; color:
 }
 
 export default function ParcelasAdminPage() {
-  const permisosTotal = usePermisosStore(s => s.permisosTotal);
-
   const [parcelas, setParcelas]   = useState<Parcela[]>([]);
   const [loading, setLoading]     = useState(true);
   const [estados, setEstados]     = useState<string[]>([]);

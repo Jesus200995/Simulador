@@ -1280,7 +1280,7 @@ router.get('/parcelas/filtros', authMiddleware, async (_req: Request, res: Respo
 });
 
 // GET /api/admin/parcelas — todas las UPs con polígono, productor y ciclo
-router.get('/parcelas', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.get('/parcelas', authMiddleware, async (req: any, res: Response): Promise<void> => {
   try {
     const { estado, municipio, q } = req.query as Record<string, string>;
     const params: any[] = [];
