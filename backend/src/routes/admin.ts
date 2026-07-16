@@ -1261,4 +1261,76 @@ router.delete('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: Aut
   }
 });
 
+// ─── PARCELAS ────────────────────────────────────────────────────────────────
+
+// GET /api/admin/parcelas/filtros — opciones para dropdowns de filtro
+router.get('/parcelas/filtros', authMiddleware, async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const { rows: estadosRows } = await pool.query(
+      `SELECT DISTINCT state_name FROM up WHERE geom IS NOT NULL AND state_name IS NOT NULL ORDER BY state_name`
+    );
+    const { rows: municipiosRows } = await pool.query(
+      `SELECT DISTINCT state_name, municipality_name FROM up WHERE geom IS NOT NULL AND municipality_name IS NOT NULL ORDER BY state_name, municipality_name`
+    );
+    res.json({ estados: estadosRows.map((r: any) => r.state_name), municipios: municipiosRows });
+  } catch (error) {
+    console.error('Error filtros parcelas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /api/admin/parcelas — todas las UPs con polígono, productor y ciclo
+router.get('/parcelas', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { estado, municipio, q } = req.query as Record<string, string>;
+    const params: any[] = [];
+    const conds: string[] = ['u.geom IS NOT NULL'];
+    let pi = 1;
+
+    if (estado)    { conds.push(`u.state_name = $${pi++}`);                       params.push(estado); }
+    if (municipio) { conds.push(`u.municipality_name = $${pi++}`);                params.push(municipio); }
+    if (q)         { conds.push(`(p.nombres ILIKE $${pi} OR p.apellido_paterno ILIKE $${pi++})`); params.push(`%${q}%`); }
+
+    const where = conds.join(' AND ');
+
+    const { rows } = await pool.query(`
+      SELECT
+        u.up_id,
+        u.up_name,
+        u.state_name,
+        u.municipality_name,
+        u.area_ha_calc,
+        u.created_at,
+        ST_AsGeoJSON(u.geom)::json   AS geom_geojson,
+        ST_Y(u.centroid::geometry)   AS centroid_lat,
+        ST_X(u.centroid::geometry)   AS centroid_lng,
+        p.producer_id,
+        p.nombres,
+        p.apellido_paterno,
+        p.apellido_materno,
+        p.estado_validacion,
+        ciclo.ciclo_activo,
+        ciclo.cultivo_principal
+      FROM up u
+      JOIN producer p ON p.producer_id = u.producer_id
+      LEFT JOIN LATERAL (
+        SELECT
+          CONCAT(c.cycle_type, ' ', c.cycle_year) AS ciclo_activo,
+          COALESCE(cc.tipo_maiz, 'Maíz')           AS cultivo_principal
+        FROM cycle c
+        LEFT JOIN cycle_crop cc ON cc.cycle_id = c.cycle_id
+        WHERE c.up_id = u.up_id
+        ORDER BY c.cycle_year DESC, c.cycle_id DESC LIMIT 1
+      ) ciclo ON TRUE
+      WHERE ${where}
+      ORDER BY u.state_name NULLS LAST, u.created_at DESC
+    `, params);
+
+    res.json({ parcelas: rows });
+  } catch (error) {
+    console.error('Error parcelas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

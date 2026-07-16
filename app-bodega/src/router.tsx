@@ -80,6 +80,7 @@ import SenasicaAdminPage from './pages/admin/SenasicaAdminPage';
 import PermisosAdminPage from './pages/admin/PermisosAdminPage';
 import CambiarPasswordPage from './pages/admin/CambiarPasswordPage';
 import MiPerfilAdminPage from './pages/admin/MiPerfilPage';
+import ParcelasAdminPage from './pages/admin/ParcelasAdminPage';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -127,7 +128,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 }
 
 /** Orden de vistas del panel admin — usado para hallar la primera disponible para un OREF. */
-const ORDEN_VISTAS = ['resumen', 'productores', 'bodegas', 'alertas', 'precios', 'produccion', 'mercado', 'senasica', 'avisos-privacidad'];
+const ORDEN_VISTAS = ['resumen', 'productores', 'parcelas', 'bodegas', 'alertas', 'precios', 'produccion', 'mercado', 'senasica', 'avisos-privacidad'];
 
 function rutaDeVista(vista: string): string {
   return vista === 'resumen' ? '/admin' : `/admin/${vista}`;
@@ -315,6 +316,7 @@ export const router = createBrowserRouter([
       { index: true, element: <RequireVista vista="resumen"><DashboardAdminPage /></RequireVista> },
       { path: 'productores',    element: <RequireVista vista="productores"><ProductoresAdminPage /></RequireVista> },
       { path: 'productores/:id',element: <RequireVista vista="productores"><ProductorDetalleAdminPage /></RequireVista> },
+      { path: 'parcelas',       element: <RequireVista vista="parcelas"><ParcelasAdminPage /></RequireVista> },
       { path: 'bodegas',        element: <RequireVista vista="bodegas"><BodegasAdminPage /></RequireVista> },
       { path: 'bodegas/:id',    element: <RequireVista vista="bodegas"><BodegaDetalleAdminPage /></RequireVista> },
       { path: 'alertas',        element: <RequireVista vista="alertas"><AlertasAdminPage /></RequireVista> },

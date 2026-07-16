@@ -6,7 +6,7 @@ import { usePermisosStore } from '../../store/permisos';
 import {
   LayoutDashboard, Users, Warehouse, AlertTriangle,
   TrendingUp, LogOut, Menu, X, ShieldCheck, ChevronRight,
-  Sprout, BarChart3, Settings, Leaf, KeyRound, CircleUserRound,
+  Sprout, BarChart3, Settings, Leaf, KeyRound, CircleUserRound, Layers,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -24,6 +24,7 @@ interface SidebarItem {
 const MENU: SidebarItem[] = [
   { label: 'Resumen',           subtitle: 'Métricas, estadísticas y vista general del sistema',               path: '/admin',                   icon: LayoutDashboard, exact: true, vista: 'resumen' },
   { label: 'Productores',       subtitle: 'Administración y gestión integral de agricultores registrados',    path: '/admin/productores',       icon: Users,           vista: 'productores' },
+  { label: 'Parcelas',          subtitle: 'Mapa de todas las unidades de producción y parcelas registradas',  path: '/admin/parcelas',          icon: Layers,          vista: 'parcelas' },
   { label: 'Bodegas',           subtitle: 'Supervisión y control detallado de centros de acopio',             path: '/admin/bodegas',           icon: Warehouse,       vista: 'bodegas' },
   { label: 'Alertas',           subtitle: 'Centro de notificaciones y avisos en tiempo real',                 path: '/admin/alertas',           icon: AlertTriangle,   vista: 'alertas' },
   { label: 'Precios',           subtitle: 'Monitoreo de cotizaciones y variaciones del mercado',              path: '/admin/precios',           icon: TrendingUp,      vista: 'precios' },
