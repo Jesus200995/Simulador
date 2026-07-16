@@ -287,6 +287,22 @@ export default function ParcelasAdminPage() {
                 {parcelas.length.toLocaleString('es-MX')} parcelas · {fmtHa(totalHaAll)} ha · {prodAll} productores
               </span>
             )}
+            {activeTab==='mapa'&&(
+              <button onClick={()=>setPanelOpen(o=>!o)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                  panelOpen
+                    ?'bg-[#1A5C38] text-white border-[#1A5C38]'
+                    :'text-[#1A5C38] border-[#1A5C38]/30 hover:bg-[#d4efe1]'
+                }`}>
+                <SlidersHorizontal size={11}/>
+                <span className="hidden sm:inline">{panelOpen?'Ocultar':'Filtros'}</span>
+                {hayFiltros&&(
+                  <span className={`text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center ${panelOpen?'bg-white/30 text-white':'bg-[#1A5C38] text-white'}`}>
+                    {[filtroEstado,filtroMunicipio].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+            )}
             <button onClick={cargar} disabled={loading}
               className="p-1.5 rounded-lg text-[#1A5C38] bg-[#d4efe1] hover:bg-[#1A5C38] hover:text-white border border-[#1A5C38]/20 hover:border-transparent transition disabled:opacity-50">
               <RefreshCw size={11} className={loading?'animate-spin':''}/>
@@ -388,23 +404,8 @@ export default function ParcelasAdminPage() {
             )}
           </div>
 
-          {/* Botón toggle panel + mapa */}
+          {/* Área del mapa */}
           <div className="flex-1 relative overflow-hidden">
-            {/* Toggle panel btn */}
-            <button onClick={()=>setPanelOpen(o=>!o)}
-              className={`absolute top-3 left-3 z-[500] flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border shadow-sm transition-all ${
-                panelOpen
-                  ?'bg-[#1A5C38] text-white border-[#1A5C38]'
-                  :'bg-white text-[#1A5C38] border-[#1A5C38]/30 hover:border-[#1A5C38]/60'
-              }`}>
-              <SlidersHorizontal size={12}/>
-              <span>{panelOpen?'Ocultar':'Filtros'}</span>
-              {hayFiltros&&!panelOpen&&(
-                <span className="w-4 h-4 rounded-full bg-[#1A5C38] text-white text-[9px] font-black flex items-center justify-center">
-                  {[filtroEstado,filtroMunicipio].filter(Boolean).length}
-                </span>
-              )}
-            </button>
 
             {loading&&(
               <div className="absolute inset-0 z-[999] flex items-center justify-center bg-gray-900/20 backdrop-blur-sm">
