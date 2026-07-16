@@ -614,7 +614,19 @@ router.get('/usuarios/:id', authMiddleware, async (req: AuthRequest, res: Respon
         ciclo.cultivo_principal,
         ciclo.variedad,
         pt.nombres AS traslape_productor_nombre,
-        pt.apellido_paterno AS traslape_productor_apellido
+        pt.apellido_paterno AS traslape_productor_apellido,
+        (
+          SELECT JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'up_id', u.up_id,
+              'geom_geojson', ST_AsGeoJSON(u.geom)::json,
+              'centroid_lat', ST_Y(u.centroid::geometry),
+              'centroid_lng', ST_X(u.centroid::geometry)
+            ) ORDER BY u.created_at ASC
+          )
+          FROM up u
+          WHERE u.producer_id = p.producer_id AND u.geom IS NOT NULL
+        ) AS ups_geom
       FROM producer p
       LEFT JOIN LATERAL (
         SELECT up_id, state_name, municipality_name, up_name, area_ha_calc, centroid,

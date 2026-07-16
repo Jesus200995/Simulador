@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 import {
   ArrowLeft, Users, Mail, Phone, Calendar, MapPin, Sprout,
   Check, X, AlertTriangle, RefreshCw, ShieldCheck
@@ -29,10 +30,15 @@ interface ProductorDetalle {
     cultivo_principal: string;
     variedad: string;
     ciclo_activo: string;
-    geom?: any; // GeoJSON geometry (MultiPolygon)
     latitud?: number;
     longitud?: number;
   } | null;
+  ups: {
+    up_id: number;
+    geom_geojson: any;
+    centroid_lat: number;
+    centroid_lng: number;
+  }[];
   disponibilidades: {
     id: number;
     tipo_maiz: string;
@@ -122,6 +128,7 @@ export default function ProductorDetalleAdminPage() {
         created_at: u.fecha_registro || u.created_at || new Date().toISOString(),
         tipo_productor: u.tipo_registro || u.tipo_productor || 'B',
         up: upData,
+        ups: Array.isArray(u.ups_geom) ? u.ups_geom : [],
         disponibilidades: dispList,
       });
 
@@ -189,24 +196,40 @@ export default function ProductorDetalleAdminPage() {
     </div>
   );
 
-  // Extraer coordenadas seguras del polígono o marcador
-  const mapCenter: [number, number] = data.up?.latitud && data.up?.longitud 
-    ? [data.up.latitud, data.up.longitud] 
-    : [24.8083, -107.3941];
+  // Centro del mapa: primer centroide disponible o fallback Culiacán
+  const mapCenter: [number, number] =
+    data.ups.length > 0
+      ? [data.ups[0].centroid_lat, data.ups[0].centroid_lng]
+      : data.up?.latitud && data.up?.longitud
+        ? [data.up.latitud, data.up.longitud]
+        : [24.8083, -107.3941];
 
-  // Parsear coordenadas para polígono Leaflet si existen
-  let polygonCoords: [number, number][] | null = null;
-  if (data.up?.geom && data.up.geom.type === 'MultiPolygon') {
-    try {
-      const coords = data.up.geom.coordinates[0][0]; // Primer anillo de polígono
-      polygonCoords = coords.map((c: any) => [c[1], c[0]]); // Leaflet usa [lat, lng]
-    } catch (_) {}
-  } else if (data.up?.geom && data.up.geom.type === 'Polygon') {
-    try {
-      const coords = data.up.geom.coordinates[0];
-      polygonCoords = coords.map((c: any) => [c[1], c[0]]);
-    } catch (_) {}
-  }
+  // Banderita azul personalizada
+  const blueFlag = L.divIcon({
+    html: `<div style="position:relative;width:20px;height:30px">
+      <div style="position:absolute;left:3px;top:0;width:2px;height:28px;background:#2563eb;border-radius:1px"></div>
+      <div style="position:absolute;left:5px;top:1px;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:12px solid #2563eb"></div>
+    </div>`,
+    className: '',
+    iconSize: [20, 30],
+    iconAnchor: [3, 28],
+    popupAnchor: [6, -28],
+  });
+
+  // Parsear polígonos de las UPs del productor para Leaflet
+  const upsParseadas = data.ups.map(u => {
+    const g = u.geom_geojson;
+    if (!g?.coordinates) return null;
+    const ring: number[][] =
+      g.type === 'MultiPolygon' ? g.coordinates[0]?.[0] : g.coordinates[0];
+    if (!ring || ring.length < 3) return null;
+    return {
+      up_id: u.up_id,
+      pos: ring.map(([ln, la]: number[]) => [la, ln] as [number, number]),
+      lat: u.centroid_lat,
+      lng: u.centroid_lng,
+    };
+  }).filter(Boolean) as { up_id: number; pos: [number, number][]; lat: number; lng: number }[];
 
   return (
     <div className="flex flex-col gap-3">
@@ -409,21 +432,29 @@ export default function ProductorDetalleAdminPage() {
 
           {/* Leaflet Map Card */}
           <div className="h-64 rounded-xl overflow-hidden border border-white/5 relative z-10">
-            <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={mapCenter} zoom={upsParseadas.length > 0 ? 14 : 13} style={{ height: '100%', width: '100%' }}>
               <TileLayer
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                 attribution="ESRI Imagery"
               />
-              {polygonCoords ? (
-                <Polygon 
-                  positions={polygonCoords} 
-                  pathOptions={{ color: '#1A5C38', fillColor: '#1A5C38', fillOpacity: 0.35, weight: 2 }}
-                >
-                  <Popup>
-                    <p className="text-[12px] font-bold">Unidad de Producción de {data.nombre}</p>
-                    <p className="text-[11px] text-gray-500">{data.up?.superficie_hectareas} Hectáreas</p>
-                  </Popup>
-                </Polygon>
+              <TileLayer
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                attribution=""
+                opacity={0.7}
+              />
+              {upsParseadas.length > 0 ? (
+                upsParseadas.map(up => (
+                  <Polygon
+                    key={up.up_id}
+                    positions={up.pos}
+                    pathOptions={{ color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.3, weight: 2.5 }}
+                  >
+                    <Popup>
+                      <p className="text-[12px] font-bold">Parcela de {data.nombre}</p>
+                      <p className="text-[11px] text-gray-500">UP #{up.up_id}</p>
+                    </Popup>
+                  </Polygon>
+                ))
               ) : (
                 <Marker position={mapCenter}>
                   <Popup>
@@ -432,6 +463,13 @@ export default function ProductorDetalleAdminPage() {
                   </Popup>
                 </Marker>
               )}
+              {upsParseadas.map(up => (
+                <Marker key={`flag-${up.up_id}`} position={[up.lat, up.lng]} icon={blueFlag}>
+                  <Popup>
+                    <p className="text-[12px] font-bold">Centro de parcela #{up.up_id}</p>
+                  </Popup>
+                </Marker>
+              ))}
             </MapContainer>
           </div>
 
