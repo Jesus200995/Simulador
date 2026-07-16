@@ -1308,6 +1308,7 @@ router.get('/parcelas', authMiddleware, async (req: any, res: Response): Promise
         p.nombres,
         p.apellido_paterno,
         p.apellido_materno,
+        p.curp,
         p.estado_validacion,
         ciclo.ciclo_activo,
         ciclo.cultivo_principal
