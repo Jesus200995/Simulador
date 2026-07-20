@@ -40,6 +40,24 @@ function extraerEstadoMunicipio(address: Record<string, string> = {}): { estado:
   return { estado, municipio };
 }
 
+/**
+ * Canonicaliza solo un nombre de estado contra geo_state.
+ * Útil cuando el nombre viene del padrón (ej. "MICHOACAN" → "Michoacán de Ocampo").
+ * Devuelve { state_id, state_name } con el nombre oficial, o los originales si no hay match.
+ */
+export async function canonicalizarEstado(
+  estadoRaw: string, municipioRaw?: string
+): Promise<{ state_id: string | null; state_name: string; municipality_id: string | null; municipality_name: string }> {
+  if (!estadoRaw) return { state_id: null, state_name: estadoRaw, municipality_id: null, municipality_name: municipioRaw || '' };
+  const result = await canonicalizar(estadoRaw, municipioRaw || '');
+  return {
+    state_id: result.state_id,
+    state_name: result.state_name || estadoRaw,
+    municipality_id: result.municipality_id,
+    municipality_name: result.municipality_name || municipioRaw || '',
+  };
+}
+
 /** Canonicaliza nombres OSM contra el catálogo geo_state / geo_municipality. */
 async function canonicalizar(estadoRaw: string, municipioRaw: string): Promise<GeoResult> {
   const result: GeoResult = {

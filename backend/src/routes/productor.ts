@@ -7,7 +7,7 @@ import fs from 'fs';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { notificar } from '../utils/notificacion';
-import { reverseGeocode } from '../utils/geocode';
+import { reverseGeocode, canonicalizarEstado } from '../utils/geocode';
 import { consultarPersonaPorCURP } from '../services/saderService';
 import { consultarCURPEnRENAPO } from '../services/renapoService';
 
@@ -490,6 +490,13 @@ async function crearUP(client: any, producerId: number, up: any): Promise<number
     if (g.municipality_name) municipioFinal = g.municipality_name;
     stateIdFinal = g.state_id;
     municipalityIdFinal = g.municipality_id;
+  } else if (estadoFinal) {
+    // Sin coordenadas: canonicalizar contra geo_state para evitar guardar nombres en mayúsculas del padrón
+    const c = await canonicalizarEstado(estadoFinal, municipioFinal);
+    estadoFinal = c.state_name;
+    if (c.municipality_name) municipioFinal = c.municipality_name;
+    stateIdFinal = c.state_id;
+    municipalityIdFinal = c.municipality_id;
   }
 
   const areaCalc = capAreaHa(area_calc_ha);
@@ -1476,6 +1483,15 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
       ]],
     }) : null;
 
+    // Canonicalizar estado/municipio contra geo_state para evitar guardar nombres del padrón en mayúsculas
+    let estadoCanon = estado_up;
+    let municipioCanon = municipio_up;
+    if (estadoCanon) {
+      const c = await canonicalizarEstado(estadoCanon, municipioCanon);
+      estadoCanon = c.state_name;
+      if (c.municipality_name) municipioCanon = c.municipality_name;
+    }
+
     // Validar overlap con UPs existentes del mismo productor
     if (hasPoligono && postgisActivo) {
       const overlap = await client.query(
@@ -1518,7 +1534,7 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
       const geomSql = useGeom ? `ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($6::text), 4326))` : 'NULL';
       const aIdx = useGeom ? 7 : 6;
       const params = [
-        producer_id, estado_up, municipio_up, lng, lat,
+        producer_id, estadoCanon, municipioCanon, lng, lat,
         ...(useGeom ? [geojson] : []),
         area_calc_ha || null, area_real_ha || null, coincide_area ?? null, upName,
       ];
@@ -1545,7 +1561,7 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
                  ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)),
                  $6, $7, $8, TRUE, 'poligono_calculado')
          RETURNING up_id, up_name`,
-        [producer_id, estado_up, municipio_up, geojson, upName,
+        [producer_id, estadoCanon, municipioCanon, geojson, upName,
          area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
       );
     } else {
@@ -1554,7 +1570,7 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
         const muni = await client.query(
           `SELECT centroid::geometry AS centroid FROM municipios_referencia
            WHERE LOWER(nombre) = LOWER($1) AND LOWER(estado) = LOWER($2) LIMIT 1`,
-          [municipio_up, estado_up]
+          [municipioCanon, estadoCanon]
         );
         centroidVal = muni.rows[0]?.centroid || null;
       } catch { /* tabla opcional */ }
@@ -1567,7 +1583,7 @@ router.post('/ups', authMiddleware, async (req: AuthRequest, res: Response): Pro
                  $2, $3, $4::geometry, NULL,
                  $6, $7, $8, FALSE, 'municipio')
          RETURNING up_id, up_name`,
-        [producer_id, estado_up, municipio_up, centroidVal, upName,
+        [producer_id, estadoCanon, municipioCanon, centroidVal, upName,
          area_calc_ha || null, area_real_ha || null, coincide_area ?? null]
       );
     }
