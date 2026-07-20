@@ -133,10 +133,8 @@ export default function CicloProductivoPage() {
       }).catch(() => {});
   }, [tipoMaiz]);
 
-  // Área efectiva: si el productor declaró que difiere y tiene área real, usar área real; si no, usar calculada
-  const areaMaxima = (coincideAreaUp === false && areaHaReal && areaHaReal > 0)
-    ? areaHaReal
-    : areaHaCalc;
+  // El límite siempre es el área calculada del polígono (medición GPS real)
+  const areaMaxima = areaHaCalc;
 
   const guardar = async () => {
     if (!upId) { setError('No se encontró tu unidad productiva.'); return; }
