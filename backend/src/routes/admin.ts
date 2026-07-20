@@ -1264,7 +1264,7 @@ router.delete('/usuarios-bodega/:id', authMiddleware, soloAdmin, async (req: Aut
 // ─── PARCELAS ────────────────────────────────────────────────────────────────
 
 // GET /api/admin/parcelas/filtros — opciones para dropdowns de filtro
-router.get('/parcelas/filtros', authMiddleware, async (_req: Request, res: Response): Promise<void> => {
+router.get('/parcelas/filtros', authMiddleware, async (_req: import('express').Request, res: Response): Promise<void> => {
   try {
     const { rows: estadosRows } = await pool.query(
       `SELECT DISTINCT state_name FROM up WHERE geom IS NOT NULL AND state_name IS NOT NULL ORDER BY state_name`
