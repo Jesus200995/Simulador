@@ -10,6 +10,7 @@ import ParcelasExistentesLayer from '../../components/productor/ParcelasExistent
 import type { DibujarPoligonoHandle, DrawMode } from '../../components/productor/DibujarPoligonoUP';
 import NominatimSearch from '../../components/productor/NominatimSearch';
 import CoordenadasGPSInput from '../../components/productor/CoordenadasGPSInput';
+import SearchPinMarker from '../../components/productor/SearchPinMarker';
 import * as turf from '@turf/turf';
 import AvisoPrivacidadStep, { type AvisoData } from './AvisoPrivacidadStep';
 
@@ -91,6 +92,7 @@ export default function RegistroNuevoPage() {
   const [center, setCenter] = useState<[number, number]>([23.6, -102.5]);
   const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef<any>(null);
+  const [searchPin, setSearchPin] = useState<[number, number] | null>(null);
   const [errorOverlap, setErrorOverlap] = useState<string | null>(null);
   const [parcelaEnPadron, setParcelaEnPadron] = useState<boolean | null>(null);
 
@@ -425,8 +427,8 @@ export default function RegistroNuevoPage() {
             <DibujarPoligonoUP
               ref={dibujarRef}
               onModeChange={setDrawMode}
-              onPointCountChange={setPointCount}
-              onPoligonoCompleto={onUPDibujada}
+              onPointCountChange={n => { setPointCount(n); if (n > 0) setSearchPin(null); }}
+              onPoligonoCompleto={(poly, centro, area) => { setSearchPin(null); onUPDibujada(poly, centro, area); }}
               onPoligonoEliminado={() => {}}
             />
             {/* Polígono visible durante confirmación */}
@@ -436,6 +438,8 @@ export default function RegistroNuevoPage() {
                 pathOptions={{ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.3, weight: 2.5, dashArray: '6 4' }}
               />
             )}
+            {/* Pin de búsqueda — desaparece al empezar a dibujar */}
+            {searchPin && !pendingUP && <SearchPinMarker position={searchPin} />}
           </MapContainer>
 
           {/* Buscador de dirección/localidad — ocultarlo en confirmación */}
@@ -446,7 +450,7 @@ export default function RegistroNuevoPage() {
             >
               <NominatimSearch
                 placeholder="Buscar dirección o localidad…"
-                onSelect={(lat, lng) => mapRef.current?.flyTo([lat, lng], 16)}
+                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 17); setSearchPin([lat, lng]); }}
               />
             </div>
           )}
@@ -568,7 +572,7 @@ export default function RegistroNuevoPage() {
             </p>
             <div onClick={e => e.stopPropagation()}>
               <CoordenadasGPSInput
-                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 16); }}
+                onSelect={(lat, lng) => { mapRef.current?.flyTo([lat, lng], 17); setSearchPin([lat, lng]); }}
                 theme="dark"
                 className="w-full justify-center rounded-xl px-4 py-3"
               />
