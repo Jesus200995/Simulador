@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { JwtPayload } from '../types';
+import { canonicalizarEstado } from '../utils/geocode';
 
 const router = Router();
 
@@ -192,15 +193,20 @@ router.post('/usuarios', authMiddleware, soloAdmin, async (req: AuthRequest, res
 
     // debe_cambiar_pass = true solo si se generó automáticamente (no si el admin puso una)
     const debecambiar = !password?.trim();
+    // Canonicalizar estado_asignado contra geo_state para evitar variantes con mayúsculas o sin acentos
+    let estadoCanon: string | null = rolData.aplica_filtro_estado ? (estado_asignado ?? null) : null;
+    if (estadoCanon) {
+      const c = await canonicalizarEstado(estadoCanon);
+      estadoCanon = c.state_name;
+    }
+
     const result = await pool.query(
       `INSERT INTO usuarios
          (email, nombre_completo, password_hash, rol, activo,
           es_panel_usuario, estado_asignado, debe_cambiar_pass)
        VALUES ($1, $2, $3, $4, true, true, $5, $6)
        RETURNING id, email, nombre_completo, rol, estado_asignado, created_at`,
-      [emailLower, nombre_completo.trim(), hash, rol,
-       rolData.aplica_filtro_estado ? (estado_asignado ?? null) : null,
-       debecambiar]
+      [emailLower, nombre_completo.trim(), hash, rol, estadoCanon, debecambiar]
     );
 
     const usuarioId = result.rows[0].id;
@@ -240,7 +246,15 @@ router.patch('/usuarios/:id', authMiddleware, soloAdmin, async (req: AuthRequest
     if (nombre_completo) { sets.push(`nombre_completo=$${n++}`); vals.push(nombre_completo.trim()); }
     if (email)           { sets.push(`email=$${n++}`);           vals.push(email.toLowerCase().trim()); }
     if (rol)             { sets.push(`rol=$${n++}`);             vals.push(rol); }
-    if (estado_asignado !== undefined) { sets.push(`estado_asignado=$${n++}`); vals.push(estado_asignado || null); }
+    if (estado_asignado !== undefined) {
+      let estadoVal: string | null = estado_asignado || null;
+      if (estadoVal) {
+        const c = await canonicalizarEstado(estadoVal);
+        estadoVal = c.state_name;
+      }
+      sets.push(`estado_asignado=$${n++}`);
+      vals.push(estadoVal);
+    }
     if (nueva_password?.trim()) {
       const nuevoHash = await bcrypt.hash(nueva_password.trim(), 12);
       sets.push(`password_hash=$${n++}`);

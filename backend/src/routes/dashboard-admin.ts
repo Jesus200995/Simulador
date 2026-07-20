@@ -24,7 +24,7 @@ function getEstado(req: AuthRequest): string | null {
 function estadoWhere(estado: string | null, col: string, nextIdx: number): { sql: string; params: string[]; nextIdx: number } {
   if (!estado) return { sql: '', params: [], nextIdx };
   return {
-    sql: `AND UPPER(${col}) = ANY(SELECT UPPER(unnest(string_to_array($${nextIdx}, ','))))`,
+    sql: `AND ${col} = ANY(string_to_array($${nextIdx}, ','))`,
     params: [estado],
     nextIdx: nextIdx + 1,
   };
@@ -293,7 +293,7 @@ router.get('/alertas', authMiddleware, async (req: AuthRequest, res: Response): 
     const estado = getEstado(req);
     const ep = estado ? [estado] : [];
     // Join con up para filtrar por estado cuando el usuario es OREF
-    const joinUp = estado ? `JOIN up u2 ON u2.up_id = a.up_id AND UPPER(u2.state_name) = UPPER($1)` : `LEFT JOIN up u2 ON u2.up_id = a.up_id`;
+    const joinUp = estado ? `JOIN up u2 ON u2.up_id = a.up_id AND u2.state_name = $1` : `LEFT JOIN up u2 ON u2.up_id = a.up_id`;
 
     const [porNivel, porEstado, porTipo, recientes, tendencia] = await Promise.all([
       pool.query(`
@@ -327,7 +327,7 @@ router.get('/alertas', authMiddleware, async (req: AuthRequest, res: Response): 
         FROM alertas a
         LEFT JOIN producer p ON p.producer_id = a.producer_id
         LEFT JOIN up u ON u.up_id = a.up_id
-        ${estado ? `WHERE a.estado_alerta = 'pendiente' AND UPPER(u.state_name) = UPPER($1)` : `WHERE a.estado_alerta = 'pendiente'`}
+        ${estado ? `WHERE a.estado_alerta = 'pendiente' AND u.state_name = $1` : `WHERE a.estado_alerta = 'pendiente'`}
         ORDER BY
           CASE a.nivel_alerta WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 WHEN 'medio' THEN 3 ELSE 4 END,
           a.fecha_alerta DESC

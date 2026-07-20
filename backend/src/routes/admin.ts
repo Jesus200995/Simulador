@@ -37,11 +37,11 @@ function getEstadoFiltro(u: AuthRequest['user']): string | null {
 function estadoWhereClause(
   estadoVal: string | null,
   startIdx: number,
-  colExpr = 'UPPER(estado)'
+  colExpr = 'estado'
 ): { sql: string; params: string[]; nextIdx: number } {
   if (!estadoVal) return { sql: '', params: [], nextIdx: startIdx };
   return {
-    sql: `AND ${colExpr} = ANY(SELECT UPPER(unnest(string_to_array($${startIdx}, ','))))`,
+    sql: `AND ${colExpr} = ANY(string_to_array($${startIdx}, ','))`,
     params: [estadoVal],
     nextIdx: startIdx + 1,
   };
@@ -125,7 +125,7 @@ router.get('/usuarios', authMiddleware, async (req: AuthRequest, res: Response):
     const estadoForzado = getEstadoFiltro(req.user);
     const estadoEfectivo = estadoForzado ?? (estado as string | undefined) ?? null;
     if (estadoEfectivo) {
-      conditions.push(`UPPER(first_up.state_name) = ANY(SELECT UPPER(unnest(string_to_array($${idx++}, ','))))`);
+      conditions.push(`first_up.state_name = ANY(string_to_array($${idx++}, ','))`);
       params.push(estadoEfectivo);
     }
 
@@ -727,7 +727,7 @@ router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: 
   try {
     const estado = (u.rol === 'admin' || u.rol === 'responsable') ? null : (u.estado_asignado ?? null);
     const ep = estado ? [estado] : [];
-    const whereEstadoP = estado ? `WHERE UPPER(p.state_name) = UPPER($1)` : '';
+    const whereEstadoP = estado ? `WHERE p.state_name = $1` : '';
 
     const productoresR = pool.query(`
       SELECT
@@ -750,7 +750,7 @@ router.get('/actividad-reciente', authMiddleware, async (req: AuthRequest, res: 
         a.fecha_alerta AS fecha,
         '/admin/alertas' AS link
       FROM alertas a
-      ${estado ? `JOIN up u2 ON u2.up_id = a.up_id AND UPPER(u2.state_name) = UPPER($1)` : ''}
+      ${estado ? `JOIN up u2 ON u2.up_id = a.up_id AND u2.state_name = $1` : ''}
       ORDER BY a.fecha_alerta DESC
       LIMIT 10
     `, ep).catch(() => ({ rows: [] as any[] }));

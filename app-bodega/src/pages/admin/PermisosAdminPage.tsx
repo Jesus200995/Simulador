@@ -52,11 +52,11 @@ const VISTAS_ACCIONES: Record<string, string[]> = {
 };
 
 const ESTADOS_MX = [
-  'AGUASCALIENTES','BAJA CALIFORNIA','BAJA CALIFORNIA SUR','CAMPECHE','CHIAPAS','CHIHUAHUA',
-  'CIUDAD DE MEXICO','COAHUILA','COLIMA','DURANGO','ESTADO DE MEXICO','GUANAJUATO','GUERRERO',
-  'HIDALGO','JALISCO','MICHOACAN','MORELOS','NAYARIT','NUEVO LEON','OAXACA','PUEBLA','QUERETARO',
-  'QUINTANA ROO','SAN LUIS POTOSI','SINALOA','SONORA','TABASCO','TAMAULIPAS','TLAXCALA',
-  'VERACRUZ','YUCATAN','ZACATECAS',
+  'Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua',
+  'Ciudad de México','Coahuila de Zaragoza','Colima','Durango','Guanajuato','Guerrero',
+  'Hidalgo','Jalisco','México','Michoacán de Ocampo','Morelos','Nayarit','Nuevo León',
+  'Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora',
+  'Tabasco','Tamaulipas','Tlaxcala','Veracruz de Ignacio de la Llave','Yucatán','Zacatecas',
 ];
 
 /* ─── Toggle switch iOS-style ────────────────────────────────────────── */
@@ -131,7 +131,7 @@ function EstadoMultiSelect({ value, onChange }: {
   const [busqueda, setBusqueda] = useState('');
   const selected = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
   const todos = selected.length === 0;
-  const filtrados = ESTADOS_MX.filter(e => e.includes(busqueda.trim().toUpperCase()));
+  const filtrados = ESTADOS_MX.filter(e => e.toLowerCase().includes(busqueda.trim().toLowerCase()));
 
   function toggleEstado(e: string) {
     if (selected.includes(e)) onChange(selected.filter(s => s !== e).join(','));
