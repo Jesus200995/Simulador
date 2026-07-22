@@ -1,36 +1,15 @@
-name: Deploy to VPS
+# NOTA: Este workflow quedó desactualizado — apuntaba al VPS antiguo (31.97.8.51),
+# que fue eliminado permanentemente. El deploy actual a AWS (bastión + EC2 + RDS)
+# se realiza manualmente. No reactivar este workflow sin actualizar host/credenciales
+# al entorno AWS vigente.
+name: Deploy to VPS (DESACTIVADO)
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch: {}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy SOMAC to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 31.97.8.51
-          username: root
-          password: ${{ secrets.VPS_PASSWORD }}
-          command_timeout: 15m
-          script: |
-            set -e
-            cd /var/www/Simulador
-            git pull origin main
-
-            # Frontend — rebuild con nuevo codigo
-            cd app-bodega
-            npm install
-            npm run build
-            cd ..
-
-            # Backend — compilar si hubo cambios
-            cd backend
-            npm install
-            npx tsc
-            cd ..
-
-            pm2 restart bodegas-api
-            echo "Deploy SOMAC completado: $(date)"
+      - name: Deploy deshabilitado
+        run: echo "Este workflow está deshabilitado. El deploy se hace manualmente a AWS."
