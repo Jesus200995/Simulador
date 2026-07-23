@@ -1,6 +1,4 @@
-# SIMAC
-Sistema de Información de Maíz y Cultivos
-
+Proyecto Simulador
 ## Estructura del repositorio
 
 - `frontend/` — React + Vite + TypeScript + Tailwind (PWA)
