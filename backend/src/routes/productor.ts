@@ -389,6 +389,16 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
     }
 
     if (!datos.activo_renapo || !datos.activo_padron) {
+      // Registro reciente: RENAPO aún no confirma la identidad (estatus "Pendiente
+      // de Revisión"). No es un rechazo — se resuelve solo en unos días.
+      if (datos.renapo_pendiente && datos.activo_padron) {
+        res.status(403).json({
+          error: 'Tu identidad está en proceso de validación ante RENAPO. Esto puede tardar algunos días desde tu alta en el padrón. Intenta de nuevo más tarde; si tarda demasiado, contacta a tu técnico territorial.',
+          codigo: 'RENAPO_PENDIENTE'
+        });
+        return;
+      }
+
       // Consultar RENAPO para saber si la inactividad es por fallecimiento
       const renapoInactivo = await consultarCURPEnRENAPO(curpN);
       if (renapoInactivo.encontrado && renapoInactivo.fallecido) {

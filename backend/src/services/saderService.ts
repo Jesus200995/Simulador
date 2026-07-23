@@ -18,6 +18,7 @@ export interface DatosSADER {
   localidad: string | null;
   activo_renapo: boolean;
   activo_padron: boolean;
+  renapo_pendiente: boolean;
 }
 
 // El response real de SADER trae la persona como objeto plano (ln_nombre en raíz),
@@ -99,6 +100,13 @@ export async function consultarPersonaPorCURP(
       estatusPersona === 'ACTIVO' ||
       (estatusPersona === null && tieneData);
 
+    // "PR" (Pendiente de Revisión) = la persona SÍ existe en el padrón y está
+    // ACTIVA, solo que RENAPO aún no confirma su identidad (registro reciente).
+    // Esto no es un rechazo/baja — es un estado transitorio, distinto de una
+    // CURP realmente inactiva/dada de baja.
+    const renapo_pendiente =
+      estatusRenapo === 'PR' || d.nu_pendiente_valida_renapo === 1;
+
     return {
       curp: d.sn_curp || curp,
       rfc,
@@ -113,7 +121,8 @@ export async function consultarPersonaPorCURP(
       municipio,
       localidad,
       activo_renapo,
-      activo_padron
+      activo_padron,
+      renapo_pendiente
     };
 
   } catch (error: any) {
