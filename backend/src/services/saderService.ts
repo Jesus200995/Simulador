@@ -16,9 +16,7 @@ export interface DatosSADER {
   estado: string | null;
   municipio: string | null;
   localidad: string | null;
-  activo_renapo: boolean;
   activo_padron: boolean;
-  renapo_pendiente: boolean;
 }
 
 // El response real de SADER trae la persona como objeto plano (ln_nombre en raíz),
@@ -83,29 +81,16 @@ export async function consultarPersonaPorCURP(
     const municipio = municipio0?.ln_nombre || null;      // "GUAYMAS"
     const localidad = localidad0?.ln_nombre || null;      // "PÓTAM"
 
-    // Estatus — dos formatos posibles:
-    // Formato completo: cat_estatus_renapo.estatus="AR", cat_estatus_persona.sn_estatus_persona="ACTIVO"
-    // Formato mínimo:   id_nu_estatus_renapo=3 (sin objetos de estatus)
-    // Si SADER devolvió datos con sn_curp/ln_nombre, la persona existe → activa por defecto.
-    const estatusRenapo  = d.cat_estatus_renapo?.estatus || null;
+    // Estatus del padrón — si SADER ya tiene el registro (sn_curp/ln_nombre
+    // presentes), esa es la fuente de verdad para el registro de cuenta. El
+    // cruce con RENAPO es un chequeo interno de SADER que corre después y no
+    // se usa para decidir si alguien puede registrarse: el padrón manda.
     const estatusPersona = d.cat_estatus_persona?.sn_estatus_persona || null;
-    const tieneData      = !!(d.sn_curp || d.ln_nombre);
-
-    const activo_renapo =
-      estatusRenapo === 'AR' ||
-      (estatusRenapo === null && d.id_nu_estatus_renapo != null) ||
-      (estatusRenapo === null && tieneData);
+    const tieneData       = !!(d.sn_curp || d.ln_nombre);
 
     const activo_padron =
       estatusPersona === 'ACTIVO' ||
       (estatusPersona === null && tieneData);
-
-    // "PR" (Pendiente de Revisión) = la persona SÍ existe en el padrón y está
-    // ACTIVA, solo que RENAPO aún no confirma su identidad (registro reciente).
-    // Esto no es un rechazo/baja — es un estado transitorio, distinto de una
-    // CURP realmente inactiva/dada de baja.
-    const renapo_pendiente =
-      estatusRenapo === 'PR' || d.nu_pendiente_valida_renapo === 1;
 
     return {
       curp: d.sn_curp || curp,
@@ -120,9 +105,7 @@ export async function consultarPersonaPorCURP(
       estado,
       municipio,
       localidad,
-      activo_renapo,
-      activo_padron,
-      renapo_pendiente
+      activo_padron
     };
 
   } catch (error: any) {

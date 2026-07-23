@@ -61,7 +61,7 @@ export default function RegistroNuevoPage() {
   const [paso, setPaso] = useState(1);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [errorTipo, setErrorTipo] = useState<'duplicada' | 'puede_activar' | 'renapo_pendiente' | null>(null);
+  const [errorTipo, setErrorTipo] = useState<'duplicada' | 'puede_activar' | null>(null);
   const [errorNombres, setErrorNombres] = useState<string | null>(null);
 
   // Paso 1
@@ -171,10 +171,6 @@ export default function RegistroNuevoPage() {
         if (data.codigo === 'PUEDE_ACTIVAR') {
           setErrorTipo('puede_activar');
           setErrorNombres(data.nombres || null);
-          return;
-        }
-        if (data.codigo === 'RENAPO_PENDIENTE') {
-          setErrorTipo('renapo_pendiente');
           return;
         }
         // Bloqueos explícitos
@@ -825,27 +821,6 @@ export default function RegistroNuevoPage() {
                         <button
                           onClick={() => { setCurp(''); setErrorTipo(null); setErrorNombres(null); }}
                           className="w-full mt-1 text-sky-300/60 hover:text-sky-200 text-xs font-medium py-1.5 transition-colors"
-                        >
-                          Usar otra CURP
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Registro reciente, validación RENAPO en proceso */}
-                    {errorTipo === 'renapo_pendiente' && (
-                      <div className="mt-4 rounded-xl ring-1 ring-amber-400/25 bg-amber-500/10 p-4 animate-auth-in">
-                        <div className="flex items-start gap-2.5 mb-3">
-                          <div className="w-8 h-8 rounded-lg bg-amber-400/15 ring-1 ring-amber-400/25 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Loader2 size={15} className="text-amber-300" />
-                          </div>
-                          <div>
-                            <p className="text-amber-200 font-bold text-sm leading-tight">Tu identidad se está validando</p>
-                            <p className="text-amber-300/60 text-xs mt-1">Tu CURP ya está en el padrón, pero RENAPO todavía está confirmando tu identidad. Esto puede tardar algunos días desde tu alta. Intenta de nuevo más tarde; si tarda demasiado, contacta a tu técnico territorial.</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => { setCurp(''); setErrorTipo(null); setErrorNombres(null); }}
-                          className="w-full mt-1 text-amber-300/60 hover:text-amber-200 text-xs font-medium py-1.5 transition-colors"
                         >
                           Usar otra CURP
                         </button>

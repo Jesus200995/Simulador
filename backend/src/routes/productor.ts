@@ -388,18 +388,14 @@ router.post('/auth/consultar-curp', async (req, res): Promise<void> => {
       return;
     }
 
-    if (!datos.activo_renapo || !datos.activo_padron) {
-      // Registro reciente: RENAPO aún no confirma la identidad (estatus "Pendiente
-      // de Revisión"). No es un rechazo — se resuelve solo en unos días.
-      if (datos.renapo_pendiente && datos.activo_padron) {
-        res.status(403).json({
-          error: 'Tu identidad está en proceso de validación ante RENAPO. Esto puede tardar algunos días desde tu alta en el padrón. Intenta de nuevo más tarde; si tarda demasiado, contacta a tu técnico territorial.',
-          codigo: 'RENAPO_PENDIENTE'
-        });
-        return;
-      }
-
-      // Consultar RENAPO para saber si la inactividad es por fallecimiento
+    // Si ya está en el padrón de SADER (activo_padron), se registra directo —
+    // el padrón es la fuente de verdad. El estatus interno de cruce con RENAPO
+    // ("PR" pendiente, etc.) es informativo y NO bloquea el registro: solo se
+    // usa para decidir si hay que verificar viva/fallecida cuando NO está en
+    // el padrón (rama de arriba, datos === null).
+    if (!datos.activo_padron) {
+      // No está activa en el padrón de SADER (dada de baja) → confirmar si es
+      // por fallecimiento antes de dar el mensaje genérico.
       const renapoInactivo = await consultarCURPEnRENAPO(curpN);
       if (renapoInactivo.encontrado && renapoInactivo.fallecido) {
         res.status(403).json({
